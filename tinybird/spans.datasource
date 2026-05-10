@@ -1,0 +1,20 @@
+DESCRIPTION >
+    Agent spans — high-volume time-series trace data for 5to1r
+
+SCHEMA >
+    `spanId`    String,
+    `runId`     String,
+    `projectId` String,
+    `spanType`  String,
+    `input`     String,
+    `output`    String,
+    `latencyMs` Int32,
+    `costUsd`   Float64,
+    `modelId`   String,
+    `toolName`  String,
+    `createdAt` DateTime
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(createdAt)"
+ENGINE_PRIMARY_KEY "projectId, runId, spanId"
+ENGINE_SORTING_KEY "projectId, runId, createdAt, spanId"
