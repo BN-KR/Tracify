@@ -1,0 +1,169 @@
+"use client";
+
+import React, { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "convex/_generated/api";
+import { useOrganization } from "@clerk/nextjs";
+import { Copy, Plus, Loader2, CheckCircle2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+
+export function CreateProjectModal({ children }: { children?: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const { organization } = useOrganization();
+  const createProject = useMutation(api.projects.create);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !organization) return;
+    
+    setIsSubmitting(true);
+    try {
+      const newApiKey = `5t1r_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+      
+      await createProject({
+        name: name.trim(),
+        clerkOrgId: organization.id,
+        apiKey: newApiKey,
+      });
+      
+      setApiKey(newApiKey);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (!apiKey) return;
+    navigator.clipboard.writeText(apiKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setTimeout(() => {
+        setName("");
+        setApiKey(null);
+        setCopied(false);
+      }, 200);
+    }
+    setOpen(newOpen);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger
+        render={
+          children ? (
+            React.isValidElement(children) ? (
+              children
+            ) : (
+              <span>{children}</span>
+            )
+          ) : (
+            <Button className="font-mono uppercase h-9 px-4">
+              <Plus className="w-4 h-4 mr-2" />
+              New Project
+            </Button>
+          )
+        }
+      />
+      <DialogContent className="sm:max-w-[425px] border-zinc-800 bg-black rounded-none">
+        {!apiKey ? (
+          <form onSubmit={handleSubmit}>
+            <DialogHeader className="space-y-3">
+              <DialogTitle className="font-mono uppercase text-xl text-white">Create Project</DialogTitle>
+              <DialogDescription className="text-zinc-500 font-sans">
+                Create a new observability project to get your SDK API key.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-8">
+              <div className="flex flex-col gap-3">
+                <label htmlFor="name" className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+                  Project Name
+                </label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Production Agent"
+                  autoComplete="off"
+                  autoFocus
+                  className="bg-zinc-950 border-zinc-800 rounded-none h-10 font-mono text-white focus-visible:ring-white/20 transition-all"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={!name.trim() || isSubmitting}
+                className="w-full h-10 font-mono uppercase"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Create Project"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        ) : (
+          <div className="py-8 space-y-8">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="w-12 h-12 rounded-none bg-white text-black flex items-center justify-center animate-in zoom-in duration-500 ease-[0.23,1,0.32,1]">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-mono font-bold tracking-tight text-xl text-white uppercase">Project Created</h3>
+                <p className="text-sm text-zinc-500 font-sans px-4">
+                  Copy your API key now. You won't be able to see it again.
+                </p>
+              </div>
+            </div>
+
+            <div className="relative group">
+              <div className="relative flex items-center justify-between p-4 rounded-none border border-zinc-800 bg-zinc-950 font-mono text-sm group-hover:border-zinc-700 transition-colors">
+                <span className="truncate mr-4 text-white uppercase tracking-tighter">{apiKey}</span>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={copyToClipboard}
+                  className="shrink-0 h-8 px-3 font-mono text-[10px] uppercase bg-zinc-900 hover:bg-white hover:text-black transition-all"
+                >
+                  {copied ? "Copied" : <Copy className="w-3.5 h-3.5" />}
+                </Button>
+              </div>
+            </div>
+            
+            <div className="pt-2">
+              <Button
+                onClick={() => handleOpenChange(false)}
+                variant="outline"
+                className="w-full h-10 font-mono uppercase border-zinc-800 hover:bg-white hover:text-black"
+              >
+                Done
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

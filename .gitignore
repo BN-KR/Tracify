@@ -45,3 +45,6 @@ convex/_generated
 
 # scratch scripts
 install_skills.js
+
+# clerk configuration (can include secrets)
+/.clerk/

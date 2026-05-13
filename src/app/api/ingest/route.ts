@@ -1,7 +1,7 @@
 import { type NextRequest } from "next/server";
 import { inngest } from "@/lib/inngest";
 import { getConvexClient } from "@/lib/convex";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "convex/_generated/api";
 import { randomUUID } from "crypto";
 
 /**

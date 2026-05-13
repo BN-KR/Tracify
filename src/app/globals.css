@@ -1,15 +1,28 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "@clerk/ui/themes/shadcn.css";
+
+/* ── Geist Pixel Font Setup ────────────────────────────────────── */
+/* Using the variable provided by geist/font/pixel in layout.tsx */
+
+.font-pixel {
+  font-family: var(--font-pixel), monospace;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  image-rendering: pixelated;
+}
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-pixel: var(--font-geist-pixel-square);
+  --font-heading: var(--font-pixel);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,73 +61,77 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
+:root,
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* ── Easing ───────────────────────────────────────────────────── */
+  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* ── Strict Monochrome Theme ────────────────────────────────── */
+  --background:          #050505;
+  --foreground:          #CCCCCC;
+
+  --card:                #111111;
+  --card-foreground:     #FFFFFF;
+
+  --popover:             #111111;
+  --popover-foreground:  #CCCCCC;
+
+  --primary:             #FFFFFF;
+  --primary-foreground:  #000000;
+
+  --secondary:           #161616;
+  --secondary-foreground:#CCCCCC;
+
+  --muted:               #161616;
+  --muted-foreground:    #666666;
+
+  --accent:              #FFFFFF;
+  --accent-foreground:   #000000;
+
+  --destructive:         #FFFFFF;
+  --destructive-foreground: #000000;
+
+  --border:              #2A2A2A;
+  --input:               #1C1C1C;
+  --ring:                #FFFFFF;
+
+  --radius: 0px;
+
+  /* ── Sidebar ──────────────────────────────────────────────────── */
+  --sidebar:                    #111111;
+  --sidebar-foreground:         #CCCCCC;
+  --sidebar-primary:            #FFFFFF;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent:             #161616;
+  --sidebar-accent-foreground:  #FFFFFF;
+  --sidebar-border:             #2A2A2A;
+  --sidebar-ring:               #FFFFFF;
+
+  /* ── 5to1r Monochrome Design Tokens ────────────────────────── */
+
+  /* Backgrounds */
+  --bg:        #050505;
+  --surface-1: #111111;
+  --surface-2: #161616;
+  --surface-3: #1C1C1C;
+
+  /* Text */
+  --color-white:       #FFFFFF;
+  --color-body:        #CCCCCC;
+  --color-subtle:      #999999;
+  --color-muted:       #666666;
+
+  /* Borders */
+  --border-default:    #2A2A2A;
+  --border-strong:     #3A3A3A;
+
+  /* Semantic Data Colors (ONLY for visualization) ───────────── */
+  --span-llm:       #818CF8;
+  --span-tool:      #34D399;
+  --span-decision:  #FBBF24;
+  --span-error:     #F87171;
+  --span-success:   #10B981;
 }
 
 @layer base {
@@ -124,7 +141,163 @@
   body {
     @apply bg-background text-foreground;
   }
+  h1 {
+    @apply font-heading uppercase;
+  }
   html {
     @apply font-sans;
   }
+}
+
+/* ── Keyframes ──────────────────────────────────────────────────── */
+@keyframes mono-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.animate-mono-pulse {
+  animation: mono-pulse 1.4s ease-in-out infinite;
+}
+
+/* ── Scrollbar Utilities ────────────────────────────────────────── */
+.scrollbar-hide {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-mono-pulse {
+    animation: none;
+  }
+}
+
+/* ── Clerk Branding & Dev Mode Removal ────────────────────────── */
+.cl-internal-1dauvpw,
+.cl-internal-1jp5gc9,
+.cl-internal-1bj7ujy,
+.cl-internal-8nb9tw,
+.cl-internal-5ghyhf {
+  display: none !important;
+}
+
+/* ── Clerk Readability & Border Enforcement ──────────────────── */
+.cl-rootBox * { color: #FFFFFF !important; }
+.cl-footerActionLink { color: #FFFFFF !important; text-decoration: underline; }
+
+/* 1. Reset shadows and rings */
+.cl-socialButtonsBlockButton,
+.cl-socialButtonsIconButton,
+.cl-formFieldInput,
+.cl-formButtonPrimary,
+.cl-card,
+.cl-cardBox {
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  outline: none !important;
+}
+
+/* 2. Force Transparency and standard 1px solid gray border (#808080) */
+.cl-rootBox .cl-card,
+.cl-card,
+.cl-cardBox,
+.cl-footer,
+.cl-internal-1dauvpw {
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Re-apply border ONLY to the main card */
+.cl-card {
+  border: 1px solid #808080 !important;
+  border-width: 1px !important;
+  border-radius: 0px !important;
+}
+
+.cl-socialButtonsBlockButton,
+.cl-socialButtonsIconButton,
+.cl-formFieldInput {
+  border: 1px solid #808080 !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: #808080 !important;
+  border-radius: 0px !important;
+  background-color: transparent !important; /* Force transparent */
+}
+
+/* 3. Social Provider Icons: 
+   GitHub/Apple: FORCE WHITE (using mask-image logic)
+   Google: REVERT TO ORIGINAL COLORS
+*/
+.cl-socialButtonsProviderIcon:not(.cl-socialButtonsProviderIcon__google) {
+  background-color: #FFFFFF !important;
+  filter: brightness(0) invert(1) !important;
+}
+
+/* Restore original Google colors by killing the mask and filter */
+.cl-socialButtonsProviderIcon__google {
+  background-color: transparent !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+  filter: none !important;
+  background-image: url("https://img.clerk.com/static/google.svg") !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+/* 4. Continue Button Styling: NO BORDER, Flat Dark Gray Bg (#111111) */
+.cl-formButtonPrimary {
+  background: #111111 !important;
+  background-color: #111111 !important;
+  background-image: none !important;
+  background-clip: border-box !important;
+  border: none !important;
+  border-width: 0px !important;
+  box-shadow: none !important;
+  border-radius: 0px !important;
+  color: #FFFFFF !important;
+  position: relative;
+}
+
+/* Kill any pseudo-elements */
+.cl-formButtonPrimary::before,
+.cl-formButtonPrimary::after {
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* Hide the default Clerk arrow SVG */
+.cl-formButtonPrimary svg,
+.cl-buttonArrowIcon {
+  display: none !important;
+}
+
+/* Inject a sharp chevron (>) */
+.cl-formButtonPrimary span::after {
+  content: ">";
+  display: inline-block;
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* 5. Placeholder and label colors */
+input.cl-formFieldInput::placeholder { 
+  color: #808080 !important; 
+}
+input.cl-formFieldInput {
+  color: #FFFFFF !important;
+}
+.cl-formFieldLabel { 
+  color: #FFFFFF !important; 
+  opacity: 1 !important; 
 }
