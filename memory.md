@@ -31,6 +31,14 @@
 - **Environment:** Created `.env.prod` template for streamlined Vercel deployment. Isolated local dev via Tinybird `dev` branch.
 
 ## Recent Important Changes
+- **Vercel Build Pipeline Fix (2026-05-15):** Removed the interactive Convex deploy from the Vercel build script and committed Convex generated bindings.
+  - **Fix:** `package.json` build now runs `next build`; Convex deployment is available separately via `npm run deploy:convex`.
+  - **Fix:** `convex/_generated` is no longer gitignored, so Vercel can resolve `convex/_generated/api` during frontend compilation without running an interactive deploy step.
+  - **Fix:** Dashboard link buttons no longer pass unsupported `asChild` props to the local Base UI-backed `Button` component.
+  - **Fix:** `agentRuns` project access typing now matches the legacy-compatible optional `projects.clerkUserId` schema field.
+  - **Verification:** `npm run build` passes with Next.js 16.2.6.
+  - **Note:** `npm run lint` still reports pre-existing lint issues in `.agents`, `scratch`, and several marketing/UI files; these are not part of the Vercel production build blocker.
+
 - **Dashboard Login Flow Correction:** Landing -> sign-in now returns users to the dashboard instead of the landing page.
   - **Behavior:** Clerk sign-in and sign-up pages now force/fallback redirect to `/dashboard`.
   - **Behavior:** `/dashboard` now renders the dashboard start state directly instead of bouncing into onboarding.

@@ -1,6 +1,10 @@
 # Task Tracker
 
 ## Completed
+- [x] Fix Vercel deployment build by removing interactive Convex deploy from `npm run build`.
+- [x] Commit Convex generated bindings so Vercel can resolve `convex/_generated/api`.
+- [x] Fix production type errors in `agentRuns` access checks and dashboard button links.
+- [x] Verify `npm run build` passes locally.
 - [x] Fix login flow so sign-in returns users to the dashboard instead of the landing page.
 - [x] Stop `/dashboard` from redirecting to onboarding and make onboarding an explicit dashboard action.
 - [x] Add an onboarding button to the dashboard top bar.
@@ -56,6 +60,8 @@
 - [x] Set up Tinybird `dev` branch for local environment isolation.
 
 ## Next
+- [ ] Clean up repo lint scope and existing lint violations so `npm run lint` can become a reliable deployment gate.
+- [ ] Add a documented Convex deployment step/environment checklist for Vercel after production deploy keys are finalized.
 - [x] Fix onboarding Convex "projects:createProject" registration error and sync schema.
 - [ ] Reconnect root routing to Convex only if the deployment sync path is stable and no longer flaky.
 - [ ] Replace beta SDK install commands with PyPI/npm commands after `5to1r` and `@5to1r/sdk` are published.

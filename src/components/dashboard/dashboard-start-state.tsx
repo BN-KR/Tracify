@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { getOnboardingHref } from "@/lib/onboarding-navigation";
 
 import {
@@ -119,20 +119,24 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
           </ol>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Button
-              asChild
-              variant="default"
-              className="h-9 px-4 uppercase"
+            <Link
+              href={quickstartHref}
+              className={buttonVariants({
+                variant: "default",
+                className: "h-9 px-4 uppercase",
+              })}
             >
-              <Link href={quickstartHref}>View quickstart</Link>
-            </Button>
-            <Button
-              asChild
-              variant="secondary"
-              className="h-9 px-4 uppercase"
+              View quickstart
+            </Link>
+            <Link
+              href="/demo"
+              className={buttonVariants({
+                variant: "secondary",
+                className: "h-9 px-4 uppercase",
+              })}
             >
-              <Link href="/demo">Open sample trace</Link>
-            </Button>
+              Open sample trace
+            </Link>
           </div>
         </section>
 
@@ -180,13 +184,15 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
             creates the real run inspection UI.
           </p>
         </div>
-        <Button
-          asChild
-          variant="secondary"
-          className="h-9 px-4 uppercase"
+        <Link
+          href="/demo"
+          className={buttonVariants({
+            variant: "secondary",
+            className: "h-9 px-4 uppercase",
+          })}
         >
-          <Link href="/demo">Open sample trace</Link>
-        </Button>
+          Open sample trace
+        </Link>
       </section>
     </div>
   );

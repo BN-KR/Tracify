@@ -1,3 +1,28 @@
+# Implementation Plan - Vercel Build Recovery
+
+## Objective
+Make the app build reliably on Vercel and locally without requiring an interactive Convex deploy during the Next.js build.
+
+## Current Phase
+- [x] Reproduce the non-interactive build failure from `npx convex deploy`.
+- [x] Change `npm run build` to run `next build` only.
+- [x] Add a separate `npm run deploy:convex` command for explicit Convex deployments.
+- [x] Stop ignoring `convex/_generated` so generated Convex bindings are available in Vercel.
+- [x] Fix TypeScript blockers found by `next build`.
+- [x] Verify `npm run build` passes.
+
+## Scope Boundaries
+- Do not redesign dashboard or onboarding UI.
+- Do not build trace viewer, runs list, costs, or alerts.
+- Do not change production environment secrets in source control.
+
+## Next Steps
+- Push the build fix and let Vercel run from git.
+- Clean up existing lint issues in a separate quality pass.
+- Document the final Convex deploy-key workflow once production deployment credentials are confirmed.
+
+---
+
 # Implementation Plan - Login and Dashboard Redirect Fix
 
 ## Objective

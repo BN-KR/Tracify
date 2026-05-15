@@ -10,12 +10,12 @@ const runStatusValidator = v.union(
 );
 
 function canAccessProject(
-  project: { clerkOrgId?: string; clerkUserId: string },
+  project: { clerkOrgId?: string; clerkUserId?: string },
   identity: { subject: string; tokenIdentifier: string },
 ) {
   const orgId = (identity as { orgId?: unknown }).orgId;
   if (typeof orgId === "string" && project.clerkOrgId === orgId) return true;
-  return project.clerkUserId === identity.subject;
+  return typeof project.clerkUserId === "string" && project.clerkUserId === identity.subject;
 }
 
 async function upsertRunSummary(

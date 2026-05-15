@@ -40,9 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# convex generated (recreated by `npx convex dev`)
-convex/_generated
-
 # scratch scripts
 install_skills.js
 

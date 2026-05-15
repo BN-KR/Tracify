@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { getOnboardingHref } from "@/lib/onboarding-navigation";
 
 export function DashboardTopbar() {
@@ -21,9 +21,16 @@ export function DashboardTopbar() {
       </div>
 
       <div className="flex items-center gap-2 text-[12px] text-[#999999]">
-        <Button asChild variant="ghost" size="sm" className="h-8 px-3 text-[12px]">
-          <Link href={onboardingHref}>Onboarding</Link>
-        </Button>
+        <Link
+          href={onboardingHref}
+          className={buttonVariants({
+            variant: "ghost",
+            size: "sm",
+            className: "h-8 px-3 text-[12px]",
+          })}
+        >
+          Onboarding
+        </Link>
         <div className="hidden h-8 items-center border border-[#2A2A2A] bg-[#111111] px-2 text-[#F59E0B] sm:flex">
           running
         </div>
