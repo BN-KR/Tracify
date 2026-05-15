@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GeistPixelSquare } from "geist/font/pixel";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -55,6 +56,7 @@ export default function RootLayout({
             <TooltipProvider>{children}</TooltipProvider>
           </ConvexClientProvider>
         </ClerkProvider>
+        <Analytics />
       </body>
     </html>
   );
