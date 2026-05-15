@@ -1,5 +1,16 @@
 # Design & Architectural Decisions
 
+# Login / Dashboard Redirect Correction (2026-05-15)
+- **Decision:** A successful login should land on the dashboard, not on the marketing home page.
+- **Decision:** Onboarding should remain an explicit dashboard action, not the default post-login destination.
+- **Decision:** `/dashboard` should render the dashboard start state directly instead of redirecting into onboarding when no project context is present.
+- **Rationale:** Signed-in users should enter the workspace first and only enter onboarding when they choose it.
+
+## Project Creation Auth-State Split (2026-05-15)
+- **Decision:** Separate Clerk sign-in state from Convex auth readiness on the project creation page.
+- **Decision:** Signed-in users should see a neutral preparation message, not a sign-in prompt, while Convex finishes attaching identity.
+- **Rationale:** The UI should not accuse already signed-in users of needing to sign in just because the Convex token is still propagating.
+
 ## Project Creation Auth Boundary Fix (2026-05-15)
 - **Decision:** Render the onboarding project creation form only after Convex reports `Authenticated`.
 - **Decision:** Use `AuthLoading`/`Unauthenticated` fallback messaging instead of blocking the button with a local loading gate.

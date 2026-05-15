@@ -1,5 +1,5 @@
-import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
+import { api } from "convex/_generated/api";
+import type { Id } from "convex/_generated/dataModel";
 
 import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";

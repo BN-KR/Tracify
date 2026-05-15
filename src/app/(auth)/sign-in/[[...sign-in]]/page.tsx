@@ -5,7 +5,11 @@ import { CLERK_APPEARANCE } from "@/components/auth/clerk-appearance";
 export default function SignInPage() {
   return (
     <AuthShell mode="sign-in">
-      <SignIn appearance={CLERK_APPEARANCE} />
+      <SignIn
+        appearance={CLERK_APPEARANCE}
+        forceRedirectUrl="/dashboard"
+        fallbackRedirectUrl="/dashboard"
+      />
     </AuthShell>
   );
 }

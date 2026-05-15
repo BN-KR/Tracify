@@ -31,6 +31,16 @@
 - **Environment:** Created `.env.prod` template for streamlined Vercel deployment. Isolated local dev via Tinybird `dev` branch.
 
 ## Recent Important Changes
+- **Dashboard Login Flow Correction:** Landing -> sign-in now returns users to the dashboard instead of the landing page.
+  - **Behavior:** Clerk sign-in and sign-up pages now force/fallback redirect to `/dashboard`.
+  - **Behavior:** `/dashboard` now renders the dashboard start state directly instead of bouncing into onboarding.
+  - **Behavior:** The dashboard top bar now exposes an explicit `Onboarding` button so quickstart remains reachable from the main workspace.
+  - **Reason:** Signed-in users should not be sent back to marketing or onboarding by default.
+
+- **Project Creation Auth-State Split:** `ProjectStep` now distinguishes Clerk sign-in from Convex auth readiness.
+  - **Behavior:** Signed-in users see `Preparing project creation...` while Convex catches up instead of a sign-in prompt.
+  - **Behavior:** Only truly unsigned users see `Sign in to create a project.`
+  - **Reason:** The previous Convex auth gate was too opaque for a user who was already signed in through Clerk.
 
 - **Project Creation Auth Boundary Fix:** `ProjectStep` now waits for Convex `Authenticated` before rendering the create-project form.
   - **Reason:** Calling `projects.createProject` before the Convex auth token is established can yield `ctx.auth.getUserIdentity() === null`.
@@ -41,6 +51,10 @@
   - **Cause:** An existing `agentRuns` document in the deployment was missing `createdAt`, which caused schema validation to fail before upload.
   - **Fix:** Made `agentRuns.createdAt` optional for backward compatibility and kept new writes populating it.
   - **Result:** `npx convex dev` now reports `Convex functions ready!`, so the deployment can serve the current public functions again.
+  
+- **Vercel Build Fix:** Resolved "Module not found" errors for `convex/_generated/api` during Vercel deployment.
+  - **Fix:** Updated `package.json` build script to `npx convex deploy --bundle && next build`. This ensures Convex generated files are available before the Next.js build starts.
+  - **Cleanup:** Standardized all Convex imports to use the `convex/` path alias instead of relative paths (e.g., in `src/lib/inngest-functions.ts`).
   
 - **Auth Instant Loading Pass:** Removed all entrance animations (Framer Motion) and conflicting global CSS overrides to eliminate 5-second loading delays and 'black overlay' effects. Pages now render immediately.
 - **Auth Contrast Pass:** Reverted background to deep black (`#050505`) and pushed all text and terminal logs to pure white (`#FFFFFF`) to ensure maximum legibility and modal visibility.

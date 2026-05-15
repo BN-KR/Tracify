@@ -1,3 +1,24 @@
+# Implementation Plan - Login and Dashboard Redirect Fix
+
+## Objective
+Keep the authenticated user flow simple: landing -> sign-in -> dashboard, with onboarding accessible from the dashboard shell instead of being the default redirect.
+
+## Current Phase
+- [x] Redirect Clerk sign-in/sign-up back to `/dashboard`.
+- [x] Stop `/dashboard` from redirecting into onboarding.
+- [x] Add a dashboard shell onboarding button for explicit quickstart re-entry.
+
+## Scope Boundaries
+- Do not modify the landing page.
+- Do not build trace viewer, runs list, cost dashboard, or alerts.
+- Keep the change navigation-only.
+
+## Next Steps
+- If needed, decide whether the dashboard onboarding button should become context-aware later.
+- Revisit build/type issues in unrelated Convex code separately.
+
+---
+
 # Implementation Plan - Convex Sync Recovery
 
 ## Objective

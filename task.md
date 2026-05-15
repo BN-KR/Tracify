@@ -1,8 +1,13 @@
 # Task Tracker
 
 ## Completed
+- [x] Fix login flow so sign-in returns users to the dashboard instead of the landing page.
+- [x] Stop `/dashboard` from redirecting to onboarding and make onboarding an explicit dashboard action.
+- [x] Add an onboarding button to the dashboard top bar.
 - [x] Add a Sign out button to the marketing navbar for authenticated users.
+- [x] Fix Vercel build errors by adding `npx convex deploy --bundle` to the build script and standardizing imports.
 
+- [x] Stop showing a sign-in prompt to already signed-in users on the project creation page.
 - [x] Fix project creation auth timing by gating the onboarding form on Convex `Authenticated`.
 - [x] Fix Convex sync blocker caused by legacy `agentRuns` rows missing `createdAt`.
 - [x] Restore deployment sync so `projects:createProject` and `projects:getProjectsByUserOrOrg` register again.

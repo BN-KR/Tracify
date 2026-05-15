@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
+import { getOnboardingHref } from "@/lib/onboarding-navigation";
 
 import {
   hasOneTimeApiKey,
@@ -65,22 +66,14 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
     getOnboardingSessionSnapshot,
     getServerOnboardingSessionSnapshot,
   );
-  const {
-    projectId: sessionProjectId,
-    hasAvailableKey,
-    hasCopiedKey,
-  } = JSON.parse(onboardingSessionSnapshot) as {
+  const onboardingSession = JSON.parse(onboardingSessionSnapshot) as {
     projectId: string;
     hasAvailableKey: boolean;
     hasCopiedKey: boolean;
   };
   const active = quickstarts[tab];
-  const effectiveProjectId = projectId ?? sessionProjectId;
-  const quickstartHref = !effectiveProjectId
-    ? "/onboarding/project"
-    : hasAvailableKey && !hasCopiedKey
-      ? "/onboarding/api-key"
-      : "/onboarding/install";
+  const effectiveProjectId = projectId ?? onboardingSession.projectId;
+  const quickstartHref = getOnboardingHref(effectiveProjectId);
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">

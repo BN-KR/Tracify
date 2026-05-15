@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { AuthLoading, Authenticated, Unauthenticated, useMutation } from "convex/react";
+import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ const LAST_PROJECT_STORAGE_KEY = "5to1r.lastProjectId";
 export function ProjectStep() {
   const router = useRouter();
   const { isLoaded, isSignedIn } = useUser();
+  const { isLoading: isConvexLoading, isAuthenticated } = useConvexAuth();
   const createProject = useMutation(api.projects.createProject);
   const [name, setName] = useState("");
   const [error, setError] = useState("");
@@ -30,6 +31,16 @@ export function ProjectStep() {
 
     if (isLoaded && !isSignedIn) {
       router.push("/sign-in");
+      return;
+    }
+
+    if (isConvexLoading) {
+      setError("Convex auth is still initializing. Try again in a moment.");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setError("Authentication is still initializing. Try again in a moment.");
       return;
     }
 
@@ -52,22 +63,32 @@ export function ProjectStep() {
     }
   }
 
+  if (!isLoaded) {
+    return (
+      <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
+        Loading authentication...
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
+        Sign in to create a project.
+      </div>
+    );
+  }
+
+  if (isConvexLoading || !isAuthenticated) {
+    return (
+      <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
+        Preparing project creation...
+      </div>
+    );
+  }
+
   return (
-    <>
-      <AuthLoading>
-        <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
-          Waiting for authentication to finish...
-        </div>
-      </AuthLoading>
-
-      <Unauthenticated>
-        <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
-          Sign in to create a project.
-        </div>
-      </Unauthenticated>
-
-      <Authenticated>
-        <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit}>
       <OnboardingHeader
         title="Create your first project."
         description="A project holds your agents, runs, API keys, and traces."
@@ -90,13 +111,11 @@ export function ProjectStep() {
       <Button
         type="submit"
         variant="default"
-        disabled={!name.trim() || isCreating || !isLoaded}
+        disabled={!name.trim() || isCreating}
         className="mt-6 h-10 px-4 uppercase"
       >
         {isCreating ? "Creating..." : "Create project"}
       </Button>
-        </form>
-      </Authenticated>
-    </>
+    </form>
   );
 }

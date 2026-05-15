@@ -5,7 +5,11 @@ import { CLERK_APPEARANCE } from "@/components/auth/clerk-appearance";
 export default function SignUpPage() {
   return (
     <AuthShell mode="sign-up">
-      <SignUp appearance={CLERK_APPEARANCE} />
+      <SignUp
+        appearance={CLERK_APPEARANCE}
+        forceRedirectUrl="/dashboard"
+        fallbackRedirectUrl="/dashboard"
+      />
     </AuthShell>
   );
 }

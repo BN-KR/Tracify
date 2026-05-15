@@ -1,5 +1,43 @@
 # Implementation Scratchpad
 
+# Login / Dashboard Redirect Fix
+- **Status:** Implemented and scoped-lint validated.
+- **Files Updated:**
+  - `src/app/(auth)/sign-in/[[...sign-in]]/page.tsx`
+  - `src/app/(auth)/sign-up/[[...sign-up]]/page.tsx`
+  - `src/app/dashboard/page.tsx`
+  - `src/components/dashboard/dashboard-entry-router.tsx`
+  - `src/components/dashboard/dashboard-start-state.tsx`
+  - `src/components/dashboard/dashboard-topbar.tsx`
+  - `src/lib/onboarding-navigation.ts`
+  - `.env.local`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **Behavior Change:**
+  - Clerk sign-in and sign-up now force/fallback redirect to `/dashboard`.
+  - `/dashboard` renders the dashboard start state directly and no longer redirects to onboarding.
+  - The dashboard top bar has an explicit `Onboarding` button back into the setup flow.
+- **Validation:**
+  - Scoped ESLint passed for the touched navigation files.
+  - Full `npm.cmd run build` is still blocked by an unrelated Convex type error in `convex/agentRuns.ts`.
+
+## Project Creation Auth-State Split
+- **Status:** Implemented and lint-validated.
+- **Files Updated:**
+  - `src/components/onboarding/project-step.tsx`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **Behavior Change:**
+  - Clerk-loaded but unsigned users still get the sign-in message.
+  - Signed-in users who are waiting on Convex auth now get `Preparing project creation...`.
+  - The create button remains clickable once the form is visible.
+
 ## Project Creation Auth Boundary Fix
 - **Status:** Implemented and lint-validated.
 - **Files Updated:**
