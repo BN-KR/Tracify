@@ -37,6 +37,8 @@
   - **Fix:** Dashboard link buttons no longer pass unsupported `asChild` props to the local Base UI-backed `Button` component.
   - **Fix:** `agentRuns` project access typing now matches the legacy-compatible optional `projects.clerkUserId` schema field.
   - **Verification:** `npm run build` passes with Next.js 16.2.6.
+  - **Deployment:** Vercel project `5to1r/5to1r` was linked and production deployment `dpl_HsSNpJDGpET5miH4ji2MEZ8773JN` is Ready at `https://5to1r.vercel.app`.
+  - **Environment:** `.env.prod` values were applied to the Vercel production environment before the successful deploy.
   - **Note:** `npm run lint` still reports pre-existing lint issues in `.agents`, `scratch`, and several marketing/UI files; these are not part of the Vercel production build blocker.
 
 - **Dashboard Login Flow Correction:** Landing -> sign-in now returns users to the dashboard instead of the landing page.

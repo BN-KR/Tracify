@@ -10,6 +10,9 @@ Make the app build reliably on Vercel and locally without requiring an interacti
 - [x] Stop ignoring `convex/_generated` so generated Convex bindings are available in Vercel.
 - [x] Fix TypeScript blockers found by `next build`.
 - [x] Verify `npm run build` passes.
+- [x] Push fix commit `c24be95` to `origin/main`.
+- [x] Apply `.env.prod` values to Vercel production.
+- [x] Deploy production and verify Vercel Ready status.
 
 ## Scope Boundaries
 - Do not redesign dashboard or onboarding UI.
@@ -17,9 +20,9 @@ Make the app build reliably on Vercel and locally without requiring an interacti
 - Do not change production environment secrets in source control.
 
 ## Next Steps
-- Push the build fix and let Vercel run from git.
 - Clean up existing lint issues in a separate quality pass.
 - Document the final Convex deploy-key workflow once production deployment credentials are confirmed.
+- Replace any remaining placeholder `.env.prod` template values with real production secrets in Vercel, not in git.
 
 ---
 

@@ -5,6 +5,9 @@
 - [x] Commit Convex generated bindings so Vercel can resolve `convex/_generated/api`.
 - [x] Fix production type errors in `agentRuns` access checks and dashboard button links.
 - [x] Verify `npm run build` passes locally.
+- [x] Push Vercel build fix to `origin/main`.
+- [x] Configure Vercel production environment from `.env.prod`.
+- [x] Deploy production to Vercel and verify Ready status.
 - [x] Fix login flow so sign-in returns users to the dashboard instead of the landing page.
 - [x] Stop `/dashboard` from redirecting to onboarding and make onboarding an explicit dashboard action.
 - [x] Add an onboarding button to the dashboard top bar.
@@ -61,6 +64,7 @@
 
 ## Next
 - [ ] Clean up repo lint scope and existing lint violations so `npm run lint` can become a reliable deployment gate.
+- [ ] Replace placeholder values in `.env.prod` with final production Clerk/Convex/Inngest secrets if they are still placeholders in the source template.
 - [ ] Add a documented Convex deployment step/environment checklist for Vercel after production deploy keys are finalized.
 - [x] Fix onboarding Convex "projects:createProject" registration error and sync schema.
 - [ ] Reconnect root routing to Convex only if the deployment sync path is stable and no longer flaky.
