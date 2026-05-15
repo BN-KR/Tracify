@@ -10,6 +10,8 @@
 - [x] Deploy production to Vercel and verify Ready status.
 - [x] Resolve production 500 caused by placeholder Clerk publishable key.
 - [x] Temporarily point Vercel production at non-placeholder `.env.local` test/dev values and redeploy.
+- [x] Add live Clerk keys to Vercel production and ignored local `.env.prod`.
+- [x] Redeploy production with live Clerk keys and verify Ready status.
 - [x] Fix login flow so sign-in returns users to the dashboard instead of the landing page.
 - [x] Stop `/dashboard` from redirecting to onboarding and make onboarding an explicit dashboard action.
 - [x] Add an onboarding button to the dashboard top bar.
@@ -66,7 +68,7 @@
 
 ## Next
 - [ ] Clean up repo lint scope and existing lint violations so `npm run lint` can become a reliable deployment gate.
-- [ ] Replace Vercel production test/dev env values with real production Clerk, Convex, Inngest, and webhook credentials.
+- [ ] Replace Vercel production dev Convex/Inngest/webhook values with real production credentials.
 - [ ] Replace placeholder values in `.env.prod` with final production credential references or keep it explicitly documented as a template.
 - [ ] Add a documented Convex deployment step/environment checklist for Vercel after production deploy keys are finalized.
 - [x] Fix onboarding Convex "projects:createProject" registration error and sync schema.
