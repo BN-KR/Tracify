@@ -39,6 +39,8 @@
   - **Verification:** `npm run build` passes with Next.js 16.2.6.
   - **Deployment:** Vercel project `5to1r/5to1r` was linked and production deployment `dpl_HsSNpJDGpET5miH4ji2MEZ8773JN` is Ready at `https://5to1r.vercel.app`.
   - **Environment:** `.env.prod` values were applied to the Vercel production environment before the successful deploy.
+  - **Runtime Correction:** `.env.prod` still contained template placeholders, causing Clerk runtime 500s (`Publishable key not valid`). Vercel production was temporarily overwritten with non-placeholder `.env.local` test/dev values and redeployed as `dpl_3AqxVmaB5qaP5LDnkJSeqL2QXjeZ`; recent 500 logs cleared.
+  - **Caution:** Live production is currently backed by test Clerk keys and the dev Convex deployment until real production credentials replace them in Vercel.
   - **Note:** `npm run lint` still reports pre-existing lint issues in `.agents`, `scratch`, and several marketing/UI files; these are not part of the Vercel production build blocker.
 
 - **Dashboard Login Flow Correction:** Landing -> sign-in now returns users to the dashboard instead of the landing page.

@@ -13,6 +13,9 @@ Make the app build reliably on Vercel and locally without requiring an interacti
 - [x] Push fix commit `c24be95` to `origin/main`.
 - [x] Apply `.env.prod` values to Vercel production.
 - [x] Deploy production and verify Vercel Ready status.
+- [x] Diagnose production 500 as invalid Clerk publishable key from `.env.prod` placeholder values.
+- [x] Temporarily overwrite Vercel production with non-placeholder `.env.local` test/dev values.
+- [x] Redeploy production and verify Ready status plus no recent 500 logs.
 
 ## Scope Boundaries
 - Do not redesign dashboard or onboarding UI.
@@ -22,7 +25,8 @@ Make the app build reliably on Vercel and locally without requiring an interacti
 ## Next Steps
 - Clean up existing lint issues in a separate quality pass.
 - Document the final Convex deploy-key workflow once production deployment credentials are confirmed.
-- Replace any remaining placeholder `.env.prod` template values with real production secrets in Vercel, not in git.
+- Replace temporary test/dev Vercel production values with real production secrets.
+- Keep `.env.prod` clearly marked as a template or replace placeholder entries with non-secret setup notes.
 
 ---
 
