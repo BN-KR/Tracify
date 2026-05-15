@@ -53,7 +53,8 @@
   - **Result:** `npx convex dev` now reports `Convex functions ready!`, so the deployment can serve the current public functions again.
   
 - **Vercel Build Fix:** Resolved "Module not found" errors for `convex/_generated/api` during Vercel deployment.
-  - **Fix:** Updated `package.json` build script to `npx convex deploy --bundle && next build`. This ensures Convex generated files are available before the Next.js build starts.
+  - **Fix:** Updated `package.json` build script to `npx convex deploy && next build`. This ensures Convex generated files are available before the Next.js build starts.
+  - **Correction:** Removed the unsupported `--bundle` flag which was causing the build to fail.
   - **Cleanup:** Standardized all Convex imports to use the `convex/` path alias instead of relative paths (e.g., in `src/lib/inngest-functions.ts`).
   
 - **Auth Instant Loading Pass:** Removed all entrance animations (Framer Motion) and conflicting global CSS overrides to eliminate 5-second loading delays and 'black overlay' effects. Pages now render immediately.
