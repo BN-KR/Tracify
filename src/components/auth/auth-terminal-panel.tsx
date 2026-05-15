@@ -55,12 +55,12 @@ export function AuthTerminalPanel() {
           return (
             <div
               key={i}
-              className={`min-h-[1.6em] transition-opacity duration-200 ${isVisible ? "opacity-100" : "opacity-0"}`}
+              className={`min-h-[1.6em] transition-all duration-300 ease-[var(--ease-out)] ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"}`}
             >
               <span
                 className={`
                   ${log.type === "command" ? "text-white" : ""}
-                  ${log.type === "system" ? "text-[#999999]" : ""}
+                  ${log.type === "system" ? "text-white" : ""}
                   ${log.type === "warning" ? "text-amber-500" : ""}
                   ${log.type === "error" ? "text-red-500 font-bold" : ""}
                   ${log.type === "success" ? "text-[#34D399]" : ""}
@@ -76,7 +76,7 @@ export function AuthTerminalPanel() {
         <motion.div
           animate={{ opacity: [1, 0] }}
           transition={{ duration: 0.8, repeat: Infinity, ease: steps(2) }}
-          className="w-2 h-4 bg-white/20 mt-1"
+          className="w-2 h-4 bg-white/40 mt-1"
         />
       </div>
     </div>

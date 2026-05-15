@@ -1,89 +1,152 @@
 import { type NextRequest } from "next/server";
-import { inngest } from "@/lib/inngest";
-import { getConvexClient } from "@/lib/convex";
 import { api } from "convex/_generated/api";
-import { randomUUID } from "crypto";
+import type { Id } from "convex/_generated/dataModel";
 
-/**
- * POST /api/ingest
- *
- * SDK endpoint for receiving spans. Authentication via Bearer API key.
- * API key is validated against the Convex projects table.
- *
- * Body:
- * {
- *   runId: string;
- *   spanType: 'llm_call' | 'tool_call' | 'decision' | 'error';
- *   input: string;     // JSON string
- *   output: string;    // JSON string
- *   latencyMs: number;
- *   costUsd: number;
- *   modelId: string;
- *   toolName: string;
- * }
- */
+import { getConvexClient } from "@/lib/convex";
+import { inngest } from "@/lib/inngest";
+import { hashApiKey } from "@/lib/api-keys";
+
+const MAX_BODY_BYTES = 1024 * 1024;
+
+type SpanPayload = {
+  spanId: string;
+  runId: string;
+  spanType: string;
+  createdAt: string;
+  latencyMs: number;
+  input?: unknown;
+  output?: unknown;
+  costUsd?: number;
+  modelId?: string;
+  toolName?: string;
+  metadata?: Record<string, unknown>;
+  parentSpanId?: string;
+};
+
+function jsonString(value: unknown) {
+  if (value === undefined || value === null) return "";
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
+function isIsoString(value: string) {
+  return !Number.isNaN(Date.parse(value));
+}
+
+function validatePayload(body: Record<string, unknown>):
+  | { ok: true; payload: SpanPayload }
+  | { ok: false; error: string } {
+  const hasInputOrOutput = body.input !== undefined || body.output !== undefined;
+
+  if (typeof body.spanId !== "string") {
+    return { ok: false, error: "spanId must be a string" };
+  }
+  if (typeof body.runId !== "string") {
+    return { ok: false, error: "runId must be a string" };
+  }
+  if (typeof body.spanType !== "string") {
+    return { ok: false, error: "spanType must be a string" };
+  }
+  if (typeof body.createdAt !== "string" || !isIsoString(body.createdAt)) {
+    return { ok: false, error: "createdAt must be an ISO string" };
+  }
+  if (typeof body.latencyMs !== "number" || body.latencyMs < 0) {
+    return { ok: false, error: "latencyMs must be a non-negative number" };
+  }
+  if (!hasInputOrOutput) {
+    return { ok: false, error: "input or output is required" };
+  }
+
+  if (body.costUsd !== undefined && typeof body.costUsd !== "number") {
+    return { ok: false, error: "costUsd must be a number" };
+  }
+  if (body.modelId !== undefined && typeof body.modelId !== "string") {
+    return { ok: false, error: "modelId must be a string" };
+  }
+  if (body.toolName !== undefined && typeof body.toolName !== "string") {
+    return { ok: false, error: "toolName must be a string" };
+  }
+  if (body.parentSpanId !== undefined && typeof body.parentSpanId !== "string") {
+    return { ok: false, error: "parentSpanId must be a string" };
+  }
+  if (
+    body.metadata !== undefined &&
+    (typeof body.metadata !== "object" || body.metadata === null || Array.isArray(body.metadata))
+  ) {
+    return { ok: false, error: "metadata must be an object" };
+  }
+
+  return { ok: true, payload: body as SpanPayload };
+}
+
 export async function POST(request: NextRequest) {
-  // ── 1. Extract and validate API key ───────────────────────────────────
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > MAX_BODY_BYTES) {
+    return Response.json({ error: "Payload too large" }, { status: 413 });
+  }
+
   const authHeader = request.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) {
-    return Response.json({ error: "Missing Bearer token" }, { status: 401 });
+    return Response.json({ error: "Invalid API key" }, { status: 401 });
   }
 
   const apiKey = authHeader.slice(7).trim();
-  if (!apiKey.startsWith("5t1r_")) {
-    return Response.json({ error: "Invalid API key format" }, { status: 401 });
+  if (!apiKey.startsWith("5t1r_sk_live_")) {
+    return Response.json({ error: "Invalid API key" }, { status: 401 });
   }
 
-  // ── 2. Look up project in Convex ──────────────────────────────────────
+  let body: Record<string, unknown>;
+  try {
+    const rawBody = await request.text();
+    if (new TextEncoder().encode(rawBody).byteLength > MAX_BODY_BYTES) {
+      return Response.json({ error: "Payload too large" }, { status: 413 });
+    }
+    body = JSON.parse(rawBody) as Record<string, unknown>;
+  } catch {
+    return Response.json({ error: "Invalid JSON body" }, { status: 422 });
+  }
+
+  const validation = validatePayload(body);
+  if (!validation.ok) {
+    return Response.json({ error: validation.error }, { status: 422 });
+  }
+  const payload = validation.payload;
+
   const convex = getConvexClient();
-  const project = await convex.query(api.projects.getByApiKey, { apiKey });
+  const project = await convex.query(api.projects.getProjectByApiKey, {
+    apiKeyHash: hashApiKey(apiKey),
+  });
+
   if (!project) {
     return Response.json({ error: "Invalid API key" }, { status: 401 });
   }
 
-  // ── 3. Parse and validate body ────────────────────────────────────────
-  let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
+  const projectDocId = project._id as Id<"projects">;
+  const now = Date.now();
 
-  const { runId, spanType, input, output, latencyMs, costUsd, modelId, toolName } = body;
+  await convex.mutation(api.projects.markApiKeyUsed, {
+    projectId: projectDocId,
+    lastUsedAt: now,
+  });
 
-  if (
-    typeof runId !== "string" ||
-    typeof spanType !== "string" ||
-    !["llm_call", "tool_call", "decision", "error"].includes(spanType) ||
-    typeof input !== "string" ||
-    typeof output !== "string" ||
-    typeof latencyMs !== "number" ||
-    typeof costUsd !== "number"
-  ) {
-    return Response.json({ error: "Invalid span payload" }, { status: 400 });
-  }
-
-  const spanId = randomUUID();
-  const createdAt = new Date().toISOString();
-
-  // ── 4. Fire Inngest event (non-blocking) ──────────────────────────────
   await inngest.send({
-    name: "span/ingested",
+    name: "5to1r/span.received",
     data: {
-      spanId,
-      runId: runId as string,
-      projectId: project.apiKey, // logical project ID for Tinybird scoping
-      projectDocId: project._id,
-      spanType: spanType as "llm_call" | "tool_call" | "decision" | "error",
-      input: input as string,
-      output: output as string,
-      latencyMs: latencyMs as number,
-      costUsd: costUsd as number,
-      modelId: (modelId as string) ?? "",
-      toolName: (toolName as string) ?? "",
-      createdAt,
+      spanId: payload.spanId,
+      runId: payload.runId,
+      projectId: projectDocId,
+      projectDocId,
+      spanType: payload.spanType,
+      input: jsonString(payload.input),
+      output: jsonString(payload.output),
+      latencyMs: payload.latencyMs,
+      costUsd: payload.costUsd ?? 0,
+      modelId: payload.modelId ?? "",
+      toolName: payload.toolName ?? "",
+      metadata: payload.metadata ?? {},
+      parentSpanId: payload.parentSpanId ?? "",
+      createdAt: payload.createdAt,
     },
   });
 
-  return Response.json({ ok: true, spanId }, { status: 202 });
+  return Response.json({ ok: true, spanId: payload.spanId }, { status: 202 });
 }

@@ -46,8 +46,8 @@ const rowVariants: Variants = {
   hidden: { opacity: 0, x: -8 },
   show: {
     opacity: 1,
-    x: 0,
-    transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] },
+    y: 0,
+    transition: { duration: 0.25, ease: [0.23, 1, 0.32, 1] },
   },
 };
 
@@ -118,7 +118,7 @@ export function TracePreview() {
             <motion.div
               key={i}
               variants={rowVariants}
-              className="flex items-center px-4 h-11 transition-colors hover:bg-[#161616]"
+              className="flex items-center px-4 h-11 transition-all duration-200 ease-out hover:bg-[#161616] active:scale-[0.99]"
               style={{
                 borderBottom: i < SPANS.length - 1 ? "1px solid #2A2A2A" : "none",
               }}

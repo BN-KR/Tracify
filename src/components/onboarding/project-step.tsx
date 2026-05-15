@@ -1,0 +1,102 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import { useUser } from "@clerk/nextjs";
+import { AuthLoading, Authenticated, Unauthenticated, useMutation } from "convex/react";
+import { api } from "convex/_generated/api";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+
+import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
+import { setOneTimeApiKey } from "@/lib/onboarding-client-state";
+
+const API_KEY_COPIED_STORAGE_KEY = "5to1r.onboarding.apiKeyCopied";
+const PROJECT_ID_STORAGE_KEY = "5to1r.onboarding.projectId";
+const PROJECT_NAME_STORAGE_KEY = "5to1r.onboarding.projectName";
+const LAST_PROJECT_STORAGE_KEY = "5to1r.lastProjectId";
+
+export function ProjectStep() {
+  const router = useRouter();
+  const { isLoaded, isSignedIn } = useUser();
+  const createProject = useMutation(api.projects.createProject);
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const trimmed = name.trim();
+    if (!trimmed || isCreating) return;
+
+    if (isLoaded && !isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
+
+    setIsCreating(true);
+    setError("");
+    try {
+      const result = await createProject({ name: trimmed });
+      setOneTimeApiKey(result.plaintextApiKey);
+      window.sessionStorage.removeItem(API_KEY_COPIED_STORAGE_KEY);
+      window.sessionStorage.setItem(PROJECT_ID_STORAGE_KEY, result.projectId);
+      window.sessionStorage.setItem(PROJECT_NAME_STORAGE_KEY, result.name);
+      window.localStorage.setItem(LAST_PROJECT_STORAGE_KEY, result.projectId);
+      router.push("/onboarding/api-key");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Project creation failed.",
+      );
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  return (
+    <>
+      <AuthLoading>
+        <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
+          Waiting for authentication to finish...
+        </div>
+      </AuthLoading>
+
+      <Unauthenticated>
+        <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
+          Sign in to create a project.
+        </div>
+      </Unauthenticated>
+
+      <Authenticated>
+        <form onSubmit={onSubmit}>
+      <OnboardingHeader
+        title="Create your first project."
+        description="A project holds your agents, runs, API keys, and traces."
+      />
+      <label
+        htmlFor="project-name"
+        className="mb-2 block text-[11px] uppercase tracking-wide text-[#999999]"
+      >
+        Project name
+      </label>
+      <input
+        id="project-name"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+        placeholder="research-agent-prod"
+        className="h-11 w-full border border-[#2A2A2A] bg-[#1C1C1C] px-3 font-mono text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#999999]"
+      />
+      {error ? <p className="mt-3 text-sm text-[#EF4444]">{error}</p> : null}
+
+      <Button
+        type="submit"
+        variant="default"
+        disabled={!name.trim() || isCreating || !isLoaded}
+        className="mt-6 h-10 px-4 uppercase"
+      >
+        {isCreating ? "Creating..." : "Create project"}
+      </Button>
+        </form>
+      </Authenticated>
+    </>
+  );
+}

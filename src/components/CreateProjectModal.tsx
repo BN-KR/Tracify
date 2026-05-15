@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
-import { useOrganization } from "@clerk/nextjs";
 import { Copy, Plus, Loader2, CheckCircle2 } from "lucide-react";
 import {
   Dialog,
@@ -16,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 
 export function CreateProjectModal({ children }: { children?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -24,24 +22,19 @@ export function CreateProjectModal({ children }: { children?: React.ReactNode })
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const { organization } = useOrganization();
-  const createProject = useMutation(api.projects.create);
+  const createProject = useMutation(api.projects.createProject);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !organization) return;
+    if (!name.trim()) return;
     
     setIsSubmitting(true);
     try {
-      const newApiKey = `5t1r_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
-      
-      await createProject({
+      const result = await createProject({
         name: name.trim(),
-        clerkOrgId: organization.id,
-        apiKey: newApiKey,
       });
       
-      setApiKey(newApiKey);
+      setApiKey(result.apiKey);
     } catch (err) {
       console.error(err);
     } finally {
@@ -133,7 +126,7 @@ export function CreateProjectModal({ children }: { children?: React.ReactNode })
               <div className="space-y-2">
                 <h3 className="font-mono font-bold tracking-tight text-xl text-white uppercase">Project Created</h3>
                 <p className="text-sm text-zinc-500 font-sans px-4">
-                  Copy your API key now. You won't be able to see it again.
+                  Copy your API key now. You will not be able to see it again.
                 </p>
               </div>
             </div>

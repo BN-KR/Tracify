@@ -52,7 +52,7 @@ export function WhatYouGet() {
   ];
 
   return (
-    <section className="w-full bg-[#050505] pt-16 pb-[72px] border-t border-[#1A1A1A]">
+    <section className="w-full bg-[#050505] pt-16 pb-[72px]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-8 grid grid-cols-1 md:grid-cols-[380px_1fr] gap-12 md:gap-24 items-start">
         
         {/* Left Content */}

@@ -155,8 +155,35 @@
   50%       { opacity: 0.3; }
 }
 
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-mono-pulse {
-  animation: mono-pulse 1.4s ease-in-out infinite;
+  animation: mono-pulse 1.4s var(--ease-in-out) infinite;
+}
+
+.animate-slide-up-fade {
+  animation: slide-up-fade 200ms var(--ease-out) forwards;
+}
+
+/* ── Interactive Polish ────────────────────────────────────────── */
+.active-press {
+  transition: transform 150ms var(--ease-out);
+}
+.active-press:active {
+  transform: scale(0.98);
+}
+
+.hover-glow {
+  transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out), border-color 200ms var(--ease-out);
 }
 
 /* ── Scrollbar Utilities ────────────────────────────────────────── */
@@ -176,128 +203,69 @@
   }
 }
 
+
 /* ── Clerk Branding & Dev Mode Removal ────────────────────────── */
-.cl-internal-1dauvpw,
-.cl-internal-1jp5gc9,
-.cl-internal-1bj7ujy,
-.cl-internal-8nb9tw,
-.cl-internal-5ghyhf {
+.cl-branding, .cl-internal-1dauvpw {
   display: none !important;
 }
 
-/* ── Clerk Readability & Border Enforcement ──────────────────── */
-.cl-rootBox * { color: #FFFFFF !important; }
-.cl-footerActionLink { color: #FFFFFF !important; text-decoration: underline; }
+/* ── COMPLETE CLERK VISUAL RESET ────────────────────────────── */
 
-/* 1. Reset shadows and rings */
-.cl-socialButtonsBlockButton,
-.cl-socialButtonsIconButton,
-.cl-formFieldInput,
-.cl-formButtonPrimary,
-.cl-card,
-.cl-cardBox {
-  box-shadow: none !important;
-  -webkit-box-shadow: none !important;
-  outline: none !important;
-}
-
-/* 2. Force Transparency and standard 1px solid gray border (#808080) */
-.cl-rootBox .cl-card,
-.cl-card,
-.cl-cardBox,
+/* 1. REMOVE BACKGROUNDS & SHADOWS (Card and Footer) */
+.cl-card, 
 .cl-footer,
-.cl-internal-1dauvpw {
+.cl-footerAction {
   background-color: transparent !important;
   background-image: none !important;
-  border: none !important;
   box-shadow: none !important;
+  border: none !important;
 }
 
-/* Re-apply border ONLY to the main card */
-.cl-card {
-  border: 1px solid #808080 !important;
-  border-width: 1px !important;
-  border-radius: 0px !important;
+
+/* 2. FIX: This forces the 3-wide rectangular layout and overrides the hardcoded 40px squares. */
+.cl-socialButtonsRoot {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  width: 100% !important;
 }
+
+.cl-socialButtons {
+  display: contents !important;
+}
+
+/* REORDER: Apple -> GitHub -> Google */
+.cl-socialButtonsIconButton__apple, .cl-socialButtonsBlockButton__apple { order: 1 !important; }
+.cl-socialButtonsIconButton__github, .cl-socialButtonsBlockButton__github { order: 2 !important; }
+.cl-socialButtonsIconButton__google, .cl-socialButtonsBlockButton__google { order: 3 !important; }
 
 .cl-socialButtonsBlockButton,
-.cl-socialButtonsIconButton,
-.cl-formFieldInput {
-  border: 1px solid #808080 !important;
-  border-width: 1px !important;
-  border-style: solid !important;
-  border-color: #808080 !important;
-  border-radius: 0px !important;
-  background-color: transparent !important; /* Force transparent */
+.cl-socialButtonsIconButton {
+  width: 100% !important;   /* Overrides the hardcoded 40px */
+  height: 44px !important;  /* Sets the rectangle height */
+  flex: 1 1 auto !important; /* Prevents shrinking */
+  min-width: 0 !important;
+  max-width: none !important;
+  aspect-ratio: auto !important; /* Ensures it's not a square */
+  padding: 0 !important;
 }
 
-/* 3. Social Provider Icons: 
-   GitHub/Apple: FORCE WHITE (using mask-image logic)
-   Google: REVERT TO ORIGINAL COLORS
-*/
-.cl-socialButtonsProviderIcon:not(.cl-socialButtonsProviderIcon__google) {
-  background-color: #FFFFFF !important;
-  filter: brightness(0) invert(1) !important;
-}
-
-/* Restore original Google colors by killing the mask and filter */
-.cl-socialButtonsProviderIcon__google {
-  background-color: transparent !important;
-  mask-image: none !important;
-  -webkit-mask-image: none !important;
-  filter: none !important;
-  background-image: url("https://img.clerk.com/static/google.svg") !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-}
-
-/* 4. Continue Button Styling: NO BORDER, Flat Dark Gray Bg (#111111) */
-.cl-formButtonPrimary {
-  background: #111111 !important;
-  background-color: #111111 !important;
-  background-image: none !important;
-  background-clip: border-box !important;
-  border: none !important;
-  border-width: 0px !important;
-  box-shadow: none !important;
-  border-radius: 0px !important;
-  color: #FFFFFF !important;
-  position: relative;
-}
-
-/* Kill any pseudo-elements */
-.cl-formButtonPrimary::before,
-.cl-formButtonPrimary::after {
-  background: none !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-
-/* Hide the default Clerk arrow SVG */
-.cl-formButtonPrimary svg,
-.cl-buttonArrowIcon {
+/* Cleanup: Hide labels and badges */
+.cl-socialButtonsBlockButtonText,
+.cl-lastAuthenticationStrategyBadge,
+.cl-badge {
   display: none !important;
 }
 
-/* Inject a sharp chevron (>) */
-.cl-formButtonPrimary span::after {
-  content: ">";
-  display: inline-block;
-  margin-left: 8px;
-  font-family: var(--font-mono);
-  font-weight: bold;
-  font-size: 14px;
+
+
+
+
+
+
+/* Optional: Hide text for a cleaner icon-only 3-wide look */
+.cl-socialButtonsBlockButtonText {
+  display: none !important;
 }
 
-/* 5. Placeholder and label colors */
-input.cl-formFieldInput::placeholder { 
-  color: #808080 !important; 
-}
-input.cl-formFieldInput {
-  color: #FFFFFF !important;
-}
-.cl-formFieldLabel { 
-  color: #FFFFFF !important; 
-  opacity: 1 !important; 
-}
+

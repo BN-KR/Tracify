@@ -1,0 +1,11 @@
+{
+    "host": "https://api.europe-west2.gcp.tinybird.co",
+    "id": "9973fedd-52f3-455d-a7d7-e0fcec029b88",
+    "name": "name_5to1r_workspace",
+    "scope": "admin",
+    "token": "p.eyJ1IjogIjk5NzNmZWRkLTUyZjMtNDU1ZC1hN2Q3LWUwZmNlYzAyOWI4OCIsICJpZCI6ICI1YjhiOWM2My1iODA1LTRlMmYtYTU1Ni04YzhjZWQyNmEyY2EiLCAiaG9zdCI6ICJnY3AtZXVyb3BlLXdlc3QyIn0.5SUmmRqvLcHkDn93XVQVzjHn8T59ySjI3atnBrX6z1w",
+    "tokens": {
+        "https://api.europe-west2.gcp.tinybird.co": "p.eyJ1IjogIjk5NzNmZWRkLTUyZjMtNDU1ZC1hN2Q3LWUwZmNlYzAyOWI4OCIsICJpZCI6ICI1YjhiOWM2My1iODA1LTRlMmYtYTU1Ni04YzhjZWQyNmEyY2EiLCAiaG9zdCI6ICJnY3AtZXVyb3BlLXdlc3QyIn0.5SUmmRqvLcHkDn93XVQVzjHn8T59ySjI3atnBrX6z1w"
+    },
+    "version": "4.5.3"
+}

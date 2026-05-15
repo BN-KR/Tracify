@@ -1,0 +1,383 @@
+"use client";
+
+import { UserButton } from "@clerk/nextjs";
+import {
+  Activity,
+  BarChart3,
+  Bell,
+  BookOpen,
+  ChevronDown,
+  KeyRound,
+  LayoutDashboard,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Receipt,
+  Settings2,
+  Terminal,
+} from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
+import { useMemo, useState, type ComponentType } from "react";
+
+import {
+  ProjectSwitcher,
+  MOCK_PROJECT_ID,
+} from "@/components/dashboard/project-switcher";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+
+type GroupId = "observe" | "configure" | "resources";
+
+type NavItem = {
+  title: string;
+  href: string;
+  icon: ComponentType<{ className?: string }>;
+  external?: boolean;
+};
+
+const GROUP_STORAGE_KEY = "5to1r:dashboard-sidebar-groups";
+const COLLAPSED_STORAGE_KEY = "5to1r.sidebar.collapsed";
+const COLLAPSED_WIDTH = 64;
+const EXPANDED_WIDTH = 240;
+
+const groups: Array<{ id: GroupId; label: string; items: NavItem[] }> = [
+  {
+    id: "observe",
+    label: "Observe",
+    items: [
+      {
+        title: "Overview",
+        icon: LayoutDashboard,
+        href: `/dashboard/${MOCK_PROJECT_ID}`,
+      },
+      {
+        title: "Runs",
+        icon: Activity,
+        href: `/dashboard/${MOCK_PROJECT_ID}/runs`,
+      },
+      {
+        title: "Costs",
+        icon: BarChart3,
+        href: `/dashboard/${MOCK_PROJECT_ID}/costs`,
+      },
+      {
+        title: "Alerts",
+        icon: Bell,
+        href: `/dashboard/${MOCK_PROJECT_ID}/alerts`,
+      },
+    ],
+  },
+  {
+    id: "configure",
+    label: "Configure",
+    items: [
+      {
+        title: "Settings",
+        icon: Settings2,
+        href: `/dashboard/${MOCK_PROJECT_ID}/settings`,
+      },
+      {
+        title: "API Keys",
+        icon: KeyRound,
+        href: `/dashboard/${MOCK_PROJECT_ID}/api-keys`,
+      },
+      {
+        title: "Billing",
+        icon: Receipt,
+        href: `/dashboard/${MOCK_PROJECT_ID}/billing`,
+      },
+    ],
+  },
+  {
+    id: "resources",
+    label: "Resources",
+    items: [
+      {
+        title: "Quickstart",
+        icon: Terminal,
+        href: "/onboarding/install",
+      },
+      {
+        title: "Docs",
+        icon: BookOpen,
+        href: "https://docs.5to1r.com",
+        external: true,
+      },
+    ],
+  },
+];
+
+function isActivePath(pathname: string, href: string) {
+  if (href.startsWith("http")) return false;
+  if (href === `/dashboard/${MOCK_PROJECT_ID}`) {
+    return pathname === "/dashboard" || pathname === href;
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function findGroupForHref(href: string) {
+  return groups.find((group) => group.items.some((item) => item.href === href));
+}
+
+export function DashboardSidebar({
+  isCollapsed,
+  onCollapsedChange,
+}: {
+  isCollapsed: boolean;
+  onCollapsedChange: (next: boolean) => void;
+}) {
+  const pathname = usePathname();
+  const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
+    if (typeof window === "undefined") {
+      return { observe: true, configure: true, resources: true };
+    }
+    const stored = window.localStorage.getItem(GROUP_STORAGE_KEY);
+    return stored
+      ? (JSON.parse(stored) as Record<GroupId, boolean>)
+      : { observe: true, configure: true, resources: true };
+  });
+
+  const showExpandedContent = !isCollapsed;
+  const visualWidth = showExpandedContent ? EXPANDED_WIDTH : COLLAPSED_WIDTH;
+
+  function toggleCollapsed() {
+    onCollapsedChange(!isCollapsed);
+  }
+
+  function expandSidebar(groupId?: GroupId) {
+    if (groupId) {
+      setOpenGroups((current) => {
+        if (current[groupId]) return current;
+        const next = { ...current, [groupId]: true };
+        window.localStorage.setItem(GROUP_STORAGE_KEY, JSON.stringify(next));
+        return next;
+      });
+    }
+    if (isCollapsed) {
+      onCollapsedChange(false);
+      window.localStorage.setItem(COLLAPSED_STORAGE_KEY, "false");
+    }
+  }
+
+  function toggleGroup(id: GroupId) {
+    setOpenGroups((current) => {
+      const next = { ...current, [id]: !current[id] };
+      window.localStorage.setItem(GROUP_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }
+
+  const collapseLabel = isCollapsed ? "Expand sidebar" : "Collapse sidebar";
+  const CollapseIcon = isCollapsed ? PanelLeftOpen : PanelLeftClose;
+
+  return (
+    <aside
+      className={cn(
+        "fixed inset-y-0 left-0 z-30 flex flex-col border-r border-[#2A2A2A] bg-[#111111] transition-[width] duration-150 ease-out motion-reduce:transition-none",
+      )}
+      style={{ width: visualWidth }}
+    >
+      <div
+        className={cn(
+          "flex h-[60px] items-center border-b border-[#2A2A2A]",
+          showExpandedContent ? "justify-between px-4" : "justify-center px-0",
+        )}
+      >
+        {showExpandedContent ? (
+          <Link
+            href="/dashboard"
+            className="font-pixel text-[20px] leading-none text-white"
+          >
+            5to1r
+          </Link>
+        ) : null}
+
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                aria-label={collapseLabel}
+                onClick={toggleCollapsed}
+                className="size-7"
+              >
+                <CollapseIcon className="size-4" />
+              </Button>
+            }
+          />
+          <TooltipContent
+            side="right"
+            className="rounded-none border border-[#2A2A2A] bg-[#111111] font-mono text-xs text-[#CCCCCC] shadow-none"
+          >
+            {collapseLabel}
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div className="border-b border-[#2A2A2A] p-3">
+        <ProjectSwitcher isCollapsed={!showExpandedContent} />
+      </div>
+
+      <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
+        {groups.map((group) => (
+          <SidebarGroup
+            key={group.id}
+            group={group}
+            showExpandedContent={showExpandedContent}
+            isOpen={openGroups[group.id]}
+            pathname={pathname}
+            onToggle={() => toggleGroup(group.id)}
+            onNavClick={(href) => {
+              const navGroup = findGroupForHref(href);
+              expandSidebar(navGroup?.id);
+            }}
+          />
+        ))}
+      </nav>
+
+      <div className="border-t border-[#2A2A2A] p-3">
+        <div
+          className={cn(
+            "flex items-center border border-[#2A2A2A] bg-[#0A0A0A] px-2 py-2",
+            showExpandedContent ? "gap-3" : "justify-center",
+          )}
+        >
+          <UserButton
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "rounded-none",
+                userButtonTrigger: "rounded-none shadow-none",
+                userButtonPopoverCard: "rounded-none shadow-none",
+              },
+            }}
+          />
+          {showExpandedContent ? (
+            <div className="min-w-0 font-mono">
+              <div className="text-[11px] leading-4 text-[#CCCCCC]">
+                Account
+              </div>
+              <div className="text-[10px] leading-3 text-[#666666]">
+                Clerk active
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+    </aside>
+  );
+}
+
+function SidebarGroup({
+  group,
+  showExpandedContent,
+  isOpen,
+  pathname,
+  onToggle,
+  onNavClick,
+}: {
+  group: (typeof groups)[number];
+  showExpandedContent: boolean;
+  isOpen: boolean;
+  pathname: string;
+  onToggle: () => void;
+  onNavClick: (href: string) => void;
+}) {
+  const hasActiveItem = group.items.some((item) =>
+    isActivePath(pathname, item.href),
+  );
+  const isVisuallyOpen = isOpen || hasActiveItem;
+  const visibleItems = useMemo(
+    () => (!showExpandedContent || isVisuallyOpen ? group.items : []),
+    [group.items, showExpandedContent, isVisuallyOpen],
+  );
+
+  return (
+    <div className="mb-5">
+      {showExpandedContent ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          className="mb-2 flex h-7 w-full items-center justify-between px-2 text-left font-mono text-[11px] uppercase tracking-wide text-[#666666] outline-none transition-colors hover:text-[#999999] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#666666]"
+        >
+          <span>{group.label}</span>
+          <ChevronDown
+            className={cn(
+              "size-3 transition-transform duration-150 motion-reduce:transition-none",
+              !isVisuallyOpen && "-rotate-90",
+            )}
+          />
+        </button>
+      ) : null}
+      <div
+        className={cn(
+          "overflow-hidden transition-[max-height,opacity] duration-150 motion-reduce:transition-none",
+          visibleItems.length ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
+        )}
+      >
+        <div className="space-y-1">
+          {visibleItems.map((item) => (
+            <NavLink
+              key={item.title}
+              item={item}
+              showExpandedContent={showExpandedContent}
+              isActive={isActivePath(pathname, item.href)}
+              onNavClick={() => onNavClick(item.href)}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NavLink({
+  item,
+  showExpandedContent,
+  isActive,
+  onNavClick,
+}: {
+  item: NavItem;
+  showExpandedContent: boolean;
+  isActive: boolean;
+  onNavClick: () => void;
+}) {
+  const Icon = item.icon;
+  const className = cn(
+    "flex h-9 items-center border-l-2 border-transparent px-2 font-mono text-[13px] font-normal text-[#666666] outline-none transition-colors hover:bg-[#161616] hover:text-[#CCCCCC] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#666666]",
+    showExpandedContent ? "gap-2" : "justify-center",
+    isActive && "border-l-white text-white hover:bg-[#161616]",
+  );
+  const link = (
+    <Link
+      href={item.href}
+      className={className}
+      aria-label={item.title}
+      onClick={onNavClick}
+    >
+      <Icon className="size-4 shrink-0" />
+      {showExpandedContent ? (
+        <span className="truncate">{item.title}</span>
+      ) : null}
+    </Link>
+  );
+
+  if (showExpandedContent) return link;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={link} />
+      <TooltipContent
+        side="right"
+        className="rounded-none border border-[#2A2A2A] bg-[#111111] font-mono text-xs text-[#CCCCCC] shadow-none"
+      >
+        {item.title}
+      </TooltipContent>
+    </Tooltip>
+  );
+}

@@ -1,0 +1,68 @@
+# Task Tracker
+
+## Completed
+- [x] Add a Sign out button to the marketing navbar for authenticated users.
+
+- [x] Fix project creation auth timing by gating the onboarding form on Convex `Authenticated`.
+- [x] Fix Convex sync blocker caused by legacy `agentRuns` rows missing `createdAt`.
+- [x] Restore deployment sync so `projects:createProject` and `projects:getProjectsByUserOrOrg` register again.
+- [x] Remove Convex query dependency from dashboard/onboarding root redirect logic.
+- [x] Route `/dashboard` and `/onboarding` from local project context.
+- [x] Refine onboarding routing so onboarding is state-based, not login-based.
+- [x] Route `/onboarding` and `/dashboard` by signed-in project state.
+- [x] Replace unpublished SDK install commands with beta GitHub install commands.
+- [x] Add AI setup prompt mode to `/onboarding/install`.
+- [x] Remove plaintext API key persistence from browser storage.
+- [x] Add navigation escape hatches between onboarding and dashboard.
+- [x] Add quiet Home/Dashboard link to every onboarding step.
+- [x] Warn before leaving the API key step when the one-time key has not been copied.
+- [x] Add dashboard Resources -> Quickstart shortcut to onboarding install.
+- [x] Route dashboard empty-state View quickstart to the appropriate onboarding step from session context.
+- [x] Fix dashboard project switcher runtime errors by removing Convex project-list query calls from the shell.
+- [x] Build Milestone 2 Part 3 ingestion and real first-span onboarding activation.
+- [x] Build Milestone 2 Part 2 project creation and one-time API key backend.
+- [x] Build Milestone 2 Part 1 onboarding UI flow with mock project/key/install/waiting/success screens.
+- [x] Remove sidebar hover-peek and adjustable-width behavior; keep fixed 240px/64px widths and the top expand icon.
+- [x] Refine dashboard sidebar into a quiet workspace panel with top icon collapse, persistent resize, hover-peek, and assisted collapsed-nav expansion.
+- [x] Refine Sign In and Sign Up pages with Emil Kowalski design engineering principles.
+- [x] Improve dashboard shell entry point with collapsible sidebar.
+- [x] Add grouped dashboard navigation with persisted group state.
+- [x] Improve mock project switcher dropdown with environment labels.
+- [x] Replace thin empty dashboard page with start-here checklist and quickstart panel.
+- [x] Add sample trace entry points without building the trace viewer.
+- [x] Build Dashboard Milestone 2 onboarding flow.
+- [x] Add project creation with one-time API key display.
+- [x] Store API key HMAC hash, prefix, last 4 chars, timestamps, and status.
+- [x] Add SDK install step with Python and TypeScript snippets.
+- [x] Add waiting state subscribed to first real Convex run.
+- [x] Add success step linking to `/dashboard/[projectId]/runs/[runId]`.
+- [x] Add temporary received-run placeholder route for first span activation.
+- [x] Add `getProjectOnboardingState` for real first-run detection.
+- [x] Track `lastSpanAt` in Convex run summaries.
+- [x] Update minimal ingest route, Inngest span processor, Tinybird write, and Convex run upsert.
+- [x] Build the initial authenticated dashboard shell using shadcn `sidebar-03` as a structural base.
+- [x] Infrastructure setup (Frontend, DB, Analytics, Queues).
+- [x] Complete Dashboard Milestone 1: shell and project selector only.
+- [x] Add 5to1r product-specific dashboard shell components under `src/components/dashboard/`.
+- [x] Protect `/dashboard(.*)` with Clerk in `src/proxy.ts`.
+- [x] Add the technical empty-state dashboard placeholder.
+- [x] Record dashboard shell decisions and temporary mock project data.
+- [x] Create `.env.prod` template for Vercel production deployment.
+- [x] Set up Tinybird `dev` branch for local environment isolation.
+
+## Next
+- [x] Fix onboarding Convex "projects:createProject" registration error and sync schema.
+- [ ] Reconnect root routing to Convex only if the deployment sync path is stable and no longer flaky.
+- [ ] Replace beta SDK install commands with PyPI/npm commands after `5to1r` and `@5to1r/sdk` are published.
+- [ ] Add API key rotation UI when settings/API key management is in scope.
+- [ ] Consider a server-backed context-aware `/onboarding` redirect after project listing/state is stable.
+- [ ] Add last dashboard route per project memory when dashboard route behavior is in scope.
+- [ ] Replace dashboard mock project selector with Convex-backed project context.
+- [ ] Replace `/demo` sample trace placeholder with real sample trace routing when trace viewer work starts.
+- [ ] Build API Keys and Billing pages only when their milestone starts.
+- [ ] Configure `FIVETOONE_API_KEY_HMAC_SECRET` in both Next.js and Convex environments.
+- [ ] Run the documented curl test with a real onboarding-generated API key.
+- [ ] Build the real trace viewer in the next explicit trace-viewer milestone.
+- [ ] Replace mock project data with real project selection.
+- [ ] Add real dashboard subpages only when their feature phase starts.
+- [ ] Visually verify mobile drawer styling in-browser during the next UI pass.

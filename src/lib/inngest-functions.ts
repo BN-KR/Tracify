@@ -1,28 +1,24 @@
-import { inngest, type SpanIngestedEvent } from "@/lib/inngest";
-import { ingestSpan } from "@/lib/tinybird";
-import { getConvexClient } from "@/lib/convex";
 import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
+
+import { getConvexClient } from "@/lib/convex";
+import { inngest } from "@/lib/inngest";
+import { ingestSpan } from "@/lib/tinybird";
 
 /**
- * Inngest function: span/ingested
- *
- * Flow:
- *   1. Write span row to Tinybird
- *   2. Upsert AgentRun summary in Convex (triggers real-time UI update)
- *   3. Check thresholds — emit alert if cost or failure condition met
+ * Milestone 2 activation pipeline:
+ * write the span to Tinybird, then update Convex so onboarding can react.
  */
 export const processSpan = inngest.createFunction(
   {
     id: "process-span",
     name: "Process ingested span",
     retries: 3,
-    triggers: [{ event: "span/ingested" }],
+    triggers: [{ event: "5to1r/span.received" }],
   },
-  async ({ event, step }: { event: { data: SpanIngestedEvent["data"] }; step: any }) => {
+  async ({ event, step }) => {
     const span = event.data;
 
-
-    // ── Step 1: Write to Tinybird ──────────────────────────────────────────
     await step.run("write-to-tinybird", async () => {
       await ingestSpan({
         spanId: span.spanId,
@@ -35,54 +31,24 @@ export const processSpan = inngest.createFunction(
         costUsd: span.costUsd,
         modelId: span.modelId,
         toolName: span.toolName,
+        parentSpanId: span.parentSpanId,
+        metadata: span.metadata,
         createdAt: span.createdAt,
       });
     });
 
-    // ── Step 2: Upsert AgentRun in Convex ─────────────────────────────────
     await step.run("upsert-convex-run", async () => {
       const convex = getConvexClient();
-      // Mark as failed if the span is an error type
-      const isFailed = span.spanType === "error";
-      await convex.mutation(api.agentRuns.upsert, {
+      await convex.mutation(api.agentRuns.upsertRunFromSpan, {
         runId: span.runId,
-        projectId: span.projectDocId as Parameters<
-          typeof convex.mutation
-        >[1]["projectId"],
+        projectId: span.projectDocId as Id<"projects">,
         costUsd: span.costUsd,
-        startedAt: span.createdAt,
-        status: isFailed ? "failed" : "running",
+        spanType: span.spanType,
+        createdAt: span.createdAt,
+        modelId: span.modelId || undefined,
       });
-    });
-
-    // ── Step 3: Threshold alerts ───────────────────────────────────────────
-    await step.run("check-alerts", async () => {
-      if (span.spanType !== "error") return;
-
-      const convex = getConvexClient();
-      const alertMessage = `Run ${span.runId} failed at span ${span.spanId}: ${span.output}`;
-
-      await convex.mutation(api.alerts.create, {
-        runId: span.runId,
-        projectId: span.projectDocId as Parameters<
-          typeof convex.mutation
-        >[1]["projectId"],
-        type: "run_failed",
-        message: alertMessage,
-        triggeredAt: new Date().toISOString(),
-      });
-
-      // Emit Slack notification if configured
-      const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
-      if (slackWebhookUrl) {
-        await fetch(slackWebhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: `🚨 5to1r Alert: ${alertMessage}` }),
-        });
-      }
     });
 
     return { ok: true, spanId: span.spanId };
-  }
+  },
 );

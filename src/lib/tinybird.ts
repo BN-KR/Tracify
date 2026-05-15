@@ -21,13 +21,15 @@ export async function ingestSpan(span: {
   spanId: string;
   runId: string;
   projectId: string;
-  spanType: "llm_call" | "tool_call" | "decision" | "error";
+  spanType: string;
   input: string;
   output: string;
   latencyMs: number;
   costUsd: number;
   modelId: string;
   toolName: string;
+  parentSpanId: string;
+  metadata: Record<string, unknown>;
   createdAt: string; // ISO 8601 UTC
 }) {
   const ndjson = JSON.stringify(span) + "\n";
@@ -117,5 +119,7 @@ export interface SpanRow {
   costUsd: number;
   modelId: string;
   toolName: string;
+  parentSpanId: string;
+  metadata: Record<string, unknown>;
   createdAt: string;
 }

@@ -318,7 +318,7 @@ export function Problem() {
   return (
     <section
       className="w-full py-16"
-      style={{ backgroundColor: "#050505", borderTop: "1px solid #2A2A2A" }}
+      style={{ backgroundColor: "#050505" }}
       aria-labelledby="problem-headline"
     >
       <div className="mx-auto w-full px-6 md:px-8 max-w-[1200px]">
@@ -365,7 +365,7 @@ export function Problem() {
           {PROBLEM_ITEMS.map((item) => (
             <div
               key={item.number}
-              className="group py-6 md:py-8 border-t border-[#2A2A2A] transition-colors duration-150 hover:bg-[#111111] px-4 -mx-4"
+              className="group py-6 md:py-8 border-t border-[#2A2A2A] transition-all duration-200 ease-out hover:bg-[#111111] active:scale-[0.995] px-4 -mx-4"
             >
               <div className="grid grid-cols-[40px_1fr] md:grid-cols-[56px_1fr] gap-4 items-start">
                 {/* Number */}
@@ -390,7 +390,6 @@ export function Problem() {
               </div>
             </div>
           ))}
-          <div className="w-full h-px bg-[#2A2A2A]" />
         </div>
 
       </div>

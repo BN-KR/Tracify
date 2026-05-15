@@ -34,8 +34,7 @@ export default function LandingPage() {
 
       {/* ── Footer ────────────────────────────────────────────────── */}
       <footer
-        className="border-t py-12 px-6 bg-[#0A0A0A]"
-        style={{ borderColor: "#2A2A2A" }}
+        className="py-12 px-6 bg-[#0A0A0A]"
       >
         <div className="mx-auto max-w-[1200px]">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12">

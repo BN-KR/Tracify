@@ -85,8 +85,8 @@ export function FinalCTA() {
           <div className="flex flex-col md:flex-row gap-4 mt-auto">
             <Link href="/sign-up" className="w-full md:w-auto">
               <Button
-                className="w-full md:w-auto bg-white text-black font-mono text-[13px] h-11 px-8 hover:bg-[#CCCCCC] transition-colors active:scale-[0.97]"
-                style={{ borderRadius: "0px", border: "none" }}
+                variant="default"
+                className="w-full md:w-auto font-mono text-[13px] h-11 px-8 uppercase"
               >
                 Start free
               </Button>
@@ -94,8 +94,7 @@ export function FinalCTA() {
             <Link href="/docs" className="w-full md:w-auto">
               <Button
                 variant="outline"
-                className="w-full md:w-auto bg-transparent border-[#2A2A2A] text-[#CCCCCC] font-mono text-[13px] h-11 px-8 hover:bg-[#161616] hover:text-white transition-colors active:scale-[0.97]"
-                style={{ borderRadius: "0px" }}
+                className="w-full md:w-auto font-mono text-[13px] h-11 px-8 uppercase"
               >
                 Read the docs
               </Button>

@@ -120,7 +120,7 @@ export function DebugStream() {
       className="relative h-screen w-full bg-[#050505] flex flex-col justify-center items-center selection:bg-white/10 overflow-hidden font-mono"
     >
       
-      <div className="w-full h-[520px] flex flex-col bg-[#0A0A0A] border-y border-[#1A1A1A] shadow-2xl relative z-10 overflow-hidden">
+      <div className="w-full h-[520px] flex flex-col bg-[#0A0A0A] shadow-2xl relative z-10 overflow-hidden">
         
         <div className="flex items-center justify-between px-6 py-3 bg-[#0F0F0F] border-b border-[#1A1A1A] shrink-0">
           <div className="flex gap-4 items-center">

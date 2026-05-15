@@ -1,48 +1,41 @@
-# Implementation Plan - Monochrome & Design Engineering Refactor
+# Implementation Plan - Convex Sync Recovery
 
 ## Objective
-Transition the 5to1r observability platform to a strict monochrome visual identity while integrating high-fidelity design engineering principles (Emil Kowalski).
+Keep the deployment syncable despite legacy data so public Convex functions register and the app can create projects again.
 
-## Design System
-- **Palette**: Strict Black (#000000) and White (#FFFFFF). Zinc grays for borders and secondary text.
-- **Radius**: 0px globally (sharp corners).
-- **Typography**: 
-  - Geist Pixel Square for logos.
-  - Geist Mono for headers (H1, H2) and buttons.
-  - Geist Sans for body text.
-- **Motion**:
-  - `active:scale(0.97)` for all interactive elements.
-  - Custom easing: `cubic-bezier(0.23, 1, 0.32, 1)`.
-  - Staggered entrances for list items and feature cards.
+## Current Phase
+- [x] Make `agentRuns.createdAt` backward compatible for legacy rows.
+- [x] Keep new run writes populating `createdAt`.
+- [x] Restore `npx convex dev` sync to a healthy state.
 
-## Task Breakdown
+## Scope Boundaries
+- Do not build trace viewer, runs list, cost dashboard, or landing page changes.
+- Do not change onboarding UX or dashboard navigation for this fix.
 
-### Phase 1: Core Foundation (COMPLETED)
-- [x] Update `globals.css` with monochrome tokens.
-- [x] Set global radius to `0px`.
-- [x] Define custom easing variables.
+## Next Steps
+- If needed, backfill legacy `agentRuns.createdAt` values later through a dedicated migration.
 
-### Phase 2: Component Refactor (COMPLETED)
-- [x] **Button**: Implement `rounded-none`, `font-mono`, and `active:scale-[0.97]`.
-- [x] **Card**: Implement `rounded-none`, strict monochrome borders.
-- [x] **Dialog**: Implement `rounded-none`, monochrome overlay and background.
-- [x] **Badge**: Implement `rounded-none`, `font-mono`, uppercase tracking.
-- [x] **Input**: Implement `rounded-none`, `font-mono`, monochrome focus ring.
+---
 
-### Phase 3: Page Overhaul (COMPLETED)
-- [x] **Landing Page**: 
-  - Overhaul Hero with Geist Pixel logo and staggered animations.
-  - Implement dot-grid background.
-  - Refactor all sections to use the new Monochrome + Motion spec.
-  - Fix Clerk imports (`SignedIn`, `SignedOut`).
-- [x] **Dashboard**:
-  - Implement staggered grid for project cards.
-  - Remove all blue/indigo accents.
-  - Update Sidebar with monochrome tokens and sharp corners.
-- [x] **Clerk Appearance**: Apply global monochrome theme and 0px radius to Clerk components.
+# Previous Implementation Plan - Onboarding Convex Error Fix
 
-### Phase 4: Final Polish (IN PROGRESS)
-- [x] Verify Clerk v7 (Core 3) compatibility (Replaced deprecated components with Show).
-- [x] Ensure consistent spacing (4px/8px grid).
-- [x] Audit for any remaining non-monochrome colors.
-- [x] Successfully build production application (npm run build).
+## Objective
+Fix the "Could not find public function for 'projects:createProject'" error by ensuring the Convex mutation is correctly exported, registered, and matches the expected fields and types (identity subject, numeric timestamps).
+
+## Current Phase
+- [x] Update `convex/schema.ts` to support numeric timestamps and flexible legacy fields (optional fields).
+- [x] Update `convex/projects.ts` to use `identity.subject` for `clerkUserId` and `Date.now()` for timestamps.
+- [x] Update `convex/projects.ts` to ensure `createProject` is correctly exported as a public mutation.
+- [x] Update `src/app/api/ingest/route.ts` to use numeric timestamps for `markApiKeyUsed`.
+- [x] Update `convex/agentRuns.ts` to use `identity.subject` for project access checks.
+- [x] Successfully run `npx convex dev --once` to verify function registration and schema validation.
+- [x] Verify frontend `project-step.tsx` and `CreateProjectModal.tsx` use the correct generated `api.projects.createProject` reference.
+
+## Scope Boundaries
+- Do not redesign onboarding UI.
+- Do not build full trace viewer or other deferred surfaces.
+- Do not change existing landing page or dashboard shell logic.
+
+## Next Steps
+- Verify onboarding flow end-to-end in the browser.
+- Monitor for any other registration issues in the Convex dashboard.

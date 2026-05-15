@@ -37,9 +37,9 @@ export default function RootLayout({
           appearance={{
             variables: {
               colorBackground: '#000000',
-              colorInputBackground: '#0A0A0A',
-              colorInputText: '#FFFFFF',
-              colorText: '#A1A1AA',
+              colorInput: '#0A0A0A',
+              colorInputForeground: '#FFFFFF',
+              colorForeground: '#A1A1AA',
               colorPrimary: '#FFFFFF',
               borderRadius: '0px',
               fontFamily: 'var(--font-geist-mono)',
@@ -59,4 +59,3 @@ export default function RootLayout({
     </html>
   );
 }
-

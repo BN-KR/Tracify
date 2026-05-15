@@ -1,4 +1,4 @@
-import { Theme } from "@clerk/types";
+import type { Theme } from "@clerk/ui/internal";
 import { dark } from "@clerk/ui/themes";
 
 /**
@@ -9,13 +9,13 @@ import { dark } from "@clerk/ui/themes";
  * Customization: Total transparency, 1px gray borders (#808080).
  */
 export const CLERK_APPEARANCE: Theme = {
-  baseTheme: dark,
+  theme: dark,
   variables: {
     colorBackground: "transparent", 
-    colorInputBackground: "transparent", // Remove black background from inputs
-    colorInputText: "#FFFFFF",
-    colorText: "#FFFFFF",
-    colorTextSecondary: "#808080",
+    colorInput: "transparent", 
+    colorInputForeground: "#FFFFFF",
+    colorForeground: "#FFFFFF",
+    colorMutedForeground: "#FFFFFF", 
     colorPrimary: "#FFFFFF",
     colorDanger: "#EF4444",
     colorSuccess: "#10B981",
@@ -32,49 +32,87 @@ export const CLERK_APPEARANCE: Theme = {
     },
     card: {
       backgroundColor: "transparent !important",
-      border: "1px solid #808080 !important", // Enforce gray border
+      backgroundImage: "none !important",
+      border: "none !important", 
       borderRadius: "0px",
-      boxShadow: "none",
+      boxShadow: "none !important",
       padding: "1rem !important",
     },
-    header: "hidden", // Hide title and subtitle
+    header: "hidden",
+    headerTitle: "font-mono text-white text-xl uppercase tracking-widest",
+    headerSubtitle: "font-mono text-white/60 text-xs mt-1",
     footer: {
       backgroundColor: "transparent !important",
+      backgroundImage: "none !important",
+      border: "none !important",
       marginTop: "0.5rem !important",
+    },
+    footerAction: {
+      backgroundColor: "transparent !important",
+      border: "none !important",
     },
     main: {
       gap: "1rem !important",
     },
-    headerTitle: "font-mono text-white text-lg uppercase tracking-widest",
-    headerSubtitle: {
-      color: "#808080",
-      fontFamily: "var(--font-mono)",
-      fontSize: "12px",
-      marginTop: "0.25rem",
-    },
+
     
     // Social Buttons
-    socialButtons: {
-      gap: "0.5rem !important",
+    socialButtonsRoot: {
+      display: "grid !important",
+      gridTemplateColumns: "repeat(3, 1fr) !important",
+      gap: "8px !important",
+      width: "100% !important",
     },
+    socialButtons: {
+      display: "contents !important",
+    },
+    
+    // REORDER: Apple -> GitHub -> Google
+    socialButtonsIconButton__apple: { order: "1" },
+    socialButtonsBlockButton__apple: { order: "1" },
+    socialButtonsIconButton__github: { order: "2" },
+    socialButtonsBlockButton__github: { order: "2" },
+    socialButtonsIconButton__google: { order: "3" },
+    socialButtonsBlockButton__google: { order: "3" },
+
     socialButtonsBlockButton: {
-      border: "1px solid #808080 !important", // Enforce gray border
+      width: "100% !important",
+      height: "44px !important",
+      flex: "1 1 auto !important",
+      minWidth: "0 !important",
+      maxWidth: "none !important",
+      border: "1px solid #808080 !important", 
       borderRadius: "0px !important",
       boxShadow: "none !important",
-      backgroundColor: "transparent !important", // Remove black background
-      height: "2.5rem !important",
-      transition: "background-color 0.2s ease",
+      backgroundColor: "transparent !important",
+      transition: "transform 160ms var(--ease-out), background-color 160ms var(--ease-out)",
       "&:hover": {
         backgroundColor: "rgba(255, 255, 255, 0.05) !important",
+        borderColor: "#FFFFFF !important",
+      },
+      "&:active": {
+        transform: "scale(0.98) !important",
       }
     },
-    socialButtonsBlockButtonText: "text-white font-mono text-[13px]",
+    socialButtonsBlockButtonText: "hidden", 
+    socialButtonsIconButton: {
+      width: "100% !important",
+      height: "44px !important",
+      flex: "1 1 auto !important",
+      minWidth: "0 !important",
+      maxWidth: "none !important",
+      aspectRatio: "auto !important",
+      borderRadius: "0px !important",
+      border: "1px solid #808080 !important",
+    },
+    badge: "hidden",
+    lastAuthenticationStrategyBadge: "hidden",
     
     // Primary Form Button
     formButtonPrimary: {
-      backgroundColor: "#111111 !important",
+      backgroundColor: "#FFFFFF !important",
       backgroundImage: "none !important",
-      color: "#FFFFFF !important",
+      color: "#000000 !important",
       border: "none !important",
       borderRadius: "0px !important",
       boxShadow: "none !important",
@@ -84,9 +122,12 @@ export const CLERK_APPEARANCE: Theme = {
       fontSize: "12px",
       height: "2.5rem !important",
       marginTop: "0.5rem !important",
-      transition: "all 0.2s ease",
+      transition: "transform 160ms var(--ease-out), background-color 160ms var(--ease-out)",
       "&:hover": {
-        backgroundColor: "#222222 !important",
+        backgroundColor: "#E0E0E0 !important",
+      },
+      "&:active": {
+        transform: "scale(0.98) !important",
       }
     },
     
@@ -96,14 +137,16 @@ export const CLERK_APPEARANCE: Theme = {
     },
     formFieldLabel: "text-white font-mono uppercase tracking-widest text-[9px] mb-1.5 block",
     formFieldInput: {
-      backgroundColor: "transparent !important", // Remove black background
-      border: "1px solid #808080 !important", // Enforce gray border
+      backgroundColor: "transparent !important",
+      border: "1px solid #808080 !important",
       borderRadius: "0px !important",
       color: "#FFFFFF",
       boxShadow: "none !important",
       height: "2.5rem !important",
+      transition: "border-color 200ms var(--ease-out), background-color 200ms var(--ease-out)",
       "&:focus": {
-        borderColor: "#FFFFFF",
+        borderColor: "#FFFFFF !important",
+        backgroundColor: "rgba(255, 255, 255, 0.02) !important",
       }
     },
     
@@ -113,14 +156,15 @@ export const CLERK_APPEARANCE: Theme = {
       marginBottom: "0.75rem !important",
     },
     dividerLine: {
-      backgroundColor: "#808080",
+      backgroundColor: "#FFFFFF",
       opacity: 0.3,
     },
-    dividerText: "text-[#808080] font-mono uppercase tracking-[0.2em] text-[9px]",
+    dividerText: "text-white font-mono uppercase tracking-[0.2em] text-[9px]",
     
     // Branding Removal
     clerkLogoBox: "hidden",
     clerkLogo: "hidden",
     branding: "hidden",
+    internal_devBadge: "hidden",
   },
 };

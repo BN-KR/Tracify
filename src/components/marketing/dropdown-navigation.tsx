@@ -64,13 +64,13 @@ export function DropdownNavigation({ navItems }: DropdownNavigationProps) {
 
             <AnimatePresence>
               {item.subMenus && activeItem === item.id && (
-                <motion.div
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 4 }}
-                  transition={{ duration: 0.14, ease: [0.23, 1, 0.32, 1] }}
-                  className="absolute left-0 top-full pt-2 z-[60]"
-                >
+              <motion.div
+                   initial={{ opacity: 0, y: 4, scale: 0.99 }}
+                   animate={{ opacity: 1, y: 0, scale: 1 }}
+                   exit={{ opacity: 0, y: 4, scale: 0.99 }}
+                   transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                   className="absolute left-0 top-full pt-2 z-[60]"
+                 >
                   <div className="bg-[#0A0A0A] border border-[#2A2A2A] p-4 min-w-[320px] md:min-w-[480px]">
                     <div className={cn(
                       "grid gap-8",

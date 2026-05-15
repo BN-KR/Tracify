@@ -1,5 +1,112 @@
 # Design & Architectural Decisions
 
+## Project Creation Auth Boundary Fix (2026-05-15)
+- **Decision:** Render the onboarding project creation form only after Convex reports `Authenticated`.
+- **Decision:** Use `AuthLoading`/`Unauthenticated` fallback messaging instead of blocking the button with a local loading gate.
+- **Rationale:** The mutation should not be callable during the short window where Clerk auth is established but Convex has not yet attached the user identity token.
+
+## Convex Sync Recovery (2026-05-14)
+- **Decision:** Preserve backward compatibility for `agentRuns.createdAt` instead of blocking deployment sync on legacy rows.
+- **Decision:** Keep new run writes populating `createdAt` so the index and onboarding state remain usable going forward.
+- **Rationale:** Deployment sync must tolerate legacy data; otherwise the public function table cannot register and the app cannot create projects.
+
+## Root Routing Stability Fix (2026-05-14)
+- **Decision:** Do not let `/dashboard` or `/onboarding` depend on a live Convex query for redirect decisions.
+- **Decision:** Use local project context (`sessionStorage` onboarding project id and `localStorage` last selected project) as the root routing source of truth.
+- **Rationale:** Route entry should stay usable even if a Convex deployment temporarily lags behind the source tree or generated bindings.
+
+## Onboarding Routing + Install Step Refinement (2026-05-14)
+- **Decision:** Onboarding is state-based, not login-based.
+- **Decision:** Users with an existing project land in the dashboard, whether or not spans have arrived; the dashboard start state provides the Quickstart path when spans are absent.
+- **Decision:** Lost API keys require rotation later; plaintext keys are shown once and are not persisted in browser storage.
+- **Decision:** The AI setup prompt should never include the real API key by default.
+- **Decision:** SDK install commands must reflect actual package availability.
+- **Decision:** Use beta GitHub install commands until the PyPI and npm packages are published.
+- **Rationale:** Setup must be reversible and truthful. Users should not be trapped in onboarding, and onboarding must not advertise package commands that cannot currently resolve.
+
+## Onboarding/Dashboard Navigation Escape Hatches (2026-05-14)
+- **Decision:** Onboarding must never feel like a trap; every onboarding step exposes a quiet Home/Dashboard escape link.
+- **Decision:** The dashboard must provide a shortcut back to quickstart/first-span setup through Resources -> Quickstart.
+- **Decision:** Leaving the API key step before copying requires confirmation because API keys are shown once.
+- **Decision:** Keep this pass navigation-only and session-context based; do not modify ingestion, Convex, Inngest, or deferred dashboard surfaces.
+- **Rationale:** Users need a reversible path between setup and workspace without losing one-time credential context or entering placeholder product areas.
+
+## Dashboard Project Switcher Runtime Stability (2026-05-14)
+- **Decision:** Do not call Convex project-list queries from the dashboard project switcher until the local deployment/function registration path is stable.
+- **Decision:** Use onboarding `sessionStorage` project context plus existing mock projects as the temporary dashboard switcher data source.
+- **Rationale:** The dashboard shell should remain loadable even if Convex has not registered newly added project-list functions in the running dev deployment.
+
+## Milestone 2 Part 3 - Ingestion + First Span Activation (2026-05-14)
+- **Decision:** Onboarding success requires real span ingestion; no normal UI simulation remains.
+- **Decision:** `POST /api/ingest` returns `202 Accepted` after accepting a valid span and queuing the processing event.
+- **Decision:** Tinybird stores raw/high-volume span rows while Convex stores run summaries for reactive product state.
+- **Decision:** `agentRuns` is the activation surface for onboarding; the waiting screen watches the first run summary.
+- **Decision:** The run page remains a temporary placeholder until the trace viewer milestone.
+- **Rationale:** Activation should prove the real SDK/API loop without prematurely building trace inspection or dashboard analytics surfaces.
+
+## Milestone 2 Part 2 - Project Creation + API Key Backend (2026-05-14)
+- **Decision:** Use HMAC-SHA256 with `FIVETOONE_API_KEY_HASH_SECRET` for API key hashing.
+- **Decision:** Plaintext API keys are never stored server-side.
+- **Decision:** `sessionStorage` is allowed only during onboarding to pass the one-time plaintext key between the project and API key steps.
+- **Decision:** Project ownership is stored with Clerk `tokenIdentifier` as `clerkUserId`, plus optional `clerkOrgId` when Clerk org context is available.
+- **Decision:** Keep API key rotation/revocation UI and ingestion validation out of Part 2.
+- **Rationale:** Project creation needs real persistence and secure key handling before ingestion. The key display remains a one-time onboarding handoff and avoids server-side plaintext exposure.
+
+## Milestone 2 Part 1 - Onboarding UI Flow (2026-05-14)
+- **Decision:** Onboarding uses a separate shell instead of the dashboard shell.
+- **Decision:** Onboarding route segments are preferred over a single query-param route.
+- **Decision:** API key Continue is gated by the copy action so users must acknowledge the one-time key behavior.
+- **Decision:** This pass uses a mock API key and temporary browser state only; no Convex mutation or ingestion logic is connected from the UI.
+- **Decision:** No fake activation in normal UI; success is reached only by direct route or the clearly marked development simulation control until Part 3 wires real first-span detection.
+- **Rationale:** The onboarding flow needs the product shape and interaction contract before backend coupling. Activation must remain truthful once connected.
+
+## Dashboard Sidebar Simplification (2026-05-14)
+- **Decision:** Remove hover-peek because it interfered with intentionally pressing the expand icon.
+- **Decision:** Remove user-adjustable sidebar width because it added interaction weight without enough value in the current dashboard shell.
+- **Decision:** Return to fixed widths: 240px expanded and 64px collapsed.
+- **Decision:** Keep the top header icon as the explicit collapse/expand affordance.
+- **Decision:** Keep collapsed nav-icon clicks expanding the sidebar before normal navigation.
+- **Rationale:** The sidebar should be predictable and easy to operate. Quiet assistance is useful only when it does not fight the user's intended click target.
+
+## Dashboard Sidebar Workspace Assistance (2026-05-14)
+- **Decision:** Collapse control lives at the top of the sidebar as a small icon, not as a bottom button or large row.
+- **Decision:** The dashboard sidebar should behave like a developer workspace panel: quiet, resizable, collapsible, and precise.
+- **Decision:** User-resizable width between 200px and 360px improves power-user control without adding visual clutter.
+- **Decision:** Resizing is disabled and hidden when the sidebar is collapsed or temporarily peeking.
+- **Decision:** Collapsed sidebar hover temporarily reveals labels and project context.
+- **Decision:** Hover-peek overlays content instead of changing the main layout, so main content remains offset at 64px while peeking.
+- **Decision:** Peeking state is temporary UI assistance and is not persisted.
+- **Decision:** Clicking a nav icon while collapsed or peeking means commitment: the sidebar permanently expands, labels return, and navigation continues normally.
+- **Decision:** The clicked nav item's group opens after expansion if needed so the active item remains visible.
+- **Rationale:** Sidebar interaction should feel assisted and effortless without becoming a tutorial, modal, chatbot, or visually loud control surface.
+
+## Dashboard Shell Usability Pass (2026-05-14)
+- **Decision:** Keep the dashboard shell as the product entry point, not a full dashboard product implementation.
+- **Decision:** Use a custom product-specific collapsible sidebar implementation on top of the dashboard shell instead of relying on shadcn demo visuals.
+- **Decision:** Persist sidebar width and group open/closed state in localStorage so the workspace keeps the user's navigation density preference.
+- **Decision:** Show OBSERVE, CONFIGURE, and RESOURCES groups, but continue hiding Replay, Evals, Integrations, Team, Memory, and Runtime.
+- **Decision:** Route sample trace entry points to `/demo` until the real sample trace or trace viewer route exists.
+- **Decision:** Keep project selection on local mock data until Convex-backed project context is wired into the dashboard shell.
+- **Rationale:** Empty dashboards are not acceptable for activation. The shell should guide a developer toward SDK install, first span ingestion, and sample inspection without prematurely building deferred product pages.
+
+## Dashboard Shell Foundation (2026-05-14)
+- **Decision:** Build the dashboard shell first before onboarding, runs list, trace viewer, costs, alerts, billing, and API keys.
+- **Decision:** `sidebar-03` is used only as a structural base, not as the visual source of truth.
+- **Decision:** The dashboard shell is product-grade and monochrome, not a generic shadcn demo.
+- **Decision:** Unfinished dashboard pages are not shown in the nav.
+- **Decision:** The dashboard shell is built before full dashboard pages such as trace viewer, costs, alerts, onboarding, billing, or project creation flows.
+- **Rationale:** The app needs an authenticated observability workspace foundation before adding dense telemetry views. Keeping the MVP nav narrow prevents users from entering placeholder Phase 2/Phase 3 surfaces.
+
+## Dashboard Milestone 2 Onboarding (2026-05-14)
+- **Decision:** Project creation is mandatory before the dashboard activation path.
+- **Decision:** API keys are shown once only; lost keys require rotation later.
+- **Decision:** Onboarding auto-advances only when a real first span arrives through ingestion.
+- **Decision:** No fake success and no simulated activation are used.
+- **Decision:** Trace viewer, runs list, costs, alerts, billing, and API key management are not built in Milestone 2.
+- **Decision:** The temporary run route only confirms receipt; it does not inspect spans or render a trace viewer.
+- **Decision:** `processSpan` is activation-only in Milestone 2 and does not create alert side effects.
+- **Rationale:** Activation must prove the core product loop: real SDK/API traffic becomes a live run record. Placeholder success would weaken the observability contract.
+
 ## Landing Page Narrative (2026-05-13)
 - **Rejection of Generic SaaS Patterns:** Rejected the "Features" and "HowItWorks" sections entirely. They were found to be redundant and felt like standard SaaS marketing fluff.
 - **Decision:** Move `DebugStream` (Terminal) directly after `Problem`.

@@ -22,10 +22,14 @@ const containerVariants: Variants = {
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0, y: 8 },
   show: {
     opacity: 1,
-    transition: { duration: 0.15 },
+    y: 0,
+    transition: { 
+      duration: 0.3,
+      ease: [0.23, 1, 0.32, 1] 
+    },
   },
 };
 
@@ -61,7 +65,7 @@ export function Hero() {
         style={{
           backgroundImage: "radial-gradient(circle, #1A1A1A 1px, transparent 1px)",
           backgroundSize: "32px 32px",
-          opacity: 0.6,
+          opacity: 0.35,
         }}
       />
 
@@ -141,14 +145,9 @@ export function Hero() {
               <Show when="signed-out">
                 <Link href="/sign-up" className="w-full sm:w-auto">
                   <Button
+                    variant="default"
                     size="lg"
-                    className="h-11 px-8 font-mono text-[13px] w-full sm:w-auto uppercase tracking-wide transition-colors"
-                    style={{
-                      backgroundColor: "#FFFFFF",
-                      color: "#000000",
-                      borderRadius: "0px",
-                      border: "none",
-                    }}
+                    className="h-11 px-8 font-mono text-[13px] w-full sm:w-auto uppercase tracking-wide"
                   >
                     Start free — no credit card
                   </Button>
@@ -158,14 +157,9 @@ export function Hero() {
               <Show when="signed-in">
                 <Link href="/dashboard" className="w-full sm:w-auto">
                   <Button
+                    variant="default"
                     size="lg"
-                    className="h-11 px-8 font-mono text-[13px] w-full uppercase tracking-wide transition-colors"
-                    style={{
-                      backgroundColor: "#FFFFFF",
-                      color: "#000000",
-                      borderRadius: "0px",
-                      border: "none",
-                    }}
+                    className="h-11 px-8 font-mono text-[13px] w-full uppercase tracking-wide"
                   >
                     Open Dashboard
                   </Button>
@@ -173,25 +167,13 @@ export function Hero() {
               </Show>
 
               <Link href="#workspace-terminal" className="w-full sm:w-auto">
-                <button
-                  className="h-11 px-8 font-mono text-[13px] w-full sm:w-auto uppercase tracking-wide transition-colors border"
-                  style={{
-                    backgroundColor: "transparent",
-                    borderColor: "#2A2A2A",
-                    color: "#CCCCCC",
-                    borderRadius: "0px",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#161616";
-                    (e.currentTarget as HTMLButtonElement).style.color = "#FFFFFF";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
-                    (e.currentTarget as HTMLButtonElement).style.color = "#CCCCCC";
-                  }}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="h-11 px-8 font-mono text-[13px] w-full sm:w-auto uppercase tracking-wide"
                 >
                   View live demo →
-                </button>
+                </Button>
               </Link>
             </motion.div>
 

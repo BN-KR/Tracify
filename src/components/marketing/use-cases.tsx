@@ -135,7 +135,7 @@ export function UseCases() {
         </div>
 
         {/* List */}
-        <div className="flex flex-col border-b border-[#1A1A1A]">
+        <div className="flex flex-col">
           {USE_CASES.map((item, i) => (
             <UseCaseItem 
               key={i} 

@@ -19,7 +19,7 @@ export function FirstTrace() {
   }, []);
 
   return (
-    <section className="w-full bg-[#050505] py-16 md:py-20 border-t border-[#1A1A1A]">
+    <section className="w-full bg-[#050505] py-16 md:py-20">
       <div className="mx-auto max-w-[1200px] px-6 md:px-8">
         
         {/* Header Block */}

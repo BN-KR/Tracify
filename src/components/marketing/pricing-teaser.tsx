@@ -66,7 +66,7 @@ export function PricingTeaser() {
   };
 
   return (
-    <section className="w-full bg-[#050505] pt-16 pb-[72px] border-t border-[#1A1A1A]">
+    <section className="w-full bg-[#050505] pt-16 pb-[72px]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-8">
         
         {/* Header */}
@@ -184,8 +184,8 @@ export function PricingTeaser() {
 
             <Link href="/sign-up?plan=pro">
               <Button 
-                className="w-full h-12 rounded-none bg-white text-black hover:bg-[#EEEEEE] font-mono text-[13px] uppercase tracking-widest transition-colors"
-                style={{ borderRadius: "0px" }}
+                variant="default"
+                className="w-full h-12 uppercase tracking-widest"
               >
                 Start Pro
               </Button>
@@ -263,9 +263,8 @@ export function PricingTeaser() {
 
             <Link href="/sign-up?plan=team">
               <Button 
-                variant="outline"
-                className="w-full h-12 rounded-none border-[#2A2A2A] text-white hover:bg-[#161616] font-mono text-[13px] uppercase tracking-widest transition-colors bg-transparent"
-                style={{ borderRadius: "0px" }}
+                variant="secondary"
+                className="w-full h-12 uppercase tracking-widest border-[#3A3A3A]"
               >
                 Start Team
               </Button>
@@ -298,9 +297,8 @@ export function PricingTeaser() {
 
             <Link href="mailto:sales@5to1r.com">
               <Button 
-                variant="outline"
-                className="w-full h-12 rounded-none border-[#3A3A3A] text-white hover:bg-[#161616] font-mono text-[13px] uppercase tracking-widest transition-colors bg-transparent"
-                style={{ borderRadius: "0px" }}
+                variant="secondary"
+                className="w-full h-12 uppercase tracking-widest border-[#3A3A3A]"
               >
                 Contact sales
               </Button>
@@ -335,9 +333,8 @@ export function PricingTeaser() {
 
           <Link href="/sign-up">
             <Button 
-              variant="outline"
-              className="w-full md:w-auto h-11 px-8 rounded-none border-[#2A2A2A] text-[#666666] hover:text-white hover:bg-[#161616] font-mono text-[12px] uppercase tracking-widest transition-colors bg-transparent"
-              style={{ borderRadius: "0px" }}
+              variant="secondary"
+              className="w-full md:w-auto h-11 px-8 uppercase tracking-widest"
             >
               Start free
             </Button>

@@ -1,5 +1,530 @@
 # Implementation Scratchpad
 
+## Project Creation Auth Boundary Fix
+- **Status:** Implemented and lint-validated.
+- **Files Updated:**
+  - `src/components/onboarding/project-step.tsx`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **Behavior Change:**
+  - `ProjectStep` now renders the form only inside `Authenticated`.
+  - `AuthLoading` shows a short waiting message while Convex auth initializes.
+  - `Unauthenticated` shows a sign-in message.
+- **Reason:**
+  - This avoids calling `createProject` before Convex has a user identity, which was surfacing as `ctx.auth.getUserIdentity() === null`.
+
+## Convex Sync Recovery
+- **Status:** Implemented and deployment sync validated.
+- **Files Updated:**
+  - `convex/schema.ts`
+  - `convex/agentRuns.ts`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **Issue:**
+  - `npx convex dev` initially failed because an existing `agentRuns` row lacked `createdAt`.
+- **Fix:**
+  - Changed `agentRuns.createdAt` to `v.optional(v.string())`.
+  - Kept new writes setting `createdAt`.
+  - Added a fallback to `startedAt` for onboarding state reads.
+- **Verification:**
+  - Fresh `npx convex dev` now reports `Convex functions ready!`.
+
+## Root Routing Stability Fix
+- **Status:** Implemented and targeted-lint validated.
+- **Files Updated:**
+  - `src/components/onboarding/onboarding-entry-router.tsx`
+  - `src/components/dashboard/dashboard-entry-router.tsx`
+  - `src/components/onboarding/project-step.tsx`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **Behavior Change:**
+  - Removed the Convex `projects.getProjectsByUserOrOrg` call from root redirect logic.
+  - `sessionStorage` project id and `localStorage` last project id now drive `/dashboard` and `/onboarding` redirects.
+  - Project creation now writes `5to1r.lastProjectId` so the next root visit can route into the dashboard without querying Convex.
+- **Reason:**
+  - A missing public function in Convex should not break route entry.
+
+## Onboarding Routing + Install Step Refinement
+- **Status:** Implemented and targeted-lint validated.
+- **Files Updated:**
+  - `src/app/onboarding/page.tsx`
+  - `src/app/dashboard/page.tsx`
+  - `src/components/onboarding/onboarding-entry-router.tsx`
+  - `src/components/dashboard/dashboard-entry-router.tsx`
+  - `src/components/onboarding/install-step.tsx`
+  - `src/components/onboarding/code-copy-block.tsx`
+  - `src/components/onboarding/project-step.tsx`
+  - `src/components/onboarding/api-key-step.tsx`
+  - `src/components/onboarding/onboarding-escape-link.tsx`
+  - `src/components/onboarding/waiting-step.tsx`
+  - `src/components/dashboard/dashboard-start-state.tsx`
+  - `src/lib/onboarding-client-state.ts`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **Onboarding Routing Rules:**
+  - Unauthenticated users are protected by Clerk proxy and route to `/sign-in`.
+  - `/onboarding` sends users with no project to `/onboarding/project`.
+  - `/onboarding` sends users with an existing project to `/dashboard/[projectId]`.
+  - `/dashboard` sends users with an existing project to `/dashboard/[projectId]`.
+  - `/dashboard` sends users with no project to `/onboarding/project`.
+  - Users with a project but no spans stay in the dashboard start state with Quickstart visible.
+- **Package Publication Check:**
+  - npm registry check for `@5to1r/sdk` returned `E404 Not Found`.
+  - PyPI JSON check for `5to1r` returned `{"message": "Not Found"}`.
+  - Current install commands use beta GitHub sources:
+    - Python: `pip install git+https://github.com/5to1r/sdk-python`
+    - TypeScript: `npm install github:5to1r/sdk-typescript`
+  - TODO: Replace beta install commands with PyPI/npm commands once packages are published.
+- **AI Setup Prompt:**
+  - `/onboarding/install` now has a third `AI setup prompt` mode.
+  - The setup prompt is copyable with `Copy setup prompt`.
+  - The prompt uses `FIVETOONE_API_KEY=your_key_here` and does not include the real API key.
+  - A visible warning tells users not to paste live API keys into AI coding tools unless they trust the environment.
+- **API Key Handling:**
+  - Project creation still receives the one-time plaintext key from Convex.
+  - Plaintext key handoff is now in-memory only via `src/lib/onboarding-client-state.ts`; it is not written to `sessionStorage`.
+  - Copying the key marks `5to1r.onboarding.apiKeyCopied` and clears the in-memory key.
+- **Scope Notes:**
+  - Did not build trace viewer, runs list, cost dashboard, or landing page changes.
+
+## Onboarding/Dashboard Navigation Escape Hatches
+- **Status:** Implemented and targeted-lint validated.
+- **Files Updated:**
+  - `src/components/onboarding/onboarding-escape-link.tsx`
+  - `src/components/onboarding/onboarding-shell.tsx`
+  - `src/components/onboarding/api-key-step.tsx`
+  - `src/components/onboarding/project-step.tsx`
+  - `src/components/dashboard/dashboard-sidebar.tsx`
+  - `src/components/dashboard/dashboard-start-state.tsx`
+  - `src/app/dashboard/[projectId]/page.tsx`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **Routes Added/Changed:**
+  - `/onboarding/project`, `/onboarding/api-key`, `/onboarding/install`, `/onboarding/waiting`, and `/onboarding/success` inherit a quiet top-left Home/Dashboard escape link from the onboarding shell.
+  - Dashboard Resources includes `Quickstart` -> `/onboarding/install`.
+  - Dashboard empty-state `View quickstart` routes to `/onboarding/project` when no project context exists, `/onboarding/api-key` when a one-time key is still available and not copied, and `/onboarding/install` otherwise.
+  - `Open sample trace` remains `/demo`; no `#` CTA destinations were added.
+- **API Key Leave Warning:**
+  - `/onboarding/api-key` records `5to1r.onboarding.apiKeyCopied` after Copy key.
+  - The escape link shows the API key warning only when the key exists and has not been copied.
+- **Context-Aware `/onboarding`:**
+  - Deferred for this pass. It still redirects to `/onboarding/project`; direct dashboard/onboarding links now cover the required escape hatches without adding server-side state assumptions.
+- **Scope Notes:**
+  - Navigation-only change. No landing, auth, pricing, ingestion, Convex, Inngest, trace viewer, runs list, cost dashboard, or alerts changes were made for this task.
+
+## Milestone 2 Part 3 - Ingestion + First Span Activation
+- **Status:** Implemented and build-validated.
+- **Files Updated:**
+  - `convex/schema.ts`
+  - `convex/agentRuns.ts`
+  - `src/app/api/ingest/route.ts`
+  - `src/lib/api-keys.ts`
+  - `src/lib/inngest-functions.ts`
+  - `src/lib/tinybird.ts`
+  - `src/components/onboarding/waiting-step.tsx`
+  - `src/components/onboarding/success-step.tsx`
+  - `src/app/onboarding/success/page.tsx`
+  - `src/components/dashboard/project-switcher.tsx`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **API Route:**
+  - `POST /api/ingest` validates Bearer keys, rejects missing/invalid keys with `401`, rejects invalid payloads with field-specific `422`, rejects >1MB payloads with `413`, updates API key last-used time, and sends `5to1r/span.received`.
+- **Inngest Function:**
+  - `processSpan` handles `5to1r/span.received`.
+  - Writes span data to Tinybird.
+  - Calls `agentRuns.upsertRunFromSpan` to create/update run summaries.
+- **Convex Functions Created/Updated:**
+  - `agentRuns.upsertRunFromSpan`
+  - `agentRuns.getFirstRunForProject`
+  - `agentRuns.getProjectOnboardingState`
+  - `agentRuns.getRecentRunsByProject`
+  - Compatibility upserts retained for existing callers.
+- **Schema Changes:**
+  - `agentRuns` now tracks `status`, `spanCount`, `totalCostUsd`, `startedAt`, `finishedAt`, `lastSpanAt`, optional `primaryModel`, `createdAt`, and `updatedAt`.
+  - Added indexes `by_projectId_createdAt` and `by_projectId_status`.
+  - Kept existing `by_projectId_and_runId` instead of adding duplicate `by_projectId_runId`.
+- **Tinybird Write Status:**
+  - `ingestSpan` writes project/run/span IDs, span type, input, output, latency, cost, model, tool, parent span, metadata, and created time.
+  - Production requires `TINYBIRD_TOKEN`; missing token throws instead of silently skipping.
+- **Onboarding Wiring:**
+  - Waiting screen reads `5to1r.onboarding.projectId`, subscribes to `agentRuns.getProjectOnboardingState`, and routes to `/onboarding/success?projectId=<projectId>&runId=<runId>` only after a real run exists.
+  - Success screen reads `projectId` and `runId` from query params and links to `/dashboard/[projectId]/runs/[runId]`.
+  - Dev-only first-span simulation was removed.
+- **Runtime Error Fix:**
+  - Dashboard project switcher no longer calls Convex project-list queries during this pass.
+  - It reads `5to1r.onboarding.projectId` and `5to1r.onboarding.projectName` from `sessionStorage` when available, then falls back to existing mock projects.
+  - TODO: Reconnect to Convex-backed project listing once `npx convex dev`/deployment registration is stable for the new functions.
+- **Manual Curl Test:**
+  ```bash
+  curl -X POST http://localhost:3000/api/ingest \
+    -H "Authorization: Bearer 5t1r_sk_live_REPLACE_WITH_REAL_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "spanId": "span_test_001",
+      "runId": "run_test_001",
+      "spanType": "llm_call",
+      "input": "{\"query\":\"hello\"}",
+      "output": "{\"result\":\"world\"}",
+      "latencyMs": 420,
+      "costUsd": 0.0004,
+      "modelId": "claude-sonnet-4-5",
+      "createdAt": "2026-05-14T00:00:00.000Z"
+    }'
+  ```
+  Expected:
+  - response `202`
+  - Inngest event created
+  - Tinybird row written
+  - Convex `agentRun` created
+  - onboarding waiting screen auto-advances
+  - success page opens `/dashboard/[projectId]/runs/run_test_001`
+- **Local Test Results:**
+  - Missing auth returned `401`.
+  - Invalid key format returned `401`.
+  - Missing required field returned `422`.
+  - Payload over 1MB returned `413`.
+  - Valid-key end-to-end test requires a signed-in onboarding project key plus matching `FIVETOONE_API_KEY_HASH_SECRET` in Next.js and Convex and `TINYBIRD_TOKEN` for span writes.
+- **Known TODOs:**
+  - Run the valid-key curl test after generating a real onboarding key in the browser.
+  - Add key rotation/revocation UI later.
+  - Build the real trace viewer in the next milestone.
+
+## Milestone 2 Part 2 - Project Creation + API Key Backend
+- **Status:** Implemented and build-validated.
+- **Files Updated:**
+  - `convex/schema.ts`
+  - `convex/projects.ts`
+  - `convex/agentRuns.ts`
+  - `convex/_generated/api.d.ts`
+  - `convex/_generated/api.js`
+  - `convex/_generated/dataModel.d.ts`
+  - `convex/_generated/server.d.ts`
+  - `convex/_generated/server.js`
+  - `src/components/onboarding/project-step.tsx`
+  - `src/components/onboarding/api-key-step.tsx`
+  - `src/components/onboarding/waiting-step.tsx`
+  - `src/components/dashboard/project-switcher.tsx`
+  - `.env.local.example`
+  - `.env.prod`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **Convex Functions Created/Updated:**
+  - `projects.createProject`
+  - `projects.getProjectsByUserOrOrg`
+  - `projects.getProjectById`
+  - `projects.getProjectOnboardingState`
+  - Existing compatibility aliases retained: `projects.getProjectsByOrg`, `projects.getProject`, `projects.getProjectByApiKey`, `projects.markApiKeyUsed`, `projects.listByOrg`.
+- **Schema Changes:**
+  - Added `slug`, `clerkUserId`, optional `clerkOrgId`, `createdAt`, `updatedAt`, `planTier`, `costThresholdUsd`, `maxDurationSeconds`, and `maxStallMinutes`.
+  - API key fields remain hash-only: `apiKeyPrefix`, `apiKeyLast4`, `apiKeyHash`, `apiKeyStatus`, `apiKeyCreatedAt`, optional `apiKeyLastUsedAt`.
+  - Added indexes `by_clerkUserId` and `by_slug`; retained `by_clerkOrgId` and `by_apiKeyHash`.
+- **Security Notes:**
+  - API key format: `5t1r_sk_live_` + 32 random hex chars.
+  - API keys are generated with `crypto.getRandomValues`.
+  - API key hashes use HMAC-SHA256 with `FIVETOONE_API_KEY_HASH_SECRET`.
+  - Plaintext API key is returned once from `createProject` and stored only in `sessionStorage` under `5to1r.onboarding.apiKey`.
+  - Plaintext API key is not stored in Convex, memory, scratchpad, or localStorage.
+- **Onboarding Client Storage:**
+  - `5to1r.onboarding.apiKey`
+  - `5to1r.onboarding.projectId`
+  - `5to1r.onboarding.projectName`
+- **Environment Variable Required:**
+  - Set `FIVETOONE_API_KEY_HASH_SECRET` in Convex deployment env before creating projects.
+- **Temporary Mocks / Deferred Work:**
+  - Project switcher now prefers real Convex projects and falls back to mock projects if none are returned.
+  - API route ingestion still uses the older local hashing helper and is intentionally not updated in this Part 2 pass.
+  - Key rotation, key revocation, settings UI, ingestion validation, and first-span backend detection remain deferred.
+- **Manual Testing Steps:**
+  - Sign in through Clerk.
+  - Visit `/onboarding/project`.
+  - Create a project named `research-agent-prod`.
+  - Confirm `/onboarding/api-key` shows a key matching `5t1r_sk_live_[32 hex chars]`.
+  - Copy key and confirm Continue unlocks.
+  - Download `.env` and confirm it contains `FIVETOONE_API_KEY=<one-time key>`.
+  - Continue to `/onboarding/install`.
+  - Confirm Convex `projects` row stores hash/prefix/last4 but not plaintext.
+
+## Milestone 2 Part 1 - Onboarding UI Flow
+- **Status:** Implemented and build-validated.
+- **Files Created:**
+  - `src/components/onboarding/onboarding-progress.tsx`
+  - `src/components/onboarding/code-copy-block.tsx`
+- **Files Updated:**
+  - `src/app/onboarding/api-key/page.tsx`
+  - `src/app/onboarding/install/page.tsx`
+  - `src/app/onboarding/waiting/page.tsx`
+  - `src/app/onboarding/success/page.tsx`
+  - `src/components/onboarding/onboarding-shell.tsx`
+  - `src/components/onboarding/project-step.tsx`
+  - `src/components/onboarding/api-key-step.tsx`
+  - `src/components/onboarding/install-step.tsx`
+  - `src/components/onboarding/waiting-step.tsx`
+  - `src/components/onboarding/success-step.tsx`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **Routes:**
+  - `/onboarding/project`
+  - `/onboarding/api-key`
+  - `/onboarding/install`
+  - `/onboarding/waiting`
+  - `/onboarding/success`
+- **Mock Data:**
+  - Mock API key: `5t1r_sk_live_mock_1234567890abcdef1234567890abcdef`.
+  - Mock success project/run target: `/dashboard/research-agent-prod/runs/run_test_001`.
+  - Temporary project name storage: `sessionStorage` key `5to1r.onboarding.mockProjectName`.
+- **Behavior Notes:**
+  - Project button is disabled until project name has a value.
+  - API key Continue is disabled until Copy key is clicked.
+  - `.env` download writes `FIVETOONE_API_KEY=<mock key>`.
+  - Install step has Python and TypeScript tabs plus copy buttons for command/code.
+  - Waiting step uses elapsed client time for secondary help: 30s sample trace, 60s troubleshooting, 120s support email.
+  - Waiting step has a development-only `Simulate first span (dev only)` button that routes to success and must be replaced in Part 3.
+- **TODO Part 2:**
+  - Connect project creation to Convex.
+  - Generate and display a real one-time API key.
+  - Replace temporary browser/session state with backend-backed onboarding state.
+- **TODO Part 3:**
+  - Wire ingestion and first-span detection.
+  - Replace development simulation with real activation.
+  - Route success with the real `projectId` and `runId`.
+
+## Dashboard Sidebar Simplification
+- **Status:** Implemented and build-validated.
+- **Files Updated:**
+  - `src/components/dashboard/dashboard-shell.tsx`
+  - `src/components/dashboard/dashboard-sidebar.tsx`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **Behavior Removed:**
+  - Removed collapsed hover-peek state and mouse enter/leave timers.
+  - Removed draggable resize handle and pointer/keyboard resizing handlers.
+  - Removed shell usage of `5to1r.sidebar.width`.
+- **Current Sidebar Widths:**
+  - Expanded: `240px`.
+  - Collapsed: `64px`.
+- **Persisted State:**
+  - `5to1r.sidebar.collapsed` remains active.
+  - `5to1r:dashboard-sidebar-groups` remains active.
+  - `5to1r.lastProjectId` remains active.
+  - `5to1r.sidebar.width` is deprecated/unused after this simplification.
+- **Preserved Interactions:**
+  - Header icon toggles collapse/expand.
+  - Collapsed nav-icon clicks expand the sidebar before letting `Link` navigation continue.
+  - The clicked item's group opens if it was closed.
+
+## Dashboard Sidebar Workspace Assistance
+- **Status:** Implemented and build-validated.
+- **Files Updated:**
+  - `src/components/dashboard/dashboard-shell.tsx`
+  - `src/components/dashboard/dashboard-sidebar.tsx`
+  - `src/components/dashboard/project-switcher.tsx`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **localStorage Keys:**
+  - `5to1r.sidebar.collapsed`: `"true"` or `"false"` for permanent collapse state.
+  - `5to1r.sidebar.width`: saved permanent expanded width in pixels.
+  - `5to1r:dashboard-sidebar-groups`: existing persisted group state, preserved.
+  - `5to1r.lastProjectId`: last selected mock project id.
+- **Width Values:**
+  - Default expanded width: `240px`.
+  - Minimum expanded width: `200px`.
+  - Maximum expanded width: `360px`.
+  - Collapsed width: `64px`.
+- **Drag Handling:**
+  - Uses pointer events on the resize separator.
+  - `pointermove` updates width live with clamping.
+  - `pointerup` persists the final clamped width.
+  - Text selection and cursor are suppressed while dragging.
+  - Resize handle supports keyboard arrows: `ArrowLeft` / `ArrowRight` by 16px; `Shift` by 32px.
+- **Hover Peek Handling:**
+  - `isPeeking` is local React state and never persisted.
+  - Open delay: `80ms`.
+  - Close delay: `120ms`.
+  - Peeking visual width uses the saved expanded width, but main layout remains offset at `64px`.
+  - Resize handle is hidden while peeking.
+- **Nav Click Handling:**
+  - Collapsed or peeking nav click calls expand before allowing Next.js `Link` navigation to continue.
+  - The clicked item's group is opened if it was previously closed.
+  - Existing group state is otherwise preserved.
+- **Accessibility Notes:**
+  - Header button aria-label switches between `Collapse sidebar` and `Expand sidebar`.
+  - Resize handle has `role="separator"`, `aria-orientation="vertical"`, and `aria-label="Resize sidebar"`.
+  - Collapsed nav links retain route aria-labels and tooltips.
+- **Deferred Workspace Assist TODOs:**
+  - Last selected project is remembered.
+  - Last dashboard route per project (`5to1r.lastRoute.[projectId]`) was deferred to avoid modifying dashboard route/content behavior in this sidebar-only pass.
+  - No-spans dashboard home behavior was already represented by the existing start-here panel and was not changed.
+
+## Dashboard Shell Usability Pass
+- **Status:** Implemented and build-validated.
+- **Files Created:**
+  - `src/components/dashboard/dashboard-start-state.tsx`
+- **Files Updated:**
+  - `src/components/dashboard/dashboard-shell.tsx`
+  - `src/components/dashboard/dashboard-sidebar.tsx`
+  - `src/components/dashboard/dashboard-topbar.tsx`
+  - `src/components/dashboard/project-switcher.tsx`
+  - `src/app/dashboard/page.tsx`
+  - `memory.md`
+  - `decisions.md`
+  - `scratchpad.md`
+  - `task.md`
+  - `implementation_plan.md`
+- **Sidebar Notes:**
+  - Expanded width is `240px`; collapsed width is `64px`.
+  - Sidebar collapsed state persists in `localStorage` as `5to1r:dashboard-sidebar`.
+  - Group state persists in `localStorage` as `5to1r:dashboard-sidebar-groups`.
+  - Groups are OBSERVE, CONFIGURE, and RESOURCES.
+  - Deferred Replay, Evals, Integrations, Team, Memory, and Runtime nav items remain hidden.
+- **Project Switcher Notes:**
+  - Still uses mock projects: `research-agent-prod`, `support-agent-staging`, `automation-dev`.
+  - Selecting a project updates local state and routes to `/dashboard/<projectId>`.
+  - TODO: Replace local mock state with Convex-backed project context.
+- **Start State Notes:**
+  - `/dashboard` and `/dashboard/[projectId]` render the same start-here state.
+  - `View quickstart` routes to `/onboarding/install`.
+  - `Open sample trace` routes to `/demo`.
+  - TODO: Replace `/demo` with a real sample trace route when the trace viewer milestone exists.
+  - API Keys and Billing are nav entry points only; their pages were not built in this pass.
+- **Validation:**
+  - Scoped dashboard ESLint passed.
+  - `npm.cmd run build` passed.
+
+## Dashboard Milestone 2 - Onboarding + Ingestion
+- **Status:** Implemented and build-validated.
+- **Files Created:**
+  - `convex/auth.config.ts`
+  - `src/app/onboarding/layout.tsx`
+  - `src/app/onboarding/page.tsx`
+  - `src/app/onboarding/project/page.tsx`
+  - `src/app/onboarding/api-key/page.tsx`
+  - `src/app/onboarding/install/page.tsx`
+  - `src/app/onboarding/waiting/page.tsx`
+  - `src/app/onboarding/success/page.tsx`
+  - `src/components/onboarding/onboarding-shell.tsx`
+  - `src/components/onboarding/project-step.tsx`
+  - `src/components/onboarding/api-key-step.tsx`
+  - `src/components/onboarding/install-step.tsx`
+  - `src/components/onboarding/waiting-step.tsx`
+  - `src/components/onboarding/success-step.tsx`
+  - `src/lib/api-keys.ts`
+  - `src/app/dashboard/[projectId]/runs/[runId]/page.tsx`
+- **API Routes Created/Updated:**
+  - Updated `src/app/api/ingest/route.ts`
+  - Existing `src/app/api/inngest/route.ts` continues to serve Inngest functions.
+- **Convex Functions Created/Updated:**
+  - `projects.createProject`
+  - `projects.getProject`
+  - `projects.getProjectsByOrg`
+  - `projects.getProjectByApiKey`
+  - `projects.markApiKeyUsed`
+  - `agentRuns.upsertRun`
+  - `agentRuns.getFirstRunForProject`
+  - `agentRuns.getRecentRunsByProject`
+  - `agentRuns.getProjectOnboardingState`
+- **Inngest Functions Created/Updated:**
+  - Updated `processSpan` to listen for `5to1r/span.received`.
+  - Writes span rows to Tinybird and upserts Convex `agentRuns`.
+  - Removed alert side effects from `processSpan`; alerts are outside Milestone 2.
+- **Temporary Mocks:**
+  - None for activation. Waiting state only advances from a real Convex run returned by `agentRuns.getProjectOnboardingState`.
+  - `/dashboard/[projectId]/runs/[runId]` is a temporary receipt placeholder, not a trace viewer.
+- **Unresolved Backend/Environment Issues:**
+  - `FIVETOONE_API_KEY_HMAC_SECRET` must be set in both Next.js runtime env and Convex deployment env to create and validate API keys consistently.
+  - `TINYBIRD_TOKEN` and `TINYBIRD_HOST` must be configured for Tinybird ingestion.
+  - `convex/auth.config.ts` uses the current Clerk issuer `https://many-crab-79.clerk.accounts.dev`.
+- **Manual Curl Test:**
+  ```bash
+  curl -X POST http://localhost:3000/api/ingest \
+    -H "Authorization: Bearer 5t1r_sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "spanId": "span_test_001",
+      "runId": "run_test_001",
+      "spanType": "llm_call",
+      "input": "{\"query\":\"hello\"}",
+      "output": "{\"result\":\"world\"}",
+      "latencyMs": 420,
+      "costUsd": 0.0004,
+      "modelId": "claude-sonnet-4-5",
+      "createdAt": "2026-05-14T00:00:00.000Z"
+    }'
+  ```
+  Expected result after using a real onboarding-generated key:
+  - API returns `202`.
+  - Tinybird receives one `spans` row.
+  - Convex creates or updates one `agentRuns` row.
+  - `/onboarding/waiting?projectId=<projectId>` auto-advances to `/onboarding/success?projectId=<projectId>&runId=run_test_001`.
+  - `/dashboard/<projectId>/runs/run_test_001` shows the temporary run received placeholder.
+- **Manual Test Status:**
+  - Not run end-to-end in this pass because a valid key must be generated through an authenticated Clerk onboarding session and Tinybird/Inngest environment variables must be configured.
+- **Validation:**
+  - `npx.cmd convex codegen` completed.
+  - Scoped Milestone 2 ESLint passed.
+  - `npm.cmd run build` passed.
+
+## Dashboard Shell Foundation
+- **Status:** Completed initial shell pass.
+- **Shadcn Command Run:** `npx shadcn@latest add sidebar-03`
+  - PowerShell blocked `npx.ps1`, so the equivalent Windows runner `npx.cmd shadcn@latest add sidebar-03` was used.
+  - The command detected existing shadcn primitives and prompted for overwriting `button.tsx`; no overwrite was selected and no new shadcn primitive files were generated.
+  - Re-ran `npx.cmd shadcn@latest add sidebar-03` for Milestone 1 verification; existing primitives were still kept.
+  - Existing sidebar primitive remains `src/components/ui/sidebar.tsx`.
+- **Product Shell Files Added:**
+  - `src/components/dashboard/dashboard-shell.tsx`
+  - `src/components/dashboard/dashboard-sidebar.tsx`
+  - `src/components/dashboard/dashboard-topbar.tsx`
+  - `src/components/dashboard/project-switcher.tsx`
+- **Routes Added/Updated:**
+  - `src/app/dashboard/layout.tsx`
+  - `src/app/dashboard/page.tsx`
+  - `src/app/dashboard/[projectId]/page.tsx`
+- **Sidebar Adaptation Notes:**
+  - Removed demo team/user/workspace content from the product shell.
+  - Sidebar uses text-only 5to1r logo, no generic icon.
+  - Nav is limited to Overview, Runs, Costs, Alerts, Settings, and Docs.
+  - Active state uses white text and a left border, not blue or rounded pill styling.
+- **Temporary Data:**
+  - Mock project id: `research-agent-prod`
+  - Mock project switcher projects: `research-agent-prod`, `support-agent-staging`, `automation-dev`
+  - `+ New project` is disabled until onboarding/project creation routing is implemented.
+- **Mobile TODOs:**
+  - Mobile uses the existing shadcn offcanvas sheet behavior via `SidebarTrigger`.
+  - Future pass should verify mobile drawer visually in-browser once the local browser tool/dev server is available.
+- **Future TODOs:**
+  - Replace mock project data with Convex-backed project data.
+  - Build onboarding later; do not add onboarding in Milestone 1.
+
 ## SDK Quickstart (FirstTrace) Rebuild
 - **Status:** Completed.
 - **Narrative:** "Catch the next one" (Connects wasted run to visible run).

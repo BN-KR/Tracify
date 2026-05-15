@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Show } from "@clerk/nextjs";
+import { Show, SignOutButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { DropdownNavigation, type NavItem } from "./dropdown-navigation";
 import { 
@@ -160,20 +160,14 @@ const NAV_ITEMS: NavItem[] = [
 export function Navbar() {
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center border-b"
-      style={{
-        height: "60px",
-        backgroundColor: "rgba(10, 10, 10, 0.85)",
-        backdropFilter: "blur(12px)",
-        borderColor: "#2A2A2A",
-      }}
+      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center border-b bg-background/80 backdrop-blur-md border-[#1A1A1A]"
+      style={{ height: "60px" }}
     >
       <div className="w-full max-w-[1200px] px-6 flex items-center justify-between">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center">
           <div
             className="font-pixel font-bold text-lg tracking-tighter text-white"
-            style={{ fontFamily: "var(--font-pixel)" }}
           >
             5to1r
           </div>
@@ -186,13 +180,22 @@ export function Navbar() {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
+
           <Show when="signed-in">
+            <SignOutButton>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="font-mono text-xs h-8 px-4"
+              >
+                Sign out
+              </Button>
+            </SignOutButton>
             <Link href="/dashboard">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                className="font-mono text-xs h-8 px-4 border-[#2A2A2A] hover:bg-[#161616] hover:text-white transition-colors active:scale-[0.97]"
-                style={{ borderRadius: "0px" }}
+                className="font-mono text-xs h-8 px-4"
               >
                 Dashboard
               </Button>
@@ -200,17 +203,18 @@ export function Navbar() {
           </Show>
           <Show when="signed-out">
             <Link href="/sign-in">
-              <button
-                className="font-mono text-[13px] px-3 py-1 text-[#CCCCCC] transition-colors hover:text-white"
+              <Button
+                variant="ghost"
+                className="font-mono text-[13px] px-3 py-1"
               >
                 Sign in
-              </button>
+              </Button>
             </Link>
             <Link href="/sign-up">
               <Button
+                variant="default"
                 size="sm"
-                className="font-mono text-xs h-8 px-4 bg-white text-black hover:bg-[#CCCCCC] transition-colors active:scale-[0.97]"
-                style={{ borderRadius: "0px", border: "none" }}
+                className="font-mono text-xs h-8 px-4"
               >
                 Start free
               </Button>
