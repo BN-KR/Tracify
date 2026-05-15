@@ -12,6 +12,11 @@
 - [x] Temporarily point Vercel production at non-placeholder `.env.local` test/dev values and redeploy.
 - [x] Add live Clerk keys to Vercel production and ignored local `.env.prod`.
 - [x] Redeploy production with live Clerk keys and verify Ready status.
+- [x] Add production Convex URLs to Vercel production and ignored local `.env.prod`.
+- [x] Deploy Convex functions and auth config to production `focused-otter-289`.
+- [x] Set Convex production `CLERK_JWT_ISSUER_DOMAIN`.
+- [x] Generate and set production `FIVETOONE_API_KEY_HASH_SECRET` in Vercel and Convex.
+- [x] Remove `INNGEST_DEV` from Vercel production.
 - [x] Fix login flow so sign-in returns users to the dashboard instead of the landing page.
 - [x] Stop `/dashboard` from redirecting to onboarding and make onboarding an explicit dashboard action.
 - [x] Add an onboarding button to the dashboard top bar.
@@ -68,7 +73,8 @@
 
 ## Next
 - [ ] Clean up repo lint scope and existing lint violations so `npm run lint` can become a reliable deployment gate.
-- [ ] Replace Vercel production dev Convex/Inngest/webhook values with real production credentials.
+- [ ] Replace Vercel production Inngest/webhook values with real production credentials.
+- [ ] Confirm Tinybird token is a production token, not a dev workspace token.
 - [ ] Replace placeholder values in `.env.prod` with final production credential references or keep it explicitly documented as a template.
 - [ ] Add a documented Convex deployment step/environment checklist for Vercel after production deploy keys are finalized.
 - [x] Fix onboarding Convex "projects:createProject" registration error and sync schema.

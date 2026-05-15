@@ -19,6 +19,11 @@ Make the app build reliably on Vercel and locally without requiring an interacti
 - [x] Update Vercel production with live Clerk keys.
 - [x] Update ignored local `.env.prod` with live Clerk entries.
 - [x] Redeploy production and verify Ready status.
+- [x] Update Vercel production and ignored `.env.prod` with production Convex URLs.
+- [x] Make Convex auth config read `CLERK_JWT_ISSUER_DOMAIN` with local dev fallback.
+- [x] Set production Clerk issuer and API-key hash secret in Convex prod.
+- [x] Deploy Convex functions to `focused-otter-289`.
+- [x] Redeploy Vercel production and verify Ready status/no recent 500 logs.
 
 ## Scope Boundaries
 - Do not redesign dashboard or onboarding UI.
@@ -28,7 +33,8 @@ Make the app build reliably on Vercel and locally without requiring an interacti
 ## Next Steps
 - Clean up existing lint issues in a separate quality pass.
 - Document the final Convex deploy-key workflow once production deployment credentials are confirmed.
-- Replace temporary dev Convex/Inngest/webhook Vercel production values with real production secrets.
+- Replace temporary Inngest/webhook Vercel production values with real production secrets.
+- Confirm Tinybird production workspace/token status.
 - Keep `.env.prod` clearly marked as a template or replace placeholder entries with non-secret setup notes.
 
 ---

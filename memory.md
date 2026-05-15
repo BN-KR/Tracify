@@ -41,7 +41,10 @@
   - **Environment:** `.env.prod` values were applied to the Vercel production environment before the successful deploy.
   - **Runtime Correction:** `.env.prod` still contained template placeholders, causing Clerk runtime 500s (`Publishable key not valid`). Vercel production was temporarily overwritten with non-placeholder `.env.local` test/dev values and redeployed as `dpl_3AqxVmaB5qaP5LDnkJSeqL2QXjeZ`; recent 500 logs cleared.
   - **Clerk Production Keys:** Vercel production now has live Clerk keys and redeployed successfully as `dpl_3TiEbJ9qwnXEzuWYoLvYSYida3er`. Local ignored `.env.prod` was also updated with the live Clerk entries.
-  - **Caution:** Live production is still backed by the dev Convex deployment until real Convex production values replace them in Vercel and `.env.prod`.
+  - **Convex Production Switch:** Vercel production now points to Convex prod `focused-otter-289` (`https://focused-otter-289.convex.cloud` and `https://focused-otter-289.convex.site`) and redeployed successfully as `dpl_8rT1Ty4pWGnMveuRTd5LagdUu1rW`.
+  - **Convex Auth:** `convex/auth.config.ts` now reads `CLERK_JWT_ISSUER_DOMAIN` with a dev fallback. Convex prod has `CLERK_JWT_ISSUER_DOMAIN=https://clerk.5to1r.com`.
+  - **Production Secret:** Generated and set `FIVETOONE_API_KEY_HASH_SECRET` in Vercel and Convex prod; a local backup is in `C:\tmp\fivetoone_api_key_hash_secret.txt`.
+  - **Caution:** Inngest and Slack production values still need final real credentials; `INNGEST_DEV` was removed from Vercel production.
   - **Note:** `npm run lint` still reports pre-existing lint issues in `.agents`, `scratch`, and several marketing/UI files; these are not part of the Vercel production build blocker.
 
 - **Dashboard Login Flow Correction:** Landing -> sign-in now returns users to the dashboard instead of the landing page.
