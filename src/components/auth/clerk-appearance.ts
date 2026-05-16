@@ -59,7 +59,7 @@ export const CLERK_APPEARANCE: Theme = {
     // Social Buttons
     socialButtonsRoot: {
       display: "grid !important",
-      gridTemplateColumns: "repeat(3, 1fr) !important",
+      gridTemplateColumns: "repeat(2, 1fr) !important",
       gap: "8px !important",
       width: "100% !important",
     },

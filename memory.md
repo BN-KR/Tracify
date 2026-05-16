@@ -165,7 +165,10 @@
   - **Auth Shell:** Split-screen layout (45% terminal panel, 55% auth form) with a "Home" back-link and mobile-optimized branding.
   - **Terminal Panel:** A looping agent trace simulation (`run-agent`, `llm_call`, `tool_call`) that signals technical capability. Now features staggered line entry with subtle y-translation.
   - **Clerk Appearance:** Comprehensive `Theme` override in `src/components/auth/clerk-appearance.ts` to enforce 0px radius, monochrome primary buttons (White/Black), and Geist Mono typography for all sub-components (inputs, cards, social buttons).
-  - **Design Engineering Polish:** Integrated Emil Kowalski principles:
+    - **Auth Pages Styling Fix:** Updated `.cl-socialButtonsRoot` to use `grid-template-columns: repeat(2, 1fr)` instead of a hardcoded 3-column grid. This ensures that when exactly 2 providers (Google/GitHub) are active, they fill the space correctly without gaps. Applied to `CLERK_APPEARANCE`, `layout.tsx`, and `globals.css`.
+- **Design Engineering Polish:** Integrated Emil Kowalski principles:
+
+
     - **Tactile Feedback:** Added `scale(0.98)` on `:active` for all buttons and interactive elements.
     - **Premium Entrances:** Implemented staggered `framer-motion` entrances for form containers and terminal visuals.
     - **Custom Easing:** Replaced default transitions with high-performance `cubic-bezier(0.23, 1, 0.32, 1)` (ease-out).

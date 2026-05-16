@@ -48,6 +48,12 @@ export default function RootLayout({
               card: "border border-zinc-800",
               navbar: "border-b border-zinc-800",
               footer: "hidden",
+              socialButtonsRoot: {
+                display: "grid !important",
+                gridTemplateColumns: "repeat(2, 1fr) !important",
+                gap: "8px !important",
+                width: "100% !important",
+              }
             }
           }}
         >

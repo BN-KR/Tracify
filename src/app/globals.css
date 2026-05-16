@@ -225,7 +225,7 @@
 /* 2. FIX: This forces the 3-wide rectangular layout and overrides the hardcoded 40px squares. */
 .cl-socialButtonsRoot {
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(2, 1fr) !important;
   gap: 8px !important;
   width: 100% !important;
 }
