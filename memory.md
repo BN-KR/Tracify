@@ -13,6 +13,7 @@
 - **Aesthetics:** Strict "Developer-grade" look: **0px border radius**, monochrome palette (#000000 bg, #FFFFFF primary), and **Emil Kowalski** design engineering principles (tactile feedback, micro-animations, polish).
 - **Branding:** Adopted a "skinnier" text-based logo aesthetic (text-lg, regular weight) across all surfaces (Navbar, Footer, Sidebar, Auth, Onboarding) for visual consistency.
 - **Legal:** Dedicated `/privacy` and `/terms` pages with a minimalist, linked **Footer** component.
+- **Auth:** Google OAuth credentials configured in `.env.prod`, `.env.local`, and Vercel production variables.
 
 
 ## Conventions
