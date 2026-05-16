@@ -15,7 +15,7 @@ export function OnboardingShell({
     <main className="relative min-h-svh bg-[#0A0A0A] px-4 py-8 font-mono text-[#CCCCCC]">
       <OnboardingEscapeLink currentStep={currentStep} />
       <div className="mx-auto flex min-h-[calc(100svh-64px)] w-full max-w-[720px] flex-col justify-center">
-        <div className="mb-4 font-pixel text-2xl text-white">5to1r</div>
+        <div className="mb-4 font-pixel text-lg text-white">5to1r</div>
         <section className="border border-[#2A2A2A] bg-[#111111]">
           <OnboardingProgress currentStep={currentStep} />
           <div className="p-6 md:p-8">{children}</div>

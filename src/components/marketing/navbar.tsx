@@ -167,7 +167,7 @@ export function Navbar() {
         {/* Left: Logo */}
         <Link href="/" className="flex items-center">
           <div
-            className="font-pixel font-bold text-lg tracking-tighter text-white"
+            className="font-pixel text-lg text-white"
           >
             5to1r
           </div>

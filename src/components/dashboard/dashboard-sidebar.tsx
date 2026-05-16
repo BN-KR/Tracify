@@ -191,7 +191,7 @@ export function DashboardSidebar({
         {showExpandedContent ? (
           <Link
             href="/dashboard"
-            className="font-pixel text-[20px] leading-none text-white"
+            className="font-pixel text-lg leading-none text-white"
           >
             5to1r
           </Link>

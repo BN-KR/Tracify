@@ -58,8 +58,7 @@ export function AuthShell({ mode, children }: AuthShellProps) {
             {/* Logo & Branding */}
             <div className="flex flex-col gap-2">
               <div 
-                className="font-pixel font-bold text-2xl text-white tracking-tighter"
-                style={{ fontFamily: "var(--font-pixel)" }}
+                className="font-pixel text-lg text-white"
               >
                 5to1r
               </div>

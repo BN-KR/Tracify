@@ -30,9 +30,9 @@ export function DashboardSidebar() {
   return (
     <Sidebar className="border-r border-border bg-black">
       <SidebarHeader className="border-b border-border h-16 flex items-center justify-center px-6">
-        <div className="flex items-center gap-2 font-pixel font-bold w-full">
+        <div className="flex items-center gap-2 font-pixel w-full">
           <div className="w-5 h-5 bg-white rounded-none" />
-          <span className="text-xl text-white tracking-tighter">5to1r</span>
+          <span className="text-lg text-white">5to1r</span>
         </div>
       </SidebarHeader>
 

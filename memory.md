@@ -9,8 +9,10 @@
 - **Application State:** Convex is the source of truth for app metadata (`projects`, `agentRuns`, `alerts`). It provides reactive UI updates.
 - **Telemetry Data:** Tinybird is the high-volume time-series database for raw telemetry (`spans`).
 - **Ingestion Pipeline:** SDK calls POST `/api/ingest` -> Inngest event -> validates, writes to Tinybird, upserts rollups to Convex, triggers alerts.
-- **Typography:** Uses **Geist Pixel Square** for logos and H1 headers, Geist Mono for UI/Data, and Geist Sans for prose.
+- **Typography:** Uses **Geist Pixel Square** for logos (regular weight, normal tracking) and H1 headers, Geist Mono for UI/Data, and Geist Sans for prose.
 - **Aesthetics:** Strict "Developer-grade" look: **0px border radius**, monochrome palette (#000000 bg, #FFFFFF primary), and **Emil Kowalski** design engineering principles (tactile feedback, micro-animations, polish).
+- **Branding:** Adopted a "skinnier" text-based logo aesthetic (text-lg, regular weight) across all surfaces (Navbar, Footer, Sidebar, Auth, Onboarding) for visual consistency.
+- **Legal:** Dedicated `/privacy` and `/terms` pages with a minimalist, linked **Footer** component.
 
 
 ## Conventions
