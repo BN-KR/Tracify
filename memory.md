@@ -1,6 +1,7 @@
 # Project Memory
 
 ## Overview
+- Last Synced: 2026-05-16T00:41:00Z
 - Purpose: 5to1r — Agent Observability Platform (Full visibility into AI agent steps, decisions, cost, failures).
 - Stack: Next.js 16 (App Router), Clerk (Auth/Orgs), Convex (App DB), Tinybird (Telemetry Storage), Inngest (Background Jobs).
 
