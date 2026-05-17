@@ -42,6 +42,7 @@
   - **Fix:** Created production Clerk JWT template `convex` with `aud: "convex"` and standard user claims.
   - **Fix:** Deployed current Convex functions/auth config to prod deployment `focused-otter-289`.
   - **Verification:** Production Clerk now lists JWT template `convex`, Convex prod env has `CLERK_JWT_ISSUER_DOMAIN=https://clerk.5to1r.com`, and Vercel production has the required Clerk/Convex env vars.
+  - **Runbook:** Detailed dev/prod troubleshooting steps are documented in `docs/troubleshooting-convex-clerk-auth.md`.
 
 - **Dashboard Layout Fix (2026-05-17):**
 40:   - **Issue:** Identified a 56px "bar" or gap at the bottom of the dashboard content area.
