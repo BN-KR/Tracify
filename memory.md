@@ -36,6 +36,13 @@
 - **Environment:** Created `.env.prod` template for streamlined Vercel deployment. Isolated local dev via Tinybird `dev` branch.
 
 ## Recent Important Changes
+- **Production Convex Auth Recovery (2026-05-17):**
+  - **Issue:** Production project creation could stay on "waiting for auth", matching the previous dev failure.
+  - **Cause:** The production Clerk instance had no JWT templates, so `ConvexProviderWithClerk` could not fetch `getToken({ template: "convex" })`.
+  - **Fix:** Created production Clerk JWT template `convex` with `aud: "convex"` and standard user claims.
+  - **Fix:** Deployed current Convex functions/auth config to prod deployment `focused-otter-289`.
+  - **Verification:** Production Clerk now lists JWT template `convex`, Convex prod env has `CLERK_JWT_ISSUER_DOMAIN=https://clerk.5to1r.com`, and Vercel production has the required Clerk/Convex env vars.
+
 - **Dashboard Layout Fix (2026-05-17):**
 40:   - **Issue:** Identified a 56px "bar" or gap at the bottom of the dashboard content area.
 41:   - **Cause:** A hardcoded height subtraction `h-[calc(100svh-56px)]` in `DashboardShell` was reserving space for a topbar that is actually rendered inside the scrollable content.

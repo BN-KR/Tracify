@@ -28,6 +28,7 @@
 - [x] Keep spend as primary card value and move savings into secondary card copy
 - [x] Add dashboard overview time-period switcher and use total selected-period savings
 - [x] Fix range-scoped spend/span cards so 1d/7d/30d/90d no longer show all-time Convex totals
+- [x] Fix production Clerk/Convex auth by creating prod `convex` JWT template and deploying Convex prod
 
 ---
 
