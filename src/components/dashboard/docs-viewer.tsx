@@ -31,9 +31,9 @@ npm install 5to1r
 Initialize the SDK with your Project API Key. You can find your API key in the [Settings](/dashboard/settings) page.
 
 \`\`\`python
-from fivetoone import FiveToOne
+from fivetoone import FiveToOneClient
 
-client = FiveToOne(api_key="5t1r_sk_live_...")
+client = FiveToOneClient(api_key="5t1r_sk_live_...")
 \`\`\`
 
 ## 3. Instrument your Agent
@@ -41,7 +41,9 @@ client = FiveToOne(api_key="5t1r_sk_live_...")
 Wrap your agent's main execution loop with the \`@trace_agent\` decorator.
 
 \`\`\`python
-@client.trace_agent(name="Research Assistant")
+from fivetoone import trace_agent
+
+@trace_agent(client=client)
 def run_agent(task):
     # Your agent logic here
     pass

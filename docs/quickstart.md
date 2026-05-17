@@ -17,7 +17,7 @@ export FIVETOONE_API_KEY=5t1r_sk_live_...
 ### Python
 Install the package:
 ```bash
-pip install fivetoone
+pip install 5to1r
 ```
 
 Instrument your agent:

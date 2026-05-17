@@ -36,6 +36,13 @@
 - **Environment:** Created `.env.prod` template for streamlined Vercel deployment. Isolated local dev via Tinybird `dev` branch.
 
 ## Recent Important Changes
+- **Python SDK PyPI Package Rename Prep (2026-05-17):**
+  - **Goal:** Make Python install match the public product/package name: `pip install 5to1r`.
+  - **Change:** `packages/python-sdk/pyproject.toml` now uses distribution name `5to1r` while keeping the import module as `fivetoone`.
+  - **Reason:** PyPI distribution names may be installed as `5to1r`, but Python import statements cannot cleanly use `from 5to1r import ...`; user code should install `5to1r` and import from `fivetoone`.
+  - **Docs:** Updated Python install snippets in app quickstart/docs and package README from `pip install fivetoone` to `pip install 5to1r`.
+  - **Verification:** `uv build` produced `dist/5to1r-0.1.0.tar.gz` and `dist/5to1r-0.1.0-py3-none-any.whl`; local wheel smoke test imported `FiveToOneClient`, `trace_agent`, `llm_call`, and `tool_call`; `uv publish --dry-run` passed. Real PyPI upload still needs a PyPI API token.
+
 - **Production Convex Auth Recovery (2026-05-17):**
   - **Issue:** Production project creation could stay on "waiting for auth", matching the previous dev failure.
   - **Cause:** The production Clerk instance had no JWT templates, so `ConvexProviderWithClerk` could not fetch `getToken({ template: "convex" })`.

@@ -56,7 +56,7 @@ const agent = traceAgent(async () => {
   return "Success";
 });`;
 
-  const installPy = "pip install fivetoone";
+  const installPy = "pip install 5to1r";
   const installTs = "npm install 5to1r";
   const envVar = `FIVETOONE_API_KEY=5t1r_sk_live_...`;
 

@@ -5,7 +5,7 @@ Observability and tracing for AI agents. Gain full visibility into your agent's 
 ## Installation
 
 ```bash
-pip install fivetoone
+pip install 5to1r
 ```
 
 ## Quickstart

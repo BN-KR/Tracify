@@ -99,7 +99,7 @@ without blocking your agent's execution.
 
 ```
 01 INSTALL
-pip install fivetoone
+pip install 5to1r
 or: npm install 5to1r
 
 02 INSTRUMENT
@@ -571,7 +571,7 @@ Choose your runtime:
 ─────────────────────────────────────────────────
 PYTHON
 
-pip install fivetoone
+pip install 5to1r
 
 ─────────────────────────────────────────────────
 

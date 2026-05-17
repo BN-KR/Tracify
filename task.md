@@ -15,6 +15,8 @@
   - [x] Prepare `@5to1r/sdk` build output for npm package contents
   - [x] Rename TypeScript package/install docs to public package name `5to1r`
   - [ ] Publish `5to1r` with npm 2FA OTP or granular publish token
+  - [x] Rename Python SDK distribution/install docs to public package name `5to1r`
+  - [ ] Publish Python `5to1r` package to PyPI with a PyPI API token
 - [x] Add admin-only manual project/API key issuance through Convex
 - [x] Add project management page with Convex-backed per-project saved stats
 - [x] Align dashboard navigation/overview/costs with dashboard decision document
@@ -30,6 +32,7 @@
 - [x] Fix range-scoped spend/span cards so 1d/7d/30d/90d no longer show all-time Convex totals
 - [x] Fix production Clerk/Convex auth by creating prod `convex` JWT template and deploying Convex prod
 - [x] Document Convex/Clerk dev-vs-production auth troubleshooting runbook
+- [x] Prepare Python SDK for `pip install 5to1r` and verify local wheel install
 
 ---
 
