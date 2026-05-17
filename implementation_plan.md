@@ -57,7 +57,7 @@ The single most important UI in the product.
 ### 6. Production SDKs [POLISHING]
 - [ ] **Python SDK:** Wrap `@trace_agent` decorator logic and publish to PyPI. Package metadata now builds as distribution `5to1r`, docs use `pip install 5to1r`, and local wheel import smoke test passes; upload is pending a PyPI API token.
 - [ ] **TS SDK:** Formalise `5to1r` and publish to npm. Build packaging is fixed, app/docs install snippets now use `npm install 5to1r`, and publish is blocked only on npm 2FA/token requirements.
-- [ ] **Documentation:** Quickstart guide for 5-minute instrumentation.
+- [x] **Documentation:** Quickstart/install surfaces now consistently use `pip install 5to1r` and `npm install 5to1r`, including the onboarding AI setup prompt.
 - [x] **Manual API Key Issuance:** Added admin-gated Convex `projects:createProjectForUser` for creating a project and one-time API key for a target Clerk user without bypassing the hashed-key storage model.
 - [x] **Local User Install Test:** Verified the published `5to1r` npm package can send a span through local Next.js/Inngest/Convex dev after aligning `.env.local` with the Convex dev API-key hash secret.
 

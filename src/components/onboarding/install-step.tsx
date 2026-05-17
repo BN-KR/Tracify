@@ -9,7 +9,7 @@ import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
 const snippets = {
   python: {
     label: "Python",
-    install: "pip install git+https://github.com/5to1r/sdk-python",
+    install: "pip install 5to1r",
     code: `from fivetoone import trace_agent
 
 @trace_agent()
@@ -42,7 +42,9 @@ Rules:
 
 Steps:
 1. Detect whether this project is Python or TypeScript.
-2. Install the 5to1r SDK.
+2. Install the 5to1r SDK with the correct command:
+   - Python: pip install 5to1r
+   - TypeScript / Node.js: npm install 5to1r
 3. Add FIVETOONE_API_KEY to .env.example.
 4. Find the main agent function.
 5. If Python, import trace_agent from fivetoone and add @trace_agent().

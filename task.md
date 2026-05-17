@@ -33,6 +33,7 @@
 - [x] Fix production Clerk/Convex auth by creating prod `convex` JWT template and deploying Convex prod
 - [x] Document Convex/Clerk dev-vs-production auth troubleshooting runbook
 - [x] Prepare Python SDK for `pip install 5to1r` and verify local wheel install
+- [x] Standardize site and AI setup prompt install commands for both `pip install 5to1r` and `npm install 5to1r`
 
 ---
 

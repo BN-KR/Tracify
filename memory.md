@@ -36,6 +36,13 @@
 - **Environment:** Created `.env.prod` template for streamlined Vercel deployment. Isolated local dev via Tinybird `dev` branch.
 
 ## Recent Important Changes
+- **SDK Install Copy Finalization (2026-05-17):**
+  - **Goal:** Make every user-facing install path consistently show the now-published package names.
+  - **Change:** Onboarding Python install now uses `pip install 5to1r` instead of the old GitHub package URL.
+  - **Change:** Marketing final CTA terminal now shows both `pip install 5to1r` and `npm install 5to1r`.
+  - **Change:** The onboarding AI setup prompt now explicitly tells coding agents to use `pip install 5to1r` for Python and `npm install 5to1r` for TypeScript/Node.js.
+  - **Verification:** Searched source/docs for stale `pip install fivetoone`, GitHub Python install, `npm install @5to1r`, and `@5to1r/sdk` references outside dependency folders; `npm run build` passes.
+
 - **Python SDK PyPI Package Rename Prep (2026-05-17):**
   - **Goal:** Make Python install match the public product/package name: `pip install 5to1r`.
   - **Change:** `packages/python-sdk/pyproject.toml` now uses distribution name `5to1r` while keeping the import module as `fivetoone`.
