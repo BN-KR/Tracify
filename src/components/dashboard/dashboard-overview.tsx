@@ -3,7 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,6 +20,7 @@ import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Activity, DollarSign, Zap, AlertTriangle } from "lucide-react";
 import { RunsTable } from "./runs-table";
+import { useProjectStats } from "@/hooks/use-project-stats";
 
 interface DashboardOverviewProps {
   projectId: string;
@@ -27,60 +28,6 @@ interface DashboardOverviewProps {
 
 export function DashboardOverview({ projectId }: DashboardOverviewProps) {
   const [range, setRange] = useState(7);
-  const [stats, setStats] = useState<{
-    dailyCosts: any[];
-    modelCosts: any[];
-    unavailable?: boolean;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    let inFlight = false;
-
-    async function fetchStats() {
-      if (inFlight || document.visibilityState === "hidden") return;
-      inFlight = true;
-
-      try {
-        const res = await fetch(`/api/projects/${projectId}/stats?days=${range}`, {
-          cache: "no-store",
-        });
-        if (!res.ok) {
-          if (!cancelled) {
-            setStats({ dailyCosts: [], modelCosts: [], unavailable: true });
-          }
-          return;
-        }
-        const data = await res.json();
-        if (!cancelled) setStats(data);
-      } catch (err) {
-        console.error(err);
-        if (!cancelled) {
-          setStats({ dailyCosts: [], modelCosts: [], unavailable: true });
-        }
-      } finally {
-        inFlight = false;
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    fetchStats();
-    const intervalId = window.setInterval(fetchStats, 4000);
-
-    function handleVisibilityChange() {
-      if (document.visibilityState === "visible") void fetchStats();
-    }
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      cancelled = true;
-      window.clearInterval(intervalId);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [projectId, range]);
-
   const recentRuns = useQuery(
     api.agentRuns.getRecentRunsByProject, 
     projectId ? { projectId: projectId as Id<"projects"> } : "skip"
@@ -89,6 +36,16 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
     api.projects.getProjectManagementSummary,
     projectId ? { projectId: projectId as Id<"projects"> } : "skip",
   );
+  const liveRefreshKey =
+    summary?.latestActivityAt ??
+    summary?.totals.totalRuns ??
+    summary?.totals.totalSpans ??
+    null;
+  const { stats, loading } = useProjectStats({
+    projectId,
+    range,
+    liveRefreshKey,
+  });
 
   if (loading || recentRuns === undefined || summary === undefined) {
     return (

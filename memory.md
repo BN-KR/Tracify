@@ -36,6 +36,14 @@
 - **Environment:** Created `.env.prod` template for streamlined Vercel deployment. Isolated local dev via Tinybird `dev` branch.
 
 ## Recent Important Changes
+- **Hybrid Dashboard Refresh Strategy (2026-05-17):**
+  - **Goal:** Make dashboard stats feel closer to 1-second updates without permanently polling Tinybird every second.
+  - **Approach:** Added shared `useProjectStats` hook for Overview and Costs that keeps 4-second visible-tab polling as a fallback.
+  - **Realtime Trigger:** Convex `getProjectManagementSummary.latestActivityAt`/totals now act as a live refresh signal; when saved run summaries change, the hook schedules quick stats refetches after 750ms and 2500ms.
+  - **Efficiency:** This preserves efficient baseline polling while refreshing charts/model breakdowns immediately after Convex sees new activity.
+  - **Robustness:** The hook avoids duplicate in-flight requests for the same project/range and ignores stale responses when the user switches ranges.
+  - **Verification:** `npm run build` passes.
+
 - **SDK Install Copy Finalization (2026-05-17):**
   - **Goal:** Make every user-facing install path consistently show the now-published package names.
   - **Change:** Onboarding Python install now uses `pip install 5to1r` instead of the old GitHub package URL.

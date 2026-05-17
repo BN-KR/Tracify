@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import {
@@ -23,72 +23,24 @@ import type { Id } from "convex/_generated/dataModel";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useProjectStats } from "@/hooks/use-project-stats";
 import { formatCurrency } from "@/lib/utils";
-
-type CostStats = {
-  dailyCosts: Array<{ day: string; totalCostUsd: number; spanCount: number }>;
-  modelCosts: Array<{
-    modelId: string;
-    totalCostUsd: number;
-    spanCount: number;
-    avgLatencyMs?: number;
-  }>;
-  unavailable?: boolean;
-};
 
 export function CostDashboard({ projectId }: { projectId: string }) {
   const summary = useQuery(api.projects.getProjectManagementSummary, {
     projectId: projectId as Id<"projects">,
   });
   const [range, setRange] = useState(30);
-  const [stats, setStats] = useState<CostStats | null>(null);
-  const [loadingStats, setLoadingStats] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    let inFlight = false;
-
-    async function fetchStats({ showLoading = false } = {}) {
-      if (inFlight || document.visibilityState === "hidden") return;
-      inFlight = true;
-      if (showLoading) setLoadingStats(true);
-
-      try {
-        const response = await fetch(
-          `/api/projects/${projectId}/stats?days=${range}`,
-          { cache: "no-store" },
-        );
-        const data = response.ok
-          ? ((await response.json()) as CostStats)
-          : { dailyCosts: [], modelCosts: [], unavailable: true };
-        if (!cancelled) setStats(data);
-      } catch {
-        if (!cancelled) {
-          setStats({ dailyCosts: [], modelCosts: [], unavailable: true });
-        }
-      } finally {
-        inFlight = false;
-        if (!cancelled) setLoadingStats(false);
-      }
-    }
-
-    fetchStats({ showLoading: true });
-    const intervalId = window.setInterval(() => {
-      void fetchStats();
-    }, 4000);
-
-    function handleVisibilityChange() {
-      if (document.visibilityState === "visible") void fetchStats();
-    }
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      cancelled = true;
-      window.clearInterval(intervalId);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [projectId, range]);
+  const liveRefreshKey =
+    summary?.latestActivityAt ??
+    summary?.totals.totalRuns ??
+    summary?.totals.totalSpans ??
+    null;
+  const { stats, loading: loadingStats } = useProjectStats({
+    projectId,
+    range,
+    liveRefreshKey,
+  });
 
   const totalSpend = useMemo(() => {
     const tinybirdTotal =
