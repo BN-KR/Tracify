@@ -205,8 +205,28 @@
 
 
 /* ── Clerk Branding & Dev Mode Removal ────────────────────────── */
-.cl-branding, .cl-internal-1dauvpw {
+.cl-branding, 
+.cl-internal-1dauvpw,
+.cl-userButtonPopoverFooter,
+.cl-userButtonPopoverFooter__userButton,
+.cl-internal-qewsb7,
+.cl-internal-1fpq5at,
+.cl-internal-1k7jtru,
+[class*="cl-userButtonPopoverFooter"],
+[class*="cl-internal-1fpq5at"] {
   display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+.cl-userButtonPopoverCard {
+  border-radius: 0 !important;
+  border: 1px solid #2A2A2A !important;
+  background-color: #0A0A0A !important;
+  box-shadow: 10px 10px 0px 0px rgba(0,0,0,1) !important;
 }
 
 /* ── COMPLETE CLERK VISUAL RESET ────────────────────────────── */

@@ -1,0 +1,151 @@
+"use client";
+
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import { Id } from "../../../convex/_generated/dataModel";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Copy, Check, RefreshCw, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { formatRelativeTime } from "@/lib/utils";
+
+interface ApiKeysManagerProps {
+  projectId: string;
+}
+
+export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
+  const project = useQuery(
+    api.projects.getProjectById, 
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip"
+  );
+
+  const rotateApiKey = useMutation(api.projects.rotateApiKey);
+
+  const [newKey, setNewKey] = useState<string | null>(null);
+  const [rotating, setRotating] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [showKey, setShowKey] = useState(false);
+
+  async function handleRotate() {
+    if (!window.confirm("Rotating your API key will immediately invalidate the existing key. Any agents using the old key will fail to ingest data. Continue?")) {
+      return;
+    }
+
+    setRotating(true);
+    try {
+      const result = await rotateApiKey({ projectId: projectId as Id<"projects"> });
+      setNewKey(result.plaintextApiKey);
+      setShowKey(true);
+    } catch (err) {
+      console.error("Failed to rotate API key:", err);
+    } finally {
+      setRotating(false);
+    }
+  }
+
+  function copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  if (project === undefined) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-40 w-full rounded-none" />
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="border border-dashed border-border py-16 text-center font-mono text-sm uppercase tracking-widest text-zinc-500">
+        Project not found
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8 max-w-3xl">
+      <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">Active API Key</h3>
+            <p className="text-[11px] text-[#666666] mt-1">This key grants write access to your project's ingestion pipeline.</p>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={handleRotate}
+            disabled={rotating}
+            className="rounded-none border-zinc-800 h-8 px-3 font-mono text-[10px] uppercase hover:bg-white hover:text-black"
+          >
+            {rotating ? "Rotating..." : <span className="flex items-center gap-2"><RefreshCw className="size-3" /> Rotate Key</span>}
+          </Button>
+        </div>
+
+        {newKey ? (
+          <div className="p-4 border border-white bg-white/5 space-y-4 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-2 text-white text-[11px] font-mono uppercase font-bold">
+              <AlertTriangle className="size-3" />
+              Copy your new API key now
+            </div>
+            <p className="text-[11px] text-zinc-400 font-sans">
+              This key will only be shown once. If you lose it, you will have to rotate it again.
+            </p>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-10 bg-black border border-white/20 px-3 flex items-center font-mono text-sm text-white overflow-x-auto whitespace-nowrap">
+                {newKey}
+              </div>
+              <Button 
+                onClick={() => copyToClipboard(newKey)}
+                className="rounded-none h-10 px-4 bg-white text-black hover:bg-zinc-200"
+              >
+                {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-10 bg-black border border-zinc-800 px-3 flex items-center font-mono text-sm text-zinc-500">
+                {project.apiKeyPrefix}************{project.apiKeyLast4}
+              </div>
+              <Button 
+                variant="outline"
+                disabled
+                className="rounded-none h-10 px-4 border-zinc-800 text-zinc-600 cursor-not-allowed"
+              >
+                <Copy className="size-4" />
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-widest text-zinc-600 font-mono">Created</label>
+                <div className="text-[11px] font-mono text-zinc-400">
+                  {project.apiKeyCreatedAt ? formatRelativeTime(project.apiKeyCreatedAt) : "Unknown"}
+                </div>
+              </div>
+              <div className="space-y-1 text-right">
+                <label className="text-[10px] uppercase tracking-widest text-zinc-600 font-mono">Last Used</label>
+                <div className="text-[11px] font-mono text-zinc-400">
+                  {project.apiKeyLastUsedAt ? formatRelativeTime(project.apiKeyLastUsedAt) : "Never"}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <div className="space-y-2 border border-dashed border-zinc-800 p-6">
+        <h4 className="font-mono text-[12px] text-zinc-400 uppercase tracking-widest">Security Note</h4>
+        <p className="text-[11px] text-zinc-600 leading-relaxed">
+          API keys carry the same level of access as your login credentials for data ingestion. 
+          Never commit them to version control or share them in public forums. 
+          If a key is compromised, rotate it immediately.
+        </p>
+      </div>
+    </div>
+  );
+}

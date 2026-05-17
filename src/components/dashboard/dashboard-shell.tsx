@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 
 const COLLAPSED_STORAGE_KEY = "5to1r.sidebar.collapsed";
 const LEGACY_COLLAPSED_STORAGE_KEY = "5to1r:dashboard-sidebar";
@@ -37,8 +36,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         className="flex min-h-svh min-w-0 flex-1 flex-col bg-[#0A0A0A] transition-[padding] duration-150 motion-reduce:transition-none"
         style={{ paddingLeft: layoutSidebarWidth }}
       >
-        <DashboardTopbar />
-        <main className="h-[calc(100svh-56px)] overflow-y-auto bg-[#0A0A0A] p-4 lg:p-6">
+        <main className="h-svh pb-0 overflow-y-auto bg-[#0A0A0A] p-4 lg:p-6 scrollbar-hide">
           {children}
         </main>
       </div>

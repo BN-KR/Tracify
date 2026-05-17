@@ -25,6 +25,7 @@ export default defineSchema({
     maxDurationSeconds: v.optional(v.number()),
     maxStallMinutes: v.optional(v.number()),
     apiKey: v.optional(v.string()),
+    slackWebhookUrl: v.optional(v.string()),
   })
     .index("by_clerkOrgId", ["clerkOrgId"])
     .index("by_clerkUserId", ["clerkUserId"])
@@ -64,4 +65,17 @@ export default defineSchema({
   })
     .index("by_projectId", ["projectId"])
     .index("by_runId", ["runId"]),
+
+  comments: defineTable({
+    spanId: v.string(), // Tinybird spanId
+    projectId: v.id("projects"),
+    runId: v.string(),
+    userId: v.string(),
+    userName: v.string(),
+    content: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_spanId", ["spanId"])
+    .index("by_runId", ["runId"])
+    .index("by_projectId", ["projectId"]),
 });

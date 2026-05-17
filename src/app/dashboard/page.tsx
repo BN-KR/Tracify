@@ -1,5 +1,5 @@
-import { DashboardStartState } from "@/components/dashboard/dashboard-start-state";
+import { DashboardHomeRouter } from "@/components/dashboard/dashboard-home-router";
 
 export default function DashboardPage() {
-  return <DashboardStartState />;
+  return <DashboardHomeRouter />;
 }

@@ -18,8 +18,8 @@ async def research_agent(query):
   },
   typescript: {
     label: "TypeScript",
-    install: "npm install github:5to1r/sdk-typescript",
-    code: `import { traceAgent } from "@5to1r/sdk"
+    install: "npm install 5to1r",
+    code: `import { traceAgent } from "5to1r"
 
 const researchAgent = traceAgent(async (query: string) => {
   return await run(query)
@@ -46,7 +46,7 @@ Steps:
 3. Add FIVETOONE_API_KEY to .env.example.
 4. Find the main agent function.
 5. If Python, import trace_agent from fivetoone and add @trace_agent().
-6. If TypeScript, import traceAgent from @5to1r/sdk and wrap the async agent function.
+6. If TypeScript, import traceAgent from 5to1r and wrap the async agent function.
 7. Run the agent once.
 8. Confirm that a span was sent to 5to1r.
 

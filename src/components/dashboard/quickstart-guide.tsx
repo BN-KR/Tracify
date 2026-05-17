@@ -1,0 +1,168 @@
+"use client";
+
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import { Id } from "../../../convex/_generated/dataModel";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Copy, Check, Terminal, Code2, BookOpen, KeyRound } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+interface QuickstartGuideProps {
+  projectId: string;
+}
+
+export function QuickstartGuide({ projectId }: QuickstartGuideProps) {
+  const project = useQuery(
+    api.projects.getProjectById, 
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip"
+  );
+
+  const [copied, setCopied] = useState<string | null>(null);
+
+  function copyToClipboard(text: string, id: string) {
+    navigator.clipboard.writeText(text);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
+  }
+
+  const pythonCode = `from fivetoone import trace_agent, llm_call
+
+@trace_agent()
+async function run_my_agent():
+    # Your agent logic here
+    llm_call(
+        input_data="Hello, world!",
+        output_data="Hello! How can I help?",
+        model_id="gpt-4",
+        cost_usd=0.002,
+        latency_ms=450
+    )
+    return "Success"`;
+
+  const tsCode = `import { traceAgent, llmCall } from '5to1r';
+
+const agent = traceAgent(async () => {
+  // Your agent logic here
+  await llmCall({
+    input: "Hello, world!",
+    output: "Hello! How can I help?",
+    modelId: "gpt-4",
+    costUsd: 0.002,
+    latencyMs: 450
+  });
+  return "Success";
+});`;
+
+  const installPy = "pip install fivetoone";
+  const installTs = "npm install 5to1r";
+  const envVar = `FIVETOONE_API_KEY=5t1r_sk_live_...`;
+
+  return (
+    <div className="space-y-8 max-w-4xl">
+      <div className="space-y-2">
+        <h2 className="font-mono text-lg text-white uppercase tracking-widest">Instrumentation</h2>
+        <p className="text-sm text-zinc-500 font-sans">
+          Connect your agent to 5to1r in less than 5 minutes.
+        </p>
+      </div>
+
+      <Tabs defaultValue="python" className="w-full">
+        <TabsList className="bg-[#111111] border border-border rounded-none p-1 h-12">
+          <TabsTrigger 
+            value="python" 
+            className="rounded-none data-[state=active]:bg-white data-[state=active]:text-black font-mono text-xs uppercase"
+          >
+            Python
+          </TabsTrigger>
+          <TabsTrigger 
+            value="typescript"
+            className="rounded-none data-[state=active]:bg-white data-[state=active]:text-black font-mono text-xs uppercase"
+          >
+            TypeScript
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="python" className="space-y-6 mt-6">
+          <section className="space-y-4">
+            <h3 className="flex items-center gap-2 font-mono text-xs text-zinc-400 uppercase">
+              <Terminal className="size-4" /> 1. Install Library
+            </h3>
+            <CodeBlock code={installPy} onCopy={() => copyToClipboard(installPy, 'py-install')} copied={copied === 'py-install'} />
+          </section>
+
+          <section className="space-y-4">
+            <h3 className="flex items-center gap-2 font-mono text-xs text-zinc-400 uppercase">
+              <Code2 className="size-4" /> 2. Instrument Agent
+            </h3>
+            <CodeBlock code={pythonCode} onCopy={() => copyToClipboard(pythonCode, 'py-code')} copied={copied === 'py-code'} language="python" />
+          </section>
+        </TabsContent>
+
+        <TabsContent value="typescript" className="space-y-6 mt-6">
+          <section className="space-y-4">
+            <h3 className="flex items-center gap-2 font-mono text-xs text-zinc-400 uppercase">
+              <Terminal className="size-4" /> 1. Install Library
+            </h3>
+            <CodeBlock code={installTs} onCopy={() => copyToClipboard(installTs, 'ts-install')} copied={copied === 'ts-install'} />
+          </section>
+
+          <section className="space-y-4">
+            <h3 className="flex items-center gap-2 font-mono text-xs text-zinc-400 uppercase">
+              <Code2 className="size-4" /> 2. Instrument Agent
+            </h3>
+            <CodeBlock code={tsCode} onCopy={() => copyToClipboard(tsCode, 'ts-code')} copied={copied === 'ts-code'} language="typescript" />
+          </section>
+        </TabsContent>
+      </Tabs>
+
+      <section className="space-y-4 pt-6">
+        <h3 className="flex items-center gap-2 font-mono text-xs text-zinc-400 uppercase">
+          <KeyRound className="size-4" /> 3. Set Environment Variable
+        </h3>
+        <p className="text-[11px] text-zinc-500 font-mono">
+          Inject your API key into your agent's environment.
+        </p>
+        <CodeBlock 
+          code={`FIVETOONE_API_KEY=${project?.apiKeyPrefix || '5t1r_sk_live_'}••••••••${project?.apiKeyLast4 || '••••'}`} 
+          onCopy={() => copyToClipboard(`FIVETOONE_API_KEY=YOUR_API_KEY`, 'env')} 
+          copied={copied === 'env'} 
+        />
+      </section>
+
+      <div className="pt-10 flex gap-4">
+        <Button variant="outline" className="rounded-none font-mono text-[10px] uppercase border-zinc-800 gap-2">
+          <BookOpen className="size-4" /> Full Documentation
+        </Button>
+        <Button className="rounded-none font-mono text-[10px] uppercase gap-2">
+          Check Connection
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function CodeBlock({ code, onCopy, copied, language }: { code: string, onCopy: () => void, copied: boolean, language?: string }) {
+  return (
+    <div className="group relative">
+      <pre className="p-4 bg-black border border-border text-[12px] font-mono text-zinc-300 overflow-x-auto leading-relaxed">
+        {code}
+      </pre>
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        onClick={onCopy}
+        className="absolute right-2 top-2 size-8 bg-black/50 border border-zinc-800 opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        {copied ? <Check className="size-4 text-emerald-500" /> : <Copy className="size-4 text-zinc-500" />}
+      </Button>
+      {language && (
+        <span className="absolute left-4 -top-2.5 px-2 bg-black border border-border text-[9px] font-mono uppercase text-zinc-500">
+          {language}
+        </span>
+      )}
+    </div>
+  );
+}

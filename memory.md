@@ -1,7 +1,7 @@
 # Project Memory
 
 ## Overview
-- Last Synced: 2026-05-16T00:41:00Z
+- Last Synced: 2026-05-17T00:19:00Z
 - Purpose: 5to1r — Agent Observability Platform (Full visibility into AI agent steps, decisions, cost, failures).
 - Stack: Next.js 16 (App Router), Clerk (Auth/Orgs), Convex (App DB), Tinybird (Telemetry Storage), Inngest (Background Jobs).
 
@@ -12,7 +12,8 @@
 - **Ingestion Pipeline:** SDK calls POST `/api/ingest` -> Inngest event -> validates, writes to Tinybird, upserts rollups to Convex, triggers alerts.
 - **Typography:** Uses **Geist Pixel Square** for logos (regular weight, normal tracking) and H1 headers, Geist Mono for UI/Data, and Geist Sans for prose.
 - **Aesthetics:** Strict "Developer-grade" look: **0px border radius**, monochrome palette (#000000 bg, #FFFFFF primary), and **Emil Kowalski** design engineering principles (tactile feedback, micro-animations, polish).
-- **Branding:** Adopted a "skinnier" text-based logo aesthetic (text-lg, regular weight) across all surfaces (Navbar, Footer, Sidebar, Auth, Onboarding) for visual consistency.
+- **Branding:** Adopted a "skinnier" text-based logo aesthetic (text-lg, regular weight) across all surfaces. Global controls (Project Switcher, Account, Breadcrumbs) are consolidated in the **Dashboard Topbar** to keep the sidebar focused on navigation.
+- **Navigation:** Integrated a custom monochromatic `DropdownMenu` for both Project Switching and Account management in the topbar.
 - **Legal:** Dedicated `/privacy` and `/terms` pages with a minimalist, linked **Footer** component.
 - **Auth:** Google OAuth credentials configured in `.env.prod`, `.env.local`, and Vercel production variables.
 
@@ -35,6 +36,105 @@
 - **Environment:** Created `.env.prod` template for streamlined Vercel deployment. Isolated local dev via Tinybird `dev` branch.
 
 ## Recent Important Changes
+- **Dashboard Layout Fix (2026-05-17):**
+40:   - **Issue:** Identified a 56px "bar" or gap at the bottom of the dashboard content area.
+41:   - **Cause:** A hardcoded height subtraction `h-[calc(100svh-56px)]` in `DashboardShell` was reserving space for a topbar that is actually rendered inside the scrollable content.
+42:   - **Fix:** Removed the height subtraction and set `main` to `h-svh pb-0` to fill the viewport and eliminate the gap.
+43: 
+44: - **Dashboard Decision Document Alignment Pass (2026-05-17):**
+  - **Source:** Read `5to1r - docs\5to1r_dashboard_decisions.docx` and used it as the dashboard MVP target.
+  - **Navigation:** Added `/dashboard/[projectId]/costs` and removed API Keys/Billing from primary sidebar navigation; those are now settings-owned actions per the decision doc.
+  - **Settings Hub:** Settings now includes API Keys and Management tabs, making project operations discoverable without cluttering primary nav.
+  - **Overview Scope:** Removed model distribution from the overview chart area; model breakdown now belongs on the Costs page.
+  - **Costs Page:** Added a lightweight cost dashboard with total spend, 7/30/90 day range controls, cost-over-time, cost-by-model, expensive saved runs, and threshold link.
+  - **Verification:** Convex dev sync passed and `npm run build` passes with `/dashboard/[projectId]/costs` included.
+
+- **Dashboard Saved Totals Fallback (2026-05-17):**
+  - **Issue:** New agent workflow runs appeared in Convex-backed run lists, but overview/cost totals could stay stale because the top cards depended on Tinybird analytics only.
+  - **Fix:** Overview spend/span cards now use Convex `getProjectManagementSummary` saved totals as the immediate source of truth when analytics are unavailable or behind.
+  - **Fix:** Costs total spend now uses the larger of Tinybird analytics and Convex saved totals, so newly ingested high-cost runs show immediately while detailed analytics catches up.
+  - **Correction:** Range-scoped spend and span cards must use Tinybird analytics for the selected range when available; Convex saved totals are all-time-ish fallback only when Tinybird is unavailable.
+  - **Verification:** `npm run build` passes.
+
+- **Tinybird SQL JSON Response Fix (2026-05-17):**
+  - **Issue:** Dashboard analytics showed `Tinybird analytics unavailable` even though Tinybird had data because `/v0/sql` returned tab-separated output and the app attempted `res.json()`.
+  - **Fix:** Tinybird SQL helpers now append `FORMAT JSON` to every analytics query so `getDailyCosts`, `getCostByModel`, and run span queries parse correctly.
+  - **Verification:** Direct Tinybird query with `FORMAT JSON` returned JSON and `npm run build` passes.
+
+- **Historical Demo Data Seed (2026-05-17):**
+  - **Script:** Added `scratch/user-test-5to1r/seed-history.mjs` and `npm run seed:history` for local demo data generation.
+  - **Data Shape:** Seeds 13 previous days with 22 runs, 132 spans, varied costs, one failed run, and model coverage across `gpt-5.5`, `claude-3-opus-latest`, and `claude-3-5-sonnet-latest`.
+  - **Verification:** Seed ran through the real `/api/ingest` path, Convex saved historical run summaries, Tinybird returned 14-day daily JSON rollups, and `npm run build` passes.
+
+- **Dashboard Analytics Auto-Refresh (2026-05-17):**
+  - **Issue:** Tinybird-backed charts and model breakdowns only updated after a manual page refresh.
+  - **Fix:** Overview and Costs now poll `/api/projects/[projectId]/stats` every 4 seconds while the tab is visible, use `cache: "no-store"`, and refresh immediately when the tab becomes visible again.
+  - **UX:** Polling keeps existing chart data on screen and avoids skeleton flicker after the first load.
+  - **Verification:** `npm run build` passes.
+
+- **Savings Impact Cost Graph (2026-05-17):**
+  - **Issue:** The Costs page line graph was too plain and did not communicate the visual impact of reducing agent spend.
+  - **Fix:** Replaced the basic cost-over-time line with a savings-impact area chart: actual spend, shaded estimated avoided spend, and a dashed peak-day baseline.
+  - **UX:** Added peak day, latest day, and estimated avoided-spend cards above the chart to make savings visible before reading the graph.
+  - **UX:** Savings copy now always renders with `$0.00` when there is no computed saving instead of disappearing.
+  - **UX:** Overview and Costs now keep spend as the primary number and show savings as smaller secondary sub-metrics in the same card.
+  - **UX:** Dashboard Overview now has a 1d/7d/30d/90d range switcher and shows total potential savings for the selected period, not per-day savings.
+  - **Demo Data:** Added `scratch/user-test-5to1r/seed-savings.mjs` and `npm run seed:savings` to create a clear unoptimized-to-optimized savings pattern through the real ingest path.
+  - **Verification:** `npm run build` passes.
+
+- **Custom 404 Page (2026-05-17):**
+  - **Fix:** Added `src/app/not-found.tsx` using the existing monochrome 5to1r visual language for unmatched routes and `notFound()` cases.
+  - **UX:** Includes direct actions back to `/dashboard` and `/`, plus a small trace-style status panel.
+  - **Verification:** `npm run build` passes and Next generates the `_not-found` route.
+
+- **Project Management + Safer Delete Flow (2026-05-17):**
+  - **Stats Resilience:** `/api/projects/[projectId]/stats` now returns an empty analytics payload with `unavailable: true` when Tinybird is unavailable instead of surfacing a dashboard console error.
+  - **Management Page:** Added `/dashboard/[projectId]/manage` with Convex-backed saved stats: runs, spans, saved cost, alerts, recent runs, lifecycle, API key last-used, and alert thresholds.
+  - **Navigation:** Added Manage to the dashboard sidebar, account menu, and overview activity header.
+  - **Deletion Safety:** Project deletion now requires typing the exact project name and `DELETE`; deletion also removes saved Convex runs, alerts, and comments for the project.
+  - **Verification:** Synced Convex dev, verified `projects:getProjectManagementSummary` for `test_manual_api`, and `npm run build` passes with Next.js 16.2.6.
+
+- **Local Ingest Dev Flow Fix (2026-05-16):**
+  - **Issue:** Localhost showed internal server/proxy errors and the npm user-test script could not move onboarding past the listening state.
+  - **Fix:** Restarted Next.js in normal `npm run dev` mode instead of binding to `127.0.0.1`, which avoided the localhost proxy hang.
+  - **Fix:** `.env.local` now uses the Convex dev `FIVETOONE_API_KEY_HASH_SECRET` and points `INNGEST_DEV` at `http://127.0.0.1:8288`.
+  - **Verification:** `http://localhost:3000` returns `200`, `/api/ingest` returns `202`, `scratch/user-test-5to1r` returns `Ingest status: 202 Accepted`, and Convex dev contains the generated run for project `jd74cdngtnqd2yw3gsb2602fv186t0hr`.
+
+- **Manual API Key Issuance + npm Package Rename (2026-05-16):**
+  - **SDK Install Copy:** Updated app onboarding, dashboard docs, quickstart docs, design spec, and TS SDK README so TypeScript installs use `npm install 5to1r` and imports use `from "5to1r"`.
+  - **Package Metadata:** `packages/ts-sdk/package.json` now publishes as `5to1r`; removed the accidental self-dependency from `package.json` and `package-lock.json`.
+  - **Admin Issuance:** Added `projects:createProjectForUser`, an admin-only Convex mutation that creates a project for a target Clerk user and returns the one-time plaintext API key using the same HMAC storage path as normal onboarding.
+  - **Access Control:** Dev Convex env `FIVETOONE_ADMIN_CLERK_USER_IDS` is set to the local admin Clerk user id `user_3DbExfanjwXgIVGD8jXscKuXf7S`.
+  - **Verification:** Convex dev sync passed, manual project/API key creation succeeded for project `jd75ha4z0264kr6wsbes7vd8rs86trsa`, SDK package build passed, and root `npm run build` passes.
+
+- **npm SDK Publish Prep (2026-05-16):**
+  - **Issue:** `npm publish --access public` for `@5to1r/sdk@0.1.0` failed with npm `E403` because the npm account requires 2FA or a granular publish token with bypass 2FA.
+  - **Fix:** Added `packages/ts-sdk/tsconfig.json` so `npm run build` emits `dist/index.js` and `dist/index.d.ts`.
+  - **Cleanup:** Removed stale `uuid` runtime/type dependencies from `packages/ts-sdk/package.json`; the SDK uses `crypto.randomUUID` with a fallback.
+  - **Verification:** `npm run build` in `packages/ts-sdk` passes, and `npm pack --dry-run --cache C:\tmp\npm-cache` includes `README.md`, `dist/index.js`, `dist/index.d.ts`, and `package.json`.
+
+- **Dashboard Shell Single-Instance Fix (2026-05-16):**
+  - **Fix:** Removed nested `DashboardShell` wrappers from project child pages (`alerts`, `api-keys`, `billing`, `quickstart`, `runs`, `runs/[runId]`, `settings`).
+  - **Reason:** `src/app/dashboard/layout.tsx` already owns the dashboard shell and sidebar. Nested shells could render two independent sidebars with different collapsed state and layer them over each other.
+  - **Guarantee:** `DashboardShell` is now referenced only by `src/app/dashboard/layout.tsx`, so dashboard routes can render only one sidebar instance.
+  - **URL Behavior:** Project workspaces keep the Convex project id in the URL (`/dashboard/[projectId]`), `/dashboard` is just an entry redirect, and the sidebar logo now links to the active project URL when a project is selected.
+  - **Verification:** `npm run build` passes with Next.js 16.2.6.
+
+- **Dev Convex Project Seed + Clerk JWT Template Fix (2026-05-16):**
+  - **Dev Data:** Created Convex dev project `Dev Terminal Project` for local Clerk user `user_3DbExfanjwXgIVGD8jXscKuXf7S`; project id is `jd77b4bxf1k3eq4ztxmphjgyy186vcf3`.
+  - **API Key Backup:** Saved the generated one-time dev API key to `C:\tmp\fivetoone_dev_terminal_project_api_key.txt`.
+  - **Auth Fix:** Local Clerk instance had no JWT templates, so `ConvexProviderWithClerk` could not fetch `getToken({ template: "convex" })` and the app stayed in "waiting for auth". Created Clerk JWT template `convex` with `aud: "convex"` and standard user claims.
+  - **Deployment Sync:** Ran `npx convex dev --once --typecheck disable` after the browser reported missing `projects:getProjectRouteState`; Convex dev now registers the route-state query.
+  - **Verification:** `projects:getProjectsByUserOrOrg` returns the seeded project and `projects:getProjectRouteState` returns `{ status: "ready", projectId: "jd77b4bxf1k3eq4ztxmphjgyy186vcf3" }` when run against Convex dev with the matching Clerk identity.
+
+- **Project Onboarding Route-State Fix (2026-05-16):** Removed `/dashboard/no-project` as an active dashboard state.
+  - **Fix:** `/dashboard` now resolves the authenticated user's real Convex project list and redirects to the last/first valid project, or shows a first-project empty state without creating a fake project id.
+  - **Fix:** `/dashboard/[projectId]` is guarded by a Convex-backed route-state query that accepts a plain string, normalizes it with `ctx.db.normalizeId`, and redirects invalid/stale/no-project routes before project-scoped query components mount.
+  - **Fix:** Onboarding entry now verifies real Convex projects instead of trusting `sessionStorage`/`localStorage`; stale project ids are cleared for zero-project users.
+  - **Fix:** Onboarding escape/return-path handling normalizes old `/dashboard/no-project` values back to `/dashboard`.
+  - **Cleanup:** Removed active `"no-project"` query guards from dashboard leaves; the sentinel remains only as stale browser-state compatibility cleanup.
+  - **Build:** `npm run build` passes with Next.js 16.2.6 after adding missing local `Tabs`, correcting encoded API route folders/files, fixing trace viewer JSX, and replacing the TS SDK `uuid` dependency with `crypto.randomUUID`.
+
 - **Vercel Build Pipeline Fix (2026-05-15):** Removed the interactive Convex deploy from the Vercel build script and committed Convex generated bindings.
   - **Fix:** `package.json` build now runs `next build`; Convex deployment is available separately via `npm run deploy:convex`.
   - **Fix:** `convex/_generated` is no longer gitignored, so Vercel can resolve `convex/_generated/api` during frontend compilation without running an interactive deploy step.

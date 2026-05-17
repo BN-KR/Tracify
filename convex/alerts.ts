@@ -3,35 +3,27 @@ import { mutation, query } from "./_generated/server";
 
 export const create = mutation({
   args: {
-    runId: v.string(),
     projectId: v.id("projects"),
+    runId: v.string(),
     type: v.string(),
     message: v.string(),
     triggeredAt: v.string(),
   },
   handler: async (ctx, args) => {
-    return ctx.db.insert("alerts", args);
+    return await ctx.db.insert("alerts", args);
   },
 });
 
 export const listByProject = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, { projectId }) => {
-    return ctx.db
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    return await ctx.db
       .query("alerts")
       .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
       .order("desc")
-      .collect();
-  },
-});
-
-export const listByRun = query({
-  args: { runId: v.string(), projectId: v.id("projects") },
-  handler: async (ctx, { runId, projectId }) => {
-    const alerts = await ctx.db
-      .query("alerts")
-      .withIndex("by_runId", (q) => q.eq("runId", runId))
-      .collect();
-    return alerts.filter((a) => a.projectId === projectId);
+      .take(50);
   },
 });

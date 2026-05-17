@@ -1,6 +1,6 @@
 import { serve } from "inngest/next";
 import { inngest } from "@/lib/inngest";
-import { processSpan } from "@/lib/inngest-functions";
+import { processSpan, processAlert } from "@/lib/inngest-functions";
 
 /**
  * Inngest serve route — handles all Inngest lifecycle events
@@ -8,5 +8,5 @@ import { processSpan } from "@/lib/inngest-functions";
  */
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  functions: [processSpan],
+  functions: [processSpan, processAlert],
 });

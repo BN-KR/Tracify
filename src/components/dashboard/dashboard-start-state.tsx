@@ -41,7 +41,7 @@ async def research_agent(query):
   },
   typescript: {
     label: "TypeScript",
-    code: `import { traceAgent } from "@5to1r/sdk"
+    code: `import { traceAgent } from "5to1r"
 
 const researchAgent = traceAgent(async (query: string) => {
   return await run(query)
@@ -50,14 +50,6 @@ const researchAgent = traceAgent(async (query: string) => {
 };
 
 type ChecklistStatus = "completed" | "current" | "pending";
-
-const checklist = [
-  { label: "Create project", status: "completed" },
-  { label: "Copy API key", status: "pending" },
-  { label: "Install SDK", status: "pending" },
-  { label: "Run your agent", status: "pending" },
-  { label: "Open first trace", status: "pending" },
-] satisfies Array<{ label: string; status: ChecklistStatus }>;
 
 export function DashboardStartState({ projectId }: { projectId?: string }) {
   const [tab, setTab] = useState<keyof typeof quickstarts>("python");
@@ -74,6 +66,14 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
   const active = quickstarts[tab];
   const effectiveProjectId = projectId ?? onboardingSession.projectId;
   const quickstartHref = getOnboardingHref(effectiveProjectId);
+  const hasProject = Boolean(effectiveProjectId);
+  const checklist = [
+    { label: "Create project", status: hasProject ? "completed" : "current" },
+    { label: "Copy API key", status: hasProject ? "pending" : "pending" },
+    { label: "Install SDK", status: "pending" },
+    { label: "Run your agent", status: "pending" },
+    { label: "Open first trace", status: "pending" },
+  ] satisfies Array<{ label: string; status: ChecklistStatus }>;
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
@@ -81,19 +81,20 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
         <div className="mb-3 flex items-center justify-between gap-4 border-b border-[#2A2A2A] pb-4">
           <div className="min-w-0">
             <div className="mb-2 text-[11px] uppercase tracking-wide text-[#666666]">
-              overview.empty_state
+              {hasProject ? "overview.empty_state" : "workspace.empty_state"}
             </div>
             <h1 className="font-mono text-2xl normal-case tracking-normal text-white">
-              No spans received yet.
+              {hasProject ? "No spans received yet." : "Create your first project."}
             </h1>
           </div>
           <div className="hidden border border-[#2A2A2A] bg-[#0A0A0A] px-3 py-2 text-[12px] text-[#F59E0B] sm:block">
-            waiting for first span
+            {hasProject ? "waiting for first span" : "no project"}
           </div>
         </div>
         <p className="max-w-2xl font-sans text-sm leading-6 text-[#999999]">
-          Install the SDK and run your agent. Your first span will appear here
-          in real time.
+          {hasProject
+            ? "Install the SDK and run your agent. Your first span will appear here in real time."
+            : "Projects hold your API keys, agent runs, alerts, and trace history."}
         </p>
       </header>
 
@@ -126,7 +127,7 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
                 className: "h-9 px-4 uppercase",
               })}
             >
-              View quickstart
+              {hasProject ? "View quickstart" : "Create project"}
             </Link>
             <Link
               href="/demo"

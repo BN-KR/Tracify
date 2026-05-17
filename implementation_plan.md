@@ -1,103 +1,97 @@
-# Implementation Plan - Vercel Build Recovery
+# 5to1r Strategic Implementation Plan
 
-## Objective
-Make the app build reliably on Vercel and locally without requiring an interactive Convex deploy during the Next.js build.
+This plan merges the **Comprehensive Build Plan** and the **What To Do Now** strategic assessment. It prioritises the transition from a verified ingestion pipeline to a functional, high-fidelity developer product.
 
-## Current Phase
-- [x] Reproduce the non-interactive build failure from `npx convex deploy`.
-- [x] Change `npm run build` to run `next build` only.
-- [x] Add a separate `npm run deploy:convex` command for explicit Convex deployments.
-- [x] Stop ignoring `convex/_generated` so generated Convex bindings are available in Vercel.
-- [x] Fix TypeScript blockers found by `next build`.
-- [x] Verify `npm run build` passes.
-- [x] Push fix commit `c24be95` to `origin/main`.
-- [x] Apply `.env.prod` values to Vercel production.
-- [x] Deploy production and verify Vercel Ready status.
-- [x] Diagnose production 500 as invalid Clerk publishable key from `.env.prod` placeholder values.
-- [x] Temporarily overwrite Vercel production with non-placeholder `.env.local` test/dev values.
-- [x] Redeploy production and verify Ready status plus no recent 500 logs.
-- [x] Update Vercel production with live Clerk keys.
-- [x] Update ignored local `.env.prod` with live Clerk entries.
-- [x] Redeploy production and verify Ready status.
-- [x] Update Vercel production and ignored `.env.prod` with production Convex URLs.
-- [x] Make Convex auth config read `CLERK_JWT_ISSUER_DOMAIN` with local dev fallback.
-- [x] Set production Clerk issuer and API-key hash secret in Convex prod.
-- [x] Deploy Convex functions to `focused-otter-289`.
-- [x] Redeploy Vercel production and verify Ready status/no recent 500 logs.
+## Strategic Decision: SaaS Infrastructure
+As established in the "What To Do Now" document, 5to1r is officially a **Developer Infrastructure SaaS**, not a web agency. All efforts are focused on agent observability.
 
-## Scope Boundaries
-- Do not redesign dashboard or onboarding UI.
-- Do not build trace viewer, runs list, costs, or alerts.
-- Do not change production environment secrets in source control.
+## Phase 1: Core Trace Viewer & Infrastructure (Weeks 1-4)
 
-## Next Steps
-- Clean up existing lint issues in a separate quality pass.
-- Document the final Convex deploy-key workflow once production deployment credentials are confirmed.
-- Replace temporary Inngest/webhook Vercel production values with real production secrets.
-- Confirm Tinybird production workspace/token status.
-- Keep `.env.prod` clearly marked as a template or replace placeholder entries with non-secret setup notes.
+### 1. Ingestion Pipeline & Environment [DONE]
+- [x] Clerk Auth Integration
+- [x] Convex Schema & Mutations (`projects`, `agentRuns`)
+- [x] Tinybird `spans.datasource` Configuration
+- [x] Inngest `processSpan` Function
+- [x] `POST /api/ingest` Ingestion Route
+- [x] End-to-end Verification (curl -> Tinybird -> Convex)
 
----
+### 2. Onboarding & Dashboard Foundation [DONE]
+- [x] Premium Landing Page (Hero, Features, Pricing)
+- [x] Dashboard Shell & Grouped Sidebar
+- [x] Multi-step Onboarding Flow
+- [x] One-time API Key Generation & Management
+- [x] Route-state hardening for zero-project users: `/dashboard` and `/onboarding` now resolve real Convex project state, and `/dashboard/[projectId]` validates route params before project-scoped queries mount.
+- [x] Local dev auth recovery: Clerk now has the required `convex` JWT template and Convex dev contains a seeded project for the current local Clerk user.
+- [x] Dashboard shell ownership hardened: only `src/app/dashboard/layout.tsx` renders `DashboardShell`; project child pages render content only, preventing duplicate sidebars while keeping project ids in workspace URLs.
+- [x] Project management foundation: `/dashboard/[projectId]/manage` shows Convex-saved project stats and requires exact project-name plus `DELETE` confirmation before destructive project removal.
+- [x] Custom 404 fallback: `src/app/not-found.tsx` provides branded actions back to Dashboard/Home for unmatched routes.
 
-# Implementation Plan - Login and Dashboard Redirect Fix
+### 3. Core Product: Trace Viewer [TODO]
+The single most important UI in the product.
+- [ ] **Runs List Page:** Live-updating table at `/dashboard/[projectId]/runs` using Convex `useQuery`.
+- [ ] **Run Detail Page:** Timeline view at `/dashboard/[projectId]/runs/[runId]`.
+- [ ] **Tinybird Pipes:** Implement `spans_by_run` and `recent_runs_summary`.
+- [ ] **Span Detail Cards:** Expandable JSON viewers for input/output payloads.
 
-## Objective
-Keep the authenticated user flow simple: landing -> sign-in -> dashboard, with onboarding accessible from the dashboard shell instead of being the default redirect.
+### 4. Cost & Usage Dashboard [TODO]
+- [x] **Usage Statistics:** Added lightweight `/dashboard/[projectId]/costs` total spend and saved expensive-run summaries.
+- [x] **Cost Visualisation:** Added Recharts cost-over-time chart with 7d / 30d / 90d controls and Tinybird-unavailable fallback copy.
+- [x] **Model Breakdown:** Moved model cost breakdown off Overview and onto `/costs` where the decision doc says it belongs.
+- [x] **Immediate Saved Totals:** Overview and Costs use Convex saved run summaries for top-level spend/span totals so newly ingested runs update immediately even if Tinybird analytics is delayed.
+- [x] **Tinybird Query Format:** Analytics SQL helpers append `FORMAT JSON` so Tinybird returns parseable JSON for cost charts and model breakdowns.
+- [x] **Demo Data Seeding:** Added a local historical seed script that sends previous-day telemetry through `/api/ingest` for realistic dashboard chart testing.
+- [x] **Analytics Auto-Refresh:** Overview and Costs poll stats every 4 seconds while visible so charts/model breakdowns update without a full page refresh.
+- [x] **Savings Impact Chart:** Costs graph now compares actual spend to a peak-day baseline with shaded avoided-spend area and impact cards.
+- [x] **Savings Demo Pattern:** Added `seed:savings` to generate expensive unoptimized days followed by cheaper optimized days, and savings copy now shows `$0.00` when there is no computed saving.
+- [x] **Spend-First Cards:** Overview and Costs keep spend as the main card value and show potential savings as secondary card copy/sub-metrics.
+- [x] **Overview Range Controls:** Dashboard Overview supports 1d/7d/30d/90d switching and displays total potential savings for the selected period.
+- [x] **Range-Scoped Totals:** Overview and Costs use Tinybird range totals when available; Convex saved totals are only a fallback when analytics is unavailable.
 
-## Current Phase
-- [x] Redirect Clerk sign-in/sign-up back to `/dashboard`.
-- [x] Stop `/dashboard` from redirecting into onboarding.
-- [x] Add a dashboard shell onboarding button for explicit quickstart re-entry.
+### 5. Alerting & Notifications [TODO]
+- [ ] **Alert Inngest Function:** Triggers on `5to1r/alert.triggered`.
+- [ ] **Notification Channels:** Slack Webhook integration and Email alerts.
+- [ ] **Alerts UI:** Inbox-style feed for active/resolved alerts.
 
-## Scope Boundaries
-- Do not modify the landing page.
-- Do not build trace viewer, runs list, cost dashboard, or alerts.
-- Keep the change navigation-only.
-
-## Next Steps
-- If needed, decide whether the dashboard onboarding button should become context-aware later.
-- Revisit build/type issues in unrelated Convex code separately.
-
----
-
-# Implementation Plan - Convex Sync Recovery
-
-## Objective
-Keep the deployment syncable despite legacy data so public Convex functions register and the app can create projects again.
-
-## Current Phase
-- [x] Make `agentRuns.createdAt` backward compatible for legacy rows.
-- [x] Keep new run writes populating `createdAt`.
-- [x] Restore `npx convex dev` sync to a healthy state.
-
-## Scope Boundaries
-- Do not build trace viewer, runs list, cost dashboard, or landing page changes.
-- Do not change onboarding UX or dashboard navigation for this fix.
-
-## Next Steps
-- If needed, backfill legacy `agentRuns.createdAt` values later through a dedicated migration.
+### 6. Production SDKs [POLISHING]
+- [ ] **Python SDK:** Wrap `@trace_agent` decorator logic and publish to PyPI.
+- [ ] **TS SDK:** Formalise `5to1r` and publish to npm. Build packaging is fixed, app/docs install snippets now use `npm install 5to1r`, and publish is blocked only on npm 2FA/token requirements.
+- [ ] **Documentation:** Quickstart guide for 5-minute instrumentation.
+- [x] **Manual API Key Issuance:** Added admin-gated Convex `projects:createProjectForUser` for creating a project and one-time API key for a target Clerk user without bypassing the hashed-key storage model.
+- [x] **Local User Install Test:** Verified the published `5to1r` npm package can send a span through local Next.js/Inngest/Convex dev after aligning `.env.local` with the Convex dev API-key hash secret.
 
 ---
 
-# Previous Implementation Plan - Onboarding Convex Error Fix
+## Phase 2: Advanced Features (Post-MVP)
 
-## Objective
-Fix the "Could not find public function for 'projects:createProject'" error by ensuring the Convex mutation is correctly exported, registered, and matches the expected fields and types (identity subject, numeric timestamps).
+### 1. Run Replay
+- [ ] **Replay UI:** Interactive "Play/Step" controls for agent traces.
+- [ ] **Payload Storage:** S3 integration for large (>10KB) span payloads.
 
-## Current Phase
-- [x] Update `convex/schema.ts` to support numeric timestamps and flexible legacy fields (optional fields).
-- [x] Update `convex/projects.ts` to use `identity.subject` for `clerkUserId` and `Date.now()` for timestamps.
-- [x] Update `convex/projects.ts` to ensure `createProject` is correctly exported as a public mutation.
-- [x] Update `src/app/api/ingest/route.ts` to use numeric timestamps for `markApiKeyUsed`.
-- [x] Update `convex/agentRuns.ts` to use `identity.subject` for project access checks.
-- [x] Successfully run `npx convex dev --once` to verify function registration and schema validation.
-- [x] Verify frontend `project-step.tsx` and `CreateProjectModal.tsx` use the correct generated `api.projects.createProject` reference.
+### 2. Orchestrator Layer
+- [ ] **Agent SDK Extension:** Native Agent class with built-in cost ceilings and retries.
+- [ ] **Tool Registry:** Versioned tool management and authentication.
 
-## Scope Boundaries
-- Do not redesign onboarding UI.
-- Do not build full trace viewer or other deferred surfaces.
-- Do not change existing landing page or dashboard shell logic.
+---
 
-## Next Steps
-- Verify onboarding flow end-to-end in the browser.
-- Monitor for any other registration issues in the Convex dashboard.
+## Phase 3: Enterprise & Evaluation
+
+### 1. Eval Engine
+- [ ] **Eval Framework:** Automated assertions (cost, latency, content) for agent runs.
+- [ ] **CI Integration:** CLI tools to run evals in GitHub Actions.
+
+### 2. Enterprise Controls
+- [ ] **SSO:** Clerk Enterprise integration.
+- [ ] **RBAC:** Fine-grained permissions (Admin, Dev, Viewer).
+
+---
+
+## Verification Plan
+
+### Automated Tests
+- `npm run test`: Unit tests for ingestion logic.
+- `npx inngest-cli dev`: Local verification of background jobs.
+- `curl` pipeline tests: Continuous validation of the API gateway.
+
+### Manual Verification
+- **Onboarding E2E:** Verify a new user can sign up, create a project, instrument an agent, and see the first trace.
+- **UI Audit:** Ensure 0px radius and monochrome high-contrast styling remains consistent.

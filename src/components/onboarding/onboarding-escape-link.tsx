@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useSyncExternalStore, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import type { OnboardingStepId } from "@/components/onboarding/onboarding-progress";
 import {
   hasOneTimeApiKey,
   subscribeToOneTimeApiKey,
+  setReturnPath,
+  getReturnPath,
+  clearReturnPath,
 } from "@/lib/onboarding-client-state";
 
 const PROJECT_ID_STORAGE_KEY = "5to1r.onboarding.projectId";
@@ -14,16 +17,18 @@ const API_KEY_COPIED_STORAGE_KEY = "5to1r.onboarding.apiKeyCopied";
 
 function getSessionSnapshot() {
   const projectId = window.sessionStorage.getItem(PROJECT_ID_STORAGE_KEY) ?? "";
+  const returnPath = getReturnPath();
   const hasApiKey = hasOneTimeApiKey();
   const hasCopiedApiKey =
     window.sessionStorage.getItem(API_KEY_COPIED_STORAGE_KEY) === "true";
 
-  return JSON.stringify({ projectId, hasApiKey, hasCopiedApiKey });
+  return JSON.stringify({ projectId, returnPath, hasApiKey, hasCopiedApiKey });
 }
 
 function getServerSessionSnapshot() {
   return JSON.stringify({
     projectId: "",
+    returnPath: "",
     hasApiKey: false,
     hasCopiedApiKey: false,
   });
@@ -35,24 +40,37 @@ export function OnboardingEscapeLink({
   currentStep: OnboardingStepId;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isConfirmingLeave, setIsConfirmingLeave] = useState(false);
   const sessionSnapshot = useSyncExternalStore(
     subscribeToOneTimeApiKey,
     getSessionSnapshot,
     getServerSessionSnapshot,
   );
-  const { projectId, hasApiKey, hasCopiedApiKey } = JSON.parse(
+  const { projectId, returnPath, hasApiKey, hasCopiedApiKey } = JSON.parse(
     sessionSnapshot,
   ) as {
     projectId: string;
+    returnPath: string;
     hasApiKey: boolean;
     hasCopiedApiKey: boolean;
   };
 
-  const label = projectId ? "Dashboard" : "Home";
-  const destination = projectId ? `/dashboard/${projectId}` : "/";
+  useEffect(() => {
+    const from = searchParams.get("from");
+    if (from) {
+      setReturnPath(from);
+    }
+  }, [searchParams]);
+
+  const label = returnPath ? "Back" : "Dashboard";
+  const destination =
+    returnPath || (projectId ? `/dashboard/${projectId}` : "/dashboard");
 
   function leaveOnboarding() {
+    if (returnPath) {
+      clearReturnPath();
+    }
     router.push(destination);
   }
 

@@ -100,7 +100,7 @@ without blocking your agent's execution.
 ```
 01 INSTALL
 pip install fivetoone
-or: npm install @5to1r/sdk
+or: npm install 5to1r
 
 02 INSTRUMENT
 @trace_agent(api_key="5t1r_sk_...")
@@ -145,7 +145,7 @@ async def research_agent(query: str) -> str:
 
 **TypeScript:**
 ```typescript
-import { traceAgent } from "@5to1r/sdk"
+import { traceAgent } from "5to1r"
 
 const researchAgent = traceAgent(
   async (query: string) => {
@@ -586,12 +586,12 @@ async def my_agent(query: str) -> str:
 ─────────────────────────────────────────────────
 TYPESCRIPT
 
-npm install @5to1r/sdk
-# or: yarn add @5to1r/sdk
+npm install 5to1r
+# or: yarn add 5to1r
 
 ─────────────────────────────────────────────────
 
-import { traceAgent } from "@5to1r/sdk"
+import { traceAgent } from "5to1r"
 
 const myAgent = traceAgent(
   async (query: string) => {

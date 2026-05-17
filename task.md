@@ -1,97 +1,89 @@
-# Task Tracker
+# 5to1r Execution Task List
 
-## Completed
-- [x] Fix Vercel deployment build by removing interactive Convex deploy from `npm run build`.
-- [x] Commit Convex generated bindings so Vercel can resolve `convex/_generated/api`.
-- [x] Fix production type errors in `agentRuns` access checks and dashboard button links.
-- [x] Verify `npm run build` passes locally.
-- [x] Push Vercel build fix to `origin/main`.
-- [x] Configure Vercel production environment from `.env.prod`.
-- [x] Deploy production to Vercel and verify Ready status.
-- [x] Resolve production 500 caused by placeholder Clerk publishable key.
-- [x] Temporarily point Vercel production at non-placeholder `.env.local` test/dev values and redeploy.
-- [x] Add live Clerk keys to Vercel production and ignored local `.env.prod`.
-- [x] Redeploy production with live Clerk keys and verify Ready status.
-- [x] Add production Convex URLs to Vercel production and ignored local `.env.prod`.
-- [x] Deploy Convex functions and auth config to production `focused-otter-289`.
-- [x] Set Convex production `CLERK_JWT_ISSUER_DOMAIN`.
-- [x] Generate and set production `FIVETOONE_API_KEY_HASH_SECRET` in Vercel and Convex.
-- [x] Remove `INNGEST_DEV` from Vercel production.
-- [x] Fix login flow so sign-in returns users to the dashboard instead of the landing page.
-- [x] Stop `/dashboard` from redirecting to onboarding and make onboarding an explicit dashboard action.
-- [x] Add an onboarding button to the dashboard top bar.
-- [x] Add a Sign out button to the marketing navbar for authenticated users.
-- [x] Fix Vercel build errors by adding `npx convex deploy --bundle` to the build script and standardizing imports.
-- [x] Create Privacy Policy and Terms of Service pages with footer links.
-- [x] Fix social login button layout on sign-in/up pages to use dynamic grid (fixing 2-provider alignment).
+## Current Phase: Phase 2 - Distribution & Teams (Milestone 5)
 
+### 1. Teams & RBAC
+- [ ] Implement Clerk Organization switching in the Dashboard
+- [ ] Add "Team Members" view in Settings
+- [x] Add safer project deletion requiring exact project name and `DELETE`
+- [ ] Implement role-based access control for project deletion
 
-- [x] Stop showing a sign-in prompt to already signed-in users on the project creation page.
-- [x] Fix project creation auth timing by gating the onboarding form on Convex `Authenticated`.
-- [x] Fix Convex sync blocker caused by legacy `agentRuns` rows missing `createdAt`.
-- [x] Restore deployment sync so `projects:createProject` and `projects:getProjectsByUserOrOrg` register again.
-- [x] Remove Convex query dependency from dashboard/onboarding root redirect logic.
-- [x] Route `/dashboard` and `/onboarding` from local project context.
-- [x] Refine onboarding routing so onboarding is state-based, not login-based.
-- [x] Route `/onboarding` and `/dashboard` by signed-in project state.
-- [x] Replace unpublished SDK install commands with beta GitHub install commands.
-- [x] Add AI setup prompt mode to `/onboarding/install`.
-- [x] Remove plaintext API key persistence from browser storage.
-- [x] Add navigation escape hatches between onboarding and dashboard.
-- [x] Add quiet Home/Dashboard link to every onboarding step.
-- [x] Warn before leaving the API key step when the one-time key has not been copied.
-- [x] Add dashboard Resources -> Quickstart shortcut to onboarding install.
-- [x] Route dashboard empty-state View quickstart to the appropriate onboarding step from session context.
-- [x] Fix dashboard project switcher runtime errors by removing Convex project-list query calls from the shell.
-- [x] Build Milestone 2 Part 3 ingestion and real first-span onboarding activation.
-- [x] Build Milestone 2 Part 2 project creation and one-time API key backend.
-- [x] Build Milestone 2 Part 1 onboarding UI flow with mock project/key/install/waiting/success screens.
-- [x] Remove sidebar hover-peek and adjustable-width behavior; keep fixed 240px/64px widths and the top expand icon.
-- [x] Refine dashboard sidebar into a quiet workspace panel with top icon collapse, persistent resize, hover-peek, and assisted collapsed-nav expansion.
-- [x] Refine Sign In and Sign Up pages with Emil Kowalski design engineering principles.
-- [x] Improve dashboard shell entry point with collapsible sidebar.
-- [x] Add grouped dashboard navigation with persisted group state.
-- [x] Improve mock project switcher dropdown with environment labels.
-- [x] Replace thin empty dashboard page with start-here checklist and quickstart panel.
-- [x] Add sample trace entry points without building the trace viewer.
-- [x] Build Dashboard Milestone 2 onboarding flow.
-- [x] Add project creation with one-time API key display.
-- [x] Store API key HMAC hash, prefix, last 4 chars, timestamps, and status.
-- [x] Add SDK install step with Python and TypeScript snippets.
-- [x] Add waiting state subscribed to first real Convex run.
-- [x] Add success step linking to `/dashboard/[projectId]/runs/[runId]`.
-- [x] Add temporary received-run placeholder route for first span activation.
-- [x] Add `getProjectOnboardingState` for real first-run detection.
-- [x] Track `lastSpanAt` in Convex run summaries.
-- [x] Update minimal ingest route, Inngest span processor, Tinybird write, and Convex run upsert.
-- [x] Build the initial authenticated dashboard shell using shadcn `sidebar-03` as a structural base.
-- [x] Infrastructure setup (Frontend, DB, Analytics, Queues).
-- [x] Complete Dashboard Milestone 1: shell and project selector only.
-- [x] Add 5to1r product-specific dashboard shell components under `src/components/dashboard/`.
-- [x] Protect `/dashboard(.*)` with Clerk in `src/proxy.ts`.
-- [x] Add the technical empty-state dashboard placeholder.
-- [x] Record dashboard shell decisions and temporary mock project data.
-- [x] Create `.env.prod` template for Vercel production deployment.
-- [x] Set up Tinybird `dev` branch for local environment isolation.
+### 2. Marketing & Distribution
+- [ ] Update Landing Page with real dashboard screenshots
+- [ ] Create "Pricing" page with real Stripe checkout links
+- [ ] Publish SDKs to PyPI and npm
+  - [x] Prepare `@5to1r/sdk` build output for npm package contents
+  - [x] Rename TypeScript package/install docs to public package name `5to1r`
+  - [ ] Publish `5to1r` with npm 2FA OTP or granular publish token
+- [x] Add admin-only manual project/API key issuance through Convex
+- [x] Add project management page with Convex-backed per-project saved stats
+- [x] Align dashboard navigation/overview/costs with dashboard decision document
+- [x] Make dashboard top-level cost/span totals update from Convex saved run summaries when Tinybird analytics lags
+- [x] Fix Tinybird SQL analytics parsing by forcing JSON responses
+- [x] Add reusable historical demo data seed for previous-day dashboard charts
+- [x] Auto-refresh dashboard analytics without requiring manual page refresh
+- [x] Upgrade Costs graph to show savings impact against a peak-day baseline
+- [x] Add branded custom 404 page for unmatched routes
+- [x] Add savings demo seed and always show zero-dollar savings state
+- [x] Keep spend as primary card value and move savings into secondary card copy
+- [x] Add dashboard overview time-period switcher and use total selected-period savings
+- [x] Fix range-scoped spend/span cards so 1d/7d/30d/90d no longer show all-time Convex totals
 
-## Next
-- [ ] Clean up repo lint scope and existing lint violations so `npm run lint` can become a reliable deployment gate.
-- [ ] Replace Vercel production Inngest/webhook values with real production credentials.
-- [ ] Confirm Tinybird token is a production token, not a dev workspace token.
-- [ ] Replace placeholder values in `.env.prod` with final production credential references or keep it explicitly documented as a template.
-- [ ] Add a documented Convex deployment step/environment checklist for Vercel after production deploy keys are finalized.
-- [x] Fix onboarding Convex "projects:createProject" registration error and sync schema.
-- [ ] Reconnect root routing to Convex only if the deployment sync path is stable and no longer flaky.
-- [ ] Replace beta SDK install commands with PyPI/npm commands after `5to1r` and `@5to1r/sdk` are published.
-- [ ] Add API key rotation UI when settings/API key management is in scope.
-- [ ] Consider a server-backed context-aware `/onboarding` redirect after project listing/state is stable.
-- [ ] Add last dashboard route per project memory when dashboard route behavior is in scope.
-- [ ] Replace dashboard mock project selector with Convex-backed project context.
-- [ ] Replace `/demo` sample trace placeholder with real sample trace routing when trace viewer work starts.
-- [ ] Build API Keys and Billing pages only when their milestone starts.
-- [ ] Configure `FIVETOONE_API_KEY_HMAC_SECRET` in both Next.js and Convex environments.
-- [ ] Run the documented curl test with a real onboarding-generated API key.
-- [ ] Build the real trace viewer in the next explicit trace-viewer milestone.
-- [ ] Replace mock project data with real project selection.
-- [ ] Add real dashboard subpages only when their feature phase starts.
-- [ ] Visually verify mobile drawer styling in-browser during the next UI pass.
+---
+
+## Completed Tasks
+
+### Project Onboarding Stability [COMPLETED]
+- [x] Centralized zero-project handling at `/dashboard` and `/onboarding` route entry
+- [x] Added Convex route-state validation for `/dashboard/[projectId]` without accepting `"no-project"` as a project id
+- [x] Cleared stale browser project state for first-time/zero-project users
+- [x] Removed active dashboard navigation paths that generated `/dashboard/no-project`
+- [x] Seeded a Convex dev project through the terminal for the local Clerk user
+- [x] Created the missing local Clerk `convex` JWT template required for browser Convex auth
+- [x] Removed nested dashboard shell wrappers so only one sidebar can render
+- [x] Verified with `npm run build`
+- [x] Updated all TypeScript SDK install/import snippets from `@5to1r/sdk` to `5to1r`
+- [x] Verified manual API key issuance via `projects:createProjectForUser`
+- [x] Fixed local ingest dev environment so `npm install 5to1r` user test returns `202 Accepted`
+- [x] Made dashboard analytics resilient when Tinybird stats are unavailable
+- [x] Fixed Overview and Costs totals so newly ingested high-cost workflow runs appear immediately from Convex summaries
+- [x] Fixed Tinybird stats endpoint so model/cost charts can parse SQL results instead of treating TSV as broken JSON
+- [x] Seeded 13 days of local demo telemetry through the real ingest path for dashboard visual testing
+- [x] Added 4-second visible-tab polling for Overview and Costs analytics cards/charts
+- [x] Added Costs page impact cards and shaded avoided-spend area chart
+
+### Milestone 4: Advanced Features & SDKs [COMPLETED]
+- [x] Python SDK: Core logic + pyproject.toml + README
+- [x] TS SDK: Core logic + package.json + README
+- [x] Documentation: Quickstart guide for 5-minute instrumentation
+- [x] Project Settings: Thresholds & API Key rotation logic
+- [x] Billing: Usage tracking & plan cards UI
+- [x] Slack Integration: Real-time alerts to Slack webhooks
+- [x] Human-in-the-loop: Span-level annotations and comments
+
+### Milestone 3: Core Trace Viewer & Product [COMPLETED]
+- [x] Runs List Page: Live-updating table at `/dashboard/[projectId]/runs`
+- [x] Run Detail (Trace Viewer): Vertical timeline UI at `/dashboard/[projectId]/runs/[runId]`
+- [x] Dashboard Overview: Charts (Spend, Model Distribution) at `/dashboard/[projectId]`
+- [x] Alerting System: Threshold checking in Inngest + Alerts inbox UI
+- [x] Sidebar/Topbar Refactor: Dynamic project-aware navigation
+- [x] Added MVP cost dashboard route and moved API Keys/Billing out of primary sidebar
+
+### Milestone 2: Onboarding & Dashboard Shell [COMPLETED]
+- [x] Dashboard Shell with Sidebar
+- [x] Project Creation & API Key Management
+- [x] Multi-step Onboarding Flow
+- [x] Local Storage Persistence for Sidebar/Project context
+
+### Milestone 1: Environment & Pipeline [COMPLETED]
+- [x] Clerk Auth Integration
+- [x] Convex Schema & Mutations
+- [x] Tinybird spans.datasource
+- [x] Inngest processSpan Function
+- [x] End-to-end Pipeline Verification
+
+### Phase 0: Foundations [COMPLETED]
+- [x] Project Scaffolding (Next.js 16, Tailwind 4, Geist)
+- [x] Auth Shell & Clerk Integration
+- [x] High-fidelity Landing Page
+- [x] Legal Pages (Privacy/Terms)

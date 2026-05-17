@@ -14,7 +14,7 @@ export function getOnboardingHref(projectId?: string) {
   const lastProjectId = window.localStorage.getItem(LAST_PROJECT_STORAGE_KEY) ?? "";
   const effectiveProjectId = projectId ?? sessionProjectId ?? lastProjectId;
 
-  if (!effectiveProjectId) {
+  if (!effectiveProjectId || effectiveProjectId === "no-project") {
     return "/onboarding/project";
   }
 

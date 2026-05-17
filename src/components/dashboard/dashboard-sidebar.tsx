@@ -1,29 +1,24 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
 import {
   Activity,
   BarChart3,
   Bell,
   BookOpen,
   ChevronDown,
-  KeyRound,
   LayoutDashboard,
+  SlidersHorizontal,
   PanelLeftClose,
   PanelLeftOpen,
-  Receipt,
   Settings2,
   Terminal,
 } from "lucide-react";
+import { useMemo, useState, type ComponentType } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { usePathname } from "next/navigation";
-import { useMemo, useState, type ComponentType } from "react";
+import { ProjectSwitcher } from "@/components/dashboard/project-switcher";
+import { usePathname, useParams } from "next/navigation";
 
-import {
-  ProjectSwitcher,
-  MOCK_PROJECT_ID,
-} from "@/components/dashboard/project-switcher";
 import {
   Tooltip,
   TooltipContent,
@@ -40,88 +35,23 @@ type NavItem = {
   external?: boolean;
 };
 
+type NavGroup = {
+  id: GroupId;
+  label: string;
+  items: NavItem[];
+};
+
 const GROUP_STORAGE_KEY = "5to1r:dashboard-sidebar-groups";
 const COLLAPSED_STORAGE_KEY = "5to1r.sidebar.collapsed";
 const COLLAPSED_WIDTH = 64;
 const EXPANDED_WIDTH = 240;
 
-const groups: Array<{ id: GroupId; label: string; items: NavItem[] }> = [
-  {
-    id: "observe",
-    label: "Observe",
-    items: [
-      {
-        title: "Overview",
-        icon: LayoutDashboard,
-        href: `/dashboard/${MOCK_PROJECT_ID}`,
-      },
-      {
-        title: "Runs",
-        icon: Activity,
-        href: `/dashboard/${MOCK_PROJECT_ID}/runs`,
-      },
-      {
-        title: "Costs",
-        icon: BarChart3,
-        href: `/dashboard/${MOCK_PROJECT_ID}/costs`,
-      },
-      {
-        title: "Alerts",
-        icon: Bell,
-        href: `/dashboard/${MOCK_PROJECT_ID}/alerts`,
-      },
-    ],
-  },
-  {
-    id: "configure",
-    label: "Configure",
-    items: [
-      {
-        title: "Settings",
-        icon: Settings2,
-        href: `/dashboard/${MOCK_PROJECT_ID}/settings`,
-      },
-      {
-        title: "API Keys",
-        icon: KeyRound,
-        href: `/dashboard/${MOCK_PROJECT_ID}/api-keys`,
-      },
-      {
-        title: "Billing",
-        icon: Receipt,
-        href: `/dashboard/${MOCK_PROJECT_ID}/billing`,
-      },
-    ],
-  },
-  {
-    id: "resources",
-    label: "Resources",
-    items: [
-      {
-        title: "Quickstart",
-        icon: Terminal,
-        href: "/onboarding/install",
-      },
-      {
-        title: "Docs",
-        icon: BookOpen,
-        href: "https://docs.5to1r.com",
-        external: true,
-      },
-    ],
-  },
-];
-
-function isActivePath(pathname: string, href: string) {
+function isActivePath(pathname: string, href: string, projectId: string) {
   if (href.startsWith("http")) return false;
-  if (href === `/dashboard/${MOCK_PROJECT_ID}`) {
+  if (href === `/dashboard/${projectId}`) {
     return pathname === "/dashboard" || pathname === href;
   }
   return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-function findGroupForHref(href: string) {
-  return groups.find((group) => group.items.some((item) => item.href === href));
 }
 
 export function DashboardSidebar({
@@ -132,6 +62,73 @@ export function DashboardSidebar({
   onCollapsedChange: (next: boolean) => void;
 }) {
   const pathname = usePathname();
+  const params = useParams();
+  const projectId = (params?.projectId as string) || "";
+  const projectDashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
+  const projectSetupHref = projectId ? `/dashboard/${projectId}` : "/onboarding/project";
+
+  const dynamicGroups = useMemo<NavGroup[]>(() => [
+    {
+      id: "observe",
+      label: "Observe",
+      items: [
+        {
+          title: "Overview",
+          icon: LayoutDashboard,
+          href: projectDashboardHref,
+        },
+        {
+          title: "Runs",
+          icon: Activity,
+          href: projectId ? `/dashboard/${projectId}/runs` : projectSetupHref,
+        },
+        {
+          title: "Costs",
+          icon: BarChart3,
+          href: projectId ? `/dashboard/${projectId}/costs` : projectSetupHref,
+        },
+        {
+          title: "Alerts",
+          icon: Bell,
+          href: projectId ? `/dashboard/${projectId}/alerts` : projectSetupHref,
+        },
+      ],
+    },
+    {
+      id: "configure",
+      label: "Configure",
+      items: [
+        {
+          title: "Settings",
+          icon: Settings2,
+          href: projectId ? `/dashboard/${projectId}/settings` : projectSetupHref,
+        },
+        {
+          title: "Manage",
+          icon: SlidersHorizontal,
+          href: projectId ? `/dashboard/${projectId}/manage` : projectSetupHref,
+        },
+      ],
+    },
+    {
+      id: "resources",
+      label: "Resources",
+      items: [
+        {
+          title: "Quickstart",
+          icon: Terminal,
+          href: projectId ? `/dashboard/${projectId}/quickstart` : "/onboarding/project",
+        },
+        {
+          title: "Docs",
+          icon: BookOpen,
+          href: "https://docs.5to1r.com",
+          external: true,
+        },
+      ],
+    },
+  ], [projectDashboardHref, projectId, projectSetupHref]);
+
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
     if (typeof window === "undefined") {
       return { observe: true, configure: true, resources: true };
@@ -190,7 +187,7 @@ export function DashboardSidebar({
       >
         {showExpandedContent ? (
           <Link
-            href="/dashboard"
+            href={projectDashboardHref}
             className="font-pixel text-lg leading-none text-white"
           >
             5to1r
@@ -218,56 +215,27 @@ export function DashboardSidebar({
           </TooltipContent>
         </Tooltip>
       </div>
-
       <div className="border-b border-[#2A2A2A] p-3">
         <ProjectSwitcher isCollapsed={!showExpandedContent} />
       </div>
 
-      <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
-        {groups.map((group) => (
+      <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4 scrollbar-hide">
+        {dynamicGroups.map((group) => (
           <SidebarGroup
             key={group.id}
             group={group}
             showExpandedContent={showExpandedContent}
             isOpen={openGroups[group.id]}
             pathname={pathname}
+            projectId={projectId}
             onToggle={() => toggleGroup(group.id)}
             onNavClick={(href) => {
-              const navGroup = findGroupForHref(href);
+              const navGroup = dynamicGroups.find((group) => group.items.some((item) => item.href === href));
               expandSidebar(navGroup?.id);
             }}
           />
         ))}
       </nav>
-
-      <div className="border-t border-[#2A2A2A] p-3">
-        <div
-          className={cn(
-            "flex items-center border border-[#2A2A2A] bg-[#0A0A0A] px-2 py-2",
-            showExpandedContent ? "gap-3" : "justify-center",
-          )}
-        >
-          <UserButton
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "rounded-none",
-                userButtonTrigger: "rounded-none shadow-none",
-                userButtonPopoverCard: "rounded-none shadow-none",
-              },
-            }}
-          />
-          {showExpandedContent ? (
-            <div className="min-w-0 font-mono">
-              <div className="text-[11px] leading-4 text-[#CCCCCC]">
-                Account
-              </div>
-              <div className="text-[10px] leading-3 text-[#666666]">
-                Clerk active
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </div>
 
     </aside>
   );
@@ -278,18 +246,20 @@ function SidebarGroup({
   showExpandedContent,
   isOpen,
   pathname,
+  projectId,
   onToggle,
   onNavClick,
 }: {
-  group: (typeof groups)[number];
+  group: NavGroup;
   showExpandedContent: boolean;
   isOpen: boolean;
   pathname: string;
+  projectId: string;
   onToggle: () => void;
   onNavClick: (href: string) => void;
 }) {
   const hasActiveItem = group.items.some((item) =>
-    isActivePath(pathname, item.href),
+    isActivePath(pathname, item.href, projectId),
   );
   const isVisuallyOpen = isOpen || hasActiveItem;
   const visibleItems = useMemo(
@@ -326,7 +296,7 @@ function SidebarGroup({
               key={item.title}
               item={item}
               showExpandedContent={showExpandedContent}
-              isActive={isActivePath(pathname, item.href)}
+              isActive={isActivePath(pathname, item.href, projectId)}
               onNavClick={() => onNavClick(item.href)}
             />
           ))}

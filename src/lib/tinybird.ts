@@ -6,6 +6,13 @@
 const TINYBIRD_HOST = process.env.TINYBIRD_HOST ?? "https://api.tinybird.co";
 const TINYBIRD_TOKEN = process.env.TINYBIRD_TOKEN;
 
+function sqlUrl(sql: string) {
+  const params = new URLSearchParams({
+    q: `${sql.trimEnd()}\nFORMAT JSON`,
+  });
+  return `${TINYBIRD_HOST}/v0/sql?${params.toString()}`;
+}
+
 function getHeaders() {
   if (!TINYBIRD_TOKEN) throw new Error("TINYBIRD_TOKEN is not set");
   return {
@@ -49,13 +56,15 @@ export async function ingestSpan(span: {
  * Query spans for a specific run from Tinybird.
  */
 export async function getSpansForRun(runId: string, projectId: string) {
-  const sql = encodeURIComponent(
+  const sql =
     `SELECT * FROM spans WHERE runId = '${runId}' AND projectId = '${projectId}' ORDER BY createdAt ASC`
-  );
-  const res = await fetch(`${TINYBIRD_HOST}/v0/sql?q=${sql}`, {
+  const res = await fetch(sqlUrl(sql), {
     headers: getHeaders(),
   });
-  if (!res.ok) throw new Error(`Tinybird query failed: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Tinybird query failed: ${res.status} ${body}`);
+  }
   const data = await res.json();
   return data.data as SpanRow[];
 }
@@ -64,7 +73,7 @@ export async function getSpansForRun(runId: string, projectId: string) {
  * Aggregate cost per day for a project.
  */
 export async function getDailyCosts(projectId: string, days = 30) {
-  const sql = encodeURIComponent(`
+  const sql = `
     SELECT
       toDate(createdAt) AS day,
       sum(costUsd)      AS totalCostUsd,
@@ -74,11 +83,14 @@ export async function getDailyCosts(projectId: string, days = 30) {
       AND createdAt >= now() - INTERVAL ${days} DAY
     GROUP BY day
     ORDER BY day ASC
-  `);
-  const res = await fetch(`${TINYBIRD_HOST}/v0/sql?q=${sql}`, {
+  `;
+  const res = await fetch(sqlUrl(sql), {
     headers: getHeaders(),
   });
-  if (!res.ok) throw new Error(`Tinybird query failed: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Tinybird query failed: ${res.status} ${body}`);
+  }
   const data = await res.json();
   return data.data as { day: string; totalCostUsd: number; spanCount: number }[];
 }
@@ -87,7 +99,7 @@ export async function getDailyCosts(projectId: string, days = 30) {
  * Get per-model cost breakdown for a project.
  */
 export async function getCostByModel(projectId: string, days = 30) {
-  const sql = encodeURIComponent(`
+  const sql = `
     SELECT
       modelId,
       sum(costUsd)   AS totalCostUsd,
@@ -99,11 +111,14 @@ export async function getCostByModel(projectId: string, days = 30) {
       AND createdAt >= now() - INTERVAL ${days} DAY
     GROUP BY modelId
     ORDER BY totalCostUsd DESC
-  `);
-  const res = await fetch(`${TINYBIRD_HOST}/v0/sql?q=${sql}`, {
+  `;
+  const res = await fetch(sqlUrl(sql), {
     headers: getHeaders(),
   });
-  if (!res.ok) throw new Error(`Tinybird query failed: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Tinybird query failed: ${res.status} ${body}`);
+  }
   const data = await res.json();
   return data.data as { modelId: string; totalCostUsd: number; spanCount: number; avgLatencyMs: number }[];
 }

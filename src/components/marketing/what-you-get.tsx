@@ -49,6 +49,26 @@ export function WhatYouGet() {
         </div>
       ),
     },
+    {
+      label: "NOTIFY",
+      content: (
+        <div className="flex items-center gap-2">
+          <span className="text-white">Slack</span>
+          <span className="text-[#444444]">/</span>
+          <span className="text-[#888888]">Email</span>
+          <span className="text-[#444444]">/</span>
+          <span className="text-[#888888]">Webhook</span>
+        </div>
+      ),
+    },
+    {
+      label: "ANNOTATE",
+      content: (
+        <div className="flex items-center gap-2">
+          <span className="text-[#888888]">Human-in-the-loop annotations</span>
+        </div>
+      ),
+    },
   ];
 
   return (

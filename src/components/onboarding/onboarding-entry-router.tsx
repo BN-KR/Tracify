@@ -1,22 +1,50 @@
 "use client";
 
 import { useEffect } from "react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
+import { api } from "convex/_generated/api";
 
 const PROJECT_ID_STORAGE_KEY = "5to1r.onboarding.projectId";
 const LAST_PROJECT_STORAGE_KEY = "5to1r.lastProjectId";
 
 export function OnboardingEntryRouter() {
   const router = useRouter();
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const projects = useQuery(
+    api.projects.getProjectsByUserOrOrg,
+    isAuthenticated ? {} : "skip",
+  );
 
   useEffect(() => {
-    const projectId =
+    if (isLoading || (isAuthenticated && projects === undefined)) return;
+
+    if (!isAuthenticated) {
+      router.replace("/onboarding/project");
+      return;
+    }
+
+    if (!projects) return;
+
+    if (!projects.length) {
+      window.sessionStorage.removeItem(PROJECT_ID_STORAGE_KEY);
+      window.localStorage.removeItem(LAST_PROJECT_STORAGE_KEY);
+      router.replace("/onboarding/project");
+      return;
+    }
+
+    const storedProjectId =
       window.sessionStorage.getItem(PROJECT_ID_STORAGE_KEY) ??
       window.localStorage.getItem(LAST_PROJECT_STORAGE_KEY) ??
       "";
+    const project =
+      projects.find((candidate) => candidate._id === storedProjectId) ??
+      projects[0];
 
-    router.replace(projectId ? `/dashboard/${projectId}` : "/onboarding/project");
-  }, [router]);
+    window.sessionStorage.setItem(PROJECT_ID_STORAGE_KEY, project._id);
+    window.localStorage.setItem(LAST_PROJECT_STORAGE_KEY, project._id);
+    router.replace(`/dashboard/${project._id}`);
+  }, [isAuthenticated, isLoading, projects, router]);
 
   return (
     <main className="min-h-svh bg-[#0A0A0A] px-4 py-8 font-mono text-[#CCCCCC]">

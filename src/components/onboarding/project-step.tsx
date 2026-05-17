@@ -82,7 +82,10 @@ export function ProjectStep() {
   if (isConvexLoading || !isAuthenticated) {
     return (
       <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
-        Preparing project creation...
+        Preparing project creation... 
+        <span className="ml-2 opacity-50">
+          (Auth: {isAuthenticated ? "Connected" : "Waiting"} | Sync: {isConvexLoading ? "Loading" : "Ready"})
+        </span>
       </div>
     );
   }

@@ -58,6 +58,15 @@ function getOrgId(identity: unknown) {
     : undefined;
 }
 
+function isAdmin(identity: { subject: string; tokenIdentifier: string }) {
+  const adminIds = (process.env.FIVETOONE_ADMIN_CLERK_USER_IDS ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+
+  return adminIds.includes(identity.subject);
+}
+
 function canAccessProject(
   project: Doc<"projects">,
   identity: { subject: string; tokenIdentifier: string },
@@ -85,6 +94,7 @@ function publicProject(project: Doc<"projects">) {
     costThresholdUsd: project.costThresholdUsd,
     maxDurationSeconds: project.maxDurationSeconds,
     maxStallMinutes: project.maxStallMinutes,
+    slackWebhookUrl: project.slackWebhookUrl ?? null,
   };
 }
 
@@ -120,6 +130,66 @@ export const createProject = mutation({
       slug,
       clerkUserId: identity.subject,
       clerkOrgId,
+      createdAt: now,
+      updatedAt: now,
+      planTier: "free",
+      apiKeyPrefix: API_KEY_PREFIX,
+      apiKeyLast4: plaintextApiKey.slice(-4),
+      apiKeyHash,
+      apiKeyStatus: "active",
+      apiKeyCreatedAt: now,
+      costThresholdUsd: 1,
+      maxDurationSeconds: 300,
+      maxStallMinutes: 5,
+    });
+
+    return {
+      projectId,
+      name,
+      slug,
+      plaintextApiKey,
+      apiKey: plaintextApiKey,
+      apiKeyPrefix: API_KEY_PREFIX,
+      apiKeyLast4: plaintextApiKey.slice(-4),
+    };
+  },
+});
+
+export const createProjectForUser = mutation({
+  args: {
+    clerkUserId: v.string(),
+    name: v.string(),
+    clerkOrgId: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<{
+    projectId: Id<"projects">;
+    name: string;
+    slug: string;
+    plaintextApiKey: string;
+    apiKey: string;
+    apiKeyPrefix: string;
+    apiKeyLast4: string;
+  }> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity || !isAdmin(identity)) {
+      throw new Error("Admin access required");
+    }
+
+    const name = args.name.trim();
+    if (!name) {
+      throw new Error("Project name is required");
+    }
+
+    const slug = `${slugify(name)}-${randomHex(3)}`;
+    const plaintextApiKey = `${API_KEY_PREFIX}${randomHex(16)}`;
+    const apiKeyHash = await hmacSha256(plaintextApiKey);
+    const now = Date.now();
+
+    const projectId = await ctx.db.insert("projects", {
+      name,
+      slug,
+      clerkUserId: args.clerkUserId,
+      clerkOrgId: args.clerkOrgId,
       createdAt: now,
       updatedAt: now,
       planTier: "free",
@@ -215,6 +285,57 @@ export const getProjectById = query({
   },
 });
 
+export const getProjectRouteState = query({
+  args: { projectId: v.string() },
+  handler: async (ctx, { projectId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return { status: "unauthenticated" as const, projectId: null };
+    }
+
+    const normalizedProjectId = ctx.db.normalizeId("projects", projectId);
+    const existingProjects = await getProjectsForIdentity(ctx, identity);
+
+    if (!normalizedProjectId) {
+      return {
+        status: existingProjects.length
+          ? ("not_found" as const)
+          : ("no_projects" as const),
+        projectId: null,
+      };
+    }
+
+    const project = await ctx.db.get(normalizedProjectId);
+    if (!project || !canAccessProject(project, identity)) {
+      return {
+        status: existingProjects.length
+          ? ("not_found" as const)
+          : ("no_projects" as const),
+        projectId: null,
+      };
+    }
+
+    return {
+      status: "ready" as const,
+      projectId: project._id,
+      projectName: project.name,
+    };
+  },
+});
+
+export const getById = query({
+  args: { id: v.id("projects") },
+  handler: async (ctx, { id }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const project = await ctx.db.get(id);
+    if (!project || !canAccessProject(project, identity)) return null;
+
+    return publicProject(project);
+  },
+});
+
 export const getProjectOnboardingState = query({
   args: { projectId: v.optional(v.id("projects")) },
   handler: async (ctx, { projectId }) => {
@@ -269,6 +390,61 @@ export const getProject = query({
   },
 });
 
+export const getProjectManagementSummary = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccessProject(project, identity)) return null;
+
+    const runs = await ctx.db
+      .query("agentRuns")
+      .withIndex("by_projectId_createdAt", (q) => q.eq("projectId", projectId))
+      .order("desc")
+      .take(250);
+
+    const alerts = await ctx.db
+      .query("alerts")
+      .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
+      .take(250);
+
+    const totalRuns = runs.length;
+    const activeRuns = runs.filter((run) => run.status === "running").length;
+    const failedRuns = runs.filter((run) => run.status === "failed").length;
+    const completedRuns = runs.filter((run) => run.status === "completed").length;
+    const totalSpans = runs.reduce((sum, run) => sum + run.spanCount, 0);
+    const totalCostUsd = runs.reduce((sum, run) => sum + run.totalCostUsd, 0);
+    const lastRun = runs[0] ?? null;
+
+    return {
+      project: publicProject(project),
+      totals: {
+        totalRuns,
+        activeRuns,
+        completedRuns,
+        failedRuns,
+        totalSpans,
+        totalCostUsd,
+        alertCount: alerts.length,
+      },
+      latestActivityAt:
+        lastRun?.lastSpanAt ?? lastRun?.createdAt ?? lastRun?.startedAt ?? null,
+      recentRuns: runs.slice(0, 8).map((run) => ({
+        _id: run._id,
+        runId: run.runId,
+        status: run.status,
+        spanCount: run.spanCount,
+        totalCostUsd: run.totalCostUsd,
+        startedAt: run.startedAt,
+        lastSpanAt: run.lastSpanAt ?? null,
+        primaryModel: run.primaryModel ?? null,
+      })),
+    };
+  },
+});
+
 export const listByOrg = query({
   args: { clerkOrgId: v.string() },
   handler: async (ctx, { clerkOrgId }) => {
@@ -301,3 +477,113 @@ async function getProjectsForIdentity(
         .order("desc")
         .take(50);
 }
+
+export const updateProject = mutation({
+  args: {
+    projectId: v.id("projects"),
+    name: v.optional(v.string()),
+    costThresholdUsd: v.optional(v.number()),
+    maxDurationSeconds: v.optional(v.number()),
+    maxStallMinutes: v.optional(v.number()),
+    slackWebhookUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project || !canAccessProject(project, identity)) {
+      throw new Error("Project not found or access denied");
+    }
+
+    const { projectId, ...updates } = args;
+    await ctx.db.patch(projectId, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const deleteProject = mutation({
+  args: {
+    projectId: v.id("projects"),
+    confirmationName: v.string(),
+    confirmationWord: v.string(),
+  },
+  handler: async (ctx, { projectId, confirmationName, confirmationWord }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccessProject(project, identity)) {
+      throw new Error("Project not found or access denied");
+    }
+
+    if (confirmationName !== project.name || confirmationWord !== "DELETE") {
+      throw new Error("Project deletion confirmation did not match");
+    }
+
+    const runs = await ctx.db
+      .query("agentRuns")
+      .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
+      .take(1000);
+    for (const run of runs) {
+      await ctx.db.delete(run._id);
+    }
+
+    const alerts = await ctx.db
+      .query("alerts")
+      .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
+      .take(1000);
+    for (const alert of alerts) {
+      await ctx.db.delete(alert._id);
+    }
+
+    const comments = await ctx.db
+      .query("comments")
+      .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
+      .take(1000);
+    for (const comment of comments) {
+      await ctx.db.delete(comment._id);
+    }
+
+    await ctx.db.delete(projectId);
+  },
+});
+
+export const rotateApiKey = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args): Promise<{
+    plaintextApiKey: string;
+    apiKeyPrefix: string;
+    apiKeyLast4: string;
+  }> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project || !canAccessProject(project, identity)) {
+      throw new Error("Project not found or access denied");
+    }
+
+    const plaintextApiKey = `${API_KEY_PREFIX}${randomHex(16)}`;
+    const apiKeyHash = await hmacSha256(plaintextApiKey);
+    const now = Date.now();
+
+    await ctx.db.patch(args.projectId, {
+      apiKeyHash,
+      apiKeyPrefix: API_KEY_PREFIX,
+      apiKeyLast4: plaintextApiKey.slice(-4),
+      apiKeyStatus: "active",
+      apiKeyCreatedAt: now,
+      apiKeyLastUsedAt: undefined,
+      updatedAt: now,
+    });
+
+    return {
+      plaintextApiKey,
+      apiKeyPrefix: API_KEY_PREFIX,
+      apiKeyLast4: plaintextApiKey.slice(-4),
+    };
+  },
+});
