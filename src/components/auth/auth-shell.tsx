@@ -47,7 +47,7 @@ export function AuthShell({ mode, children }: AuthShellProps) {
             ))}
           </div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-white/40">
-            5to1r-trace-v1.0.4 — session_8f21a9
+            tracify-trace-v1.0.4 — session_8f21a9
           </div>
           <div className="w-12" /> {/* Spacer */}
         </div>
@@ -60,7 +60,7 @@ export function AuthShell({ mode, children }: AuthShellProps) {
               <div 
                 className="font-pixel text-lg text-white"
               >
-                5to1r
+                tracify
               </div>
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/40">
                 agent observability infrastructure

@@ -1,22 +1,28 @@
-# 5to1r Execution Task List
+# tracify Execution Task List
 
 ## Current Phase: Phase 2 - Distribution & Teams (Milestone 5)
 
 ### 1. Teams & RBAC
 - [ ] Implement Clerk Organization switching in the Dashboard
-- [ ] Add "Team Members" view in Settings
+- [x] Add "Team Members" view in Settings backed by Clerk organization memberships
 - [x] Add safer project deletion requiring exact project name and `DELETE`
-- [ ] Implement role-based access control for project deletion
+- [x] Implement role-based access control for project deletion
+- [x] Require admin access for project settings updates and API key rotation
+- [x] Require developer/admin style access for trace comments
 
 ### 2. Marketing & Distribution
+- [x] Reposition landing page around agent observability for builders/operators
 - [ ] Update Landing Page with real dashboard screenshots
-- [ ] Create "Pricing" page with real Stripe checkout links
+- [x] Create honest beta Pricing page without fake checkout links
+- [ ] Connect Pricing page to real Stripe checkout links when Stripe is ready
 - [ ] Publish SDKs to PyPI and npm
   - [x] Prepare `@5to1r/sdk` build output for npm package contents
   - [x] Rename TypeScript package/install docs to public package name `5to1r`
-  - [ ] Publish `5to1r` with npm 2FA OTP or granular publish token
+  - [x] Rename TypeScript package/install docs to new public package name `tracify`
+  - [ ] Publish `tracify` with npm 2FA OTP or granular publish token
   - [x] Rename Python SDK distribution/install docs to public package name `5to1r`
-  - [ ] Publish Python `5to1r` package to PyPI with a PyPI API token
+  - [x] Rename Python SDK distribution/install docs to new public package name `tracify`
+  - [ ] Publish Python `tracify` package to PyPI with a PyPI API token
 - [x] Add admin-only manual project/API key issuance through Convex
 - [x] Add project management page with Convex-backed per-project saved stats
 - [x] Align dashboard navigation/overview/costs with dashboard decision document
@@ -31,10 +37,32 @@
 - [x] Add dashboard overview time-period switcher and use total selected-period savings
 - [x] Fix range-scoped spend/span cards so 1d/7d/30d/90d no longer show all-time Convex totals
 - [x] Add hybrid realtime refresh for dashboard stats using Convex activity signals plus 4-second Tinybird fallback polling
+- [x] Replace 4-second Tinybird polling with Convex-backed analytics cache, budget guard, and manual refresh controls
+- [x] Cache run span timelines and add manual span refresh for running traces
+- [x] Make running run durations tick client-side without analytics requests
+- [x] Add Redis-backed API cache for analytics stats and run spans
+- [x] Remove analytics outage label, right-align timeframe/refresh controls, and keep charts visible with saved-run fallback data
+- [x] Add paginated dashboard runs table with 10/25/50 page-size controls, page navigation, and total page count
+- [x] Convert Alerts from sidebar page navigation into a topbar popup
+- [x] Add unread alert state, prominent new-notification styling, and a Read all action
+- [x] Mark individual alerts read on click and deduplicate repeated run/type alerts
+- [x] Add settings validation and Slack test-alert action
+- [x] Add exact indexed runId lookup to runs search
+- [x] Polish trace viewer with span overview, copyable payloads, error auto-expand, and model/tool summary panel
 - [x] Fix production Clerk/Convex auth by creating prod `convex` JWT template and deploying Convex prod
 - [x] Document Convex/Clerk dev-vs-production auth troubleshooting runbook
 - [x] Prepare Python SDK for `pip install 5to1r` and verify local wheel install
-- [x] Standardize site and AI setup prompt install commands for both `pip install 5to1r` and `npm install 5to1r`
+- [x] Standardize site and AI setup prompt install commands for both `pip install tracify` and `npm install tracify`
+- [x] Add guarded cancel/stop control for running saved run summaries
+- [x] Make dashboard breadcrumbs clickable for parent navigation
+- [x] Create detailed project-manager handoff summary document
+- [x] Add Tinybird pipe endpoints for `spans_by_run` and `recent_runs_summary`
+- [x] Replace fake billing usage/checkout affordances with real usage or beta contact state
+- [x] Add print-friendly project reports with report metadata, run totals, model/tool breakdowns, alerts, and failed traces
+- [x] Add beta smoke script for ingest auth failures, invalid payloads, protected route reachability, and optional valid ingest/Convex run checks
+- [ ] Deploy Tinybird endpoint pipes to the active Tinybird workspace and verify endpoint responses
+- [ ] Smoke test report page states: no data, normal runs, failed runs, and analytics unavailable
+- [ ] Run `npm run smoke:beta` with `FIVETOONE_SMOKE_API_KEY` and `FIVETOONE_SMOKE_PROJECT_ID`
 
 ---
 

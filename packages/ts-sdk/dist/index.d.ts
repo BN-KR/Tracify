@@ -2,6 +2,7 @@ export interface FiveToOneConfig {
     apiKey?: string;
     host?: string;
 }
+export type TracifyConfig = FiveToOneConfig;
 export interface SpanData {
     spanId?: string;
     runId?: string;
@@ -21,6 +22,8 @@ export declare class FiveToOneClient {
     private ingestUrl;
     constructor(config?: FiveToOneConfig);
     ingest(data: SpanData): Promise<void>;
+}
+export declare class TracifyClient extends FiveToOneClient {
 }
 export declare function traceAgent<T extends (...args: any[]) => Promise<any>>(func: T, config?: FiveToOneConfig): T;
 export declare const llmCall: (data: Omit<SpanData, "spanType">) => Promise<void>;

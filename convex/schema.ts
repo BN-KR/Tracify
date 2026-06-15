@@ -15,6 +15,8 @@ export default defineSchema({
       v.literal("team"),
       v.literal("enterprise"),
     )),
+    clientName: v.optional(v.string()),
+    reportNotes: v.optional(v.string()),
     apiKeyPrefix: v.optional(v.string()),
     apiKeyLast4: v.optional(v.string()),
     apiKeyHash: v.optional(v.string()),
@@ -38,6 +40,7 @@ export default defineSchema({
       v.literal("running"),
       v.literal("completed"),
       v.literal("failed"),
+      v.literal("cancelled"),
     ),
     spanCount: v.number(),
     totalCostUsd: v.number(),
@@ -61,6 +64,7 @@ export default defineSchema({
     type: v.string(), // 'run_failed' | 'cost_exceeded' | 'duration_exceeded'
     message: v.string(),
     triggeredAt: v.string(), // ISO 8601 UTC
+    readAt: v.optional(v.number()),
     projectId: v.id("projects"),
   })
     .index("by_projectId", ["projectId"])
@@ -78,4 +82,66 @@ export default defineSchema({
     .index("by_spanId", ["spanId"])
     .index("by_runId", ["runId"])
     .index("by_projectId", ["projectId"]),
+
+  analyticsStatsCache: defineTable({
+    projectId: v.id("projects"),
+    rangeDays: v.number(),
+    dailyCosts: v.array(v.object({
+      day: v.string(),
+      totalCostUsd: v.number(),
+      spanCount: v.number(),
+    })),
+    modelCosts: v.array(v.object({
+      modelId: v.string(),
+      totalCostUsd: v.number(),
+      spanCount: v.number(),
+      avgLatencyMs: v.optional(v.number()),
+    })),
+    toolCosts: v.optional(v.array(v.object({
+      toolName: v.string(),
+      totalCostUsd: v.number(),
+      spanCount: v.number(),
+      avgLatencyMs: v.optional(v.number()),
+    }))),
+    updatedAt: v.number(),
+    source: v.string(),
+    lastManualRefreshAt: v.optional(v.number()),
+  })
+    .index("by_projectId_and_rangeDays", ["projectId", "rangeDays"]),
+
+  runSpanCache: defineTable({
+    projectId: v.id("projects"),
+    runId: v.string(),
+    spans: v.array(v.object({
+      spanId: v.string(),
+      runId: v.string(),
+      projectId: v.string(),
+      spanType: v.string(),
+      input: v.string(),
+      output: v.string(),
+      latencyMs: v.number(),
+      costUsd: v.number(),
+      modelId: v.string(),
+      toolName: v.string(),
+      parentSpanId: v.string(),
+      metadata: v.any(),
+      createdAt: v.string(),
+    })),
+    runStatus: v.optional(v.union(
+      v.literal("running"),
+      v.literal("completed"),
+      v.literal("failed"),
+      v.literal("cancelled"),
+    )),
+    updatedAt: v.number(),
+    source: v.string(),
+    lastManualRefreshAt: v.optional(v.number()),
+  })
+    .index("by_projectId_and_runId", ["projectId", "runId"]),
+
+  tinybirdReadBudget: defineTable({
+    day: v.string(),
+    readCount: v.number(),
+    updatedAt: v.number(),
+  }).index("by_day", ["day"]),
 });

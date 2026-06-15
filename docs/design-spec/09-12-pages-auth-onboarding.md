@@ -21,7 +21,7 @@ AGENT OBSERVABILITY INFRASTRUCTURE
 
 Every step your agent takes.
 
-5to1r instruments your AI agents in two lines of code.
+tracify instruments your AI agents in two lines of code.
 See every tool call, LLM decision, and dollar spent —
 in real time. Debug in minutes, not hours.
 
@@ -99,8 +99,8 @@ without blocking your agent's execution.
 
 ```
 01 INSTALL
-pip install 5to1r
-or: npm install 5to1r
+pip install tracify
+or: npm install tracify
 
 02 INSTRUMENT
 @trace_agent(api_key="5t1r_sk_...")
@@ -108,7 +108,7 @@ async def my_agent(query):
     ...
 
 03 OBSERVE
-Open 5to1r. See every span, cost, and failure in real time.
+Open tracify. See every span, cost, and failure in real time.
 ```
 
 ---
@@ -134,7 +134,7 @@ Panel shows: span timeline, cost breakdown, LLM call details with token counts.
 
 **Python:**
 ```python
-from fivetoone import trace_agent
+from tracify import trace_agent
 
 @trace_agent(api_key="5t1r_sk_your_key_here")
 async def research_agent(query: str) -> str:
@@ -145,7 +145,7 @@ async def research_agent(query: str) -> str:
 
 **TypeScript:**
 ```typescript
-import { traceAgent } from "5to1r"
+import { traceAgent } from "tracify"
 
 const researchAgent = traceAgent(
   async (query: string) => {
@@ -189,7 +189,7 @@ Gemini · AWS Bedrock · Cohere · Pinecone · Weaviate
 **Layout:** 3-column testimonial cards.
 
 ```
-"5to1r is the first observability tool that actually understands 
+"tracify is the first observability tool that actually understands 
 what an AI agent is doing. We caught a $400/day runaway loop 
 in 20 minutes."
 — Priya S., Head of AI Engineering, Arco
@@ -247,7 +247,7 @@ Agent observability     Trace Viewer Python SDK   Privacy
 infrastructure for      Pricing      TypeScript   Terms
 developers.             Changelog    API Ref      Security
 
-© 2026 5to1r Inc. · Privacy · Terms · Status
+© 2026 tracify Inc. · Privacy · Terms · Status
 ```
 
 ---
@@ -375,7 +375,7 @@ Left panel:
   (animated terminal showing a trace arriving)
 
 Right panel:
-  SIGN IN TO 5to1r
+  SIGN IN TO tracify
 
   [Clerk SignIn component]
   
@@ -419,7 +419,7 @@ Right panel:
 Layout: Centered single column (no left panel). Max-width 400px.
 
 Headline: RESET YOUR PASSWORD
-Subtext:  Enter the email connected to your 5to1r account. 
+Subtext:  Enter the email connected to your tracify account. 
           We'll send you a reset link.
 
 [Email input]
@@ -545,7 +545,7 @@ Your project is an isolated environment with its own API key.
 ```
 YOUR API KEY
 
-This key authenticates your agent with 5to1r.
+This key authenticates your agent with tracify.
 Copy it now — you won't see it again.
 
 ┌─────────────────────────────────────────────────┐
@@ -571,11 +571,11 @@ Choose your runtime:
 ─────────────────────────────────────────────────
 PYTHON
 
-pip install 5to1r
+pip install tracify
 
 ─────────────────────────────────────────────────
 
-from fivetoone import trace_agent
+from tracify import trace_agent
 
 @trace_agent(api_key="5t1r_sk_your_key")
 async def my_agent(query: str) -> str:
@@ -586,12 +586,12 @@ async def my_agent(query: str) -> str:
 ─────────────────────────────────────────────────
 TYPESCRIPT
 
-npm install 5to1r
-# or: yarn add 5to1r
+npm install tracify
+# or: yarn add tracify
 
 ─────────────────────────────────────────────────
 
-import { traceAgent } from "5to1r"
+import { traceAgent } from "tracify"
 
 const myAgent = traceAgent(
   async (query: string) => {
@@ -646,7 +646,7 @@ Run ID: run_a3f2b1c9
 ```
 ■ YOU'RE READY
 
-5to1r is now observing your agent.
+tracify is now observing your agent.
 
 What's next:
 → Open your Dashboard to see live runs

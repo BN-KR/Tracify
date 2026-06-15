@@ -62,7 +62,7 @@ export function WaitingStep() {
     <div>
       <OnboardingHeader
         title="Waiting for your first span"
-        description="Run your agent. 5to1r is listening on your project."
+        description="Run your agent. Tracify is listening on your project."
       />
       <div className="border border-[#2A2A2A] bg-[#0A0A0A] p-4">
         <div className="mb-4 flex items-center gap-2 text-[#F59E0B]">
@@ -112,7 +112,7 @@ export function WaitingStep() {
             Common issues
           </summary>
           <ul className="mt-4 space-y-2 font-sans text-sm text-[#999999]">
-            <li>FIVETOONE_API_KEY is not set</li>
+            <li>TRACIFY_API_KEY is not set</li>
             <li>API key copied incorrectly</li>
             <li>agent is not running</li>
             <li>outbound HTTPS blocked</li>
@@ -122,7 +122,7 @@ export function WaitingStep() {
       ) : null}
       {elapsed >= 120 ? (
         <a
-          href="mailto:support@5to1r.com"
+          href="mailto:support@tracify.tech"
           className="mt-5 inline-block text-sm text-[#999999] underline underline-offset-4 transition-colors hover:text-white"
         >
           Still stuck? Email support

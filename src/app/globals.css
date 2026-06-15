@@ -64,86 +64,89 @@
 :root,
 .dark {
   /* ── Easing ───────────────────────────────────────────────────── */
-  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
   /* ── Strict Monochrome Theme ────────────────────────────────── */
-  --background:          #050505;
-  --foreground:          #CCCCCC;
+  --background: #050505;
+  --foreground: #CCCCCC;
 
-  --card:                #111111;
-  --card-foreground:     #FFFFFF;
+  --card: #111111;
+  --card-foreground: #FFFFFF;
 
-  --popover:             #111111;
-  --popover-foreground:  #CCCCCC;
+  --popover: #111111;
+  --popover-foreground: #CCCCCC;
 
-  --primary:             #FFFFFF;
-  --primary-foreground:  #000000;
+  --primary: #FFFFFF;
+  --primary-foreground: #000000;
 
-  --secondary:           #161616;
-  --secondary-foreground:#CCCCCC;
+  --secondary: #161616;
+  --secondary-foreground: #CCCCCC;
 
-  --muted:               #161616;
-  --muted-foreground:    #666666;
+  --muted: #161616;
+  --muted-foreground: #666666;
 
-  --accent:              #FFFFFF;
-  --accent-foreground:   #000000;
+  --accent: #FFFFFF;
+  --accent-foreground: #000000;
 
-  --destructive:         #FFFFFF;
+  --destructive: #FFFFFF;
   --destructive-foreground: #000000;
 
-  --border:              #2A2A2A;
-  --input:               #1C1C1C;
-  --ring:                #FFFFFF;
+  --border: #2A2A2A;
+  --input: #1C1C1C;
+  --ring: #FFFFFF;
 
   --radius: 0px;
 
   /* ── Sidebar ──────────────────────────────────────────────────── */
-  --sidebar:                    #111111;
-  --sidebar-foreground:         #CCCCCC;
-  --sidebar-primary:            #FFFFFF;
+  --sidebar: #111111;
+  --sidebar-foreground: #CCCCCC;
+  --sidebar-primary: #FFFFFF;
   --sidebar-primary-foreground: #000000;
-  --sidebar-accent:             #161616;
-  --sidebar-accent-foreground:  #FFFFFF;
-  --sidebar-border:             #2A2A2A;
-  --sidebar-ring:               #FFFFFF;
+  --sidebar-accent: #161616;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #2A2A2A;
+  --sidebar-ring: #FFFFFF;
 
-  /* ── 5to1r Monochrome Design Tokens ────────────────────────── */
+  /* ── tracify Monochrome Design Tokens ────────────────────────── */
 
   /* Backgrounds */
-  --bg:        #050505;
+  --bg: #050505;
   --surface-1: #111111;
   --surface-2: #161616;
   --surface-3: #1C1C1C;
 
   /* Text */
-  --color-white:       #FFFFFF;
-  --color-body:        #CCCCCC;
-  --color-subtle:      #999999;
-  --color-muted:       #666666;
+  --color-white: #FFFFFF;
+  --color-body: #CCCCCC;
+  --color-subtle: #999999;
+  --color-muted: #666666;
 
   /* Borders */
-  --border-default:    #2A2A2A;
-  --border-strong:     #3A3A3A;
+  --border-default: #2A2A2A;
+  --border-strong: #3A3A3A;
 
   /* Semantic Data Colors (ONLY for visualization) ───────────── */
-  --span-llm:       #818CF8;
-  --span-tool:      #34D399;
-  --span-decision:  #FBBF24;
-  --span-error:     #F87171;
-  --span-success:   #10B981;
+  --span-llm: #818CF8;
+  --span-tool: #34D399;
+  --span-decision: #FBBF24;
+  --span-error: #F87171;
+  --span-success: #10B981;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   h1 {
     @apply font-heading uppercase;
   }
+
   html {
     @apply font-sans;
   }
@@ -151,8 +154,15 @@
 
 /* ── Keyframes ──────────────────────────────────────────────────── */
 @keyframes mono-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
 }
 
 @keyframes slide-up-fade {
@@ -160,6 +170,7 @@
     opacity: 0;
     transform: translateY(4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -178,6 +189,7 @@
 .active-press {
   transition: transform 150ms var(--ease-out);
 }
+
 .active-press:active {
   transform: scale(0.98);
 }
@@ -191,6 +203,7 @@
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
 }
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
@@ -205,7 +218,7 @@
 
 
 /* ── Clerk Branding & Dev Mode Removal ────────────────────────── */
-.cl-branding, 
+.cl-branding,
 .cl-internal-1dauvpw,
 .cl-userButtonPopoverFooter,
 .cl-userButtonPopoverFooter__userButton,
@@ -226,13 +239,13 @@
   border-radius: 0 !important;
   border: 1px solid #2A2A2A !important;
   background-color: #0A0A0A !important;
-  box-shadow: 10px 10px 0px 0px rgba(0,0,0,1) !important;
+  box-shadow: 10px 10px 0px 0px rgba(0, 0, 0, 1) !important;
 }
 
 /* ── COMPLETE CLERK VISUAL RESET ────────────────────────────── */
 
 /* 1. REMOVE BACKGROUNDS & SHADOWS (Card and Footer) */
-.cl-card, 
+.cl-card,
 .cl-footer,
 .cl-footerAction {
   background-color: transparent !important;
@@ -255,18 +268,33 @@
 }
 
 /* REORDER: Apple -> GitHub -> Google */
-.cl-socialButtonsIconButton__apple, .cl-socialButtonsBlockButton__apple { order: 1 !important; }
-.cl-socialButtonsIconButton__github, .cl-socialButtonsBlockButton__github { order: 2 !important; }
-.cl-socialButtonsIconButton__google, .cl-socialButtonsBlockButton__google { order: 3 !important; }
+.cl-socialButtonsIconButton__apple,
+.cl-socialButtonsBlockButton__apple {
+  order: 1 !important;
+}
+
+.cl-socialButtonsIconButton__github,
+.cl-socialButtonsBlockButton__github {
+  order: 2 !important;
+}
+
+.cl-socialButtonsIconButton__google,
+.cl-socialButtonsBlockButton__google {
+  order: 3 !important;
+}
 
 .cl-socialButtonsBlockButton,
 .cl-socialButtonsIconButton {
-  width: 100% !important;   /* Overrides the hardcoded 40px */
-  height: 44px !important;  /* Sets the rectangle height */
-  flex: 1 1 auto !important; /* Prevents shrinking */
+  width: 100% !important;
+  /* Overrides the hardcoded 40px */
+  height: 44px !important;
+  /* Sets the rectangle height */
+  flex: 1 1 auto !important;
+  /* Prevents shrinking */
   min-width: 0 !important;
   max-width: none !important;
-  aspect-ratio: auto !important; /* Ensures it's not a square */
+  aspect-ratio: auto !important;
+  /* Ensures it's not a square */
   padding: 0 !important;
 }
 
@@ -287,5 +315,3 @@
 .cl-socialButtonsBlockButtonText {
   display: none !important;
 }
-
-

@@ -1,28 +1,28 @@
-# 5to1r
+# Tracify
 
 Observability and tracing for AI agents. Gain full visibility into your agent's decision-making process, tool usage, and LLM costs.
 
 ## Installation
 
 ```bash
-npm install 5to1r
+npm install tracify
 # or
-yarn add 5to1r
+yarn add tracify
 ```
 
 ## Quickstart
 
-1. Get your API Key from the [5to1r Dashboard](https://5to1r.com).
+1. Get your API Key from the [Tracify Dashboard](https://tracify.tech).
 2. Set it as an environment variable:
 
 ```bash
-export FIVETOONE_API_KEY=your_sk_live_...
+export TRACIFY_API_KEY=your_sk_live_...
 ```
 
 3. Instrument your agent:
 
 ```typescript
-import { traceAgent, llmCall, toolCall } from '5to1r';
+import { traceAgent, llmCall, toolCall } from 'tracify';
 
 const agent = traceAgent(async (query: string) => {
   // LLM Call

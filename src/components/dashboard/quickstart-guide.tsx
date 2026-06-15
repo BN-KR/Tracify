@@ -16,7 +16,7 @@ interface QuickstartGuideProps {
 
 export function QuickstartGuide({ projectId }: QuickstartGuideProps) {
   const project = useQuery(
-    api.projects.getProjectById, 
+    api.projects.getProjectById,
     projectId ? { projectId: projectId as Id<"projects"> } : "skip"
   );
 
@@ -28,7 +28,7 @@ export function QuickstartGuide({ projectId }: QuickstartGuideProps) {
     setTimeout(() => setCopied(null), 2000);
   }
 
-  const pythonCode = `from fivetoone import trace_agent, llm_call
+  const pythonCode = `from tracify import trace_agent, llm_call
 
 @trace_agent()
 async function run_my_agent():
@@ -42,7 +42,7 @@ async function run_my_agent():
     )
     return "Success"`;
 
-  const tsCode = `import { traceAgent, llmCall } from '5to1r';
+  const tsCode = `import { traceAgent, llmCall } from 'tracify';
 
 const agent = traceAgent(async () => {
   // Your agent logic here
@@ -56,28 +56,28 @@ const agent = traceAgent(async () => {
   return "Success";
 });`;
 
-  const installPy = "pip install 5to1r";
-  const installTs = "npm install 5to1r";
-  const envVar = `FIVETOONE_API_KEY=5t1r_sk_live_...`;
+  const installPy = "pip install tracify";
+  const installTs = "npm install tracify";
+  const envVar = `TRACIFY_API_KEY=5t1r_sk_live_...`;
 
   return (
     <div className="space-y-8 max-w-4xl">
       <div className="space-y-2">
         <h2 className="font-mono text-lg text-white uppercase tracking-widest">Instrumentation</h2>
         <p className="text-sm text-zinc-500 font-sans">
-          Connect your agent to 5to1r in less than 5 minutes.
+          Connect your agent to Tracify in less than 5 minutes.
         </p>
       </div>
 
       <Tabs defaultValue="python" className="w-full">
         <TabsList className="bg-[#111111] border border-border rounded-none p-1 h-12">
-          <TabsTrigger 
-            value="python" 
+          <TabsTrigger
+            value="python"
             className="rounded-none data-[state=active]:bg-white data-[state=active]:text-black font-mono text-xs uppercase"
           >
             Python
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="typescript"
             className="rounded-none data-[state=active]:bg-white data-[state=active]:text-black font-mono text-xs uppercase"
           >
@@ -125,10 +125,10 @@ const agent = traceAgent(async () => {
         <p className="text-[11px] text-zinc-500 font-mono">
           Inject your API key into your agent's environment.
         </p>
-        <CodeBlock 
-          code={`FIVETOONE_API_KEY=${project?.apiKeyPrefix || '5t1r_sk_live_'}••••••••${project?.apiKeyLast4 || '••••'}`} 
-          onCopy={() => copyToClipboard(`FIVETOONE_API_KEY=YOUR_API_KEY`, 'env')} 
-          copied={copied === 'env'} 
+        <CodeBlock
+          code={`TRACIFY_API_KEY=${project?.apiKeyPrefix || '5t1r_sk_live_'}••••••••${project?.apiKeyLast4 || '••••'}`}
+          onCopy={() => copyToClipboard(`TRACIFY_API_KEY=YOUR_API_KEY`, 'env')}
+          copied={copied === 'env'}
         />
       </section>
 
@@ -150,9 +150,9 @@ function CodeBlock({ code, onCopy, copied, language }: { code: string, onCopy: (
       <pre className="p-4 bg-black border border-border text-[12px] font-mono text-zinc-300 overflow-x-auto leading-relaxed">
         {code}
       </pre>
-      <Button 
-        variant="ghost" 
-        size="icon" 
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={onCopy}
         className="absolute right-2 top-2 size-8 bg-black/50 border border-zinc-800 opacity-0 group-hover:opacity-100 transition-opacity"
       >

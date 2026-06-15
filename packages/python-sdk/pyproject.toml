@@ -3,10 +3,10 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "5to1r"
+name = "tracify"
 version = "0.1.0"
 authors = [
-  { name="5to1r Team", email="hello@5to1r.com" },
+  { name="Tracify Team", email="hello@tracify.tech" },
 ]
 description = "Observability and tracing for AI agents."
 readme = "README.md"
@@ -24,6 +24,6 @@ dependencies = [
 where = ["src"]
 
 [project.urls]
-"Homepage" = "https://5to1r.com"
-"Documentation" = "https://docs.5to1r.com"
-"Bug Tracker" = "https://github.com/5to1r/python-sdk/issues"
+"Homepage" = "https://tracify.tech"
+"Documentation" = "https://docs.tracify.tech"
+"Bug Tracker" = "https://github.com/tracify/python-sdk/issues"

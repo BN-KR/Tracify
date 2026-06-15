@@ -1,5 +1,5 @@
 DESCRIPTION >
-    Agent spans — high-volume time-series trace data for 5to1r
+    Agent spans — high-volume time-series trace data for tracify
 
 SCHEMA >
     `spanId`    String `json:$.spanId`,

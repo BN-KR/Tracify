@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { api } from "./_generated/api";
+import { action, mutation, query } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 
@@ -52,10 +53,17 @@ function slugify(name: string) {
 }
 
 function getOrgId(identity: unknown) {
-  const orgId = (identity as { orgId?: unknown }).orgId;
+  const orgId = (identity as { orgId?: unknown; org_id?: unknown }).orgId ??
+    (identity as { org_id?: unknown }).org_id;
   return typeof orgId === "string" && orgId.length > 0
     ? orgId
     : undefined;
+}
+
+function getOrgRole(identity: unknown) {
+  const role = (identity as { orgRole?: unknown; org_role?: unknown }).orgRole ??
+    (identity as { org_role?: unknown }).org_role;
+  return typeof role === "string" ? role : undefined;
 }
 
 function isAdmin(identity: { subject: string; tokenIdentifier: string }) {
@@ -76,6 +84,84 @@ function canAccessProject(
   return project.clerkUserId === identity.subject;
 }
 
+function canAdminProject(
+  project: Doc<"projects">,
+  identity: { subject: string; tokenIdentifier: string },
+) {
+  if (isAdmin(identity)) return true;
+  if (project.clerkUserId === identity.subject) return true;
+
+  const clerkOrgId = getOrgId(identity);
+  const orgRole = getOrgRole(identity);
+  return (
+    Boolean(clerkOrgId && project.clerkOrgId === clerkOrgId) &&
+    (orgRole === "admin" || orgRole === "org:admin")
+  );
+}
+
+function validateSlackWebhookUrl(value: string | undefined) {
+  if (!value) return undefined;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error("Slack webhook must be a valid Slack webhook URL");
+  }
+
+  if (
+    parsed.protocol !== "https:" ||
+    parsed.hostname !== "hooks.slack.com" ||
+    !parsed.pathname.startsWith("/services/")
+  ) {
+    throw new Error("Slack webhook must be a valid Slack webhook URL");
+  }
+
+  return value;
+}
+
+function validateProjectSettings(args: {
+  name?: string;
+  clientName?: string;
+  reportNotes?: string;
+  costThresholdUsd?: number;
+  maxDurationSeconds?: number;
+  maxStallMinutes?: number;
+  slackWebhookUrl?: string;
+}) {
+  if (args.name !== undefined && args.name.trim().length === 0) {
+    throw new Error("Project name is required");
+  }
+  if (
+    args.costThresholdUsd !== undefined &&
+    (!Number.isFinite(args.costThresholdUsd) || args.costThresholdUsd < 0)
+  ) {
+    throw new Error("Cost threshold must be a non-negative number");
+  }
+  if (
+    args.maxDurationSeconds !== undefined &&
+    (!Number.isInteger(args.maxDurationSeconds) || args.maxDurationSeconds <= 0)
+  ) {
+    throw new Error("Duration threshold must be a positive integer");
+  }
+  if (
+    args.maxStallMinutes !== undefined &&
+    (!Number.isInteger(args.maxStallMinutes) || args.maxStallMinutes <= 0)
+  ) {
+    throw new Error("Stall threshold must be a positive integer");
+  }
+
+  return {
+    name: args.name?.trim(),
+    clientName: args.clientName?.trim() || undefined,
+    reportNotes: args.reportNotes?.trim() || undefined,
+    costThresholdUsd: args.costThresholdUsd,
+    maxDurationSeconds: args.maxDurationSeconds,
+    maxStallMinutes: args.maxStallMinutes,
+    slackWebhookUrl: validateSlackWebhookUrl(args.slackWebhookUrl),
+  };
+}
+
 function publicProject(project: Doc<"projects">) {
   return {
     _id: project._id,
@@ -86,6 +172,8 @@ function publicProject(project: Doc<"projects">) {
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
     planTier: project.planTier,
+    clientName: project.clientName ?? null,
+    reportNotes: project.reportNotes ?? null,
     apiKeyPrefix: project.apiKeyPrefix,
     apiKeyLast4: project.apiKeyLast4,
     apiKeyStatus: project.apiKeyStatus,
@@ -256,17 +344,17 @@ export const getProjectsByUserOrOrg = query({
     const clerkOrgId = getOrgId(identity);
     const projects = clerkOrgId
       ? await ctx.db
-          .query("projects")
-          .withIndex("by_clerkOrgId", (q) => q.eq("clerkOrgId", clerkOrgId))
-          .order("desc")
-          .take(50)
+        .query("projects")
+        .withIndex("by_clerkOrgId", (q) => q.eq("clerkOrgId", clerkOrgId))
+        .order("desc")
+        .take(50)
       : await ctx.db
-          .query("projects")
-          .withIndex("by_clerkUserId", (q) =>
-            q.eq("clerkUserId", identity.subject),
-          )
-          .order("desc")
-          .take(50);
+        .query("projects")
+        .withIndex("by_clerkUserId", (q) =>
+          q.eq("clerkUserId", identity.subject),
+        )
+        .order("desc")
+        .take(50);
 
     return projects.map(publicProject);
   },
@@ -280,6 +368,20 @@ export const getProjectById = query({
 
     const project = await ctx.db.get(projectId);
     if (!project || !canAccessProject(project, identity)) return null;
+
+    return publicProject(project);
+  },
+});
+
+export const getProjectForAdmin = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccessProject(project, identity)) return null;
+    if (!canAdminProject(project, identity)) return null;
 
     return publicProject(project);
   },
@@ -465,23 +567,25 @@ async function getProjectsForIdentity(
   const clerkOrgId = getOrgId(identity);
   return clerkOrgId
     ? await ctx.db
-        .query("projects")
-        .withIndex("by_clerkOrgId", (q) => q.eq("clerkOrgId", clerkOrgId))
-        .order("desc")
-        .take(50)
+      .query("projects")
+      .withIndex("by_clerkOrgId", (q) => q.eq("clerkOrgId", clerkOrgId))
+      .order("desc")
+      .take(50)
     : await ctx.db
-        .query("projects")
-        .withIndex("by_clerkUserId", (q) =>
-          q.eq("clerkUserId", identity.subject),
-        )
-        .order("desc")
-        .take(50);
+      .query("projects")
+      .withIndex("by_clerkUserId", (q) =>
+        q.eq("clerkUserId", identity.subject),
+      )
+      .order("desc")
+      .take(50);
 }
 
 export const updateProject = mutation({
   args: {
     projectId: v.id("projects"),
     name: v.optional(v.string()),
+    clientName: v.optional(v.string()),
+    reportNotes: v.optional(v.string()),
     costThresholdUsd: v.optional(v.number()),
     maxDurationSeconds: v.optional(v.number()),
     maxStallMinutes: v.optional(v.number()),
@@ -495,8 +599,12 @@ export const updateProject = mutation({
     if (!project || !canAccessProject(project, identity)) {
       throw new Error("Project not found or access denied");
     }
+    if (!canAdminProject(project, identity)) {
+      throw new Error("Admin access required");
+    }
 
-    const { projectId, ...updates } = args;
+    const { projectId, ...rawUpdates } = args;
+    const updates = validateProjectSettings(rawUpdates);
     await ctx.db.patch(projectId, {
       ...updates,
       updatedAt: Date.now(),
@@ -517,6 +625,9 @@ export const deleteProject = mutation({
     const project = await ctx.db.get(projectId);
     if (!project || !canAccessProject(project, identity)) {
       throw new Error("Project not found or access denied");
+    }
+    if (!canAdminProject(project, identity)) {
+      throw new Error("Admin access required");
     }
 
     if (confirmationName !== project.name || confirmationWord !== "DELETE") {
@@ -565,6 +676,9 @@ export const rotateApiKey = mutation({
     if (!project || !canAccessProject(project, identity)) {
       throw new Error("Project not found or access denied");
     }
+    if (!canAdminProject(project, identity)) {
+      throw new Error("Admin access required");
+    }
 
     const plaintextApiKey = `${API_KEY_PREFIX}${randomHex(16)}`;
     const apiKeyHash = await hmacSha256(plaintextApiKey);
@@ -585,5 +699,55 @@ export const rotateApiKey = mutation({
       apiKeyPrefix: API_KEY_PREFIX,
       apiKeyLast4: plaintextApiKey.slice(-4),
     };
+  },
+});
+
+export const sendTestAlert = action({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const project = await ctx.runQuery(api.projects.getProjectForAdmin, {
+      projectId,
+    });
+
+    if (!project) {
+      throw new Error("Project not found or access denied");
+    }
+    if (!project.slackWebhookUrl) {
+      throw new Error("Add a Slack webhook URL before sending a test alert");
+    }
+
+    const response = await fetch(project.slackWebhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: "tracify test alert",
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: "*tracify test alert*",
+            },
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `Project ${project.name} is connected to this Slack channel.`,
+            },
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Slack test alert failed", {
+        status: response.status,
+        statusText: response.statusText,
+      });
+      throw new Error("Slack test alert failed");
+    }
+
+    return { ok: true };
   },
 });

@@ -5,7 +5,7 @@ export default {
       applicationID: "convex",
     },
     {
-      domain: "https://clerk.5to1r.com",
+      domain: "https://clerk.tracify.tech",
       applicationID: "convex",
     },
   ],

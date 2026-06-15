@@ -1,26 +1,26 @@
-# 5to1r Python SDK
+# Tracify Python SDK
 
 Observability and tracing for AI agents. Gain full visibility into your agent's decision-making process, tool usage, and LLM costs.
 
 ## Installation
 
 ```bash
-pip install 5to1r
+pip install tracify
 ```
 
 ## Quickstart
 
-1. Get your API Key from the [5to1r Dashboard](https://5to1r.com).
+1. Get your API Key from the [Tracify Dashboard](https://tracify.tech).
 2. Set it as an environment variable:
 
 ```bash
-export FIVETOONE_API_KEY=your_sk_live_...
+export TRACIFY_API_KEY=your_sk_live_...
 ```
 
 3. Instrument your agent:
 
 ```python
-from fivetoone import trace_agent, llm_call, tool_call
+from tracify import trace_agent, llm_call, tool_call
 
 @trace_agent()
 async def my_agent(query: str):

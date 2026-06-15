@@ -55,9 +55,7 @@ export function WhatYouGet() {
         <div className="flex items-center gap-2">
           <span className="text-white">Slack</span>
           <span className="text-[#444444]">/</span>
-          <span className="text-[#888888]">Email</span>
-          <span className="text-[#444444]">/</span>
-          <span className="text-[#888888]">Webhook</span>
+          <span className="text-[#888888]">Dashboard alerts</span>
         </div>
       ),
     },
@@ -74,14 +72,14 @@ export function WhatYouGet() {
   return (
     <section className="w-full bg-[#050505] pt-16 pb-[72px]">
       <div className="mx-auto max-w-[1200px] px-6 md:px-8 grid grid-cols-1 md:grid-cols-[380px_1fr] gap-12 md:gap-24 items-start">
-        
+
         {/* Left Content */}
         <div className="flex flex-col gap-6">
           <h2 className="text-white text-3xl md:text-4xl font-bold tracking-tighter uppercase font-pixel leading-[1.1]">
             Every run becomes inspectable.
           </h2>
           <p className="text-[#888888] text-[15px] leading-relaxed max-w-[340px]">
-            5to1r turns one agent run into a trace, cost map, retry trail, and failure record.
+            Tracify turns one agent run into a trace, cost map, retry trail, and failure record.
           </p>
         </div>
 
@@ -94,9 +92,8 @@ export function WhatYouGet() {
               whileInView={{ opacity: 1 }}
               transition={{ delay: i * 0.1, duration: 0.4 }}
               viewport={{ once: true }}
-              className={`grid grid-cols-[100px_1fr] md:grid-cols-[140px_1fr] p-6 md:p-8 items-center font-mono text-[13px] tracking-tight ${
-                i !== rows.length - 1 ? "border-b border-[#1A1A1A]" : ""
-              }`}
+              className={`grid grid-cols-[100px_1fr] md:grid-cols-[140px_1fr] p-6 md:p-8 items-center font-mono text-[13px] tracking-tight ${i !== rows.length - 1 ? "border-b border-[#1A1A1A]" : ""
+                }`}
             >
               <span className="text-[#444444] font-bold uppercase tracking-[0.2em] text-[10px]">
                 {row.label}
@@ -106,17 +103,17 @@ export function WhatYouGet() {
               </div>
             </motion.div>
           ))}
-          
+
           {/* Subtle focus pass animation */}
           <motion.div
             initial={{ top: "-25%", opacity: 0 }}
-            whileInView={{ 
-              top: ["-25%", "100%"], 
-              opacity: [0, 0.4, 0] 
+            whileInView={{
+              top: ["-25%", "100%"],
+              opacity: [0, 0.4, 0]
             }}
             viewport={{ once: true }}
-            transition={{ 
-              duration: 1.5, 
+            transition={{
+              duration: 1.5,
               ease: "easeInOut",
               delay: 0.6
             }}

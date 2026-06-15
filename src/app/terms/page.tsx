@@ -7,7 +7,7 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-white selection:text-black">
       <Navbar />
-      
+
       <main className="max-w-3xl mx-auto px-6 pt-32 pb-24">
         <div className="mb-12">
           <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#666666] mb-4">
@@ -25,7 +25,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-white text-lg uppercase tracking-widest mb-4">1. Acceptance of Terms</h2>
             <p>
-              By accessing or using the 5to1r platform, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
+              By accessing or using the Tracify platform, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
             </p>
           </section>
 
@@ -45,21 +45,21 @@ export default function TermsPage() {
           <section>
             <h2 className="text-white text-lg uppercase tracking-widest mb-4">3. Disclaimer</h2>
             <p>
-              The materials on 5to1r are provided on an 'as is' basis. 5to1r makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+              The materials on Tracify are provided on an 'as is' basis. Tracify makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
             </p>
           </section>
 
           <section>
             <h2 className="text-white text-lg uppercase tracking-widest mb-4">4. Limitations</h2>
             <p>
-              In no event shall 5to1r or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the platform, even if 5to1r has been notified orally or in writing of the possibility of such damage.
+              In no event shall Tracify or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the platform, even if Tracify has been notified orally or in writing of the possibility of such damage.
             </p>
           </section>
 
           <section>
             <h2 className="text-white text-lg uppercase tracking-widest mb-4">5. Governing Law</h2>
             <p>
-              These terms and conditions are governed by and construed in accordance with the laws of the jurisdiction in which 5to1r operates and you irrevocably submit to the exclusive jurisdiction of the courts in that State or location.
+              These terms and conditions are governed by and construed in accordance with the laws of the jurisdiction in which Tracify operates and you irrevocably submit to the exclusive jurisdiction of the courts in that State or location.
             </p>
           </section>
         </div>

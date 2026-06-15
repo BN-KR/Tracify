@@ -126,7 +126,7 @@ export const processAlert = inngest.createFunction(
                 type: "section",
                 text: {
                   type: "mrkdwn",
-                  text: `🚨 *5to1r Alert: ${alert.type.replace('_', ' ').toUpperCase()}*`
+                  text: `🚨 *Tracify Alert: ${alert.type.replace('_', ' ').toUpperCase()}*`
                 }
               },
               {
@@ -146,7 +146,7 @@ export const processAlert = inngest.createFunction(
                       text: "View Trace",
                       emoji: true
                     },
-                    url: `https://5to1r.com/dashboard/${alert.projectId}/runs/${alert.runId}`,
+                    url: `https://tracify.tech/dashboard/${alert.projectId}/runs/${alert.runId}`,
                     style: "primary"
                   }
                 ]

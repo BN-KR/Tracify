@@ -21,9 +21,9 @@ export function ProjectSwitcher({ isCollapsed = false }: { isCollapsed?: boolean
   const router = useRouter();
   const params = useParams();
   const currentProjectId = params?.projectId as string | undefined;
-  
+
   const projects = useQuery(api.projects.getProjectsByUserOrOrg) || [];
-  
+
   const selectedProject =
     projects.find((project) => project._id === currentProjectId) ??
     projects[0] ??

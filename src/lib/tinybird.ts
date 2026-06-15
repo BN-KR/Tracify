@@ -123,6 +123,35 @@ export async function getCostByModel(projectId: string, days = 30) {
   return data.data as { modelId: string; totalCostUsd: number; spanCount: number; avgLatencyMs: number }[];
 }
 
+/**
+ * Get per-tool cost and latency breakdown for a project.
+ */
+export async function getCostByTool(projectId: string, days = 30) {
+  const sql = `
+    SELECT
+      toolName,
+      sum(costUsd)   AS totalCostUsd,
+      count()        AS spanCount,
+      avg(latencyMs) AS avgLatencyMs
+    FROM spans
+    WHERE projectId = '${projectId}'
+      AND toolName != ''
+      AND createdAt >= now() - INTERVAL ${days} DAY
+    GROUP BY toolName
+    ORDER BY totalCostUsd DESC
+    LIMIT 10
+  `;
+  const res = await fetch(sqlUrl(sql), {
+    headers: getHeaders(),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Tinybird query failed: ${res.status} ${body}`);
+  }
+  const data = await res.json();
+  return data.data as { toolName: string; totalCostUsd: number; spanCount: number; avgLatencyMs: number }[];
+}
+
 export interface SpanRow {
   spanId: string;
   runId: string;

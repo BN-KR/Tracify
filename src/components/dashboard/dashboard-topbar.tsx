@@ -1,20 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
-import { 
-  BookOpen, 
-  Bell, 
-  ChevronRight, 
-  UserPen, 
-  LogOut, 
-  Settings, 
-  MessageSquare, 
-  Book 
+import {
+  BookOpen,
+  Bell,
+  ChevronRight,
+  UserPen,
+  LogOut,
+  Settings,
+  MessageSquare,
+  Book
 } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { setReturnPath } from "@/lib/onboarding-client-state";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 
@@ -33,6 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { ProjectSwitcher } from "./project-switcher";
+import { cn, formatRelativeTime } from "@/lib/utils";
 
 interface DashboardTopbarProps {
   title?: string;
@@ -53,6 +55,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
   const projectDocsHref = projectId
     ? `/dashboard/${projectId}/docs`
     : "/onboarding/project";
+  const dashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
   const { user } = useUser();
   const { signOut, openUserProfile } = useClerk();
 
@@ -60,7 +63,10 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
     api.alerts.listByProject,
     projectId ? { projectId: projectId as Id<"projects"> } : "skip"
   );
-  const alertCount = alerts?.length;
+  const markAllAlertsRead = useMutation(api.alerts.markAllRead);
+  const markAlertRead = useMutation(api.alerts.markRead);
+  const [isMarkingAlertsRead, setIsMarkingAlertsRead] = useState(false);
+  const unreadAlertCount = alerts?.filter((alert) => !alert.readAt).length ?? 0;
 
   const initials = user?.firstName?.charAt(0) || user?.username?.charAt(0) || "U";
 
@@ -71,19 +77,48 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
     router.push(onboardingHref);
   };
 
+  const handleReadAllAlerts = async () => {
+    if (!projectId || unreadAlertCount === 0 || isMarkingAlertsRead) return;
+
+    setIsMarkingAlertsRead(true);
+    try {
+      await markAllAlertsRead({ projectId: projectId as Id<"projects"> });
+    } finally {
+      setIsMarkingAlertsRead(false);
+    }
+  };
+
   // Breadcrumb logic
   const segments = pathname.split("/").filter(Boolean);
+  const sectionHref =
+    projectId && segments.length > 2
+      ? `/dashboard/${projectId}/${segments[2]}`
+      : dashboardHref;
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#2A2A2A] bg-[#0A0A0A] px-4 font-mono lg:px-6">
       <div className="flex min-w-0 items-center gap-4">
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-[#666666]">
           <div className="flex items-center gap-2 overflow-hidden">
-            <span className="shrink-0 text-white">Dashboard</span>
+            <Link
+              href={dashboardHref}
+              className="shrink-0 text-white transition-colors hover:text-[#CCCCCC]"
+            >
+              Dashboard
+            </Link>
             {segments.length > 2 && (
               <>
                 <ChevronRight className="size-3 shrink-0" />
-                <span className="truncate text-white">{segments[2]}</span>
+                {segments.length > 3 ? (
+                  <Link
+                    href={sectionHref}
+                    className="truncate text-white transition-colors hover:text-[#CCCCCC]"
+                  >
+                    {segments[2]}
+                  </Link>
+                ) : (
+                  <span className="truncate text-white">{segments[2]}</span>
+                )}
               </>
             )}
             {segments.length > 3 && (
@@ -115,9 +150,9 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
           <DropdownMenuTrigger asChild>
             <button className="flex h-8 w-8 items-center justify-center border border-[#2A2A2A] bg-[#111111] text-[#CCCCCC] transition-colors hover:border-white hover:text-white outline-none overflow-hidden">
               {user?.imageUrl ? (
-                <img 
-                  src={user.imageUrl} 
-                  alt={user.fullName || "User"} 
+                <img
+                  src={user.imageUrl}
+                  alt={user.fullName || "User"}
                   className="size-full object-cover grayscale opacity-80 group-hover:opacity-100 transition-opacity"
                 />
               ) : (
@@ -184,20 +219,122 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
         </DropdownMenu>
 
         {projectId && (
-          <Link
-            href={`/dashboard/${projectId}/alerts`}
-            className="relative flex h-8 items-center border border-[#2A2A2A] bg-[#111111] px-2 text-[#999999] transition-colors hover:bg-[#161616] hover:text-white"
-          >
-            <Bell className="size-4" />
-            {alertCount && alertCount > 0 ? (
-              <span className="absolute -right-1 -top-1 flex size-3 items-center justify-center bg-white text-[8px] font-bold text-black animate-pulse">
-                {alertCount}
-              </span>
-            ) : null}
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={cn(
+                  "relative flex h-8 items-center border px-2 outline-none transition-colors hover:bg-[#161616] hover:text-white",
+                  unreadAlertCount > 0
+                    ? "border-white bg-[#181818] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.18)]"
+                    : "border-[#2A2A2A] bg-[#111111] text-[#999999]",
+                )}
+              >
+                <Bell className="size-4" />
+                {unreadAlertCount > 0 ? (
+                  <span className="absolute -right-1.5 -top-1.5 flex min-w-4 items-center justify-center bg-white px-1 text-[9px] font-bold leading-4 text-black shadow-[0_0_0_2px_#0A0A0A]">
+                    {unreadAlertCount > 9 ? "9+" : unreadAlertCount}
+                  </span>
+                ) : null}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[360px] p-0" align="end" sideOffset={8}>
+              <div className="flex items-start justify-between gap-3 border-b border-[#2A2A2A] p-3">
+                <div>
+                  <div className="font-mono text-[11px] uppercase tracking-widest text-white">
+                    Alerts
+                  </div>
+                  <div className="mt-1 font-mono text-[10px] text-[#666666]">
+                    Cost, failure, and duration triggers
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleReadAllAlerts}
+                  disabled={unreadAlertCount === 0 || isMarkingAlertsRead}
+                  className="shrink-0 border border-[#333333] px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-[#CCCCCC] transition-colors hover:border-white hover:text-white disabled:cursor-not-allowed disabled:border-[#222222] disabled:text-[#555555]"
+                >
+                  Read all
+                </button>
+              </div>
+              <div className="max-h-[420px] overflow-y-auto p-2">
+                {alerts === undefined ? (
+                  <div className="space-y-2 p-2">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="h-16 border border-[#222222] bg-[#0A0A0A]"
+                      />
+                    ))}
+                  </div>
+                ) : alerts.length === 0 ? (
+                  <div className="border border-dashed border-[#2A2A2A] p-6 text-center font-mono text-[11px] uppercase tracking-widest text-[#666666]">
+                    No alerts triggered
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {alerts.slice(0, 8).map((alert) => {
+                      const isUnread = !alert.readAt;
+
+                      return (
+                        <Link
+                          key={alert._id}
+                          href={`/dashboard/${projectId}/runs/${alert.runId}`}
+                          onClick={() => {
+                            if (isUnread) {
+                              void markAlertRead({ alertId: alert._id });
+                            }
+                          }}
+                          className={cn(
+                            "relative block border p-3 transition-colors hover:border-[#555555]",
+                            isUnread
+                              ? "border-[#555555] bg-[#171717] hover:bg-[#1C1C1C]"
+                              : "border-[#222222] bg-[#0A0A0A] hover:bg-[#111111]",
+                          )}
+                        >
+                          {isUnread ? (
+                            <span className="absolute left-0 top-0 h-full w-1 bg-white" />
+                          ) : null}
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex min-w-0 items-center gap-2">
+                              {isUnread ? (
+                                <span className="shrink-0 bg-white px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-black">
+                                  New
+                                </span>
+                              ) : null}
+                              <span
+                                className={cn(
+                                  "truncate font-mono text-[10px] uppercase tracking-widest",
+                                  alert.type === "cost_exceeded"
+                                    ? "text-[#F59E0B]"
+                                    : "text-red-400",
+                                )}
+                              >
+                                {alert.type.replace("_", " ")}
+                              </span>
+                            </div>
+                            <span className="shrink-0 font-mono text-[9px] text-[#666666]">
+                              {formatRelativeTime(alert.triggeredAt)}
+                            </span>
+                          </div>
+                          <p
+                            className={cn(
+                              "mt-2 line-clamp-2 font-sans text-xs leading-relaxed",
+                              isUnread ? "text-white" : "text-[#CCCCCC]",
+                            )}
+                          >
+                            {alert.message}
+                          </p>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
         <Link
-          href="https://docs.5to1r.com"
+          href="https://docs.tracify.tech"
           className="flex h-8 items-center gap-2 border border-[#2A2A2A] bg-[#111111] px-2 text-[#999999] transition-colors hover:bg-[#161616] hover:text-white"
         >
           <BookOpen className="size-4" />

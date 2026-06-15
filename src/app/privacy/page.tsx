@@ -7,7 +7,7 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-white selection:text-black">
       <Navbar />
-      
+
       <main className="max-w-3xl mx-auto px-6 pt-32 pb-24">
         <div className="mb-12">
           <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#666666] mb-4">
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-white text-lg uppercase tracking-widest mb-4">1. Overview</h2>
             <p>
-              5to1r ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our agent observability platform and services.
+              Tracify ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our agent observability platform and services.
             </p>
           </section>
 
@@ -64,7 +64,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-white text-lg uppercase tracking-widest mb-4">5. Contact</h2>
             <p>
-              If you have questions about this policy, please contact us at <Link href="mailto:privacy@5to1r.com" className="text-white underline underline-offset-4 decoration-zinc-700 hover:decoration-white transition-colors">privacy@5to1r.com</Link>.
+              If you have questions about this policy, please contact us at <Link href="mailto:privacy@tracify.tech" className="text-white underline underline-offset-4 decoration-zinc-700 hover:decoration-white transition-colors">privacy@tracify.tech</Link>.
             </p>
           </section>
         </div>

@@ -180,7 +180,7 @@ TIP:     left-border: 2px --success;   bg: --success-dim
 ```
 [filename.py]                                        [Copy ✓]
 ──────────────────────────────────────────────────────────
- 1  from fivetoone import trace_agent
+ 1  from tracify import trace_agent
  2  
  3  @trace_agent(api_key="5t1r_sk_...")
  4  async def research_agent(query: str) -> str:
@@ -212,7 +212,7 @@ Sticky. Auto-generated from H2/H3 in page. Active heading highlighted with `--ac
 
 BLOG
 ──────────────────────────────────────────────────
-From the 5to1r team: engineering, agents, and AI in production.
+From the tracify team: engineering, agents, and AI in production.
 
 [All] [Engineering] [Agents] [Observability] [Cost Control] [Product] [Company]
 
@@ -301,7 +301,7 @@ From the 5to1r team: engineering, agents, and AI in production.
 ## SEO Metadata (per article)
 
 ```html
-<title>{article.title} — 5to1r Blog</title>
+<title>{article.title} — tracify Blog</title>
 <meta name="description" content="{article.excerpt}" />
 <meta property="og:title" content="{article.title}" />
 <meta property="og:image" content="{article.coverImage}" />
@@ -408,11 +408,11 @@ Q: Is there a free trial of Pro?
 A: Yes — 14 days, no credit card required.
 
 Q: Do you offer startup discounts?
-A: Yes. Email founders@5to1r.com with proof of incorporation.
+A: Yes. Email founders@tracify.com with proof of incorporation.
 
 Q: Do you offer annual invoicing for Enterprise?
 A: Yes. Contact sales for a custom contract.
 
-Q: Can I self-host 5to1r?
+Q: Can I self-host tracify?
 A: Enterprise plans include self-hosted deployment documentation.
 ```

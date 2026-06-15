@@ -124,7 +124,7 @@
 ## Prompt A — Design Tokens + globals.css
 
 ```
-Create src/app/globals.css for the 5to1r SaaS platform.
+Create src/app/globals.css for the tracify SaaS platform.
 
 Requirements:
 - Dark mode only. Background: #0A0A0A. No light mode variables.
@@ -154,7 +154,7 @@ Requirements:
 ## Prompt B — Landing Page
 
 ```
-Build src/app/(marketing)/page.tsx — the 5to1r landing page.
+Build src/app/(marketing)/page.tsx — the tracify landing page.
 
 Tech stack: Next.js 15 App Router, Tailwind CSS, Framer Motion, Lucide React, shadcn/ui.
 
@@ -169,14 +169,14 @@ Build these sections in order:
 1. HERO
    - Left: eyebrow "AGENT OBSERVABILITY INFRASTRUCTURE" (badge, Geist Mono 11px uppercase)
    - Headline: "Every step your agent takes." (Geist Mono, clamp(48px,7vw,80px), font-weight 700)
-   - Subheadline: "5to1r instruments your AI agents in two lines of code. See every tool call, 
+   - Subheadline: "tracify instruments your AI agents in two lines of code. See every tool call, 
      LLM decision, and dollar spent — in real time. Debug in minutes, not hours."
    - CTA: "Start free — no credit card" → /sign-up (primary button)
    - Ghost CTA: "View live demo" (ghost button)
    - Right: static code block showing:
-     from fivetoone import trace_agent, llm_call, tool_call
+     from tracify import trace_agent, llm_call, tool_call
      
-     @trace_agent(api_key=os.environ["FIVETOONE_API_KEY"])
+     @trace_agent(api_key=os.environ["TRACIFY_API_KEY"])
      async def research_agent(query: str) -> str:
          result = await llm_call(model="claude-sonnet-4-5", prompt=query)
          sources = await tool_call("web_search", query=query)
@@ -213,7 +213,7 @@ Export default as LandingPage. Use Show from @clerk/nextjs for signed-in/signed-
 ## Prompt C — Auth Shell with Clerk
 
 ```
-Build the auth layout and auth pages for 5to1r.
+Build the auth layout and auth pages for tracify.
 
 Files to create:
 - src/app/(auth)/layout.tsx
@@ -317,7 +317,7 @@ Use useOrganization from @clerk/nextjs for org switcher.
 ```
 Build the trace viewer page at src/app/dashboard/[projectId]/runs/[runId]/page.tsx
 
-This is the hero page of 5to1r. It must be extremely detailed.
+This is the hero page of tracify. It must be extremely detailed.
 
 Layout:
 - Run header (full width)
@@ -550,5 +550,5 @@ And ErrorBanner component:
 
 ---
 
-*End of 5to1r Full Frontend Design Package — v1.0 — 2026-05-12*
+*End of tracify Full Frontend Design Package — v1.0 — 2026-05-12*
 *All sections: 01 through 40 complete.*

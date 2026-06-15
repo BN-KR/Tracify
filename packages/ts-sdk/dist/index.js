@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.decision = exports.toolCall = exports.llmCall = exports.FiveToOneClient = void 0;
+exports.decision = exports.toolCall = exports.llmCall = exports.TracifyClient = exports.FiveToOneClient = void 0;
 exports.traceAgent = traceAgent;
 function createId() {
     if (globalThis.crypto?.randomUUID) {
@@ -10,11 +10,11 @@ function createId() {
 }
 class FiveToOneClient {
     constructor(config = {}) {
-        this.apiKey = config.apiKey || process.env.FIVETOONE_API_KEY || '';
+        this.apiKey = config.apiKey || process.env.TRACIFY_API_KEY || process.env.FIVETOONE_API_KEY || '';
         if (!this.apiKey) {
-            console.warn('5to1r Warning: FIVETOONE_API_KEY is not set');
+            console.warn('Tracify Warning: TRACIFY_API_KEY or FIVETOONE_API_KEY is not set');
         }
-        this.host = (config.host || 'https://5to1r.com').replace(/\/$/, '');
+        this.host = (config.host || 'https://tracify.tech').replace(/\/$/, '');
         this.ingestUrl = `${this.host}/api/ingest`;
     }
     async ingest(data) {
@@ -22,7 +22,7 @@ class FiveToOneClient {
             return;
         const span = {
             spanId: data.spanId || createId(),
-            runId: data.runId || process.env.FIVETOONE_CURRENT_RUN_ID || 'unknown',
+            runId: data.runId || process.env.TRACIFY_CURRENT_RUN_ID || process.env.FIVETOONE_CURRENT_RUN_ID || 'unknown',
             createdAt: data.createdAt || new Date().toISOString(),
             metadata: data.metadata || {},
             input: typeof data.input === 'string' ? data.input : JSON.stringify(data.input || ''),
@@ -38,7 +38,7 @@ class FiveToOneClient {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(span),
-            }).catch(err => console.warn('5to1r Warning: Failed to ingest span:', err));
+            }).catch(err => console.warn('Tracify Warning: Failed to ingest span:', err));
         }
         catch (e) {
             // Ignore errors in telemetry
@@ -46,12 +46,16 @@ class FiveToOneClient {
     }
 }
 exports.FiveToOneClient = FiveToOneClient;
+class TracifyClient extends FiveToOneClient {
+}
+exports.TracifyClient = TracifyClient;
 function traceAgent(func, config = {}) {
-    const client = new FiveToOneClient(config);
+    const client = new TracifyClient(config);
     return (async (...args) => {
         const runId = createId();
         const startTime = Date.now();
         // Set runId for the current execution context
+        process.env.TRACIFY_CURRENT_RUN_ID = runId;
         process.env.FIVETOONE_CURRENT_RUN_ID = runId;
         try {
             const result = await func(...args);
@@ -77,7 +81,7 @@ function traceAgent(func, config = {}) {
     });
 }
 // Global default client for easy access
-const defaultClient = new FiveToOneClient();
+const defaultClient = new TracifyClient();
 const llmCall = (data) => defaultClient.ingest({ ...data, spanType: 'llm_call' });
 exports.llmCall = llmCall;
 const toolCall = (data) => defaultClient.ingest({ ...data, spanType: 'tool_call' });

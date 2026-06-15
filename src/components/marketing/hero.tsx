@@ -26,9 +26,9 @@ const itemVariants: Variants = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { 
+    transition: {
       duration: 0.3,
-      ease: [0.23, 1, 0.32, 1] 
+      ease: [0.23, 1, 0.32, 1]
     },
   },
 };
@@ -36,10 +36,10 @@ const itemVariants: Variants = {
 // ── Data ───────────────────────────────────────────────────────────────────
 
 const PROOF_ITEMS = [
-  "Open-source SDK",
+  "Python + TypeScript SDKs",
   "Works with any LLM",
   "First span in 5 minutes",
-  "Free up to 50,000 spans",
+  "Built for production agents",
 ];
 
 const TYPEWRITER_WORDS = ["takes.", "decides.", "breaks.", "retries.", "costs."];
@@ -74,7 +74,7 @@ export function Hero() {
         style={{ maxWidth: "1200px" }}
       >
         <div className="flex flex-col lg:flex-row lg:items-center gap-16 xl:gap-24">
-          
+
           {/* ── LEFT: Content ────────────────────────────────────────── */}
           <motion.div
             variants={containerVariants}
@@ -113,9 +113,9 @@ export function Hero() {
               <span className="whitespace-nowrap">Every step your</span>
               <span className="whitespace-nowrap">
                 agent{" "}
-                <Typewriter 
-                  words={TYPEWRITER_WORDS} 
-                  className="font-pixel inline-block min-w-[2.5em]" 
+                <Typewriter
+                  words={TYPEWRITER_WORDS}
+                  className="font-pixel inline-block min-w-[2.5em]"
                 />
               </span>
             </motion.h1>
@@ -132,9 +132,9 @@ export function Hero() {
                 letterSpacing: "-0.01em",
               }}
             >
-              5to1r instruments your AI agents in two lines of code. See every
-              tool call, LLM decision, and dollar spent — in real time. Debug
-              in minutes, not hours.
+              Tracify shows what your AI agent did, why it failed, what it cost,
+              and what to fix next. Trace every step, tool call, retry, and
+              alert across production AI workflows.
             </motion.p>
 
             {/* CTA Row — Strict Monochrome Button System */}

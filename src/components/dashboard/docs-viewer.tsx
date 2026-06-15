@@ -12,7 +12,7 @@ const DOCS = {
     content: `
 # Quickstart
 
-Welcome to **5to1r**. This guide will help you integrate our observability SDK into your agentic workflow in less than 2 minutes.
+Welcome to **Tracify**. This guide will help you integrate our observability SDK into your agentic workflow in less than 2 minutes.
 
 ## 1. Install the SDK
 
@@ -20,10 +20,10 @@ Depending on your environment, run one of the following commands:
 
 \`\`\`bash
 # Python
-pip install 5to1r
+pip install tracify
 
 # TypeScript / Node.js
-npm install 5to1r
+npm install tracify
 \`\`\`
 
 ## 2. Initialize the Client
@@ -31,9 +31,9 @@ npm install 5to1r
 Initialize the SDK with your Project API Key. You can find your API key in the [Settings](/dashboard/settings) page.
 
 \`\`\`python
-from fivetoone import FiveToOneClient
+from tracify import TracifyClient
 
-client = FiveToOneClient(api_key="5t1r_sk_live_...")
+client = TracifyClient(api_key="5t1r_sk_live_...")
 \`\`\`
 
 ## 3. Instrument your Agent
@@ -41,7 +41,7 @@ client = FiveToOneClient(api_key="5t1r_sk_live_...")
 Wrap your agent's main execution loop with the \`@trace_agent\` decorator.
 
 \`\`\`python
-from fivetoone import trace_agent
+from tracify import trace_agent
 
 @trace_agent(client=client)
 def run_agent(task):
@@ -59,7 +59,7 @@ Once your agent runs, traces will appear in the [Runs](/dashboard/runs) list in 
     content: `
 # Python SDK Reference
 
-The 5to1r Python SDK provides deep instrumentation for LLM-based agents.
+The Tracify Python SDK provides deep instrumentation for LLM-based agents.
 
 ## Core Decorators
 
@@ -96,15 +96,15 @@ High-performance observability for Node.js and Browser-based agents.
 
 ## Installation
 \`\`\`bash
-npm install 5to1r
+npm install tracify
 \`\`\`
 
 ## Usage
 \`\`\`typescript
-import { FiveToOne } from "5to1r";
+import { TracifyClient } from "tracify";
 
-const client = new FiveToOne({
-  apiKey: process.env.FIVETOONE_API_KEY
+const client = new TracifyClient({
+  apiKey: process.env.TRACIFY_API_KEY
 });
 
 async function main() {
@@ -135,8 +135,8 @@ export function DocsViewer() {
               onClick={() => setActiveTab(id as any)}
               className={cn(
                 "flex w-full items-center justify-between px-3 py-2 text-[12px] transition-colors outline-none",
-                activeTab === id 
-                  ? "bg-[#161616] text-white" 
+                activeTab === id
+                  ? "bg-[#161616] text-white"
                   : "text-[#666666] hover:bg-[#161616] hover:text-[#999999]"
               )}
             >
@@ -150,7 +150,7 @@ export function DocsViewer() {
       {/* Docs Content */}
       <div className="flex-1 overflow-y-auto p-10 scrollbar-hide">
         <div className="max-w-3xl mx-auto prose prose-invert prose-zinc prose-sm">
-          <ReactMarkdown 
+          <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
               h1: ({ className, ...props }) => (

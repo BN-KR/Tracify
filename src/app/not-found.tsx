@@ -10,7 +10,7 @@ export default function NotFound() {
       <section className="w-full max-w-3xl border border-[#2A2A2A] bg-[#0A0A0A]">
         <div className="border-b border-[#2A2A2A] px-5 py-3">
           <div className="flex items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-widest text-[#777777]">
-            <span>5to1r.error</span>
+            <span>tracify.error</span>
             <span>404</span>
           </div>
         </div>
@@ -23,8 +23,8 @@ export default function NotFound() {
             </div>
 
             <div>
-              <h1 className="font-mono text-4xl leading-none text-white sm:text-6xl">
-                Nothing is tracing here.
+              <h1 className="font-pixel text-4xl uppercase leading-[1.1] tracking-tighter text-white sm:text-6xl" style={{ fontFamily: "var(--font-pixel)" }}>
+                404 - Nothing is tracing here.
               </h1>
               <p className="mt-5 max-w-xl font-mono text-sm leading-6 text-[#999999]">
                 The page you requested does not exist, moved, or belongs to a

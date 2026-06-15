@@ -3,9 +3,9 @@
 import {
   Activity,
   BarChart3,
-  Bell,
   BookOpen,
   ChevronDown,
+  FileText,
   LayoutDashboard,
   SlidersHorizontal,
   PanelLeftClose,
@@ -88,9 +88,9 @@ export function DashboardSidebar({
           href: projectId ? `/dashboard/${projectId}/costs` : projectSetupHref,
         },
         {
-          title: "Alerts",
-          icon: Bell,
-          href: projectId ? `/dashboard/${projectId}/alerts` : projectSetupHref,
+          title: "Reports",
+          icon: FileText,
+          href: projectId ? `/dashboard/${projectId}/reports` : projectSetupHref,
         },
       ],
     },
@@ -122,7 +122,7 @@ export function DashboardSidebar({
         {
           title: "Docs",
           icon: BookOpen,
-          href: "https://docs.5to1r.com",
+          href: "https://docs.tracify.tech",
           external: true,
         },
       ],
@@ -190,7 +190,7 @@ export function DashboardSidebar({
             href={projectDashboardHref}
             className="font-pixel text-lg leading-none text-white"
           >
-            5to1r
+            tracify
           </Link>
         ) : null}
 

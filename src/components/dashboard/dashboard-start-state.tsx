@@ -33,7 +33,7 @@ function getServerOnboardingSessionSnapshot() {
 const quickstarts = {
   python: {
     label: "Python",
-    code: `from fivetoone import trace_agent
+    code: `from tracify import trace_agent
 
 @trace_agent()
 async def research_agent(query):
@@ -41,7 +41,7 @@ async def research_agent(query):
   },
   typescript: {
     label: "TypeScript",
-    code: `import { traceAgent } from "5to1r"
+    code: `import { traceAgent } from "tracify"
 
 const researchAgent = traceAgent(async (query: string) => {
   return await run(query)

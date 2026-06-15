@@ -4,7 +4,7 @@ import { dark } from "@clerk/ui/themes";
 /**
  * Clerk Appearance Configuration
  * 
- * Defines the 5to1r monochrome, 0px radius aesthetic for Clerk components.
+ * Defines the tracify monochrome, 0px radius aesthetic for Clerk components.
  * Base: 'dark' theme only.
  * Customization: Total transparency, 1px gray borders (#808080).
  */

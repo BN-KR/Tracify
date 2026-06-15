@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "5to1r — Agent Observability",
+  title: "tracify — Agent Observability",
   description:
     "Full visibility into every step an AI agent takes — tools, decisions, cost, and failures.",
 };

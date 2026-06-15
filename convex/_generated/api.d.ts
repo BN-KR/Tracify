@@ -10,6 +10,7 @@
 
 import type * as agentRuns from "../agentRuns.js";
 import type * as alerts from "../alerts.js";
+import type * as analyticsCache from "../analyticsCache.js";
 import type * as comments from "../comments.js";
 import type * as projects from "../projects.js";
 
@@ -22,6 +23,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   agentRuns: typeof agentRuns;
   alerts: typeof alerts;
+  analyticsCache: typeof analyticsCache;
   comments: typeof comments;
   projects: typeof projects;
 }>;

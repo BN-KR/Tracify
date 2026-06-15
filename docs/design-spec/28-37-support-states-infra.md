@@ -7,7 +7,7 @@
 ```
 SUPPORT
 ────────────────────────────────────────────────
-Get help with 5to1r.
+Get help with tracify.
 
 [Docs →]  [Status ↗]  [GitHub Issues ↗]  [Discord ↗]
 
@@ -402,17 +402,17 @@ Payment failed:        Payment failed. Update your billing method.
 
 | Page | Title | Meta description |
 |------|-------|-----------------|
-| `/` | 5to1r — Agent Observability Infrastructure | See every tool call, LLM decision, and cost your AI agents make — in real time. Free up to 50,000 spans/month. |
-| `/product` | Product — 5to1r | Trace viewer, cost dashboard, real-time span streaming. Everything you need to debug AI agents in production. |
-| `/pricing` | Pricing — 5to1r | Free, Pro, Team, and Enterprise plans. Start free with 50,000 spans/month. No credit card required. |
-| `/docs` | Docs — 5to1r | Get started with 5to1r in under 5 minutes. Python and TypeScript SDKs, API reference, and guides. |
-| `/blog` | Blog — 5to1r | Engineering insights, agent patterns, and production AI from the 5to1r team. |
-| `/changelog` | Changelog — 5to1r | Every 5to1r product update, release note, and improvement — in chronological order. |
-| `/sign-in` | Sign in — 5to1r | Sign in to your 5to1r dashboard. |
-| `/sign-up` | Start free — 5to1r | Create your free 5to1r account. No credit card required. |
-| `/support` | Support — 5to1r | Get help with 5to1r. Docs, community, and direct support. |
-| `/privacy` | Privacy Policy — 5to1r | How 5to1r collects, uses, and protects your data. |
-| `/terms` | Terms of Service — 5to1r | 5to1r terms of service. |
+| `/` | tracify — Agent Observability Infrastructure | See every tool call, LLM decision, and cost your AI agents make — in real time. Free up to 50,000 spans/month. |
+| `/product` | Product — tracify | Trace viewer, cost dashboard, real-time span streaming. Everything you need to debug AI agents in production. |
+| `/pricing` | Pricing — tracify | Free, Pro, Team, and Enterprise plans. Start free with 50,000 spans/month. No credit card required. |
+| `/docs` | Docs — tracify | Get started with tracify in under 5 minutes. Python and TypeScript SDKs, API reference, and guides. |
+| `/blog` | Blog — tracify | Engineering insights, agent patterns, and production AI from the tracify team. |
+| `/changelog` | Changelog — tracify | Every tracify product update, release note, and improvement — in chronological order. |
+| `/sign-in` | Sign in — tracify | Sign in to your tracify dashboard. |
+| `/sign-up` | Start free — tracify | Create your free tracify account. No credit card required. |
+| `/support` | Support — tracify | Get help with tracify. Docs, community, and direct support. |
+| `/privacy` | Privacy Policy — tracify | How tracify collects, uses, and protects your data. |
+| `/terms` | Terms of Service — tracify | tracify terms of service. |
 
 ---
 

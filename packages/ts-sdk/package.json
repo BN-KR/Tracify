@@ -1,5 +1,5 @@
 {
-  "name": "5to1r",
+  "name": "tracify",
   "version": "0.1.0",
   "description": "Observability and tracing for AI agents.",
   "main": "dist/index.js",
@@ -18,7 +18,7 @@
     "tracing",
     "llm"
   ],
-  "author": "5to1r Team",
+  "author": "Tracify Team",
   "license": "MIT",
   "sideEffects": false,
   "devDependencies": {

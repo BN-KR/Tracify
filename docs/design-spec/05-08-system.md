@@ -458,7 +458,7 @@ Sections: Recent Runs / Navigate / Actions / Docs
 Routes: /, /product, /pricing, /blog, /changelog, /support, /contact, /docs (if separate domain)
 
 Nav (fixed, top):
-  Left: ■ 5to1r (logo wordmark, Geist Pixel)
+  Left: ■ tracify (logo wordmark, Geist Pixel)
   Center: Product · Pricing · Docs · Blog · Changelog
   Right: Sign in (ghost) · Start free (primary)
   

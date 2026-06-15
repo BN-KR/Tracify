@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { paginationOptsValidator } from "convex/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 
@@ -7,13 +8,16 @@ const runStatusValidator = v.union(
   v.literal("running"),
   v.literal("completed"),
   v.literal("failed"),
+  v.literal("cancelled"),
 );
+const MAX_COUNTABLE_RUNS = 1000;
 
 function canAccessProject(
   project: { clerkOrgId?: string; clerkUserId?: string },
   identity: { subject: string; tokenIdentifier: string },
 ) {
-  const orgId = (identity as { orgId?: unknown }).orgId;
+  const orgId = (identity as { orgId?: unknown; org_id?: unknown }).orgId ??
+    (identity as { org_id?: unknown }).org_id;
   if (typeof orgId === "string" && project.clerkOrgId === orgId) return true;
   return typeof project.clerkUserId === "string" && project.clerkUserId === identity.subject;
 }
@@ -58,7 +62,9 @@ async function upsertRunSummary(
   }
 
   const nextStatus =
-    existing.status === "failed" || existing.status === "completed"
+    existing.status === "failed" ||
+    existing.status === "completed" ||
+    existing.status === "cancelled"
       ? existing.status
       : status;
 
@@ -175,6 +181,164 @@ export const getRecentRunsByProject = query({
   },
 });
 
+export const getRunsPageByProject = query({
+  args: {
+    projectId: v.id("projects"),
+    status: v.union(
+      v.literal("all"),
+      v.literal("running"),
+      v.literal("completed"),
+      v.literal("failed"),
+      v.literal("cancelled"),
+    ),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, { projectId, status, paginationOpts }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: "",
+      };
+    }
+
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccessProject(project, identity)) {
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: "",
+      };
+    }
+
+    if (status !== "all") {
+      return await ctx.db
+        .query("agentRuns")
+        .withIndex("by_projectId_status", (q) =>
+          q.eq("projectId", projectId).eq("status", status),
+        )
+        .order("desc")
+        .paginate(paginationOpts);
+    }
+
+    return await ctx.db
+      .query("agentRuns")
+      .withIndex("by_projectId_createdAt", (q) => q.eq("projectId", projectId))
+      .order("desc")
+      .paginate(paginationOpts);
+  },
+});
+
+export const getRunCountsByProject = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return null;
+    }
+
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccessProject(project, identity)) {
+      return null;
+    }
+
+    const [all, running, completed, failed, cancelled] = await Promise.all([
+      ctx.db
+        .query("agentRuns")
+        .withIndex("by_projectId_createdAt", (q) => q.eq("projectId", projectId))
+        .take(MAX_COUNTABLE_RUNS + 1),
+      ctx.db
+        .query("agentRuns")
+        .withIndex("by_projectId_status", (q) =>
+          q.eq("projectId", projectId).eq("status", "running"),
+        )
+        .take(MAX_COUNTABLE_RUNS + 1),
+      ctx.db
+        .query("agentRuns")
+        .withIndex("by_projectId_status", (q) =>
+          q.eq("projectId", projectId).eq("status", "completed"),
+        )
+        .take(MAX_COUNTABLE_RUNS + 1),
+      ctx.db
+        .query("agentRuns")
+        .withIndex("by_projectId_status", (q) =>
+          q.eq("projectId", projectId).eq("status", "failed"),
+        )
+        .take(MAX_COUNTABLE_RUNS + 1),
+      ctx.db
+        .query("agentRuns")
+        .withIndex("by_projectId_status", (q) =>
+          q.eq("projectId", projectId).eq("status", "cancelled"),
+        )
+        .take(MAX_COUNTABLE_RUNS + 1),
+    ]);
+
+    return {
+      all: Math.min(all.length, MAX_COUNTABLE_RUNS),
+      running: Math.min(running.length, MAX_COUNTABLE_RUNS),
+      completed: Math.min(completed.length, MAX_COUNTABLE_RUNS),
+      failed: Math.min(failed.length, MAX_COUNTABLE_RUNS),
+      cancelled: Math.min(cancelled.length, MAX_COUNTABLE_RUNS),
+      capped:
+        all.length > MAX_COUNTABLE_RUNS ||
+        running.length > MAX_COUNTABLE_RUNS ||
+        completed.length > MAX_COUNTABLE_RUNS ||
+        failed.length > MAX_COUNTABLE_RUNS ||
+        cancelled.length > MAX_COUNTABLE_RUNS,
+    };
+  },
+});
+
+export const cancelRun = mutation({
+  args: {
+    projectId: v.id("projects"),
+    runId: v.string(),
+  },
+  handler: async (ctx, { projectId, runId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccessProject(project, identity)) {
+      throw new Error("Project not found or access denied");
+    }
+
+    const run = await ctx.db
+      .query("agentRuns")
+      .withIndex("by_projectId_and_runId", (q) =>
+        q.eq("projectId", projectId).eq("runId", runId),
+      )
+      .unique();
+
+    if (!run) {
+      throw new Error("Run not found");
+    }
+
+    if (run.status !== "running") {
+      return {
+        status: run.status,
+        changed: false,
+      };
+    }
+
+    const now = new Date().toISOString();
+    await ctx.db.patch(run._id, {
+      status: "cancelled",
+      finishedAt: now,
+      lastSpanAt: run.lastSpanAt ?? now,
+      updatedAt: now,
+    });
+
+    return {
+      status: "cancelled" as const,
+      changed: true,
+    };
+  },
+});
+
 export const getProjectOnboardingState = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, { projectId }) => {
@@ -205,6 +369,12 @@ export const getProjectOnboardingState = query({
 export const listByProject = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, { projectId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccessProject(project, identity)) return [];
+
     return await ctx.db
       .query("agentRuns")
       .withIndex("by_projectId_createdAt", (q) => q.eq("projectId", projectId))
@@ -216,6 +386,24 @@ export const listByProject = query({
 export const getByRunId = query({
   args: { runId: v.string(), projectId: v.id("projects") },
   handler: async (ctx, { runId, projectId }) => {
+    return await ctx.db
+      .query("agentRuns")
+      .withIndex("by_projectId_and_runId", (q) =>
+        q.eq("projectId", projectId).eq("runId", runId),
+      )
+      .unique();
+  },
+});
+
+export const getByRunIdForViewer = query({
+  args: { runId: v.string(), projectId: v.id("projects") },
+  handler: async (ctx, { runId, projectId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccessProject(project, identity)) return null;
+
     return await ctx.db
       .query("agentRuns")
       .withIndex("by_projectId_and_runId", (q) =>

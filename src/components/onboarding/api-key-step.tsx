@@ -16,7 +16,7 @@ export function ApiKeyStep() {
   const [copied, setCopied] = useState(false);
   const [apiKey] = useState(getOneTimeApiKey);
   const envContent = useMemo(
-    () => (apiKey ? `FIVETOONE_API_KEY=${apiKey}\n` : ""),
+    () => (apiKey ? `TRACIFY_API_KEY=${apiKey}\n` : ""),
     [apiKey],
   );
 

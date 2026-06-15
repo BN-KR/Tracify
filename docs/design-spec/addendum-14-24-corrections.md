@@ -68,7 +68,7 @@ Status | Run ID | Spans | Cost | Duration | Model | Started
 ## §23 DOCS — Corrections
 
 **Deployment:** Separate subdomain `docs.5to1r.com`
-**Platform:** Mintlify or Nextra (dark theme, maintains 5to1r visual identity)
+**Platform:** Mintlify or Nextra (dark theme, maintains tracify visual identity)
 **Search:** Cmd+K
 
 ### Full Navigation Tree

@@ -10,10 +10,10 @@ from typing import Any, Callable, Dict, Optional, Union
 from contextlib import contextmanager, asynccontextmanager
 
 class FiveToOneClient:
-    def __init__(self, api_key: Optional[str] = None, host: str = "https://5to1r.com"):
-        self.api_key = api_key or os.environ.get("FIVETOONE_API_KEY")
+    def __init__(self, api_key: Optional[str] = None, host: str = "https://tracify.tech"):
+        self.api_key = api_key or os.environ.get("TRACIFY_API_KEY") or os.environ.get("FIVETOONE_API_KEY")
         if not self.api_key:
-            raise ValueError("FIVETOONE_API_KEY must be provided or set as an environment variable")
+            raise ValueError("TRACIFY_API_KEY or FIVETOONE_API_KEY must be provided or set as an environment variable")
         self.host = host.rstrip("/")
         self.ingest_url = f"{self.host}/api/ingest"
 
@@ -27,7 +27,7 @@ class FiveToOneClient:
             requests.post(self.ingest_url, headers=headers, json=span, timeout=2)
         except Exception as e:
             # Never crash the agent due to telemetry failure
-            print(f"5to1r Warning: Failed to ingest span: {e}")
+            print(f"Tracify Warning: Failed to ingest span: {e}")
 
     def ingest(self, **kwargs):
         span = {
@@ -54,6 +54,7 @@ def trace_agent(client: Optional[FiveToOneClient] = None):
             start_time = time.time()
             
             # Contextual runId for child spans (simplified for MVP)
+            os.environ["TRACIFY_CURRENT_RUN_ID"] = run_id
             os.environ["FIVETOONE_CURRENT_RUN_ID"] = run_id
             
             try:
@@ -87,6 +88,7 @@ def trace_agent(client: Optional[FiveToOneClient] = None):
             
             run_id = str(uuid.uuid4())
             start_time = time.time()
+            os.environ["TRACIFY_CURRENT_RUN_ID"] = run_id
             os.environ["FIVETOONE_CURRENT_RUN_ID"] = run_id
             
             try:
@@ -120,7 +122,7 @@ def trace_agent(client: Optional[FiveToOneClient] = None):
 def llm_call(input_data: Any, output_data: Any, model_id: str, cost_usd: float, latency_ms: int, client: Optional[FiveToOneClient] = None):
     if client is None: client = FiveToOneClient()
     client.ingest(
-        runId=os.environ.get("FIVETOONE_CURRENT_RUN_ID", "unknown"),
+        runId=os.environ.get("TRACIFY_CURRENT_RUN_ID") or os.environ.get("FIVETOONE_CURRENT_RUN_ID", "unknown"),
         spanType="llm_call",
         input=json.dumps(input_data) if not isinstance(input_data, str) else input_data,
         output=json.dumps(output_data) if not isinstance(output_data, str) else output_data,
@@ -132,7 +134,7 @@ def llm_call(input_data: Any, output_data: Any, model_id: str, cost_usd: float, 
 def tool_call(tool_name: str, input_data: Any, output_data: Any, latency_ms: int, client: Optional[FiveToOneClient] = None):
     if client is None: client = FiveToOneClient()
     client.ingest(
-        runId=os.environ.get("FIVETOONE_CURRENT_RUN_ID", "unknown"),
+        runId=os.environ.get("TRACIFY_CURRENT_RUN_ID") or os.environ.get("FIVETOONE_CURRENT_RUN_ID", "unknown"),
         spanType="tool_call",
         toolName=tool_name,
         input=json.dumps(input_data) if not isinstance(input_data, str) else input_data,
@@ -140,3 +142,5 @@ def tool_call(tool_name: str, input_data: Any, output_data: Any, latency_ms: int
         latencyMs=latency_ms,
         costUsd=0
     )
+
+TracifyClient = FiveToOneClient

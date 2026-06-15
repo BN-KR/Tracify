@@ -25,6 +25,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProjectStats } from "@/hooks/use-project-stats";
 import { formatCurrency } from "@/lib/utils";
+import { AnalyticsRefreshControl } from "./analytics-refresh-control";
 
 export function CostDashboard({ projectId }: { projectId: string }) {
   const summary = useQuery(api.projects.getProjectManagementSummary, {
@@ -36,25 +37,36 @@ export function CostDashboard({ projectId }: { projectId: string }) {
     summary?.totals.totalRuns ??
     summary?.totals.totalSpans ??
     null;
-  const { stats, loading: loadingStats } = useProjectStats({
+  const {
+    stats,
+    loading: loadingStats,
+    refreshing,
+    refreshStats,
+  } = useProjectStats({
     projectId,
     range,
     liveRefreshKey,
   });
 
   const totalSpend = useMemo(() => {
-    const tinybirdTotal =
+    const analyticsTotal =
       stats?.dailyCosts.reduce((sum, day) => sum + day.totalCostUsd, 0) ?? 0;
-    return stats?.unavailable ? summary?.totals.totalCostUsd || 0 : tinybirdTotal;
+    return stats?.unavailable ? summary?.totals.totalCostUsd || 0 : analyticsTotal;
   }, [stats, summary]);
 
+  const chartDailyCosts = useMemo(() => {
+    const analyticsDailyCosts = stats?.dailyCosts ?? [];
+    return analyticsDailyCosts.length
+      ? analyticsDailyCosts
+      : buildDailyCostSeries(range, summary?.recentRuns ?? []);
+  }, [range, stats, summary]);
+
   const costImpact = useMemo(() => {
-    const dailyCosts = stats?.dailyCosts ?? [];
     const peakSpend = Math.max(
-      ...dailyCosts.map((day) => day.totalCostUsd),
+      ...chartDailyCosts.map((day) => day.totalCostUsd),
       0,
     );
-    const chartData = dailyCosts.map((day) => ({
+    const chartData = chartDailyCosts.map((day) => ({
       ...day,
       baselineUsd: peakSpend,
       avoidedUsd: Math.max(peakSpend - day.totalCostUsd, 0),
@@ -77,7 +89,7 @@ export function CostDashboard({ projectId }: { projectId: string }) {
       peakDay,
       peakSpend,
     };
-  }, [stats]);
+  }, [chartDailyCosts]);
 
   if (summary === undefined || loadingStats) {
     return (
@@ -99,19 +111,47 @@ export function CostDashboard({ projectId }: { projectId: string }) {
   return (
     <div className="space-y-6">
       <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-6 shadow-none">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="font-mono text-[11px] uppercase tracking-widest text-[#666666]">
-              total spend
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="font-mono text-[11px] uppercase tracking-widest text-[#666666]">
+                total spend
+              </div>
+              <div className="mt-2 font-mono text-4xl text-white">
+                {formatCurrency(totalSpend)}
+              </div>
+              <p className="mt-2 font-mono text-[11px] text-[#777777]">
+                {chartDailyCosts.some((day) => day.totalCostUsd > 0)
+                  ? "Live analytics plus saved run summaries."
+                  : "Saved run summaries will appear here as runs arrive."}
+              </p>
             </div>
-            <div className="mt-2 font-mono text-4xl text-white">
-              {formatCurrency(totalSpend)}
+            <div className="flex flex-wrap items-center justify-end gap-3 lg:ml-auto">
+              <div className="flex gap-2">
+                {[7, 30, 90].map((days) => (
+                  <button
+                    key={days}
+                    type="button"
+                    onClick={() => setRange(days)}
+                    className={
+                      range === days
+                        ? "h-8 border border-white bg-white px-3 font-mono text-[11px] text-black"
+                        : "h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] text-[#777777] hover:text-white"
+                    }
+                  >
+                    {days}d
+                  </button>
+                ))}
+              </div>
+              <AnalyticsRefreshControl
+                stats={stats}
+                refreshing={refreshing}
+                onRefresh={refreshStats}
+              />
             </div>
-            <p className="mt-2 font-mono text-[11px] text-[#777777]">
-              {stats?.unavailable
-                ? "Using saved Convex run summaries until Tinybird analytics are available."
-                : "Live analytics plus saved run summaries."}
-            </p>
+          </div>
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
             <div className="mt-4 grid max-w-xl gap-2 sm:grid-cols-2">
               <InlineSavingsMetric
                 label="could have saved"
@@ -125,38 +165,23 @@ export function CostDashboard({ projectId }: { projectId: string }) {
               />
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[520px]">
-            <ImpactMetric
-              label="peak day"
-              value={formatCurrency(costImpact.peakSpend)}
-              sublabel={costImpact.peakDay?.day ?? "No data"}
-            />
-            <ImpactMetric
-              label="latest day"
-              value={formatCurrency(costImpact.latestSpend)}
-              sublabel="current run-rate"
-            />
-            <ImpactMetric
-              label="could save"
-              value={formatGraphCurrency(costImpact.couldSaveDailyUsd)}
-              sublabel="per day vs peak"
-            />
-          </div>
-          <div className="flex gap-2">
-            {[7, 30, 90].map((days) => (
-              <button
-                key={days}
-                type="button"
-                onClick={() => setRange(days)}
-                className={
-                  range === days
-                    ? "h-8 border border-white bg-white px-3 font-mono text-[11px] text-black"
-                    : "h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] text-[#777777] hover:text-white"
-                }
-              >
-                {days}d
-              </button>
-            ))}
+            <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[520px]">
+              <ImpactMetric
+                label="peak day"
+                value={formatCurrency(costImpact.peakSpend)}
+                sublabel={costImpact.peakDay?.day ?? "Current range"}
+              />
+              <ImpactMetric
+                label="latest day"
+                value={formatCurrency(costImpact.latestSpend)}
+                sublabel="current run-rate"
+              />
+              <ImpactMetric
+                label="could save"
+                value={formatGraphCurrency(costImpact.couldSaveDailyUsd)}
+                sublabel="per day vs peak"
+              />
+            </div>
           </div>
         </div>
       </Card>
@@ -176,88 +201,85 @@ export function CostDashboard({ projectId }: { projectId: string }) {
               shaded area = estimated avoided spend
             </div>
           </div>
-          {costImpact.chartData.length ? (
-            <div className="h-[340px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={costImpact.chartData}>
-                  <defs>
-                    <linearGradient id="avoidedGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#FFFFFF" stopOpacity={0.22} />
-                      <stop offset="95%" stopColor="#FFFFFF" stopOpacity={0.02} />
-                    </linearGradient>
-                    <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#FFFFFF" stopOpacity={0.55} />
-                      <stop offset="95%" stopColor="#FFFFFF" stopOpacity={0.08} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="#242424" vertical={false} />
-                  <XAxis
-                    dataKey="day"
-                    stroke="#666666"
-                    fontSize={10}
-                    tickFormatter={(value) =>
-                      new Date(value).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })
-                    }
-                  />
-                  <YAxis
-                    stroke="#666666"
-                    fontSize={10}
-                    tickFormatter={(value) => formatGraphCurrency(Number(value))}
-                  />
-                  <Tooltip
-                    formatter={(value, name) => [
-                      formatGraphCurrency(Number(value)),
-                      name === "totalCostUsd"
-                        ? "Spend"
-                        : name === "avoidedUsd"
-                          ? "Avoided"
-                          : "Peak baseline",
-                    ]}
-                    labelFormatter={(value) =>
-                      new Date(value).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })
-                    }
-                    contentStyle={{
-                      backgroundColor: "#0A0A0A",
-                      border: "1px solid #2A2A2A",
-                      borderRadius: "0px",
-                      fontFamily: "var(--font-geist-mono)",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="avoidedUsd"
-                    stroke="#555555"
-                    strokeWidth={1}
-                    fill="url(#avoidedGradient)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="totalCostUsd"
-                    stroke="#FFFFFF"
-                    strokeWidth={2}
-                    fill="url(#spendGradient)"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="baselineUsd"
-                    stroke="#71717A"
-                    strokeDasharray="4 4"
-                    strokeWidth={1}
-                    dot={false}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <EmptyCostState projectId={projectId} />
-          )}
+          <div className="h-[340px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={costImpact.chartData}>
+                <defs>
+                  <linearGradient id="avoidedGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#FFFFFF" stopOpacity={0.22} />
+                    <stop offset="95%" stopColor="#FFFFFF" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="spendGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#FFFFFF" stopOpacity={0.55} />
+                    <stop offset="95%" stopColor="#FFFFFF" stopOpacity={0.08} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="#242424" vertical={false} />
+                <XAxis
+                  dataKey="day"
+                  stroke="#666666"
+                  fontSize={10}
+                  tickFormatter={(value) =>
+                    new Date(value).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }
+                />
+                <YAxis
+                  stroke="#666666"
+                  fontSize={10}
+                  domain={[0, "auto"]}
+                  tickFormatter={(value) => formatGraphCurrency(Number(value))}
+                />
+                <Tooltip
+                  formatter={(value, name) => [
+                    formatGraphCurrency(Number(value)),
+                    name === "totalCostUsd"
+                      ? "Spend"
+                      : name === "avoidedUsd"
+                        ? "Avoided"
+                        : "Peak baseline",
+                  ]}
+                  labelFormatter={(value) =>
+                    new Date(value).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }
+                  contentStyle={{
+                    backgroundColor: "#0A0A0A",
+                    border: "1px solid #2A2A2A",
+                    borderRadius: "0px",
+                    fontFamily: "var(--font-geist-mono)",
+                    fontSize: "12px",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="avoidedUsd"
+                  stroke="#555555"
+                  strokeWidth={1}
+                  fill="url(#avoidedGradient)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="totalCostUsd"
+                  stroke="#FFFFFF"
+                  strokeWidth={2}
+                  fill="url(#spendGradient)"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="baselineUsd"
+                  stroke="#71717A"
+                  strokeDasharray="4 4"
+                  strokeWidth={1}
+                  dot={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </Card>
 
         <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-6 shadow-none">
@@ -404,22 +426,30 @@ function formatGraphCurrency(value: number) {
   }).format(value);
 }
 
-function EmptyCostState({ projectId }: { projectId: string }) {
-  return (
-    <div className="flex min-h-[280px] flex-col items-center justify-center border border-dashed border-[#2A2A2A] p-6 text-center">
-      <div className="font-mono text-sm uppercase tracking-widest text-white">
-        No cost data for this period.
-      </div>
-      <Link
-        href={`/dashboard/${projectId}/quickstart`}
-        className={buttonVariants({
-          variant: "outline",
-          size: "sm",
-          className: "mt-4 text-[11px] uppercase",
-        })}
-      >
-        View quickstart
-      </Link>
-    </div>
+type CostSeriesRun = {
+  startedAt: string;
+  totalCostUsd: number;
+  spanCount: number;
+};
+
+function buildDailyCostSeries(range: number, runs: CostSeriesRun[]) {
+  const today = new Date();
+  const days = Array.from({ length: range }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (range - 1 - index));
+    return date.toISOString().slice(0, 10);
+  });
+  const byDay = new Map(
+    days.map((day) => [day, { day, totalCostUsd: 0, spanCount: 0 }]),
   );
+
+  for (const run of runs) {
+    const day = new Date(run.startedAt).toISOString().slice(0, 10);
+    const bucket = byDay.get(day);
+    if (!bucket) continue;
+    bucket.totalCostUsd += run.totalCostUsd;
+    bucket.spanCount += run.spanCount;
+  }
+
+  return days.map((day) => byDay.get(day)!);
 }

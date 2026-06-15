@@ -8,7 +8,7 @@ export function Footer() {
         <div className="flex flex-col items-start justify-between gap-12 md:flex-row md:items-center">
           <div className="flex flex-col gap-4">
             <Link href="/" className="font-pixel text-lg text-white">
-              5to1r
+              tracify
             </Link>
             <p className="max-w-xs font-mono text-[11px] uppercase tracking-widest text-zinc-500">
               Agent observability infrastructure for serious builders.
@@ -20,7 +20,7 @@ export function Footer() {
               <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white">Product</span>
               <div className="flex flex-col gap-2">
                 <Link href="/pricing" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Pricing</Link>
-                <Link href="/changelog" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Changelog</Link>
+                <Link href="/blog" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Blog</Link>
                 <Link href="/docs" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Documentation</Link>
               </div>
             </div>
@@ -36,8 +36,8 @@ export function Footer() {
             <div className="flex flex-col gap-4">
               <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white">Contact</span>
               <div className="flex flex-col gap-2">
-                <Link href="https://x.com/5to1r" target="_blank" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">X / Twitter</Link>
-                <Link href="mailto:hello@5to1r.com" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Email</Link>
+                <Link href="https://x.com/tracify" target="_blank" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">X / Twitter</Link>
+                <Link href="mailto:hello@tracify.tech" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Email</Link>
               </div>
             </div>
           </div>
@@ -45,7 +45,7 @@ export function Footer() {
 
         <div className="mt-24 flex flex-col items-start justify-between gap-6 border-t border-zinc-900 pt-8 md:flex-row md:items-center">
           <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-zinc-600">
-            © {new Date().getFullYear()} 5to1r. Built for the next trillion spans.
+            © {new Date().getFullYear()} tracify. Built for the next trillion spans.
           </p>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">

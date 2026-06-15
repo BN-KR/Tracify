@@ -5,21 +5,21 @@ import Link from "next/link";
 import { Show, SignOutButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { DropdownNavigation, type NavItem } from "./dropdown-navigation";
-import { 
-  Activity, 
-  BarChart3, 
-  RotateCcw, 
-  Wrench, 
-  Cpu, 
-  AlertTriangle, 
-  Search, 
-  MessageSquare, 
-  Workflow, 
-  Terminal, 
-  BookOpen, 
-  Code2, 
-  Braces, 
-  FileCode 
+import {
+  Activity,
+  BarChart3,
+  FileText,
+  Wrench,
+  Cpu,
+  AlertTriangle,
+  Search,
+  MessageSquare,
+  Workflow,
+  Terminal,
+  BookOpen,
+  Code2,
+  Braces,
+  FileCode
 } from "lucide-react";
 
 const NAV_ITEMS: NavItem[] = [
@@ -43,10 +43,10 @@ const NAV_ITEMS: NavItem[] = [
             icon: BarChart3,
           },
           {
-            label: "Run Replay",
-            description: "Step through failures exactly as they happened.",
-            href: "/product/run-replay",
-            icon: RotateCcw,
+            label: "Reports",
+            description: "Print activity, cost, alerts, and failed-trace proof.",
+            href: "/pricing",
+            icon: FileText,
           },
         ],
       },
@@ -169,7 +169,7 @@ export function Navbar() {
           <div
             className="font-pixel text-lg text-white"
           >
-            5to1r
+            tracify
           </div>
         </Link>
 

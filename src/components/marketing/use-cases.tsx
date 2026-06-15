@@ -5,6 +5,61 @@ import { motion, useInView } from "framer-motion";
 
 const USE_CASES = [
   {
+    label: "DEVELOPERS",
+    headline: "Debug multi-step agents without reading raw logs",
+    problem: "Install the SDK, send spans, inspect the trace, copy payloads, and see exactly which model or tool call failed.",
+    logs: [
+      "> pip install tracify",
+      "> span accepted",
+      "> trace ready",
+      "> copy_payload input"
+    ]
+  },
+  {
+    label: "AI STARTUPS",
+    headline: "Explain reliability and cost before customers ask",
+    problem: "Track cost over time, model usage, failed runs, and expensive traces so production agents do not become a black box.",
+    logs: [
+      "> daily_cost: $42.18",
+      "> failed_runs: 3",
+      "> model_breakdown ready",
+      "> reliability_report generated"
+    ]
+  },
+  {
+    label: "AI AGENCIES",
+    headline: "Show clients what their workflows did in production",
+    problem: "Label projects by client, collect proof of failures and fixes, and print reports that stakeholders can understand.",
+    logs: [
+      "> client_label: acme",
+      "> report_notes saved",
+      "> notable_failed_trace linked",
+      "> stakeholder_report printed"
+    ]
+  },
+  {
+    label: "INTERNAL TEAMS",
+    headline: "Operate shared agents with access control and alerts",
+    problem: "Give product, engineering, and operations one view of runs, costs, Slack alerts, settings, and project ownership.",
+    logs: [
+      "> org_members synced",
+      "> slack_threshold active",
+      "> api_key_rotated",
+      "> read_all_alerts"
+    ]
+  },
+  {
+    label: "OPERATORS",
+    headline: "Catch failures before users escalate them",
+    problem: "Watch failed runs, cost spikes, stalls, retries, and alert status from the same dashboard used for trace triage.",
+    logs: [
+      "> cost_exceeded",
+      "> run_failed",
+      "> alert unread",
+      "> trace opened"
+    ]
+  },
+  {
     label: "RESEARCH",
     headline: "Agents that browse, summarize, and synthesize information",
     problem: "They call multiple tools, retry queries, and generate inconsistent outputs. You don’t know which step failed or why the answer changed.",
@@ -18,7 +73,7 @@ const USE_CASES = [
   {
     label: "SUPPORT",
     headline: "Agents handling user conversations in production",
-    problem: "Context grows, responses drift, and failures are unpredictable. When something breaks, you can’t replay what the agent saw.",
+    problem: "Context grows, responses drift, and failures are unpredictable. When something breaks, you need the exact trace of what the agent saw.",
     logs: [
       "> tokens_consumed: 12,402",
       "> drift_detected (confidence: 0.12)",
@@ -60,7 +115,7 @@ function UseCaseItem({ item, isLast }: { item: typeof USE_CASES[0], isLast: bool
   };
 
   return (
-    <div 
+    <div
       ref={ref}
       className={`w-full py-12 border-t border-[#1A1A1A] transition-opacity duration-500 ${isInView ? 'opacity-100' : 'opacity-20'}`}
     >
@@ -83,7 +138,7 @@ function UseCaseItem({ item, isLast }: { item: typeof USE_CASES[0], isLast: bool
         {/* Visual Logs */}
         <div className="bg-[#0A0A0A] border border-[#1A1A1A] p-4 flex flex-col gap-1.5 min-h-[100px]">
           {item.logs.map((log, i) => (
-            <motion.div 
+            <motion.div
               key={i}
               initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 1 } : { opacity: 0 }}
@@ -91,7 +146,7 @@ function UseCaseItem({ item, isLast }: { item: typeof USE_CASES[0], isLast: bool
               className="font-mono text-[10px] whitespace-nowrap overflow-hidden"
               style={{ color: getLogColor(log) }}
             >
-              <span className="text-[#222222] mr-2">0{i+1}</span>
+              <span className="text-[#222222] mr-2">0{i + 1}</span>
               {log}
             </motion.div>
           ))}
@@ -103,44 +158,44 @@ function UseCaseItem({ item, isLast }: { item: typeof USE_CASES[0], isLast: bool
 
 export function UseCases() {
   return (
-    <section 
+    <section
       className="w-full py-16"
       style={{ backgroundColor: "#050505" }}
     >
       <div className="mx-auto w-full px-6 md:px-8 max-w-[1200px]">
-        
+
         {/* Header */}
         <div className="mb-12">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             className="font-mono text-[12px] uppercase tracking-[0.3em] mb-6"
             style={{ color: "#666666" }}
           >
-            APPLICATIONS
+            WHO USES TRACIFY?
           </motion.div>
           <motion.h2
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             className="font-pixel font-bold text-white mb-6 uppercase tracking-tighter"
-            style={{ 
+            style={{
               fontFamily: "var(--font-pixel)",
               fontSize: "clamp(32px, 5vw, 44px)"
             }}
           >
-            Built for complexity.
+            Built for agent builders and operators.
           </motion.h2>
         </div>
 
         {/* List */}
         <div className="flex flex-col">
           {USE_CASES.map((item, i) => (
-            <UseCaseItem 
-              key={i} 
-              item={item} 
-              isLast={i === USE_CASES.length - 1} 
+            <UseCaseItem
+              key={i}
+              item={item}
+              isLast={i === USE_CASES.length - 1}
             />
           ))}
         </div>

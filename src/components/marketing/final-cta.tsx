@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 /**
  * FinalCTA Component
  * 
- * A compact, terminal-styled conversion section for the 5to1r landing page.
+ * A compact, terminal-styled conversion section for the tracify landing page.
  * Follows a strict monochrome, 0px radius, and developer-grade aesthetic.
  */
 export function FinalCTA() {
@@ -31,14 +31,14 @@ export function FinalCTA() {
 
   const lineVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: { duration: 0.2 }
     },
   };
 
   return (
-    <section 
+    <section
       id="final-cta"
       className="py-[80px] pb-[96px] px-6 mx-auto max-w-[1200px] w-full"
       style={{ backgroundColor: "#050505" }}
@@ -60,7 +60,7 @@ export function FinalCTA() {
         {/* Right Content: 45% */}
         <div className="w-full md:w-[45%] flex flex-col gap-8 md:pl-10 justify-between">
           {/* Command Snippet */}
-          <motion.div 
+          <motion.div
             initial="hidden"
             animate={isVisible ? "visible" : "hidden"}
             variants={terminalVariants}
@@ -69,11 +69,11 @@ export function FinalCTA() {
             <div className="flex flex-col gap-1">
               <motion.div variants={lineVariants} className="flex gap-2">
                 <span className="text-[#666666] shrink-0">$</span>
-                <span className="text-[#999999]">pip install 5to1r</span>
+                <span className="text-[#999999]">pip install tracify</span>
               </motion.div>
               <motion.div variants={lineVariants} className="flex gap-2">
                 <span className="text-[#666666] shrink-0">$</span>
-                <span className="text-[#999999]">npm install 5to1r</span>
+                <span className="text-[#999999]">npm install tracify</span>
               </motion.div>
               <motion.div variants={lineVariants} className="flex gap-2">
                 <span className="text-[#666666] shrink-0">$</span>

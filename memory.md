@@ -1,9 +1,9 @@
 # Project Memory
 
 ## Overview
-- Last Synced: 2026-05-17T00:19:00Z
-- Purpose: 5to1r — Agent Observability Platform (Full visibility into AI agent steps, decisions, cost, failures).
-- Stack: Next.js 16 (App Router), Clerk (Auth/Orgs), Convex (App DB), Tinybird (Telemetry Storage), Inngest (Background Jobs).
+- Last Synced: 2026-06-15T01:30:00Z
+- Purpose: tracify — Agent Observability Platform (Full visibility into AI agent steps, decisions, cost, failures).
+- Stack: Next.js 16 (App Router), Clerk (Auth/Orgs), Convex (App DB), Tinybird (Telemetry Storage), Redis (API cache), Inngest (Background Jobs).
 
 ## Architecture
 - **Auth:** Clerk handles user and organization auth. Now uses **Keyless mode** for local development.
@@ -12,7 +12,7 @@
 - **Ingestion Pipeline:** SDK calls POST `/api/ingest` -> Inngest event -> validates, writes to Tinybird, upserts rollups to Convex, triggers alerts.
 - **Typography:** Uses **Geist Pixel Square** for logos (regular weight, normal tracking) and H1 headers, Geist Mono for UI/Data, and Geist Sans for prose.
 - **Aesthetics:** Strict "Developer-grade" look: **0px border radius**, monochrome palette (#000000 bg, #FFFFFF primary), and **Emil Kowalski** design engineering principles (tactile feedback, micro-animations, polish).
-- **Branding:** Adopted a "skinnier" text-based logo aesthetic (text-lg, regular weight) across all surfaces. Global controls (Project Switcher, Account, Breadcrumbs) are consolidated in the **Dashboard Topbar** to keep the sidebar focused on navigation.
+- **Branding:** Site UI rebranded to **tracify** (lowercase logo with Geist Pixel Square, same monochrome styling). SDK packages already use `tracify`; internal storage keys and Inngest event IDs retain legacy `5to1r` prefixes for compatibility.
 - **Navigation:** Integrated a custom monochromatic `DropdownMenu` for both Project Switching and Account management in the topbar.
 - **Legal:** Dedicated `/privacy` and `/terms` pages with a minimalist, linked **Footer** component.
 - **Auth:** Google OAuth credentials configured in `.env.prod`, `.env.local`, and Vercel production variables.
@@ -36,6 +36,108 @@
 - **Environment:** Created `.env.prod` template for streamlined Vercel deployment. Isolated local dev via Tinybird `dev` branch.
 
 ## Recent Important Changes
+- **Site Rebrand to Tracify (2026-06-14):**
+  - **UI:** Marketing, auth, onboarding, dashboard, legal pages, and Slack alert copy now show **tracify** branding with unchanged monochrome styling (Geist Pixel Square logo, 0px radius, black/white palette).
+  - **Env copy:** Onboarding and quickstart surfaces now show `TRACIFY_API_KEY` instead of `FIVETOONE_API_KEY`.
+  - **Links:** Public docs/social/email links use **tracify.tech** domains.
+  - **Unchanged:** localStorage keys, Inngest app/event IDs, and backend env var fallbacks kept for compatibility.
+
+- **Tracify SDK Package Rename (2026-06-14):**
+  - **Public Packages:** Python distribution and TypeScript npm package metadata now use `tracify`.
+  - **Install Copy:** Marketing CTA, dashboard docs, SDK READMEs, quickstart docs, design specs, and project-manager summary now show `pip install tracify` and `npm install tracify`.
+  - **Imports:** Added Python `tracify` import package that re-exports the existing SDK, and added TypeScript `TracifyClient` export while preserving legacy `fivetoone` / `FiveToOneClient` compatibility.
+  - **Environment:** SDKs now prefer `TRACIFY_API_KEY` and `TRACIFY_CURRENT_RUN_ID`, with fallbacks for existing `FIVETOONE_*` variables.
+  - **Verification:** `npm run build` passes for the TypeScript SDK and full Next app. Python import smoke test passes using the repo virtualenv with local `PYTHONPATH`.
+
+- **Marketing Repositioning, Pricing, and Beta Smoke Script (2026-05-21):**
+  - **Positioning:** Landing hero copy now centers the broader niche: agent observability for production AI workflows, with concrete language around what the agent did, why it failed, cost, and what to fix next.
+  - **Audience:** Use-case section now explicitly covers developers, AI startups, AI agencies, internal teams, and operators before agent-type examples.
+  - **Honest Pricing:** Added `/pricing` and rewrote the landing pricing teaser around Free/Pro/Team/Enterprise beta states without claiming replay, evals, email alerts, self-hosting, PDF export, or runtime controls as currently working.
+  - **Navigation:** Marketing navigation no longer advertises Run Replay as a product surface; it points to reports instead.
+  - **Smoke Tests:** Added `npm run smoke:beta` using `scripts/beta-smoke.mjs` for missing API key, invalid API key, invalid payload, protected route reachability, and optional valid-span/Convex-run verification when smoke env vars are provided.
+  - **Verification:** `npm run build`, `node --check scripts\beta-smoke.mjs`, and default `npm run smoke:beta` pass. Default smoke skips valid ingest/run checks until `FIVETOONE_SMOKE_API_KEY` and `FIVETOONE_SMOKE_PROJECT_ID` are set.
+
+- **Reports, Honest Billing, and Tinybird Pipe Prep (2026-05-20):**
+  - **Reports:** Added `/dashboard/[projectId]/reports` with a print-friendly project report covering run totals, failed runs, saved cost, span count, top models, top tools, recent alerts, and notable failed traces.
+  - **Project Metadata:** Added optional `clientName` and `reportNotes` project fields, surfaced in settings, so agencies/internal teams can label stakeholder reports without changing ingest payloads.
+  - **Billing:** Replaced hardcoded billing usage and nonfunctional upgrade buttons with real Convex saved usage, current `planTier`, and beta "Join beta" states while Stripe remains unconnected.
+  - **Analytics:** Extended stats cache/API responses with Tinybird-backed tool cost breakdowns and adjusted the daily Tinybird read reservation from 2 to 3 reads for stats refreshes.
+  - **Tinybird:** Added endpoint pipe definitions for `spans_by_run` and `recent_runs_summary` under `tinybird/endpoints/`.
+  - **Verification:** `npx convex codegen` and `npm run build` pass.
+
+- **Settings, Alerts, and RBAC Hardening (2026-05-18):**
+  - **Settings Validation:** Project settings now validate project name, non-negative cost thresholds, positive integer duration/stall thresholds, and Slack webhook URLs on both client and Convex mutation paths.
+  - **Slack Test:** Settings includes a guarded "Send test alert" action that posts to the saved Slack webhook only for admins.
+  - **RBAC:** Project settings updates, API key rotation, and project deletion now require project owner, configured app admin, or Clerk org admin access; comments require developer/admin style access.
+  - **Alerts:** Alert creation deduplicates repeated run/type events, topbar alert clicks mark individual alerts read, and alert/comment queries now enforce project access.
+  - **Runs Search:** Runs search now performs an exact indexed runId lookup across saved project runs in addition to loaded-page filtering.
+  - **Teams:** Settings members now renders Clerk organization membership data instead of placeholder teammates.
+  - **Verification:** `npx convex codegen` and `npm run build` pass.
+
+- **Trace Viewer Product Polish (2026-05-18):**
+  - **Core UX:** Added a compact span latency overview above the timeline so a developer can scan trace shape before opening individual spans.
+  - **Inspection:** Input/output payload panels now have copy buttons with immediate copied feedback.
+  - **Debugging:** Error spans auto-expand, and empty completed traces now show a clear inline empty state instead of a blank timeline.
+  - **Summary:** Added a right-side trace summary panel with cost/latency metrics plus model and tool breakdowns.
+  - **Verification:** `npm run build` passes.
+
+- **Alert Read State + Visibility (2026-05-18):**
+  - **Backend:** Added optional `alerts.readAt` and public `alerts:markAllRead`, guarded by the same Clerk project access check as alert listing.
+  - **UX:** Topbar bell now counts unread alerts only, highlights when unread notifications exist, and exposes a `Read all` action in the popup.
+  - **UX:** Unread popup rows have a stronger border/background, a left accent rail, and a `New` label so fresh notifications are easier to spot.
+  - **Verification:** `npx convex codegen`, `npx convex dev --once`, and `npm run build` pass.
+
+- **Alerts Popup Conversion (2026-05-18):**
+  - **UX:** Converted the dashboard Alerts entry from a primary sidebar/page destination into a topbar bell popup showing recent alerts inline.
+  - **Navigation:** Removed Alerts from the primary dashboard sidebar. The old `/dashboard/[projectId]/alerts` route remains as a compatibility redirect back to the project overview.
+  - **Security:** Hardened `alerts:listByProject` to verify Clerk identity has access to the project before returning alerts.
+  - **Verification:** `npx convex codegen`, `npx convex dev --once`, and `npm run build` pass.
+
+- **Dashboard Runs Pagination (2026-05-18):**
+  - **Backend:** Added Convex `agentRuns:getRunsPageByProject` using `paginationOptsValidator`, project access checks, and server-side status filtering.
+  - **Backend:** Added bounded `agentRuns:getRunCountsByProject` so pagination can show total pages for the active status filter. Counts are capped at 1,000 and should become denormalized counters for large production projects.
+  - **UI:** Runs table now uses Convex paginated results instead of a fixed 25-run query.
+  - **Controls:** Added rows-per-page controls for 10/25/50 runs, Prev/Next buttons, and a `Page X of Y` indicator.
+  - **Behavior:** Duration still ticks client-side for running runs; status filters reset to page 1 and search applies within loaded results.
+  - **Verification:** `npx convex codegen` and `npm run build` pass.
+
+- **Dashboard Analytics Empty-State Polish (2026-05-18):**
+  - **UX Copy:** Removed the visible `Analytics temporarily unavailable; showing cached data` label from dashboard refresh controls and trace span status copy.
+  - **Controls:** Overview and Costs range selectors plus manual refresh controls are right-aligned in the dashboard header/control area.
+  - **Charts:** Overview and Costs now always render a date series for the selected range. Analytics data wins when available; saved Convex run summaries are used when analytics is empty; a zero baseline renders when no runs exist yet.
+  - **Verification:** `npm run build` passes.
+
+- **Low-Query Analytics Refresh (2026-05-17):**
+  - **Goal:** Keep Tinybird read volume under 1,000/day while preserving a live-feeling dashboard.
+  - **Stats Cache:** Added Convex-backed `analyticsStatsCache` keyed by project/range with 10-minute fresh TTL, 24-hour stale fallback, and metadata used by Overview/Costs labels.
+  - **Budget Guard:** Added `tinybirdReadBudget` with stats refresh reservations counting 2 Tinybird reads, soft protection near 850/day, and hard protection near 980/day.
+  - **Manual Refresh:** Overview and Costs now expose an explicit Refresh button and status copy; repeated manual refreshes cool down for 30 seconds.
+  - **Polling Removed:** `useProjectStats` no longer does 4-second Tinybird polling. It fetches on load/range/visibility and only performs controlled stale refreshes from Convex activity.
+  - **Span Cache:** Run span responses are cached in Convex; running traces use cached spans by default and expose `Refresh spans`.
+  - **Live Durations:** Runs table and trace viewer durations now tick with a client timer from Convex run timestamps, without Tinybird requests.
+  - **Verification:** `npx convex codegen` and `npm run build` pass.
+
+- **Redis Analytics Cache Layer (2026-05-17):**
+  - **Goal:** Prevent empty analytics screens when the analytics backend is unavailable before Convex has a warm cache.
+  - **Dependency:** Installed `redis` and added `REDIS_URL` support for server route handlers.
+  - **Stats Route:** `/api/projects/[projectId]/stats` now verifies project access, reads fresh Redis cache before spending analytics reads, writes successful analytics responses to Redis, and uses stale Redis cache before returning an empty analytics payload.
+  - **Spans Route:** `/api/projects/[projectId]/runs/[runId]/spans` now caches span responses in Redis; running traces use a 30-second fresh window and otherwise require manual refresh while terminal traces can reuse cached data for 24 hours.
+  - **Security:** Redis responses are only served after existing Clerk/Convex project or run access checks pass. The real Redis URL is local-env only; `.env.local.example` contains a placeholder.
+  - **Verification:** `npm run build` passes and a Redis smoke test writes/reads a temporary key successfully.
+
+- **Project Manager Summary Document (2026-05-17):**
+  - **File:** Added `docs/project-manager-project-summary.md` as a detailed handoff summary for non-implementation stakeholders.
+  - **Scope:** Captures product status, architecture, implemented dashboard areas, Convex functions, API routes, Inngest/Tinybird pipeline, SDK/package status, deployment lessons, major bug fixes, and open production-beta work.
+  - **Purpose:** Gives a project manager enough context to track what has shipped, what is verified, and what remains without reading the full codebase.
+
+- **Run Cancellation + Clickable Dashboard Breadcrumbs (2026-05-17):**
+  - **Run Control:** Added a guarded `agentRuns:cancelRun` Convex mutation that can mark a running saved run summary as `cancelled` after verifying Clerk identity and project access.
+  - **UI:** Runs table and trace detail now expose a two-step stop/cancel control for running traces; completed, failed, and cancelled runs remain terminal and are not overwritten by later ingest updates.
+  - **Navigation:** Dashboard topbar breadcrumbs are clickable for parent levels. `Dashboard` returns to the active project overview, and nested section crumbs like `runs` return to the section list while the current leaf remains plain text.
+  - **Limit:** Cancellation currently stops the observed dashboard run state only; it does not terminate a user's external agent process until SDK/runtime cancellation polling is added.
+  - **Deployment Note:** The stop button requires the Convex deployment to have `agentRuns:cancelRun`; after the frontend error, both dev `diligent-dragon-604` and prod `focused-otter-289` were synced and verified with `convex function-spec`.
+  - **Verification:** `npm run build` passes.
+
 - **Hybrid Dashboard Refresh Strategy (2026-05-17):**
   - **Goal:** Make dashboard stats feel closer to 1-second updates without permanently polling Tinybird every second.
   - **Approach:** Added shared `useProjectStats` hook for Overview and Costs that keeps 4-second visible-tab polling as a fallback.
@@ -321,8 +423,33 @@
   - **Purpose:** Transition from "learning" to "immediate action" after the pricing section.
 - **Full Frontend Design Package:** Complete 40-section design spec written to `docs/design-spec/`. Covers design tokens, all 30+ pages, component system, copy, SEO, file structure, build prompts, and QA checklist. Key decisions: `#0A0A0A` bg, `#6366F1` accent, 0px radius, Geist Pixel for logo, tagline "Five signals. One truth.", free tier 50K spans/month.
 
+- **Project Rename 5to1r → tracify (2026-06-15):**
+  - **Goal:** Complete the project/product rename from `5to1r` to `tracify`.
+  - **Change:** Updated `package.json` name to `tracify`.
+  - **Change:** Updated all source code comments and visible product name references in docs.
+  - **Change:** Updated `pyproject.toml` bug tracker URL to `github.com/tracify/python-sdk`.
+  - **Change:** Updated Tinybird pipe/datasource descriptions.
+  - **Change:** Updated Convex test alert text.
+  - **Retained:** Internal localStorage keys, Inngest event IDs (`5to1r/span.received`, `5to1r/alert.triggered`), and scratch scripts preserve legacy `5to1r` prefixes for backward compatibility.
+  - **Verification:** `npm run build` pending.
+
+- **Blog CMS via Sanity (2026-06-15):**
+  - **Goal:** Add a headless CMS-powered blog to tracify using Sanity.io (free tier).
+  - **Schema:** Blog post schema in `sanity/schemas/post.ts` with title, slug, author, publishedAt, excerpt, coverImage, categories, tags, rich body (Portable Text + code blocks), and a full SEO object (metaTitle, metaDescription, ogImage, canonicalUrl).
+  - **Client:** `src/lib/sanity/client.ts` – Sanity client with image URL builder. Gracefully handles missing env vars.
+  - **Queries:** `src/lib/sanity/queries.ts` – GROQ queries for listing, single post, slugs, recent posts, and category filtering.
+  - **Blog Listing (`/blog`):** Static page with post cards (cover image, title, date, author, excerpt, categories), responsive layout, and empty/not-configured states.
+  - **Blog Post (`/blog/[slug]`):** SSG with `generateStaticParams`. Full rich text rendering via `@portabletext/react`. JSON-LD structured data for BlogPosting schema. SEO metadata via `generateMetadata` with Open Graph, Twitter cards, and canonical URL.
+  - **RSS Feed (`/blog/rss.xml`):** Static RSS 2.0 feed with all published posts.
+  - **Sitemap (`/sitemap.xml`):** Includes blog posts with `weekly` change frequency.
+  - **Footer:** Added "Blog" link to the marketing footer.
+  - **Env vars required:** `NEXT_PUBLIC_SANITY_PROJECT_ID`, `NEXT_PUBLIC_SANITY_DATASET`, `NEXT_PUBLIC_SANITY_API_VERSION`.
+  - **Setup:** User needs to create a free Sanity project at sanity.io, get the project ID, and add it to `.env.local`. The Sanity Studio is accessed via Sanity's hosted platform (responsive web app works on mobile for posting from phone).
+  - **Verification:** `npm run build` passes.
+
 ## Active Priorities
-- **Phase 2.0: Trace Viewer.**
-- Build the hierarchical Gantt timeline for agent runs.
-- Implement the telemetry sidebar for detailed span inspection.
-- Ensure strict monochrome and 0px radius are maintained in the complex data visualization.
+- **Phase 2.1: Beta Reliability and Proof.**
+- Deploy and validate Tinybird endpoint pipes in the active Tinybird workspace.
+- Run full beta smoke with a real API key/project id so valid ingest and Convex run creation are checked, not skipped.
+- Smoke test report page states with authenticated sessions: no data, normal runs, failed runs, and analytics-unavailable fallback.
+- Continue replacing beta placeholders with real usage, contact, or hidden states.

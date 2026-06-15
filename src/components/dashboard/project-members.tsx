@@ -12,7 +12,16 @@ interface ProjectMembersProps {
 }
 
 export function ProjectMembers({ projectId }: ProjectMembersProps) {
-  const { organization, isLoaded: orgLoaded } = useOrganization();
+  const {
+    organization,
+    isLoaded: orgLoaded,
+    memberships,
+  } = useOrganization({
+    memberships: {
+      pageSize: 50,
+      keepPreviousData: true,
+    },
+  });
   const { user, isLoaded: userLoaded } = useUser();
 
   if (!orgLoaded || !userLoaded) {
@@ -66,30 +75,36 @@ export function ProjectMembers({ projectId }: ProjectMembersProps) {
           <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">{organization.name} Members</h3>
           <p className="text-[11px] text-[#666666] mt-1">Manage who has access to this project.</p>
         </div>
-        <Button className="rounded-none font-mono text-[10px] uppercase gap-2">
+        <Button disabled className="rounded-none font-mono text-[10px] uppercase gap-2">
           <UserPlus className="size-4" /> Invite Member
         </Button>
       </div>
 
       <Card className="divide-y divide-[#2A2A2A] rounded-none border-border bg-[#111111] shadow-none">
-        {/* We would typically map over organization.memberships here if we had the memberships preloaded */}
-        {/* For now, we'll show a high-fidelity placeholder of the team state */}
-        <MemberRow 
-          name={user?.fullName || "You"} 
-          email={user?.primaryEmailAddress?.emailAddress || ""} 
-          role="Admin" 
-          isMe 
-        />
-        <MemberRow 
-          name="Sarah Chen" 
-          email="sarah@5to1r.com" 
-          role="Developer" 
-        />
-        <MemberRow 
-          name="Marcus Wright" 
-          email="marcus@5to1r.com" 
-          role="Viewer" 
-        />
+        {memberships?.data?.length ? (
+          memberships.data.map((membership) => {
+            const member = membership.publicUserData;
+            const name =
+              [member?.firstName, member?.lastName].filter(Boolean).join(" ") ||
+              member?.identifier ||
+              "Member";
+            const email = member?.identifier ?? "";
+
+            return (
+              <MemberRow
+                key={membership.id}
+                name={name}
+                email={email}
+                role={formatRole(membership.role)}
+                isMe={member?.userId === user?.id}
+              />
+            );
+          })
+        ) : (
+          <div className="p-4 font-mono text-[11px] uppercase tracking-widest text-[#666666]">
+            No organization members found.
+          </div>
+        )}
       </Card>
 
       <div className="p-4 border border-zinc-800/50 bg-zinc-900/10 flex items-start gap-4">
@@ -103,6 +118,13 @@ export function ProjectMembers({ projectId }: ProjectMembersProps) {
       </div>
     </div>
   );
+}
+
+function formatRole(role: string) {
+  if (role === "org:admin" || role === "admin") return "Admin";
+  if (role === "org:member" || role === "member") return "Developer";
+  if (role === "org:viewer" || role === "viewer") return "Viewer";
+  return role.replace(/^org:/, "").replace("_", " ");
 }
 
 function MemberRow({ name, email, role, isMe }: { name: string, email: string, role: string, isMe?: boolean }) {

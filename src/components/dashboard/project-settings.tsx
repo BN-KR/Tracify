@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, ArrowRight, Save } from "lucide-react";
+import { AlertCircle, ArrowRight, Send, Save } from "lucide-react";
 
 interface ProjectSettingsProps {
   projectId: string;
@@ -22,18 +22,25 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
   );
 
   const updateProject = useMutation(api.projects.updateProject);
+  const sendTestAlert = useAction(api.projects.sendTestAlert);
 
   const [name, setName] = useState("");
+  const [clientName, setClientName] = useState("");
+  const [reportNotes, setReportNotes] = useState("");
   const [costThreshold, setCostThreshold] = useState("");
   const [maxDuration, setMaxDuration] = useState("");
   const [maxStall, setMaxStall] = useState("");
   const [slackWebhookUrl, setSlackWebhookUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [testingSlack, setTestingSlack] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (project) {
       setName(project.name);
+      setClientName(project.clientName || "");
+      setReportNotes(project.reportNotes || "");
       setCostThreshold(project.costThresholdUsd?.toString() || "1.00");
       setMaxDuration(project.maxDurationSeconds?.toString() || "300");
       setMaxStall(project.maxStallMinutes?.toString() || "5");
@@ -42,21 +49,60 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
   }, [project]);
 
   async function handleSave() {
+    const parsed = validateSettings({
+      name,
+      clientName,
+      reportNotes,
+      costThreshold,
+      maxDuration,
+      maxStall,
+      slackWebhookUrl,
+    });
+    if (!parsed.ok) {
+      setNotice(null);
+      setError(parsed.error);
+      return;
+    }
+
     setSaving(true);
     setError(null);
+    setNotice(null);
     try {
       await updateProject({
         projectId: projectId as Id<"projects">,
-        name,
-        costThresholdUsd: parseFloat(costThreshold),
-        maxDurationSeconds: parseInt(maxDuration),
-        maxStallMinutes: parseInt(maxStall),
-        slackWebhookUrl: slackWebhookUrl || undefined,
+        name: parsed.value.name,
+        clientName: parsed.value.clientName,
+        reportNotes: parsed.value.reportNotes,
+        costThresholdUsd: parsed.value.costThresholdUsd,
+        maxDurationSeconds: parsed.value.maxDurationSeconds,
+        maxStallMinutes: parsed.value.maxStallMinutes,
+        slackWebhookUrl: parsed.value.slackWebhookUrl,
       });
+      setNotice("Settings saved");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update project");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleSendTestAlert() {
+    if (!isValidSlackWebhookUrl(slackWebhookUrl.trim())) {
+      setNotice(null);
+      setError("Add a valid Slack webhook URL before sending a test alert");
+      return;
+    }
+
+    setTestingSlack(true);
+    setError(null);
+    setNotice(null);
+    try {
+      await sendTestAlert({ projectId: projectId as Id<"projects"> });
+      setNotice("Test alert sent");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send test alert");
+    } finally {
+      setTestingSlack(false);
     }
   }
 
@@ -95,6 +141,27 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
               readOnly
               className="rounded-none border-zinc-800 bg-black text-zinc-500 font-mono h-10 cursor-not-allowed"
             />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Client / Workspace Label</label>
+              <Input
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                placeholder="Acme Support Agent"
+                className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Report Notes</label>
+              <Input
+                value={reportNotes}
+                onChange={(e) => setReportNotes(e.target.value)}
+                placeholder="Beta weekly reliability report"
+                className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              />
+            </div>
           </div>
         </div>
       </Card>
@@ -146,16 +213,28 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
             className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
           />
           <p className="text-[9px] text-zinc-600 font-mono uppercase">Alerts will be sent to this channel when thresholds are exceeded.</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleSendTestAlert}
+            disabled={testingSlack || !slackWebhookUrl.trim()}
+            className="mt-2 h-8 rounded-none border-zinc-800 font-mono text-[10px] uppercase"
+          >
+            <Send className="size-3" />
+            {testingSlack ? "Sending..." : "Send test alert"}
+          </Button>
         </div>
       </Card>
 
       <div className="flex items-center justify-between pt-4">
-        {error && (
+        {error ? (
           <div className="flex items-center gap-2 text-red-500 text-[11px] font-mono">
             <AlertCircle className="size-3" />
             {error}
           </div>
-        )}
+        ) : notice ? (
+          <div className="text-[11px] font-mono text-zinc-400">{notice}</div>
+        ) : null}
         <div />
         <Button 
           onClick={handleSave} 
@@ -187,4 +266,73 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
       </div>
     </div>
   );
+}
+
+function validateSettings(values: {
+  name: string;
+  clientName: string;
+  reportNotes: string;
+  costThreshold: string;
+  maxDuration: string;
+  maxStall: string;
+  slackWebhookUrl: string;
+}):
+  | {
+      ok: true;
+      value: {
+        name: string;
+        clientName?: string;
+        reportNotes?: string;
+        costThresholdUsd: number;
+        maxDurationSeconds: number;
+        maxStallMinutes: number;
+        slackWebhookUrl?: string;
+      };
+    }
+  | { ok: false; error: string } {
+  const name = values.name.trim();
+  const costThresholdUsd = Number(values.costThreshold);
+  const maxDurationSeconds = Number(values.maxDuration);
+  const maxStallMinutes = Number(values.maxStall);
+  const slackWebhookUrl = values.slackWebhookUrl.trim();
+
+  if (!name) return { ok: false, error: "Project name is required" };
+  if (!Number.isFinite(costThresholdUsd) || costThresholdUsd < 0) {
+    return { ok: false, error: "Cost threshold must be a non-negative number" };
+  }
+  if (!Number.isInteger(maxDurationSeconds) || maxDurationSeconds <= 0) {
+    return { ok: false, error: "Duration threshold must be a positive integer" };
+  }
+  if (!Number.isInteger(maxStallMinutes) || maxStallMinutes <= 0) {
+    return { ok: false, error: "Stall threshold must be a positive integer" };
+  }
+  if (slackWebhookUrl && !isValidSlackWebhookUrl(slackWebhookUrl)) {
+    return { ok: false, error: "Slack webhook must be a valid Slack webhook URL" };
+  }
+
+  return {
+    ok: true,
+    value: {
+      name,
+      clientName: values.clientName.trim() || undefined,
+      reportNotes: values.reportNotes.trim() || undefined,
+      costThresholdUsd,
+      maxDurationSeconds,
+      maxStallMinutes,
+      slackWebhookUrl: slackWebhookUrl || undefined,
+    },
+  };
+}
+
+function isValidSlackWebhookUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      url.hostname === "hooks.slack.com" &&
+      url.pathname.startsWith("/services/")
+    );
+  } catch {
+    return false;
+  }
 }

@@ -10,51 +10,79 @@ export type ProjectStats = {
     spanCount: number;
     avgLatencyMs?: number;
   }>;
+  toolCosts?: Array<{
+    toolName: string;
+    totalCostUsd: number;
+    spanCount: number;
+    avgLatencyMs?: number;
+  }>;
   unavailable?: boolean;
+  meta?: {
+    source: string;
+    cacheStatus: string;
+    reason?: string | null;
+    updatedAt: number | null;
+    ageMs: number | null;
+  };
 };
 
 type FetchOptions = {
   showLoading?: boolean;
   force?: boolean;
+  refresh?: "normal" | "manual";
 };
 
 const EMPTY_STATS: ProjectStats = {
   dailyCosts: [],
   modelCosts: [],
+  toolCosts: [],
   unavailable: true,
+  meta: {
+    source: "none",
+    cacheStatus: "unavailable",
+    reason: "empty",
+    updatedAt: null,
+    ageMs: null,
+  },
 };
 
 export function useProjectStats({
   projectId,
   range,
   liveRefreshKey,
-  pollMs = 4000,
 }: {
   projectId: string;
   range: number;
   liveRefreshKey?: string | number | null;
-  pollMs?: number;
 }) {
   const [stats, setStats] = useState<ProjectStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const inFlightKeyRef = useRef<string | null>(null);
   const cancelledRef = useRef(false);
   const hasSeenLiveKeyRef = useRef(false);
   const activeRequestKeyRef = useRef("");
 
   const fetchStats = useCallback(
-    async ({ showLoading = false, force = false }: FetchOptions = {}) => {
+    async ({
+      showLoading = false,
+      force = false,
+      refresh = "normal",
+    }: FetchOptions = {}) => {
       if (!projectId) return;
       if (!force && document.visibilityState === "hidden") return;
 
-      const requestKey = `${projectId}:${range}`;
+      const requestKey = `${projectId}:${range}:${refresh}`;
       if (inFlightKeyRef.current === requestKey) return;
       inFlightKeyRef.current = requestKey;
       if (showLoading) setLoading(true);
+      if (refresh === "manual") setRefreshing(true);
 
       try {
+        const params = new URLSearchParams({ days: range.toString() });
+        if (refresh === "manual") params.set("refresh", "manual");
         const response = await fetch(
-          `/api/projects/${projectId}/stats?days=${range}`,
+          `/api/projects/${projectId}/stats?${params.toString()}`,
           { cache: "no-store" },
         );
         const data = response.ok
@@ -62,7 +90,7 @@ export function useProjectStats({
           : EMPTY_STATS;
         if (
           !cancelledRef.current &&
-          activeRequestKeyRef.current === requestKey
+          activeRequestKeyRef.current === `${projectId}:${range}`
         ) {
           setStats(data);
         }
@@ -70,7 +98,7 @@ export function useProjectStats({
         console.error(error);
         if (
           !cancelledRef.current &&
-          activeRequestKeyRef.current === requestKey
+          activeRequestKeyRef.current === `${projectId}:${range}`
         ) {
           setStats(EMPTY_STATS);
         }
@@ -80,10 +108,11 @@ export function useProjectStats({
         }
         if (
           !cancelledRef.current &&
-          activeRequestKeyRef.current === requestKey
+          activeRequestKeyRef.current === `${projectId}:${range}`
         ) {
           setLoading(false);
         }
+        if (refresh === "manual") setRefreshing(false);
       }
     },
     [projectId, range],
@@ -95,9 +124,6 @@ export function useProjectStats({
     activeRequestKeyRef.current = `${projectId}:${range}`;
 
     void fetchStats({ showLoading: true, force: true });
-    const intervalId = window.setInterval(() => {
-      void fetchStats();
-    }, pollMs);
 
     function handleVisibilityChange() {
       if (document.visibilityState === "visible") {
@@ -109,10 +135,9 @@ export function useProjectStats({
 
     return () => {
       cancelledRef.current = true;
-      window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [fetchStats, pollMs]);
+  }, [fetchStats, projectId, range]);
 
   useEffect(() => {
     if (!liveRefreshKey) return;
@@ -122,18 +147,23 @@ export function useProjectStats({
       return;
     }
 
-    const quickRefreshId = window.setTimeout(() => {
-      void fetchStats({ force: true });
-    }, 750);
-    const settleRefreshId = window.setTimeout(() => {
-      void fetchStats({ force: true });
+    const staleRefreshId = window.setTimeout(() => {
+      const updatedAt = stats?.meta?.updatedAt;
+      const ageMs = updatedAt ? Date.now() - updatedAt : Number.POSITIVE_INFINITY;
+      if (ageMs > 10 * 60 * 1000) {
+        void fetchStats({ force: true });
+      }
     }, 2500);
 
     return () => {
-      window.clearTimeout(quickRefreshId);
-      window.clearTimeout(settleRefreshId);
+      window.clearTimeout(staleRefreshId);
     };
-  }, [fetchStats, liveRefreshKey]);
+  }, [fetchStats, liveRefreshKey, stats?.meta?.updatedAt]);
 
-  return { stats, loading, refetchStats: fetchStats };
+  const refreshStats = useCallback(
+    () => fetchStats({ force: true, refresh: "manual" }),
+    [fetchStats],
+  );
+
+  return { stats, loading, refreshing, refetchStats: fetchStats, refreshStats };
 }

@@ -9,8 +9,8 @@ import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
 const snippets = {
   python: {
     label: "Python",
-    install: "pip install 5to1r",
-    code: `from fivetoone import trace_agent
+    install: "pip install tracify",
+    code: `from tracify import trace_agent
 
 @trace_agent()
 async def research_agent(query):
@@ -18,8 +18,8 @@ async def research_agent(query):
   },
   typescript: {
     label: "TypeScript",
-    install: "npm install 5to1r",
-    code: `import { traceAgent } from "5to1r"
+    install: "npm install tracify",
+    code: `import { traceAgent } from "tracify"
 
 const researchAgent = traceAgent(async (query: string) => {
   return await run(query)
@@ -28,32 +28,32 @@ const researchAgent = traceAgent(async (query: string) => {
   prompt: {
     label: "AI setup prompt",
     install: "",
-    code: `You are integrating 5to1r into this agent project.
+    code: `You are integrating Tracify into this agent project.
 
 Goal:
-Instrument the main agent run function so every run sends spans to 5to1r.
+Instrument the main agent run function so every run sends spans to Tracify.
 
 Rules:
 - Do not rewrite the agent.
 - Preserve existing behavior.
 - Add the smallest possible instrumentation change.
-- Use environment variable FIVETOONE_API_KEY.
+- Use environment variable TRACIFY_API_KEY.
 - Do not hardcode secrets.
 
 Steps:
 1. Detect whether this project is Python or TypeScript.
-2. Install the 5to1r SDK with the correct command:
-   - Python: pip install 5to1r
-   - TypeScript / Node.js: npm install 5to1r
-3. Add FIVETOONE_API_KEY to .env.example.
+2. Install the Tracify SDK with the correct command:
+   - Python: pip install tracify
+   - TypeScript / Node.js: npm install tracify
+3. Add TRACIFY_API_KEY to .env.example.
 4. Find the main agent function.
-5. If Python, import trace_agent from fivetoone and add @trace_agent().
-6. If TypeScript, import traceAgent from 5to1r and wrap the async agent function.
+5. If Python, import trace_agent from tracify and add @trace_agent().
+6. If TypeScript, import traceAgent from tracify and wrap the async agent function.
 7. Run the agent once.
-8. Confirm that a span was sent to 5to1r.
+8. Confirm that a span was sent to Tracify.
 
 Use this environment variable locally:
-FIVETOONE_API_KEY=your_key_here`,
+TRACIFY_API_KEY=your_key_here`,
   },
 };
 
@@ -66,7 +66,7 @@ export function InstallStep() {
     <div>
       <OnboardingHeader
         title="Install the SDK."
-        description="Choose your runtime and add 5to1r to your agent."
+        description="Choose your runtime and add Tracify to your agent."
       />
       <div className="mb-4 grid border border-[#2A2A2A] sm:grid-cols-3">
         {Object.entries(snippets).map(([key, snippet]) => (

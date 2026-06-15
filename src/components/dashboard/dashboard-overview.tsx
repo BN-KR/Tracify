@@ -21,6 +21,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Activity, DollarSign, Zap, AlertTriangle } from "lucide-react";
 import { RunsTable } from "./runs-table";
 import { useProjectStats } from "@/hooks/use-project-stats";
+import { AnalyticsRefreshControl } from "./analytics-refresh-control";
 
 interface DashboardOverviewProps {
   projectId: string;
@@ -41,7 +42,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
     summary?.totals.totalRuns ??
     summary?.totals.totalSpans ??
     null;
-  const { stats, loading } = useProjectStats({
+  const { stats, loading, refreshing, refreshStats } = useProjectStats({
     projectId,
     range,
     liveRefreshKey,
@@ -69,7 +70,10 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
   const useSavedFallback = stats?.unavailable;
   const totalSpend = useSavedFallback ? savedSpend : analyticsSpend;
   const totalSpans = useSavedFallback ? savedSpans : analyticsSpans;
-  const dailyCosts = stats?.dailyCosts ?? [];
+  const analyticsDailyCosts = stats?.dailyCosts ?? [];
+  const dailyCosts = analyticsDailyCosts.length
+    ? analyticsDailyCosts
+    : buildDailyCostSeries(range, recentRuns);
   const latestDailySpend = dailyCosts.at(-1)?.totalCostUsd ?? 0;
   const couldHaveSavedUsd = dailyCosts.reduce(
     (sum, day) => sum + Math.max(day.totalCostUsd - latestDailySpend, 0),
@@ -91,26 +95,33 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
             Spend, savings, and recent run health.
           </p>
         </div>
-        <div className="flex gap-2">
-          {[
-            { label: "1d", value: 1 },
-            { label: "7d", value: 7 },
-            { label: "30d", value: 30 },
-            { label: "90d", value: 90 },
-          ].map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setRange(option.value)}
-              className={
-                range === option.value
-                  ? "h-8 border border-white bg-white px-3 font-mono text-[11px] text-black"
-                  : "h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] text-[#777777] hover:text-white"
-              }
-            >
-              {option.label}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center justify-end gap-3 sm:ml-auto">
+          <div className="flex gap-2">
+            {[
+              { label: "1d", value: 1 },
+              { label: "7d", value: 7 },
+              { label: "30d", value: 30 },
+              { label: "90d", value: 90 },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setRange(option.value)}
+                className={
+                  range === option.value
+                    ? "h-8 border border-white bg-white px-3 font-mono text-[11px] text-black"
+                    : "h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] text-[#777777] hover:text-white"
+                }
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <AnalyticsRefreshControl
+            stats={stats}
+            refreshing={refreshing}
+            onRefresh={refreshStats}
+          />
         </div>
       </div>
 
@@ -151,14 +162,14 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
           <div className="mb-6">
             <h3 className="font-mono text-[14px] text-white">Spend Over Time</h3>
             <p className="text-[11px] text-[#666666] uppercase tracking-widest mt-1">
-              {stats?.unavailable
-                ? "Tinybird analytics unavailable; saved run summaries still update below"
-                : `LLM infrastructure costs, last ${range} day${range === 1 ? "" : "s"}`}
+              {analyticsDailyCosts.length
+                ? `LLM infrastructure costs, last ${range} day${range === 1 ? "" : "s"}`
+                : `Saved run summaries, last ${range} day${range === 1 ? "" : "s"}`}
             </p>
           </div>
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={stats?.dailyCosts}>
+              <LineChart data={dailyCosts}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
                 <XAxis 
                   dataKey="day" 
@@ -209,6 +220,34 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
       </div>
     </div>
   );
+}
+
+type CostSeriesRun = {
+  startedAt: string;
+  totalCostUsd: number;
+  spanCount: number;
+};
+
+function buildDailyCostSeries(range: number, runs: CostSeriesRun[]) {
+  const today = new Date();
+  const days = Array.from({ length: range }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (range - 1 - index));
+    return date.toISOString().slice(0, 10);
+  });
+  const byDay = new Map(
+    days.map((day) => [day, { day, totalCostUsd: 0, spanCount: 0 }]),
+  );
+
+  for (const run of runs) {
+    const day = new Date(run.startedAt).toISOString().slice(0, 10);
+    const bucket = byDay.get(day);
+    if (!bucket) continue;
+    bucket.totalCostUsd += run.totalCostUsd;
+    bucket.spanCount += run.spanCount;
+  }
+
+  return days.map((day) => byDay.get(day)!);
 }
 
 function formatGraphCurrency(value: number) {
