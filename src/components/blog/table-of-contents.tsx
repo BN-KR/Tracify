@@ -6,14 +6,13 @@ function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-const hideScrollbar = {
-  scrollbarWidth: "none" as const,
-  msOverflowStyle: "none" as const,
+const hideScrollbar: React.CSSProperties = {
+  scrollbarWidth: "none",
+  msOverflowStyle: "none",
 };
 
 export function TableOfContents({ body, collapsible }: { body: any[]; collapsible?: boolean }) {
   const [activeId, setActiveId] = useState<string>("");
-  const [scrollProgress, setScrollProgress] = useState(0);
 
   if (!body || !Array.isArray(body)) return null;
 
@@ -29,10 +28,6 @@ export function TableOfContents({ body, collapsible }: { body: any[]; collapsibl
 
   useEffect(() => {
     function handleScroll() {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      setScrollProgress(docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0);
-
       for (let i = headingItems.length - 1; i >= 0; i--) {
         const el = document.getElementById(headingItems[i].slug);
         if (el && el.getBoundingClientRect().top <= 120) {
@@ -72,23 +67,16 @@ export function TableOfContents({ body, collapsible }: { body: any[]; collapsibl
   );
 
   const inner = (
-    <div className="flex gap-3">
-      <div className="relative w-[2px] bg-[#2A2A2A] shrink-0">
-        <div
-          className="absolute top-0 left-0 w-full bg-white transition-[height] duration-150 ease-out"
-          style={{ height: `${scrollProgress * 100}%` }}
-        />
-      </div>
-      <div className="min-w-0 flex-1 flex flex-col">
-        <h4 className="font-mono text-[11px] uppercase tracking-widest text-[#666666] mb-3">
-          On this page
-        </h4>
-        <div
-          className="max-h-[65vh] overflow-y-auto [&::-webkit-scrollbar]:hidden"
-          style={hideScrollbar}
-        >
-          {list}
-        </div>
+    <div className="flex flex-col">
+      <style>{`.toc-scroll-hide::-webkit-scrollbar { display: none; }`}</style>
+      <h4 className="font-mono text-[11px] uppercase tracking-widest text-[#666666] mb-3">
+        On this page
+      </h4>
+      <div
+        className="toc-scroll-hide max-h-[65vh] overflow-y-auto"
+        style={hideScrollbar}
+      >
+        {list}
       </div>
     </div>
   );
