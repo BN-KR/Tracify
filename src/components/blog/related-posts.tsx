@@ -10,12 +10,18 @@ interface RelatedPost {
   coverImage: any;
 }
 
-export async function RelatedPosts({ categories }: { categories: string[] }) {
+export async function RelatedPosts({
+  categories,
+  currentId,
+}: {
+  categories: string[];
+  currentId?: string;
+}) {
   if (!client || !categories?.length) return null;
 
   const posts: RelatedPost[] = await client
     .fetch(
-      `*[_type == "post" && count(categories[@ in $categories]) > 0 && defined(slug.current)] | order(publishedAt desc) [0...3] {
+      `*[_type == "post" && _id != $currentId && count(categories[@ in $categories]) > 0 && defined(slug.current)] | order(publishedAt desc) [0...3] {
         _id,
         title,
         "slug": slug.current,
@@ -23,7 +29,7 @@ export async function RelatedPosts({ categories }: { categories: string[] }) {
         excerpt,
         coverImage
       }`,
-      { categories }
+      { categories, currentId: currentId || "" }
     )
     .catch(() => []);
 

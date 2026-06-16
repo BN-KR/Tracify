@@ -259,7 +259,7 @@ export default async function BlogPostPage({
           __html: JSON.stringify(jsonLd(post)),
         }}
       />
-      <div className="max-w-[720px] mx-auto px-6 py-24">
+      <div className="max-w-[1060px] mx-auto px-6 py-24">
         <Link
           href="/blog"
           className="font-mono text-[13px] text-[#666666] hover:text-white transition-colors inline-block mb-12"
@@ -268,7 +268,7 @@ export default async function BlogPostPage({
         </Link>
 
         <article>
-          <header className="mb-10">
+          <header className="mb-10 max-w-[720px]">
             <div className="flex items-center gap-3 text-[12px] font-mono text-[#666666] mb-4">
               <time dateTime={post.date}>{formatDate(post.date)}</time>
               {post.author && (
@@ -306,7 +306,7 @@ export default async function BlogPostPage({
           </header>
 
           {post.coverImage && (
-            <div className="mb-10 border border-[#2A2A2A] overflow-hidden">
+            <div className="mb-10 border border-[#2A2A2A] overflow-hidden max-w-[720px]">
               <img
                 src={urlFor(post.coverImage)?.width(900).height(450).url() || ""}
                 alt={post.coverImage?.alt || post.title}
@@ -315,16 +315,16 @@ export default async function BlogPostPage({
             </div>
           )}
 
-          <div className="flex gap-10">
-            <div className="hidden lg:block w-[200px] shrink-0">
+          <div className="flex gap-12">
+            <aside className="hidden lg:block w-[200px] shrink-0">
               <div className="sticky top-24">
                 <TableOfContents body={post.body} />
               </div>
-            </div>
+            </aside>
 
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 max-w-[720px]">
               <div className="lg:hidden mb-8">
-                <TableOfContents body={post.body} />
+                <TableOfContents body={post.body} collapsible />
               </div>
 
               <div className="prose-custom">
@@ -333,35 +333,34 @@ export default async function BlogPostPage({
                   components={portableTextComponents}
                 />
               </div>
-            </div>
-          </div>
 
-          <div className="mt-12 pt-8 border-t border-[#2A2A2A] flex flex-col gap-6">
-            <ShareButtons title={post.title} />
-
-            <AuthorBio author={post.author} />
-          </div>
-
-          <RelatedPosts categories={post.categories} />
-
-          <div className="mt-10">
-            <NewsletterCta />
-          </div>
-
-          {post.tags && post.tags.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-[#2A2A2A]">
-              <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="font-mono text-[11px] text-[#666666] border border-[#2A2A2A] px-2 py-1"
-                  >
-                    #{tag}
-                  </span>
-                ))}
+              <div className="mt-12 pt-8 border-t border-[#2A2A2A] flex flex-col gap-6">
+                <ShareButtons title={post.title} />
+                <AuthorBio author={post.author} />
               </div>
+
+              <RelatedPosts categories={post.categories} currentId={post._id} />
+
+              <div className="mt-10">
+                <NewsletterCta />
+              </div>
+
+              {post.tags && post.tags.length > 0 && (
+                <div className="mt-12 pt-8 border-t border-[#2A2A2A]">
+                  <div className="flex flex-wrap gap-2">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="font-mono text-[11px] text-[#666666] border border-[#2A2A2A] px-2 py-1"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </article>
       </div>
     </div>
