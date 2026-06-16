@@ -6,6 +6,11 @@ function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+const hideScrollbar = {
+  scrollbarWidth: "none" as const,
+  msOverflowStyle: "none" as const,
+};
+
 export function TableOfContents({ body, collapsible }: { body: any[]; collapsible?: boolean }) {
   const [activeId, setActiveId] = useState<string>("");
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -66,7 +71,7 @@ export function TableOfContents({ body, collapsible }: { body: any[]; collapsibl
     </ul>
   );
 
-  const tocContent = (
+  const inner = (
     <div className="flex gap-3">
       <div className="relative w-[2px] bg-[#2A2A2A] shrink-0">
         <div
@@ -74,11 +79,16 @@ export function TableOfContents({ body, collapsible }: { body: any[]; collapsibl
           style={{ height: `${scrollProgress * 100}%` }}
         />
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 flex flex-col">
         <h4 className="font-mono text-[11px] uppercase tracking-widest text-[#666666] mb-3">
           On this page
         </h4>
-        {list}
+        <div
+          className="max-h-[65vh] overflow-y-auto [&::-webkit-scrollbar]:hidden"
+          style={hideScrollbar}
+        >
+          {list}
+        </div>
       </div>
     </div>
   );
@@ -91,11 +101,11 @@ export function TableOfContents({ body, collapsible }: { body: any[]; collapsibl
           <span className="text-[#666666] group-open:rotate-180 transition-transform text-[10px]">▼</span>
         </summary>
         <div className="px-4 pb-4 border-t border-[#2A2A2A] pt-3">
-          {tocContent}
+          {inner}
         </div>
       </details>
     );
   }
 
-  return <nav>{tocContent}</nav>;
+  return <nav>{inner}</nav>;
 }
