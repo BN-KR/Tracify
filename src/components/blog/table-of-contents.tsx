@@ -8,7 +8,7 @@ export function TableOfContents({ body, collapsible }: { body: any[]; collapsibl
   if (headings.length < 2) return null;
 
   const list = (
-    <ul className="flex flex-col gap-1.5">
+    <ul className="flex flex-col gap-1.5 max-h-[60vh] overflow-y-auto">
       {headings.map((heading: any, i: number) => {
         const text = heading.children?.map((c: any) => c.text).join("") || "";
         const slug = text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -30,7 +30,7 @@ export function TableOfContents({ body, collapsible }: { body: any[]; collapsibl
 
   if (collapsible) {
     return (
-      <details className="border border-[#2A2A2A] bg-[#0A0A0A] group">
+      <details open className="border border-[#2A2A2A] bg-[#0A0A0A] group">
         <summary className="font-mono text-[11px] uppercase tracking-widest text-[#666666] px-4 py-3 cursor-pointer select-none list-none flex items-center justify-between">
           On this page
           <span className="text-[#666666] group-open:rotate-180 transition-transform">▼</span>

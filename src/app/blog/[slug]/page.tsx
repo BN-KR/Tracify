@@ -117,8 +117,12 @@ function jsonLd(post: Post) {
   };
 }
 
-function HeadingWithAnchor({ level, children, style }: any) {
-  const text = typeof children === "string" ? children : "";
+function getHeadingText(blockValue: any) {
+  return blockValue?.children?.map((c: any) => c.text).join("") || "";
+}
+
+function HeadingWithAnchor({ level, children, blockValue, style }: any) {
+  const text = getHeadingText(blockValue);
   const id = slugify(text);
   const Tag = level;
   const sizeClasses: Record<string, string> = {
@@ -140,14 +144,14 @@ const portableTextComponents = {
         {children}
       </p>
     ),
-    h2: ({ children }: any) => (
-      <HeadingWithAnchor level="h2">{children}</HeadingWithAnchor>
+    h2: ({ value, children }: any) => (
+      <HeadingWithAnchor level="h2" blockValue={value}>{children}</HeadingWithAnchor>
     ),
-    h3: ({ children }: any) => (
-      <HeadingWithAnchor level="h3">{children}</HeadingWithAnchor>
+    h3: ({ value, children }: any) => (
+      <HeadingWithAnchor level="h3" blockValue={value}>{children}</HeadingWithAnchor>
     ),
-    h4: ({ children }: any) => (
-      <HeadingWithAnchor level="h4">{children}</HeadingWithAnchor>
+    h4: ({ value, children }: any) => (
+      <HeadingWithAnchor level="h4" blockValue={value}>{children}</HeadingWithAnchor>
     ),
     blockquote: ({ children }: any) => (
       <blockquote className="border-l-2 border-[#444444] pl-4 my-6 font-mono text-[14px] text-[#999999] italic">
