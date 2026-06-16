@@ -19,7 +19,9 @@ import {
   BookOpen,
   Code2,
   Braces,
-  FileCode
+  FileCode,
+  Feather,
+  GitCompare,
 } from "lucide-react";
 
 const NAV_ITEMS: NavItem[] = [
@@ -77,6 +79,58 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 2,
+    label: "Developers",
+    subMenus: [
+      {
+        title: "Start",
+        items: [
+          {
+            label: "Docs",
+            description: "Install the SDK and send your first span.",
+            href: "/docs",
+            icon: BookOpen,
+          },
+          {
+            label: "Python SDK",
+            description: "Instrument agents with a decorator.",
+            href: "/docs/python",
+            icon: Code2,
+          },
+          {
+            label: "TypeScript SDK",
+            description: "Trace Node and Next.js agent workflows.",
+            href: "/docs/typescript",
+            icon: Braces,
+          },
+          {
+            label: "API Reference",
+            description: "Ingest spans directly from custom runtimes.",
+            href: "/docs/api",
+            icon: FileCode,
+          },
+        ],
+      },
+      {
+        title: "Resources",
+        items: [
+          {
+            label: "Blog",
+            description: "Engineering insights and agent patterns.",
+            href: "/blog",
+            icon: Feather,
+          },
+          {
+            label: "Changelog",
+            description: "Product updates and release notes.",
+            href: "/changelog",
+            icon: GitCompare,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 3,
     label: "Use Cases",
     subMenus: [
       {
@@ -111,49 +165,14 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    id: 3,
-    label: "Developers",
-    subMenus: [
-      {
-        title: "Start",
-        items: [
-          {
-            label: "Docs",
-            description: "Install the SDK and send your first span.",
-            href: "/docs",
-            icon: BookOpen,
-          },
-          {
-            label: "Python SDK",
-            description: "Instrument agents with a decorator.",
-            href: "/docs/python",
-            icon: Code2,
-          },
-          {
-            label: "TypeScript SDK",
-            description: "Trace Node and Next.js agent workflows.",
-            href: "/docs/typescript",
-            icon: Braces,
-          },
-          {
-            label: "API Reference",
-            description: "Ingest spans directly from custom runtimes.",
-            href: "/docs/api",
-            icon: FileCode,
-          },
-        ],
-      },
-    ],
-  },
-  {
     id: 4,
     label: "Pricing",
     href: "/pricing",
   },
   {
     id: 5,
-    label: "Changelog",
-    href: "/changelog",
+    label: "Blog",
+    href: "/blog",
   },
 ];
 

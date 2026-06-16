@@ -11,7 +11,15 @@ export const postFields = groq`
   tags,
   coverImage,
   seo,
-  body
+  body[]{
+    ...,
+    markDefs[]{
+      ...,
+      _type == "internalLink" => {
+        "reference": reference-> { slug }
+      }
+    }
+  }
 `;
 
 export const postsQuery = groq`
@@ -28,6 +36,10 @@ export const postQuery = groq`
 
 export const postSlugsQuery = groq`
   *[_type == "post" && defined(slug.current)].slug.current
+`;
+
+export const allCategoriesQuery = groq`
+  *[_type == "post" && defined(slug.current)].categories[]
 `;
 
 export const recentPostsQuery = groq`

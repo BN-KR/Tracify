@@ -4,6 +4,15 @@ import { PortableText } from "@portabletext/react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getReadingTime } from "@/components/blog/reading-time";
+import { AuthorBio } from "@/components/blog/author-bio";
+import { ShareButtons } from "@/components/blog/share-buttons";
+import { ProgressBar } from "@/components/blog/progress-bar";
+import { TableOfContents } from "@/components/blog/table-of-contents";
+import { NewsletterCta } from "@/components/blog/newsletter-cta";
+import { RelatedPosts } from "@/components/blog/related-posts";
+
+export const revalidate = 60;
 
 interface Post {
   _id: string;
@@ -88,6 +97,10 @@ function formatDate(dateString: string) {
   });
 }
 
+function slugify(text: string) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
 function jsonLd(post: Post) {
   return {
     "@context": "https://schema.org",
@@ -104,6 +117,22 @@ function jsonLd(post: Post) {
   };
 }
 
+function HeadingWithAnchor({ level, children, style }: any) {
+  const text = typeof children === "string" ? children : "";
+  const id = slugify(text);
+  const Tag = level;
+  const sizeClasses: Record<string, string> = {
+    h2: "font-mono text-[24px] md:text-[28px] font-bold text-white mt-12 mb-4 leading-snug",
+    h3: "font-mono text-[18px] md:text-[20px] font-bold text-white mt-10 mb-3 leading-snug",
+    h4: "font-mono text-[16px] font-bold text-white mt-8 mb-2 leading-snug",
+  };
+  return (
+    <Tag id={id} className={sizeClasses[level] || style}>
+      {children}
+    </Tag>
+  );
+}
+
 const portableTextComponents = {
   block: {
     normal: ({ children }: any) => (
@@ -112,19 +141,13 @@ const portableTextComponents = {
       </p>
     ),
     h2: ({ children }: any) => (
-      <h2 className="font-mono text-[24px] md:text-[28px] font-bold text-white mt-12 mb-4 leading-snug">
-        {children}
-      </h2>
+      <HeadingWithAnchor level="h2">{children}</HeadingWithAnchor>
     ),
     h3: ({ children }: any) => (
-      <h3 className="font-mono text-[18px] md:text-[20px] font-bold text-white mt-10 mb-3 leading-snug">
-        {children}
-      </h3>
+      <HeadingWithAnchor level="h3">{children}</HeadingWithAnchor>
     ),
     h4: ({ children }: any) => (
-      <h4 className="font-mono text-[16px] font-bold text-white mt-8 mb-2 leading-snug">
-        {children}
-      </h4>
+      <HeadingWithAnchor level="h4">{children}</HeadingWithAnchor>
     ),
     blockquote: ({ children }: any) => (
       <blockquote className="border-l-2 border-[#444444] pl-4 my-6 font-mono text-[14px] text-[#999999] italic">
@@ -173,6 +196,19 @@ const portableTextComponents = {
         {children}
       </a>
     ),
+    internalLink: ({ children, value }: any) => {
+      const slug = value?.reference?.slug;
+      return slug ? (
+        <Link
+          href={`/blog/${slug}`}
+          className="text-white underline underline-offset-4 decoration-[#444444] hover:decoration-white transition-colors"
+        >
+          {children}
+        </Link>
+      ) : (
+        <>{children}</>
+      );
+    },
   },
   types: {
     image: ({ value }: any) => (
@@ -190,9 +226,16 @@ const portableTextComponents = {
       </figure>
     ),
     code: ({ value }: any) => (
-      <pre className="border border-[#2A2A2A] bg-[#0A0A0A] p-4 my-6 overflow-x-auto font-mono text-[13px] text-[#CCCCCC] leading-relaxed">
-        <code>{value?.code || ""}</code>
-      </pre>
+      <div className="my-6 border border-[#2A2A2A]">
+        {value?.language && (
+          <div className="font-mono text-[10px] uppercase tracking-widest text-[#666666] bg-[#050505] px-4 py-1.5 border-b border-[#2A2A2A]">
+            {value.language}
+          </div>
+        )}
+        <pre className="bg-[#0A0A0A] p-4 overflow-x-auto font-mono text-[13px] text-[#CCCCCC] leading-relaxed m-0">
+          <code>{value?.code || ""}</code>
+        </pre>
+      </div>
     ),
   },
 };
@@ -209,6 +252,7 @@ export default async function BlogPostPage({
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#050505" }}>
+      <ProgressBar />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -233,6 +277,8 @@ export default async function BlogPostPage({
                   <span>{post.author}</span>
                 </>
               )}
+              <span className="text-[#2A2A2A]">/</span>
+              <span>{getReadingTime(post.body)} min read</span>
             </div>
 
             <h1 className="font-mono text-[32px] md:text-[40px] font-bold text-white leading-tight mb-4">
@@ -269,11 +315,37 @@ export default async function BlogPostPage({
             </div>
           )}
 
-          <div className="prose-custom">
-            <PortableText
-              value={post.body}
-              components={portableTextComponents}
-            />
+          <div className="flex gap-10">
+            <div className="hidden lg:block w-[200px] shrink-0">
+              <div className="sticky top-24">
+                <TableOfContents body={post.body} />
+              </div>
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="lg:hidden mb-8">
+                <TableOfContents body={post.body} />
+              </div>
+
+              <div className="prose-custom">
+                <PortableText
+                  value={post.body}
+                  components={portableTextComponents}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-[#2A2A2A] flex flex-col gap-6">
+            <ShareButtons title={post.title} />
+
+            <AuthorBio author={post.author} />
+          </div>
+
+          <RelatedPosts categories={post.categories} />
+
+          <div className="mt-10">
+            <NewsletterCta />
           </div>
 
           {post.tags && post.tags.length > 0 && (
