@@ -319,8 +319,8 @@ export default async function BlogPostPage({
             </div>
           )}
 
-          <div className="flex gap-12">
-            <aside className="hidden lg:block w-[200px] shrink-0">
+          <div className="flex gap-8">
+            <aside className="hidden lg:block w-[150px] shrink-0">
               <div className="sticky top-24">
                 <TableOfContents body={post.body} />
               </div>

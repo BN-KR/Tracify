@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -13,6 +13,7 @@ const hideScrollbar: React.CSSProperties = {
 
 export function TableOfContents({ body, collapsible }: { body: any[]; collapsible?: boolean }) {
   const [activeId, setActiveId] = useState<string>("");
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   if (!body || !Array.isArray(body)) return null;
 
@@ -43,15 +44,22 @@ export function TableOfContents({ body, collapsible }: { body: any[]; collapsibl
     return () => window.removeEventListener("scroll", handleScroll);
   }, [headingItems]);
 
+  useEffect(() => {
+    if (!activeId || !scrollRef.current) return;
+    const link = scrollRef.current.querySelector(`[data-toc-link="${activeId}"]`);
+    link?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [activeId]);
+
   if (headingItems.length < 2) return null;
 
   const list = (
-    <ul className="flex flex-col gap-1">
+    <ul className="flex flex-col gap-0.5">
       {headingItems.map((item) => (
         <li key={item.slug}>
           <a
             href={`#${item.slug}`}
-            className={`block font-sans text-[13px] leading-relaxed transition-colors duration-150 ${
+            data-toc-link={item.slug}
+            className={`block font-sans text-[12px] leading-snug py-0.5 transition-colors duration-150 ${
               item.level === "h3" ? "pl-4" : ""
             } ${
               activeId === item.slug
@@ -73,6 +81,7 @@ export function TableOfContents({ body, collapsible }: { body: any[]; collapsibl
         On this page
       </h4>
       <div
+        ref={scrollRef}
         className="toc-scroll-hide max-h-[65vh] overflow-y-auto"
         style={hideScrollbar}
       >
@@ -83,7 +92,7 @@ export function TableOfContents({ body, collapsible }: { body: any[]; collapsibl
 
   if (collapsible) {
     return (
-      <details open className="border border-[#2A2A2A] bg-[#0A0A0A] group">
+      <details className="border border-[#2A2A2A] bg-[#0A0A0A] group">
         <summary className="font-mono text-[11px] uppercase tracking-widest text-[#666666] px-4 py-3 cursor-pointer select-none list-none flex items-center justify-between">
           On this page
           <span className="text-[#666666] group-open:rotate-180 transition-transform text-[10px]">▼</span>

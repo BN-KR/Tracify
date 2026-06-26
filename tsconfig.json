@@ -31,5 +31,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "scratch", "sanity"]
+  "exclude": ["node_modules", "scratch", "sanity", "studio-tracify"]
 }

@@ -4,7 +4,7 @@ import { action, mutation, query } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 
-const API_KEY_PREFIX = "5t1r_sk_live_";
+const API_KEY_PREFIX = "tracify_sk_live_";
 
 function getHmacSecret() {
   const secret = process.env.FIVETOONE_API_KEY_HASH_SECRET;

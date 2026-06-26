@@ -58,7 +58,7 @@ const agent = traceAgent(async () => {
 
   const installPy = "pip install tracify";
   const installTs = "npm install tracify";
-  const envVar = `TRACIFY_API_KEY=5t1r_sk_live_...`;
+  const envVar = `TRACIFY_API_KEY=tracify_sk_live_...`;
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -126,7 +126,7 @@ const agent = traceAgent(async () => {
           Inject your API key into your agent's environment.
         </p>
         <CodeBlock
-          code={`TRACIFY_API_KEY=${project?.apiKeyPrefix || '5t1r_sk_live_'}••••••••${project?.apiKeyLast4 || '••••'}`}
+          code={`TRACIFY_API_KEY=${project?.apiKeyPrefix || 'tracify_sk_live_'}••••••••${project?.apiKeyLast4 || '••••'}`}
           onCopy={() => copyToClipboard(`TRACIFY_API_KEY=YOUR_API_KEY`, 'env')}
           copied={copied === 'env'}
         />

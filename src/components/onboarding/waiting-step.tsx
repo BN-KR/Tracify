@@ -29,9 +29,9 @@ export function WaitingStep() {
     );
   });
   const [apiKeyDisplay] = useState(() => {
-    if (typeof window === "undefined") return "5t1r_sk_live_...";
+    if (typeof window === "undefined") return "tracify_sk_live_...";
     const apiKey = getOneTimeApiKey();
-    return apiKey ? `5t1r_sk_live_...${apiKey.slice(-4)}` : "5t1r_sk_live_...";
+    return apiKey ? `tracify_sk_live_...${apiKey.slice(-4)}` : "tracify_sk_live_...";
   });
   const onboardingState = useQuery(
     api.agentRuns.getProjectOnboardingState,

@@ -1,7 +1,7 @@
 # Project Memory
 
 ## Overview
-- Last Synced: 2026-06-15T01:30:00Z
+- Last Synced: 2026-06-16T12:00:00Z
 - Purpose: tracify — Agent Observability Platform (Full visibility into AI agent steps, decisions, cost, failures).
 - Stack: Next.js 16 (App Router), Clerk (Auth/Orgs), Convex (App DB), Tinybird (Telemetry Storage), Redis (API cache), Inngest (Background Jobs).
 
@@ -422,6 +422,23 @@
   - **Visual:** Compact terminal surface showing `pip install 5to1r` and `run-agent` with a `trace ready` confirmation.
   - **Purpose:** Transition from "learning" to "immediate action" after the pricing section.
 - **Full Frontend Design Package:** Complete 40-section design spec written to `docs/design-spec/`. Covers design tokens, all 30+ pages, component system, copy, SEO, file structure, build prompts, and QA checklist. Key decisions: `#0A0A0A` bg, `#6366F1` accent, 0px radius, Geist Pixel for logo, tagline "Five signals. One truth.", free tier 50K spans/month.
+
+- **Sanity CMS Blog Added (2026-06-15):**
+  - **Goal:** Add a blog with rich content managed via Sanity Studio.
+  - **Schema:** Post schema with title, slug, author, publishedAt, excerpt, coverImage, categories, tags, block content, and SEO object.
+  - **Pages:** Blog listing (`/blog`), blog post (`/blog/[slug]`) with SSG + JSON-LD + OG/Twitter meta, RSS feed (`/blog/rss.xml`), sitemap integration.
+  - **Sanity Studio:** https://8no3oibu.sanity.studio
+  - **Dataset:** `production`
+
+- **API Key Prefix Changed (2026-06-16):**
+  - **Change:** API keys now generated with `tracify_sk_live_` prefix instead of `5t1r_sk_live_`.
+  - **Validation:** Ingest API still accepts both prefixes for backward compatibility with existing keys.
+
+- **Google OAuth Updated (2026-06-16):**
+  - **Change:** Replaced old Google OAuth client ID/secret in `.env.prod` and Vercel production env.
+
+- **Convex Auth Config Deployed (2026-06-16):**
+  - **Fix:** Deployed `convex/auth.config.ts` with `https://clerk.tracify.tech` to Convex production, resolving the "Auth: Waiting" hang during onboarding.
 
 - **Project Rename 5to1r → tracify (2026-06-15):**
   - **Goal:** Complete the project/product rename from `5to1r` to `tracify`.

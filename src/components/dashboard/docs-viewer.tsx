@@ -33,7 +33,7 @@ Initialize the SDK with your Project API Key. You can find your API key in the [
 \`\`\`python
 from tracify import TracifyClient
 
-client = TracifyClient(api_key="5t1r_sk_live_...")
+client = TracifyClient(api_key="tracify_sk_live_...")
 \`\`\`
 
 ## 3. Instrument your Agent

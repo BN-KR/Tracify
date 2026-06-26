@@ -1,6 +1,6 @@
 import { createHmac, randomBytes } from "crypto";
 
-export const API_KEY_PREFIX = "5t1r_sk_live_";
+export const API_KEY_PREFIX = "tracify_sk_live_";
 
 export function generateApiKey() {
   return `${API_KEY_PREFIX}${randomBytes(16).toString("hex")}`;

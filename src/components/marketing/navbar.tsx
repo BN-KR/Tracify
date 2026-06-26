@@ -1,10 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Show, SignOutButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { DropdownNavigation, type NavItem } from "./dropdown-navigation";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   Activity,
   BarChart3,
@@ -22,6 +29,8 @@ import {
   FileCode,
   Feather,
   GitCompare,
+  Menu,
+  ChevronDown,
 } from "lucide-react";
 
 const NAV_ITEMS: NavItem[] = [
@@ -199,48 +208,177 @@ export function Navbar() {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
+          {/* Desktop actions */}
+          <div className="hidden md:flex items-center gap-3">
+            <Show when="signed-in">
+              <SignOutButton>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="font-mono text-xs h-8 px-4"
+                >
+                  Sign out
+                </Button>
+              </SignOutButton>
+              <Link href="/dashboard">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="font-mono text-xs h-8 px-4"
+                >
+                  Dashboard
+                </Button>
+              </Link>
+            </Show>
+            <Show when="signed-out">
+              <Link href="/sign-in">
+                <Button
+                  variant="ghost"
+                  className="font-mono text-[13px] px-3 py-1"
+                >
+                  Sign in
+                </Button>
+              </Link>
+              <Link href="/sign-up">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="font-mono text-xs h-8 px-4"
+                >
+                  Start free
+                </Button>
+              </Link>
+            </Show>
+          </div>
 
-          <Show when="signed-in">
-            <SignOutButton>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="font-mono text-xs h-8 px-4"
-              >
-                Sign out
-              </Button>
-            </SignOutButton>
-            <Link href="/dashboard">
-              <Button
-                variant="secondary"
-                size="sm"
-                className="font-mono text-xs h-8 px-4"
-              >
-                Dashboard
-              </Button>
+          {/* Mobile hamburger */}
+          <MobileNav />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function MobileNav() {
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  return (
+    <Sheet>
+      <SheetTrigger
+        className="md:hidden"
+        render={
+          <Button variant="ghost" size="icon-sm" />
+        }
+      >
+        <Menu className="w-5 h-5" />
+      </SheetTrigger>
+      <SheetContent
+        side="right"
+        className="w-[300px] sm:w-[350px] bg-[#050505] border-l border-[#1A1A1A] flex flex-col"
+      >
+        <SheetHeader className="border-b border-[#1A1A1A] pb-4">
+          <SheetTitle>
+            <Link href="/" className="font-pixel text-lg text-white">
+              tracify
             </Link>
-          </Show>
+          </SheetTitle>
+        </SheetHeader>
+
+        <nav className="flex-1 overflow-y-auto px-4 pb-4">
+          <ul className="flex flex-col gap-1">
+            {NAV_ITEMS.map((item) => (
+              <li key={item.id}>
+                {item.subMenus ? (
+                  <>
+                    <button
+                      onClick={() =>
+                        setExpandedId(
+                          expandedId === item.id ? null : item.id
+                        )
+                      }
+                      className="flex items-center justify-between w-full px-2 py-2.5 font-mono text-[13px] text-[#666666] hover:text-white transition-colors text-left"
+                    >
+                      {item.label}
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform ${
+                          expandedId === item.id ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    {expandedId === item.id && (
+                      <div className="ml-2 border-l border-[#1A1A1A] pl-3">
+                        {item.subMenus.map((section, idx) => (
+                          <div key={idx} className="py-1">
+                            <p className="font-mono text-[10px] uppercase tracking-widest text-[#444444] px-2 py-1">
+                              {section.title}
+                            </p>
+                            {section.items.map((subItem, sIdx) => (
+                              <Link
+                                key={sIdx}
+                                href={subItem.href}
+                                className="flex items-center gap-3 px-2 py-2 font-mono text-[13px] text-[#999999] hover:text-white hover:bg-[#0A0A0A] transition-colors rounded"
+                              >
+                                <subItem.icon className="w-4 h-4 shrink-0" />
+                                <span>{subItem.label}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    href={item.href || "#"}
+                    className="block px-2 py-2.5 font-mono text-[13px] text-[#666666] hover:text-white transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="border-t border-[#1A1A1A] px-4 py-4 flex flex-col gap-2">
           <Show when="signed-out">
-            <Link href="/sign-in">
+            <Link href="/sign-in" className="w-full">
               <Button
                 variant="ghost"
-                className="font-mono text-[13px] px-3 py-1"
+                className="w-full font-mono text-[13px] justify-center"
               >
                 Sign in
               </Button>
             </Link>
-            <Link href="/sign-up">
+            <Link href="/sign-up" className="w-full">
               <Button
                 variant="default"
-                size="sm"
-                className="font-mono text-xs h-8 px-4"
+                className="w-full font-mono text-xs h-8"
               >
                 Start free
               </Button>
             </Link>
           </Show>
+          <Show when="signed-in">
+            <Link href="/dashboard" className="w-full">
+              <Button
+                variant="secondary"
+                className="w-full font-mono text-xs h-8"
+              >
+                Dashboard
+              </Button>
+            </Link>
+            <SignOutButton>
+              <Button
+                variant="ghost"
+                className="w-full font-mono text-xs h-8"
+              >
+                Sign out
+              </Button>
+            </SignOutButton>
+          </Show>
         </div>
-      </div>
-    </header>
+      </SheetContent>
+    </Sheet>
   );
 }
