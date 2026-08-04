@@ -10,7 +10,9 @@ import {
   SlidersHorizontal,
   PanelLeftClose,
   PanelLeftOpen,
+  Search,
   Settings2,
+  ShieldCheck,
   Terminal,
 } from "lucide-react";
 import { useMemo, useState, type ComponentType } from "react";
@@ -26,7 +28,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-type GroupId = "observe" | "configure" | "resources";
+type GroupId = "observe" | "control" | "configure" | "resources";
 
 type NavItem = {
   title: string;
@@ -83,6 +85,16 @@ export function DashboardSidebar({
           href: projectId ? `/dashboard/${projectId}/runs` : projectSetupHref,
         },
         {
+          title: "Sessions",
+          icon: Activity,
+          href: projectId ? `/dashboard/${projectId}/sessions` : projectSetupHref,
+        },
+        {
+          title: "Search",
+          icon: Search,
+          href: projectId ? `/dashboard/${projectId}/search` : projectSetupHref,
+        },
+        {
           title: "Costs",
           icon: BarChart3,
           href: projectId ? `/dashboard/${projectId}/costs` : projectSetupHref,
@@ -91,6 +103,17 @@ export function DashboardSidebar({
           title: "Reports",
           icon: FileText,
           href: projectId ? `/dashboard/${projectId}/reports` : projectSetupHref,
+        },
+      ],
+    },
+    {
+      id: "control",
+      label: "Control",
+      items: [
+        {
+          title: "Runtime Policy",
+          icon: ShieldCheck,
+          href: projectId ? `/dashboard/${projectId}/control` : projectSetupHref,
         },
       ],
     },
@@ -125,18 +148,33 @@ export function DashboardSidebar({
           href: "https://docs.tracify.tech",
           external: true,
         },
+        {
+          title: "Roadmap",
+          icon: FileText,
+          href: "/roadmap",
+          external: true,
+        },
       ],
     },
   ], [projectDashboardHref, projectId, projectSetupHref]);
 
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
     if (typeof window === "undefined") {
-      return { observe: true, configure: true, resources: true };
+      return { observe: true, control: true, configure: true, resources: true };
     }
     const stored = window.localStorage.getItem(GROUP_STORAGE_KEY);
-    return stored
-      ? (JSON.parse(stored) as Record<GroupId, boolean>)
-      : { observe: true, configure: true, resources: true };
+    const defaults: Record<GroupId, boolean> = {
+      observe: true,
+      control: true,
+      configure: true,
+      resources: true,
+    };
+    if (!stored) return defaults;
+    try {
+      return { ...defaults, ...(JSON.parse(stored) as Partial<Record<GroupId, boolean>>) };
+    } catch {
+      return defaults;
+    }
   });
 
   const showExpandedContent = !isCollapsed;

@@ -20,10 +20,10 @@ Depending on your environment, run one of the following commands:
 
 \`\`\`bash
 # Python
-pip install tracify
+pip install 5to1r
 
 # TypeScript / Node.js
-npm install tracify
+npm install 5to1r
 \`\`\`
 
 ## 2. Initialize the Client
@@ -31,7 +31,7 @@ npm install tracify
 Initialize the SDK with your Project API Key. You can find your API key in the [Settings](/dashboard/settings) page.
 
 \`\`\`python
-from tracify import TracifyClient
+from 5to1r import TracifyClient
 
 client = TracifyClient(api_key="tracify_sk_live_...")
 \`\`\`
@@ -41,7 +41,7 @@ client = TracifyClient(api_key="tracify_sk_live_...")
 Wrap your agent's main execution loop with the \`@trace_agent\` decorator.
 
 \`\`\`python
-from tracify import trace_agent
+from 5to1r import trace_agent
 
 @trace_agent(client=client)
 def run_agent(task):
@@ -96,12 +96,12 @@ High-performance observability for Node.js and Browser-based agents.
 
 ## Installation
 \`\`\`bash
-npm install tracify
+npm install 5to1r
 \`\`\`
 
 ## Usage
 \`\`\`typescript
-import { TracifyClient } from "tracify";
+import { TracifyClient } from "5to1r";
 
 const client = new TracifyClient({
   apiKey: process.env.TRACIFY_API_KEY

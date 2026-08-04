@@ -12,7 +12,9 @@ import type * as agentRuns from "../agentRuns.js";
 import type * as alerts from "../alerts.js";
 import type * as analyticsCache from "../analyticsCache.js";
 import type * as comments from "../comments.js";
+import type * as costCounters from "../costCounters.js";
 import type * as projects from "../projects.js";
+import type * as sessions from "../sessions.js";
 
 import type {
   ApiFromModules,
@@ -25,7 +27,9 @@ declare const fullApi: ApiFromModules<{
   alerts: typeof alerts;
   analyticsCache: typeof analyticsCache;
   comments: typeof comments;
+  costCounters: typeof costCounters;
   projects: typeof projects;
+  sessions: typeof sessions;
 }>;
 
 /**

@@ -50,6 +50,7 @@ async def my_agent(query: str):
 - **Granular Spans:** Manually record LLMs, tools, and custom decisions.
 - **Cost Tracking:** Monitor your infrastructure spend in real-time.
 - **Asynchronous & Synchronous Support:** Works with `async/await` or standard functions.
+- **Session context:** Attach `session_id`, `end_user_id`, `environment`, `release`, and `tags` to connect related traces.
 
 ## License
 

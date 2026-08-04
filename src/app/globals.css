@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 @import "@clerk/ui/themes/shadcn.css";
 
 /* ── Geist Pixel Font Setup ────────────────────────────────────── */

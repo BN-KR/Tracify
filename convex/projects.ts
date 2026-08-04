@@ -128,6 +128,19 @@ function validateProjectSettings(args: {
   maxDurationSeconds?: number;
   maxStallMinutes?: number;
   slackWebhookUrl?: string;
+  runtimePolicy?: {
+    enforcementMode?: "observe" | "enforce";
+    maxCostPerRun?: number;
+    maxCostPerDay?: number;
+    fallbackChain?: string[];
+    retryPolicy?: {
+      maxAttempts: number;
+      backoffMs: number;
+      backoffMultiplier: number;
+      retryableErrors: string[];
+    };
+    latencyBudgetMs?: number;
+  };
 }) {
   if (args.name !== undefined && args.name.trim().length === 0) {
     throw new Error("Project name is required");
@@ -159,6 +172,78 @@ function validateProjectSettings(args: {
     maxDurationSeconds: args.maxDurationSeconds,
     maxStallMinutes: args.maxStallMinutes,
     slackWebhookUrl: validateSlackWebhookUrl(args.slackWebhookUrl),
+    runtimePolicy: args.runtimePolicy ? validateRuntimePolicy(args.runtimePolicy) : undefined,
+  };
+}
+
+function validateRuntimePolicy(policy: {
+  enforcementMode?: "observe" | "enforce";
+  maxCostPerRun?: number;
+  maxCostPerDay?: number;
+  fallbackChain?: string[];
+  retryPolicy?: {
+    maxAttempts: number;
+    backoffMs: number;
+    backoffMultiplier: number;
+    retryableErrors: string[];
+  };
+  latencyBudgetMs?: number;
+}) {
+  const enforcementMode = policy.enforcementMode ?? "observe";
+
+  if (policy.maxCostPerRun !== undefined) {
+    if (!Number.isFinite(policy.maxCostPerRun) || policy.maxCostPerRun <= 0) {
+      throw new Error("maxCostPerRun must be a positive number");
+    }
+  }
+  if (policy.maxCostPerDay !== undefined) {
+    if (!Number.isFinite(policy.maxCostPerDay) || policy.maxCostPerDay <= 0) {
+      throw new Error("maxCostPerDay must be a positive number");
+    }
+  }
+  if (policy.latencyBudgetMs !== undefined) {
+    if (!Number.isInteger(policy.latencyBudgetMs) || policy.latencyBudgetMs <= 0) {
+      throw new Error("latencyBudgetMs must be a positive integer");
+    }
+  }
+  if (policy.fallbackChain) {
+    if (!Array.isArray(policy.fallbackChain) || policy.fallbackChain.length === 0) {
+      throw new Error("fallbackChain must be a non-empty array of model IDs");
+    }
+    for (const model of policy.fallbackChain) {
+      if (typeof model !== "string" || model.trim().length === 0) {
+        throw new Error("Each model in fallbackChain must be a non-empty string");
+      }
+    }
+  }
+  if (policy.retryPolicy) {
+    const rp = policy.retryPolicy;
+    if (!Number.isInteger(rp.maxAttempts) || rp.maxAttempts < 0 || rp.maxAttempts > 10) {
+      throw new Error("retryPolicy.maxAttempts must be an integer between 0 and 10");
+    }
+    if (!Number.isFinite(rp.backoffMs) || rp.backoffMs < 0) {
+      throw new Error("retryPolicy.backoffMs must be a non-negative number");
+    }
+    if (!Number.isFinite(rp.backoffMultiplier) || rp.backoffMultiplier < 1) {
+      throw new Error("retryPolicy.backoffMultiplier must be >= 1");
+    }
+    if (!Array.isArray(rp.retryableErrors)) {
+      throw new Error("retryPolicy.retryableErrors must be an array");
+    }
+  }
+
+  return {
+    enforcementMode,
+    maxCostPerRun: policy.maxCostPerRun,
+    maxCostPerDay: policy.maxCostPerDay,
+    fallbackChain: policy.fallbackChain ?? [],
+    retryPolicy: policy.retryPolicy ?? {
+      maxAttempts: 0,
+      backoffMs: 1000,
+      backoffMultiplier: 2,
+      retryableErrors: ["timeout", "5xx"],
+    },
+    latencyBudgetMs: policy.latencyBudgetMs,
   };
 }
 
@@ -183,6 +268,7 @@ function publicProject(project: Doc<"projects">) {
     maxDurationSeconds: project.maxDurationSeconds,
     maxStallMinutes: project.maxStallMinutes,
     slackWebhookUrl: project.slackWebhookUrl ?? null,
+    runtimePolicy: project.runtimePolicy ?? null,
   };
 }
 
@@ -438,36 +524,6 @@ export const getById = query({
   },
 });
 
-export const getProjectOnboardingState = query({
-  args: { projectId: v.optional(v.id("projects")) },
-  handler: async (ctx, { projectId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
-
-    const project = projectId
-      ? await ctx.db.get(projectId)
-      : (await getProjectsForIdentity(ctx, identity))[0];
-
-    if (!project || !canAccessProject(project, identity)) {
-      return {
-        hasProject: false,
-        projectId: null,
-        projectName: null,
-        apiKeyCopied: false,
-        hasReceivedFirstSpan: false,
-      };
-    }
-
-    return {
-      hasProject: true,
-      projectId: project._id,
-      projectName: project.name,
-      apiKeyCopied: false,
-      hasReceivedFirstSpan: false,
-    };
-  },
-});
-
 export const getProjectsByOrg = query({
   args: {},
   handler: async (ctx) => {
@@ -590,6 +646,19 @@ export const updateProject = mutation({
     maxDurationSeconds: v.optional(v.number()),
     maxStallMinutes: v.optional(v.number()),
     slackWebhookUrl: v.optional(v.string()),
+    runtimePolicy: v.optional(v.object({
+      enforcementMode: v.union(v.literal("observe"), v.literal("enforce")),
+      maxCostPerRun: v.optional(v.number()),
+      maxCostPerDay: v.optional(v.number()),
+      fallbackChain: v.array(v.string()),
+      retryPolicy: v.object({
+        maxAttempts: v.number(),
+        backoffMs: v.number(),
+        backoffMultiplier: v.number(),
+        retryableErrors: v.array(v.string()),
+      }),
+      latencyBudgetMs: v.optional(v.number()),
+    })),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -699,6 +768,33 @@ export const rotateApiKey = mutation({
       apiKeyPrefix: API_KEY_PREFIX,
       apiKeyLast4: plaintextApiKey.slice(-4),
     };
+  },
+});
+
+export const getRuntimePolicy = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccessProject(project, identity)) return null;
+
+    return project.runtimePolicy ?? null;
+  },
+});
+
+export const getRuntimePolicyByApiKey = query({
+  args: { apiKeyHash: v.string() },
+  handler: async (ctx, { apiKeyHash }) => {
+    const project = await ctx.db
+      .query("projects")
+      .withIndex("by_apiKeyHash", (q) => q.eq("apiKeyHash", apiKeyHash))
+      .unique();
+
+    if (!project || project.apiKeyStatus !== "active") return null;
+
+    return project.runtimePolicy ?? null;
   },
 });
 

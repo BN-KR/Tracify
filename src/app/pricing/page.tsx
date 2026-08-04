@@ -1,214 +1,384 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Check, Minus } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
+import { motion } from "framer-motion";
 
 import { Footer } from "@/components/marketing/footer";
 import { Navbar } from "@/components/marketing/navbar";
 import { Button } from "@/components/ui/button";
+import { DotPattern } from "@/components/ui/dot-pattern";
 
 const PLANS = [
   {
-    name: "Free",
-    for: "Experimenting",
-    price: "$0",
-    action: "Start free",
-    href: "/sign-up",
-    description: "For builders proving an agent workflow before production.",
-    included: [
-      "SDK ingest",
-      "Trace viewer",
-      "Run summaries",
-      "Cost dashboard",
-      "One project",
-    ],
-    unavailable: ["Team operations", "Custom retention"],
-  },
-  {
     name: "Pro",
-    for: "Production agents",
-    price: "Beta",
-    action: "Join beta",
+    price: "$19",
+    note: "/mo",
+    cta: "Start building",
     href: "/sign-up?intent=beta&plan=pro",
-    description: "For teams shipping agents that need cost and failure visibility.",
-    included: [
-      "Higher beta usage",
-      "Slack alerts",
-      "Reports",
-      "Longer history",
-      "Priority beta feedback",
+    popular: true,
+    lines: [
+      ["spans", "100,000 / mo"],
+      ["retention", "30 days"],
+      ["projects", "5"],
+      ["members", "3"],
+      ["alerts", "Slack"],
     ],
-    unavailable: ["Enterprise SSO", "Custom deployment"],
   },
   {
     name: "Team",
-    for: "Shared agent operations",
-    price: "Beta",
-    action: "Join beta",
+    price: "$39",
+    note: "/mo",
+    cta: "Start building",
     href: "/sign-up?intent=beta&plan=team",
-    description: "For product and engineering teams operating multiple agents.",
-    included: [
-      "Team members",
-      "Role-aware settings",
-      "Project management",
-      "Client/workspace labels",
-      "Operator reporting",
+    popular: false,
+    lines: [
+      ["spans", "1,000,000 / mo"],
+      ["retention", "90 days"],
+      ["projects", "unlimited"],
+      ["members", "10"],
+      ["alerts", "Slack"],
+      ["reports", "PDF-ready"],
     ],
-    unavailable: ["SOC 2 package", "Dedicated deployment"],
   },
   {
     name: "Enterprise",
-    for: "Compliance, SSO, retention",
-    price: "Contact",
-    action: "Contact sales",
+    price: "Custom",
+    cta: "Contact us",
     href: "mailto:sales@tracify.tech",
-    description: "For organizations with procurement, security, and retention needs.",
-    included: [
-      "Security review",
-      "SSO planning",
-      "Custom retention",
-      "Deployment requirements",
-      "Roadmap alignment",
+    popular: false,
+    lines: [
+      ["spans", "unlimited"],
+      ["retention", "custom"],
+      ["SSO", "SAML / OIDC"],
+      ["audit logs", "included"],
+      ["deployment", "on-prem"],
     ],
-    unavailable: [],
   },
 ];
 
-const CURRENTLY_WORKING = [
-  "Python and TypeScript SDK ingest",
-  "Valid and invalid API key handling",
-  "Runs table and trace viewer",
-  "Cost dashboard with cached fallback",
-  "Slack alert test and threshold alerts",
-  "Team member view and guarded settings",
+const WORKING = [
+  "Python SDK (pip install 5to1r)",
+  "TypeScript SDK (npm install 5to1r)",
+  "Trace viewer with span timeline",
+  "Cost dashboard with real spend",
+  "Slack threshold alerts",
+  "Team member management",
+  "API key rotation & access control",
   "Print-friendly project reports",
 ];
 
 const ROADMAP = [
-  "Runtime cost ceilings",
-  "Retry and tool-call limits",
-  "Saved trace-to-test conversion",
-  "Full eval layer",
+  "Run replay",
+  "Eval engine",
   "Email alerts",
+  "Runtime cost ceilings",
   "PDF export",
-  "Enterprise SSO package",
 ];
 
+const FAQ = [
+  {
+    q: "What counts as a span?",
+    a: "A single traced operation — an LLM call, tool execution, or logic step. Most production agent runs generate 5–50 spans.",
+  },
+  {
+    q: "What happens during the beta?",
+    a: "Full access at no charge. Beta users lock in the published rate for 12 months after billing launches.",
+  },
+  {
+    q: "Can I switch plans?",
+    a: "Yes. Upgrades apply immediately. Downgrades take effect at the start of the next billing cycle.",
+  },
+  {
+    q: "Do you offer annual billing?",
+    a: "Yes — 20% off with annual billing.",
+  },
+];
+
+function useInView(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setInView(true); observer.disconnect(); }
+    }, { threshold });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+  return [ref, inView] as const;
+}
+
 export default function PricingPage() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   return (
     <div className="min-h-screen bg-[#050505] text-white">
       <Navbar />
       <main className="pt-[60px]">
-        <section className="border-b border-[#1A1A1A] py-20">
-          <div className="mx-auto max-w-[1200px] px-6 md:px-8">
-            <div className="max-w-3xl">
-              <div className="mb-6 font-mono text-[12px] uppercase tracking-[0.3em] text-[#666666]">
+
+        {/* ── Hero ──────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden border-b border-[#1A1A1A] py-28">
+          <DotPattern className="fill-[#ffffff]/[0.025]" />
+          <div className="relative z-10 mx-auto max-w-[1200px] px-6 md:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={mounted ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+              className="max-w-3xl"
+            >
+              <div className="mb-6 inline-flex items-center gap-3 font-mono text-[12px] uppercase tracking-[0.3em] text-[#666666]">
+                <span className="h-px w-6 bg-[#666666]" />
                 Pricing
               </div>
               <h1
-                className="font-pixel text-white font-bold uppercase leading-none tracking-tighter"
+                className="font-pixel text-white font-bold uppercase leading-[0.9] tracking-tighter"
                 style={{
                   fontFamily: "var(--font-pixel)",
-                  fontSize: "clamp(44px, 7vw, 82px)",
+                  fontSize: "clamp(44px, 7vw, 90px)",
                 }}
               >
-                Agent observability for every stage.
+                Pricing that doesn&apos;t
+                <br />
+                <span className="text-[#555555]">waste your time.</span>
               </h1>
-              <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-[#999999]">
-                Free is for testing. Pro is for production agents. Team is for
-                shared operations. Enterprise is for security, SSO, retention,
-                and deployment requirements. Checkout is disabled during beta.
+              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-[#888888]">
+                10,000 free spans to try the full product. Paid plans start at $19/mo.
+                No credit card required.
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── Plans ─────────────────────────────────────────────────── */}
+        <section className="py-24">
+          <div className="mx-auto max-w-[1200px] px-6 md:px-8">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+              {PLANS.map((plan, index) => (
+                <motion.div
+                  key={plan.name}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={mounted ? { opacity: 1, y: 0 } : {}}
+                  transition={{ delay: 0.1 + index * 0.1, duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
+                  className={`flex flex-col border bg-[#0A0A0A] ${
+                    plan.popular ? "border-white" : "border-[#2A2A2A]"
+                  }`}
+                >
+                  {/* Terminal header */}
+                  <div className="flex items-center gap-2 border-b border-[#1A1A1A] bg-[#080808] px-4 py-2.5 font-mono text-[11px] text-[#555555]">
+                    <span className="text-[#10B981]">$</span>
+                    <span>./plan</span>
+                    <span className="text-[#666666]">--{plan.name.toLowerCase()}</span>
+                    {plan.popular && (
+                      <>
+                        <span className="ml-auto text-[#444444]">#</span>
+                        <span className="text-[#666666]">recommended</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex flex-1 flex-col p-6 pt-5">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-mono text-5xl tracking-tight text-white">
+                        {plan.price}
+                      </span>
+                      {plan.note && (
+                        <span className="font-mono text-[13px] text-[#555555]">
+                          {plan.note}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-6 flex-1 space-y-2.5">
+                      {plan.lines.map(([key, val]) => (
+                        <div key={key} className="flex items-center gap-3 font-mono text-[13px]">
+                          <span className="text-[#444444]">&gt;</span>
+                          <span className="text-[#666666]">{key}</span>
+                          <span className="ml-auto text-[#CCCCCC]">{val}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-auto pt-8">
+                      <Link href={plan.href}>
+                        <Button
+                          variant={plan.popular ? "default" : "secondary"}
+                          className={`h-11 w-full rounded-none font-mono text-[12px] uppercase tracking-widest transition-all duration-200 ${
+                            plan.popular ? "hover:bg-[#CCCCCC]" : "hover:bg-[#1A1A1A] hover:text-white"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            {plan.cta}
+                            <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                          </span>
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Free plan */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={mounted ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 0.5, duration: 0.4 }}
+              className="mt-6 border border-[#2A2A2A] bg-[#0A0A0A] transition-colors hover:border-[#555555]"
+            >
+              <div className="flex items-center gap-2 border-b border-[#1A1A1A] bg-[#080808] px-5 py-3 font-mono text-[11px] text-[#555555]">
+                <span className="text-[#10B981]">$</span>
+                <span>./plan</span>
+                <span className="text-[#666666]">--free</span>
+              </div>
+              <div className="flex flex-col gap-8 p-8 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-8">
+                  <div className="shrink-0">
+                    <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#666666]">
+                      Experimenting
+                    </div>
+                    <div className="mt-2 font-mono text-3xl uppercase text-white">Free</div>
+                    <div className="mt-1 flex items-baseline gap-1">
+                      <span className="font-mono text-4xl tracking-tight text-white">$0</span>
+                      <span className="font-mono text-[12px] text-[#555555]">/ mo</span>
+                    </div>
+                  </div>
+                  <div className="hidden h-16 w-px bg-[#1A1A1A] md:block" />
+                  <div className="grid gap-x-10 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wider text-[#555555]">Spans</div>
+                      <div className="mt-0.5 font-mono text-[14px] text-white">10,000 / mo</div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wider text-[#555555]">Retention</div>
+                      <div className="mt-0.5 font-mono text-[14px] text-white">7 days</div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wider text-[#555555]">Projects</div>
+                      <div className="mt-0.5 font-mono text-[14px] text-white">1</div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wider text-[#555555]">Support</div>
+                      <div className="mt-0.5 font-mono text-[14px] text-white">Community</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="shrink-0">
+                  <Link href="/sign-up">
+                    <Button
+                      variant="secondary"
+                      className="h-11 rounded-none font-mono text-[11px] uppercase tracking-widest hover:bg-[#1A1A1A] hover:text-white"
+                    >
+                      Start free
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── Disclaimer ────────────────────────────────────────────── */}
+        <section className="border-y border-[#1A1A1A] bg-black py-12">
+          <div className="mx-auto max-w-[1200px] px-6 md:px-8">
+            <div className="border border-[#2A2A2A] bg-[#0A0A0A] p-6 text-center">
+              <p className="font-mono text-[12px] uppercase tracking-widest text-[#555555]">
+                Runtime controls, evals, self-hosting, and email alerts are on the roadmap — not current beta promises.
               </p>
             </div>
           </div>
         </section>
 
-        <section className="py-16">
-          <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-0 px-6 md:grid-cols-4 md:px-8">
-            {PLANS.map((plan) => (
-              <article
-                key={plan.name}
-                className="flex min-h-[560px] flex-col border border-[#2A2A2A] bg-[#0A0A0A] p-6 md:-ml-px md:first:ml-0"
-              >
-                <div className="flex-1">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#666666]">
-                    {plan.for}
-                  </div>
-                  <h2 className="mt-3 font-mono text-xl uppercase text-white">
-                    {plan.name}
-                  </h2>
-                  <p className="mt-3 min-h-16 text-[13px] leading-relaxed text-[#999999]">
-                    {plan.description}
-                  </p>
-                  <div className="mt-6 font-mono text-3xl text-white">
-                    {plan.price}
-                  </div>
-                  <div className="mt-6 h-px bg-[#1A1A1A]" />
-                  <ul className="mt-6 space-y-3">
-                    {plan.included.map((item) => (
-                      <li key={item} className="flex gap-3 text-[12px] text-[#CCCCCC]">
-                        <Check className="mt-0.5 size-3 shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                    {plan.unavailable.map((item) => (
-                      <li key={item} className="flex gap-3 text-[12px] text-[#555555]">
-                        <Minus className="mt-0.5 size-3 shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <Link href={plan.href} className="mt-8">
-                  <Button
-                    variant={plan.name === "Free" ? "default" : "secondary"}
-                    className="h-11 w-full rounded-none font-mono text-[11px] uppercase tracking-widest"
+        {/* ── Working / Roadmap ─────────────────────────────────────── */}
+        <Section title="What ships today vs what is next">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="border border-[#2A2A2A] bg-[#0A0A0A] p-8">
+              <h2 className="font-mono text-[11px] uppercase tracking-[0.25em] text-white">
+                Working in beta
+              </h2>
+              <div className="mt-6 space-y-2">
+                {WORKING.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center justify-between gap-4 py-1.5 font-mono text-[12px] uppercase tracking-wider"
                   >
-                    {plan.action}
-                  </Button>
-                </Link>
-              </article>
-            ))}
+                    <span className="text-[#CCCCCC]">{item}</span>
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="border border-[#2A2A2A] bg-[#0A0A0A] p-8">
+              <h2 className="font-mono text-[11px] uppercase tracking-[0.25em] text-[#666666]">
+                On the roadmap
+              </h2>
+              <div className="mt-6 space-y-2">
+                {ROADMAP.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center justify-between gap-4 py-1.5 font-mono text-[12px] uppercase tracking-wider"
+                  >
+                    <span className="text-[#444444]">{item}</span>
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#333333]" />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </section>
+        </Section>
 
-        <section className="border-y border-[#1A1A1A] bg-black py-16">
-          <div className="mx-auto grid max-w-[1200px] gap-8 px-6 md:grid-cols-2 md:px-8">
-            <CapabilityList title="Working in beta" rows={CURRENTLY_WORKING} />
-            <CapabilityList title="Roadmap, not a promise yet" rows={ROADMAP} muted />
+        {/* ── FAQ ────────────────────────────────────────────────────── */}
+        <Section title="Frequently asked questions" className="border-y border-[#1A1A1A] bg-black py-20">
+          <div className="mx-auto max-w-[700px]">
+            <div className="divide-y divide-[#1A1A1A]">
+              {FAQ.map((item) => (
+                <details key={item.q} className="group py-5">
+                  <summary className="flex cursor-pointer items-center justify-between font-mono text-[14px] text-white transition-colors hover:text-[#CCCCCC] [&::-webkit-details-marker]:hidden">
+                    {item.q}
+                    <ChevronDown className="size-4 shrink-0 text-[#555555] transition-transform duration-200 group-open:rotate-180" />
+                  </summary>
+                  <p className="mt-3 max-w-lg text-[13px] leading-relaxed text-[#777777]">
+                    {item.a}
+                  </p>
+                </details>
+              ))}
+            </div>
+            <div className="mt-10 border border-[#2A2A2A] bg-[#0A0A0A] p-6 text-center">
+              <p className="font-mono text-[12px] text-[#777777]">
+                Still have questions?{" "}
+                <Link href="mailto:sales@tracify.tech" className="text-white underline underline-offset-2 transition-colors hover:text-[#CCCCCC]">
+                  Email us
+                </Link>
+              </p>
+            </div>
           </div>
-        </section>
+        </Section>
       </main>
       <Footer />
     </div>
   );
 }
 
-function CapabilityList({
-  title,
-  rows,
-  muted = false,
-}: {
-  title: string;
-  rows: string[];
-  muted?: boolean;
-}) {
+function Section({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
+  const [ref, inView] = useInView(0.1);
   return (
-    <div className="border border-[#2A2A2A] bg-[#0A0A0A] p-6">
-      <h2 className="font-mono text-[12px] uppercase tracking-[0.25em] text-white">
-        {title}
-      </h2>
-      <div className="mt-6 divide-y divide-[#1A1A1A]">
-        {rows.map((row) => (
-          <div
-            key={row}
-            className="flex items-center justify-between gap-4 py-3 font-mono text-[11px] uppercase tracking-wider"
-          >
-            <span className={muted ? "text-[#555555]" : "text-[#CCCCCC]"}>
-              {row}
-            </span>
-            <span className={muted ? "h-1.5 w-1.5 bg-[#333333]" : "h-1.5 w-1.5 bg-white"} />
+    <section ref={ref} className={className}>
+      <div className="mx-auto max-w-[1200px] px-6 md:px-8 py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+        >
+          <div className="mb-10 inline-flex items-center gap-3 font-mono text-[12px] uppercase tracking-[0.3em] text-[#666666]">
+            <span className="h-px w-6 bg-[#666666]" />
+            {title}
           </div>
-        ))}
+          {children}
+        </motion.div>
       </div>
-    </div>
+    </section>
   );
 }

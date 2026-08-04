@@ -26,8 +26,20 @@ export default defineSchema({
     costThresholdUsd: v.optional(v.number()),
     maxDurationSeconds: v.optional(v.number()),
     maxStallMinutes: v.optional(v.number()),
-    apiKey: v.optional(v.string()),
     slackWebhookUrl: v.optional(v.string()),
+    runtimePolicy: v.optional(v.object({
+      enforcementMode: v.union(v.literal("observe"), v.literal("enforce")),
+      maxCostPerRun: v.optional(v.number()),
+      maxCostPerDay: v.optional(v.number()),
+      fallbackChain: v.array(v.string()),
+      retryPolicy: v.object({
+        maxAttempts: v.number(),
+        backoffMs: v.number(),
+        backoffMultiplier: v.number(),
+        retryableErrors: v.array(v.string()),
+      }),
+      latencyBudgetMs: v.optional(v.number()),
+    })),
   })
     .index("by_clerkOrgId", ["clerkOrgId"])
     .index("by_clerkUserId", ["clerkUserId"])
@@ -51,13 +63,37 @@ export default defineSchema({
     createdAt: v.optional(v.string()),
     updatedAt: v.optional(v.string()),
     projectId: v.id("projects"),
+    sessionId: v.optional(v.string()),
   })
     .index("by_projectId", ["projectId"])
     .index("by_runId", ["runId"])
     .index("by_projectId_and_runId", ["projectId", "runId"])
-    .index("by_projectId_startedAt", ["projectId", "startedAt"])
     .index("by_projectId_createdAt", ["projectId", "createdAt"])
-    .index("by_projectId_status", ["projectId", "status"]),
+    .index("by_projectId_status", ["projectId", "status"])
+    .index("by_projectId_and_sessionId", ["projectId", "sessionId"]),
+
+  sessions: defineTable({
+    projectId: v.id("projects"),
+    sessionId: v.string(),
+    endUserId: v.optional(v.string()),
+    environment: v.optional(v.string()),
+    release: v.optional(v.string()),
+    traceName: v.optional(v.string()),
+    tags: v.array(v.string()),
+    firstSeenAt: v.string(),
+    lastSeenAt: v.string(),
+    traceCount: v.number(),
+    spanCount: v.number(),
+    totalCostUsd: v.number(),
+    latestStatus: v.union(
+      v.literal("running"),
+      v.literal("completed"),
+      v.literal("failed"),
+      v.literal("cancelled"),
+    ),
+  })
+    .index("by_projectId_and_sessionId", ["projectId", "sessionId"])
+    .index("by_projectId_and_lastSeenAt", ["projectId", "lastSeenAt"]),
 
   alerts: defineTable({
     runId: v.string(),
@@ -144,4 +180,12 @@ export default defineSchema({
     readCount: v.number(),
     updatedAt: v.number(),
   }).index("by_day", ["day"]),
+
+  costCounters: defineTable({
+    projectId: v.id("projects"),
+    period: v.string(), // "run:{runId}" or "day:{YYYY-MM-DD}"
+    costUsd: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_projectId_and_period", ["projectId", "period"]),
 });

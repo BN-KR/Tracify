@@ -21,6 +21,12 @@ type SpanPayload = {
   toolName?: string;
   metadata?: Record<string, unknown>;
   parentSpanId?: string;
+  sessionId?: string;
+  endUserId?: string;
+  environment?: string;
+  release?: string;
+  tags?: string[];
+  traceName?: string;
 };
 
 function jsonString(value: unknown) {
@@ -67,6 +73,14 @@ function validatePayload(body: Record<string, unknown>):
   }
   if (body.parentSpanId !== undefined && typeof body.parentSpanId !== "string") {
     return { ok: false, error: "parentSpanId must be a string" };
+  }
+  for (const key of ["sessionId", "endUserId", "environment", "release", "traceName"] as const) {
+    if (body[key] !== undefined && typeof body[key] !== "string") {
+      return { ok: false, error: `${key} must be a string` };
+    }
+  }
+  if (body.tags !== undefined && (!Array.isArray(body.tags) || body.tags.some((tag) => typeof tag !== "string"))) {
+    return { ok: false, error: "tags must be an array of strings" };
   }
   if (
     body.metadata !== undefined &&
@@ -128,25 +142,35 @@ export async function POST(request: NextRequest) {
     lastUsedAt: now,
   });
 
-  await inngest.send({
-    name: "5to1r/span.received",
-    data: {
-      spanId: payload.spanId,
-      runId: payload.runId,
-      projectId: projectDocId,
-      projectDocId,
-      spanType: payload.spanType,
-      input: jsonString(payload.input),
-      output: jsonString(payload.output),
-      latencyMs: payload.latencyMs,
-      costUsd: payload.costUsd ?? 0,
-      modelId: payload.modelId ?? "",
-      toolName: payload.toolName ?? "",
-      metadata: payload.metadata ?? {},
-      parentSpanId: payload.parentSpanId ?? "",
-      createdAt: payload.createdAt,
-    },
-  });
+  try {
+    await inngest.send({
+      name: "5to1r/span.received",
+      data: {
+        spanId: payload.spanId,
+        runId: payload.runId,
+        projectId: projectDocId,
+        projectDocId,
+        spanType: payload.spanType,
+        input: jsonString(payload.input),
+        output: jsonString(payload.output),
+        latencyMs: payload.latencyMs,
+        costUsd: payload.costUsd ?? 0,
+        modelId: payload.modelId ?? "",
+        toolName: payload.toolName ?? "",
+        metadata: payload.metadata ?? {},
+        parentSpanId: payload.parentSpanId ?? "",
+        sessionId: payload.sessionId ?? "",
+        endUserId: payload.endUserId ?? "",
+        environment: payload.environment ?? "",
+        release: payload.release ?? "",
+        tags: payload.tags ?? [],
+        traceName: payload.traceName ?? "",
+        createdAt: payload.createdAt,
+      },
+    });
+  } catch (err) {
+    console.error("Inngest send failed (span accepted but not queued):", err);
+  }
 
   return Response.json({ ok: true, spanId: payload.spanId }, { status: 202 });
 }

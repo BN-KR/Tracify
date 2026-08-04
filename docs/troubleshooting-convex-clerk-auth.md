@@ -57,7 +57,7 @@ export default {
       applicationID: "convex",
     },
     {
-      domain: "https://clerk.5to1r.com",
+      domain: "https://clerk.tracify.tech",
       applicationID: "convex",
     },
   ],
@@ -97,7 +97,7 @@ The production Clerk instance must have:
 The Convex prod deployment must have:
 
 ```text
-CLERK_JWT_ISSUER_DOMAIN=https://clerk.5to1r.com
+CLERK_JWT_ISSUER_DOMAIN=https://clerk.tracify.tech
 ```
 
 Vercel production must point browser clients at production Convex:
@@ -122,7 +122,7 @@ npx.cmd convex env list --prod
 Expected important value:
 
 ```text
-CLERK_JWT_ISSUER_DOMAIN=https://clerk.5to1r.com
+CLERK_JWT_ISSUER_DOMAIN=https://clerk.tracify.tech
 ```
 
 2. Deployed the current Convex functions and auth config to production:
@@ -174,9 +174,9 @@ npx.cmd vercel env ls production
 5. Pushed the documentation commit, which triggered a production Vercel deployment. The deployment was ready and aliased to:
 
 ```text
-https://5to1r.com
-https://www.5to1r.com
-https://5to1r.vercel.app
+https://tracify.tech
+https://tracify.tech
+https://tracify.vercel.app
 ```
 
 ## Dev vs Production Checklist
@@ -275,7 +275,7 @@ Fix:
 
 - Confirm the Clerk issuer domain in Convex matches the actual environment.
 - Dev: `https://many-crab-79.clerk.accounts.dev`
-- Prod: `https://clerk.5to1r.com`
+- Prod: `https://clerk.tracify.tech`
 
 ### Stale Convex functions
 

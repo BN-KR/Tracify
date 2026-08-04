@@ -12,6 +12,14 @@ SCHEMA >
     `costUsd`   Float64 `json:$.costUsd`,
     `modelId`   String `json:$.modelId`,
     `toolName`  String `json:$.toolName`,
+    `parentSpanId` String `json:$.parentSpanId`,
+    `sessionId` String `json:$.sessionId`,
+    `endUserId` String `json:$.endUserId`,
+    `environment` String `json:$.environment`,
+    `release` String `json:$.release`,
+    `tags` Array(String) `json:$.tags`,
+    `traceName` String `json:$.traceName`,
+    `metadata` String `json:$.metadata`,
     `createdAt` DateTime `json:$.createdAt`
 
 ENGINE "MergeTree"

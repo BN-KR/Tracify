@@ -60,7 +60,7 @@
 - [x] Replace fake billing usage/checkout affordances with real usage or beta contact state
 - [x] Add print-friendly project reports with report metadata, run totals, model/tool breakdowns, alerts, and failed traces
 - [x] Add beta smoke script for ingest auth failures, invalid payloads, protected route reachability, and optional valid ingest/Convex run checks
-- [ ] Deploy Tinybird endpoint pipes to the active Tinybird workspace and verify endpoint responses
+- [x] Deploy Tinybird endpoint pipes to the active Tinybird workspace and verify endpoint responses
 - [ ] Smoke test report page states: no data, normal runs, failed runs, and analytics unavailable
 - [ ] Run `npm run smoke:beta` with `FIVETOONE_SMOKE_API_KEY` and `FIVETOONE_SMOKE_PROJECT_ID`
 
@@ -122,3 +122,17 @@
 - [x] Auth Shell & Clerk Integration
 - [x] High-fidelity Landing Page
 - [x] Legal Pages (Privacy/Terms)
+
+### Competitive Product Surface [COMPLETED]
+- [x] Replace placeholder product feature pages with detailed shipped-capability pages
+- [x] Add public roadmap, contact, and honest status surfaces
+- [x] Expose runtime controls as a dashboard Control workspace route
+- [x] Add product/roadmap access through the marketing and dashboard navigation
+
+### Observe Foundation: Sessions and Search [COMPLETED]
+- [x] Add optional session/user/environment/release/tag context to JSON and OTLP ingestion
+- [x] Persist bounded Convex session summaries and link runs to sessions
+- [x] Add Tinybird-backed project trace search with bounded filters
+- [x] Add dashboard Sessions, Session detail, and Trace Search routes
+- [x] Update Python/TypeScript SDK context helpers and regenerate Convex bindings
+- [x] Verify targeted lint, production build, and TypeScript SDK build

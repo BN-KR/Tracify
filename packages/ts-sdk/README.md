@@ -52,6 +52,7 @@ const agent = traceAgent(async (query: string) => {
 - **Granular Spans:** Manually record LLMs, tools, and custom decisions.
 - **Environment Aware:** Automatically picks up API keys from `process.env`.
 - **Lightweight:** Minimal dependencies, optimized for Node.js and Edge runtimes.
+- **Session context:** Add `sessionId`, `endUserId`, `environment`, `release`, and `tags` to connect related traces.
 
 ## License
 

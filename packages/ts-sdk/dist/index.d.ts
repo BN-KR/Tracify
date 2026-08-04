@@ -14,14 +14,50 @@ export interface SpanData {
     modelId?: string;
     toolName?: string;
     metadata?: Record<string, any>;
+    parentSpanId?: string;
+    sessionId?: string;
+    endUserId?: string;
+    environment?: string;
+    release?: string;
+    tags?: string[];
+    traceName?: string;
     createdAt?: string;
 }
+export interface RuntimePolicy {
+    enforcementMode: "observe" | "enforce";
+    maxCostPerRun?: number;
+    maxCostPerDay?: number;
+    fallbackChain: string[];
+    retryPolicy: {
+        maxAttempts: number;
+        backoffMs: number;
+        backoffMultiplier: number;
+        retryableErrors: string[];
+    };
+    latencyBudgetMs?: number;
+}
+export interface OrchestrateOptions<T> {
+    policy: RuntimePolicy;
+    call: (model: string, signal: AbortSignal) => Promise<T>;
+    model: string;
+    input?: any;
+    calculateCost?: (result: T, model: string) => number;
+    runId?: string;
+}
 export declare class FiveToOneClient {
-    private apiKey;
-    private host;
-    private ingestUrl;
+    protected apiKey: string;
+    protected host: string;
+    protected ingestUrl: string;
+    private checkCostUrl;
+    private _lastFailOpen;
     constructor(config?: FiveToOneConfig);
     ingest(data: SpanData): Promise<void>;
+    /**
+     * Server-side cost check. Returns the server's decision on whether
+     * the next call would exceed the ceiling.
+     */
+    private checkCost;
+    orchestrate<T>(options: OrchestrateOptions<T>): Promise<T>;
 }
 export declare class TracifyClient extends FiveToOneClient {
 }

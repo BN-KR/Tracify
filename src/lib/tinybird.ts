@@ -21,6 +21,10 @@ function getHeaders() {
   };
 }
 
+function sqlString(value: string) {
+  return value.replace(/'/g, "''");
+}
+
 /**
  * Ingest a single span row into the Tinybird `spans` datasource.
  */
@@ -37,6 +41,12 @@ export async function ingestSpan(span: {
   toolName: string;
   parentSpanId: string;
   metadata: Record<string, unknown>;
+  sessionId: string;
+  endUserId: string;
+  environment: string;
+  release: string;
+  tags: string[];
+  traceName: string;
   createdAt: string; // ISO 8601 UTC
 }) {
   const ndjson = JSON.stringify(span) + "\n";
@@ -152,6 +162,170 @@ export async function getCostByTool(projectId: string, days = 30) {
   return data.data as { toolName: string; totalCostUsd: number; spanCount: number; avgLatencyMs: number }[];
 }
 
+export type TraceSearchFilters = {
+  query?: string;
+  sessionId?: string;
+  endUserId?: string;
+  environment?: string;
+  release?: string;
+  modelId?: string;
+  tag?: string;
+  status?: "all" | "error" | "healthy";
+  minCostUsd?: number;
+  minLatencyMs?: number;
+  days?: number;
+  limit?: number;
+};
+
+export async function searchTraces(projectId: string, filters: TraceSearchFilters) {
+  const where = [`projectId = '${sqlString(projectId)}'`];
+  const days = Math.min(Math.max(filters.days ?? 30, 1), 90);
+  const limit = Math.min(Math.max(filters.limit ?? 50, 1), 100);
+  where.push(`createdAt >= now() - INTERVAL ${days} DAY`);
+  if (filters.sessionId) where.push(`sessionId = '${sqlString(filters.sessionId)}'`);
+  if (filters.endUserId) where.push(`endUserId = '${sqlString(filters.endUserId)}'`);
+  if (filters.environment) where.push(`environment = '${sqlString(filters.environment)}'`);
+  if (filters.release) where.push(`release = '${sqlString(filters.release)}'`);
+  if (filters.modelId) where.push(`modelId = '${sqlString(filters.modelId)}'`);
+  if (filters.tag) where.push(`has(tags, '${sqlString(filters.tag)}')`);
+  if (filters.query) {
+    const value = sqlString(filters.query);
+    where.push(`(positionCaseInsensitive(runId, '${value}') > 0 OR positionCaseInsensitive(traceName, '${value}') > 0)`);
+  }
+
+  const having = [];
+  if (filters.status === "error") having.push("countIf(spanType = 'error') > 0");
+  if (filters.status === "healthy") having.push("countIf(spanType = 'error') = 0");
+  if (filters.minCostUsd !== undefined) having.push(`sum(costUsd) >= ${Number(filters.minCostUsd)}`);
+  if (filters.minLatencyMs !== undefined) having.push(`max(latencyMs) >= ${Number(filters.minLatencyMs)}`);
+  const sql = `
+    SELECT
+      runId,
+      any(sessionId) AS sessionId,
+      any(endUserId) AS endUserId,
+      any(environment) AS environment,
+      any(release) AS release,
+      any(traceName) AS traceName,
+      min(createdAt) AS startedAt,
+      max(createdAt) AS lastSeenAt,
+      count() AS spanCount,
+      sum(costUsd) AS totalCostUsd,
+      max(latencyMs) AS maxLatencyMs,
+      countIf(spanType = 'error') AS errorCount
+    FROM spans
+    WHERE ${where.join(" AND ")}
+    GROUP BY runId
+    ${having.length ? `HAVING ${having.join(" AND ")}` : ""}
+    ORDER BY lastSeenAt DESC
+    LIMIT ${limit}
+  `;
+  const res = await fetch(sqlUrl(sql), { headers: getHeaders() });
+  if (!res.ok) {
+    throw new Error(`Tinybird query failed: ${res.status} ${await res.text()}`);
+  }
+  const data = await res.json();
+  return data.data as Array<{
+    runId: string; sessionId: string; endUserId: string; environment: string; release: string;
+    traceName: string; startedAt: string; lastSeenAt: string; spanCount: number;
+    totalCostUsd: number; maxLatencyMs: number; errorCount: number;
+  }>;
+}
+
+/**
+ * Get orchestration savings summary for a project.
+ * Returns calls retried, calls fell back, calls blocked, and estimated cost savings.
+ */
+export async function getOrchestrationSavings(projectId: string, days = 30) {
+  const sql = `
+    SELECT
+      countIf(
+        JSONExtractBool(metadata, 'orchestrationWillRetry') = 1
+      ) AS callsRetried,
+      countIf(
+        JSONExtractBool(metadata, 'orchestrationIsFallback') = 1
+          AND JSONExtractBool(metadata, 'orchestrationFinal') = 1
+      ) AS callsFellBack,
+      countIf(
+        JSONExtractBool(metadata, 'orchestrationBlocked') = 1
+      ) AS callsBlocked,
+      sumIf(
+        costUsd,
+        JSONExtractBool(metadata, 'orchestrationIsFallback') = 1
+          AND JSONExtractBool(metadata, 'orchestrationFinal') = 1
+      ) AS fallbackCostUsd,
+      sumIf(
+        costUsd,
+        JSONExtractBool(metadata, 'orchestrationIsFallback') = 0
+          AND spanType = 'llm_call'
+      ) AS primaryCostUsd
+    FROM spans
+    WHERE projectId = '${projectId}'
+      AND createdAt >= now() - INTERVAL ${days} DAY
+      AND has(metadata, 'orchestrationAttempt')
+  `;
+  const res = await fetch(sqlUrl(sql), {
+    headers: getHeaders(),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Tinybird query failed: ${res.status} ${body}`);
+  }
+  const data = await res.json();
+  const row = data.data?.[0] ?? {
+    callsRetried: 0,
+    callsFellBack: 0,
+    callsBlocked: 0,
+    fallbackCostUsd: 0,
+    primaryCostUsd: 0,
+  };
+
+  return {
+    callsRetried: Number(row.callsRetried) || 0,
+    callsFellBack: Number(row.callsFellBack) || 0,
+    callsBlocked: Number(row.callsBlocked) || 0,
+    fallbackCostUsd: Number(row.fallbackCostUsd) || 0,
+    primaryCostUsd: Number(row.primaryCostUsd) || 0,
+    totalOrchestratedCalls:
+      (Number(row.callsRetried) || 0) +
+      (Number(row.callsFellBack) || 0) +
+      (Number(row.callsBlocked) || 0),
+  };
+}
+
+/**
+ * Get fail-open rate for a project over the last N days.
+ * Returns total orchestrations, fail-open count, and rate.
+ */
+export async function getFailOpenRate(projectId: string, days = 7) {
+  const endpoint = `${TINYBIRD_HOST}/v0/pipes/fail_open_rate.json`;
+  const params = new URLSearchParams({
+    projectId,
+    days: String(days),
+    token: TINYBIRD_TOKEN ?? "",
+  });
+
+  const res = await fetch(`${endpoint}?${params}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Tinybird query failed: ${res.status} ${body}`);
+  }
+  const data = await res.json();
+  const row = data.data?.[0] ?? {
+    totalOrchestrations: 0,
+    failOpenCount: 0,
+  };
+
+  const total = Number(row.totalOrchestrations) || 0;
+  const failOpen = Number(row.failOpenCount) || 0;
+
+  return {
+    totalOrchestrations: total,
+    failOpenCount: failOpen,
+    failOpenRate: total > 0 ? failOpen / total : 0,
+    elevated: total >= 10 && failOpen / total > 0.05,
+  };
+}
+
 export interface SpanRow {
   spanId: string;
   runId: string;
@@ -165,5 +339,11 @@ export interface SpanRow {
   toolName: string;
   parentSpanId: string;
   metadata: Record<string, unknown>;
+  sessionId: string;
+  endUserId: string;
+  environment: string;
+  release: string;
+  tags: string[];
+  traceName: string;
   createdAt: string;
 }

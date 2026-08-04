@@ -31,6 +31,7 @@ async function upsertRunSummary(
     spanType: string;
     createdAt: string;
     modelId?: string;
+    sessionId?: string;
   },
 ) {
   const isFailed = args.spanType === "error";
@@ -46,7 +47,7 @@ async function upsertRunSummary(
     .unique();
 
   if (!existing) {
-    return await ctx.db.insert("agentRuns", {
+    const id = await ctx.db.insert("agentRuns", {
       runId: args.runId,
       projectId: args.projectId,
       status,
@@ -58,7 +59,9 @@ async function upsertRunSummary(
       primaryModel: args.modelId || undefined,
       createdAt: args.createdAt,
       updatedAt: args.createdAt,
+      sessionId: args.sessionId,
     });
+    return { id, created: true };
   }
 
   const nextStatus =
@@ -75,10 +78,11 @@ async function upsertRunSummary(
     lastSpanAt: args.createdAt,
     finishedAt: finishedAt ?? existing.finishedAt,
     primaryModel: existing.primaryModel ?? args.modelId ?? undefined,
+    sessionId: existing.sessionId ?? args.sessionId,
     updatedAt: args.createdAt,
   });
 
-  return existing._id;
+  return { id: existing._id, created: false };
 }
 
 export const upsertRunFromSpan = mutation({
@@ -89,6 +93,7 @@ export const upsertRunFromSpan = mutation({
     spanType: v.string(),
     createdAt: v.string(),
     modelId: v.optional(v.string()),
+    sessionId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     return await upsertRunSummary(ctx, args);

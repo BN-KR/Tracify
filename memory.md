@@ -470,3 +470,16 @@
 - Run full beta smoke with a real API key/project id so valid ingest and Convex run creation are checked, not skipped.
 - Smoke test report page states with authenticated sessions: no data, normal runs, failed runs, and analytics-unavailable fallback.
 - Continue replacing beta placeholders with real usage, contact, or hidden states.
+
+## Competitive Product Surface (2026-08-03)
+- Replaced the placeholder marketing product pages with detailed, feature-specific pages for Trace Viewer, Cost Dashboard, Tool Calls, LLM Calls, Failures, Reports, and Runtime Control.
+- Added public `/roadmap`, `/contact`, and intentionally non-claiming `/status` routes. The roadmap explicitly separates shipped work from in-progress, planned, and enterprise-phase delivery.
+- Added dashboard `/dashboard/[projectId]/control`, which exposes the existing project runtime-policy controls from the sidebar. The sidebar now has a Control group and preserves compatibility with previously stored group preferences.
+- Marketing navigation now links to Reports, Runtime Control, and the roadmap. Targeted ESLint passes; the full lint command exceeded the 60-second command limit without diagnostics.
+
+## Sessions and Search Milestone (2026-08-03)
+- Added optional session context to native ingest, OTLP ingest, TypeScript SDK, and Python SDK helpers: session, end user, environment, release, tags, and trace name.
+- Added Tinybird span fields and a project-scoped `/api/projects/[projectId]/search` route with bounded filters for text, session, user, environment, release, model, tags, status, cost, latency, and time range.
+- Added Convex `sessions` summaries and optional `agentRuns.sessionId` linkage with authorized list/detail/run queries.
+- Added dashboard Observe routes for Sessions, session detail, and Trace Search, plus sidebar navigation.
+- Convex codegen, targeted ESLint, Next production build, and TypeScript SDK build pass.

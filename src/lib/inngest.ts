@@ -19,6 +19,12 @@ export type SpanIngestedEvent = {
     toolName: string;
     metadata: Record<string, unknown>;
     parentSpanId: string;
+    sessionId: string;
+    endUserId: string;
+    environment: string;
+    release: string;
+    tags: string[];
+    traceName: string;
     createdAt: string;
   };
 };

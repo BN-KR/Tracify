@@ -3,21 +3,22 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tracify"
-version = "0.1.0"
+name = "5to1r"
+version = "0.2.0"
 authors = [
   { name="Tracify Team", email="hello@tracify.tech" },
 ]
-description = "Observability and tracing for AI agents."
+description = "Observability, runtime enforcement, and tracing for AI agents."
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
     "requests>=2.25.0",
+    "httpx>=0.24.0",
 ]
 
 [tool.setuptools.packages.find]

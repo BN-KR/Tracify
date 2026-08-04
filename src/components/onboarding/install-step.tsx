@@ -9,8 +9,8 @@ import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
 const snippets = {
   python: {
     label: "Python",
-    install: "pip install tracify",
-    code: `from tracify import trace_agent
+    install: "pip install 5to1r",
+    code: `from 5to1r import trace_agent
 
 @trace_agent()
 async def research_agent(query):
@@ -18,8 +18,8 @@ async def research_agent(query):
   },
   typescript: {
     label: "TypeScript",
-    install: "npm install tracify",
-    code: `import { traceAgent } from "tracify"
+    install: "npm install 5to1r",
+    code: `import { traceAgent } from "5to1r"
 
 const researchAgent = traceAgent(async (query: string) => {
   return await run(query)
@@ -43,12 +43,12 @@ Rules:
 Steps:
 1. Detect whether this project is Python or TypeScript.
 2. Install the Tracify SDK with the correct command:
-   - Python: pip install tracify
-   - TypeScript / Node.js: npm install tracify
+   - Python: pip install 5to1r
+   - TypeScript / Node.js: npm install 5to1r
 3. Add TRACIFY_API_KEY to .env.example.
 4. Find the main agent function.
-5. If Python, import trace_agent from tracify and add @trace_agent().
-6. If TypeScript, import traceAgent from tracify and wrap the async agent function.
+5. If Python, import trace_agent from 5to1r and add @trace_agent().
+6. If TypeScript, import traceAgent from 5to1r and wrap the async agent function.
 7. Run the agent once.
 8. Confirm that a span was sent to Tracify.
 

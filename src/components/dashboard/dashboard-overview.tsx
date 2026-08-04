@@ -20,6 +20,8 @@ import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Activity, DollarSign, Zap, AlertTriangle } from "lucide-react";
 import { RunsTable } from "./runs-table";
+import { OrchestrationSavings } from "./orchestration-savings";
+import { FailOpenAlert } from "./fail-open-alert";
 import { useProjectStats } from "@/hooks/use-project-stats";
 import { AnalyticsRefreshControl } from "./analytics-refresh-control";
 
@@ -155,6 +157,12 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
           status={failedRuns > 0 ? "warning" : "stable"}
         />
       </div>
+
+      {/* Orchestration Savings */}
+      <OrchestrationSavings projectId={projectId} range={range} />
+
+      {/* Fail-open Alert */}
+      <FailOpenAlert projectId={projectId} />
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 gap-6">

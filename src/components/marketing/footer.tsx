@@ -28,8 +28,16 @@ export function Footer() {
             <div className="flex flex-col gap-4">
               <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white">Legal</span>
               <div className="flex flex-col gap-2">
+                <Link href="/security" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Security</Link>
                 <Link href="/privacy" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Privacy Policy</Link>
                 <Link href="/terms" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Terms of Service</Link>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white">Developers</span>
+              <div className="flex flex-col gap-2">
+                <Link href="/integrations" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Integrations</Link>
               </div>
             </div>
 

@@ -33,11 +33,17 @@ export const processSpan = inngest.createFunction(
         toolName: span.toolName,
         parentSpanId: span.parentSpanId,
         metadata: span.metadata,
+        sessionId: span.sessionId ?? "",
+        endUserId: span.endUserId ?? "",
+        environment: span.environment ?? "",
+        release: span.release ?? "",
+        tags: span.tags ?? [],
+        traceName: span.traceName ?? "",
         createdAt: span.createdAt,
       });
     });
 
-    const runDocId = await step.run("upsert-convex-run", async () => {
+    const run = await step.run("upsert-convex-run", async () => {
       const convex = getConvexClient();
       return await convex.mutation(api.agentRuns.upsertRunFromSpan, {
         runId: span.runId,
@@ -46,8 +52,33 @@ export const processSpan = inngest.createFunction(
         spanType: span.spanType,
         createdAt: span.createdAt,
         modelId: span.modelId || undefined,
+        sessionId: span.sessionId || undefined,
       });
     });
+
+    if (span.sessionId) {
+      await step.run("upsert-convex-session", async () => {
+        const convex = getConvexClient();
+        const status = span.spanType === "error"
+          ? "failed"
+          : span.spanType === "run_end"
+            ? "completed"
+            : "running";
+        await convex.mutation(api.sessions.upsertFromSpan, {
+          projectId: span.projectDocId as Id<"projects">,
+          sessionId: span.sessionId,
+          endUserId: span.endUserId || undefined,
+          environment: span.environment || undefined,
+          release: span.release || undefined,
+          traceName: span.traceName || undefined,
+          tags: span.tags ?? [],
+          createdAt: span.createdAt,
+          costUsd: span.costUsd,
+          status,
+          isNewTrace: run.created,
+        });
+      });
+    }
 
     await step.run("check-thresholds", async () => {
       const convex = getConvexClient();

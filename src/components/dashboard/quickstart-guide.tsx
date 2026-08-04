@@ -28,7 +28,7 @@ export function QuickstartGuide({ projectId }: QuickstartGuideProps) {
     setTimeout(() => setCopied(null), 2000);
   }
 
-  const pythonCode = `from tracify import trace_agent, llm_call
+  const pythonCode = `from 5to1r import trace_agent, llm_call
 
 @trace_agent()
 async function run_my_agent():
@@ -42,7 +42,7 @@ async function run_my_agent():
     )
     return "Success"`;
 
-  const tsCode = `import { traceAgent, llmCall } from 'tracify';
+  const tsCode = `import { traceAgent, llmCall } from '5to1r';
 
 const agent = traceAgent(async () => {
   // Your agent logic here
@@ -56,8 +56,8 @@ const agent = traceAgent(async () => {
   return "Success";
 });`;
 
-  const installPy = "pip install tracify";
-  const installTs = "npm install tracify";
+  const installPy = "pip install 5to1r";
+  const installTs = "npm install 5to1r";
   const envVar = `TRACIFY_API_KEY=tracify_sk_live_...`;
 
   return (

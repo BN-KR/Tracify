@@ -47,5 +47,18 @@ scratch/temp.zip
 scratch/docx_extract/
 scratch/user-test-5to1r/node_modules/
 
+# local reference documents; do not publish
+/Tracify - Docs/
+
+# generated local artifacts and credentials
+**/__pycache__/
+**/*.pyc
+packages/python-sdk/dist/
+packages/python-sdk/src/*.egg-info/
+packages/python-sdk/src/*/egg-info/
+teams-bot/sessions.json
+teams-bot/*-out.log
+teams-bot/*-err.log
+
 # clerk configuration (can include secrets)
 /.clerk/

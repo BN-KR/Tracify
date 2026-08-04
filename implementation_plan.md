@@ -141,3 +141,16 @@ The single most important UI in the product.
 ### Manual Verification
 - **Onboarding E2E:** Verify a new user can sign up, create a project, instrument an agent, and see the first trace.
 - **UI Audit:** Ensure 0px radius and monochrome high-contrast styling remains consistent.
+
+### Competitive Product Surface [DONE]
+- [x] Product detail pages now cover the currently shipped tracing, analytics, reporting, failure, tool/LLM call, and runtime-control capabilities.
+- [x] Public roadmap, contact, and status routes establish an honest delivery and enterprise-contact surface.
+- [x] Runtime control is reachable at `/dashboard/[projectId]/control` through the new dashboard Control group.
+- [ ] Continue the planned program with canonical telemetry/session data, search, redaction, datasets/evaluations, prompt management, and enterprise deployment in separately verifiable milestones.
+
+### Observe Foundation: Sessions and Search [DONE]
+- [x] Canonical optional session context is accepted by native and OTLP ingestion and both SDKs.
+- [x] Convex stores bounded session summaries and links saved runs by session.
+- [x] Tinybird-backed trace search supports bounded metadata, status, cost, latency, and time-window filters.
+- [x] Dashboard exposes Sessions, session detail, and Trace Search under Observe.
+- [ ] Next: ingestion-time redaction and object-storage references for large/multimodal payloads.
