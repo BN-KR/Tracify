@@ -230,7 +230,7 @@ export async function searchTraces(projectId: string, filters: TraceSearchFilter
   if (filters.tag) where.push(`has(tags, '${sqlString(filters.tag)}')`);
   if (filters.query) {
     const value = sqlString(filters.query);
-    where.push(`(positionCaseInsensitive(runId, '${value}') > 0 OR positionCaseInsensitive(traceName, '${value}') > 0)`);
+    where.push(`(positionCaseInsensitive(runId, '${value}') > 0 OR positionCaseInsensitive(traceName, '${value}') > 0 OR positionCaseInsensitive(metadata, '${value}') > 0 OR positionCaseInsensitive(input, '${value}') > 0 OR positionCaseInsensitive(output, '${value}') > 0)`);
   }
 
   const having = [];
