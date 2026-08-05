@@ -212,4 +212,301 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_projectId_and_period", ["projectId", "period"]),
+
+  prompts: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    type: v.union(v.literal("text"), v.literal("chat")),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_projectId_and_name", ["projectId", "name"]),
+
+  promptVersions: defineTable({
+    promptId: v.id("prompts"),
+    projectId: v.id("projects"),
+    version: v.optional(v.number()),
+    content: v.string(),
+    variables: v.array(v.string()),
+    labels: v.array(v.string()),
+    model: v.optional(v.string()),
+    createdBy: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_promptId", ["promptId"])
+    .index("by_projectId", ["projectId"])
+    .index("by_promptId_and_version", ["promptId", "version"]),
+
+  promptTraceLinks: defineTable({
+    projectId: v.id("projects"),
+    promptId: v.id("prompts"),
+    promptVersionId: v.id("promptVersions"),
+    traceId: v.string(),
+    spanId: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_promptVersionId", ["promptVersionId"])
+    .index("by_projectId", ["projectId"])
+    .index("by_traceId", ["projectId", "traceId"]),
+
+  datasets: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    version: v.optional(v.number()),
+    access: v.optional(v.union(v.literal("project"), v.literal("restricted"))),
+    allowedUserIds: v.optional(v.array(v.string())),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_projectId_and_name", ["projectId", "name"]),
+
+  datasetItems: defineTable({
+    projectId: v.id("projects"),
+    datasetId: v.id("datasets"),
+    traceId: v.optional(v.string()),
+    input: v.string(),
+    expectedOutput: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+    createdAt: v.number(),
+  })
+    .index("by_datasetId", ["datasetId"])
+    .index("by_projectId", ["projectId"])
+    .index("by_datasetId_and_traceId", ["datasetId", "traceId"]),
+
+  scores: defineTable({
+    projectId: v.id("projects"),
+    traceId: v.optional(v.string()),
+    spanId: v.optional(v.string()),
+    datasetItemId: v.optional(v.id("datasetItems")),
+    name: v.string(),
+    value: v.union(v.number(), v.boolean(), v.string()),
+    dataType: v.union(v.literal("numeric"), v.literal("boolean"), v.literal("categorical"), v.literal("text")),
+    source: v.union(v.literal("human"), v.literal("llm"), v.literal("code"), v.literal("user")),
+    comment: v.optional(v.string()),
+    createdBy: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_projectId_and_traceId", ["projectId", "traceId"])
+    .index("by_datasetItemId", ["datasetItemId"]),
+
+  annotations: defineTable({
+    projectId: v.id("projects"),
+    traceId: v.string(),
+    spanId: v.optional(v.string()),
+    status: v.union(v.literal("queued"), v.literal("in_review"), v.literal("completed")),
+    assignee: v.optional(v.string()),
+    label: v.optional(v.string()),
+    labels: v.optional(v.array(v.string())),
+    notes: v.optional(v.string()),
+    confidence: v.optional(v.number()),
+    assignedAt: v.optional(v.number()),
+    assignmentMethod: v.optional(v.union(v.literal("manual"), v.literal("round_robin"), v.literal("least_loaded"))),
+    agreementGroupId: v.optional(v.string()),
+    adjudicatedBy: v.optional(v.string()),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_projectId_and_status", ["projectId", "status"])
+    .index("by_projectId_and_traceId", ["projectId", "traceId"]),
+
+  annotationReviews: defineTable({
+    projectId: v.id("projects"),
+    annotationId: v.id("annotations"),
+    reviewerId: v.string(),
+    reviewerName: v.string(),
+    label: v.optional(v.string()),
+    score: v.optional(v.number()),
+    notes: v.optional(v.string()),
+    status: v.union(v.literal("assigned"), v.literal("submitted")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_annotationId", ["annotationId"])
+    .index("by_projectId", ["projectId"])
+    .index("by_annotationId_and_reviewerId", ["annotationId", "reviewerId"]),
+
+  evaluators: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    type: v.union(v.literal("code"), v.literal("llm_judge")),
+    criteria: v.string(),
+    active: v.boolean(),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_projectId_and_name", ["projectId", "name"]),
+
+  experiments: defineTable({
+    projectId: v.id("projects"),
+    datasetId: v.id("datasets"),
+    promptId: v.optional(v.id("prompts")),
+    promptVersionId: v.optional(v.id("promptVersions")),
+    suiteId: v.optional(v.id("evaluationSuites")),
+    name: v.string(),
+    model: v.optional(v.string()),
+    status: v.union(v.literal("draft"), v.literal("running"), v.literal("completed"), v.literal("failed")),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_datasetId", ["datasetId"]),
+
+  experimentResults: defineTable({
+    projectId: v.id("projects"),
+    experimentId: v.id("experiments"),
+    datasetItemId: v.id("datasetItems"),
+    output: v.string(),
+    traceId: v.optional(v.string()),
+    latencyMs: v.optional(v.number()),
+    costUsd: v.optional(v.number()),
+    score: v.optional(v.number()),
+    error: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_experimentId", ["experimentId"])
+    .index("by_projectId", ["projectId"]),
+
+  evaluatorVersions: defineTable({
+    projectId: v.id("projects"),
+    evaluatorId: v.id("evaluators"),
+    version: v.number(),
+    config: v.object({
+      target: v.union(v.literal("trace"), v.literal("span"), v.literal("dataset_item")),
+      scoreType: v.union(v.literal("boolean"), v.literal("numeric"), v.literal("categorical"), v.literal("text")),
+      prompt: v.optional(v.string()),
+      model: v.optional(v.string()),
+      rule: v.optional(v.string()),
+      categories: v.optional(v.array(v.string())),
+      minScore: v.optional(v.number()),
+      maxScore: v.optional(v.number()),
+      sampleRate: v.number(),
+      enabledOnline: v.boolean(),
+      template: v.optional(v.union(v.literal("groundedness"), v.literal("toxicity"), v.literal("pii"), v.literal("jailbreak"), v.literal("prompt_injection"), v.literal("policy"))),
+    }),
+    createdBy: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_evaluatorId", ["evaluatorId"])
+    .index("by_projectId", ["projectId"]),
+
+  evaluationSuites: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    datasetId: v.id("datasets"),
+    evaluatorIds: v.array(v.id("evaluators")),
+    baselineExperimentId: v.optional(v.id("experiments")),
+    minScore: v.optional(v.number()),
+    maxRegressionRate: v.optional(v.number()),
+    active: v.boolean(),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_datasetId", ["datasetId"]),
+
+  evaluationJobs: defineTable({
+    projectId: v.id("projects"),
+    suiteId: v.optional(v.id("evaluationSuites")),
+    mode: v.union(v.literal("online"), v.literal("offline"), v.literal("preview")),
+    status: v.union(v.literal("queued"), v.literal("running"), v.literal("completed"), v.literal("partial"), v.literal("failed"), v.literal("cancelled")),
+    traceId: v.optional(v.string()),
+    prompt: v.optional(v.string()),
+    model: v.optional(v.string()),
+    promptVersionId: v.optional(v.id("promptVersions")),
+    itemCount: v.number(),
+    completedCount: v.number(),
+    failedCount: v.number(),
+    error: v.optional(v.string()),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_projectId_and_status", ["projectId", "status"])
+    .index("by_traceId", ["traceId"]),
+
+  evaluationResults: defineTable({
+    projectId: v.id("projects"),
+    jobId: v.id("evaluationJobs"),
+    evaluatorId: v.id("evaluators"),
+    evaluatorVersion: v.number(),
+    traceId: v.optional(v.string()),
+    spanId: v.optional(v.string()),
+    datasetItemId: v.optional(v.id("datasetItems")),
+    value: v.union(v.number(), v.boolean(), v.string()),
+    dataType: v.union(v.literal("boolean"), v.literal("numeric"), v.literal("categorical"), v.literal("text")),
+    status: v.union(v.literal("passed"), v.literal("failed"), v.literal("error"), v.literal("skipped")),
+    explanation: v.optional(v.string()),
+    latencyMs: v.optional(v.number()),
+    costUsd: v.optional(v.number()),
+    error: v.optional(v.string()),
+    dedupeKey: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_jobId", ["jobId"])
+    .index("by_projectId_and_traceId", ["projectId", "traceId"])
+    .index("by_evaluatorId", ["evaluatorId"])
+    .index("by_dedupeKey", ["dedupeKey"]),
+
+  evaluationMonitors: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    evaluatorId: v.optional(v.id("evaluators")),
+    scoreName: v.string(),
+    aggregation: v.union(v.literal("failure_rate"), v.literal("average"), v.literal("count"), v.literal("categorical_rate")),
+    threshold: v.number(),
+    recoveryThreshold: v.optional(v.number()),
+    windowMinutes: v.number(),
+    minSamples: v.number(),
+    severity: v.union(v.literal("info"), v.literal("warning"), v.literal("critical")),
+    groupBy: v.optional(v.union(v.literal("model"), v.literal("prompt_version"), v.literal("environment"), v.literal("tag"))),
+    active: v.boolean(),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_projectId_and_active", ["projectId", "active"]),
+
+  evaluationMonitorState: defineTable({
+    projectId: v.id("projects"),
+    monitorId: v.id("evaluationMonitors"),
+    breached: v.boolean(),
+    measured: v.number(),
+    sampleCount: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_monitorId", ["monitorId"])
+    .index("by_projectId", ["projectId"]),
+
+  evaluationFeedback: defineTable({
+    projectId: v.id("projects"),
+    traceId: v.string(),
+    spanId: v.optional(v.string()),
+    kind: v.union(v.literal("thumb"), v.literal("star"), v.literal("text")),
+    value: v.union(v.number(), v.boolean(), v.string()),
+    reason: v.optional(v.string()),
+    comment: v.optional(v.string()),
+    endUserId: v.optional(v.string()),
+    dedupeKey: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_projectId_and_traceId", ["projectId", "traceId"])
+    .index("by_dedupeKey", ["dedupeKey"]),
 });

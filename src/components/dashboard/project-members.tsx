@@ -1,17 +1,14 @@
 "use client";
 
 import { useOrganization, useUser } from "@clerk/nextjs";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserPlus, Shield, MoreVertical, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface ProjectMembersProps {
-  projectId: string;
-}
-
-export function ProjectMembers({ projectId }: ProjectMembersProps) {
+export function ProjectMembers() {
   const {
     organization,
     isLoaded: orgLoaded,
@@ -23,6 +20,25 @@ export function ProjectMembers({ projectId }: ProjectMembersProps) {
     },
   });
   const { user, isLoaded: userLoaded } = useUser();
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<"org:member" | "org:viewer">("org:member");
+  const [inviteStatus, setInviteStatus] = useState("");
+  const [inviting, setInviting] = useState(false);
+
+  async function invite() {
+    if (!organization || !inviteEmail.trim()) return;
+    setInviting(true);
+    setInviteStatus("");
+    try {
+      await organization.inviteMember({ emailAddress: inviteEmail.trim(), role: inviteRole });
+      setInviteEmail("");
+      setInviteStatus("Invitation sent.");
+    } catch (error) {
+      setInviteStatus(error instanceof Error ? error.message : "Could not send invitation.");
+    } finally {
+      setInviting(false);
+    }
+  }
 
   if (!orgLoaded || !userLoaded) {
     return (
@@ -75,9 +91,11 @@ export function ProjectMembers({ projectId }: ProjectMembersProps) {
           <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">{organization.name} Members</h3>
           <p className="text-[11px] text-[#666666] mt-1">Manage who has access to this project.</p>
         </div>
-        <Button disabled className="rounded-none font-mono text-[10px] uppercase gap-2">
-          <UserPlus className="size-4" /> Invite Member
-        </Button>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <input value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="teammate@example.com" type="email" className="h-9 w-52 border border-zinc-800 bg-black px-3 font-mono text-[10px] text-zinc-300 outline-none focus:border-zinc-500" />
+          <select value={inviteRole} onChange={(event) => setInviteRole(event.target.value as "org:member" | "org:viewer")} className="h-9 border border-zinc-800 bg-black px-2 font-mono text-[10px] uppercase text-zinc-300"><option value="org:member">Developer</option><option value="org:viewer">Viewer</option></select>
+          <Button onClick={invite} disabled={inviting || !inviteEmail.trim()} className="rounded-none font-mono text-[10px] uppercase gap-2"><UserPlus className="size-4" /> {inviting ? "Sending..." : "Invite"}</Button>
+        </div>
       </div>
 
       <Card className="divide-y divide-[#2A2A2A] rounded-none border-border bg-[#111111] shadow-none">
@@ -106,6 +124,7 @@ export function ProjectMembers({ projectId }: ProjectMembersProps) {
           </div>
         )}
       </Card>
+      {inviteStatus ? <p className="border border-zinc-800 p-3 font-mono text-[10px] text-zinc-400">{inviteStatus}</p> : null}
 
       <div className="p-4 border border-zinc-800/50 bg-zinc-900/10 flex items-start gap-4">
         <Shield className="size-5 text-zinc-500 shrink-0 mt-0.5" />

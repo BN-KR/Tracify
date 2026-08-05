@@ -308,6 +308,7 @@ export async function POST(request: NextRequest) {
 
   await convex.mutation(api.projects.markApiKeyUsed, {
     projectId: projectDocId,
+    apiKeyHash: hashApiKey(apiKey),
     lastUsedAt: now,
   });
 

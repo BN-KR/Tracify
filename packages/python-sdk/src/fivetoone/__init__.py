@@ -181,15 +181,17 @@ def _run_with_timeout(
 
 
 class FiveToOneClient:
-    def __init__(self, api_key: Optional[str] = None, host: str = "https://tracify.tech"):
+    def __init__(self, api_key: Optional[str] = None, host: str = "https://tracify.tech", project_id: Optional[str] = None):
         self.api_key = api_key or os.environ.get("TRACIFY_API_KEY") or os.environ.get("FIVETOONE_API_KEY")
         if not self.api_key:
             raise ValueError("TRACIFY_API_KEY or FIVETOONE_API_KEY must be provided or set as an environment variable")
         self.host = host.rstrip("/")
+        self.project_id = project_id
         self.ingest_url = f"{self.host}/api/ingest"
         self.check_cost_url = f"{self.host}/api/orchestration/check-cost"
         self._http = httpx.Client(timeout=10) if _HAS_HTTPX else None
         self._last_fail_open = False
+        self._prompt_cache: Dict[str, Any] = {}
 
     def _send_span(self, span: Dict[str, Any]):
         try:
@@ -212,6 +214,47 @@ class FiveToOneClient:
             **kwargs
         }
         self._send_span(span)
+
+    def get_prompt(self, name: str, environment: str = "production", cache_ttl_seconds: float = 60, fallback: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Resolve a deployed prompt, using a short-lived cache and stale/fallback recovery."""
+        key = f"{name}:{environment}"
+        now = time.time()
+        cached = self._prompt_cache.get(key)
+        if cached and cached["expires_at"] > now:
+            return cached["value"]
+        try:
+            response = (self._http.get if self._http else _requests_fallback.get)(f"{self.host}/api/prompts/{name}", headers={"Authorization": f"Bearer {self.api_key}"}, params={"environment": environment}, timeout=10)
+            if response.status_code >= 400:
+                raise RuntimeError(f"Prompt resolution failed ({response.status_code}): {response.text[:300]}")
+            value = response.json()
+            self._prompt_cache[key] = {"value": value, "expires_at": now + cache_ttl_seconds}
+            return value
+        except Exception:
+            if cached:
+                return cached["value"]
+            if fallback is not None:
+                return fallback
+            raise
+
+    def _send_feedback(self, payload: Dict[str, Any]):
+        if not self.project_id:
+            print("Tracify Warning: project_id is required for feedback and score helpers")
+            return
+        try:
+            headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+            if self._http:
+                self._http.post(f"{self.host}/api/feedback", headers=headers, json={"projectId": self.project_id, **payload}, timeout=5)
+            else:
+                _requests_fallback.post(f"{self.host}/api/feedback", headers=headers, json={"projectId": self.project_id, **payload}, timeout=5)
+        except Exception as e:
+            print(f"Tracify Warning: Failed to record evaluation signal: {e}")
+
+    def feedback(self, trace_id: str, value: Union[bool, float, int, str], kind: Optional[str] = None, span_id: Optional[str] = None, reason: Optional[str] = None, comment: Optional[str] = None, end_user_id: Optional[str] = None, dedupe_key: Optional[str] = None):
+        inferred_kind = kind or ("star" if isinstance(value, (int, float)) and not isinstance(value, bool) else "thumb" if isinstance(value, bool) else "text")
+        self._send_feedback({"traceId": trace_id, "spanId": span_id, "kind": inferred_kind, "value": value, "reason": reason, "comment": comment, "endUserId": end_user_id, "dedupeKey": dedupe_key})
+
+    def score(self, trace_id: str, name: str, value: Union[bool, float, int, str], data_type: Optional[str] = None, span_id: Optional[str] = None, comment: Optional[str] = None):
+        self._send_feedback({"traceId": trace_id, "spanId": span_id, "kind": "text", "name": name, "value": value, "dataType": data_type, "comment": comment})
 
     def _check_cost(self, run_id: str, increment_usd: float) -> Dict[str, Any]:
         """Server-side cost check. Returns the server's decision."""

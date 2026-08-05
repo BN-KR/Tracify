@@ -1,5 +1,36 @@
 # Project Memory
 
+## 2026-08-05 Platform Continuation
+- Official Langfuse review highlighted score analytics and model comparison as remaining product gaps; Tracify now has both in the evaluation and playground surfaces.
+- Evaluation sub-routes previously rendered a generic “ready to be expanded” panel. They now expose dataset, run, monitor, and settings workflows backed by Convex state.
+- `npm run build` and `npx tsc --noEmit` pass after the changes. `npm run lint:platform` passes cleanly. The unauthenticated smoke script can lose its external local server mid-run; this is not an application build failure.
+- Annotation review now has Convex-backed reviewer records, self-claim/submission controls, and queue-level agreement visibility; production build remains green.
+- Prompt deployment now has a real runtime contract at `/api/prompts/:name?environment=production`; it resolves only explicitly labeled versions using the project API key and is documented under `/docs/prompts`.
+- Both SDKs expose prompt resolution helpers (`getPrompt` and `get_prompt`) and show how to attach the returned version id to a traced generation.
+- Datasets now support backward-compatible `project` or `restricted` access, with owner-only access changes and experiment visibility checks.
+- Experiment summaries now calculate score deltas against the prior run and the UI labels improvements versus regressions.
+- API-key score ingestion now honors and validates the SDK-provided data type instead of coercing every custom score to text.
+- Prompt SDK helpers now cache resolved deployments for 60 seconds by default and serve stale/fallback prompts when the resolver is unavailable.
+- The platform smoke script now probes `/api/evaluation/run`; the full Next production build completed successfully across 56 routes on this pass.
+- Root scripts now expose `test:sdk:ts` and `test:sdk:python`; both SDK suites pass after adding Python test-path configuration.
+- Public pricing pages now accurately describe the shipped AI engineering workflows instead of calling them roadmap items.
+- Platform smoke now checks `GET /api/otel`; its API-key prefix matches the Convex project key generator (`tracify_sk_live_`).
+- `projects.markApiKeyUsed` now verifies the supplied API-key hash, project ID, and active status before patching usage metadata.
+- Datasets are now directly reachable at `/dashboard/[projectId]/datasets` and use the live Evaluation Engine dataset workflow rather than being hidden under Evaluation.
+- Trace viewer now exposes a copyable deep link for sharing findings; the action remains within the existing project authorization boundary.
+- Dashboard Resources now links directly to `/integrations`, making framework/provider setup discoverable from an authenticated project workspace.
+- `npm run lint:platform` passes. Full `npm run lint` remains noisy because of pre-existing blog/marketing `any` and hook-rule violations outside the platform scope.
+- Production prompt labels are now backend-gated; direct prompt editing cannot bypass the evaluation suite promotion mutation.
+- Integrations docs now include a Python OTLP exporter example for OpenAI/LangChain/LlamaIndex and the attributes needed for sessions and releases.
+- The focused platform lint command now includes the newest routes/components rather than only the original workflow files; it passes alongside `tsc --noEmit`.
+- `/demo` now has a working promotion interaction instead of a dead button, completing the visible Trace → Experiment → Deploy story.
+- Live `npm run smoke:platform` now passes all public, protected, OTLP, prompt, evaluation, experiment, and dataset route checks; invalid offline evaluation IDs return 404 instead of 500.
+- Final production build completed successfully across 56 routes after the demo, navigation, deployment-safety, and evaluation API fixes.
+- Platform smoke now verifies both `GET /api/otel` health and rejection of unauthenticated OTLP ingestion.
+- Platform smoke also rejects unauthenticated native ingestion, covering the primary SDK/API path.
+- The lifecycle is now documented explicitly at `/docs/lifecycle` and `/product/lifecycle`, not only implied by the interactive demo.
+- The demo now has an explicit Datasets surface alongside Prompts, Evaluation, and Experiments, completing its seeded lifecycle coverage.
+
 ## Overview
 - Last Synced: 2026-06-16T12:00:00Z
 - Purpose: tracify — Agent Observability Platform (Full visibility into AI agent steps, decisions, cost, failures).
@@ -16,6 +47,8 @@
 - **Navigation:** Integrated a custom monochromatic `DropdownMenu` for both Project Switching and Account management in the topbar.
 - **Legal:** Dedicated `/privacy` and `/terms` pages with a minimalist, linked **Footer** component.
 - **Auth:** Google OAuth credentials configured in `.env.prod`, `.env.local`, and Vercel production variables.
+
+- **Evaluation Engine (2026-08-06):** Added versioned evaluator/suite/job/result/monitor/feedback schema and authenticated Convex mutations in `convex/evaluationEngine.ts`. The dashboard now has a unified Evaluation Engine workspace with overview, evaluator, dataset, run, monitor, review, and settings routes. Trace Viewer shows linked quality scores/results/feedback. Online evaluation now runs through a secret-protected Convex HTTP action invoked from Inngest, with deterministic rules, LLM judges, built-in groundedness/toxicity/PII/jailbreak/prompt-injection/policy templates, idempotent results, automatic failed-trace review queueing, and monitor alert creation. Offline jobs run through `/api/evaluation/run`. Reviewer assignment supports round-robin/least-loaded rotation and agreement metrics. TypeScript/Python SDKs expose feedback and score helpers. Public marketing and quickstart/SDK docs expose the workflow. Live online/API-key feedback requires the same `EVALUATION_INTERNAL_SECRET` in Next and Convex environments.
 
 
 ## Conventions
@@ -483,3 +516,22 @@
 - Added Convex `sessions` summaries and optional `agentRuns.sessionId` linkage with authorized list/detail/run queries.
 - Added dashboard Observe routes for Sessions, session detail, and Trace Search, plus sidebar navigation.
 - Convex codegen, targeted ESLint, Next production build, and TypeScript SDK build pass.
+
+## Evaluation Engine Integration (2026-08-06)
+- Added release-gated regression suites, safe prompt promotion mutation, and UI gate visibility.
+- Added monitor state transitions so recovery alerts are emitted after a breach clears.
+- Added Tinybird evaluation score datasource, ingestion, and hourly aggregation query helper.
+- Verification: Convex codegen, Next production build, targeted ESLint, TypeScript SDK build, Python compile, and diff check pass.
+- Remaining production setup: `EVALUATION_INTERNAL_SECRET` and Tinybird datasource deployment/smoke validation.
+- Follow-up audit fixes: configurable suite thresholds and prompt-version promotion UI, trace-to-dataset and queue-review mutations, job completion accounting, JSON Schema/numeric-range deterministic rules, and explicit evaluation result retrieval.
+- Full-repository lint still reports unrelated pre-existing errors outside the evaluation changes; targeted evaluation lint and production build remain green.
+- Added `/docs/evaluation` documentation and expanded platform smoke coverage for the evaluation product/docs routes. Smoke requests now use per-request timeouts; the current local run timed out on the existing dev environment before completing, so production credential validation remains outstanding.
+- Configured a local-only `EVALUATION_INTERNAL_SECRET` consistently in `.env.local` and the Convex dev deployment; private evaluator endpoint checks returned 401 for the wrong secret and 422 for an authenticated but invalid payload. Formatted `tinybird/evaluation_scores.datasource` with the Tinybird CLI. Tinybird cloud deployment remains unavailable because the workspace is not logged in.
+- Corrected monitor aggregation to filter by configured score/evaluator name, count failed and error results, and honor hysteresis via `recoveryThreshold`; Convex codegen and Next production build pass afterward.
+- Routed online evaluation monitor breach/recovery events through the existing Inngest `5to1r/alert.triggered` flow so Convex alerts can reach configured Slack notifications with the standard deduplication path. Build and Convex codegen pass.
+- Extended Tinybird evaluation score records and hourly aggregation to retain numeric, boolean, categorical, and text-derived score types instead of forwarding numeric values only. Tinybird formatting, Convex codegen, SDK build, Next build, targeted lint, and diff check pass.
+- Added `npm run deploy:tinybird:evaluation` with a guarded PowerShell deployment script and documented the required secret/authentication setup; it is ready to run after Tinybird CLI login.
+- Exposed monitor score name, aggregation, breach/recovery thresholds, and grouping controls in the Evaluation dashboard; build, Convex codegen, targeted lint, and diff check pass.
+- Connected `/experiments` to evaluation suites: experiments can now select a matching suite, persist its criteria, and use the same evaluator thresholds while retaining prompt/model comparison. Build and Convex codegen pass.
+- Added an allowlisted server-side custom evaluator registry (`has_citation`, `no_pii`, `non_empty_json`) so custom checks remain controlled and never execute browser-provided code. Next build, targeted lint, and diff check pass.
+- Added built-in redaction of common emails, phone numbers, identifiers, and API secrets before LLM judge calls, plus a 10-second timeout and one retry for transient judge failures. The first build worker reported a stale demo-page symbol error; a clean rerun passed with all 57 static pages generated.

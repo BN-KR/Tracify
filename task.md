@@ -10,6 +10,41 @@
 - [x] Require admin access for project settings updates and API key rotation
 - [x] Require developer/admin style access for trace comments
 
+### Evaluation Engine Integration [IN PROGRESS]
+- [x] Add score analytics and side-by-side model comparison in the prompt playground
+- [x] Replace evaluation sub-route placeholder surfaces with usable workflows
+- [x] Keep dataset version updates compatible with pre-versioning records
+- [x] Add independent reviewer claims, submissions, rotation, and agreement reporting
+- [x] Add runtime prompt resolution for deployed environment labels with API-key authentication
+- [x] Add TypeScript and Python SDK helpers for deployed prompt resolution
+- [x] Add restricted dataset access, owner sharing controls, and experiment permission checks
+- [x] Add experiment baseline deltas and regression/improvement reporting
+- [x] Preserve typed score data from API-key SDK feedback helpers
+- [x] Add prompt cache TTL and fallback behavior to both SDKs
+- [x] Add offline evaluation API smoke coverage and re-verify the production build
+- [x] Make both TypeScript and Python SDK test suites runnable from the repository root
+- [x] Add versioned evaluator, suite, job, result, monitor, and feedback tables with project indexes
+- [x] Add authenticated evaluation overview, evaluator creation, suite creation, job creation, monitor creation, and feedback mutations
+- [x] Add unified Evaluation Engine dashboard and routes for evaluators, datasets, runs, monitors, and settings
+- [x] Add trace-linked quality panel for persisted scores, evaluation results, and user feedback
+- [x] Add exact match, regex, JSON validity, and basic JSON Schema deterministic evaluator rules
+- [x] Add public Evaluation Engine product page and marketing navigation entry
+- [x] Connect online evaluator execution to the Inngest ingestion pipeline
+- [x] Add reviewer assignment/rotation and inter-rater agreement UI
+- [x] Add provider-backed groundedness, toxicity, PII, jailbreak, prompt-injection, and policy detector templates
+- [x] Add monitor threshold alert creation and deduplication in Convex
+- [x] Add SDK helpers and evaluation documentation
+- [x] Add Tinybird-backed score time-series aggregation and threshold recovery alerts
+- [x] Add release-gate enforcement and prompt-version promotion for regression suites
+- [x] Prevent direct production-label assignment outside a passed release gate
+- [x] Verify live platform smoke routes, including invalid offline evaluation requests
+- [x] Add first-class Datasets and Integrations navigation plus shareable trace links
+- [x] Re-run the full production build after the final platform pass
+- [x] Assert unauthenticated OTLP ingestion is rejected in runtime smoke tests
+- [x] Assert unauthenticated native ingestion is rejected in runtime smoke tests
+- [x] Add dedicated public lifecycle overview documentation and product page
+- [x] Add a dedicated realistic Datasets tab to the interactive demo
+
 ### 2. Marketing & Distribution
 - [x] Reposition landing page around agent observability for builders/operators
 - [ ] Update Landing Page with real dashboard screenshots
@@ -136,3 +171,9 @@
 - [x] Add dashboard Sessions, Session detail, and Trace Search routes
 - [x] Update Python/TypeScript SDK context helpers and regenerate Convex bindings
 - [x] Verify targeted lint, production build, and TypeScript SDK build
+
+### Evaluation Engine Integration (2026-08-06)
+- [x] Online/offline evaluators, guardrail templates, typed scores, feedback, human review, and trace-linked quality panels.
+- [x] Regression suites with release-gate metrics and safe prompt-version promotion.
+- [x] Monitor breach and recovery alerts, plus Tinybird score time-series ingestion and hourly aggregation support.
+- [ ] Production rollout validation: configure `EVALUATION_INTERNAL_SECRET`, deploy Tinybird datasource, and run beta smoke tests with production credentials.

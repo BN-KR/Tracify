@@ -112,8 +112,7 @@ function useInView(threshold = 0.15) {
 }
 
 export default function PricingPage() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  const [mounted] = useState(true);
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
@@ -286,7 +285,7 @@ export default function PricingPage() {
           <div className="mx-auto max-w-[1200px] px-6 md:px-8">
             <div className="border border-[#2A2A2A] bg-[#0A0A0A] p-6 text-center">
               <p className="font-mono text-[12px] uppercase tracking-widest text-[#555555]">
-                Runtime controls, evals, self-hosting, and email alerts are on the roadmap — not current beta promises.
+                Prompt workflows, evaluations, experiments, runtime controls, and integrations are available now. Contact us for production self-hosting and alerting setup.
               </p>
             </div>
           </div>

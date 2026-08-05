@@ -60,6 +60,24 @@ const agent = traceAgent(async () => {
 ## 4. View Your Traces
 Run your agent once, then return to your [Tracify Runs Dashboard](https://tracify.tech/dashboard/runs). You should see your first run appear with its status, cost, and the full trace of spans you recorded.
 
+## Add evaluation signals
+
+Create an Evaluation Engine evaluator from your project dashboard, then attach user feedback or typed scores from your agent. The helpers use the same API key as span ingestion and are safe to call in production because failures are ignored by the SDK.
+
+```ts
+client.feedback(runId, true, { kind: "thumb", comment: "Resolved the request" });
+client.score(runId, "answer_quality", 0.92, { dataType: "numeric" });
+```
+
+```python
+client.feedback(run_id, True, kind="thumb", comment="Resolved the request")
+client.score(run_id, "answer_quality", 0.92, data_type="numeric")
+```
+
+In the dashboard, use Evaluation Engine to configure deterministic rules, LLM judges, groundedness and policy templates, offline regression suites, reviewer queues, and score monitors. Evaluator failures are isolated from ingestion and can automatically create a human-review item.
+
+For self-hosted or production setup, set `EVALUATION_INTERNAL_SECRET` in both Next.js and Convex, authenticate the Tinybird CLI, then run `npm run deploy:tinybird:evaluation` to deploy the evaluation score datasource before enabling score monitors.
+
 ## 5. Next Steps
 - **Set Thresholds:** Go to Settings to configure cost and duration alerts.
 - **Invite Your Team:** Connect your Clerk organization to share project access.

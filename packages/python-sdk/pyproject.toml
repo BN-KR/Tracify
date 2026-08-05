@@ -28,3 +28,7 @@ where = ["src"]
 "Homepage" = "https://tracify.tech"
 "Documentation" = "https://docs.tracify.tech"
 "Bug Tracker" = "https://github.com/tracify/python-sdk/issues"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

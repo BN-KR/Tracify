@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
@@ -63,8 +63,7 @@ const cardVariants = {
 };
 
 export function PricingTeaser() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  const [mounted] = useState(true);
 
   return (
     <section className="w-full bg-[#050505] py-24">
@@ -217,7 +216,7 @@ export function PricingTeaser() {
 
         <div className="mt-6 border border-[#2A2A2A] bg-[#0A0A0A]/50 px-5 py-4">
           <p className="font-mono text-[11px] uppercase tracking-widest text-[#555555]">
-            Runtime controls, evals, self-hosting, and email alerts are on the roadmap — not current beta promises.
+            Prompt workflows, evaluations, experiments, runtime controls, and integrations are available now. Contact us for production self-hosting and alerting setup.
           </p>
         </div>
       </div>

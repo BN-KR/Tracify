@@ -11,9 +11,16 @@
 import type * as agentRuns from "../agentRuns.js";
 import type * as alerts from "../alerts.js";
 import type * as analyticsCache from "../analyticsCache.js";
+import type * as annotations from "../annotations.js";
 import type * as comments from "../comments.js";
 import type * as costCounters from "../costCounters.js";
+import type * as evaluation from "../evaluation.js";
+import type * as evaluationEngine from "../evaluationEngine.js";
+import type * as evaluators from "../evaluators.js";
+import type * as experiments from "../experiments.js";
+import type * as http from "../http.js";
 import type * as projects from "../projects.js";
+import type * as prompts from "../prompts.js";
 import type * as retention from "../retention.js";
 import type * as sessions from "../sessions.js";
 
@@ -27,9 +34,16 @@ declare const fullApi: ApiFromModules<{
   agentRuns: typeof agentRuns;
   alerts: typeof alerts;
   analyticsCache: typeof analyticsCache;
+  annotations: typeof annotations;
   comments: typeof comments;
   costCounters: typeof costCounters;
+  evaluation: typeof evaluation;
+  evaluationEngine: typeof evaluationEngine;
+  evaluators: typeof evaluators;
+  experiments: typeof experiments;
+  http: typeof http;
   projects: typeof projects;
+  prompts: typeof prompts;
   retention: typeof retention;
   sessions: typeof sessions;
 }>;

@@ -1,6 +1,50 @@
 # tracify Strategic Implementation Plan
 
+## AI Engineering Platform Pass (2026-08-05)
+
+- Added score analytics in the Evaluation workspace: per-evaluator sample counts, numeric averages, boolean pass rates, and source breakdowns.
+- Extended the prompt playground to compare two provider models in parallel with per-model output and latency.
+- Replaced evaluation sub-route placeholder copy with working dataset, run-history, monitor, and settings workflows.
+- Made dataset versions backward-compatible for legacy Convex documents (missing versions default to v1 on update).
+- Verification: production `npm run build`, TypeScript, focused platform lint, and Convex code generation pass. Authenticated browser E2E remains pending until a signed-in test session is available.
+- Added independent annotation review records with self-claim, reviewer submission, reviewer rotation support, and agreement reporting in the review queue.
+- Added an API-key-authenticated prompt resolver for labeled development/staging/production versions, plus public runtime documentation and smoke coverage.
+- Added `getPrompt` / `get_prompt` helpers to the TypeScript and Python SDKs, including prompt-version trace linking examples.
+- Added project/restricted dataset access modes, owner-controlled sharing, and permission checks across dataset and experiment reads/writes.
+- Added experiment score deltas against the prior run, with a regression/improvement report in the experiment workspace.
+- Fixed API-key SDK score ingestion so declared numeric, boolean, categorical, and text data types are persisted and validated correctly.
+- Added SDK-side prompt caching with stale-cache and explicit fallback recovery for runtime availability.
+- Extended platform smoke coverage to the offline evaluation-run API and verified the full Next production build again (56 routes).
+- Made the TypeScript and Python SDK suites runnable from the repository root; both pass (24 TS, 18 Python).
+- Corrected pricing copy that still described shipped prompt/evaluation/experiment/runtime workflows as roadmap items.
+- Added the OTLP health endpoint to platform smoke coverage and verified the OTLP route plus TypeScript compilation.
+- Hardened API-key usage bookkeeping so the public mutation requires the matching hashed key and active project, protecting both native and OTLP ingestion.
+- Added a first-class Datasets dashboard route and sidebar navigation entry, backed by the existing dataset workflow, plus smoke coverage.
+- Added a one-click “Share trace” action that copies the authenticated deep link from the trace viewer, and cleared the viewer lint gate.
+- Added Integrations as a direct dashboard Resources link and kept it covered by the public-route smoke suite.
+- Platform-focused lint passes; the repository-wide lint command still reports unrelated legacy errors in blog/marketing files and is intentionally not being widened into this platform pass.
+- Closed the production-label bypass: prompt mutations and the editor can promote only to development/staging; production is assigned exclusively by a passed evaluation release gate.
+- Expanded the integrations guide with a copy-paste OTLP exporter setup and explicit OpenAI, LangChain, and LlamaIndex instrumentation guidance.
+- Expanded `lint:platform` to cover OTLP ingestion, Datasets, sidebar navigation, trace sharing, and all current platform workflow files; the gate passes with TypeScript compilation.
+- Made the interactive demo’s production-promotion control functional: clicking it updates the demo state and explains the evaluation-gated release behavior.
+- Ran the live platform smoke suite against the existing local server, fixed `/api/evaluation/run` invalid-ID handling (500 → 404), and confirmed every smoke route passes.
+- Final `npm run build` passes after all changes: Next.js compiled, TypeScript passed, and all 56 static/dynamic routes generated successfully.
+- Added an unauthenticated OTLP POST contract assertion to smoke coverage; the live suite still passes.
+- Added the same unauthenticated-boundary assertion for native `/api/ingest`; smoke and focused lint remain green.
+- Added dedicated `/docs/lifecycle` and `/product/lifecycle` overview pages explaining the complete Trace → Deploy loop, with both routes in smoke coverage.
+- Expanded the interactive demo with a dedicated Datasets tab showing versioned examples, expected outputs, metadata, and project-sharing state.
+
 This plan merges the **Comprehensive Build Plan** and the **What To Do Now** strategic assessment. It prioritises the transition from a verified ingestion pipeline to a functional, high-fidelity developer product.
+
+## Evaluation Engine Integration (2026-08-05)
+
+- Added the durable evaluation domain model in `convex/schema.ts`: evaluator versions, suites, jobs, results, monitors, and feedback.
+- Added `convex/evaluationEngine.ts` for authenticated overview, trace-quality reads, evaluator/suite/job/monitor creation, and deduplicated feedback capture.
+- Replaced the Evaluation Lab landing surface with a unified Evaluation Engine workspace and added datasets, runs, monitors, and settings routes while preserving existing evaluator/review URLs.
+- Added trace-viewer quality evidence and expanded deterministic evaluator rules for exact match, regex, JSON validity, and basic JSON Schema validation.
+- Added `/product/evaluation-engine` and marketing navigation copy.
+- Remaining integration work at the time was Inngest online execution, provider-backed detectors, reviewer workflows, score aggregation, and release gates.
+- Follow-up completion: Online execution, offline jobs, guardrail templates, automatic review queueing, reviewer rotation/agreement, API-key feedback/score helpers, Tinybird score aggregation, recovery alerts, release gates, prompt promotion, and quickstart/SDK documentation are wired.
 
 ## Strategic Decision: SaaS Infrastructure
 As established in the "What To Do Now" document, tracify is officially a **Developer Infrastructure SaaS**, not a web agency. All efforts are focused on agent observability.
@@ -154,3 +198,10 @@ The single most important UI in the product.
 - [x] Tinybird-backed trace search supports bounded metadata, status, cost, latency, and time-window filters.
 - [x] Dashboard exposes Sessions, session detail, and Trace Search under Observe.
 - [ ] Next: ingestion-time redaction and object-storage references for large/multimodal payloads.
+
+## Evaluation Engine Integration (2026-08-06)
+- [x] Online/offline evaluators, guardrail templates, typed scores, feedback, human review, and trace-linked quality panels.
+- [x] Regression suites expose release-gate metrics and safe prompt-version promotion.
+- [x] Monitor state tracks both threshold breaches and recovery alerts.
+- [x] Numeric evaluation scores have a Tinybird datasource and hourly time-series query path.
+- [ ] Production validation remains: configure the internal secret and deploy the Tinybird datasource in the active workspace.

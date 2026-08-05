@@ -46,6 +46,16 @@ const productFeatures: Record<string, Feature> = {
     description: "Configure cost ceilings, retry behavior, latency budgets, and model fallback chains from one policy surface.",
     capabilities: ["Observe and enforce modes", "Run and daily cost ceilings", "Ordered fallback chains", "Retry and backoff policy"],
   },
+  "evaluation-engine": {
+    title: "Evaluation Engine",
+    description: "Measure the quality of live agent traffic and prompt changes with judges, deterministic checks, human review, and score-based monitors.",
+    capabilities: ["LLM-as-judge and rule evaluators", "Versioned datasets and regression suites", "Human annotation and user feedback", "Groundedness and policy checks", "Score-based alerts for quality drift", "Trace-linked boolean, categorical, and numeric scores"],
+  },
+  lifecycle: {
+    title: "AI Engineering Lifecycle",
+    description: "Trace production behavior, evaluate quality, experiment on real datasets, and deploy improvements behind release gates.",
+    capabilities: ["Trace and session inspection", "Prompt and dataset versioning", "Evaluator and human review workflows", "Experiment comparison and regression reports", "Gated production promotion", "Post-release quality monitoring"],
+  },
 };
 
 export function generateStaticParams() {

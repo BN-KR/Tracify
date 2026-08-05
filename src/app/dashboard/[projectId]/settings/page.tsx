@@ -67,7 +67,7 @@ export default async function SettingsPage({
           </TabsContent>
 
           <TabsContent value="members" className="mt-0 pt-8 focus-visible:ring-0">
-            <ProjectMembers projectId={projectId} />
+            <ProjectMembers />
           </TabsContent>
 
           <TabsContent value="api-keys" className="mt-0 pt-8 focus-visible:ring-0">

@@ -94,6 +94,43 @@ export const processSpan = inngest.createFunction(
       });
     }
 
+    await step.run("online-evaluation", async () => {
+      const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+      const evaluationSecret = process.env.EVALUATION_INTERNAL_SECRET;
+      if (!convexUrl || !evaluationSecret || !span.spanId) return { skipped: true };
+      try {
+        const response = await fetch(`${convexUrl.replace(/\/$/, "")}/evaluation/online`, {
+          method: "POST",
+          headers: { "content-type": "application/json", "x-tracify-evaluation-secret": evaluationSecret },
+          body: JSON.stringify({
+            projectId: span.projectDocId,
+            traceId: span.runId,
+            spanId: span.spanId,
+            spanType: span.spanType,
+            input: span.input ?? "",
+            output: span.output ?? "",
+            modelId: span.modelId ?? "",
+            metadata: JSON.stringify(span.metadata ?? {}),
+          }),
+        });
+        if (!response.ok) console.warn("Online evaluation returned", response.status);
+        if (response.ok) {
+          const body = await response.json().catch(() => null) as { results?: Array<{ resultId?: string; evaluatorId?: string; scoreName?: string; value?: number | boolean | string; status?: string }>; alerts?: Array<{ projectId: string; runId: string; type: string; message: string; triggeredAt: string }> } | null;
+          for (const alert of body?.alerts ?? []) await inngest.send({ name: "5to1r/alert.triggered", data: alert });
+          const tinybird = await import("@/lib/tinybird");
+          for (const result of body?.results ?? []) {
+            if (!result.resultId || !result.evaluatorId || !result.scoreName || result.value === undefined) continue;
+            const dataType = typeof result.value === "number" ? "numeric" : typeof result.value === "boolean" ? "boolean" : "categorical";
+            await tinybird.ingestEvaluationScore({ scoreId: result.resultId, projectId: span.projectDocId, traceId: span.runId, evaluatorId: result.evaluatorId, scoreName: result.scoreName, dataType, valueNumeric: typeof result.value === "number" ? result.value : 0, valueBoolean: typeof result.value === "boolean" ? result.value : false, valueCategorical: typeof result.value === "string" ? result.value : "", status: result.status ?? "passed", modelId: span.modelId ?? "", environment: span.environment ?? "", createdAt: new Date().toISOString() }).catch((error) => console.warn("Tinybird score ingest failed without blocking ingestion", error));
+          }
+        }
+        return { skipped: false, status: response.status };
+      } catch (error) {
+        console.warn("Online evaluation failed without blocking ingestion", error);
+        return { skipped: false, error: error instanceof Error ? error.message : "Online evaluation failed" };
+      }
+    });
+
     await step.run("check-thresholds", async () => {
       const convex = getConvexClient();
       const project = await convex.query(api.projects.getById, {

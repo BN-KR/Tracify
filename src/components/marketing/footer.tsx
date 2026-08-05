@@ -20,6 +20,8 @@ export function Footer() {
               <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white">Product</span>
               <div className="flex flex-col gap-2">
                 <Link href="/pricing" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Pricing</Link>
+                <Link href="/product/trace-viewer" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Products</Link>
+                <Link href="/roadmap" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Roadmap</Link>
                 <Link href="/blog" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Blog</Link>
                 <Link href="/docs" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Documentation</Link>
               </div>
@@ -31,6 +33,7 @@ export function Footer() {
                 <Link href="/security" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Security</Link>
                 <Link href="/privacy" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Privacy Policy</Link>
                 <Link href="/terms" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Terms of Service</Link>
+                <Link href="/status" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">System Status</Link>
               </div>
             </div>
 
@@ -38,6 +41,7 @@ export function Footer() {
               <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white">Developers</span>
               <div className="flex flex-col gap-2">
                 <Link href="/integrations" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Integrations</Link>
+                <Link href="/contact" className="font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Contact</Link>
               </div>
             </div>
 

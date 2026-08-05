@@ -426,8 +426,15 @@ export const getProjectByApiKey = query({
 });
 
 export const markApiKeyUsed = mutation({
-  args: { projectId: v.id("projects"), lastUsedAt: v.number() },
+  args: { projectId: v.id("projects"), apiKeyHash: v.string(), lastUsedAt: v.number() },
   handler: async (ctx, args) => {
+    const project = await ctx.db
+      .query("projects")
+      .withIndex("by_apiKeyHash", (q) => q.eq("apiKeyHash", args.apiKeyHash))
+      .unique();
+    if (!project || project._id !== args.projectId || project.apiKeyStatus !== "active") {
+      throw new Error("Invalid API key");
+    }
     await ctx.db.patch(args.projectId, {
       apiKeyLastUsedAt: args.lastUsedAt,
       updatedAt: args.lastUsedAt,

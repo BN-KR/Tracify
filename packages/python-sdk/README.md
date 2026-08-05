@@ -52,6 +52,29 @@ async def my_agent(query: str):
 - **Asynchronous & Synchronous Support:** Works with `async/await` or standard functions.
 - **Session context:** Attach `session_id`, `end_user_id`, `environment`, `release`, and `tags` to connect related traces.
 
+## Feedback and evaluation scores
+
+Pass `project_id` when constructing the client to attach end-user feedback and typed scores to traces:
+
+```python
+client = TracifyClient(project_id="your-project-id")
+client.feedback(run_id, True, kind="thumb", comment="Helpful answer")
+client.score(run_id, "answer_quality", 0.92, data_type="numeric")
+```
+
+Feedback and scores use the same API key as ingestion and do not interrupt the agent when delivery fails.
+
+## Prompt deployment
+
+Resolve a deployed prompt without shipping a new application build:
+
+```python
+deployed = client.get_prompt("support-agent", "production")
+client.ingest(spanType="llm", input=question, output=answer, promptVersionId=deployed["version"]["id"])
+```
+
+Prompt responses are cached for 60 seconds by default. Use `cache_ttl_seconds=0` or provide a `fallback` for development and guaranteed-availability behavior.
+
 ## License
 
 MIT

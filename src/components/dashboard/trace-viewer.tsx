@@ -26,6 +26,7 @@ import {
   Send,
   Copy,
   Check,
+  Share2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,13 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   const [spansMessage, setSpansMessage] = useState("Cached spans");
   const [spansError, setSpansError] = useState<string | null>(null);
   const [replayIndex, setReplayIndex] = useState(0);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  async function copyShareLink() {
+    await navigator.clipboard.writeText(window.location.href);
+    setShareCopied(true);
+    window.setTimeout(() => setShareCopied(false), 1600);
+  }
 
   const fetchSpans = useCallback(
     async (refresh: "normal" | "manual" = "normal") => {
@@ -79,6 +87,8 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   );
 
   useEffect(() => {
+    // Fetching remote trace data is the synchronization this effect is responsible for.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchSpans();
   }, [fetchSpans]);
 
@@ -134,6 +144,14 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => void copyShareLink()}
+              className="flex h-8 items-center gap-2 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] hover:border-white hover:text-white"
+            >
+              {shareCopied ? <Check className="size-3" /> : <Share2 className="size-3" />}
+              {shareCopied ? "Link copied" : "Share trace"}
+            </button>
             {run.status === "running" && (
               <button
                 type="button"
@@ -166,6 +184,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
       </div>
 
       <SpanOverview spans={safeSpans} />
+      <TraceQualityPanel projectId={projectId} runId={runId} />
       <LatencyWaterfall spans={safeSpans} />
 
       <div className="border border-border bg-muted/10 p-4 space-y-4">
@@ -227,6 +246,25 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
       <TraceSummaryPanel summary={spanSummary} durationMs={durationMs} />
     </div>
   );
+}
+
+function TraceQualityPanel({ projectId, runId }: { projectId: string; runId: string }) {
+  const quality = useQuery(api.evaluationEngine.traceQuality, { projectId: projectId as Id<"projects">, traceId: runId });
+  const recordFeedback = useMutation(api.evaluationEngine.recordFeedback);
+  const [feedbackSent, setFeedbackSent] = useState(false);
+  const [feedbackNote, setFeedbackNote] = useState("");
+  const scoreCount = (quality?.scores.length ?? 0) + (quality?.results.length ?? 0);
+  async function submitFeedback(value: boolean) {
+    await recordFeedback({ projectId: projectId as Id<"projects">, traceId: runId, kind: "thumb", value, comment: feedbackNote.trim() || undefined });
+    setFeedbackSent(true);
+    setFeedbackNote("");
+  }
+  return <section className="border border-white/20 bg-white/[0.03] p-4">
+    <div className="flex items-center justify-between gap-3"><div><div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Quality</div><div className="mt-1 text-sm text-white">Evaluation evidence attached to this trace</div></div><span className="font-mono text-[10px] uppercase text-zinc-600">{scoreCount} signals</span></div>
+    {scoreCount ? <div className="mt-4 grid gap-2 sm:grid-cols-2">{quality?.scores.slice(0, 8).map((score) => <div key={score._id} className="border border-zinc-800 bg-black/40 p-3"><div className="flex justify-between text-xs text-white"><span>{score.name}</span><span className="font-mono text-zinc-300">{String(score.value)}</span></div><p className="mt-1 font-mono text-[9px] uppercase text-zinc-600">{score.source} · {score.dataType}</p></div>)}{quality?.results.slice(0, 8).map((result) => <div key={result._id} className="border border-zinc-800 bg-black/40 p-3"><div className="flex justify-between text-xs text-white"><span>Evaluator result</span><span className={result.status === "passed" ? "font-mono text-emerald-300" : "font-mono text-red-300"}>{result.status}</span></div><p className="mt-1 truncate text-xs text-zinc-500">{result.explanation || String(result.value)}</p></div>)}</div> : <p className="mt-4 text-xs text-zinc-600">No evaluator results yet. Use Evaluation Engine to enable a live evaluator or queue this trace for review.</p>}
+    <div className="mt-4 border-t border-zinc-800 pt-4"><p className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Human feedback</p><div className="mt-2 flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => void submitFeedback(true)}>Helpful</Button><Button size="sm" variant="outline" onClick={() => void submitFeedback(false)}>Needs review</Button>{feedbackSent ? <span className="self-center font-mono text-[10px] uppercase text-emerald-400">Feedback recorded</span> : null}</div><Input className="mt-2" value={feedbackNote} onChange={(event) => setFeedbackNote(event.target.value)} placeholder="Optional reviewer note" /></div>
+    {quality?.feedback.length ? <p className="mt-3 font-mono text-[10px] uppercase text-zinc-500">{quality.feedback.length} user feedback item{quality.feedback.length === 1 ? "" : "s"} linked</p> : null}
+  </section>;
 }
 
 function formatSpanCacheMessage(meta?: {

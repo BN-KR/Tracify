@@ -22,13 +22,7 @@ export default function DocsRootPage() {
           Learn how to install the SDK and send your first span.
         </p>
         <div className="border border-[#2A2A2A] bg-[#0A0A0A] p-8">
-          <p className="font-sans text-[14px] text-[#666666] leading-relaxed">
-            Documentation is being written. Check the{" "}
-            <Link href="/blog" className="text-white underline underline-offset-4 decoration-[#444444] hover:decoration-white transition-colors">
-              blog
-            </Link>{" "}
-            for guides and patterns.
-          </p>
+          <div className="grid gap-3 sm:grid-cols-2"><Link href="/docs/lifecycle" className="border border-zinc-800 p-4 text-sm text-zinc-300 hover:border-zinc-500">Lifecycle overview</Link><Link href="/docs/python" className="border border-zinc-800 p-4 text-sm text-zinc-300 hover:border-zinc-500">Python SDK</Link><Link href="/docs/typescript" className="border border-zinc-800 p-4 text-sm text-zinc-300 hover:border-zinc-500">TypeScript SDK</Link><Link href="/docs/api" className="border border-zinc-800 p-4 text-sm text-zinc-300 hover:border-zinc-500">Ingestion API</Link><Link href="/docs/prompts" className="border border-zinc-800 p-4 text-sm text-zinc-300 hover:border-zinc-500">Prompt deployment</Link><Link href="/docs/integrations" className="border border-zinc-800 p-4 text-sm text-zinc-300 hover:border-zinc-500">Integrations + OTLP</Link><Link href="/docs/self-hosting" className="border border-zinc-800 p-4 text-sm text-zinc-300 hover:border-zinc-500">Self-hosting</Link><Link href="/roadmap" className="border border-zinc-800 p-4 text-sm text-zinc-300 hover:border-zinc-500">Roadmap</Link></div>
         </div>
       </div>
     </div>

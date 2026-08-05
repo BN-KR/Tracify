@@ -66,6 +66,12 @@ const NAV_ITEMS: NavItem[] = [
             href: "/product/runtime-control",
             icon: ShieldCheck,
           },
+          {
+            label: "Evaluation Engine",
+            description: "Score live traces, compare prompts, and catch quality drift.",
+            href: "/product/evaluation-engine",
+            icon: GitCompare,
+          },
         ],
       },
       {

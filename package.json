@@ -3,12 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "deploy:convex": "convex deploy",
+    "deploy:tinybird:evaluation": "powershell -ExecutionPolicy Bypass -File scripts/deploy-evaluation-tinybird.ps1",
     "start": "next start",
-    "lint": "eslint",
-    "smoke:beta": "node scripts/beta-smoke.mjs"
+    "lint": "eslint src convex scripts",
+    "test:sdk:ts": "npm test --prefix packages/ts-sdk",
+    "test:sdk:python": "python -m pytest packages/python-sdk/tests -q",
+    "lint:platform": "eslint src/app/demo src/app/docs src/app/api/otel src/app/api/evaluation src/app/api/playground src/app/api/evaluators src/app/api/feedback src/app/api/prompts src/app/dashboard/[projectId]/datasets src/components/dashboard/dashboard-sidebar.tsx src/components/dashboard/trace-viewer.tsx src/components/dashboard/project-members.tsx src/components/dashboard/prompt-management.tsx src/components/dashboard/prompt-playground.tsx src/components/dashboard/evaluation-lab.tsx src/components/dashboard/evaluator-manager.tsx src/components/dashboard/experiment-lab.tsx src/components/dashboard/review-queue.tsx scripts/platform-smoke.mjs",
+    "smoke:beta": "node scripts/beta-smoke.mjs",
+    "smoke:platform": "node scripts/platform-smoke.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

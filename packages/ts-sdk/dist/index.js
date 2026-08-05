@@ -51,11 +51,13 @@ function isLatencyAbort(error) {
 class FiveToOneClient {
     constructor(config = {}) {
         this._lastFailOpen = false;
+        this.promptCache = new Map();
         this.apiKey = config.apiKey || process.env.TRACIFY_API_KEY || process.env.FIVETOONE_API_KEY || '';
         if (!this.apiKey) {
             console.warn('Tracify Warning: TRACIFY_API_KEY or FIVETOONE_API_KEY is not set');
         }
         this.host = (config.host || 'https://tracify.tech').replace(/\/$/, '');
+        this.projectId = config.projectId;
         this.ingestUrl = `${this.host}/api/ingest`;
         this.checkCostUrl = `${this.host}/api/orchestration/check-cost`;
     }
@@ -84,6 +86,43 @@ class FiveToOneClient {
         catch (e) {
             // Ignore errors in telemetry
         }
+    }
+    /** Resolve a prompt version labeled for an environment without redeploying application code. */
+    async getPrompt(name, environment = "production", options = {}) {
+        if (!this.apiKey)
+            throw new Error("A Tracify API key is required to resolve prompts");
+        const key = `${name}:${environment}`;
+        const cached = this.promptCache.get(key);
+        if (cached && cached.expiresAt > Date.now())
+            return cached.value;
+        try {
+            const response = await fetch(`${this.host}/api/prompts/${encodeURIComponent(name)}?environment=${encodeURIComponent(environment)}`, { headers: { Authorization: `Bearer ${this.apiKey}` } });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok)
+                throw new Error(data?.error || `Prompt resolution failed (${response.status})`);
+            const value = data;
+            this.promptCache.set(key, { value, expiresAt: Date.now() + (options.cacheTtlMs ?? 60000) });
+            return value;
+        }
+        catch (error) {
+            if (cached)
+                return cached.value;
+            if (options.fallback)
+                return options.fallback;
+            throw error;
+        }
+    }
+    /** Attach end-user feedback to a trace or span. The request is fire-and-forget like span ingestion. */
+    feedback(traceId, value, options = {}) {
+        if (!this.apiKey || !(options.projectId || this.projectId))
+            return;
+        fetch(`${this.host}/api/feedback`, { method: 'POST', headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ projectId: options.projectId || this.projectId, traceId, spanId: options.spanId, kind: options.kind || (typeof value === 'number' ? 'star' : typeof value === 'boolean' ? 'thumb' : 'text'), value, reason: options.reason, comment: options.comment, endUserId: options.endUserId, dedupeKey: options.dedupeKey }) }).catch((error) => console.warn('Tracify Warning: Failed to record feedback:', error));
+    }
+    /** Attach a typed score to a trace or span through the feedback API. */
+    score(traceId, name, value, options = {}) {
+        if (!this.apiKey || !(options.projectId || this.projectId))
+            return;
+        fetch(`${this.host}/api/feedback`, { method: 'POST', headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ projectId: options.projectId || this.projectId, traceId, spanId: options.spanId, kind: 'text', name, value, dataType: options.dataType, comment: options.comment }) }).catch((error) => console.warn('Tracify Warning: Failed to record score:', error));
     }
     /**
      * Server-side cost check. Returns the server's decision on whether

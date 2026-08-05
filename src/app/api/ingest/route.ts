@@ -42,6 +42,7 @@ type SpanPayload = {
   stackTrace?: string;
   timedOut?: boolean;
   timeoutMs?: number;
+  promptVersionId?: string;
 };
 
 function jsonString(value: unknown) {
@@ -118,6 +119,9 @@ function validatePayload(body: Record<string, unknown>):
   if (body.timeoutMs !== undefined && (typeof body.timeoutMs !== "number" || body.timeoutMs < 0)) {
     return { ok: false, error: "timeoutMs must be a non-negative number" };
   }
+  if (body.promptVersionId !== undefined && typeof body.promptVersionId !== "string") {
+    return { ok: false, error: "promptVersionId must be a string" };
+  }
   if (
     body.metadata !== undefined &&
     (typeof body.metadata !== "object" || body.metadata === null || Array.isArray(body.metadata))
@@ -177,6 +181,7 @@ export async function POST(request: NextRequest) {
 
   await convex.mutation(api.projects.markApiKeyUsed, {
     projectId: projectDocId,
+    apiKeyHash: hashApiKey(apiKey),
     lastUsedAt: now,
   });
 
@@ -220,6 +225,19 @@ export async function POST(request: NextRequest) {
         createdAt: payload.createdAt,
       },
     });
+    if (payload.promptVersionId) {
+      try {
+        await convex.mutation(api.prompts.linkTraceFromApiKey, {
+          projectId: projectDocId,
+          apiKeyHash: hashApiKey(apiKey),
+          promptVersionId: payload.promptVersionId as Id<"promptVersions">,
+          traceId: payload.runId,
+          spanId: payload.spanId,
+        });
+      } catch (error) {
+        console.warn("Prompt trace link rejected:", error);
+      }
+    }
   } catch (err) {
     console.error("Inngest send failed (span accepted but not queued):", err);
   }

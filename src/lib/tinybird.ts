@@ -76,6 +76,34 @@ export async function ingestSpan(span: {
   return res.json();
 }
 
+export async function ingestEvaluationScore(score: {
+  scoreId: string;
+  projectId: string;
+  traceId?: string;
+  evaluatorId: string;
+  scoreName: string;
+  dataType: "boolean" | "numeric" | "categorical" | "text";
+  valueNumeric: number;
+  valueBoolean: boolean;
+  valueCategorical: string;
+  status: string;
+  modelId?: string;
+  environment?: string;
+  createdAt: string;
+}) {
+  const res = await fetch(`${TINYBIRD_HOST}/v0/events?name=evaluation_scores`, { method: "POST", headers: getHeaders(), body: `${JSON.stringify(score)}\n` });
+  if (!res.ok) throw new Error(`Tinybird evaluation score ingest failed: ${res.status} ${await res.text()}`);
+  return res.json();
+}
+
+export async function getEvaluationScoreTimeseries(projectId: string, scoreName: string, days = 7) {
+  const sql = `SELECT toStartOfHour(createdAt) AS bucket, count() AS sampleCount, avgIf(valueNumeric, dataType = 'numeric') AS averageScore, countIf(status IN ('failed', 'error')) / count() AS failureRate, countIf(dataType = 'boolean' AND valueBoolean = 1) / greatest(countIf(dataType = 'boolean'), 1) AS booleanPassRate FROM evaluation_scores WHERE projectId = '${sqlString(projectId)}' AND scoreName = '${sqlString(scoreName)}' AND createdAt >= now() - INTERVAL ${Math.min(Math.max(days, 1), 90)} DAY GROUP BY bucket ORDER BY bucket ASC`;
+  const res = await fetch(sqlUrl(sql), { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Tinybird evaluation score query failed: ${res.status} ${await res.text()}`);
+  const data = await res.json();
+  return data.data as Array<{ bucket: string; sampleCount: number; averageScore: number; failureRate: number; booleanPassRate: number }>;
+}
+
 /**
  * Query spans for a specific run from Tinybird.
  */
