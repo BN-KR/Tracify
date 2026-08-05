@@ -128,6 +128,9 @@ function validateProjectSettings(args: {
   maxDurationSeconds?: number;
   maxStallMinutes?: number;
   slackWebhookUrl?: string;
+  redactionEnabled?: boolean;
+  redactionRules?: string[];
+  retentionDays?: number;
   runtimePolicy?: {
     enforcementMode?: "observe" | "enforce";
     maxCostPerRun?: number;
@@ -151,6 +154,9 @@ function validateProjectSettings(args: {
   ) {
     throw new Error("Cost threshold must be a non-negative number");
   }
+  if (args.retentionDays !== undefined && (!Number.isInteger(args.retentionDays) || args.retentionDays < 1 || args.retentionDays > 3650)) {
+    throw new Error("Retention must be between 1 and 3650 days");
+  }
   if (
     args.maxDurationSeconds !== undefined &&
     (!Number.isInteger(args.maxDurationSeconds) || args.maxDurationSeconds <= 0)
@@ -172,6 +178,9 @@ function validateProjectSettings(args: {
     maxDurationSeconds: args.maxDurationSeconds,
     maxStallMinutes: args.maxStallMinutes,
     slackWebhookUrl: validateSlackWebhookUrl(args.slackWebhookUrl),
+    redactionEnabled: args.redactionEnabled,
+    redactionRules: args.redactionRules?.slice(0, 20),
+    retentionDays: args.retentionDays,
     runtimePolicy: args.runtimePolicy ? validateRuntimePolicy(args.runtimePolicy) : undefined,
   };
 }
@@ -269,6 +278,9 @@ function publicProject(project: Doc<"projects">) {
     maxStallMinutes: project.maxStallMinutes,
     slackWebhookUrl: project.slackWebhookUrl ?? null,
     runtimePolicy: project.runtimePolicy ?? null,
+    redactionEnabled: project.redactionEnabled ?? true,
+    redactionRules: project.redactionRules ?? [],
+    retentionDays: project.retentionDays ?? 365,
   };
 }
 
@@ -406,6 +418,9 @@ export const getProjectByApiKey = query({
       name: project.name,
       apiKeyPrefix: project.apiKeyPrefix,
       apiKeyLast4: project.apiKeyLast4,
+      redactionEnabled: project.redactionEnabled ?? true,
+      redactionRules: project.redactionRules ?? [],
+      retentionDays: project.retentionDays ?? 365,
     };
   },
 });
@@ -646,6 +661,9 @@ export const updateProject = mutation({
     maxDurationSeconds: v.optional(v.number()),
     maxStallMinutes: v.optional(v.number()),
     slackWebhookUrl: v.optional(v.string()),
+    redactionEnabled: v.optional(v.boolean()),
+    redactionRules: v.optional(v.array(v.string())),
+    retentionDays: v.optional(v.number()),
     runtimePolicy: v.optional(v.object({
       enforcementMode: v.union(v.literal("observe"), v.literal("enforce")),
       maxCostPerRun: v.optional(v.number()),

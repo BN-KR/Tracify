@@ -5,6 +5,7 @@ import type { Id } from "convex/_generated/dataModel";
 import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
 import { hashApiKey } from "@/lib/api-keys";
+import { DEFAULT_REDACTION_RULES, redactPayload, redactRecord } from "@/lib/redaction";
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -136,6 +137,8 @@ export async function POST(request: NextRequest) {
 
   const projectDocId = project._id as Id<"projects">;
   const now = Date.now();
+  const redactionEnabled = project.redactionEnabled !== false;
+  const redactionRules = project.redactionRules?.length ? project.redactionRules : [...DEFAULT_REDACTION_RULES];
 
   await convex.mutation(api.projects.markApiKeyUsed, {
     projectId: projectDocId,
@@ -151,13 +154,13 @@ export async function POST(request: NextRequest) {
         projectId: projectDocId,
         projectDocId,
         spanType: payload.spanType,
-        input: jsonString(payload.input),
-        output: jsonString(payload.output),
+        input: redactionEnabled ? redactPayload(payload.input, redactionRules) : jsonString(payload.input),
+        output: redactionEnabled ? redactPayload(payload.output, redactionRules) : jsonString(payload.output),
         latencyMs: payload.latencyMs,
         costUsd: payload.costUsd ?? 0,
         modelId: payload.modelId ?? "",
         toolName: payload.toolName ?? "",
-        metadata: payload.metadata ?? {},
+        metadata: redactionEnabled ? redactRecord(payload.metadata ?? {}, redactionRules) : payload.metadata ?? {},
         parentSpanId: payload.parentSpanId ?? "",
         sessionId: payload.sessionId ?? "",
         endUserId: payload.endUserId ?? "",

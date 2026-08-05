@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, ArrowRight, Send, Save } from "lucide-react";
+import { DEFAULT_REDACTION_RULES } from "@/lib/redaction";
 
 interface ProjectSettingsProps {
   projectId: string;
@@ -31,6 +32,9 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
   const [maxDuration, setMaxDuration] = useState("");
   const [maxStall, setMaxStall] = useState("");
   const [slackWebhookUrl, setSlackWebhookUrl] = useState("");
+  const [redactionEnabled, setRedactionEnabled] = useState(true);
+  const [redactionRules, setRedactionRules] = useState<string[]>([...DEFAULT_REDACTION_RULES]);
+  const [retentionDays, setRetentionDays] = useState("365");
   const [saving, setSaving] = useState(false);
   const [testingSlack, setTestingSlack] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -45,6 +49,9 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
       setMaxDuration(project.maxDurationSeconds?.toString() || "300");
       setMaxStall(project.maxStallMinutes?.toString() || "5");
       setSlackWebhookUrl(project.slackWebhookUrl || "");
+      setRedactionEnabled(project.redactionEnabled !== false);
+      setRedactionRules(project.redactionRules?.length ? project.redactionRules : [...DEFAULT_REDACTION_RULES]);
+      setRetentionDays(project.retentionDays?.toString() || "365");
     }
   }, [project]);
 
@@ -57,6 +64,9 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
       maxDuration,
       maxStall,
       slackWebhookUrl,
+      redactionEnabled,
+      redactionRules,
+      retentionDays,
     });
     if (!parsed.ok) {
       setNotice(null);
@@ -77,6 +87,9 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
         maxDurationSeconds: parsed.value.maxDurationSeconds,
         maxStallMinutes: parsed.value.maxStallMinutes,
         slackWebhookUrl: parsed.value.slackWebhookUrl,
+        redactionEnabled: parsed.value.redactionEnabled,
+        redactionRules: parsed.value.redactionRules,
+        retentionDays: parsed.value.retentionDays,
       });
       setNotice("Settings saved");
     } catch (err) {
@@ -166,11 +179,41 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
         </div>
       </Card>
 
+      <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+        <div>
+          <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">Privacy & Retention</h3>
+          <p className="text-[11px] text-[#666666] mt-1">Sensitive payloads are scrubbed before they leave the ingest boundary.</p>
+        </div>
+        <label className="flex items-center gap-3 text-[11px] text-zinc-300 font-mono uppercase">
+          <input type="checkbox" checked={redactionEnabled} onChange={(e) => setRedactionEnabled(e.target.checked)} className="accent-white" />
+          Redact sensitive values on ingest
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {DEFAULT_REDACTION_RULES.map((rule) => {
+            const selected = redactionRules.includes(rule);
+            return (
+              <button
+                type="button"
+                key={rule}
+                onClick={() => setRedactionRules((current) => selected ? current.filter((item) => item !== rule) : [...current, rule])}
+                className={`border px-3 py-2 font-mono text-[10px] uppercase ${selected ? "border-white text-white" : "border-zinc-800 text-zinc-600"}`}
+              >
+                {rule.replace("_", " ")}
+              </button>
+            );
+          })}
+        </div>
+        <div className="max-w-xs space-y-2">
+          <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Retention (days)</label>
+          <Input type="number" min="1" max="3650" value={retentionDays} onChange={(e) => setRetentionDays(e.target.value)} className="rounded-none border-zinc-800 bg-black text-white font-mono h-10" />
+        </div>
+      </Card>
+
       {/* Thresholds & Limits */}
       <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
         <div>
           <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">Alert Thresholds</h3>
-          <p className="text-[11px] text-[#666666] mt-1">Set boundaries for your agent's resource usage.</p>
+          <p className="text-[11px] text-[#666666] mt-1">Set boundaries for your agent&apos;s resource usage.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -276,6 +319,9 @@ function validateSettings(values: {
   maxDuration: string;
   maxStall: string;
   slackWebhookUrl: string;
+  redactionEnabled: boolean;
+  redactionRules: string[];
+  retentionDays: string;
 }):
   | {
       ok: true;
@@ -287,6 +333,9 @@ function validateSettings(values: {
         maxDurationSeconds: number;
         maxStallMinutes: number;
         slackWebhookUrl?: string;
+        redactionEnabled: boolean;
+        redactionRules: string[];
+        retentionDays: number;
       };
     }
   | { ok: false; error: string } {
@@ -295,6 +344,7 @@ function validateSettings(values: {
   const maxDurationSeconds = Number(values.maxDuration);
   const maxStallMinutes = Number(values.maxStall);
   const slackWebhookUrl = values.slackWebhookUrl.trim();
+  const retentionDays = Number(values.retentionDays);
 
   if (!name) return { ok: false, error: "Project name is required" };
   if (!Number.isFinite(costThresholdUsd) || costThresholdUsd < 0) {
@@ -309,6 +359,9 @@ function validateSettings(values: {
   if (slackWebhookUrl && !isValidSlackWebhookUrl(slackWebhookUrl)) {
     return { ok: false, error: "Slack webhook must be a valid Slack webhook URL" };
   }
+  if (!Number.isInteger(retentionDays) || retentionDays < 1 || retentionDays > 3650) {
+    return { ok: false, error: "Retention must be an integer between 1 and 3650 days" };
+  }
 
   return {
     ok: true,
@@ -320,6 +373,9 @@ function validateSettings(values: {
       maxDurationSeconds,
       maxStallMinutes,
       slackWebhookUrl: slackWebhookUrl || undefined,
+      redactionEnabled: values.redactionEnabled,
+      redactionRules: values.redactionRules,
+      retentionDays,
     },
   };
 }

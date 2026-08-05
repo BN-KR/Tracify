@@ -5,6 +5,7 @@ import type { Id } from "convex/_generated/dataModel";
 import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
 import { hashApiKey } from "@/lib/api-keys";
+import { DEFAULT_REDACTION_RULES, redactPayload, redactRecord } from "@/lib/redaction";
 
 const MAX_BODY_BYTES = 4 * 1024 * 1024; // 4MB for batched OTLP traces
 
@@ -241,6 +242,8 @@ export async function POST(request: NextRequest) {
 
   const projectDocId = project._id as Id<"projects">;
   const now = Date.now();
+  const redactionEnabled = project.redactionEnabled !== false;
+  const redactionRules = project.redactionRules?.length ? project.redactionRules : [...DEFAULT_REDACTION_RULES];
 
   await convex.mutation(api.projects.markApiKeyUsed, {
     projectId: projectDocId,
@@ -281,13 +284,13 @@ export async function POST(request: NextRequest) {
           projectId: projectDocId,
           projectDocId,
           spanType,
-          input: jsonString(input),
-          output: jsonString(output),
+          input: redactionEnabled ? redactPayload(input, redactionRules) : jsonString(input),
+          output: redactionEnabled ? redactPayload(output, redactionRules) : jsonString(output),
           latencyMs: nanoToMs(otelSpan.endTimeUnixNano) - nanoToMs(otelSpan.startTimeUnixNano),
           costUsd: attrs.costUsd ?? 0,
           modelId: attrs.modelId ?? defaultServiceName,
           toolName: attrs.toolName ?? "",
-          metadata: attrs.metadata,
+          metadata: redactionEnabled ? redactRecord(attrs.metadata, redactionRules) : attrs.metadata,
           parentSpanId: otelSpan.parentSpanId ?? "",
           sessionId: attrs.sessionId ?? getAttr(resourceSpans.resource?.attributes, "session.id") ?? "",
           endUserId: attrs.endUserId ?? getAttr(resourceSpans.resource?.attributes, "enduser.id") ?? "",

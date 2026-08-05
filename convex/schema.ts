@@ -27,6 +27,9 @@ export default defineSchema({
     maxDurationSeconds: v.optional(v.number()),
     maxStallMinutes: v.optional(v.number()),
     slackWebhookUrl: v.optional(v.string()),
+    redactionEnabled: v.optional(v.boolean()),
+    redactionRules: v.optional(v.array(v.string())),
+    retentionDays: v.optional(v.number()),
     runtimePolicy: v.optional(v.object({
       enforcementMode: v.union(v.literal("observe"), v.literal("enforce")),
       maxCostPerRun: v.optional(v.number()),

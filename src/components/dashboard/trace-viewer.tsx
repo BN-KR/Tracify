@@ -49,6 +49,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   const [refreshingSpans, setRefreshingSpans] = useState(false);
   const [spansMessage, setSpansMessage] = useState("Cached spans");
   const [spansError, setSpansError] = useState<string | null>(null);
+  const [replayIndex, setReplayIndex] = useState(0);
 
   const fetchSpans = useCallback(
     async (refresh: "normal" | "manual" = "normal") => {
@@ -81,6 +82,16 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
     void fetchSpans();
   }, [fetchSpans]);
 
+  useEffect(() => {
+    if (run?.status !== "running") return;
+    const interval = window.setInterval(() => void fetchSpans(), 3000);
+    return () => window.clearInterval(interval);
+  }, [run?.status, fetchSpans]);
+
+  useEffect(() => {
+    setReplayIndex((current) => Math.min(current, Math.max(0, (spans?.length ?? 1) - 1)));
+  }, [spans]);
+
   if (run === undefined || (loadingSpans && !spans)) {
     return (
       <div className="space-y-6">
@@ -107,6 +118,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
     : now - new Date(run.startedAt).getTime();
   const safeSpans = spans ?? [];
   const spanSummary = buildSpanSummary(safeSpans);
+  const replaySpan = safeSpans[replayIndex];
 
   return (
     <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_280px]">
@@ -147,7 +159,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
           <StatItem label="Duration" value={formatDuration(durationMs)} />
         </div>
         <div className="mt-4 border-t border-border pt-3 font-mono text-[10px] uppercase tracking-widest text-zinc-600">
-          {spansMessage}
+          {run.status === "running" ? "Live trace · polling every 3s · " : ""}{spansMessage}
         </div>
         {spansError ? (
           <div className="mt-3 border border-red-900/40 bg-red-950/10 p-3 font-mono text-[11px] text-red-300">
@@ -157,6 +169,32 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
       </div>
 
       <SpanOverview spans={safeSpans} />
+
+      <div className="border border-border bg-muted/10 p-4 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Session replay</div>
+            <div className="mt-1 font-mono text-[11px] text-zinc-400">Scrub the trace one span at a time like a debugger.</div>
+          </div>
+          <div className="font-mono text-[10px] uppercase text-zinc-600">{safeSpans.length ? `${replayIndex + 1}/${safeSpans.length}` : "0/0"}</div>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={Math.max(0, safeSpans.length - 1)}
+          value={replayIndex}
+          onChange={(event) => setReplayIndex(Number(event.target.value))}
+          disabled={!safeSpans.length}
+          className="w-full accent-white"
+        />
+        {replaySpan ? (
+          <div className="border border-white/20 bg-black/30 p-3 font-mono text-[11px] text-zinc-300">
+            <span className="text-white">{replaySpan.spanType}</span> · {replaySpan.modelId || replaySpan.toolName || "span"} · {formatDuration(replaySpan.latencyMs)}
+          </div>
+        ) : null}
+      </div>
+
+      <SpanGraph spans={safeSpans} />
 
       {/* Timeline */}
       <div className="relative pl-8 space-y-6 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-[1px] before:bg-border">
@@ -172,7 +210,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
         ) : null}
 
         {safeSpans.map((span, index) => (
-          <SpanCard key={span.spanId} span={span} index={index} projectId={projectId} />
+          <SpanCard key={span.spanId} span={span} index={index} projectId={projectId} replayActive={index === replayIndex} />
         ))}
         
         {run.status === "running" && (
@@ -288,6 +326,8 @@ function TraceSummaryPanel({
           <MiniMetric label="Latency" value={formatDuration(durationMs)} />
           <MiniMetric label="LLM" value={summary.typeCounts.llm_call?.toString() ?? "0"} />
           <MiniMetric label="Tools" value={summary.typeCounts.tool_call?.toString() ?? "0"} />
+          <MiniMetric label="Tokens" value={summary.totalTokens.toLocaleString()} />
+          <MiniMetric label="TTFT" value={summary.ttftMs ? formatDuration(summary.ttftMs) : "—"} />
         </div>
       </div>
 
@@ -360,7 +400,7 @@ function SummaryList({
   );
 }
 
-function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, projectId: string }) {
+function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, index: number, projectId: string, replayActive?: boolean }) {
   const [isExpanded, setIsExpanded] = useState(index === 0 || span.spanType === "error");
   const [commentContent, setCommentContent] = useState("");
   const [isCommenting, setIsCommenting] = useState(false);
@@ -414,7 +454,7 @@ function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, pr
       {/* Card */}
       <div className={cn(
         "border transition-all duration-200",
-        isExpanded ? "border-zinc-700 bg-muted/20 shadow-lg" : "border-border bg-transparent hover:border-zinc-700 hover:bg-muted/5"
+        replayActive ? "border-white bg-white/5 shadow-lg" : isExpanded ? "border-zinc-700 bg-muted/20 shadow-lg" : "border-border bg-transparent hover:border-zinc-700 hover:bg-muted/5"
       )}>
         <button 
           onClick={() => setIsExpanded(!isExpanded)}
@@ -518,6 +558,30 @@ function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, pr
   );
 }
 
+function SpanGraph({ spans }: { spans: SpanRow[] }) {
+  const roots = spans.filter((span) => !span.parentSpanId || !spans.some((candidate) => candidate.spanId === span.parentSpanId));
+  return (
+    <div className="border border-border bg-muted/10 p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Agent handoff graph</div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">{spans.length} nodes · {Math.max(0, spans.length - roots.length)} edges</div>
+      </div>
+      {spans.length === 0 ? <div className="border border-dashed border-border p-4 text-center font-mono text-[10px] uppercase text-zinc-600">No handoffs captured</div> : (
+        <div className="flex flex-wrap items-center gap-2">
+          {spans.map((span, index) => (
+            <div key={span.spanId} className="flex items-center gap-2">
+              {index > 0 ? <span className="font-mono text-zinc-700">→</span> : null}
+              <div className={cn("border px-2 py-1 font-mono text-[10px]", span.parentSpanId ? "border-indigo-400/40 text-indigo-300" : "border-zinc-700 text-zinc-300")} title={span.parentSpanId ? `child of ${span.parentSpanId}` : "root span"}>
+                {span.modelId || span.toolName || span.spanType}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PayloadHeader({
   label,
   copied,
@@ -604,9 +668,14 @@ function buildSpanSummary(spans: SpanRow[]) {
   const models = new Map<string, { label: string; count: number; cost: number; latencyMs: number }>();
   const tools = new Map<string, { label: string; count: number; cost: number; latencyMs: number }>();
   let totalCost = 0;
+  let totalTokens = 0;
+  let ttftMs = 0;
 
   for (const span of spans) {
     totalCost += span.costUsd;
+    totalTokens += Number(span.metadata?.totalTokens ?? Number(span.metadata?.inputTokens ?? 0) + Number(span.metadata?.outputTokens ?? 0)) || 0;
+    const candidateTtft = Number(span.metadata?.ttftMs ?? span.metadata?.timeToFirstTokenMs ?? 0);
+    if (candidateTtft > 0 && (ttftMs === 0 || candidateTtft < ttftMs)) ttftMs = candidateTtft;
     typeCounts[span.spanType] = (typeCounts[span.spanType] ?? 0) + 1;
 
     if (span.modelId) {
@@ -642,6 +711,8 @@ function buildSpanSummary(spans: SpanRow[]) {
 
   return {
     totalCost,
+    totalTokens,
+    ttftMs,
     typeCounts,
     models: sortRows(models),
     tools: sortRows(tools),
