@@ -56,7 +56,7 @@ function isIsoString(value: string) {
 function validatePayload(body: Record<string, unknown>):
   | { ok: true; payload: SpanPayload }
   | { ok: false; error: string } {
-  const hasInputOrOutput = body.input !== undefined || body.output !== undefined;
+  const hasInputOrOutput = body.input !== undefined || body.output !== undefined || body.attachments !== undefined;
 
   if (typeof body.spanId !== "string") {
     return { ok: false, error: "spanId must be a string" };
@@ -96,6 +96,9 @@ function validatePayload(body: Record<string, unknown>):
   }
   if (body.tags !== undefined && (!Array.isArray(body.tags) || body.tags.some((tag) => typeof tag !== "string"))) {
     return { ok: false, error: "tags must be an array of strings" };
+  }
+  if (body.attachments !== undefined && !Array.isArray(body.attachments)) {
+    return { ok: false, error: "attachments must be an array" };
   }
   for (const key of ["inputTokens", "outputTokens", "ttftMs", "retryCount", "streamSequence"] as const) {
     if (body[key] !== undefined && (typeof body[key] !== "number" || body[key] < 0)) {
