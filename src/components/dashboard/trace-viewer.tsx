@@ -551,6 +551,7 @@ function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, ind
                   </div>
                 ) : null}
                 {span.stackTrace ? <pre className="max-h-48 overflow-auto border border-red-400/20 bg-black/40 p-3 font-mono text-[10px] text-red-200">{span.stackTrace}</pre> : null}
+                {span.attachments && span.attachments !== "[]" ? <pre className="max-h-40 overflow-auto border border-indigo-400/20 bg-black/40 p-3 font-mono text-[10px] text-indigo-200">attachments · {formatJson(span.attachments)}</pre> : null}
 
                 {/* Comments Section */}
                 <div className="pt-4 border-t border-border/30 space-y-4">

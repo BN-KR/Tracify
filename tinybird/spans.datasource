@@ -8,6 +8,7 @@ SCHEMA >
     `spanType`  String `json:$.spanType`,
     `input`     String `json:$.input`,
     `output`    String `json:$.output`,
+    `attachments` String `json:$.attachments` DEFAULT '[]',
     `latencyMs` Int32 `json:$.latencyMs`,
     `costUsd`   Float64 `json:$.costUsd`,
     `modelId`   String `json:$.modelId`,

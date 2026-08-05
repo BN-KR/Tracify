@@ -13,6 +13,7 @@ export type SpanIngestedEvent = {
     spanType: string;
     input: string;
     output: string;
+    attachments: string;
     latencyMs: number;
     costUsd: number;
     modelId: string;

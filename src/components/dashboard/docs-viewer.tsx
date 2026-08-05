@@ -128,7 +128,7 @@ Every span may include \`sessionId\`, \`endUserId\`, \`environment\`, \`release\
 
 ## Streaming and multimodal payloads
 
-Send each partial as a span with \`isStreamChunk: true\`, an increasing \`streamSequence\`, and \`streamFinal: true\` on the final chunk. Set \`payloadFormat\` to values such as \`image\`, \`audio\`, or \`function_call\`; structured input/output JSON is preserved.
+Send each partial as a span with \`isStreamChunk: true\`, an increasing \`streamSequence\`, and \`streamFinal: true\` on the final chunk. Set \`payloadFormat\` to values such as \`image\`, \`audio\`, or \`function_call\`; structured input/output JSON and the optional \`attachments\` array are preserved.
 
 ## Privacy and retention
 

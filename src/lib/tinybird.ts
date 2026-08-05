@@ -35,6 +35,7 @@ export async function ingestSpan(span: {
   spanType: string;
   input: string;
   output: string;
+  attachments: string;
   latencyMs: number;
   costUsd: number;
   modelId: string;
@@ -374,6 +375,7 @@ export interface SpanRow {
   spanType: string;
   input: string;
   output: string;
+  attachments: string;
   latencyMs: number;
   costUsd: number;
   modelId: string;

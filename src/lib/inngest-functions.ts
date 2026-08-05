@@ -27,6 +27,7 @@ export const processSpan = inngest.createFunction(
         spanType: span.spanType,
         input: span.input,
         output: span.output,
+        attachments: span.attachments ?? "[]",
         latencyMs: span.latencyMs,
         costUsd: span.costUsd,
         modelId: span.modelId,

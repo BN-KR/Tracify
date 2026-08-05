@@ -165,6 +165,7 @@ export default defineSchema({
       spanType: v.string(),
       input: v.string(),
       output: v.string(),
+      attachments: v.optional(v.string()),
       latencyMs: v.number(),
       costUsd: v.number(),
       modelId: v.string(),

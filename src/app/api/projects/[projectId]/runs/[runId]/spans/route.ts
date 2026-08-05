@@ -118,6 +118,7 @@ export async function GET(
 
     const spans = (await getSpansForRun(runId, projectId)).map((span) => ({
       ...span,
+      attachments: span.attachments ?? "[]",
       inputTokens: span.inputTokens ?? 0,
       outputTokens: span.outputTokens ?? 0,
       ttftMs: span.ttftMs ?? 0,

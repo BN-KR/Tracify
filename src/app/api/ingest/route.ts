@@ -17,6 +17,7 @@ type SpanPayload = {
   latencyMs: number;
   input?: unknown;
   output?: unknown;
+  attachments?: unknown[];
   costUsd?: number;
   modelId?: string;
   toolName?: string;
@@ -187,6 +188,7 @@ export async function POST(request: NextRequest) {
         spanType: payload.spanType,
         input: redactionEnabled ? redactPayload(payload.input, redactionRules) : jsonString(payload.input),
         output: redactionEnabled ? redactPayload(payload.output, redactionRules) : jsonString(payload.output),
+        attachments: redactionEnabled ? redactPayload(payload.attachments ?? [], redactionRules) : jsonString(payload.attachments ?? []),
         latencyMs: payload.latencyMs,
         costUsd: payload.costUsd ?? 0,
         modelId: payload.modelId ?? "",
