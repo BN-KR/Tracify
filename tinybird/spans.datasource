@@ -18,7 +18,7 @@ SCHEMA >
     `endUserId` String `json:$.endUserId`,
     `environment` String `json:$.environment`,
     `release` String `json:$.release`,
-    `tags` Array(String) `json:$.tags`,
+    `tags` Array(String) `json:$.tags[:]`,
     `traceName` String `json:$.traceName`,
     `metadata` String `json:$.metadata`,
     `inputTokens` UInt32 `json:$.inputTokens` default 0,
