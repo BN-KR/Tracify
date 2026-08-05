@@ -57,6 +57,9 @@ export async function ingestSpan(span: {
   streamSequence: number;
   streamFinal: boolean;
   payloadFormat: string;
+  stackTrace: string;
+  timedOut: boolean;
+  timeoutMs: number;
   createdAt: string; // ISO 8601 UTC
 }) {
   const ndjson = JSON.stringify(span) + "\n";
@@ -393,5 +396,8 @@ export interface SpanRow {
   streamSequence: number;
   streamFinal: boolean;
   payloadFormat: string;
+  stackTrace: string;
+  timedOut: boolean;
+  timeoutMs: number;
   createdAt: string;
 }

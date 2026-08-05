@@ -30,6 +30,9 @@ SCHEMA >
     `streamSequence` UInt32 `json:$.streamSequence` default 0,
     `streamFinal` Bool `json:$.streamFinal` default 1,
     `payloadFormat` String `json:$.payloadFormat` default 'json',
+    `stackTrace` String `json:$.stackTrace` default '',
+    `timedOut` Bool `json:$.timedOut` default 0,
+    `timeoutMs` UInt32 `json:$.timeoutMs` default 0,
     `createdAt` DateTime `json:$.createdAt`
 
 ENGINE "MergeTree"

@@ -38,6 +38,9 @@ type SpanPayload = {
   streamSequence?: number;
   streamFinal?: boolean;
   payloadFormat?: string;
+  stackTrace?: string;
+  timedOut?: boolean;
+  timeoutMs?: number;
 };
 
 function jsonString(value: unknown) {
@@ -98,15 +101,18 @@ function validatePayload(body: Record<string, unknown>):
       return { ok: false, error: `${key} must be a non-negative number` };
     }
   }
-  for (const key of ["errorType", "errorMessage", "payloadFormat"] as const) {
+  for (const key of ["errorType", "errorMessage", "payloadFormat", "stackTrace"] as const) {
     if (body[key] !== undefined && typeof body[key] !== "string") {
       return { ok: false, error: `${key} must be a string` };
     }
   }
-  for (const key of ["isStreamChunk", "streamFinal"] as const) {
+  for (const key of ["isStreamChunk", "streamFinal", "timedOut"] as const) {
     if (body[key] !== undefined && typeof body[key] !== "boolean") {
       return { ok: false, error: `${key} must be a boolean` };
     }
+  }
+  if (body.timeoutMs !== undefined && (typeof body.timeoutMs !== "number" || body.timeoutMs < 0)) {
+    return { ok: false, error: "timeoutMs must be a non-negative number" };
   }
   if (
     body.metadata !== undefined &&
@@ -203,6 +209,9 @@ export async function POST(request: NextRequest) {
         streamSequence: payload.streamSequence ?? Number(payload.metadata?.streamSequence ?? 0),
         streamFinal: payload.streamFinal ?? Boolean(payload.metadata?.streamFinal ?? true),
         payloadFormat: payload.payloadFormat ?? "json",
+        stackTrace: payload.stackTrace ?? String(payload.metadata?.stackTrace ?? ""),
+        timedOut: payload.timedOut ?? Boolean(payload.metadata?.timedOut),
+        timeoutMs: payload.timeoutMs ?? Number(payload.metadata?.timeoutMs ?? 0),
         createdAt: payload.createdAt,
       },
     });

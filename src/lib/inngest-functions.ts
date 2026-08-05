@@ -49,6 +49,9 @@ export const processSpan = inngest.createFunction(
         streamSequence: span.streamSequence ?? 0,
         streamFinal: span.streamFinal ?? true,
         payloadFormat: span.payloadFormat ?? "json",
+        stackTrace: span.stackTrace ?? "",
+        timedOut: span.timedOut ?? false,
+        timeoutMs: span.timeoutMs ?? 0,
         createdAt: span.createdAt,
       });
     });

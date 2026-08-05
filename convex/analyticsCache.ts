@@ -69,6 +69,9 @@ const spanValidator = v.object({
   streamSequence: v.optional(v.number()),
   streamFinal: v.optional(v.boolean()),
   payloadFormat: v.optional(v.string()),
+  stackTrace: v.optional(v.string()),
+  timedOut: v.optional(v.boolean()),
+  timeoutMs: v.optional(v.number()),
   createdAt: v.string(),
 });
 

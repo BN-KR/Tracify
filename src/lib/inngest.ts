@@ -35,6 +35,9 @@ export type SpanIngestedEvent = {
     streamSequence: number;
     streamFinal: boolean;
     payloadFormat: string;
+    stackTrace: string;
+    timedOut: boolean;
+    timeoutMs: number;
     createdAt: string;
   };
 };

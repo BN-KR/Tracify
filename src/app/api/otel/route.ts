@@ -116,6 +116,9 @@ function mapSpanAttributes(attrs: OtlpKeyValue[] | undefined): {
   streamSequence?: number;
   streamFinal?: boolean;
   payloadFormat?: string;
+  stackTrace?: string;
+  timedOut?: boolean;
+  timeoutMs?: number;
   metadata: Record<string, unknown>;
 } {
   if (!attrs) return { metadata: {}, tags: [] };
@@ -141,6 +144,9 @@ function mapSpanAttributes(attrs: OtlpKeyValue[] | undefined): {
   let streamSequence: number | undefined;
   let streamFinal: boolean | undefined;
   let payloadFormat: string | undefined;
+  let stackTrace: string | undefined;
+  let timedOut: boolean | undefined;
+  let timeoutMs: number | undefined;
 
   for (const attr of attrs) {
     const val = attr.value.stringValue ?? attr.value.intValue ?? String(attr.value.doubleValue ?? "");
@@ -231,12 +237,24 @@ function mapSpanAttributes(attrs: OtlpKeyValue[] | undefined): {
       case "tracify.payload.format":
         payloadFormat = val;
         break;
+      case "exception.stacktrace":
+      case "error.stacktrace":
+        stackTrace = val;
+        break;
+      case "tracify.timeout":
+      case "ai.timeout":
+        timedOut = val === "true" || val === "1";
+        break;
+      case "tracify.timeout_ms":
+      case "ai.timeout_ms":
+        timeoutMs = Number(val);
+        break;
       default:
         metadata[attr.key] = val;
     }
   }
 
-  return { input, output, costUsd, modelId, toolName, spanType, sessionId, endUserId, environment, release, tags, traceName, inputTokens, outputTokens, ttftMs, retryCount, isStreamChunk, streamSequence, streamFinal, payloadFormat, metadata };
+  return { input, output, costUsd, modelId, toolName, spanType, sessionId, endUserId, environment, release, tags, traceName, inputTokens, outputTokens, ttftMs, retryCount, isStreamChunk, streamSequence, streamFinal, payloadFormat, stackTrace, timedOut, timeoutMs, metadata };
 }
 
 // ─── Route handler ────────────────────────────────────────────────
@@ -351,6 +369,9 @@ export async function POST(request: NextRequest) {
           streamSequence: attrs.streamSequence ?? 0,
           streamFinal: attrs.streamFinal ?? true,
           payloadFormat: attrs.payloadFormat ?? "json",
+          stackTrace: attrs.stackTrace ?? "",
+          timedOut: attrs.timedOut ?? false,
+          timeoutMs: attrs.timeoutMs ?? 0,
           createdAt: nanoToIso(otelSpan.startTimeUnixNano),
         };
 

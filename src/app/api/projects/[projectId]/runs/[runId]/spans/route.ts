@@ -128,6 +128,9 @@ export async function GET(
       streamSequence: span.streamSequence ?? 0,
       streamFinal: span.streamFinal ?? true,
       payloadFormat: span.payloadFormat ?? "json",
+      stackTrace: span.stackTrace ?? "",
+      timedOut: span.timedOut ?? false,
+      timeoutMs: span.timeoutMs ?? 0,
     }));
     const cached = await convex.mutation(api.analyticsCache.upsertRunSpanCache, {
       projectId: convexProjectId,

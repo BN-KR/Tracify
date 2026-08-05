@@ -496,7 +496,8 @@ function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, ind
               {span.modelId || span.toolName || "Processing..."}
             </div>
             {span.retryCount > 0 ? <Badge variant="outline" className="rounded-none border-amber-400/40 px-1.5 font-mono text-[9px] text-amber-300">retry ×{span.retryCount}</Badge> : null}
-            {span.errorType || span.errorMessage ? <Badge variant="outline" className="rounded-none border-red-400/40 px-1.5 font-mono text-[9px] text-red-300">error</Badge> : null}
+            {span.errorType || span.errorMessage || span.stackTrace ? <Badge variant="outline" className="rounded-none border-red-400/40 px-1.5 font-mono text-[9px] text-red-300">error</Badge> : null}
+            {span.timedOut ? <Badge variant="outline" className="rounded-none border-amber-400/40 px-1.5 font-mono text-[9px] text-amber-300">timeout</Badge> : null}
           </div>
           
           <div className="flex items-center gap-6">
@@ -540,14 +541,16 @@ function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, ind
                     </pre>
                   </div>
                 </div>
-                {(span.errorType || span.errorMessage || span.isStreamChunk || span.payloadFormat !== "json") ? (
+                {(span.errorType || span.errorMessage || span.stackTrace || span.timedOut || span.isStreamChunk || span.payloadFormat !== "json") ? (
                   <div className="flex flex-wrap gap-2 border-t border-border/30 pt-3 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
                     {span.errorType ? <span className="border border-red-400/30 px-2 py-1 text-red-300">{span.errorType}</span> : null}
                     {span.errorMessage ? <span className="max-w-full truncate border border-red-400/30 px-2 py-1 text-red-300">{span.errorMessage}</span> : null}
+                    {span.timedOut ? <span className="border border-amber-400/30 px-2 py-1 text-amber-300">timeout {span.timeoutMs ? `${span.timeoutMs}ms` : ""}</span> : null}
                     {span.isStreamChunk ? <span className="border border-indigo-400/30 px-2 py-1 text-indigo-300">stream chunk #{span.streamSequence}</span> : null}
                     {span.payloadFormat !== "json" ? <span className="border border-zinc-700 px-2 py-1">{span.payloadFormat}</span> : null}
                   </div>
                 ) : null}
+                {span.stackTrace ? <pre className="max-h-48 overflow-auto border border-red-400/20 bg-black/40 p-3 font-mono text-[10px] text-red-200">{span.stackTrace}</pre> : null}
 
                 {/* Comments Section */}
                 <div className="pt-4 border-t border-border/30 space-y-4">
