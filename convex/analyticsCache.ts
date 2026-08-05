@@ -25,6 +25,14 @@ const toolCostValidator = v.object({
   avgLatencyMs: v.optional(v.number()),
 });
 
+const userCostValidator = v.object({
+  endUserId: v.string(),
+  totalCostUsd: v.number(),
+  totalTokens: v.number(),
+  spanCount: v.number(),
+  avgLatencyMs: v.optional(v.number()),
+});
+
 const dailyCostValidator = v.object({
   day: v.string(),
   totalCostUsd: v.number(),
@@ -51,6 +59,16 @@ const spanValidator = v.object({
   toolName: v.string(),
   parentSpanId: v.string(),
   metadata: v.any(),
+  inputTokens: v.optional(v.number()),
+  outputTokens: v.optional(v.number()),
+  ttftMs: v.optional(v.number()),
+  retryCount: v.optional(v.number()),
+  errorType: v.optional(v.string()),
+  errorMessage: v.optional(v.string()),
+  isStreamChunk: v.optional(v.boolean()),
+  streamSequence: v.optional(v.number()),
+  streamFinal: v.optional(v.boolean()),
+  payloadFormat: v.optional(v.string()),
   createdAt: v.string(),
 });
 
@@ -94,6 +112,7 @@ function statsPayload(cache: Doc<"analyticsStatsCache"> | null) {
     dailyCosts: cache.dailyCosts,
     modelCosts: cache.modelCosts,
     toolCosts: cache.toolCosts ?? [],
+    userCosts: cache.userCosts ?? [],
     meta: {
       source: cache.source,
       cacheStatus: ageMs <= STATS_TTL_MS ? "fresh" : "stale",
@@ -200,6 +219,7 @@ export const upsertStatsCache = mutation({
     dailyCosts: v.array(dailyCostValidator),
     modelCosts: v.array(modelCostValidator),
     toolCosts: v.optional(v.array(toolCostValidator)),
+    userCosts: v.optional(v.array(userCostValidator)),
     refresh: v.union(v.literal("normal"), v.literal("manual")),
   },
   handler: async (ctx, args) => {
@@ -217,6 +237,7 @@ export const upsertStatsCache = mutation({
       dailyCosts: args.dailyCosts,
       modelCosts: args.modelCosts,
       toolCosts: args.toolCosts ?? [],
+      userCosts: args.userCosts ?? [],
       updatedAt: now,
       source: "tinybird",
       lastManualRefreshAt:
@@ -237,6 +258,7 @@ export const upsertStatsCache = mutation({
       dailyCosts: args.dailyCosts,
       modelCosts: args.modelCosts,
       toolCosts: args.toolCosts ?? [],
+      userCosts: args.userCosts ?? [],
       meta: {
         source: "tinybird",
         cacheStatus: "fresh",

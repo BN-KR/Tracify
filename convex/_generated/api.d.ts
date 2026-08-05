@@ -14,6 +14,7 @@ import type * as analyticsCache from "../analyticsCache.js";
 import type * as comments from "../comments.js";
 import type * as costCounters from "../costCounters.js";
 import type * as projects from "../projects.js";
+import type * as retention from "../retention.js";
 import type * as sessions from "../sessions.js";
 
 import type {
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   comments: typeof comments;
   costCounters: typeof costCounters;
   projects: typeof projects;
+  retention: typeof retention;
   sessions: typeof sessions;
 }>;
 

@@ -10,7 +10,7 @@ import {
   setJsonCache,
   withCacheReason,
 } from "@/lib/redis-cache";
-import { getCostByModel, getCostByTool, getDailyCosts } from "@/lib/tinybird";
+import { getCostByModel, getCostByTool, getCostByUser, getDailyCosts } from "@/lib/tinybird";
 
 type StatsCachePayload = {
   dailyCosts: Array<{ day: string; totalCostUsd: number; spanCount: number }>;
@@ -23,6 +23,13 @@ type StatsCachePayload = {
   toolCosts: Array<{
     toolName: string;
     totalCostUsd: number;
+    spanCount: number;
+    avgLatencyMs?: number;
+  }>;
+  userCosts: Array<{
+    endUserId: string;
+    totalCostUsd: number;
+    totalTokens: number;
     spanCount: number;
     avgLatencyMs?: number;
   }>;
@@ -104,10 +111,11 @@ export async function GET(
       return NextResponse.json(withReason(reservation.cache, reservation.reason));
     }
 
-    const [dailyCosts, modelCosts, toolCosts] = await Promise.all([
+    const [dailyCosts, modelCosts, toolCosts, userCosts] = await Promise.all([
       getDailyCosts(projectId, days),
       getCostByModel(projectId, days),
       getCostByTool(projectId, days),
+      getCostByUser(projectId, days),
     ]);
 
     const cached = await convex.mutation(api.analyticsCache.upsertStatsCache, {
@@ -116,6 +124,7 @@ export async function GET(
       dailyCosts,
       modelCosts,
       toolCosts,
+      userCosts,
       refresh,
     });
 
@@ -165,6 +174,7 @@ export async function GET(
       dailyCosts: [],
       modelCosts: [],
       toolCosts: [],
+      userCosts: [],
       unavailable: true,
       meta: {
         source: "none",
@@ -197,6 +207,7 @@ function withReason(
     dailyCosts: [],
     modelCosts: [],
     toolCosts: [],
+    userCosts: [],
     unavailable: true,
     meta: {
       source: "none",

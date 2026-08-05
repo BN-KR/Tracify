@@ -106,6 +106,16 @@ function mapSpanAttributes(attrs: OtlpKeyValue[] | undefined): {
   release?: string;
   tags: string[];
   traceName?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  ttftMs?: number;
+  retryCount?: number;
+  errorType?: string;
+  errorMessage?: string;
+  isStreamChunk?: boolean;
+  streamSequence?: number;
+  streamFinal?: boolean;
+  payloadFormat?: string;
   metadata: Record<string, unknown>;
 } {
   if (!attrs) return { metadata: {}, tags: [] };
@@ -123,6 +133,14 @@ function mapSpanAttributes(attrs: OtlpKeyValue[] | undefined): {
   let release: string | undefined;
   let traceName: string | undefined;
   let tags: string[] = [];
+  let inputTokens: number | undefined;
+  let outputTokens: number | undefined;
+  let ttftMs: number | undefined;
+  let retryCount: number | undefined;
+  let isStreamChunk: boolean | undefined;
+  let streamSequence: number | undefined;
+  let streamFinal: boolean | undefined;
+  let payloadFormat: string | undefined;
 
   for (const attr of attrs) {
     const val = attr.value.stringValue ?? attr.value.intValue ?? String(attr.value.doubleValue ?? "");
@@ -137,12 +155,14 @@ function mapSpanAttributes(attrs: OtlpKeyValue[] | undefined): {
       case "gen_ai.usage.input_tokens":
       case "gen_ai.usage.prompt_tokens":
       case "ai.usage.input_tokens":
-        metadata.inputTokens = Number(val);
+        inputTokens = Number(val);
+        metadata.inputTokens = inputTokens;
         break;
       case "gen_ai.usage.output_tokens":
       case "gen_ai.usage.completion_tokens":
       case "ai.usage.output_tokens":
-        metadata.outputTokens = Number(val);
+        outputTokens = Number(val);
+        metadata.outputTokens = outputTokens;
         break;
       case "gen_ai.usage.total_cost":
       case "ai.cost.usd":
@@ -188,12 +208,35 @@ function mapSpanAttributes(attrs: OtlpKeyValue[] | undefined): {
       case "ai.trace.name":
         traceName = val;
         break;
+      case "gen_ai.latency.time_to_first_token":
+      case "gen_ai.time_to_first_token_ms":
+      case "ai.ttft_ms":
+        ttftMs = Number(val);
+        metadata.ttftMs = ttftMs;
+        break;
+      case "tracify.retry_count":
+      case "ai.retry_count":
+        retryCount = Number(val);
+        metadata.retryCount = retryCount;
+        break;
+      case "tracify.stream.chunk":
+        isStreamChunk = val === "true" || val === "1";
+        break;
+      case "tracify.stream.sequence":
+        streamSequence = Number(val);
+        break;
+      case "tracify.stream.final":
+        streamFinal = val !== "false" && val !== "0";
+        break;
+      case "tracify.payload.format":
+        payloadFormat = val;
+        break;
       default:
         metadata[attr.key] = val;
     }
   }
 
-  return { input, output, costUsd, modelId, toolName, spanType, sessionId, endUserId, environment, release, tags, traceName, metadata };
+  return { input, output, costUsd, modelId, toolName, spanType, sessionId, endUserId, environment, release, tags, traceName, inputTokens, outputTokens, ttftMs, retryCount, isStreamChunk, streamSequence, streamFinal, payloadFormat, metadata };
 }
 
 // ─── Route handler ────────────────────────────────────────────────
@@ -298,6 +341,16 @@ export async function POST(request: NextRequest) {
           release: attrs.release ?? getAttr(resourceSpans.resource?.attributes, "service.version") ?? "",
           tags: attrs.tags,
           traceName: attrs.traceName ?? otelSpan.name,
+          inputTokens: attrs.inputTokens ?? Number(attrs.metadata.inputTokens ?? 0),
+          outputTokens: attrs.outputTokens ?? Number(attrs.metadata.outputTokens ?? 0),
+          ttftMs: attrs.ttftMs ?? Number(attrs.metadata.ttftMs ?? 0),
+          retryCount: attrs.retryCount ?? Number(attrs.metadata.retryCount ?? 0),
+          errorType: otelSpan.status?.code === 2 ? "otel_error" : "",
+          errorMessage: otelSpan.status?.code === 2 ? otelSpan.status.message ?? "error" : "",
+          isStreamChunk: attrs.isStreamChunk ?? false,
+          streamSequence: attrs.streamSequence ?? 0,
+          streamFinal: attrs.streamFinal ?? true,
+          payloadFormat: attrs.payloadFormat ?? "json",
           createdAt: nanoToIso(otelSpan.startTimeUnixNano),
         };
 

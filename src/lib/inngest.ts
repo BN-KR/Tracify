@@ -25,6 +25,16 @@ export type SpanIngestedEvent = {
     release: string;
     tags: string[];
     traceName: string;
+    inputTokens: number;
+    outputTokens: number;
+    ttftMs: number;
+    retryCount: number;
+    errorType: string;
+    errorMessage: string;
+    isStreamChunk: boolean;
+    streamSequence: number;
+    streamFinal: boolean;
+    payloadFormat: string;
     createdAt: string;
   };
 };

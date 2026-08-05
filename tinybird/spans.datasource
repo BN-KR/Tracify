@@ -20,9 +20,20 @@ SCHEMA >
     `tags` Array(String) `json:$.tags`,
     `traceName` String `json:$.traceName`,
     `metadata` String `json:$.metadata`,
+    `inputTokens` UInt32 `json:$.inputTokens` default 0,
+    `outputTokens` UInt32 `json:$.outputTokens` default 0,
+    `ttftMs` UInt32 `json:$.ttftMs` default 0,
+    `retryCount` UInt16 `json:$.retryCount` default 0,
+    `errorType` String `json:$.errorType` default '',
+    `errorMessage` String `json:$.errorMessage` default '',
+    `isStreamChunk` Bool `json:$.isStreamChunk` default 0,
+    `streamSequence` UInt32 `json:$.streamSequence` default 0,
+    `streamFinal` Bool `json:$.streamFinal` default 1,
+    `payloadFormat` String `json:$.payloadFormat` default 'json',
     `createdAt` DateTime `json:$.createdAt`
 
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYYYYMM(createdAt)"
 ENGINE_PRIMARY_KEY "projectId, runId"
 ENGINE_SORTING_KEY "projectId, runId, createdAt, spanId"
+ENGINE_TTL "createdAt + toIntervalDay(365)"

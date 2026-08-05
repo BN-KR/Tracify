@@ -6,7 +6,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { formatCurrency, formatRelativeTime } from "@/lib/utils";
 
-type Result = { runId: string; sessionId: string; endUserId: string; environment: string; release: string; traceName: string; startedAt: string; lastSeenAt: string; spanCount: number; totalCostUsd: number; maxLatencyMs: number; errorCount: number };
+type Result = { runId: string; sessionId: string; endUserId: string; environment: string; release: string; traceName: string; startedAt: string; lastSeenAt: string; spanCount: number; totalCostUsd: number; maxLatencyMs: number; ttftMs: number; retryCount: number; errorCount: number };
 
 export function TraceSearch({ projectId }: { projectId: string }) {
   const [query, setQuery] = useState("");

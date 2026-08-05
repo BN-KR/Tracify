@@ -88,10 +88,6 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
     return () => window.clearInterval(interval);
   }, [run?.status, fetchSpans]);
 
-  useEffect(() => {
-    setReplayIndex((current) => Math.min(current, Math.max(0, (spans?.length ?? 1) - 1)));
-  }, [spans]);
-
   if (run === undefined || (loadingSpans && !spans)) {
     return (
       <div className="space-y-6">
@@ -118,7 +114,8 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
     : now - new Date(run.startedAt).getTime();
   const safeSpans = spans ?? [];
   const spanSummary = buildSpanSummary(safeSpans);
-  const replaySpan = safeSpans[replayIndex];
+  const activeReplayIndex = Math.min(replayIndex, Math.max(0, safeSpans.length - 1));
+  const replaySpan = safeSpans[activeReplayIndex];
 
   return (
     <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_280px]">
@@ -169,6 +166,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
       </div>
 
       <SpanOverview spans={safeSpans} />
+      <LatencyWaterfall spans={safeSpans} />
 
       <div className="border border-border bg-muted/10 p-4 space-y-4">
         <div className="flex items-center justify-between gap-3">
@@ -176,13 +174,13 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Session replay</div>
             <div className="mt-1 font-mono text-[11px] text-zinc-400">Scrub the trace one span at a time like a debugger.</div>
           </div>
-          <div className="font-mono text-[10px] uppercase text-zinc-600">{safeSpans.length ? `${replayIndex + 1}/${safeSpans.length}` : "0/0"}</div>
+          <div className="font-mono text-[10px] uppercase text-zinc-600">{safeSpans.length ? `${activeReplayIndex + 1}/${safeSpans.length}` : "0/0"}</div>
         </div>
         <input
           type="range"
           min={0}
           max={Math.max(0, safeSpans.length - 1)}
-          value={replayIndex}
+          value={activeReplayIndex}
           onChange={(event) => setReplayIndex(Number(event.target.value))}
           disabled={!safeSpans.length}
           className="w-full accent-white"
@@ -210,7 +208,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
         ) : null}
 
         {safeSpans.map((span, index) => (
-          <SpanCard key={span.spanId} span={span} index={index} projectId={projectId} replayActive={index === replayIndex} />
+          <SpanCard key={span.spanId} span={span} index={index} projectId={projectId} replayActive={index === activeReplayIndex} />
         ))}
         
         {run.status === "running" && (
@@ -304,6 +302,36 @@ function SpanOverview({ spans }: { spans: SpanRow[] }) {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+function LatencyWaterfall({ spans }: { spans: SpanRow[] }) {
+  if (!spans.length) return null;
+  const start = Math.min(...spans.map((span) => Date.parse(span.createdAt)).filter(Number.isFinite));
+  const end = Math.max(...spans.map((span) => Date.parse(span.createdAt) + Math.max(0, span.latencyMs)).filter(Number.isFinite));
+  const total = Math.max(1, end - start);
+  return (
+    <div className="border border-border bg-muted/10 p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Latency waterfall</div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">wall-clock span overlap</div>
+      </div>
+      <div className="space-y-1.5">
+        {spans.map((span) => {
+          const created = Date.parse(span.createdAt);
+          const left = Number.isFinite(created) ? ((created - start) / total) * 100 : 0;
+          const width = Math.max(1.5, (Math.max(0, span.latencyMs) / total) * 100);
+          return (
+            <div key={span.spanId} className="grid grid-cols-[110px_minmax(0,1fr)] items-center gap-2">
+              <span className="truncate font-mono text-[9px] text-zinc-500">{span.modelId || span.toolName || span.spanType}</span>
+              <div className="relative h-3 bg-black/50">
+                <div className={cn("absolute h-full", getSpanTypeConfig(span.spanType).segment)} style={{ left: `${left}%`, width: `${width}%` }} title={`${formatDuration(span.latencyMs)} from ${span.createdAt}`} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -467,6 +495,8 @@ function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, ind
             <div className="truncate font-mono text-xs text-white max-w-[200px] md:max-w-md">
               {span.modelId || span.toolName || "Processing..."}
             </div>
+            {span.retryCount > 0 ? <Badge variant="outline" className="rounded-none border-amber-400/40 px-1.5 font-mono text-[9px] text-amber-300">retry ×{span.retryCount}</Badge> : null}
+            {span.errorType || span.errorMessage ? <Badge variant="outline" className="rounded-none border-red-400/40 px-1.5 font-mono text-[9px] text-red-300">error</Badge> : null}
           </div>
           
           <div className="flex items-center gap-6">
@@ -510,6 +540,14 @@ function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, ind
                     </pre>
                   </div>
                 </div>
+                {(span.errorType || span.errorMessage || span.isStreamChunk || span.payloadFormat !== "json") ? (
+                  <div className="flex flex-wrap gap-2 border-t border-border/30 pt-3 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+                    {span.errorType ? <span className="border border-red-400/30 px-2 py-1 text-red-300">{span.errorType}</span> : null}
+                    {span.errorMessage ? <span className="max-w-full truncate border border-red-400/30 px-2 py-1 text-red-300">{span.errorMessage}</span> : null}
+                    {span.isStreamChunk ? <span className="border border-indigo-400/30 px-2 py-1 text-indigo-300">stream chunk #{span.streamSequence}</span> : null}
+                    {span.payloadFormat !== "json" ? <span className="border border-zinc-700 px-2 py-1">{span.payloadFormat}</span> : null}
+                  </div>
+                ) : null}
 
                 {/* Comments Section */}
                 <div className="pt-4 border-t border-border/30 space-y-4">
@@ -559,7 +597,9 @@ function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, ind
 }
 
 function SpanGraph({ spans }: { spans: SpanRow[] }) {
-  const roots = spans.filter((span) => !span.parentSpanId || !spans.some((candidate) => candidate.spanId === span.parentSpanId));
+  const byId = new Map(spans.map((span) => [span.spanId, span]));
+  const edges = spans.filter((span) => span.parentSpanId && byId.has(span.parentSpanId));
+  const roots = spans.filter((span) => !span.parentSpanId || !byId.has(span.parentSpanId));
   return (
     <div className="border border-border bg-muted/10 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
@@ -567,15 +607,18 @@ function SpanGraph({ spans }: { spans: SpanRow[] }) {
         <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">{spans.length} nodes · {Math.max(0, spans.length - roots.length)} edges</div>
       </div>
       {spans.length === 0 ? <div className="border border-dashed border-border p-4 text-center font-mono text-[10px] uppercase text-zinc-600">No handoffs captured</div> : (
-        <div className="flex flex-wrap items-center gap-2">
-          {spans.map((span, index) => (
-            <div key={span.spanId} className="flex items-center gap-2">
-              {index > 0 ? <span className="font-mono text-zinc-700">→</span> : null}
-              <div className={cn("border px-2 py-1 font-mono text-[10px]", span.parentSpanId ? "border-indigo-400/40 text-indigo-300" : "border-zinc-700 text-zinc-300")} title={span.parentSpanId ? `child of ${span.parentSpanId}` : "root span"}>
-                {span.modelId || span.toolName || span.spanType}
+        <div className="space-y-2">
+          {edges.map((span) => {
+            const parent = byId.get(span.parentSpanId);
+            return (
+              <div key={span.spanId} className="flex flex-wrap items-center gap-2 font-mono text-[10px]">
+                <span className="border border-zinc-700 px-2 py-1 text-zinc-400">{parent?.modelId || parent?.toolName || parent?.spanType}</span>
+                <span className="text-indigo-300">→ handoff →</span>
+                <span className="border border-indigo-400/40 px-2 py-1 text-indigo-300">{span.modelId || span.toolName || span.spanType}</span>
               </div>
-            </div>
-          ))}
+            );
+          })}
+          {roots.map((span) => <span key={span.spanId} className="mr-2 inline-block border border-zinc-700 px-2 py-1 font-mono text-[10px] text-zinc-300">root · {span.modelId || span.toolName || span.spanType}</span>)}
         </div>
       )}
     </div>

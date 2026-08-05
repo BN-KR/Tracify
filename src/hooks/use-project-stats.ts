@@ -16,6 +16,13 @@ export type ProjectStats = {
     spanCount: number;
     avgLatencyMs?: number;
   }>;
+  userCosts?: Array<{
+    endUserId: string;
+    totalCostUsd: number;
+    totalTokens: number;
+    spanCount: number;
+    avgLatencyMs?: number;
+  }>;
   unavailable?: boolean;
   meta?: {
     source: string;

@@ -28,6 +28,16 @@ type SpanPayload = {
   release?: string;
   tags?: string[];
   traceName?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  ttftMs?: number;
+  retryCount?: number;
+  errorType?: string;
+  errorMessage?: string;
+  isStreamChunk?: boolean;
+  streamSequence?: number;
+  streamFinal?: boolean;
+  payloadFormat?: string;
 };
 
 function jsonString(value: unknown) {
@@ -82,6 +92,21 @@ function validatePayload(body: Record<string, unknown>):
   }
   if (body.tags !== undefined && (!Array.isArray(body.tags) || body.tags.some((tag) => typeof tag !== "string"))) {
     return { ok: false, error: "tags must be an array of strings" };
+  }
+  for (const key of ["inputTokens", "outputTokens", "ttftMs", "retryCount", "streamSequence"] as const) {
+    if (body[key] !== undefined && (typeof body[key] !== "number" || body[key] < 0)) {
+      return { ok: false, error: `${key} must be a non-negative number` };
+    }
+  }
+  for (const key of ["errorType", "errorMessage", "payloadFormat"] as const) {
+    if (body[key] !== undefined && typeof body[key] !== "string") {
+      return { ok: false, error: `${key} must be a string` };
+    }
+  }
+  for (const key of ["isStreamChunk", "streamFinal"] as const) {
+    if (body[key] !== undefined && typeof body[key] !== "boolean") {
+      return { ok: false, error: `${key} must be a boolean` };
+    }
   }
   if (
     body.metadata !== undefined &&
@@ -168,6 +193,16 @@ export async function POST(request: NextRequest) {
         release: payload.release ?? "",
         tags: payload.tags ?? [],
         traceName: payload.traceName ?? "",
+        inputTokens: payload.inputTokens ?? Number(payload.metadata?.inputTokens ?? 0),
+        outputTokens: payload.outputTokens ?? Number(payload.metadata?.outputTokens ?? 0),
+        ttftMs: payload.ttftMs ?? Number(payload.metadata?.ttftMs ?? payload.metadata?.timeToFirstTokenMs ?? 0),
+        retryCount: payload.retryCount ?? Number(payload.metadata?.retryCount ?? payload.metadata?.attempt ?? 0),
+        errorType: payload.errorType ?? String(payload.metadata?.errorType ?? ""),
+        errorMessage: payload.errorMessage ?? String(payload.metadata?.errorMessage ?? ""),
+        isStreamChunk: payload.isStreamChunk ?? Boolean(payload.metadata?.isStreamChunk),
+        streamSequence: payload.streamSequence ?? Number(payload.metadata?.streamSequence ?? 0),
+        streamFinal: payload.streamFinal ?? Boolean(payload.metadata?.streamFinal ?? true),
+        payloadFormat: payload.payloadFormat ?? "json",
         createdAt: payload.createdAt,
       },
     });

@@ -116,7 +116,19 @@ export async function GET(
       });
     }
 
-    const spans = await getSpansForRun(runId, projectId);
+    const spans = (await getSpansForRun(runId, projectId)).map((span) => ({
+      ...span,
+      inputTokens: span.inputTokens ?? 0,
+      outputTokens: span.outputTokens ?? 0,
+      ttftMs: span.ttftMs ?? 0,
+      retryCount: span.retryCount ?? 0,
+      errorType: span.errorType ?? "",
+      errorMessage: span.errorMessage ?? "",
+      isStreamChunk: span.isStreamChunk ?? false,
+      streamSequence: span.streamSequence ?? 0,
+      streamFinal: span.streamFinal ?? true,
+      payloadFormat: span.payloadFormat ?? "json",
+    }));
     const cached = await convex.mutation(api.analyticsCache.upsertRunSpanCache, {
       projectId: convexProjectId,
       runId,

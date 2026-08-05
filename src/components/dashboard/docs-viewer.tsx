@@ -115,6 +115,26 @@ async function main() {
 \`\`\`
     `,
   },
+  observability: {
+    title: "Observability fields",
+    content: `
+# Observability fields
+
+Every span may include `sessionId`, `endUserId`, `environment`, `release`, `tags`, and `parentSpanId` for session grouping and handoff graphs.
+
+## Tokens, latency, and retries
+
+`inputTokens`, `outputTokens`, `ttftMs`, and `retryCount` power cost and latency breakdowns. Error spans can provide `errorType` and `errorMessage`.
+
+## Streaming and multimodal payloads
+
+Send each partial as a span with `isStreamChunk: true`, an increasing `streamSequence`, and `streamFinal: true` on the final chunk. Set `payloadFormat` to values such as `image`, `audio`, or `function_call`; structured input/output JSON is preserved.
+
+## Privacy and retention
+
+Redaction is enabled by default and configurable under **Project settings → Privacy & Retention**. A scheduler can call `POST /api/retention` with the `x-retention-secret` header to purge Convex summaries; set `TRACIFY_RETENTION_SECRET` in the deployment environment.
+    `,
+  },
 };
 
 export function DocsViewer() {

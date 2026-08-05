@@ -47,6 +47,16 @@ export async function ingestSpan(span: {
   release: string;
   tags: string[];
   traceName: string;
+  inputTokens: number;
+  outputTokens: number;
+  ttftMs: number;
+  retryCount: number;
+  errorType: string;
+  errorMessage: string;
+  isStreamChunk: boolean;
+  streamSequence: number;
+  streamFinal: boolean;
+  payloadFormat: string;
   createdAt: string; // ISO 8601 UTC
 }) {
   const ndjson = JSON.stringify(span) + "\n";
@@ -162,6 +172,32 @@ export async function getCostByTool(projectId: string, days = 30) {
   return data.data as { toolName: string; totalCostUsd: number; spanCount: number; avgLatencyMs: number }[];
 }
 
+/** Get cost, token, and latency breakdown per end-user identifier. */
+export async function getCostByUser(projectId: string, days = 30) {
+  const sql = `
+    SELECT
+      endUserId,
+      sum(costUsd) AS totalCostUsd,
+      sum(inputTokens + outputTokens) AS totalTokens,
+      count() AS spanCount,
+      avg(latencyMs) AS avgLatencyMs
+    FROM spans
+    WHERE projectId = '${projectId}'
+      AND endUserId != ''
+      AND createdAt >= now() - INTERVAL ${days} DAY
+    GROUP BY endUserId
+    ORDER BY totalCostUsd DESC
+    LIMIT 20
+  `;
+  const res = await fetch(sqlUrl(sql), { headers: getHeaders() });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Tinybird query failed: ${res.status} ${body}`);
+  }
+  const data = await res.json();
+  return data.data as { endUserId: string; totalCostUsd: number; totalTokens: number; spanCount: number; avgLatencyMs: number }[];
+}
+
 export type TraceSearchFilters = {
   query?: string;
   sessionId?: string;
@@ -211,6 +247,8 @@ export async function searchTraces(projectId: string, filters: TraceSearchFilter
       count() AS spanCount,
       sum(costUsd) AS totalCostUsd,
       max(latencyMs) AS maxLatencyMs,
+      max(ttftMs) AS ttftMs,
+      sum(retryCount) AS retryCount,
       countIf(spanType = 'error') AS errorCount
     FROM spans
     WHERE ${where.join(" AND ")}
@@ -227,7 +265,7 @@ export async function searchTraces(projectId: string, filters: TraceSearchFilter
   return data.data as Array<{
     runId: string; sessionId: string; endUserId: string; environment: string; release: string;
     traceName: string; startedAt: string; lastSeenAt: string; spanCount: number;
-    totalCostUsd: number; maxLatencyMs: number; errorCount: number;
+    totalCostUsd: number; maxLatencyMs: number; ttftMs: number; retryCount: number; errorCount: number;
   }>;
 }
 
@@ -345,5 +383,15 @@ export interface SpanRow {
   release: string;
   tags: string[];
   traceName: string;
+  inputTokens: number;
+  outputTokens: number;
+  ttftMs: number;
+  retryCount: number;
+  errorType: string;
+  errorMessage: string;
+  isStreamChunk: boolean;
+  streamSequence: number;
+  streamFinal: boolean;
+  payloadFormat: string;
   createdAt: string;
 }

@@ -333,6 +333,27 @@ export function CostDashboard({ projectId }: { projectId: string }) {
       </div>
 
       <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-6 shadow-none">
+        <div className="mb-6">
+          <h2 className="font-mono text-[14px] uppercase tracking-widest text-white">Cost By End User</h2>
+          <p className="mt-1 font-mono text-[11px] text-[#666666]">Per-user spend and token usage from trace context.</p>
+        </div>
+        {stats?.userCosts?.length ? (
+          <div className="divide-y divide-[#222222] border border-[#222222]">
+            {stats.userCosts.slice(0, 10).map((user) => (
+              <div key={user.endUserId} className="grid gap-2 px-4 py-3 font-mono text-[11px] sm:grid-cols-[minmax(0,1fr)_120px_120px_80px]">
+                <span className="truncate text-white">{user.endUserId}</span>
+                <span className="text-zinc-400">{user.totalTokens.toLocaleString()} tokens</span>
+                <span className="text-zinc-300">{formatCurrency(user.totalCostUsd)}</span>
+                <span className="text-right text-zinc-500">{user.spanCount} spans</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="border border-dashed border-[#2A2A2A] p-6 font-mono text-[12px] text-[#666666]">No end-user identifiers captured for this period.</div>
+        )}
+      </Card>
+
+      <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-6 shadow-none">
         <div className="mb-5 flex items-center justify-between">
           <div>
             <h2 className="font-mono text-[14px] uppercase tracking-widest text-white">
