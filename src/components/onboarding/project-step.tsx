@@ -6,6 +6,7 @@ import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import posthog from "posthog-js";
 
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
 import { setOneTimeApiKey } from "@/lib/onboarding-client-state";
@@ -14,6 +15,10 @@ const API_KEY_COPIED_STORAGE_KEY = "5to1r.onboarding.apiKeyCopied";
 const PROJECT_ID_STORAGE_KEY = "5to1r.onboarding.projectId";
 const PROJECT_NAME_STORAGE_KEY = "5to1r.onboarding.projectName";
 const LAST_PROJECT_STORAGE_KEY = "5to1r.lastProjectId";
+const isPostHogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+    process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 export function ProjectStep() {
   const router = useRouter();
@@ -48,6 +53,9 @@ export function ProjectStep() {
     setError("");
     try {
       const result = await createProject({ name: trimmed });
+      if (isPostHogConfigured) {
+        posthog.capture("project_created", { creation_flow: "onboarding" });
+      }
       setOneTimeApiKey(result.plaintextApiKey);
       window.sessionStorage.removeItem(API_KEY_COPIED_STORAGE_KEY);
       window.sessionStorage.setItem(PROJECT_ID_STORAGE_KEY, result.projectId);

@@ -10,6 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, ArrowRight, Send, Save } from "lucide-react";
+import posthog from "posthog-js";
+
+const isPostHogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+    process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 interface ProjectSettingsProps {
   projectId: string;
@@ -78,6 +84,9 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
         maxStallMinutes: parsed.value.maxStallMinutes,
         slackWebhookUrl: parsed.value.slackWebhookUrl,
       });
+      if (isPostHogConfigured) {
+        posthog.capture("project_settings_saved");
+      }
       setNotice("Settings saved");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update project");
@@ -98,6 +107,9 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
     setNotice(null);
     try {
       await sendTestAlert({ projectId: projectId as Id<"projects"> });
+      if (isPostHogConfigured) {
+        posthog.capture("test_alert_sent");
+      }
       setNotice("Test alert sent");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send test alert");

@@ -31,6 +31,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { CancelRunButton } from "./cancel-run-button";
 import { useNow } from "@/hooks/use-now";
+import posthog from "posthog-js";
+
+const isPostHogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+    process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 interface TraceViewerProps {
   projectId: string;
@@ -383,6 +389,9 @@ function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, pr
         content: commentContent,
       });
       setCommentContent("");
+      if (isPostHogConfigured) {
+        posthog.capture("span_comment_added");
+      }
     } catch (err) {
       console.error(err);
     } finally {
