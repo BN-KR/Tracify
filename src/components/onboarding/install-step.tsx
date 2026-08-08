@@ -2,9 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 
 import { CodeCopyBlock } from "@/components/onboarding/code-copy-block";
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
+
+const isPostHogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+    process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 const snippets = {
   python: {
@@ -107,7 +113,12 @@ export function InstallStep() {
       )}
       <button
         type="button"
-        onClick={() => router.push("/onboarding/waiting")}
+        onClick={() => {
+          if (isPostHogConfigured) {
+            posthog.capture("onboarding_install_ready", { runtime: tab });
+          }
+          router.push("/onboarding/waiting");
+        }}
         className="mt-6 h-10 border border-white bg-white px-4 text-[13px] text-black transition-colors hover:bg-[#CCCCCC]"
       >
         I&apos;m ready

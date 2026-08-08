@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
 import {
@@ -10,6 +11,10 @@ import {
 } from "@/lib/onboarding-client-state";
 
 const API_KEY_COPIED_STORAGE_KEY = "5to1r.onboarding.apiKeyCopied";
+const isPostHogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+    process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 export function ApiKeyStep() {
   const router = useRouter();
@@ -23,6 +28,9 @@ export function ApiKeyStep() {
   async function copyKey() {
     if (!apiKey) return;
     await navigator.clipboard.writeText(apiKey);
+    if (isPostHogConfigured) {
+      posthog.capture("api_key_copied", { issuance_flow: "onboarding" });
+    }
     window.sessionStorage.setItem(API_KEY_COPIED_STORAGE_KEY, "true");
     clearOneTimeApiKey();
     setCopied(true);

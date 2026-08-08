@@ -21,6 +21,12 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/utils";
+import posthog from "posthog-js";
+
+const isPostHogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+    process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 export function ProjectManagement({ projectId }: { projectId: string }) {
   const router = useRouter();
@@ -52,6 +58,9 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
         confirmationName,
         confirmationWord,
       });
+      if (isPostHogConfigured) {
+        posthog.capture("project_deleted");
+      }
       router.replace("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete project");

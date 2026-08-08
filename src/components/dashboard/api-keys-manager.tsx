@@ -9,6 +9,12 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Copy, Check, RefreshCw, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
+import posthog from "posthog-js";
+
+const isPostHogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+    process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 interface ApiKeysManagerProps {
   projectId: string;
@@ -35,6 +41,9 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
     setRotating(true);
     try {
       const result = await rotateApiKey({ projectId: projectId as Id<"projects"> });
+      if (isPostHogConfigured) {
+        posthog.capture("api_key_rotated");
+      }
       setNewKey(result.plaintextApiKey);
       setShowKey(true);
     } catch (err) {
