@@ -3,7 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
-import { BookOpen, Terminal, ChevronRight } from "lucide-react";
+import { BookOpen, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 const DOCS = {
@@ -20,10 +20,10 @@ Depending on your environment, run one of the following commands:
 
 \`\`\`bash
 # Python
-pip install tracify
+pip install 5to1r
 
 # TypeScript / Node.js
-npm install tracify
+npm install 5to1r
 \`\`\`
 
 ## 2. Initialize the Client
@@ -31,7 +31,7 @@ npm install tracify
 Initialize the SDK with your Project API Key. You can find your API key in the [Settings](/dashboard/settings) page.
 
 \`\`\`python
-from tracify import TracifyClient
+from 5to1r import TracifyClient
 
 client = TracifyClient(api_key="tracify_sk_live_...")
 \`\`\`
@@ -41,7 +41,7 @@ client = TracifyClient(api_key="tracify_sk_live_...")
 Wrap your agent's main execution loop with the \`@trace_agent\` decorator.
 
 \`\`\`python
-from tracify import trace_agent
+from 5to1r import trace_agent
 
 @trace_agent(client=client)
 def run_agent(task):
@@ -96,12 +96,12 @@ High-performance observability for Node.js and Browser-based agents.
 
 ## Installation
 \`\`\`bash
-npm install tracify
+npm install 5to1r
 \`\`\`
 
 ## Usage
 \`\`\`typescript
-import { TracifyClient } from "tracify";
+import { TracifyClient } from "5to1r";
 
 const client = new TracifyClient({
   apiKey: process.env.TRACIFY_API_KEY
@@ -113,6 +113,26 @@ async function main() {
   });
 }
 \`\`\`
+    `,
+  },
+  observability: {
+    title: "Observability fields",
+    content: `
+# Observability fields
+
+Every span may include \`sessionId\`, \`endUserId\`, \`environment\`, \`release\`, \`tags\`, and \`parentSpanId\` for session grouping and handoff graphs.
+
+## Tokens, latency, and retries
+
+\`inputTokens\`, \`outputTokens\`, \`ttftMs\`, and \`retryCount\` power cost and latency breakdowns. Error spans can provide \`errorType\` and \`errorMessage\`.
+
+## Streaming and multimodal payloads
+
+Send each partial as a span with \`isStreamChunk: true\`, an increasing \`streamSequence\`, and \`streamFinal: true\` on the final chunk. Set \`payloadFormat\` to values such as \`image\`, \`audio\`, or \`function_call\`; structured input/output JSON and the optional \`attachments\` array are preserved.
+
+## Privacy and retention
+
+Redaction is enabled by default and configurable under **Project settings → Privacy & Retention**. A scheduler can call \`POST /api/retention\` with the \`x-retention-secret\` header to purge Convex summaries; set \`TRACIFY_RETENTION_SECRET\` in the deployment environment.
     `,
   },
 };
@@ -132,9 +152,9 @@ export function DocsViewer() {
           {Object.entries(DOCS).map(([id, doc]) => (
             <button
               key={id}
-              onClick={() => setActiveTab(id as any)}
+              onClick={() => setActiveTab(id as keyof typeof DOCS)}
               className={cn(
-                "flex w-full items-center justify-between px-3 py-2 text-[12px] transition-colors outline-none",
+                "flex w-full items-center justify-between px-3 py-2 text-[12px] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-inset",
                 activeTab === id
                   ? "bg-[#161616] text-white"
                   : "text-[#666666] hover:bg-[#161616] hover:text-[#999999]"

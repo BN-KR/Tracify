@@ -46,10 +46,23 @@ export const blockContent = defineType({
                 type: "boolean",
               }),
             ],
-          },
-        ],
+            },
+            {
+              name: "internalLink",
+              type: "object",
+              title: "Internal link",
+              fields: [
+                {
+                  name: "reference",
+                  type: "reference",
+                  title: "Reference",
+                  to: [{ type: "post" }],
+                },
+              ],
+            },
+          ],
+        },
       },
-    },
     {
       type: "image",
       options: { hotspot: true },

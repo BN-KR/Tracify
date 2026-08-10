@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { isAuthenticated } from "@/lib/auth-server";
 import { NextRequest, NextResponse } from "next/server";
 
 import { api } from "convex/_generated/api";
@@ -32,8 +32,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ projectId: string; runId: string }> },
 ) {
-  const { userId } = await auth();
-  if (!userId) {
+  if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -116,7 +115,23 @@ export async function GET(
       });
     }
 
-    const spans = await getSpansForRun(runId, projectId);
+    const spans = (await getSpansForRun(runId, projectId)).map((span) => ({
+      ...span,
+      attachments: span.attachments ?? "[]",
+      inputTokens: span.inputTokens ?? 0,
+      outputTokens: span.outputTokens ?? 0,
+      ttftMs: span.ttftMs ?? 0,
+      retryCount: span.retryCount ?? 0,
+      errorType: span.errorType ?? "",
+      errorMessage: span.errorMessage ?? "",
+      isStreamChunk: span.isStreamChunk ?? false,
+      streamSequence: span.streamSequence ?? 0,
+      streamFinal: span.streamFinal ?? true,
+      payloadFormat: span.payloadFormat ?? "json",
+      stackTrace: span.stackTrace ?? "",
+      timedOut: span.timedOut ?? false,
+      timeoutMs: span.timeoutMs ?? 0,
+    }));
     const cached = await convex.mutation(api.analyticsCache.upsertRunSpanCache, {
       projectId: convexProjectId,
       runId,

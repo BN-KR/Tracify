@@ -21,6 +21,10 @@ function getHeaders() {
   };
 }
 
+function sqlString(value: string) {
+  return value.replace(/'/g, "''");
+}
+
 /**
  * Ingest a single span row into the Tinybird `spans` datasource.
  */
@@ -31,12 +35,32 @@ export async function ingestSpan(span: {
   spanType: string;
   input: string;
   output: string;
+  attachments: string;
   latencyMs: number;
   costUsd: number;
   modelId: string;
   toolName: string;
   parentSpanId: string;
   metadata: Record<string, unknown>;
+  sessionId: string;
+  endUserId: string;
+  environment: string;
+  release: string;
+  tags: string[];
+  traceName: string;
+  inputTokens: number;
+  outputTokens: number;
+  ttftMs: number;
+  retryCount: number;
+  errorType: string;
+  errorMessage: string;
+  isStreamChunk: boolean;
+  streamSequence: number;
+  streamFinal: boolean;
+  payloadFormat: string;
+  stackTrace: string;
+  timedOut: boolean;
+  timeoutMs: number;
   createdAt: string; // ISO 8601 UTC
 }) {
   const ndjson = JSON.stringify(span) + "\n";
@@ -50,6 +74,34 @@ export async function ingestSpan(span: {
     throw new Error(`Tinybird ingest failed: ${res.status} ${body}`);
   }
   return res.json();
+}
+
+export async function ingestEvaluationScore(score: {
+  scoreId: string;
+  projectId: string;
+  traceId?: string;
+  evaluatorId: string;
+  scoreName: string;
+  dataType: "boolean" | "numeric" | "categorical" | "text";
+  valueNumeric: number;
+  valueBoolean: boolean;
+  valueCategorical: string;
+  status: string;
+  modelId?: string;
+  environment?: string;
+  createdAt: string;
+}) {
+  const res = await fetch(`${TINYBIRD_HOST}/v0/events?name=evaluation_scores`, { method: "POST", headers: getHeaders(), body: `${JSON.stringify(score)}\n` });
+  if (!res.ok) throw new Error(`Tinybird evaluation score ingest failed: ${res.status} ${await res.text()}`);
+  return res.json();
+}
+
+export async function getEvaluationScoreTimeseries(projectId: string, scoreName: string, days = 7) {
+  const sql = `SELECT toStartOfHour(createdAt) AS bucket, count() AS sampleCount, avgIf(valueNumeric, dataType = 'numeric') AS averageScore, countIf(status IN ('failed', 'error')) / count() AS failureRate, countIf(dataType = 'boolean' AND valueBoolean = 1) / greatest(countIf(dataType = 'boolean'), 1) AS booleanPassRate FROM evaluation_scores WHERE projectId = '${sqlString(projectId)}' AND scoreName = '${sqlString(scoreName)}' AND createdAt >= now() - INTERVAL ${Math.min(Math.max(days, 1), 90)} DAY GROUP BY bucket ORDER BY bucket ASC`;
+  const res = await fetch(sqlUrl(sql), { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Tinybird evaluation score query failed: ${res.status} ${await res.text()}`);
+  const data = await res.json();
+  return data.data as Array<{ bucket: string; sampleCount: number; averageScore: number; failureRate: number; booleanPassRate: number }>;
 }
 
 /**
@@ -152,6 +204,198 @@ export async function getCostByTool(projectId: string, days = 30) {
   return data.data as { toolName: string; totalCostUsd: number; spanCount: number; avgLatencyMs: number }[];
 }
 
+/** Get cost, token, and latency breakdown per end-user identifier. */
+export async function getCostByUser(projectId: string, days = 30) {
+  const sql = `
+    SELECT
+      endUserId,
+      sum(costUsd) AS totalCostUsd,
+      sum(inputTokens + outputTokens) AS totalTokens,
+      count() AS spanCount,
+      avg(latencyMs) AS avgLatencyMs
+    FROM spans
+    WHERE projectId = '${projectId}'
+      AND endUserId != ''
+      AND createdAt >= now() - INTERVAL ${days} DAY
+    GROUP BY endUserId
+    ORDER BY totalCostUsd DESC
+    LIMIT 20
+  `;
+  const res = await fetch(sqlUrl(sql), { headers: getHeaders() });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Tinybird query failed: ${res.status} ${body}`);
+  }
+  const data = await res.json();
+  return data.data as { endUserId: string; totalCostUsd: number; totalTokens: number; spanCount: number; avgLatencyMs: number }[];
+}
+
+export type TraceSearchFilters = {
+  query?: string;
+  sessionId?: string;
+  endUserId?: string;
+  environment?: string;
+  release?: string;
+  modelId?: string;
+  tag?: string;
+  status?: "all" | "error" | "healthy";
+  minCostUsd?: number;
+  minLatencyMs?: number;
+  days?: number;
+  limit?: number;
+};
+
+export async function searchTraces(projectId: string, filters: TraceSearchFilters) {
+  const where = [`projectId = '${sqlString(projectId)}'`];
+  const days = Math.min(Math.max(filters.days ?? 30, 1), 90);
+  const limit = Math.min(Math.max(filters.limit ?? 50, 1), 100);
+  where.push(`createdAt >= now() - INTERVAL ${days} DAY`);
+  if (filters.sessionId) where.push(`sessionId = '${sqlString(filters.sessionId)}'`);
+  if (filters.endUserId) where.push(`endUserId = '${sqlString(filters.endUserId)}'`);
+  if (filters.environment) where.push(`environment = '${sqlString(filters.environment)}'`);
+  if (filters.release) where.push(`release = '${sqlString(filters.release)}'`);
+  if (filters.modelId) where.push(`modelId = '${sqlString(filters.modelId)}'`);
+  if (filters.tag) where.push(`has(tags, '${sqlString(filters.tag)}')`);
+  if (filters.query) {
+    const value = sqlString(filters.query);
+    where.push(`(positionCaseInsensitive(runId, '${value}') > 0 OR positionCaseInsensitive(traceName, '${value}') > 0 OR positionCaseInsensitive(metadata, '${value}') > 0 OR positionCaseInsensitive(input, '${value}') > 0 OR positionCaseInsensitive(output, '${value}') > 0)`);
+  }
+
+  const having = [];
+  if (filters.status === "error") having.push("countIf(spanType = 'error') > 0");
+  if (filters.status === "healthy") having.push("countIf(spanType = 'error') = 0");
+  if (filters.minCostUsd !== undefined) having.push(`sum(costUsd) >= ${Number(filters.minCostUsd)}`);
+  if (filters.minLatencyMs !== undefined) having.push(`max(latencyMs) >= ${Number(filters.minLatencyMs)}`);
+  const sql = `
+    SELECT
+      runId,
+      any(sessionId) AS sessionId,
+      any(endUserId) AS endUserId,
+      any(environment) AS environment,
+      any(release) AS release,
+      any(traceName) AS traceName,
+      min(createdAt) AS startedAt,
+      max(createdAt) AS lastSeenAt,
+      count() AS spanCount,
+      sum(costUsd) AS totalCostUsd,
+      max(latencyMs) AS maxLatencyMs,
+      max(ttftMs) AS ttftMs,
+      sum(retryCount) AS retryCount,
+      countIf(spanType = 'error') AS errorCount
+    FROM spans
+    WHERE ${where.join(" AND ")}
+    GROUP BY runId
+    ${having.length ? `HAVING ${having.join(" AND ")}` : ""}
+    ORDER BY lastSeenAt DESC
+    LIMIT ${limit}
+  `;
+  const res = await fetch(sqlUrl(sql), { headers: getHeaders() });
+  if (!res.ok) {
+    throw new Error(`Tinybird query failed: ${res.status} ${await res.text()}`);
+  }
+  const data = await res.json();
+  return data.data as Array<{
+    runId: string; sessionId: string; endUserId: string; environment: string; release: string;
+    traceName: string; startedAt: string; lastSeenAt: string; spanCount: number;
+    totalCostUsd: number; maxLatencyMs: number; ttftMs: number; retryCount: number; errorCount: number;
+  }>;
+}
+
+/**
+ * Get orchestration savings summary for a project.
+ * Returns calls retried, calls fell back, calls blocked, and estimated cost savings.
+ */
+export async function getOrchestrationSavings(projectId: string, days = 30) {
+  const sql = `
+    SELECT
+      countIf(
+        JSONExtractBool(metadata, 'orchestrationWillRetry') = 1
+      ) AS callsRetried,
+      countIf(
+        JSONExtractBool(metadata, 'orchestrationIsFallback') = 1
+          AND JSONExtractBool(metadata, 'orchestrationFinal') = 1
+      ) AS callsFellBack,
+      countIf(
+        JSONExtractBool(metadata, 'orchestrationBlocked') = 1
+      ) AS callsBlocked,
+      sumIf(
+        costUsd,
+        JSONExtractBool(metadata, 'orchestrationIsFallback') = 1
+          AND JSONExtractBool(metadata, 'orchestrationFinal') = 1
+      ) AS fallbackCostUsd,
+      sumIf(
+        costUsd,
+        JSONExtractBool(metadata, 'orchestrationIsFallback') = 0
+          AND spanType = 'llm_call'
+      ) AS primaryCostUsd
+    FROM spans
+    WHERE projectId = '${projectId}'
+      AND createdAt >= now() - INTERVAL ${days} DAY
+      AND has(metadata, 'orchestrationAttempt')
+  `;
+  const res = await fetch(sqlUrl(sql), {
+    headers: getHeaders(),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Tinybird query failed: ${res.status} ${body}`);
+  }
+  const data = await res.json();
+  const row = data.data?.[0] ?? {
+    callsRetried: 0,
+    callsFellBack: 0,
+    callsBlocked: 0,
+    fallbackCostUsd: 0,
+    primaryCostUsd: 0,
+  };
+
+  return {
+    callsRetried: Number(row.callsRetried) || 0,
+    callsFellBack: Number(row.callsFellBack) || 0,
+    callsBlocked: Number(row.callsBlocked) || 0,
+    fallbackCostUsd: Number(row.fallbackCostUsd) || 0,
+    primaryCostUsd: Number(row.primaryCostUsd) || 0,
+    totalOrchestratedCalls:
+      (Number(row.callsRetried) || 0) +
+      (Number(row.callsFellBack) || 0) +
+      (Number(row.callsBlocked) || 0),
+  };
+}
+
+/**
+ * Get fail-open rate for a project over the last N days.
+ * Returns total orchestrations, fail-open count, and rate.
+ */
+export async function getFailOpenRate(projectId: string, days = 7) {
+  const endpoint = `${TINYBIRD_HOST}/v0/pipes/fail_open_rate.json`;
+  const params = new URLSearchParams({
+    projectId,
+    days: String(days),
+    token: TINYBIRD_TOKEN ?? "",
+  });
+
+  const res = await fetch(`${endpoint}?${params}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Tinybird query failed: ${res.status} ${body}`);
+  }
+  const data = await res.json();
+  const row = data.data?.[0] ?? {
+    totalOrchestrations: 0,
+    failOpenCount: 0,
+  };
+
+  const total = Number(row.totalOrchestrations) || 0;
+  const failOpen = Number(row.failOpenCount) || 0;
+
+  return {
+    totalOrchestrations: total,
+    failOpenCount: failOpen,
+    failOpenRate: total > 0 ? failOpen / total : 0,
+    elevated: total >= 10 && failOpen / total > 0.05,
+  };
+}
+
 export interface SpanRow {
   spanId: string;
   runId: string;
@@ -159,11 +403,31 @@ export interface SpanRow {
   spanType: string;
   input: string;
   output: string;
+  attachments: string;
   latencyMs: number;
   costUsd: number;
   modelId: string;
   toolName: string;
   parentSpanId: string;
   metadata: Record<string, unknown>;
+  sessionId: string;
+  endUserId: string;
+  environment: string;
+  release: string;
+  tags: string[];
+  traceName: string;
+  inputTokens: number;
+  outputTokens: number;
+  ttftMs: number;
+  retryCount: number;
+  errorType: string;
+  errorMessage: string;
+  isStreamChunk: boolean;
+  streamSequence: number;
+  streamFinal: boolean;
+  payloadFormat: string;
+  stackTrace: string;
+  timedOut: boolean;
+  timeoutMs: number;
   createdAt: string;
 }

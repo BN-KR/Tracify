@@ -1,158 +1,70 @@
 "use client";
 
-import { useOrganization, useUser } from "@clerk/nextjs";
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import { Mail, Shield, UserPlus } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Shield, MoreVertical, Mail } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface ProjectMembersProps {
-  projectId: string;
-}
+export function ProjectMembers() {
+  const { data: session, isPending: sessionPending } = authClient.useSession();
+  const { data: organization, isPending: organizationPending } = authClient.useActiveOrganization();
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<"member" | "admin">("member");
+  const [status, setStatus] = useState("");
+  const [inviting, setInviting] = useState(false);
 
-export function ProjectMembers({ projectId }: ProjectMembersProps) {
-  const {
-    organization,
-    isLoaded: orgLoaded,
-    memberships,
-  } = useOrganization({
-    memberships: {
-      pageSize: 50,
-      keepPreviousData: true,
-    },
-  });
-  const { user, isLoaded: userLoaded } = useUser();
-
-  if (!orgLoaded || !userLoaded) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-12 w-full rounded-none" />
-        <Skeleton className="h-12 w-full rounded-none" />
-        <Skeleton className="h-12 w-full rounded-none" />
-      </div>
-    );
+  async function invite() {
+    if (!organization || !inviteEmail.trim()) return;
+    setInviting(true);
+    setStatus("");
+    const result = await authClient.organization.inviteMember({
+      email: inviteEmail.trim(),
+      role: inviteRole,
+      organizationId: organization.id,
+    });
+    setInviting(false);
+    if (result.error) return setStatus(result.error.message || "Could not send invitation.");
+    setInviteEmail("");
+    setStatus(`Invitation link: ${window.location.origin}/accept-invitation?id=${result.data.id}`);
   }
 
-  // If not in an org, show personal project state
-  if (!organization) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">Personal Project</h3>
-            <p className="text-[11px] text-[#666666] mt-1">This project is only visible to you.</p>
-          </div>
-          <Button variant="outline" className="rounded-none font-mono text-[10px] uppercase border-zinc-800 gap-2">
-            <UserPlus className="size-4" /> Move to Organization
-          </Button>
-        </div>
+  if (sessionPending || organizationPending) return <div className="space-y-4">{[1, 2, 3].map((item) => <Skeleton key={item} className="h-12 w-full rounded-none" />)}</div>;
+  if (!organization) return <PersonalMember name={session?.user.name || "You"} email={session?.user.email || ""} />;
 
-        <Card className="divide-y divide-[#2A2A2A] rounded-none border-border bg-[#111111] shadow-none">
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="size-8 bg-zinc-800 rounded-none flex items-center justify-center font-mono text-xs text-white">
-                {user?.firstName?.slice(0, 1) || "U"}
-              </div>
-              <div>
-                <p className="text-[13px] font-mono text-white">{user?.fullName || "You"}</p>
-                <p className="text-[11px] font-mono text-[#666666]">{user?.primaryEmailAddress?.emailAddress}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] bg-white text-black px-1.5 py-0.5 font-mono uppercase font-bold">Owner</span>
-            </div>
-          </div>
-        </Card>
+  return <div className="space-y-6">
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div><h3 className="font-mono text-[14px] uppercase tracking-widest text-white">{organization.name} members</h3><p className="mt-1 text-[11px] text-[#666666]">Manage who has access to this workspace.</p></div>
+      <div className="flex flex-wrap gap-2">
+        <input value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="teammate@example.com" type="email" className="h-9 w-52 border border-zinc-800 bg-black px-3 font-mono text-[10px] text-zinc-300 outline-none focus:border-zinc-500" />
+        <select value={inviteRole} onChange={(event) => setInviteRole(event.target.value as "member" | "admin")} className="h-9 border border-zinc-800 bg-black px-2 font-mono text-[10px] uppercase text-zinc-300"><option value="member">Developer</option><option value="admin">Admin</option></select>
+        <Button onClick={() => void invite()} disabled={inviting || !inviteEmail.trim()} className="rounded-none font-mono text-[10px] uppercase"><UserPlus className="size-4" />{inviting ? "Sending..." : "Invite"}</Button>
       </div>
-    );
+    </div>
+    <Card className="divide-y divide-[#2A2A2A] rounded-none border-border bg-[#111111] shadow-none">
+      {organization.members?.map((membership) => <MemberRow key={membership.id} name={membership.user.name} email={membership.user.email} role={formatRole(membership.role)} isMe={membership.userId === session?.user.id} />)}
+    </Card>
+    {status ? <p className="border border-zinc-800 p-3 font-mono text-[10px] text-zinc-400">{status}</p> : null}
+    <div className="flex items-start gap-4 border border-zinc-800/50 bg-zinc-900/10 p-4"><Shield className="mt-0.5 size-5 shrink-0 text-zinc-500" /><p className="font-mono text-[10px] leading-relaxed text-zinc-500">Owners and admins manage workspace access. Project authorization is enforced by Convex.</p></div>
+  </div>;
+}
+
+function PersonalMember({ name, email }: { name: string; email: string }) {
+  const [organizationName, setOrganizationName] = useState("");
+  const [message, setMessage] = useState("");
+  async function createOrganization() {
+    const slug = organizationName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const result = await authClient.organization.create({ name: organizationName.trim(), slug });
+    if (result.error) return setMessage(result.error.message || "Could not create workspace.");
+    if (result.data) await authClient.organization.setActive({ organizationId: result.data.id });
+    setMessage("Workspace created.");
   }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">{organization.name} Members</h3>
-          <p className="text-[11px] text-[#666666] mt-1">Manage who has access to this project.</p>
-        </div>
-        <Button disabled className="rounded-none font-mono text-[10px] uppercase gap-2">
-          <UserPlus className="size-4" /> Invite Member
-        </Button>
-      </div>
-
-      <Card className="divide-y divide-[#2A2A2A] rounded-none border-border bg-[#111111] shadow-none">
-        {memberships?.data?.length ? (
-          memberships.data.map((membership) => {
-            const member = membership.publicUserData;
-            const name =
-              [member?.firstName, member?.lastName].filter(Boolean).join(" ") ||
-              member?.identifier ||
-              "Member";
-            const email = member?.identifier ?? "";
-
-            return (
-              <MemberRow
-                key={membership.id}
-                name={name}
-                email={email}
-                role={formatRole(membership.role)}
-                isMe={member?.userId === user?.id}
-              />
-            );
-          })
-        ) : (
-          <div className="p-4 font-mono text-[11px] uppercase tracking-widest text-[#666666]">
-            No organization members found.
-          </div>
-        )}
-      </Card>
-
-      <div className="p-4 border border-zinc-800/50 bg-zinc-900/10 flex items-start gap-4">
-        <Shield className="size-5 text-zinc-500 shrink-0 mt-0.5" />
-        <div className="space-y-1">
-          <p className="text-[11px] text-white font-mono uppercase">Role-Based Access Control</p>
-          <p className="text-[10px] text-zinc-500 font-mono leading-relaxed">
-            Only Admins can rotate API keys or delete projects. Developers can view and manage runs. Viewers have read-only access.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="space-y-4"><div className="flex flex-wrap items-end justify-between gap-3"><div><h3 className="font-mono text-[14px] uppercase tracking-widest text-white">Personal project</h3><p className="mt-1 text-[11px] text-[#666666]">This project is only visible to you.</p></div><div className="flex gap-2"><input value={organizationName} onChange={(event) => setOrganizationName(event.target.value)} placeholder="Workspace name" className="h-9 border border-zinc-800 bg-black px-3 font-mono text-[10px] text-zinc-300 outline-none focus:border-zinc-500" /><Button onClick={() => void createOrganization()} disabled={!organizationName.trim()} className="rounded-none font-mono text-[10px] uppercase">Create workspace</Button></div></div><Card className="rounded-none border-border bg-[#111111] shadow-none"><MemberRow name={name} email={email} role="Owner" isMe /></Card>{message ? <p className="font-mono text-[10px] text-zinc-500">{message}</p> : null}</div>;
 }
 
-function formatRole(role: string) {
-  if (role === "org:admin" || role === "admin") return "Admin";
-  if (role === "org:member" || role === "member") return "Developer";
-  if (role === "org:viewer" || role === "viewer") return "Viewer";
-  return role.replace(/^org:/, "").replace("_", " ");
-}
+function formatRole(role: string) { return role === "owner" ? "Owner" : role === "admin" ? "Admin" : role === "member" ? "Developer" : role === "viewer" ? "Viewer" : role; }
 
-function MemberRow({ name, email, role, isMe }: { name: string, email: string, role: string, isMe?: boolean }) {
-  return (
-    <div className="p-4 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="size-8 bg-zinc-900 border border-zinc-800 rounded-none flex items-center justify-center font-mono text-xs text-white uppercase">
-          {name.slice(0, 1)}
-        </div>
-        <div>
-          <p className="text-[13px] font-mono text-white">{name} {isMe && <span className="text-[#666666] ml-1">(me)</span>}</p>
-          <div className="flex items-center gap-2 text-[11px] font-mono text-[#666666]">
-            <Mail className="size-3" />
-            {email}
-          </div>
-        </div>
-      </div>
-      <div className="flex items-center gap-4">
-        <span className={cn(
-          "text-[9px] px-1.5 py-0.5 font-mono uppercase font-bold",
-          role === "Admin" ? "bg-white text-black" : "bg-[#1A1A1A] text-[#999999]"
-        )}>
-          {role}
-        </span>
-        <Button variant="ghost" size="icon" className="size-8 text-[#666666] hover:text-white">
-          <MoreVertical className="size-4" />
-        </Button>
-      </div>
-    </div>
-  );
+function MemberRow({ name, email, role, isMe }: { name: string; email: string; role: string; isMe?: boolean }) {
+  return <div className="flex items-center justify-between p-4"><div className="flex items-center gap-3"><div className="flex size-8 items-center justify-center border border-zinc-800 bg-zinc-900 font-mono text-xs uppercase text-white">{name.slice(0, 1)}</div><div><p className="font-mono text-[13px] text-white">{name}{isMe ? <span className="ml-1 text-[#666666]">(me)</span> : null}</p><p className="flex items-center gap-2 font-mono text-[11px] text-[#666666]"><Mail className="size-3" />{email}</p></div></div><span className="bg-[#1A1A1A] px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-[#999999]">{role}</span></div>;
 }

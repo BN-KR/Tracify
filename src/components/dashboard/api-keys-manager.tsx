@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Copy, Check, RefreshCw, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { Copy, Check, RefreshCw, AlertTriangle } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
 import posthog from "posthog-js";
 
@@ -31,7 +31,6 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
   const [newKey, setNewKey] = useState<string | null>(null);
   const [rotating, setRotating] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [showKey, setShowKey] = useState(false);
 
   async function handleRotate() {
     if (!window.confirm("Rotating your API key will immediately invalidate the existing key. Any agents using the old key will fail to ingest data. Continue?")) {
@@ -45,7 +44,6 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
         posthog.capture("api_key_rotated");
       }
       setNewKey(result.plaintextApiKey);
-      setShowKey(true);
     } catch (err) {
       console.error("Failed to rotate API key:", err);
     } finally {
@@ -81,7 +79,7 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
         <div className="flex items-start justify-between">
           <div>
             <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">Active API Key</h3>
-            <p className="text-[11px] text-[#666666] mt-1">This key grants write access to your project's ingestion pipeline.</p>
+            <p className="text-[11px] text-[#666666] mt-1">This key grants write access to your project&apos;s ingestion pipeline.</p>
           </div>
           <Button 
             variant="outline" 

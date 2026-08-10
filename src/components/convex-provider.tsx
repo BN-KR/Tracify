@@ -1,14 +1,16 @@
 "use client";
 
-import { useAuth, useUser } from "@clerk/nextjs";
+import { ConvexBetterAuthProvider, type AuthClient } from "@convex-dev/better-auth/react";
 import { ConvexReactClient } from "convex/react";
-import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useEffect, useRef } from "react";
 import posthog from "posthog-js";
+import { authClient } from "@/lib/auth-client";
 
-const convex = new ConvexReactClient(
-  process.env.NEXT_PUBLIC_CONVEX_URL as string
-);
+// Auth and marketing routes do not need Convex. Avoid constructing a client
+// with an empty address so those routes remain usable when local/preview
+// environment variables are not configured yet.
+const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
 
 const isPostHogConfigured = Boolean(
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
@@ -16,11 +18,12 @@ const isPostHogConfigured = Boolean(
 );
 
 function PostHogIdentity() {
-  const { isLoaded, user } = useUser();
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user;
   const identifiedUserId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!isLoaded || !isPostHogConfigured) return;
+    if (isPending || !isPostHogConfigured) return;
 
     if (!user) {
       if (identifiedUserId.current) {
@@ -35,26 +38,30 @@ function PostHogIdentity() {
     }
 
     posthog.identify(user.id, {
-      ...(user.primaryEmailAddress?.emailAddress
-        ? { email: user.primaryEmailAddress.emailAddress }
-        : {}),
-      ...(user.fullName ? { name: user.fullName } : {}),
+      ...(user.email ? { email: user.email } : {}),
+      ...(user.name ? { name: user.name } : {}),
     });
     identifiedUserId.current = user.id;
-  }, [isLoaded, user]);
+  }, [isPending, user]);
 
   return null;
 }
 
 export function ConvexClientProvider({
   children,
+  initialToken,
 }: {
   children: React.ReactNode;
+  initialToken?: string | null;
 }) {
+  if (!convex) {
+    return <>{children}</>;
+  }
+
   return (
-    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+    <ConvexBetterAuthProvider client={convex} authClient={authClient as unknown as AuthClient} initialToken={initialToken}>
       <PostHogIdentity />
       {children}
-    </ConvexProviderWithClerk>
+    </ConvexBetterAuthProvider>
   );
 }

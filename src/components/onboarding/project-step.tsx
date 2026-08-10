@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { authClient } from "@/lib/auth-client";
 import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,7 @@ const isPostHogConfigured = Boolean(
 
 export function ProjectStep() {
   const router = useRouter();
-  const { isLoaded, isSignedIn } = useUser();
+  const { data: session, isPending: isSessionPending } = authClient.useSession();
   const { isLoading: isConvexLoading, isAuthenticated } = useConvexAuth();
   const createProject = useMutation(api.projects.createProject);
   const [name, setName] = useState("");
@@ -34,7 +34,7 @@ export function ProjectStep() {
     const trimmed = name.trim();
     if (!trimmed || isCreating) return;
 
-    if (isLoaded && !isSignedIn) {
+    if (!isSessionPending && !session) {
       router.push("/sign-in");
       return;
     }
@@ -71,7 +71,7 @@ export function ProjectStep() {
     }
   }
 
-  if (!isLoaded) {
+  if (isSessionPending) {
     return (
       <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
         Loading authentication...
@@ -79,7 +79,7 @@ export function ProjectStep() {
     );
   }
 
-  if (!isSignedIn) {
+  if (!session) {
     return (
       <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
         Sign in to create a project.

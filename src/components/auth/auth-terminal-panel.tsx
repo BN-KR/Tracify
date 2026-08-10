@@ -45,7 +45,7 @@ export function AuthTerminalPanel() {
 
   return (
     <div 
-      className="w-full font-mono text-[12px] md:text-[13px] leading-relaxed selection:bg-white/10"
+      className="w-full font-mono text-[12px] md:text-[13px] leading-relaxed selection:bg-yellow-300/40"
       aria-hidden="true"
     >
       <div className="flex flex-col gap-1">

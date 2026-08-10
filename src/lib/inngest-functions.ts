@@ -27,17 +27,37 @@ export const processSpan = inngest.createFunction(
         spanType: span.spanType,
         input: span.input,
         output: span.output,
+        attachments: span.attachments ?? "[]",
         latencyMs: span.latencyMs,
         costUsd: span.costUsd,
         modelId: span.modelId,
         toolName: span.toolName,
         parentSpanId: span.parentSpanId,
         metadata: span.metadata,
+        sessionId: span.sessionId ?? "",
+        endUserId: span.endUserId ?? "",
+        environment: span.environment ?? "",
+        release: span.release ?? "",
+        tags: span.tags ?? [],
+        traceName: span.traceName ?? "",
+        inputTokens: span.inputTokens ?? 0,
+        outputTokens: span.outputTokens ?? 0,
+        ttftMs: span.ttftMs ?? 0,
+        retryCount: span.retryCount ?? 0,
+        errorType: span.errorType ?? "",
+        errorMessage: span.errorMessage ?? "",
+        isStreamChunk: span.isStreamChunk ?? false,
+        streamSequence: span.streamSequence ?? 0,
+        streamFinal: span.streamFinal ?? true,
+        payloadFormat: span.payloadFormat ?? "json",
+        stackTrace: span.stackTrace ?? "",
+        timedOut: span.timedOut ?? false,
+        timeoutMs: span.timeoutMs ?? 0,
         createdAt: span.createdAt,
       });
     });
 
-    const runDocId = await step.run("upsert-convex-run", async () => {
+    const run = await step.run("upsert-convex-run", async () => {
       const convex = getConvexClient();
       return await convex.mutation(api.agentRuns.upsertRunFromSpan, {
         runId: span.runId,
@@ -46,7 +66,71 @@ export const processSpan = inngest.createFunction(
         spanType: span.spanType,
         createdAt: span.createdAt,
         modelId: span.modelId || undefined,
+        sessionId: span.sessionId || undefined,
+        environment: span.environment || undefined,
+        release: span.release || undefined,
       });
+    });
+
+    if (span.sessionId) {
+      await step.run("upsert-convex-session", async () => {
+        const convex = getConvexClient();
+        const status = span.spanType === "error"
+          ? "failed"
+          : span.spanType === "run_end"
+            ? "completed"
+            : "running";
+        await convex.mutation(api.sessions.upsertFromSpan, {
+          projectId: span.projectDocId as Id<"projects">,
+          sessionId: span.sessionId,
+          endUserId: span.endUserId || undefined,
+          environment: span.environment || undefined,
+          release: span.release || undefined,
+          traceName: span.traceName || undefined,
+          tags: span.tags ?? [],
+          createdAt: span.createdAt,
+          costUsd: span.costUsd,
+          status,
+          isNewTrace: run.created,
+        });
+      });
+    }
+
+    await step.run("online-evaluation", async () => {
+      const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+      const evaluationSecret = process.env.EVALUATION_INTERNAL_SECRET;
+      if (!convexUrl || !evaluationSecret || !span.spanId) return { skipped: true };
+      try {
+        const response = await fetch(`${convexUrl.replace(/\/$/, "")}/evaluation/online`, {
+          method: "POST",
+          headers: { "content-type": "application/json", "x-tracify-evaluation-secret": evaluationSecret },
+          body: JSON.stringify({
+            projectId: span.projectDocId,
+            traceId: span.runId,
+            spanId: span.spanId,
+            spanType: span.spanType,
+            input: span.input ?? "",
+            output: span.output ?? "",
+            modelId: span.modelId ?? "",
+            metadata: JSON.stringify(span.metadata ?? {}),
+          }),
+        });
+        if (!response.ok) console.warn("Online evaluation returned", response.status);
+        if (response.ok) {
+          const body = await response.json().catch(() => null) as { results?: Array<{ resultId?: string; evaluatorId?: string; scoreName?: string; value?: number | boolean | string; status?: string }>; alerts?: Array<{ projectId: string; runId: string; type: string; message: string; triggeredAt: string }> } | null;
+          for (const alert of body?.alerts ?? []) await inngest.send({ name: "5to1r/alert.triggered", data: alert });
+          const tinybird = await import("@/lib/tinybird");
+          for (const result of body?.results ?? []) {
+            if (!result.resultId || !result.evaluatorId || !result.scoreName || result.value === undefined) continue;
+            const dataType = typeof result.value === "number" ? "numeric" : typeof result.value === "boolean" ? "boolean" : "categorical";
+            await tinybird.ingestEvaluationScore({ scoreId: result.resultId, projectId: span.projectDocId, traceId: span.runId, evaluatorId: result.evaluatorId, scoreName: result.scoreName, dataType, valueNumeric: typeof result.value === "number" ? result.value : 0, valueBoolean: typeof result.value === "boolean" ? result.value : false, valueCategorical: typeof result.value === "string" ? result.value : "", status: result.status ?? "passed", modelId: span.modelId ?? "", environment: span.environment ?? "", createdAt: new Date().toISOString() }).catch((error) => console.warn("Tinybird score ingest failed without blocking ingestion", error));
+          }
+        }
+        return { skipped: false, status: response.status };
+      } catch (error) {
+        console.warn("Online evaluation failed without blocking ingestion", error);
+        return { skipped: false, error: error instanceof Error ? error.message : "Online evaluation failed" };
+      }
     });
 
     await step.run("check-thresholds", async () => {

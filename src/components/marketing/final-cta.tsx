@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
 
 /**
  * FinalCTA Component
@@ -12,31 +11,6 @@ import { motion } from "framer-motion";
  * Follows a strict monochrome, 0px radius, and developer-grade aesthetic.
  */
 export function FinalCTA() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
-  const terminalVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.25,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const lineVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { duration: 0.2 }
-    },
-  };
-
   return (
     <section
       id="final-cta"
@@ -60,30 +34,27 @@ export function FinalCTA() {
         {/* Right Content: 45% */}
         <div className="w-full md:w-[45%] flex flex-col gap-8 md:pl-10 justify-between">
           {/* Command Snippet */}
-          <motion.div
-            initial="hidden"
-            animate={isVisible ? "visible" : "hidden"}
-            variants={terminalVariants}
+          <div
             className="border border-[#2A2A2A] bg-[#050505] p-4 font-mono text-[12px] md:text-[13px] leading-[1.6] w-full"
           >
             <div className="flex flex-col gap-1">
-              <motion.div variants={lineVariants} className="flex gap-2">
+              <div className="flex gap-2">
                 <span className="text-[#666666] shrink-0">$</span>
                 <span className="text-[#999999]">pip install tracify</span>
-              </motion.div>
-              <motion.div variants={lineVariants} className="flex gap-2">
+              </div>
+              <div className="flex gap-2">
                 <span className="text-[#666666] shrink-0">$</span>
                 <span className="text-[#999999]">npm install tracify</span>
-              </motion.div>
-              <motion.div variants={lineVariants} className="flex gap-2">
+              </div>
+              <div className="flex gap-2">
                 <span className="text-[#666666] shrink-0">$</span>
                 <span className="text-[#999999]">run-agent</span>
-              </motion.div>
-              <motion.div variants={lineVariants} className="text-[#34D399] mt-1 font-bold">
+              </div>
+              <div className="text-[#34D399] mt-1 font-bold">
                 trace ready: run_8f21a9
-              </motion.div>
+              </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Buttons */}
           <div className="flex flex-col md:flex-row gap-4 mt-auto">

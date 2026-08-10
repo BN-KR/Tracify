@@ -5,6 +5,7 @@ import type { Id } from "convex/_generated/dataModel";
 import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
 import { hashApiKey } from "@/lib/api-keys";
+import { DEFAULT_REDACTION_RULES, redactPayload, redactRecord } from "@/lib/redaction";
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -16,11 +17,32 @@ type SpanPayload = {
   latencyMs: number;
   input?: unknown;
   output?: unknown;
+  attachments?: unknown[];
   costUsd?: number;
   modelId?: string;
   toolName?: string;
   metadata?: Record<string, unknown>;
   parentSpanId?: string;
+  sessionId?: string;
+  endUserId?: string;
+  environment?: string;
+  release?: string;
+  tags?: string[];
+  traceName?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  ttftMs?: number;
+  retryCount?: number;
+  errorType?: string;
+  errorMessage?: string;
+  isStreamChunk?: boolean;
+  streamSequence?: number;
+  streamFinal?: boolean;
+  payloadFormat?: string;
+  stackTrace?: string;
+  timedOut?: boolean;
+  timeoutMs?: number;
+  promptVersionId?: string;
 };
 
 function jsonString(value: unknown) {
@@ -35,7 +57,7 @@ function isIsoString(value: string) {
 function validatePayload(body: Record<string, unknown>):
   | { ok: true; payload: SpanPayload }
   | { ok: false; error: string } {
-  const hasInputOrOutput = body.input !== undefined || body.output !== undefined;
+  const hasInputOrOutput = body.input !== undefined || body.output !== undefined || body.attachments !== undefined;
 
   if (typeof body.spanId !== "string") {
     return { ok: false, error: "spanId must be a string" };
@@ -68,6 +90,38 @@ function validatePayload(body: Record<string, unknown>):
   if (body.parentSpanId !== undefined && typeof body.parentSpanId !== "string") {
     return { ok: false, error: "parentSpanId must be a string" };
   }
+  for (const key of ["sessionId", "endUserId", "environment", "release", "traceName"] as const) {
+    if (body[key] !== undefined && typeof body[key] !== "string") {
+      return { ok: false, error: `${key} must be a string` };
+    }
+  }
+  if (body.tags !== undefined && (!Array.isArray(body.tags) || body.tags.some((tag) => typeof tag !== "string"))) {
+    return { ok: false, error: "tags must be an array of strings" };
+  }
+  if (body.attachments !== undefined && !Array.isArray(body.attachments)) {
+    return { ok: false, error: "attachments must be an array" };
+  }
+  for (const key of ["inputTokens", "outputTokens", "ttftMs", "retryCount", "streamSequence"] as const) {
+    if (body[key] !== undefined && (typeof body[key] !== "number" || body[key] < 0)) {
+      return { ok: false, error: `${key} must be a non-negative number` };
+    }
+  }
+  for (const key of ["errorType", "errorMessage", "payloadFormat", "stackTrace"] as const) {
+    if (body[key] !== undefined && typeof body[key] !== "string") {
+      return { ok: false, error: `${key} must be a string` };
+    }
+  }
+  for (const key of ["isStreamChunk", "streamFinal", "timedOut"] as const) {
+    if (body[key] !== undefined && typeof body[key] !== "boolean") {
+      return { ok: false, error: `${key} must be a boolean` };
+    }
+  }
+  if (body.timeoutMs !== undefined && (typeof body.timeoutMs !== "number" || body.timeoutMs < 0)) {
+    return { ok: false, error: "timeoutMs must be a non-negative number" };
+  }
+  if (body.promptVersionId !== undefined && typeof body.promptVersionId !== "string") {
+    return { ok: false, error: "promptVersionId must be a string" };
+  }
   if (
     body.metadata !== undefined &&
     (typeof body.metadata !== "object" || body.metadata === null || Array.isArray(body.metadata))
@@ -90,7 +144,7 @@ export async function POST(request: NextRequest) {
   }
 
   const apiKey = authHeader.slice(7).trim();
-  if (!apiKey.startsWith("tracify_sk_live_")) {
+  if (!apiKey.startsWith("tracify_sk_live_") && !apiKey.startsWith("5t1r_sk_live_")) {
     return Response.json({ error: "Invalid API key" }, { status: 401 });
   }
 
@@ -122,31 +176,71 @@ export async function POST(request: NextRequest) {
 
   const projectDocId = project._id as Id<"projects">;
   const now = Date.now();
+  const redactionEnabled = project.redactionEnabled !== false;
+  const redactionRules = project.redactionRules?.length ? project.redactionRules : [...DEFAULT_REDACTION_RULES];
 
   await convex.mutation(api.projects.markApiKeyUsed, {
     projectId: projectDocId,
+    apiKeyHash: hashApiKey(apiKey),
     lastUsedAt: now,
   });
 
-  await inngest.send({
-    name: "5to1r/span.received",
-    data: {
-      spanId: payload.spanId,
-      runId: payload.runId,
-      projectId: projectDocId,
-      projectDocId,
-      spanType: payload.spanType,
-      input: jsonString(payload.input),
-      output: jsonString(payload.output),
-      latencyMs: payload.latencyMs,
-      costUsd: payload.costUsd ?? 0,
-      modelId: payload.modelId ?? "",
-      toolName: payload.toolName ?? "",
-      metadata: payload.metadata ?? {},
-      parentSpanId: payload.parentSpanId ?? "",
-      createdAt: payload.createdAt,
-    },
-  });
+  try {
+    await inngest.send({
+      name: "5to1r/span.received",
+      data: {
+        spanId: payload.spanId,
+        runId: payload.runId,
+        projectId: projectDocId,
+        projectDocId,
+        spanType: payload.spanType,
+        input: redactionEnabled ? redactPayload(payload.input, redactionRules) : jsonString(payload.input),
+        output: redactionEnabled ? redactPayload(payload.output, redactionRules) : jsonString(payload.output),
+        attachments: redactionEnabled ? redactPayload(payload.attachments ?? [], redactionRules) : jsonString(payload.attachments ?? []),
+        latencyMs: payload.latencyMs,
+        costUsd: payload.costUsd ?? 0,
+        modelId: payload.modelId ?? "",
+        toolName: payload.toolName ?? "",
+        metadata: redactionEnabled ? redactRecord(payload.metadata ?? {}, redactionRules) : payload.metadata ?? {},
+        parentSpanId: payload.parentSpanId ?? "",
+        sessionId: payload.sessionId ?? "",
+        endUserId: payload.endUserId ?? "",
+        environment: payload.environment ?? "",
+        release: payload.release ?? "",
+        tags: payload.tags ?? [],
+        traceName: payload.traceName ?? "",
+        inputTokens: payload.inputTokens ?? Number(payload.metadata?.inputTokens ?? 0),
+        outputTokens: payload.outputTokens ?? Number(payload.metadata?.outputTokens ?? 0),
+        ttftMs: payload.ttftMs ?? Number(payload.metadata?.ttftMs ?? payload.metadata?.timeToFirstTokenMs ?? 0),
+        retryCount: payload.retryCount ?? Number(payload.metadata?.retryCount ?? payload.metadata?.attempt ?? 0),
+        errorType: payload.errorType ?? String(payload.metadata?.errorType ?? ""),
+        errorMessage: payload.errorMessage ?? String(payload.metadata?.errorMessage ?? ""),
+        isStreamChunk: payload.isStreamChunk ?? Boolean(payload.metadata?.isStreamChunk),
+        streamSequence: payload.streamSequence ?? Number(payload.metadata?.streamSequence ?? 0),
+        streamFinal: payload.streamFinal ?? Boolean(payload.metadata?.streamFinal ?? true),
+        payloadFormat: payload.payloadFormat ?? "json",
+        stackTrace: payload.stackTrace ?? String(payload.metadata?.stackTrace ?? ""),
+        timedOut: payload.timedOut ?? Boolean(payload.metadata?.timedOut),
+        timeoutMs: payload.timeoutMs ?? Number(payload.metadata?.timeoutMs ?? 0),
+        createdAt: payload.createdAt,
+      },
+    });
+    if (payload.promptVersionId) {
+      try {
+        await convex.mutation(api.prompts.linkTraceFromApiKey, {
+          projectId: projectDocId,
+          apiKeyHash: hashApiKey(apiKey),
+          promptVersionId: payload.promptVersionId as Id<"promptVersions">,
+          traceId: payload.runId,
+          spanId: payload.spanId,
+        });
+      } catch (error) {
+        console.warn("Prompt trace link rejected:", error);
+      }
+    }
+  } catch (err) {
+    console.error("Inngest send failed (span accepted but not queued):", err);
+  }
 
   return Response.json({ ok: true, spanId: payload.spanId }, { status: 202 });
 }

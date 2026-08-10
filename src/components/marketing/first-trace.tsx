@@ -45,7 +45,7 @@ export function FirstTrace() {
               <span className="font-mono text-[10px] text-[#666666] uppercase tracking-widest font-bold">Diff</span>
             </div>
 
-            <div className="flex-1 font-mono text-[14px] leading-relaxed text-[#888888] selection:bg-white/10">
+            <div className="flex-1 font-mono text-[14px] leading-relaxed text-[#888888] selection:bg-yellow-300/40">
               {/* Added Line */}
               <AnimatePresence mode="wait">
                 {isDecorated && (

@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { UserButton, useOrganization } from "@clerk/nextjs";
+import { authClient } from "@/lib/auth-client";
 import { LayoutDashboard, ActivitySquare, Settings, BookOpen } from "lucide-react";
 import {
   Sidebar,
@@ -25,7 +25,8 @@ const NAV_ITEMS = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
-  const { organization, isLoaded } = useOrganization();
+  const { data: organization, isPending } = authClient.useActiveOrganization();
+  const { data: session } = authClient.useSession();
 
   return (
     <Sidebar className="border-r border-border bg-black">
@@ -37,7 +38,7 @@ export function DashboardSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="bg-black">
-        {isLoaded && organization && (
+        {!isPending && organization && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-[10px] font-mono tracking-widest text-zinc-600 uppercase py-4">
               Organization
@@ -95,14 +96,9 @@ export function DashboardSidebar() {
 
       <SidebarFooter className="border-t border-border p-6 bg-black">
         <div className="flex items-center gap-3">
-          <UserButton 
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "rounded-none",
-                userButtonTrigger: "active:scale-[0.97] transition-transform",
-              }
-            }}
-          />
+          <button type="button" onClick={() => void authClient.signOut()} className="size-8 border border-zinc-800 bg-zinc-900 font-mono text-xs uppercase text-white" aria-label="Sign out">
+            {session?.user.name?.slice(0, 1) || session?.user.email.slice(0, 1) || "U"}
+          </button>
           <div className="flex flex-col">
             <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">Account</span>
             <span className="text-[10px] font-mono text-zinc-600 uppercase">Pro Plan</span>

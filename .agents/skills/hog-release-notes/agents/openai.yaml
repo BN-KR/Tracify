@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hog Release Notes"
+  short_description: "Draft concise PostHog release notes from merged changes."
+  default_prompt: "Draft release notes for the recent merged changes."

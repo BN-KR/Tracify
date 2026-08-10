@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { isAuthenticated } from "@/lib/auth-server";
 import { NextRequest, NextResponse } from "next/server";
 
 import { api } from "convex/_generated/api";
@@ -10,7 +10,7 @@ import {
   setJsonCache,
   withCacheReason,
 } from "@/lib/redis-cache";
-import { getCostByModel, getCostByTool, getDailyCosts } from "@/lib/tinybird";
+import { getCostByModel, getCostByTool, getCostByUser, getDailyCosts } from "@/lib/tinybird";
 
 type StatsCachePayload = {
   dailyCosts: Array<{ day: string; totalCostUsd: number; spanCount: number }>;
@@ -23,6 +23,13 @@ type StatsCachePayload = {
   toolCosts: Array<{
     toolName: string;
     totalCostUsd: number;
+    spanCount: number;
+    avgLatencyMs?: number;
+  }>;
+  userCosts: Array<{
+    endUserId: string;
+    totalCostUsd: number;
+    totalTokens: number;
     spanCount: number;
     avgLatencyMs?: number;
   }>;
@@ -44,8 +51,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ projectId: string }> },
 ) {
-  const { userId } = await auth();
-  if (!userId) {
+  if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -104,10 +110,11 @@ export async function GET(
       return NextResponse.json(withReason(reservation.cache, reservation.reason));
     }
 
-    const [dailyCosts, modelCosts, toolCosts] = await Promise.all([
+    const [dailyCosts, modelCosts, toolCosts, userCosts] = await Promise.all([
       getDailyCosts(projectId, days),
       getCostByModel(projectId, days),
       getCostByTool(projectId, days),
+      getCostByUser(projectId, days),
     ]);
 
     const cached = await convex.mutation(api.analyticsCache.upsertStatsCache, {
@@ -116,6 +123,7 @@ export async function GET(
       dailyCosts,
       modelCosts,
       toolCosts,
+      userCosts,
       refresh,
     });
 
@@ -165,6 +173,7 @@ export async function GET(
       dailyCosts: [],
       modelCosts: [],
       toolCosts: [],
+      userCosts: [],
       unavailable: true,
       meta: {
         source: "none",
@@ -197,6 +206,7 @@ function withReason(
     dailyCosts: [],
     modelCosts: [],
     toolCosts: [],
+    userCosts: [],
     unavailable: true,
     meta: {
       source: "none",

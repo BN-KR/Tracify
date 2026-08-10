@@ -3,7 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { SpanRow } from "@/lib/tinybird";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDuration, formatRelativeTime } from "@/lib/utils";
@@ -26,9 +26,12 @@ import {
   Send,
   Copy,
   Check,
+  Share2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CancelRunButton } from "./cancel-run-button";
 import { useNow } from "@/hooks/use-now";
 import posthog from "posthog-js";
@@ -45,6 +48,9 @@ interface TraceViewerProps {
 
 export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   const now = useNow(1000);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const run = useQuery(
     api.agentRuns.getByRunIdForViewer,
     projectId ? { runId, projectId: projectId as Id<"projects"> } : "skip"
@@ -55,6 +61,22 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   const [refreshingSpans, setRefreshingSpans] = useState(false);
   const [spansMessage, setSpansMessage] = useState("Cached spans");
   const [spansError, setSpansError] = useState<string | null>(null);
+  const [replayIndex, setReplayIndex] = useState(0);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [shareError, setShareError] = useState(false);
+  const selectedSpanId = searchParams.get("span");
+
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShareError(false);
+      setShareCopied(true);
+      window.setTimeout(() => setShareCopied(false), 1600);
+    } catch {
+      setShareError(true);
+      window.setTimeout(() => setShareError(false), 2400);
+    }
+  }
 
   const fetchSpans = useCallback(
     async (refresh: "normal" | "manual" = "normal") => {
@@ -84,8 +106,25 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   );
 
   useEffect(() => {
+    // Fetching remote trace data is the synchronization this effect is responsible for.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchSpans();
   }, [fetchSpans]);
+
+  useEffect(() => {
+    if (run?.status !== "running") return;
+    const interval = window.setInterval(() => void fetchSpans(), 3000);
+    return () => window.clearInterval(interval);
+  }, [run?.status, fetchSpans]);
+
+  const safeSpans = useMemo(() => spans ?? [], [spans]);
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (!selectedSpanId || !safeSpans.length) return;
+    const selectedIndex = safeSpans.findIndex((span) => span.spanId === selectedSpanId);
+    if (selectedIndex >= 0 && selectedIndex !== replayIndex) setReplayIndex(selectedIndex);
+  }, [replayIndex, safeSpans, selectedSpanId]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (run === undefined || (loadingSpans && !spans)) {
     return (
@@ -111,8 +150,28 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   const durationMs = run.finishedAt
     ? new Date(run.finishedAt).getTime() - new Date(run.startedAt).getTime()
     : now - new Date(run.startedAt).getTime();
-  const safeSpans = spans ?? [];
+  const traceContext = safeSpans.find((span) => span.traceName || span.environment || span.release || span.sessionId) ?? safeSpans[0];
   const spanSummary = buildSpanSummary(safeSpans);
+  const firstErrorIndex = safeSpans.findIndex((span) => span.spanType === "error" || Boolean(span.errorMessage));
+  const activeReplayIndex = Math.min(replayIndex, Math.max(0, safeSpans.length - 1));
+  const replaySpan = safeSpans[activeReplayIndex];
+
+  function selectSpan(index: number) {
+    const span = safeSpans[index];
+    if (!span) return;
+    setReplayIndex(index);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("span", span.spanId);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
+  function focusFirstError() {
+    if (firstErrorIndex < 0) return;
+    selectSpan(firstErrorIndex);
+    window.requestAnimationFrame(() => {
+      document.getElementById(`trace-span-${safeSpans[firstErrorIndex].spanId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
 
   return (
     <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_280px]">
@@ -131,12 +190,20 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => void copyShareLink()}
+              className="flex h-8 items-center gap-2 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              {shareCopied ? <Check className="size-3" /> : <Share2 className="size-3" />}
+              {shareCopied ? "Link copied" : shareError ? "Copy failed" : "Share trace"}
+            </button>
             {run.status === "running" && (
               <button
                 type="button"
                 onClick={() => void fetchSpans("manual")}
                 disabled={refreshingSpans}
-                className="h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] hover:border-white hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {refreshingSpans ? "Refreshing" : "Refresh spans"}
               </button>
@@ -144,16 +211,28 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             {run.status === "running" && (
               <CancelRunButton projectId={projectId} runId={run.runId} />
             )}
+            {firstErrorIndex >= 0 && (
+              <button
+                type="button"
+                onClick={focusFirstError}
+                className="flex h-8 items-center gap-2 border border-red-400/40 bg-red-400/5 px-3 font-mono text-[11px] uppercase text-red-300 transition-colors hover:border-red-300 hover:bg-red-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+              >
+                <AlertCircle className="size-3" aria-hidden="true" />
+                Focus first error
+              </button>
+            )}
           </div>
         </div>
+        <div aria-live="polite" className="sr-only">{shareCopied ? "Trace link copied to clipboard." : shareError ? "Trace link could not be copied." : ""}</div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <StatItem label="Status" value={<span className="capitalize">{run.status}</span>} />
           <StatItem label="Total Cost" value={formatCurrency(run.totalCostUsd)} />
           <StatItem label="Span Count" value={run.spanCount.toString()} />
           <StatItem label="Duration" value={formatDuration(durationMs)} />
         </div>
+        {traceContext ? <TraceContextStrip projectId={projectId} span={traceContext} /> : null}
         <div className="mt-4 border-t border-border pt-3 font-mono text-[10px] uppercase tracking-widest text-zinc-600">
-          {spansMessage}
+          {run.status === "running" ? "Live trace · polling every 3s · " : ""}{spansMessage}
         </div>
         {spansError ? (
           <div className="mt-3 border border-red-900/40 bg-red-950/10 p-3 font-mono text-[11px] text-red-300">
@@ -163,6 +242,34 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
       </div>
 
       <SpanOverview spans={safeSpans} />
+      <TraceQualityPanel projectId={projectId} runId={runId} />
+      <LatencyWaterfall spans={safeSpans} />
+
+      <div className="border border-border bg-muted/10 p-4 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Session replay</div>
+            <div className="mt-1 font-mono text-[11px] text-zinc-400">Scrub the trace one span at a time like a debugger.</div>
+          </div>
+          <div className="font-mono text-[10px] uppercase text-zinc-600">{safeSpans.length ? `${activeReplayIndex + 1}/${safeSpans.length}` : "0/0"}</div>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={Math.max(0, safeSpans.length - 1)}
+          value={activeReplayIndex}
+          onChange={(event) => selectSpan(Number(event.target.value))}
+          disabled={!safeSpans.length}
+          className="w-full accent-white"
+        />
+        {replaySpan ? (
+          <div className="border border-white/20 bg-black/30 p-3 font-mono text-[11px] text-zinc-300">
+            <span className="text-white">{replaySpan.spanType}</span> · {replaySpan.modelId || replaySpan.toolName || "span"} · {formatDuration(replaySpan.latencyMs)}
+          </div>
+        ) : null}
+      </div>
+
+      <SpanGraph spans={safeSpans} />
 
       {/* Timeline */}
       <div className="relative pl-8 space-y-6 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-[1px] before:bg-border">
@@ -178,7 +285,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
         ) : null}
 
         {safeSpans.map((span, index) => (
-          <SpanCard key={span.spanId} span={span} index={index} projectId={projectId} />
+          <SpanCard key={span.spanId} span={span} index={index} projectId={projectId} replayActive={index === activeReplayIndex} onSelect={() => selectSpan(index)} />
         ))}
         
         {run.status === "running" && (
@@ -194,9 +301,77 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
       </div>
       </div>
 
-      <TraceSummaryPanel summary={spanSummary} durationMs={durationMs} />
+      <aside className="space-y-4 xl:sticky xl:top-20 xl:self-start">
+        {replaySpan ? <SelectedSpanPanel span={replaySpan} /> : null}
+        <TraceSummaryPanel summary={spanSummary} durationMs={durationMs} />
+      </aside>
     </div>
   );
+}
+
+function TraceContextStrip({ projectId, span }: { projectId: string; span: SpanRow }) {
+  const values = [
+    ["Trace", span.traceName],
+    ["Environment", span.environment],
+    ["Release", span.release],
+    ["Session", span.sessionId],
+  ].filter(([, value]) => value);
+  if (!values.length) return null;
+  return (
+    <div className="mt-5 flex flex-wrap gap-2 border-t border-border pt-4">
+      {values.map(([label, value]) => (
+        <div key={label} className="min-w-0 max-w-full border border-border bg-black/30 px-3 py-2">
+          <div className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">{label}</div>
+          <div className="mt-1 max-w-[220px] truncate font-mono text-[11px] text-zinc-200">
+            {label === "Session" ? <Link href={`/dashboard/${projectId}/sessions/${encodeURIComponent(String(value))}`} className="underline decoration-zinc-700 underline-offset-4 hover:text-white hover:decoration-white">{value}</Link> : label === "Environment" || label === "Release" ? <Link href={`/dashboard/${projectId}/search?${label.toLowerCase()}=${encodeURIComponent(String(value))}`} className="underline decoration-zinc-700 underline-offset-4 hover:text-white hover:decoration-white">{value}</Link> : value}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SelectedSpanPanel({ span }: { span: SpanRow }) {
+  const label = span.modelId || span.toolName || span.spanType.replace("_", " ");
+  return (
+    <section className="border border-white/25 bg-white/[0.04] p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Selected span</div>
+          <div className="mt-1 truncate font-mono text-sm text-white">{label}</div>
+        </div>
+        <span className="shrink-0 border border-white/20 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-zinc-300">{span.spanType.replace("_", " ")}</span>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <MiniMetric label="Latency" value={formatDuration(span.latencyMs)} />
+        <MiniMetric label="Cost" value={formatCurrency(span.costUsd)} />
+      </div>
+      {span.errorMessage ? <div className="mt-3 border border-red-400/30 bg-red-400/5 p-3 font-mono text-[10px] leading-relaxed text-red-200">{span.errorMessage}</div> : null}
+      <div className="mt-3 border-t border-border pt-3">
+        <div className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">Output preview</div>
+        <pre className="mt-2 max-h-28 overflow-auto whitespace-pre-wrap break-words font-mono text-[10px] leading-relaxed text-zinc-400">{formatJson(span.output).slice(0, 1200)}</pre>
+      </div>
+    </section>
+  );
+}
+
+function TraceQualityPanel({ projectId, runId }: { projectId: string; runId: string }) {
+  const quality = useQuery(api.evaluationEngine.traceQuality, { projectId: projectId as Id<"projects">, traceId: runId });
+  const recordFeedback = useMutation(api.evaluationEngine.recordFeedback);
+  const [feedbackSent, setFeedbackSent] = useState(false);
+  const [feedbackNote, setFeedbackNote] = useState("");
+  const scoreCount = (quality?.scores.length ?? 0) + (quality?.results.length ?? 0);
+  async function submitFeedback(value: boolean) {
+    await recordFeedback({ projectId: projectId as Id<"projects">, traceId: runId, kind: "thumb", value, comment: feedbackNote.trim() || undefined });
+    setFeedbackSent(true);
+    setFeedbackNote("");
+  }
+  return <section className="border border-white/20 bg-white/[0.03] p-4">
+    <div className="flex items-center justify-between gap-3"><div><div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Quality</div><div className="mt-1 text-sm text-white">Evaluation evidence attached to this trace</div></div><span className="font-mono text-[10px] uppercase text-zinc-600">{scoreCount} signals</span></div>
+    {scoreCount ? <div className="mt-4 grid gap-2 sm:grid-cols-2">{quality?.scores.slice(0, 8).map((score) => <div key={score._id} className="border border-zinc-800 bg-black/40 p-3"><div className="flex justify-between text-xs text-white"><span>{score.name}</span><span className="font-mono text-zinc-300">{String(score.value)}</span></div><p className="mt-1 font-mono text-[9px] uppercase text-zinc-600">{score.source} · {score.dataType}</p></div>)}{quality?.results.slice(0, 8).map((result) => <div key={result._id} className="border border-zinc-800 bg-black/40 p-3"><div className="flex justify-between text-xs text-white"><span>Evaluator result</span><span className={result.status === "passed" ? "font-mono text-emerald-300" : "font-mono text-red-300"}>{result.status}</span></div><p className="mt-1 truncate text-xs text-zinc-500">{result.explanation || String(result.value)}</p></div>)}</div> : <p className="mt-4 text-xs text-zinc-600">No evaluator results yet. Use Evaluation Engine to enable a live evaluator or queue this trace for review.</p>}
+    <div className="mt-4 border-t border-zinc-800 pt-4"><p className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Human feedback</p><div className="mt-2 flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => void submitFeedback(true)}>Helpful</Button><Button size="sm" variant="outline" onClick={() => void submitFeedback(false)}>Needs review</Button>{feedbackSent ? <span className="self-center font-mono text-[10px] uppercase text-emerald-400">Feedback recorded</span> : null}</div><Input className="mt-2" value={feedbackNote} onChange={(event) => setFeedbackNote(event.target.value)} placeholder="Optional reviewer note" /></div>
+    {quality?.feedback.length ? <p className="mt-3 font-mono text-[10px] uppercase text-zinc-500">{quality.feedback.length} user feedback item{quality.feedback.length === 1 ? "" : "s"} linked</p> : null}
+  </section>;
 }
 
 function formatSpanCacheMessage(meta?: {
@@ -276,6 +451,36 @@ function SpanOverview({ spans }: { spans: SpanRow[] }) {
   );
 }
 
+function LatencyWaterfall({ spans }: { spans: SpanRow[] }) {
+  if (!spans.length) return null;
+  const start = Math.min(...spans.map((span) => Date.parse(span.createdAt)).filter(Number.isFinite));
+  const end = Math.max(...spans.map((span) => Date.parse(span.createdAt) + Math.max(0, span.latencyMs)).filter(Number.isFinite));
+  const total = Math.max(1, end - start);
+  return (
+    <div className="border border-border bg-muted/10 p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Latency waterfall</div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">wall-clock span overlap</div>
+      </div>
+      <div className="space-y-1.5">
+        {spans.map((span) => {
+          const created = Date.parse(span.createdAt);
+          const left = Number.isFinite(created) ? ((created - start) / total) * 100 : 0;
+          const width = Math.max(1.5, (Math.max(0, span.latencyMs) / total) * 100);
+          return (
+            <div key={span.spanId} className="grid grid-cols-[110px_minmax(0,1fr)] items-center gap-2">
+              <span className="truncate font-mono text-[9px] text-zinc-500">{span.modelId || span.toolName || span.spanType}</span>
+              <div className="relative h-3 bg-black/50">
+                <div className={cn("absolute h-full", getSpanTypeConfig(span.spanType).segment)} style={{ left: `${left}%`, width: `${width}%` }} title={`${formatDuration(span.latencyMs)} from ${span.createdAt}`} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function TraceSummaryPanel({
   summary,
   durationMs,
@@ -294,6 +499,8 @@ function TraceSummaryPanel({
           <MiniMetric label="Latency" value={formatDuration(durationMs)} />
           <MiniMetric label="LLM" value={summary.typeCounts.llm_call?.toString() ?? "0"} />
           <MiniMetric label="Tools" value={summary.typeCounts.tool_call?.toString() ?? "0"} />
+          <MiniMetric label="Tokens" value={summary.totalTokens.toLocaleString()} />
+          <MiniMetric label="TTFT" value={summary.ttftMs ? formatDuration(summary.ttftMs) : "—"} />
         </div>
       </div>
 
@@ -366,11 +573,12 @@ function SummaryList({
   );
 }
 
-function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, projectId: string }) {
+function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: SpanRow, index: number, projectId: string, replayActive?: boolean; onSelect?: () => void }) {
   const [isExpanded, setIsExpanded] = useState(index === 0 || span.spanType === "error");
   const [commentContent, setCommentContent] = useState("");
   const [isCommenting, setIsCommenting] = useState(false);
   const [copiedPayload, setCopiedPayload] = useState<"input" | "output" | null>(null);
+  const [copyError, setCopyError] = useState(false);
 
   const comments = useQuery(api.comments.listBySpan, {
     spanId: span.spanId,
@@ -401,9 +609,15 @@ function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, pr
 
   async function handleCopyPayload(kind: "input" | "output") {
     const payload = kind === "input" ? formatJson(span.input) : formatJson(span.output);
-    await navigator.clipboard.writeText(payload);
-    setCopiedPayload(kind);
-    window.setTimeout(() => setCopiedPayload(null), 1200);
+    try {
+      await navigator.clipboard.writeText(payload);
+      setCopyError(false);
+      setCopiedPayload(kind);
+      window.setTimeout(() => setCopiedPayload(null), 1200);
+    } catch {
+      setCopyError(true);
+      window.setTimeout(() => setCopyError(false), 2400);
+    }
   }
 
   const typeConfig = getSpanTypeConfig(span.spanType);
@@ -411,7 +625,7 @@ function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, pr
   const Icon = typeConfig.icon;
 
   return (
-    <div className="relative">
+    <div id={`trace-span-${span.spanId}`} className="relative scroll-mt-24">
       {/* Timeline Node */}
       <div className={cn(
         "absolute -left-[23px] top-4 size-4 rounded-full border bg-black flex items-center justify-center z-10",
@@ -423,11 +637,13 @@ function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, pr
       {/* Card */}
       <div className={cn(
         "border transition-all duration-200",
-        isExpanded ? "border-zinc-700 bg-muted/20 shadow-lg" : "border-border bg-transparent hover:border-zinc-700 hover:bg-muted/5"
+        replayActive ? "border-white bg-white/5 shadow-lg" : isExpanded ? "border-zinc-700 bg-muted/20 shadow-lg" : "border-border bg-transparent hover:border-zinc-700 hover:bg-muted/5"
       )}>
         <button 
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between p-4 text-left"
+          onClick={() => { onSelect?.(); setIsExpanded(!isExpanded); }}
+          aria-expanded={isExpanded}
+          aria-label={`${isExpanded ? "Collapse" : "Expand"} ${span.spanType.replace("_", " ")} span`}
+          className="w-full flex items-center justify-between p-4 text-left focus-visible:outline focus-visible:outline-1 focus-visible:outline-white"
         >
           <div className="flex items-center gap-4 min-w-0">
             <Badge variant="outline" className={cn("rounded-none border-0 px-0 font-mono", typeConfig.color)}>
@@ -436,6 +652,9 @@ function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, pr
             <div className="truncate font-mono text-xs text-white max-w-[200px] md:max-w-md">
               {span.modelId || span.toolName || "Processing..."}
             </div>
+            {span.retryCount > 0 ? <Badge variant="outline" className="rounded-none border-amber-400/40 px-1.5 font-mono text-[9px] text-amber-300">retry ×{span.retryCount}</Badge> : null}
+            {span.errorType || span.errorMessage || span.stackTrace ? <Badge variant="outline" className="rounded-none border-red-400/40 px-1.5 font-mono text-[9px] text-red-300">error</Badge> : null}
+            {span.timedOut ? <Badge variant="outline" className="rounded-none border-amber-400/40 px-1.5 font-mono text-[9px] text-amber-300">timeout</Badge> : null}
           </div>
           
           <div className="flex items-center gap-6">
@@ -479,6 +698,20 @@ function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, pr
                     </pre>
                   </div>
                 </div>
+                <div aria-live="polite" className="sr-only">
+                  {copiedPayload ? `${copiedPayload} payload copied.` : copyError ? "Payload could not be copied." : ""}
+                </div>
+                {(span.errorType || span.errorMessage || span.stackTrace || span.timedOut || span.isStreamChunk || span.payloadFormat !== "json") ? (
+                  <div className="flex flex-wrap gap-2 border-t border-border/30 pt-3 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+                    {span.errorType ? <span className="border border-red-400/30 px-2 py-1 text-red-300">{span.errorType}</span> : null}
+                    {span.errorMessage ? <span className="max-w-full truncate border border-red-400/30 px-2 py-1 text-red-300">{span.errorMessage}</span> : null}
+                    {span.timedOut ? <span className="border border-amber-400/30 px-2 py-1 text-amber-300">timeout {span.timeoutMs ? `${span.timeoutMs}ms` : ""}</span> : null}
+                    {span.isStreamChunk ? <span className="border border-indigo-400/30 px-2 py-1 text-indigo-300">stream chunk #{span.streamSequence}</span> : null}
+                    {span.payloadFormat !== "json" ? <span className="border border-zinc-700 px-2 py-1">{span.payloadFormat}</span> : null}
+                  </div>
+                ) : null}
+                {span.stackTrace ? <pre className="max-h-48 overflow-auto border border-red-400/20 bg-black/40 p-3 font-mono text-[10px] text-red-200">{span.stackTrace}</pre> : null}
+                {span.attachments && span.attachments !== "[]" ? <pre className="max-h-40 overflow-auto border border-indigo-400/20 bg-black/40 p-3 font-mono text-[10px] text-indigo-200">attachments · {formatJson(span.attachments)}</pre> : null}
 
                 {/* Comments Section */}
                 <div className="pt-4 border-t border-border/30 space-y-4">
@@ -510,9 +743,11 @@ function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, pr
                     />
                     <Button 
                       size="icon" 
+                      aria-label="Add annotation"
+                      title="Add annotation"
                       onClick={handleAddComment}
                       disabled={isCommenting || !commentContent.trim()}
-                      className="size-9 rounded-none bg-zinc-800 hover:bg-white hover:text-black shrink-0"
+                      className="size-9 rounded-none bg-zinc-800 hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white shrink-0"
                     >
                       <Send className="size-4" />
                     </Button>
@@ -523,6 +758,35 @@ function SpanCard({ span, index, projectId }: { span: SpanRow, index: number, pr
           )}
         </AnimatePresence>
       </div>
+    </div>
+  );
+}
+
+function SpanGraph({ spans }: { spans: SpanRow[] }) {
+  const byId = new Map(spans.map((span) => [span.spanId, span]));
+  const edges = spans.filter((span) => span.parentSpanId && byId.has(span.parentSpanId));
+  const roots = spans.filter((span) => !span.parentSpanId || !byId.has(span.parentSpanId));
+  return (
+    <div className="border border-border bg-muted/10 p-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Agent handoff graph</div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">{spans.length} nodes · {Math.max(0, spans.length - roots.length)} edges</div>
+      </div>
+      {spans.length === 0 ? <div className="border border-dashed border-border p-4 text-center font-mono text-[10px] uppercase text-zinc-600">No handoffs captured</div> : (
+        <div className="space-y-2">
+          {edges.map((span) => {
+            const parent = byId.get(span.parentSpanId);
+            return (
+              <div key={span.spanId} className="flex flex-wrap items-center gap-2 font-mono text-[10px]">
+                <span className="border border-zinc-700 px-2 py-1 text-zinc-400">{parent?.modelId || parent?.toolName || parent?.spanType}</span>
+                <span className="text-indigo-300">→ handoff →</span>
+                <span className="border border-indigo-400/40 px-2 py-1 text-indigo-300">{span.modelId || span.toolName || span.spanType}</span>
+              </div>
+            );
+          })}
+          {roots.map((span) => <span key={span.spanId} className="mr-2 inline-block border border-zinc-700 px-2 py-1 font-mono text-[10px] text-zinc-300">root · {span.modelId || span.toolName || span.spanType}</span>)}
+        </div>
+      )}
     </div>
   );
 }
@@ -544,7 +808,8 @@ function PayloadHeader({
       <button
         type="button"
         onClick={onCopy}
-        className="flex h-6 items-center gap-1 border border-zinc-800 px-2 font-mono text-[9px] uppercase tracking-widest text-zinc-500 transition-colors hover:border-white hover:text-white"
+        aria-label={`Copy ${label.toLowerCase()} payload`}
+        className="flex h-6 items-center gap-1 border border-zinc-800 px-2 font-mono text-[9px] uppercase tracking-widest text-zinc-500 transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
       >
         {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
         {copied ? "Copied" : "Copy"}
@@ -613,9 +878,14 @@ function buildSpanSummary(spans: SpanRow[]) {
   const models = new Map<string, { label: string; count: number; cost: number; latencyMs: number }>();
   const tools = new Map<string, { label: string; count: number; cost: number; latencyMs: number }>();
   let totalCost = 0;
+  let totalTokens = 0;
+  let ttftMs = 0;
 
   for (const span of spans) {
     totalCost += span.costUsd;
+    totalTokens += Number(span.metadata?.totalTokens ?? Number(span.metadata?.inputTokens ?? 0) + Number(span.metadata?.outputTokens ?? 0)) || 0;
+    const candidateTtft = Number(span.metadata?.ttftMs ?? span.metadata?.timeToFirstTokenMs ?? 0);
+    if (candidateTtft > 0 && (ttftMs === 0 || candidateTtft < ttftMs)) ttftMs = candidateTtft;
     typeCounts[span.spanType] = (typeCounts[span.spanType] ?? 0) + 1;
 
     if (span.modelId) {
@@ -651,6 +921,8 @@ function buildSpanSummary(spans: SpanRow[]) {
 
   return {
     totalCost,
+    totalTokens,
+    ttftMs,
     typeCounts,
     models: sortRows(models),
     tools: sortRows(tools),

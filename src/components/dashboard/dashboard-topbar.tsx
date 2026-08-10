@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 
 import {
@@ -13,7 +14,7 @@ import {
   MessageSquare,
   Book
 } from "lucide-react";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { setReturnPath } from "@/lib/onboarding-client-state";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -22,7 +23,8 @@ import { Id } from "../../../convex/_generated/dataModel";
 import { buttonVariants } from "@/components/ui/button";
 import { getOnboardingHref } from "@/lib/onboarding-navigation";
 
-import { useUser, useClerk } from "@clerk/nextjs";
+import { authClient } from "@/lib/auth-client";
+import { OrganizationSwitcher } from "@/components/auth/organization-switcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { ProjectSwitcher } from "./project-switcher";
+import { DashboardCommandMenu } from "./dashboard-command-menu";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
 interface DashboardTopbarProps {
@@ -44,6 +46,7 @@ interface DashboardTopbarProps {
 export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
   const onboardingHref = getOnboardingHref();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const params = useParams();
   const projectId = params?.projectId as string | undefined;
   const projectSettingsHref = projectId
@@ -56,8 +59,21 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
     ? `/dashboard/${projectId}/docs`
     : "/onboarding/project";
   const dashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
-  const { user } = useUser();
-  const { signOut, openUserProfile } = useClerk();
+  const environmentContext = searchParams.get("environment")?.trim() || "all environments";
+  const usesRunsWindow = pathname.includes("/runs") || pathname.includes("/search");
+  const requestedRange = usesRunsWindow ? searchParams.get("days") : searchParams.get("range");
+  const rangeContext = ["1", "7", "30", "90"].includes(requestedRange ?? "")
+    ? `${requestedRange}d`
+    : usesRunsWindow
+      ? "30d"
+      : "7d";
+  const { data: session } = authClient.useSession();
+  const { data: organization } = authClient.useActiveOrganization();
+  const user = session?.user;
+  const project = useQuery(
+    api.projects.getProject,
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
+  );
 
   const alerts = useQuery(
     api.alerts.listByProject,
@@ -68,7 +84,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
   const [isMarkingAlertsRead, setIsMarkingAlertsRead] = useState(false);
   const unreadAlertCount = alerts?.filter((alert) => !alert.readAt).length ?? 0;
 
-  const initials = user?.firstName?.charAt(0) || user?.username?.charAt(0) || "U";
+  const initials = user?.name?.charAt(0) || user?.email?.charAt(0) || "U";
 
   const router = useRouter();
 
@@ -97,6 +113,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#2A2A2A] bg-[#0A0A0A] px-4 font-mono lg:px-6">
+      <span className="sr-only">{title || "Dashboard"}{description ? `: ${description}` : ""}</span>
       <div className="flex min-w-0 items-center gap-4">
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-[#666666]">
           <div className="flex items-center gap-2 overflow-hidden">
@@ -132,6 +149,8 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
       </div>
 
       <div className="flex items-center gap-2 text-[12px] text-[#999999]">
+        <DashboardCommandMenu projectId={projectId} />
+        <OrganizationSwitcher />
         <button
           onClick={handleOnboardingClick}
           className={buttonVariants({
@@ -142,17 +161,34 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
         >
           Onboarding
         </button>
-        <div className="hidden h-8 items-center border border-[#2A2A2A] bg-[#111111] px-2 text-[#F59E0B] sm:flex">
-          running
+        <div className="hidden max-w-[360px] items-center gap-2 border border-[#2A2A2A] bg-[#111111] px-2 sm:flex">
+          <span className="size-1.5 bg-emerald-300" aria-hidden="true" />
+          <span className="truncate text-[10px] uppercase tracking-widest text-[#CCCCCC]">
+            {organization?.name || "Personal workspace"}
+          </span>
+          <span className="text-[#555555]">/</span>
+          <span className="truncate text-[10px] text-[#777777]">{project?.name || "Loading project…"}</span>
+          <span className="text-[#555555]">/</span>
+          <span className="truncate text-[10px] uppercase text-[#777777]" title="Environment context">{environmentContext}</span>
+          <span className="text-[#555555]">/</span>
+          <span className="shrink-0 text-[10px] uppercase text-[#777777]" title="Dashboard time range">{rangeContext}</span>
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex h-8 w-8 items-center justify-center border border-[#2A2A2A] bg-[#111111] text-[#CCCCCC] transition-colors hover:border-white hover:text-white outline-none overflow-hidden">
-              {user?.imageUrl ? (
-                <img
-                  src={user.imageUrl}
-                  alt={user.fullName || "User"}
+            <button
+              type="button"
+              aria-label="Open account menu"
+              title="Account menu"
+              className="flex h-8 w-8 items-center justify-center border border-[#2A2A2A] bg-[#111111] text-[#CCCCCC] transition-colors hover:border-white hover:text-white outline-none overflow-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
+            >
+              {user?.image ? (
+                <Image
+                  src={user.image}
+                  alt={user.name || "User"}
+                  width={32}
+                  height={32}
+                  unoptimized
                   className="size-full object-cover grayscale opacity-80 group-hover:opacity-100 transition-opacity"
                 />
               ) : (
@@ -163,26 +199,28 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
           <DropdownMenuContent className="w-64" align="end" sideOffset={8}>
             <DropdownMenuLabel className="flex items-start gap-3 p-3">
               <div className="size-8 shrink-0 bg-zinc-900 border border-zinc-800 flex items-center justify-center font-mono text-xs text-white uppercase overflow-hidden">
-                {user?.imageUrl ? (
-                  <img src={user.imageUrl} alt={user.fullName || "User"} className="size-full object-cover grayscale" />
+                {user?.image ? (
+                  <Image src={user.image} alt={user.name || "User"} width={32} height={32} unoptimized className="size-full object-cover grayscale" />
                 ) : (
                   initials
                 )}
               </div>
               <div className="flex min-w-0 flex-col">
                 <span className="truncate text-[11px] font-mono text-white">
-                  {user?.fullName || user?.username || "User"}
+                  {user?.name || "User"}
                 </span>
                 <span className="truncate text-[10px] font-mono text-[#666666]">
-                  {user?.primaryEmailAddress?.emailAddress}
+                  {user?.email}
                 </span>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => openUserProfile()}>
+              <DropdownMenuItem asChild>
+                <Link href={projectSettingsHref}>
                 <UserPen size={14} className="opacity-60" />
                 <span>Manage Account</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={projectSettingsHref}>
@@ -211,7 +249,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut()}>
+            <DropdownMenuItem onClick={() => void authClient.signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}>
               <LogOut size={14} className="opacity-60" />
               <span>Sign Out</span>
             </DropdownMenuItem>
@@ -222,8 +260,11 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
+                type="button"
+                aria-label={unreadAlertCount > 0 ? `Open alerts, ${unreadAlertCount} unread` : "Open alerts"}
+                title="Alerts"
                 className={cn(
-                  "relative flex h-8 items-center border px-2 outline-none transition-colors hover:bg-[#161616] hover:text-white",
+                  "relative flex h-8 items-center border px-2 outline-none transition-colors hover:bg-[#161616] hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]",
                   unreadAlertCount > 0
                     ? "border-white bg-[#181818] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.18)]"
                     : "border-[#2A2A2A] bg-[#111111] text-[#999999]",

@@ -2,6 +2,7 @@ import { ProjectSettings } from "@/components/dashboard/project-settings";
 import { ProjectMembers } from "@/components/dashboard/project-members";
 import { ApiKeysManager } from "@/components/dashboard/api-keys-manager";
 import { ProjectManagement } from "@/components/dashboard/project-management";
+import { ProjectOrchestration } from "@/components/dashboard/project-orchestration";
 import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -47,6 +48,12 @@ export default async function SettingsPage({
               Management
             </TabsTrigger>
             <TabsTrigger
+              value="orchestration"
+              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-white data-[state=active]:bg-transparent data-[state=active]:text-white"
+            >
+              Orchestration
+            </TabsTrigger>
+            <TabsTrigger
               value="notifications"
               className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest opacity-50 data-[state=active]:border-white data-[state=active]:bg-transparent data-[state=active]:text-white"
               disabled
@@ -60,7 +67,7 @@ export default async function SettingsPage({
           </TabsContent>
 
           <TabsContent value="members" className="mt-0 pt-8 focus-visible:ring-0">
-            <ProjectMembers projectId={projectId} />
+            <ProjectMembers />
           </TabsContent>
 
           <TabsContent value="api-keys" className="mt-0 pt-8 focus-visible:ring-0">
@@ -69,6 +76,10 @@ export default async function SettingsPage({
 
           <TabsContent value="management" className="mt-0 pt-8 focus-visible:ring-0">
             <ProjectManagement projectId={projectId} />
+          </TabsContent>
+
+          <TabsContent value="orchestration" className="mt-0 pt-8 focus-visible:ring-0">
+            <ProjectOrchestration projectId={projectId} />
           </TabsContent>
         </Tabs>
       </div>

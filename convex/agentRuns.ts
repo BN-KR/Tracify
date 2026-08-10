@@ -31,6 +31,9 @@ async function upsertRunSummary(
     spanType: string;
     createdAt: string;
     modelId?: string;
+    sessionId?: string;
+    environment?: string;
+    release?: string;
   },
 ) {
   const isFailed = args.spanType === "error";
@@ -46,7 +49,7 @@ async function upsertRunSummary(
     .unique();
 
   if (!existing) {
-    return await ctx.db.insert("agentRuns", {
+    const id = await ctx.db.insert("agentRuns", {
       runId: args.runId,
       projectId: args.projectId,
       status,
@@ -58,7 +61,11 @@ async function upsertRunSummary(
       primaryModel: args.modelId || undefined,
       createdAt: args.createdAt,
       updatedAt: args.createdAt,
+      sessionId: args.sessionId,
+      environment: args.environment,
+      release: args.release,
     });
+    return { id, created: true };
   }
 
   const nextStatus =
@@ -75,10 +82,13 @@ async function upsertRunSummary(
     lastSpanAt: args.createdAt,
     finishedAt: finishedAt ?? existing.finishedAt,
     primaryModel: existing.primaryModel ?? args.modelId ?? undefined,
+    sessionId: existing.sessionId ?? args.sessionId,
+    environment: existing.environment ?? args.environment,
+    release: existing.release ?? args.release,
     updatedAt: args.createdAt,
   });
 
-  return existing._id;
+  return { id: existing._id, created: false };
 }
 
 export const upsertRunFromSpan = mutation({
@@ -89,6 +99,9 @@ export const upsertRunFromSpan = mutation({
     spanType: v.string(),
     createdAt: v.string(),
     modelId: v.optional(v.string()),
+    sessionId: v.optional(v.string()),
+    environment: v.optional(v.string()),
+    release: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     return await upsertRunSummary(ctx, args);
@@ -191,9 +204,16 @@ export const getRunsPageByProject = query({
       v.literal("failed"),
       v.literal("cancelled"),
     ),
+    primaryModel: v.optional(v.string()),
+    sessionId: v.optional(v.string()),
+    environment: v.optional(v.string()),
+    release: v.optional(v.string()),
+    startedAtAfter: v.optional(v.string()),
+    minCostUsd: v.optional(v.number()),
+    minSpanCount: v.optional(v.number()),
     paginationOpts: paginationOptsValidator,
   },
-  handler: async (ctx, { projectId, status, paginationOpts }) => {
+  handler: async (ctx, { projectId, status, primaryModel, sessionId, environment, release, startedAtAfter, minCostUsd, minSpanCount, paginationOpts }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       return {
@@ -218,6 +238,15 @@ export const getRunsPageByProject = query({
         .withIndex("by_projectId_status", (q) =>
           q.eq("projectId", projectId).eq("status", status),
         )
+        .filter((q) => q.and(
+          ...(primaryModel ? [q.eq(q.field("primaryModel"), primaryModel)] : []),
+          ...(sessionId ? [q.eq(q.field("sessionId"), sessionId)] : []),
+          ...(environment ? [q.eq(q.field("environment"), environment)] : []),
+          ...(release ? [q.eq(q.field("release"), release)] : []),
+          ...(startedAtAfter ? [q.gte(q.field("startedAt"), startedAtAfter)] : []),
+          ...(minCostUsd !== undefined ? [q.gte(q.field("totalCostUsd"), minCostUsd)] : []),
+          ...(minSpanCount !== undefined ? [q.gte(q.field("spanCount"), minSpanCount)] : []),
+        ))
         .order("desc")
         .paginate(paginationOpts);
     }
@@ -225,6 +254,15 @@ export const getRunsPageByProject = query({
     return await ctx.db
       .query("agentRuns")
       .withIndex("by_projectId_createdAt", (q) => q.eq("projectId", projectId))
+      .filter((q) => q.and(
+        ...(primaryModel ? [q.eq(q.field("primaryModel"), primaryModel)] : []),
+        ...(sessionId ? [q.eq(q.field("sessionId"), sessionId)] : []),
+        ...(environment ? [q.eq(q.field("environment"), environment)] : []),
+        ...(release ? [q.eq(q.field("release"), release)] : []),
+        ...(startedAtAfter ? [q.gte(q.field("startedAt"), startedAtAfter)] : []),
+        ...(minCostUsd !== undefined ? [q.gte(q.field("totalCostUsd"), minCostUsd)] : []),
+        ...(minSpanCount !== undefined ? [q.gte(q.field("spanCount"), minSpanCount)] : []),
+      ))
       .order("desc")
       .paginate(paginationOpts);
   },

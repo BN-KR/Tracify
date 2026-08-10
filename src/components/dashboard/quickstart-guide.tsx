@@ -5,9 +5,7 @@ import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Copy, Check, Terminal, Code2, BookOpen, KeyRound } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface QuickstartGuideProps {
@@ -28,7 +26,7 @@ export function QuickstartGuide({ projectId }: QuickstartGuideProps) {
     setTimeout(() => setCopied(null), 2000);
   }
 
-  const pythonCode = `from tracify import trace_agent, llm_call
+  const pythonCode = `from 5to1r import trace_agent, llm_call
 
 @trace_agent()
 async function run_my_agent():
@@ -42,7 +40,7 @@ async function run_my_agent():
     )
     return "Success"`;
 
-  const tsCode = `import { traceAgent, llmCall } from 'tracify';
+  const tsCode = `import { traceAgent, llmCall } from '5to1r';
 
 const agent = traceAgent(async () => {
   // Your agent logic here
@@ -56,9 +54,8 @@ const agent = traceAgent(async () => {
   return "Success";
 });`;
 
-  const installPy = "pip install tracify";
-  const installTs = "npm install tracify";
-  const envVar = `TRACIFY_API_KEY=tracify_sk_live_...`;
+  const installPy = "pip install 5to1r";
+  const installTs = "npm install 5to1r";
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -123,7 +120,7 @@ const agent = traceAgent(async () => {
           <KeyRound className="size-4" /> 3. Set Environment Variable
         </h3>
         <p className="text-[11px] text-zinc-500 font-mono">
-          Inject your API key into your agent's environment.
+          Inject your API key into your agent&apos;s environment.
         </p>
         <CodeBlock
           code={`TRACIFY_API_KEY=${project?.apiKeyPrefix || 'tracify_sk_live_'}••••••••${project?.apiKeyLast4 || '••••'}`}

@@ -9,7 +9,7 @@ const USE_CASES = [
     headline: "Debug multi-step agents without reading raw logs",
     problem: "Install the SDK, send spans, inspect the trace, copy payloads, and see exactly which model or tool call failed.",
     logs: [
-      "> pip install tracify",
+      "> pip install 5to1r",
       "> span accepted",
       "> trace ready",
       "> copy_payload input"

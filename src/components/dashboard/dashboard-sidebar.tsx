@@ -6,11 +6,18 @@ import {
   BookOpen,
   ChevronDown,
   FileText,
+  Database,
   LayoutDashboard,
   SlidersHorizontal,
   PanelLeftClose,
   PanelLeftOpen,
+  Search,
+  MessageSquareText,
+  FlaskConical,
+  GitCompare,
+  FlaskConical as PlaygroundIcon,
   Settings2,
+  ShieldCheck,
   Terminal,
 } from "lucide-react";
 import { useMemo, useState, type ComponentType } from "react";
@@ -26,7 +33,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-type GroupId = "observe" | "configure" | "resources";
+type GroupId = "observe" | "analyze" | "improve" | "operate" | "manage" | "resources";
 
 type NavItem = {
   title: string;
@@ -48,10 +55,11 @@ const EXPANDED_WIDTH = 240;
 
 function isActivePath(pathname: string, href: string, projectId: string) {
   if (href.startsWith("http")) return false;
-  if (href === `/dashboard/${projectId}`) {
-    return pathname === "/dashboard" || pathname === href;
+  const hrefPath = href.split("?")[0];
+  if (hrefPath === `/dashboard/${projectId}`) {
+    return pathname === "/dashboard" || pathname === hrefPath;
   }
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return pathname === hrefPath || pathname.startsWith(`${hrefPath}/`);
 }
 
 export function DashboardSidebar({
@@ -83,6 +91,22 @@ export function DashboardSidebar({
           href: projectId ? `/dashboard/${projectId}/runs` : projectSetupHref,
         },
         {
+          title: "Sessions",
+          icon: Activity,
+          href: projectId ? `/dashboard/${projectId}/sessions` : projectSetupHref,
+        },
+        {
+          title: "Search",
+          icon: Search,
+          href: projectId ? `/dashboard/${projectId}/search` : projectSetupHref,
+        },
+      ],
+    },
+    {
+      id: "analyze",
+      label: "Analyze",
+      items: [
+        {
           title: "Costs",
           icon: BarChart3,
           href: projectId ? `/dashboard/${projectId}/costs` : projectSetupHref,
@@ -95,8 +119,61 @@ export function DashboardSidebar({
       ],
     },
     {
-      id: "configure",
-      label: "Configure",
+      id: "improve",
+      label: "Improve",
+      items: [
+        {
+          title: "Prompts",
+          icon: MessageSquareText,
+          href: projectId ? "/dashboard/" + projectId + "/prompts" : projectSetupHref,
+        },
+        {
+          title: "Evaluation",
+          icon: FlaskConical,
+          href: projectId ? "/dashboard/" + projectId + "/evaluation" : projectSetupHref,
+        },
+        {
+          title: "Datasets",
+          icon: Database,
+          href: projectId ? "/dashboard/" + projectId + "/datasets" : projectSetupHref,
+        },
+        {
+          title: "Experiments",
+          icon: GitCompare,
+          href: projectId ? "/dashboard/" + projectId + "/experiments" : projectSetupHref,
+        },
+        {
+          title: "Playground",
+          icon: PlaygroundIcon,
+          href: projectId ? "/dashboard/" + projectId + "/playground" : projectSetupHref,
+        },
+      ],
+    },
+    {
+      id: "operate",
+      label: "Operate",
+      items: [
+        {
+          title: "Runtime Policy",
+          icon: ShieldCheck,
+          href: projectId ? `/dashboard/${projectId}/control` : projectSetupHref,
+        },
+        {
+          title: "Alerts",
+          icon: Activity,
+          href: projectId ? `/dashboard/${projectId}/alerts` : projectSetupHref,
+        },
+        {
+          title: "Integrations",
+          icon: Terminal,
+          href: "/integrations",
+          external: true,
+        },
+      ],
+    },
+    {
+      id: "manage",
+      label: "Manage",
       items: [
         {
           title: "Settings",
@@ -104,9 +181,24 @@ export function DashboardSidebar({
           href: projectId ? `/dashboard/${projectId}/settings` : projectSetupHref,
         },
         {
+          title: "Members",
+          icon: Activity,
+          href: projectId ? `/dashboard/${projectId}/settings?tab=members` : projectSetupHref,
+        },
+        {
           title: "Manage",
           icon: SlidersHorizontal,
           href: projectId ? `/dashboard/${projectId}/manage` : projectSetupHref,
+        },
+        {
+          title: "API Keys",
+          icon: Terminal,
+          href: projectId ? `/dashboard/${projectId}/api-keys` : projectSetupHref,
+        },
+        {
+          title: "Billing",
+          icon: FileText,
+          href: projectId ? `/dashboard/${projectId}/billing` : projectSetupHref,
         },
       ],
     },
@@ -125,18 +217,35 @@ export function DashboardSidebar({
           href: "https://docs.tracify.tech",
           external: true,
         },
+        {
+          title: "Roadmap",
+          icon: FileText,
+          href: "/roadmap",
+          external: true,
+        },
       ],
     },
   ], [projectDashboardHref, projectId, projectSetupHref]);
 
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
     if (typeof window === "undefined") {
-      return { observe: true, configure: true, resources: true };
+      return { observe: true, analyze: true, improve: true, operate: true, manage: true, resources: true };
     }
     const stored = window.localStorage.getItem(GROUP_STORAGE_KEY);
-    return stored
-      ? (JSON.parse(stored) as Record<GroupId, boolean>)
-      : { observe: true, configure: true, resources: true };
+    const defaults: Record<GroupId, boolean> = {
+      observe: true,
+      analyze: true,
+      improve: true,
+      operate: true,
+      manage: true,
+      resources: true,
+    };
+    if (!stored) return defaults;
+    try {
+      return { ...defaults, ...(JSON.parse(stored) as Partial<Record<GroupId, boolean>>) };
+    } catch {
+      return defaults;
+    }
   });
 
   const showExpandedContent = !isCollapsed;
@@ -211,7 +320,7 @@ export function DashboardSidebar({
             side="right"
             className="rounded-none border border-[#2A2A2A] bg-[#111111] font-mono text-xs text-[#CCCCCC] shadow-none"
           >
-            {collapseLabel}
+            {collapseLabel} · Ctrl+\
           </TooltipContent>
         </Tooltip>
       </div>

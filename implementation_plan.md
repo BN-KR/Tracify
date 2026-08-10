@@ -1,6 +1,151 @@
 # tracify Strategic Implementation Plan
 
+## Better Auth Migration (2026-08-10)
+
+- Better Auth now owns sessions, credentials, OAuth, and organizations through a Convex component, with Next.js proxying `/api/auth/*` and hydrating authenticated Convex clients with the Better Auth JWT.
+- Clerk UI/runtime packages and middleware were removed. Custom Tracify forms now provide email/password and Google sign-in, while dashboard controls use Better Auth session and organization APIs.
+- Authorization keeps project-owner and active-organization semantics. JWT payloads include the active organization and membership role so Convex admin checks continue to distinguish owners/admins from members.
+- Security defaults include database-backed rate limiting, CSRF/origin checks, encrypted OAuth tokens, explicit trusted origins, and disabled organization deletion.
+- Better Auth Infrastructure is integrated through `dash()`; development and production Convex environments have the Infra key. The canonical production origin is `https://www.tracify.tech` because the bare domain redirects.
+- Development Convex synchronization and production build pass. Production deployment remains a deliberate follow-up because unrelated local changes share the worktree.
+
+## Homepage Reference Refinement (2026-08-07)
+- Added a compact lifecycle rail to the landing page, linking each stage to the relevant product workflow.
+- Kept the Better Auth/Langfuse editorial structure, Linear-style product evidence, and monochrome Tracify system intact.
+- Added distinct section compositions rather than repeating a two-column text/visual template: workflow canvas, centered white connection statement, integration matrix, README quickstart, and FAQ.
+- Upgraded public product feature pages with feature-specific evidence panels and action-oriented next steps.
+- Verification: focused ESLint, standalone TypeScript, `git diff --check`, and production build pass.
+
+## Marketing Visual Redesign (2026-08-07)
+
+- Reframed the homepage as a command-center incident journey: a production timeout, trace inspection, root-cause recommendation, evaluation, and improved release form one coherent story.
+- Replaced the broad client-page implementation with a server-rendered route and isolated interactive workflow, product-signal, code-runtime, and trace-inspector components.
+- Added product-specific Open Graph/X metadata and a generated incident-style Open Graph image route.
+- Corrected legacy final-CTA installation examples to `tracify`, linked footer status to the public status surface, and added accessible tabs, pressed states, focus rings, copy feedback, and reduced-motion-compatible interaction.
+- Verification: `npx.cmd tsc --noEmit`, focused marketing ESLint, `git diff --check`, and the full production build pass; Next generates all 58 routes, including `/opengraph-image`.
+
+- Reworked the public homepage into a smaller editorial, monochrome composition inspired by Better Auth and Langfuse.
+- Kept Geist Pixel, Geist Mono, Geist Sans, zero-radius controls, and existing marketing routes/CTAs.
+- Centered the first viewport on the live trace preview, then added integrations, trace-to-fix feature rows, a README-style quickstart, and a focused final CTA.
+- Added a restrained grid treatment and preserved purposeful motion/reduced-motion behavior.
+- Verification: TypeScript, homepage/platform lint, diff check, and the full production build pass; the build generates all 57 routes.
+- Follow-up: tightened the hero to a single viewport composition so the primary CTAs remain visible without scrolling.
+- Added lightweight interaction to the hero trace preview: selectable span rows, selected-span context, and a live/inspection toggle.
+- Rebuilt the marketing homepage into distinct interactive moments on a pure-black canvas: workflow map, before/after failure lab, five-state product showcase, runtime selector/code lab, ecosystem rail, and line/grid CTA motif.
+- Verification: focused ESLint, TypeScript, diff check, and full production build pass across 57 routes.
+
+## Dashboard Excellence Foundation (2026-08-07)
+
+- Added project-scoped saved Runs views. Users can name the current filter/sort/page-size state, restore it into controls and URL state, or delete it; storage is bounded to the most recent 12 views.
+- Added keyboard navigation to the Runs table: Arrow Up/Down, Home/End, and Enter-to-open trace work from focused rows.
+- Added URL-persisted Runs time windows (24h, 7d, 30d, 90d) backed by a Convex `startedAt` lower-bound filter; saved views now restore the time window too.
+- Added dashboard-level `loading.tsx` and `error.tsx` boundaries with layout-matched skeletons, retry recovery, and a project-selector escape hatch.
+- Extended the command menu with active-project run and session lookup actions when a query is entered, preserving deep-linkable context.
+- Added a dashboard-specific not-found boundary with a clear explanation and project-selector recovery path.
+- Added confirmation before muting an alert; resolve/reopen remain reversible through the alert center.
+- Expanded Overview health summary with sample-labeled failure rate and p95 latency metrics, each linking directly to the relevant Runs investigation view.
+- Live beta smoke now passes 5/5 available checks; 2 credential-dependent ingestion checks are skipped without smoke credentials. Also restored legacy `5t1r_sk_live_` API-key prefix acceptance so malformed legacy-key payloads reach the documented 422 validation path.
+- Final `npm run build` passes after the latest changes and generates 58 routes. In-app browser visual inspection was attempted against the local dashboard but timed out before a reliable authenticated render; manual authenticated visual QA remains pending.
+- Fresh browser inspection now confirms the public entry page renders its trace-first hierarchy and interactive controls; `/dashboard` consistently redirects to Clerk sign-in without an authenticated session, so authenticated dashboard visual QA remains the only browser-gated check.
+- Hardened trace payload copying with failure recovery, live-region feedback, accessible labels, and visible keyboard focus on copy actions.
+- Made the selected trace span deep-linkable via the `span` query parameter; clicking a span, using the replay slider, and focusing the first error synchronize the evidence panel and URL.
+- Expanded Alerts into a lifecycle-aware center with backward-compatible active defaults, URL-persisted active/resolved/muted tabs, resolve/mute/reopen actions, and accessible action labels.
+- Added a global `prefers-reduced-motion` override covering dashboard animations, transitions, and smooth scrolling.
+- Standardized Trace Search around the shared empty state, distinguishing first-use from no-match results, and added an inline retry action for analytics outages.
+- Full production verification completed: `npm run lint:platform`, `npx.cmd tsc --noEmit`, and `npm run build` all pass; Next generated all 57 routes.
+- Audited and cleaned the dashboard lint surface; `npx.cmd eslint src/components/dashboard src/app/dashboard` now passes cleanly. Remaining full-lint errors are outside the dashboard scope (blog, marketing, shared hooks, and unrelated APIs).
+- Verification: focused Runs ESLint, TypeScript, and `git diff --check` pass.
+
+- Added reusable dashboard signal, metric, and attention primitives in `src/components/dashboard/dashboard-primitives.tsx`.
+- Refreshed Overview with clickable health metrics, failure-aware attention queue, and next-best-action links.
+- Added dashboard grid, semantic signal, and tabular-number CSS tokens; enabled dark color-scheme behavior.
+- Updated shell group language from Control/Configure toward Operate/Manage while retaining existing routes.
+- Verification: TypeScript, focused dashboard ESLint, and `npm run lint:platform` pass.
+- Reorganized the dashboard sidebar into intent-based Observe, Analyze, Improve, Operate, Manage, and Resources groups.
+- Added operational, API key, and billing destinations to the Manage/Operate areas.
+- Made Runs `status` and `q` state URL-addressable so Overview links preserve user context.
+- Verification: focused dashboard ESLint and TypeScript pass.
+- Added error-first Trace Viewer navigation: the first error span can be focused, highlighted, and scrolled into view.
+- Added stable span anchors and keyboard-visible focus styling to support direct debugging navigation.
+- Verification: Trace Viewer ESLint and TypeScript pass.
+- Added the first global command-menu shell slice with keyboard shortcut support, destination filtering, and project-aware navigation.
+- Reused the existing dialog system; no new package dependency.
+- Verification: command menu/topbar TypeScript and focused ESLint pass with only existing warnings.
+- Made Trace Search query, status, and day-window state URL-addressable and added reusable search presets.
+- Improved result hierarchy with stronger error/healthy status signals and focus treatment.
+- Verification: Trace Search and Sessions ESLint plus TypeScript pass.
+- Made Costs period selection URL-addressable and added explicit measured-spend/source context.
+- Added a direct Costs → Runs workflow link and removed an unused chart import found during focused lint.
+- Verification: Costs ESLint and TypeScript pass.
+- Added explicit supported workspace context to the topbar using Clerk organization state and the authorized project query.
+- Replaced the static running badge with organization/project context while preserving existing auth and project boundaries.
+- Verification: topbar ESLint and TypeScript pass with existing warnings only.
+- Restored the project-level Alerts center with all/unread filters and the existing Convex read-state mutations.
+- Kept the topbar popup as the quick-access notification surface while making the full route operational.
+- Verification: Alerts page/list ESLint and TypeScript pass.
+- Exposed existing environment and release search filters in the Trace Search UI and preserved them in submitted query state.
+- Verification: focused Trace Search ESLint and standalone TypeScript pass.
+- Improved Runs row hierarchy with primary model and session context from the existing Convex run summary shape; context hides responsively on narrow screens.
+- Verification: Runs ESLint and TypeScript pass.
+- Ran focused lint across the full dashboard redesign surface; it is clean, and `npm run lint:platform` passes.
+- Removed topbar lint warnings by exposing title/description to assistive technology and using dimensioned `next/image` avatars.
+- Standalone TypeScript passes; full production build remains timeout-limited on Windows without emitted source errors.
+- Added explicit Clerk organization switching to the topbar using the installed `OrganizationSwitcher`, preserving personal workspace support and existing auth boundaries.
+- Verification: topbar ESLint and TypeScript pass.
+- Made Runs pagination deep-linkable with URL-backed page and row-limit state, preserving status/search context when navigating.
+- Verification: Runs ESLint is clean; TypeScript passed in the pagination verification run.
+- Made Sessions responsive: desktop keeps the dense grid while mobile uses labeled metric rows with preserved session context and deep links.
+- Added stronger focus/hover affordances and tabular-number treatment.
+- Verification: Trace Search and Sessions ESLint plus TypeScript pass.
+- Added persistent Trace Viewer context strips for trace name, environment, release, and session metadata.
+- Added a sticky selected-span evidence panel tied to the active replay span, including output preview and error details.
+- Verification: Trace Viewer ESLint and TypeScript pass.
+
+## AI Engineering Platform Pass (2026-08-05)
+
+- Added score analytics in the Evaluation workspace: per-evaluator sample counts, numeric averages, boolean pass rates, and source breakdowns.
+- Extended the prompt playground to compare two provider models in parallel with per-model output and latency.
+- Replaced evaluation sub-route placeholder copy with working dataset, run-history, monitor, and settings workflows.
+- Made dataset versions backward-compatible for legacy Convex documents (missing versions default to v1 on update).
+- Verification: production `npm run build`, TypeScript, focused platform lint, and Convex code generation pass. Authenticated browser E2E remains pending until a signed-in test session is available.
+- Added independent annotation review records with self-claim, reviewer submission, reviewer rotation support, and agreement reporting in the review queue.
+- Added an API-key-authenticated prompt resolver for labeled development/staging/production versions, plus public runtime documentation and smoke coverage.
+- Added `getPrompt` / `get_prompt` helpers to the TypeScript and Python SDKs, including prompt-version trace linking examples.
+- Added project/restricted dataset access modes, owner-controlled sharing, and permission checks across dataset and experiment reads/writes.
+- Added experiment score deltas against the prior run, with a regression/improvement report in the experiment workspace.
+- Fixed API-key SDK score ingestion so declared numeric, boolean, categorical, and text data types are persisted and validated correctly.
+- Added SDK-side prompt caching with stale-cache and explicit fallback recovery for runtime availability.
+- Extended platform smoke coverage to the offline evaluation-run API and verified the full Next production build again (56 routes).
+- Made the TypeScript and Python SDK suites runnable from the repository root; both pass (24 TS, 18 Python).
+- Corrected pricing copy that still described shipped prompt/evaluation/experiment/runtime workflows as roadmap items.
+- Added the OTLP health endpoint to platform smoke coverage and verified the OTLP route plus TypeScript compilation.
+- Hardened API-key usage bookkeeping so the public mutation requires the matching hashed key and active project, protecting both native and OTLP ingestion.
+- Added a first-class Datasets dashboard route and sidebar navigation entry, backed by the existing dataset workflow, plus smoke coverage.
+- Added a one-click “Share trace” action that copies the authenticated deep link from the trace viewer, and cleared the viewer lint gate.
+- Added Integrations as a direct dashboard Resources link and kept it covered by the public-route smoke suite.
+- Platform-focused lint passes; the repository-wide lint command still reports unrelated legacy errors in blog/marketing files and is intentionally not being widened into this platform pass.
+- Closed the production-label bypass: prompt mutations and the editor can promote only to development/staging; production is assigned exclusively by a passed evaluation release gate.
+- Expanded the integrations guide with a copy-paste OTLP exporter setup and explicit OpenAI, LangChain, and LlamaIndex instrumentation guidance.
+- Expanded `lint:platform` to cover OTLP ingestion, Datasets, sidebar navigation, trace sharing, and all current platform workflow files; the gate passes with TypeScript compilation.
+- Made the interactive demo’s production-promotion control functional: clicking it updates the demo state and explains the evaluation-gated release behavior.
+- Ran the live platform smoke suite against the existing local server, fixed `/api/evaluation/run` invalid-ID handling (500 → 404), and confirmed every smoke route passes.
+- Final `npm run build` passes after all changes: Next.js compiled, TypeScript passed, and all 56 static/dynamic routes generated successfully.
+- Added an unauthenticated OTLP POST contract assertion to smoke coverage; the live suite still passes.
+- Added the same unauthenticated-boundary assertion for native `/api/ingest`; smoke and focused lint remain green.
+- Added dedicated `/docs/lifecycle` and `/product/lifecycle` overview pages explaining the complete Trace → Deploy loop, with both routes in smoke coverage.
+- Expanded the interactive demo with a dedicated Datasets tab showing versioned examples, expected outputs, metadata, and project-sharing state.
+
 This plan merges the **Comprehensive Build Plan** and the **What To Do Now** strategic assessment. It prioritises the transition from a verified ingestion pipeline to a functional, high-fidelity developer product.
+
+## Evaluation Engine Integration (2026-08-05)
+
+- Added the durable evaluation domain model in `convex/schema.ts`: evaluator versions, suites, jobs, results, monitors, and feedback.
+- Added `convex/evaluationEngine.ts` for authenticated overview, trace-quality reads, evaluator/suite/job/monitor creation, and deduplicated feedback capture.
+- Replaced the Evaluation Lab landing surface with a unified Evaluation Engine workspace and added datasets, runs, monitors, and settings routes while preserving existing evaluator/review URLs.
+- Added trace-viewer quality evidence and expanded deterministic evaluator rules for exact match, regex, JSON validity, and basic JSON Schema validation.
+- Added `/product/evaluation-engine` and marketing navigation copy.
+- Remaining integration work at the time was Inngest online execution, provider-backed detectors, reviewer workflows, score aggregation, and release gates.
+- Follow-up completion: Online execution, offline jobs, guardrail templates, automatic review queueing, reviewer rotation/agreement, API-key feedback/score helpers, Tinybird score aggregation, recovery alerts, release gates, prompt promotion, and quickstart/SDK documentation are wired.
 
 ## Strategic Decision: SaaS Infrastructure
 As established in the "What To Do Now" document, tracify is officially a **Developer Infrastructure SaaS**, not a web agency. All efforts are focused on agent observability.
@@ -141,3 +286,247 @@ The single most important UI in the product.
 ### Manual Verification
 - **Onboarding E2E:** Verify a new user can sign up, create a project, instrument an agent, and see the first trace.
 - **UI Audit:** Ensure 0px radius and monochrome high-contrast styling remains consistent.
+
+### Competitive Product Surface [DONE]
+- [x] Product detail pages now cover the currently shipped tracing, analytics, reporting, failure, tool/LLM call, and runtime-control capabilities.
+- [x] Public roadmap, contact, and status routes establish an honest delivery and enterprise-contact surface.
+- [x] Runtime control is reachable at `/dashboard/[projectId]/control` through the new dashboard Control group.
+- [ ] Continue the planned program with canonical telemetry/session data, search, redaction, datasets/evaluations, prompt management, and enterprise deployment in separately verifiable milestones.
+
+### Observe Foundation: Sessions and Search [DONE]
+- [x] Canonical optional session context is accepted by native and OTLP ingestion and both SDKs.
+- [x] Convex stores bounded session summaries and links saved runs by session.
+- [x] Tinybird-backed trace search supports bounded metadata, status, cost, latency, and time-window filters.
+- [x] Dashboard exposes Sessions, session detail, and Trace Search under Observe.
+- [ ] Next: ingestion-time redaction and object-storage references for large/multimodal payloads.
+
+## Evaluation Engine Integration (2026-08-06)
+- [x] Online/offline evaluators, guardrail templates, typed scores, feedback, human review, and trace-linked quality panels.
+- [x] Regression suites expose release-gate metrics and safe prompt-version promotion.
+- [x] Monitor state tracks both threshold breaches and recovery alerts.
+- [x] Numeric evaluation scores have a Tinybird datasource and hourly time-series query path.
+- [ ] Production validation remains: configure the internal secret and deploy the Tinybird datasource in the active workspace.
+## Dashboard Feedback States (2026-08-07)
+- Added a reusable empty-state primitive with explanatory copy and optional recovery/onboarding action.
+- Applied it to Sessions and Alerts.
+- Verification: focused ESLint and standalone TypeScript pass.
+## Runs Triage Views (2026-08-07)
+- Added URL-backed client-side sorting for newest, most expensive, slowest, and most spans.
+- Added visible Views controls so common triage states are one interaction away and survive refresh/deep links.
+- Verification: Runs ESLint and standalone TypeScript pass.
+## Server-backed Runs Filters (2026-08-07)
+- Extended `getRunsPageByProject` with optional model, session, minimum cost, and minimum span-count filters.
+- Connected the Runs filter controls to URL state and the Convex paginated query, with numeric validation for threshold inputs.
+- Regenerated Convex bindings and verified focused ESLint plus TypeScript.
+## Runs Bulk Export (2026-08-07)
+- Added accessible row selection and select-all-visible behavior to Runs.
+- Added bounded CSV export for selected loaded runs, including status, model, session, spans, cost, and start time.
+- Verification: Runs ESLint and standalone TypeScript pass.
+## Search Saved Queries (2026-08-07)
+- Added project-scoped local saved searches with naming, restore, and delete actions.
+- Added visible active filter chips with one-click clearing for query, environment, release, and status.
+- Preserved URL-backed query state and verified focused ESLint plus TypeScript.
+## Trace Handoff Feedback (2026-08-07)
+- Hardened the Trace Viewer share-link action against clipboard failures.
+- Added visible button fallback text and an aria-live announcement for copied/failed states.
+- Verification: Trace Viewer ESLint and standalone TypeScript pass.
+## Improve Lifecycle Navigation (2026-08-07)
+- Added a shared lifecycle rail across Prompts, Datasets, Evaluation, Experiments, and Playground.
+- The rail makes Observe → Collect → Evaluate → Compare → Promote → Monitor explicit, with active-step styling and keyboard-visible focus.
+- Verification: affected route ESLint and standalone TypeScript pass.
+## Alert Review States (2026-08-07)
+- Expanded Alerts with All, Unread, and Reviewed views while preserving mark-read and inspect behavior.
+- Alert rows now expose review state and triggering run context directly in the center.
+- Verification: Alerts ESLint and standalone TypeScript pass.
+## Sidebar Keyboard Shortcut (2026-08-07)
+- Added Ctrl+\\ / Cmd+\\ as a global sidebar toggle shortcut.
+- Added the shortcut to the sidebar control tooltip while retaining the accessible button label.
+- Verification: shell/sidebar ESLint and standalone TypeScript pass.
+## Dashboard Quality Gate and Navigation Audit (2026-08-07)
+- Platform lint and standalone TypeScript pass after the dashboard slices.
+- Corrected sidebar taxonomy so Integrations is under Operate and Members is visible under Manage.
+- Updated active-path matching to handle query-bearing navigation links such as the Members shortcut.
+## Visual QA and Trace Context Links (2026-08-07)
+- Attempted authenticated dashboard visual QA at localhost; the app correctly redirected to Clerk sign-in, so project-level desktop/mobile inspection remains pending authenticated access.
+- Trace Viewer context metadata now links sessions to Session detail and environment/release values to filtered Search routes.
+- Verification: Trace Viewer ESLint and standalone TypeScript pass.
+## Active Project Shortcut (2026-08-07)
+- Added Alt+Shift+O / Cmd+Shift+O to open the active project's Overview from any dashboard route.
+- Added the shortcut to the command-menu footer alongside the sidebar shortcut.
+- Verification: shell/command-menu ESLint and standalone TypeScript pass.
+## Alerts URL State (2026-08-07)
+- Persisted the Alerts All/Unread/Reviewed view in the `view` query parameter.
+- Alert review tabs now restore correctly from deep links and refreshes.
+- Verification: Alerts ESLint and standalone TypeScript pass.
+## Alert Grouping (2026-08-07)
+- Grouped identical alert type/message pairs in the alert center and surfaced occurrence counts.
+- Preserved the first triggering run as the direct inspection target while reducing repeated visual noise.
+- Verification: Alerts ESLint and standalone TypeScript pass.
+## Runs Accessibility Hardening (2026-08-07)
+- Added accessible names and focus-visible treatment to the icon-only run link.
+- Added `aria-pressed` semantics and focus states to status and view toggles.
+- Verification: Runs ESLint and standalone TypeScript pass.
+## Repository Lint Audit (2026-08-07)
+- `git diff --check` passes.
+- Dashboard-focused lint, platform lint, and standalone TypeScript pass.
+- Full `npm run lint` remains red with 69 pre-existing errors and 29 warnings across unrelated marketing/UI/hooks/lib files; this is an outstanding repository-wide gate, not a dashboard-specific diagnostic.
+## Runs Empty State (2026-08-07)
+- Replaced the bare Runs “No results found” message with a shared contextual empty state.
+- Filtered no-data states offer Clear filters; genuinely empty projects offer the Quickstart path.
+- Verification: Runs ESLint and standalone TypeScript pass.
+## Shared Empty-State Focus (2026-08-07)
+- Added a visible focus ring to the shared empty-state recovery link used across dashboard surfaces.
+- Verification: dashboard primitives ESLint and standalone TypeScript pass.
+## Run Environment and Release Contract (2026-08-07)
+- Added optional environment and release fields to Convex agent-run summaries.
+- Propagated those fields from Inngest span processing into run upserts.
+- Added server-backed Runs filters and URL state for environment and release.
+- Regenerated Convex bindings and verified focused lint plus TypeScript.
+## Runs Context Visibility (2026-08-07)
+- Added environment and release context to the large-screen Runs row hierarchy alongside model and session.
+- Verification: Runs ESLint and standalone TypeScript pass.
+## Cost Breakdown Actions (2026-08-07)
+- Added direct “Inspect model runs” links beneath the Cost by Model chart.
+- Links carry the model filter and cost sort into the Runs workflow.
+- Verification: Costs ESLint and standalone TypeScript pass.
+## Overview Evaluation Quality (2026-08-07)
+- Added the existing project evaluation pass rate to the Overview health summary.
+- The metric is clickable, sample-labeled, and shows an explicit no-data state until evaluations exist.
+- Verification: focused Overview ESLint, standalone TypeScript, and `git diff --check` pass.
+## Overview Scope-Preserving Links (2026-08-07)
+- Overview run metrics, attention items, and failure actions now carry the selected `days` window into Runs.
+- Verification: focused Overview ESLint, standalone TypeScript, and `git diff --check` pass.
+## Overview Alert Action (2026-08-07)
+- Overview now includes a direct Configure alert coverage action alongside failure, spend, and quality actions.
+- All next-best-action links have visible keyboard focus treatment.
+- Verification: focused Overview ESLint, standalone TypeScript, and `git diff --check` pass.
+- The configuration action points to project settings; alert center remains the review destination.
+## Shared Dashboard Contracts (2026-08-07)
+- Added a shared dashboard contract module for metric/attention shapes, time ranges, run filters, saved views, alert status, and query state.
+- Runs and primitives now consume shared contracts instead of duplicating route-local types.
+- Verification: focused ESLint, standalone TypeScript, and `git diff --check` pass.
+## Trace Action Focus States (2026-08-07)
+- Added consistent focus-visible treatment to Trace Viewer share, refresh, and first-error actions.
+- Existing annotation/comment, deep-link, error-first, and cancel workflows remain intact.
+- Verification: focused Trace Viewer ESLint, standalone TypeScript, and `git diff --check` pass.
+## Trace Annotation Action (2026-08-07)
+- Named and focused the icon-only annotation submit control in the Trace Viewer.
+- Verification: focused Trace Viewer ESLint, standalone TypeScript, and `git diff --check` pass.
+## Critical Route Validation (2026-08-07)
+- `npm run build` passes; Next generated 58 routes including the dashboard surfaces.
+- `npm run smoke:beta` passes 5 checks with 2 credential-dependent skips and no failures.
+- Dashboard-focused ESLint, TypeScript, and `git diff --check` pass.
+- Authenticated visual QA remains an explicit follow-up because local dashboard access redirects to Clerk sign-in.
+## Accessibility Sweep (2026-08-07)
+- Named member actions, analytics refresh state, and documentation navigation focus behavior.
+- Verification: focused ESLint, standalone TypeScript, and `git diff --check` pass.
+## Explicit Environment Context (2026-08-07)
+- Added environment scope to the organization/project context strip in the topbar.
+- The context reads the active URL filter and defaults to “all environments” without inventing configuration.
+- Verification: focused topbar ESLint, standalone TypeScript, and `git diff --check` pass.
+## Route-Aware Time Context (2026-08-07)
+- Fixed topbar scope reporting so Runs/Search no longer display Overview’s 7-day default when their default window is 30 days.
+- Verification: focused topbar ESLint, standalone TypeScript, and `git diff --check` pass.
+## Topbar Time Context (2026-08-07)
+- Topbar context now displays environment scope and the active 1d/7d/30d/90d dashboard range.
+- Invalid or absent range values use the same 7-day default as Overview.
+- Verification: focused topbar ESLint, standalone TypeScript, and `git diff --check` pass.
+## Final Dashboard Build Recheck (2026-08-07)
+- `npm run build` passes after the latest dashboard/topbar changes and generates all 58 routes.
+## Overview Range Semantics (2026-08-07)
+- Overview range controls now expose selected state to assistive technology and have consistent keyboard focus treatment.
+- Verification: focused Overview ESLint, standalone TypeScript, and `git diff --check` pass.
+## Overview Quality Trend (2026-08-07)
+- Added a daily quality pass-rate chart from the existing recent evaluation results contract.
+- Empty days render as zero while the surrounding label makes the limited sample explicit; no synthetic quality score is created.
+- Verification: focused Overview ESLint, standalone TypeScript, and `git diff --check` pass.
+## Shell Icon Accessibility (2026-08-07)
+- Named the account and alert icon-only controls for screen readers and added visible focus rings.
+- Verification: focused topbar ESLint, standalone TypeScript, and `git diff --check` pass.
+## Alert Recommended Actions (2026-08-07)
+- Alert cards now explain the next useful action for cost and failure alerts.
+- Recommendations are deliberately honest: thresholds and trends remain absent until the backend exposes them.
+- Verification: focused Alerts ESLint, standalone TypeScript, and `git diff --check` pass.
+## Alert Resolve Safeguard (2026-08-07)
+- Resolving an alert now requires confirmation and communicates the reversible reopen path.
+- Verification: focused Alerts ESLint, standalone TypeScript, and `git diff --check` pass.
+## Alert Filter Semantics (2026-08-07)
+- Alert lifecycle filters now expose selected state to assistive technology and keyboard users.
+- Verification: focused Alerts ESLint, standalone TypeScript, and `git diff --check` pass.
+## Overview Run Failure Trend (2026-08-07)
+- Added a combined run-volume and failure-rate chart to the Overview cockpit.
+- The chart is derived from loaded run summaries and explicitly labels its sample/window to avoid overstating coverage.
+- Verification: focused Overview ESLint, standalone TypeScript, and `git diff --check` pass.
+## Overview URL Time Range (2026-08-07)
+- Overview health windows now use the deep-linkable `range` query parameter for 1d, 7d, 30d, and 90d.
+- Range changes preserve other query state and update without scrolling the page.
+- Verification: focused Overview ESLint, standalone TypeScript, and `git diff --check` pass.
+## Project Skill: Hog Release Notes (2026-08-08)
+- Initialized and implemented `.agents/skills/hog-release-notes` with a focused workflow for researching, drafting, and formatting PostHog release notes.
+- No bundled resources are needed because the workflow relies on repository history and the existing changelog.
+## PostHog Environment Configuration (2026-08-08)
+- Added the supplied PostHog browser project token and EU host to `.env.local` and `.env.prod`.
+## Marketing Surface Refresh (2026-08-08)
+1. Establish page-level content architecture and conversion paths for home, blog, FAQ, docs, pricing, contact, and signup.
+2. [Complete 2026-08-09] Redesign the homepage with original Tracify product visuals, lifecycle proof, integration confidence, customer-ready trust signals, and conversion CTAs.
+   - Follow-up: compacted the desktop/tablet composition to a single viewport per primary section and top-aligned the hero health panel.
+   - Added a removable three-section exploration set at the bottom for user selection: execution report, developer-first implementation brief, and platform lifecycle matrix.
+   - Follow-up round 02: appended ten more removable concepts (04–13), each with a distinct composition and original Tracify content, while leaving all earlier sections intact.
+   - Hero gallery follow-up: appended five removable hero directions (A–E) after all existing concepts, with the production hero left untouched.
+   - Definitive follow-up: appended Hero F as a single best-of gallery direction with run health, evidence, diagnosis, evaluation, and release proof visible together.
+   - Footer follow-up: appended four removable footer/newsletter directions with distinct editorial, newsroom, control-room, and brand-monument layouts while preserving the production footer.
+   - Full-bleed footer follow-up: added Footer 05 with a responsive edge-to-edge `tracify` wordmark as the final visual anchor.
+   - Refined Footer 05 so the wordmark has no horizontal inset and deliberately spans the full viewport from left to right.
+   - CTA follow-up: appended five removable conversion directions covering editorial, proof-led, developer, lifecycle, and live-signal structures while preserving existing CTAs.
+   - Global polish follow-up: standardized selected text to a faint translucent yellow marker across all routes; moved the rule outside cascade layers so local selection utilities cannot win.
+   - Pricing follow-up: appended five removable pricing directions using the existing Free, $19 Pro, $39 Team, and Enterprise plan facts without changing `/pricing`.
+   - Pricing clarity refinement: upgraded every direction to surface monthly price, usage allowance, and concrete plan benefits before the conversion action.
+   - Pricing billing refinement: added a shared monthly/annual state with exact 20%-off monthly equivalents and a clearly readable normal-font `/mo` suffix in every plan presentation.
+   - Extended-surface exploration: appended thirty removable directions (three each for proof, integrations, trust, FAQ, docs, use cases, comparisons, resources, workflow, and contact) after the pricing gallery.
+   - Creative gallery rebuild: replaced the uniform left-copy/right-visual pattern with theme-specific layouts, original generated art, placeholder logo treatments, restrained signal colors, and reduced-motion-safe interactive animation.
+   - Future-surface exploration: appended 24 further directions spanning product sandbox, calculators, architecture, migration, onboarding, reliability, deployment, personas, evaluation, cost, release gates, trace anatomy, brand/company/community, templates, newsletter, announcements, navigation, hero, pricing, page curation, mobile, and footer.
+   - Private-library follow-up: moved every exploration off `/` and into canonical `/admin/library`, with 94 live sections across 16 categories, searchable/filterable cards, direct local anchor links, and five recommended site structures.
+   - Lead-generation follow-up: added six concepts covering readiness scoring, trace clinics, benchmark research, cost diagnostics, migration planning, and an operator email course.
+   - Access follow-up: every host now requires Clerk authentication plus an approved admin user or an approved organization with `org:admin`; access fails closed when unconfigured, the route is absent from marketing navigation, and it remains excluded from indexing.
+   - Owner-access follow-up: added a server-side Clerk email allowlist so `kristoffer.bon@gmail.com` is approved locally and in the project production environment configuration.
+   - Alternative-homepage follow-up: added public `/alternative` as one deliberate conversion-first composition using the strongest hero, product, lead-generation, pricing, CTA, nav, and footer patterns; made acid yellow the system-level accent and linked it from the admin library.
+   - Composer follow-up: added private `/admin/composer` with seven show/hide controls that generate a shareable section-filtered `/alternative?sections=...` URL; library category links use URL filters for focused Hero, CTA, and other category views.
+   - Future 19 system follow-up: translated the new navigation's light-grid, black-panel, yellow-accent visual language into 15 distinct live sections and indexed them under a dedicated library category; the library now contains 114 sections across 17 categories.
+   - Future 19 preview follow-up: replaced the mixed `/alternative` composition with a complete preview using only the Future 19 navigation system and its 15 coordinated homepage sections.
+   - Homepage promotion follow-up: replaced the public `/` page body with the approved Future 19 composition, while retaining `/alternative` as a comparison preview.
+   - Sitewide chrome follow-up: centralized the Future 19 navbar and footer in a route-aware root shell, removed page-local duplicates, and excluded `/dashboard` and its child routes.
+3. Turn the existing Sanity-backed blog into an editorial hub with featured stories, categories, article templates, RSS, and a working subscription path.
+4. Replace the three-card FAQ with an accessible accordion and a dedicated route or full FAQ index if content volume warrants it.
+5. Validate responsive behavior, keyboard accessibility, metadata/schema, and builds; measure the funnel with privacy-appropriate events.
+# Future 19 auth implementation — 2026-08-10
+
+1. [completed] Translate the production Future 19 marketing system into a dedicated auth shell.
+2. [completed] Rebuild email/password and Google/GitHub OAuth forms with accessible interaction states.
+3. [completed] Add password recovery, reset, provider-error, and invitation pages.
+4. [completed] Extend Better Auth's Convex configuration for GitHub and managed reset emails.
+5. [completed] Run type, lint, diff, browser, and production-build verification.
+# Better Auth dashboard production connection — 2026-08-10
+
+1. [completed] Confirm the dashboard plugin exists in the Convex-hosted auth configuration.
+2. [completed] Replace `BETTER_AUTH_API_KEY` in the production Convex deployment.
+3. [completed] Deploy the production Convex backend and Better Auth component.
+4. [completed] Deploy the application to Vercel production and wait for Ready.
+5. [completed] Confirm the canonical custom domain resolves to the new deployment.
+# Stable staging hostname — 2026-08-10
+
+1. [completed] Resolve the current production deployment and Vercel domain ownership.
+2. [completed] Assign `tracifytech.vercel.app` as an alias of the live deployment.
+3. [completed] Trust the staging origin in Better Auth and deploy Convex production.
+# Better Auth Sentinel — 2026-08-10
+
+1. [completed] Add `sentinel()` beside the dashboard plugin on the auth server.
+2. [completed] Add `sentinelClient()` with the project identify endpoint.
+3. [completed] Configure production environment variables in Convex and Vercel.
+4. [completed] Verify types/lint and deploy Convex plus Vercel production.
+5. [completed] Point canonical and stable staging hostnames at the Ready build.
+# Better Auth social OAuth credentials — 2026-08-10
+
+1. [completed] Audit local Google/GitHub credential availability.
+2. [completed] Reuse the existing Google OAuth pair in both Convex environments.
+3. [completed] Confirm the auth server and UI already invoke both provider IDs.
+4. [completed] Configure the supplied GitHub OAuth App credentials in both Convex environments and deploy production.

@@ -117,7 +117,7 @@ export function DebugStream() {
   return (
     <section 
       id="workspace-terminal"
-      className="relative h-screen w-full bg-[#050505] flex flex-col justify-center items-center selection:bg-white/10 overflow-hidden font-mono"
+      className="relative h-screen w-full bg-[#050505] flex flex-col justify-center items-center selection:bg-yellow-300/40 overflow-hidden font-mono"
     >
       
       <div className="w-full h-[520px] flex flex-col bg-[#0A0A0A] shadow-2xl relative z-10 overflow-hidden">
