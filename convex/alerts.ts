@@ -26,6 +26,7 @@ export const create = mutation({
     type: v.string(),
     message: v.string(),
     triggeredAt: v.string(),
+    state: v.optional(v.union(v.literal("active"), v.literal("resolved"), v.literal("muted"))),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -42,7 +43,7 @@ export const create = mutation({
       return duplicate._id;
     }
 
-    return await ctx.db.insert("alerts", args);
+    return await ctx.db.insert("alerts", { ...args, state: args.state ?? "active" });
   },
 });
 
@@ -114,5 +115,22 @@ export const markRead = mutation({
     }
 
     return { updated: false };
+  },
+});
+
+export const updateState = mutation({
+  args: {
+    alertId: v.id("alerts"),
+    state: v.union(v.literal("active"), v.literal("resolved"), v.literal("muted")),
+  },
+  handler: async (ctx, { alertId, state }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return { updated: false };
+    const alert = await ctx.db.get(alertId);
+    if (!alert) return { updated: false };
+    const project = await ctx.db.get(alert.projectId);
+    if (!project || !canAccessProject(project, identity)) return { updated: false };
+    await ctx.db.patch(alertId, { state });
+    return { updated: true };
   },
 });

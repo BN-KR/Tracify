@@ -3,13 +3,16 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { useState } from "react";
+import { useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { formatDuration } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   LineChart,
   Line,
+  ComposedChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -18,25 +21,37 @@ import {
 } from "recharts";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { Activity, DollarSign, Zap, AlertTriangle } from "lucide-react";
+import { Activity, DollarSign, Zap, AlertTriangle, ArrowUpRight, CircleCheck, Clock3, Gauge, Percent } from "lucide-react";
 import { RunsTable } from "./runs-table";
 import { OrchestrationSavings } from "./orchestration-savings";
 import { FailOpenAlert } from "./fail-open-alert";
 import { useProjectStats } from "@/hooks/use-project-stats";
 import { AnalyticsRefreshControl } from "./analytics-refresh-control";
+import { AttentionItem, DashboardMetric, SignalBadge } from "./dashboard-primitives";
 
 interface DashboardOverviewProps {
   projectId: string;
 }
 
 export function DashboardOverview({ projectId }: DashboardOverviewProps) {
-  const [range, setRange] = useState(7);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const requestedRange = Number(searchParams.get("range"));
+  const range = useMemo(
+    () => ([1, 7, 30, 90].includes(requestedRange) ? requestedRange : 7),
+    [requestedRange],
+  );
   const recentRuns = useQuery(
     api.agentRuns.getRecentRunsByProject, 
     projectId ? { projectId: projectId as Id<"projects"> } : "skip"
   );
   const summary = useQuery(
     api.projects.getProjectManagementSummary,
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
+  );
+  const evaluationOverview = useQuery(
+    api.evaluationEngine.overview,
     projectId ? { projectId: projectId as Id<"projects"> } : "skip",
   );
   const liveRefreshKey =
@@ -50,7 +65,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
     liveRefreshKey,
   });
 
-  if (loading || recentRuns === undefined || summary === undefined) {
+  if (loading || recentRuns === undefined || summary === undefined || evaluationOverview === undefined) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -85,16 +100,25 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
     summary?.totals.activeRuns ?? recentRuns.filter(r => r.status === "running").length;
   const failedRuns =
     summary?.totals.failedRuns ?? recentRuns.filter(r => r.status === "failed").length;
+  const recentFailureRate = recentRuns.length ? (recentRuns.filter((run) => run.status === "failed").length / recentRuns.length) * 100 : 0;
+  const recentDurations = recentRuns
+    .map((run) => run.finishedAt ? new Date(run.finishedAt).getTime() - new Date(run.startedAt).getTime() : null)
+    .filter((duration): duration is number => duration !== null && Number.isFinite(duration) && duration >= 0)
+    .sort((left, right) => left - right);
+  const p95Duration = recentDurations.length ? recentDurations[Math.min(recentDurations.length - 1, Math.ceil(recentDurations.length * 0.95) - 1)] : 0;
+  const runTrend = buildRunTrendSeries(range, recentRuns);
+  const qualityTrend = buildQualityTrendSeries(range, evaluationOverview?.recentResults ?? []);
+  const runsWindow = `days=${range}`;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="dashboard-grid flex flex-col gap-8 p-1">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-mono text-[14px] uppercase tracking-widest text-white">
-            Overview
+          <h2 className="font-pixel text-xl uppercase tracking-wide text-white">
+            Workspace health
           </h2>
           <p className="mt-1 font-mono text-[11px] text-[#666666]">
-            Spend, savings, and recent run health.
+            Find the next failure worth investigating.
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3 sm:ml-auto">
@@ -108,11 +132,17 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
               <button
                 key={option.value}
                 type="button"
-                onClick={() => setRange(option.value)}
+                aria-pressed={range === option.value}
+                aria-label={`Show workspace health for ${option.label}`}
+                onClick={() => {
+                  const nextParams = new URLSearchParams(searchParams.toString());
+                  nextParams.set("range", String(option.value));
+                  router.replace(`${pathname}?${nextParams.toString()}`, { scroll: false });
+                }}
                 className={
                   range === option.value
-                    ? "h-8 border border-white bg-white px-3 font-mono text-[11px] text-black"
-                    : "h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] text-[#777777] hover:text-white"
+                    ? "h-8 border border-white bg-white px-3 font-mono text-[11px] text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    : "h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] text-[#777777] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 }
               >
                 {option.label}
@@ -128,34 +158,107 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <OverviewCard 
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-7">
+        <DashboardMetric
           label="Spend"
           value={formatGraphCurrency(totalSpend)} 
           icon={DollarSign}
-          trend={
-            useSavedFallback
-              ? "Saved total fallback"
-              : `Could have saved ${formatGraphCurrency(couldHaveSavedUsd)}`
-          }
+          href={`/dashboard/${projectId}/costs`}
+          detail={useSavedFallback ? "Saved summary" : `Could save ${formatGraphCurrency(couldHaveSavedUsd)}`}
         />
-        <OverviewCard 
+        <DashboardMetric
           label="Spans"
           value={totalSpans.toLocaleString()} 
           icon={Zap} 
+          detail={`Observed in last ${range} days`}
+          href={`/dashboard/${projectId}/runs?${runsWindow}`}
         />
-        <OverviewCard 
+        <DashboardMetric
           label="Active Runs" 
           value={activeRuns.toString()} 
           icon={Activity} 
-          status="live"
+          signal="info"
+          detail="Currently running"
+          href={`/dashboard/${projectId}/runs?status=running&${runsWindow}`}
         />
-        <OverviewCard 
+        <DashboardMetric
           label="Failed Runs" 
           value={failedRuns.toString()} 
           icon={AlertTriangle} 
-          status={failedRuns > 0 ? "warning" : "stable"}
+          signal={failedRuns > 0 ? "danger" : "success"}
+          detail={failedRuns > 0 ? "Needs attention" : "No failures detected"}
+          href={`/dashboard/${projectId}/runs?status=failed&${runsWindow}`}
         />
+        <DashboardMetric
+          label="Failure Rate"
+          value={`${recentFailureRate.toFixed(1)}%`}
+          icon={Percent}
+          signal={recentFailureRate > 0 ? "warning" : "success"}
+          detail={recentRuns.length ? `Recent ${recentRuns.length}-run sample` : "No recent runs"}
+          href={`/dashboard/${projectId}/runs?status=failed&${runsWindow}`}
+        />
+        <DashboardMetric
+          label="p95 Latency"
+          value={p95Duration ? formatDuration(p95Duration) : "—"}
+          icon={Gauge}
+          signal={p95Duration > 10000 ? "warning" : "neutral"}
+          detail={recentDurations.length ? "Recent completed runs" : "No completed runs"}
+          href={`/dashboard/${projectId}/runs?sort=duration&${runsWindow}`}
+        />
+        <DashboardMetric
+          label="Evaluation Quality"
+          value={evaluationOverview?.passRate === null || evaluationOverview?.passRate === undefined ? "—" : `${Math.round(evaluationOverview.passRate * 100)}%`}
+          icon={CircleCheck}
+          signal={evaluationOverview?.passRate === null || evaluationOverview?.passRate === undefined ? "neutral" : evaluationOverview.passRate >= 0.9 ? "success" : "warning"}
+          detail={evaluationOverview?.resultCount ? `${evaluationOverview.resultCount} evaluation results` : "No evaluation results"}
+          href={`/dashboard/${projectId}/evaluation`}
+        />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
+        <Card className="border-[#2A2A2A] bg-[#111111] p-0 shadow-none">
+          <div className="flex items-start justify-between gap-4 border-b border-[#2A2A2A] p-5">
+            <div>
+              <h3 className="font-mono text-sm uppercase tracking-widest text-white">Attention queue</h3>
+              <p className="mt-1 font-mono text-[10px] text-[#777777]">The fastest path to your next useful action.</p>
+            </div>
+            <SignalBadge signal={failedRuns > 0 ? "danger" : "success"}>{failedRuns > 0 ? `${failedRuns} open` : "Clear"}</SignalBadge>
+          </div>
+          {failedRuns > 0 ? (
+            <div>
+              <AttentionItem label={`${failedRuns} failed run${failedRuns === 1 ? "" : "s"} need review`} detail="Open the failed-runs view to inspect the latest error." signal="danger" href={`/dashboard/${projectId}/runs?status=failed&${runsWindow}`} />
+              <AttentionItem label="Review recent activity" detail="Compare the newest traces against successful runs." signal="info" href={`/dashboard/${projectId}/runs?${runsWindow}`} />
+            </div>
+          ) : (
+            <div className="flex items-start gap-3 p-5">
+              <CircleCheck className="mt-0.5 size-4 text-emerald-300" aria-hidden="true" />
+              <div>
+                <p className="font-mono text-xs text-white">No failures in the current window.</p>
+                <p className="mt-1 font-mono text-[10px] text-[#777777]">Keep an eye on latency and spend as traffic grows.</p>
+              </div>
+            </div>
+          )}
+        </Card>
+        <Card className="border-[#2A2A2A] bg-[#111111] p-0 shadow-none">
+          <div className="border-b border-[#2A2A2A] p-5">
+            <h3 className="font-mono text-sm uppercase tracking-widest text-white">Next best action</h3>
+            <p className="mt-1 font-mono text-[10px] text-[#777777]">Keep the feedback loop moving.</p>
+          </div>
+          <div className="space-y-2 p-4">
+            <Link href={failedRuns > 0 ? `/dashboard/${projectId}/runs?status=failed&${runsWindow}` : `/dashboard/${projectId}/quickstart`} className="flex items-center justify-between border border-[#2A2A2A] p-3 font-mono text-xs text-[#CCCCCC] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+              <span>{failedRuns > 0 ? "Investigate latest failure" : "Verify instrumentation"}</span><ArrowUpRight className="size-3" aria-hidden="true" />
+            </Link>
+            <Link href={`/dashboard/${projectId}/costs`} className="flex items-center justify-between border border-[#2A2A2A] p-3 font-mono text-xs text-[#CCCCCC] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+              <span>Review spend trend</span><ArrowUpRight className="size-3" aria-hidden="true" />
+            </Link>
+            <Link href={`/dashboard/${projectId}/evaluation`} className="flex items-center justify-between border border-[#2A2A2A] p-3 font-mono text-xs text-[#CCCCCC] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+              <span>Check evaluation quality</span><ArrowUpRight className="size-3" aria-hidden="true" />
+            </Link>
+            <Link href={`/dashboard/${projectId}/settings`} className="flex items-center justify-between border border-[#2A2A2A] p-3 font-mono text-xs text-[#CCCCCC] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+              <span>Configure alert coverage</span><ArrowUpRight className="size-3" aria-hidden="true" />
+            </Link>
+          </div>
+        </Card>
       </div>
 
       {/* Orchestration Savings */}
@@ -167,8 +270,57 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
       {/* Charts Section */}
       <div className="grid grid-cols-1 gap-6">
         <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none">
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <h3 className="font-mono text-[14px] text-white">Run Volume &amp; Failure Rate</h3>
+              <p className="mt-1 text-[11px] uppercase tracking-widest text-[#666666]">
+                {recentRuns.length ? `Recent ${recentRuns.length}-run sample · selected ${range}-day window` : "No run summaries in the selected window"}
+              </p>
+            </div>
+            <Activity className="size-4 text-[#666666]" aria-hidden="true" />
+          </div>
+          <div className="h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={runTrend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <XAxis dataKey="day" stroke="#666666" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
+                <YAxis yAxisId="runs" stroke="#666666" fontSize={10} allowDecimals={false} />
+                <YAxis yAxisId="failure" orientation="right" stroke="#666666" fontSize={10} tickFormatter={(value) => `${value}%`} />
+                <Tooltip contentStyle={{ backgroundColor: "#0A0A0A", border: "1px solid #2A2A2A", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }} />
+                <Bar yAxisId="runs" dataKey="runs" fill="#FFFFFF" barSize={18} name="Runs" />
+                <Line yAxisId="failure" type="monotone" dataKey="failureRate" stroke="#F59E0B" strokeWidth={2} dot={false} name="Failure rate" />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+        <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none">
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <h3 className="font-mono text-[14px] text-white">Quality Score Trend</h3>
+              <p className="mt-1 text-[11px] uppercase tracking-widest text-[#666666]">
+                {evaluationOverview?.resultCount ? `${evaluationOverview.resultCount} recent evaluation results` : "No evaluation results in the selected window"}
+              </p>
+            </div>
+            <CircleCheck className="size-4 text-[#666666]" aria-hidden="true" />
+          </div>
+          <div className="h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={qualityTrend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <XAxis dataKey="day" stroke="#666666" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
+                <YAxis stroke="#666666" fontSize={10} domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                <Tooltip formatter={(value) => `${Number(value).toFixed(0)}%`} contentStyle={{ backgroundColor: "#0A0A0A", border: "1px solid #2A2A2A", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }} />
+                <Line type="monotone" dataKey="passRate" stroke="#FFFFFF" strokeWidth={2} dot={{ r: 2, fill: "#FFFFFF" }} name="Pass rate" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+        <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none">
           <div className="mb-6">
-            <h3 className="font-mono text-[14px] text-white">Spend Over Time</h3>
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="font-mono text-[14px] text-white">Spend Over Time</h3>
+              <Clock3 className="size-4 text-[#666666]" aria-hidden="true" />
+            </div>
             <p className="text-[11px] text-[#666666] uppercase tracking-widest mt-1">
               {analyticsDailyCosts.length
                 ? `LLM infrastructure costs, last ${range} day${range === 1 ? "" : "s"}`
@@ -258,42 +410,40 @@ function buildDailyCostSeries(range: number, runs: CostSeriesRun[]) {
   return days.map((day) => byDay.get(day)!);
 }
 
+function buildRunTrendSeries(range: number, runs: Array<{ startedAt: string; status: string }>) {
+  const today = new Date();
+  const days = Array.from({ length: range }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (range - 1 - index));
+    return date.toISOString().slice(0, 10);
+  });
+  return days.map((day) => {
+    const dayRuns = runs.filter((run) => run.startedAt.slice(0, 10) === day);
+    return {
+      day,
+      runs: dayRuns.length,
+      failureRate: dayRuns.length ? Math.round((dayRuns.filter((run) => run.status === "failed").length / dayRuns.length) * 100) : 0,
+    };
+  });
+}
+
+function buildQualityTrendSeries(range: number, results: Array<{ createdAt?: number; status: string }>) {
+  const today = new Date();
+  const days = Array.from({ length: range }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (range - 1 - index));
+    return date.toISOString().slice(0, 10);
+  });
+  return days.map((day) => {
+    const dayResults = results.filter((result) => result.createdAt !== undefined && new Date(result.createdAt).toISOString().slice(0, 10) === day);
+    return { day, passRate: dayResults.length ? (dayResults.filter((result) => result.status === "passed").length / dayResults.length) * 100 : 0 };
+  });
+}
+
 function formatGraphCurrency(value: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 2,
   }).format(value);
-}
-
-function OverviewCard({ 
-  label, 
-  value, 
-  icon: Icon, 
-  trend, 
-  status 
-}: { 
-  label: string; 
-  value: string; 
-  icon: any; 
-  trend?: string;
-  status?: "live" | "warning" | "stable"
-}) {
-  return (
-    <Card className="p-5 rounded-none border-border bg-[#111111] shadow-none group hover:border-zinc-700 transition-colors">
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">{label}</p>
-          <div className="flex items-baseline gap-2">
-            <h4 className="text-2xl font-mono text-white">{value}</h4>
-            {status === "live" && <div className="size-2 bg-white animate-pulse" />}
-          </div>
-          {trend && <p className="text-[10px] text-zinc-600 font-mono">{trend}</p>}
-        </div>
-        <div className="p-2 border border-border group-hover:border-zinc-700 transition-colors">
-          <Icon className={cn("size-4", status === "warning" ? "text-amber-500" : "text-zinc-500")} />
-        </div>
-      </div>
-    </Card>
-  );
 }

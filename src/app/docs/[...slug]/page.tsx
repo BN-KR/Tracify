@@ -36,7 +36,7 @@ const docPages: Record<string, { title: string; description: string }> = {
   },
   "self-hosting": {
     title: "Self-hosting",
-    description: "Run the Tracify web application and connect it to your own Convex, Tinybird, Clerk, and provider infrastructure.",
+    description: "Run the Tracify web application and connect it to your own Convex, Tinybird, Better Auth, and provider infrastructure.",
   },
 };
 
@@ -79,7 +79,7 @@ const codeExamples: Record<string, { install: string; code: string; notes: strin
   "self-hosting": {
     install: "git clone https://github.com/BN-KR/Tracify && cd Tracify && npm ci",
     code: "NEXT_PUBLIC_CONVEX_URL=https://your-convex-deployment.convex.cloud\\nNEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...\\nCLERK_SECRET_KEY=sk_...\\nTINYBIRD_HOST=https://api.tinybird.co\\nTINYBIRD_TOKEN=...\\nOPENAI_API_KEY=...\\nnpm run build && npm run start",
-    notes: ["Deploy the Next.js application to Vercel, Docker, or your own Node host.", "Create separate Convex and Tinybird environments for staging and production.", "Configure Clerk JWT issuer and Convex auth before exposing dashboard routes.", "Set provider keys only in server environments; use a reverse proxy for custom domains and TLS."],
+    notes: ["Deploy the Next.js application to Vercel, Docker, or your own Node host.", "Create separate Convex and Tinybird environments for staging and production.", "Configure Better Auth secrets, site URL, and Convex auth before exposing dashboard routes.", "Set provider keys only in server environments; use a reverse proxy for custom domains and TLS."],
   },
 };
 

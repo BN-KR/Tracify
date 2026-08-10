@@ -1,13 +1,7 @@
 import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 import { DocsViewer } from "@/components/dashboard/docs-viewer";
 
-export default async function DocsPage({
-  params,
-}: {
-  params: Promise<{ projectId: string }>;
-}) {
-  const { projectId } = await params;
-
+export default function DocsPage() {
   return (
     <div className="flex flex-col gap-6">
       <DashboardTopbar title="Documentation" description="SDK Reference & Quickstart" />

@@ -1,15 +1,10 @@
-import { SignIn } from "@clerk/nextjs";
 import { AuthShell } from "@/components/auth/auth-shell";
-import { CLERK_APPEARANCE } from "@/components/auth/clerk-appearance";
+import { BetterAuthForm } from "@/components/auth/better-auth-form";
 
 export default function SignInPage() {
   return (
     <AuthShell mode="sign-in">
-      <SignIn
-        appearance={CLERK_APPEARANCE}
-        forceRedirectUrl="/dashboard"
-        fallbackRedirectUrl="/dashboard"
-      />
+      <BetterAuthForm mode="sign-in" />
     </AuthShell>
   );
 }

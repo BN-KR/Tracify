@@ -63,7 +63,7 @@ export function RootCauseTrace() {
   }, []);
 
   return (
-    <section className="bg-[#050505] py-[72px] font-mono selection:bg-white/10 overflow-hidden">
+    <section className="bg-[#050505] py-[72px] font-mono selection:bg-yellow-300/40 overflow-hidden">
       <div className="max-w-[1200px] mx-auto px-6">
         
         {/* Header Block */}

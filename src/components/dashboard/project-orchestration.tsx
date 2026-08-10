@@ -60,6 +60,7 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (project?.runtimePolicy) {
       const rp = project.runtimePolicy;
@@ -78,6 +79,7 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
       });
     }
   }, [project]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   function addModelToChain() {
     const model = newModel.trim();

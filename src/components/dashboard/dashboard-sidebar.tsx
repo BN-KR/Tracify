@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-type GroupId = "observe" | "control" | "configure" | "resources";
+type GroupId = "observe" | "analyze" | "improve" | "operate" | "manage" | "resources";
 
 type NavItem = {
   title: string;
@@ -55,10 +55,11 @@ const EXPANDED_WIDTH = 240;
 
 function isActivePath(pathname: string, href: string, projectId: string) {
   if (href.startsWith("http")) return false;
-  if (href === `/dashboard/${projectId}`) {
-    return pathname === "/dashboard" || pathname === href;
+  const hrefPath = href.split("?")[0];
+  if (hrefPath === `/dashboard/${projectId}`) {
+    return pathname === "/dashboard" || pathname === hrefPath;
   }
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return pathname === hrefPath || pathname.startsWith(`${hrefPath}/`);
 }
 
 export function DashboardSidebar({
@@ -99,6 +100,12 @@ export function DashboardSidebar({
           icon: Search,
           href: projectId ? `/dashboard/${projectId}/search` : projectSetupHref,
         },
+      ],
+    },
+    {
+      id: "analyze",
+      label: "Analyze",
+      items: [
         {
           title: "Costs",
           icon: BarChart3,
@@ -109,6 +116,12 @@ export function DashboardSidebar({
           icon: FileText,
           href: projectId ? `/dashboard/${projectId}/reports` : projectSetupHref,
         },
+      ],
+    },
+    {
+      id: "improve",
+      label: "Improve",
+      items: [
         {
           title: "Prompts",
           icon: MessageSquareText,
@@ -137,19 +150,30 @@ export function DashboardSidebar({
       ],
     },
     {
-      id: "control",
-      label: "Control",
+      id: "operate",
+      label: "Operate",
       items: [
         {
           title: "Runtime Policy",
           icon: ShieldCheck,
           href: projectId ? `/dashboard/${projectId}/control` : projectSetupHref,
         },
+        {
+          title: "Alerts",
+          icon: Activity,
+          href: projectId ? `/dashboard/${projectId}/alerts` : projectSetupHref,
+        },
+        {
+          title: "Integrations",
+          icon: Terminal,
+          href: "/integrations",
+          external: true,
+        },
       ],
     },
     {
-      id: "configure",
-      label: "Configure",
+      id: "manage",
+      label: "Manage",
       items: [
         {
           title: "Settings",
@@ -157,9 +181,24 @@ export function DashboardSidebar({
           href: projectId ? `/dashboard/${projectId}/settings` : projectSetupHref,
         },
         {
+          title: "Members",
+          icon: Activity,
+          href: projectId ? `/dashboard/${projectId}/settings?tab=members` : projectSetupHref,
+        },
+        {
           title: "Manage",
           icon: SlidersHorizontal,
           href: projectId ? `/dashboard/${projectId}/manage` : projectSetupHref,
+        },
+        {
+          title: "API Keys",
+          icon: Terminal,
+          href: projectId ? `/dashboard/${projectId}/api-keys` : projectSetupHref,
+        },
+        {
+          title: "Billing",
+          icon: FileText,
+          href: projectId ? `/dashboard/${projectId}/billing` : projectSetupHref,
         },
       ],
     },
@@ -179,12 +218,6 @@ export function DashboardSidebar({
           external: true,
         },
         {
-          title: "Integrations",
-          icon: Terminal,
-          href: "/integrations",
-          external: true,
-        },
-        {
           title: "Roadmap",
           icon: FileText,
           href: "/roadmap",
@@ -196,13 +229,15 @@ export function DashboardSidebar({
 
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
     if (typeof window === "undefined") {
-      return { observe: true, control: true, configure: true, resources: true };
+      return { observe: true, analyze: true, improve: true, operate: true, manage: true, resources: true };
     }
     const stored = window.localStorage.getItem(GROUP_STORAGE_KEY);
     const defaults: Record<GroupId, boolean> = {
       observe: true,
-      control: true,
-      configure: true,
+      analyze: true,
+      improve: true,
+      operate: true,
+      manage: true,
       resources: true,
     };
     if (!stored) return defaults;
@@ -285,7 +320,7 @@ export function DashboardSidebar({
             side="right"
             className="rounded-none border border-[#2A2A2A] bg-[#111111] font-mono text-xs text-[#CCCCCC] shadow-none"
           >
-            {collapseLabel}
+            {collapseLabel} · Ctrl+\
           </TooltipContent>
         </Tooltip>
       </div>

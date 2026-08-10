@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
-import { Show } from "@clerk/nextjs";
+import { authClient } from "@/lib/auth-client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TracePreview } from "@/components/marketing/trace-preview";
@@ -47,6 +47,7 @@ const TYPEWRITER_WORDS = ["takes.", "decides.", "breaks.", "retries.", "costs."]
 // ── Main Component ─────────────────────────────────────────────────────────
 
 export function Hero() {
+  const { data: session } = authClient.useSession();
   return (
     <section
       className="relative flex items-center overflow-hidden"
@@ -142,7 +143,7 @@ export function Hero() {
               variants={itemVariants}
               className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mb-4"
             >
-              <Show when="signed-out">
+              {!session ? (
                 <Link href="/sign-up" className="w-full sm:w-auto">
                   <Button
                     variant="default"
@@ -152,9 +153,9 @@ export function Hero() {
                     Start free — no credit card
                   </Button>
                 </Link>
-              </Show>
+              ) : null}
 
-              <Show when="signed-in">
+              {session ? (
                 <Link href="/dashboard" className="w-full sm:w-auto">
                   <Button
                     variant="default"
@@ -164,7 +165,7 @@ export function Hero() {
                     Open Dashboard
                   </Button>
                 </Link>
-              </Show>
+              ) : null}
 
               <Link href="#workspace-terminal" className="w-full sm:w-auto">
                 <Button

@@ -12,6 +12,7 @@ import type * as agentRuns from "../agentRuns.js";
 import type * as alerts from "../alerts.js";
 import type * as analyticsCache from "../analyticsCache.js";
 import type * as annotations from "../annotations.js";
+import type * as auth from "../auth.js";
 import type * as comments from "../comments.js";
 import type * as costCounters from "../costCounters.js";
 import type * as evaluation from "../evaluation.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   alerts: typeof alerts;
   analyticsCache: typeof analyticsCache;
   annotations: typeof annotations;
+  auth: typeof auth;
   comments: typeof comments;
   costCounters: typeof costCounters;
   evaluation: typeof evaluation;
@@ -74,4 +76,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  betterAuth: import("../betterAuth/_generated/component.js").ComponentApi<"betterAuth">;
+};

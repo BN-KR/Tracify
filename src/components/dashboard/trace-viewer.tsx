@@ -3,7 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { SpanRow } from "@/lib/tinybird";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDuration, formatRelativeTime } from "@/lib/utils";
@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CancelRunButton } from "./cancel-run-button";
 import { useNow } from "@/hooks/use-now";
 
@@ -40,6 +42,9 @@ interface TraceViewerProps {
 
 export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   const now = useNow(1000);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const run = useQuery(
     api.agentRuns.getByRunIdForViewer,
     projectId ? { runId, projectId: projectId as Id<"projects"> } : "skip"
@@ -52,11 +57,19 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   const [spansError, setSpansError] = useState<string | null>(null);
   const [replayIndex, setReplayIndex] = useState(0);
   const [shareCopied, setShareCopied] = useState(false);
+  const [shareError, setShareError] = useState(false);
+  const selectedSpanId = searchParams.get("span");
 
   async function copyShareLink() {
-    await navigator.clipboard.writeText(window.location.href);
-    setShareCopied(true);
-    window.setTimeout(() => setShareCopied(false), 1600);
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShareError(false);
+      setShareCopied(true);
+      window.setTimeout(() => setShareCopied(false), 1600);
+    } catch {
+      setShareError(true);
+      window.setTimeout(() => setShareError(false), 2400);
+    }
   }
 
   const fetchSpans = useCallback(
@@ -98,6 +111,15 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
     return () => window.clearInterval(interval);
   }, [run?.status, fetchSpans]);
 
+  const safeSpans = useMemo(() => spans ?? [], [spans]);
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (!selectedSpanId || !safeSpans.length) return;
+    const selectedIndex = safeSpans.findIndex((span) => span.spanId === selectedSpanId);
+    if (selectedIndex >= 0 && selectedIndex !== replayIndex) setReplayIndex(selectedIndex);
+  }, [replayIndex, safeSpans, selectedSpanId]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
   if (run === undefined || (loadingSpans && !spans)) {
     return (
       <div className="space-y-6">
@@ -122,10 +144,28 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   const durationMs = run.finishedAt
     ? new Date(run.finishedAt).getTime() - new Date(run.startedAt).getTime()
     : now - new Date(run.startedAt).getTime();
-  const safeSpans = spans ?? [];
+  const traceContext = safeSpans.find((span) => span.traceName || span.environment || span.release || span.sessionId) ?? safeSpans[0];
   const spanSummary = buildSpanSummary(safeSpans);
+  const firstErrorIndex = safeSpans.findIndex((span) => span.spanType === "error" || Boolean(span.errorMessage));
   const activeReplayIndex = Math.min(replayIndex, Math.max(0, safeSpans.length - 1));
   const replaySpan = safeSpans[activeReplayIndex];
+
+  function selectSpan(index: number) {
+    const span = safeSpans[index];
+    if (!span) return;
+    setReplayIndex(index);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("span", span.spanId);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
+  function focusFirstError() {
+    if (firstErrorIndex < 0) return;
+    selectSpan(firstErrorIndex);
+    window.requestAnimationFrame(() => {
+      document.getElementById(`trace-span-${safeSpans[firstErrorIndex].spanId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
 
   return (
     <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_280px]">
@@ -147,17 +187,17 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             <button
               type="button"
               onClick={() => void copyShareLink()}
-              className="flex h-8 items-center gap-2 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] hover:border-white hover:text-white"
+              className="flex h-8 items-center gap-2 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               {shareCopied ? <Check className="size-3" /> : <Share2 className="size-3" />}
-              {shareCopied ? "Link copied" : "Share trace"}
+              {shareCopied ? "Link copied" : shareError ? "Copy failed" : "Share trace"}
             </button>
             {run.status === "running" && (
               <button
                 type="button"
                 onClick={() => void fetchSpans("manual")}
                 disabled={refreshingSpans}
-                className="h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] hover:border-white hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {refreshingSpans ? "Refreshing" : "Refresh spans"}
               </button>
@@ -165,14 +205,26 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             {run.status === "running" && (
               <CancelRunButton projectId={projectId} runId={run.runId} />
             )}
+            {firstErrorIndex >= 0 && (
+              <button
+                type="button"
+                onClick={focusFirstError}
+                className="flex h-8 items-center gap-2 border border-red-400/40 bg-red-400/5 px-3 font-mono text-[11px] uppercase text-red-300 transition-colors hover:border-red-300 hover:bg-red-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+              >
+                <AlertCircle className="size-3" aria-hidden="true" />
+                Focus first error
+              </button>
+            )}
           </div>
         </div>
+        <div aria-live="polite" className="sr-only">{shareCopied ? "Trace link copied to clipboard." : shareError ? "Trace link could not be copied." : ""}</div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <StatItem label="Status" value={<span className="capitalize">{run.status}</span>} />
           <StatItem label="Total Cost" value={formatCurrency(run.totalCostUsd)} />
           <StatItem label="Span Count" value={run.spanCount.toString()} />
           <StatItem label="Duration" value={formatDuration(durationMs)} />
         </div>
+        {traceContext ? <TraceContextStrip projectId={projectId} span={traceContext} /> : null}
         <div className="mt-4 border-t border-border pt-3 font-mono text-[10px] uppercase tracking-widest text-zinc-600">
           {run.status === "running" ? "Live trace · polling every 3s · " : ""}{spansMessage}
         </div>
@@ -200,7 +252,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
           min={0}
           max={Math.max(0, safeSpans.length - 1)}
           value={activeReplayIndex}
-          onChange={(event) => setReplayIndex(Number(event.target.value))}
+          onChange={(event) => selectSpan(Number(event.target.value))}
           disabled={!safeSpans.length}
           className="w-full accent-white"
         />
@@ -227,7 +279,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
         ) : null}
 
         {safeSpans.map((span, index) => (
-          <SpanCard key={span.spanId} span={span} index={index} projectId={projectId} replayActive={index === activeReplayIndex} />
+          <SpanCard key={span.spanId} span={span} index={index} projectId={projectId} replayActive={index === activeReplayIndex} onSelect={() => selectSpan(index)} />
         ))}
         
         {run.status === "running" && (
@@ -243,8 +295,57 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
       </div>
       </div>
 
-      <TraceSummaryPanel summary={spanSummary} durationMs={durationMs} />
+      <aside className="space-y-4 xl:sticky xl:top-20 xl:self-start">
+        {replaySpan ? <SelectedSpanPanel span={replaySpan} /> : null}
+        <TraceSummaryPanel summary={spanSummary} durationMs={durationMs} />
+      </aside>
     </div>
+  );
+}
+
+function TraceContextStrip({ projectId, span }: { projectId: string; span: SpanRow }) {
+  const values = [
+    ["Trace", span.traceName],
+    ["Environment", span.environment],
+    ["Release", span.release],
+    ["Session", span.sessionId],
+  ].filter(([, value]) => value);
+  if (!values.length) return null;
+  return (
+    <div className="mt-5 flex flex-wrap gap-2 border-t border-border pt-4">
+      {values.map(([label, value]) => (
+        <div key={label} className="min-w-0 max-w-full border border-border bg-black/30 px-3 py-2">
+          <div className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">{label}</div>
+          <div className="mt-1 max-w-[220px] truncate font-mono text-[11px] text-zinc-200">
+            {label === "Session" ? <Link href={`/dashboard/${projectId}/sessions/${encodeURIComponent(String(value))}`} className="underline decoration-zinc-700 underline-offset-4 hover:text-white hover:decoration-white">{value}</Link> : label === "Environment" || label === "Release" ? <Link href={`/dashboard/${projectId}/search?${label.toLowerCase()}=${encodeURIComponent(String(value))}`} className="underline decoration-zinc-700 underline-offset-4 hover:text-white hover:decoration-white">{value}</Link> : value}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SelectedSpanPanel({ span }: { span: SpanRow }) {
+  const label = span.modelId || span.toolName || span.spanType.replace("_", " ");
+  return (
+    <section className="border border-white/25 bg-white/[0.04] p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Selected span</div>
+          <div className="mt-1 truncate font-mono text-sm text-white">{label}</div>
+        </div>
+        <span className="shrink-0 border border-white/20 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-zinc-300">{span.spanType.replace("_", " ")}</span>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <MiniMetric label="Latency" value={formatDuration(span.latencyMs)} />
+        <MiniMetric label="Cost" value={formatCurrency(span.costUsd)} />
+      </div>
+      {span.errorMessage ? <div className="mt-3 border border-red-400/30 bg-red-400/5 p-3 font-mono text-[10px] leading-relaxed text-red-200">{span.errorMessage}</div> : null}
+      <div className="mt-3 border-t border-border pt-3">
+        <div className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">Output preview</div>
+        <pre className="mt-2 max-h-28 overflow-auto whitespace-pre-wrap break-words font-mono text-[10px] leading-relaxed text-zinc-400">{formatJson(span.output).slice(0, 1200)}</pre>
+      </div>
+    </section>
   );
 }
 
@@ -466,11 +567,12 @@ function SummaryList({
   );
 }
 
-function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, index: number, projectId: string, replayActive?: boolean }) {
+function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: SpanRow, index: number, projectId: string, replayActive?: boolean; onSelect?: () => void }) {
   const [isExpanded, setIsExpanded] = useState(index === 0 || span.spanType === "error");
   const [commentContent, setCommentContent] = useState("");
   const [isCommenting, setIsCommenting] = useState(false);
   const [copiedPayload, setCopiedPayload] = useState<"input" | "output" | null>(null);
+  const [copyError, setCopyError] = useState(false);
 
   const comments = useQuery(api.comments.listBySpan, {
     spanId: span.spanId,
@@ -498,9 +600,15 @@ function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, ind
 
   async function handleCopyPayload(kind: "input" | "output") {
     const payload = kind === "input" ? formatJson(span.input) : formatJson(span.output);
-    await navigator.clipboard.writeText(payload);
-    setCopiedPayload(kind);
-    window.setTimeout(() => setCopiedPayload(null), 1200);
+    try {
+      await navigator.clipboard.writeText(payload);
+      setCopyError(false);
+      setCopiedPayload(kind);
+      window.setTimeout(() => setCopiedPayload(null), 1200);
+    } catch {
+      setCopyError(true);
+      window.setTimeout(() => setCopyError(false), 2400);
+    }
   }
 
   const typeConfig = getSpanTypeConfig(span.spanType);
@@ -508,7 +616,7 @@ function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, ind
   const Icon = typeConfig.icon;
 
   return (
-    <div className="relative">
+    <div id={`trace-span-${span.spanId}`} className="relative scroll-mt-24">
       {/* Timeline Node */}
       <div className={cn(
         "absolute -left-[23px] top-4 size-4 rounded-full border bg-black flex items-center justify-center z-10",
@@ -523,8 +631,10 @@ function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, ind
         replayActive ? "border-white bg-white/5 shadow-lg" : isExpanded ? "border-zinc-700 bg-muted/20 shadow-lg" : "border-border bg-transparent hover:border-zinc-700 hover:bg-muted/5"
       )}>
         <button 
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between p-4 text-left"
+          onClick={() => { onSelect?.(); setIsExpanded(!isExpanded); }}
+          aria-expanded={isExpanded}
+          aria-label={`${isExpanded ? "Collapse" : "Expand"} ${span.spanType.replace("_", " ")} span`}
+          className="w-full flex items-center justify-between p-4 text-left focus-visible:outline focus-visible:outline-1 focus-visible:outline-white"
         >
           <div className="flex items-center gap-4 min-w-0">
             <Badge variant="outline" className={cn("rounded-none border-0 px-0 font-mono", typeConfig.color)}>
@@ -579,6 +689,9 @@ function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, ind
                     </pre>
                   </div>
                 </div>
+                <div aria-live="polite" className="sr-only">
+                  {copiedPayload ? `${copiedPayload} payload copied.` : copyError ? "Payload could not be copied." : ""}
+                </div>
                 {(span.errorType || span.errorMessage || span.stackTrace || span.timedOut || span.isStreamChunk || span.payloadFormat !== "json") ? (
                   <div className="flex flex-wrap gap-2 border-t border-border/30 pt-3 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
                     {span.errorType ? <span className="border border-red-400/30 px-2 py-1 text-red-300">{span.errorType}</span> : null}
@@ -621,9 +734,11 @@ function SpanCard({ span, index, projectId, replayActive }: { span: SpanRow, ind
                     />
                     <Button 
                       size="icon" 
+                      aria-label="Add annotation"
+                      title="Add annotation"
                       onClick={handleAddComment}
                       disabled={isCommenting || !commentContent.trim()}
-                      className="size-9 rounded-none bg-zinc-800 hover:bg-white hover:text-black shrink-0"
+                      className="size-9 rounded-none bg-zinc-800 hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white shrink-0"
                     >
                       <Send className="size-4" />
                     </Button>
@@ -684,7 +799,8 @@ function PayloadHeader({
       <button
         type="button"
         onClick={onCopy}
-        className="flex h-6 items-center gap-1 border border-zinc-800 px-2 font-mono text-[9px] uppercase tracking-widest text-zinc-500 transition-colors hover:border-white hover:text-white"
+        aria-label={`Copy ${label.toLowerCase()} payload`}
+        className="flex h-6 items-center gap-1 border border-zinc-800 px-2 font-mono text-[9px] uppercase tracking-widest text-zinc-500 transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
       >
         {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
         {copied ? "Copied" : "Copy"}

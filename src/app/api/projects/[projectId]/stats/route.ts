@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { isAuthenticated } from "@/lib/auth-server";
 import { NextRequest, NextResponse } from "next/server";
 
 import { api } from "convex/_generated/api";
@@ -51,8 +51,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ projectId: string }> },
 ) {
-  const { userId } = await auth();
-  if (!userId) {
+  if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

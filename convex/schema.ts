@@ -67,6 +67,8 @@ export default defineSchema({
     updatedAt: v.optional(v.string()),
     projectId: v.id("projects"),
     sessionId: v.optional(v.string()),
+    environment: v.optional(v.string()),
+    release: v.optional(v.string()),
   })
     .index("by_projectId", ["projectId"])
     .index("by_runId", ["runId"])
@@ -103,6 +105,7 @@ export default defineSchema({
     type: v.string(), // 'run_failed' | 'cost_exceeded' | 'duration_exceeded'
     message: v.string(),
     triggeredAt: v.string(), // ISO 8601 UTC
+    state: v.optional(v.union(v.literal("active"), v.literal("resolved"), v.literal("muted"))),
     readAt: v.optional(v.number()),
     projectId: v.id("projects"),
   })

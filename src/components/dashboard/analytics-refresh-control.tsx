@@ -22,7 +22,8 @@ export function AnalyticsRefreshControl({
         type="button"
         onClick={onRefresh}
         disabled={refreshing}
-        className="flex h-8 items-center gap-2 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] transition-colors hover:border-white hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label={refreshing ? "Refreshing analytics" : "Refresh analytics"}
+        className="flex h-8 items-center gap-2 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
       >
         <RefreshCw className={cn("size-3", refreshing && "animate-spin")} />
         Refresh

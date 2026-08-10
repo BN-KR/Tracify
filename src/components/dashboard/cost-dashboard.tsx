@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import {
   Area,
@@ -11,7 +12,6 @@ import {
   CartesianGrid,
   Cell,
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -28,10 +28,12 @@ import { formatCurrency } from "@/lib/utils";
 import { AnalyticsRefreshControl } from "./analytics-refresh-control";
 
 export function CostDashboard({ projectId }: { projectId: string }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const summary = useQuery(api.projects.getProjectManagementSummary, {
     projectId: projectId as Id<"projects">,
   });
-  const [range, setRange] = useState(30);
+  const [range, setRange] = useState(() => Number(searchParams.get("days")) || 30);
   const liveRefreshKey =
     summary?.latestActivityAt ??
     summary?.totals.totalRuns ??
@@ -91,6 +93,11 @@ export function CostDashboard({ projectId }: { projectId: string }) {
     };
   }, [chartDailyCosts]);
 
+  function changeRange(days: number) {
+    setRange(days);
+    router.replace(`/dashboard/${projectId}/costs?days=${days}`, { scroll: false });
+  }
+
   if (summary === undefined || loadingStats) {
     return (
       <div className="space-y-6">
@@ -132,14 +139,14 @@ export function CostDashboard({ projectId }: { projectId: string }) {
                   <button
                     key={days}
                     type="button"
-                    onClick={() => setRange(days)}
+                    onClick={() => changeRange(days)}
                     className={
                       range === days
                         ? "h-8 border border-white bg-white px-3 font-mono text-[11px] text-black"
                         : "h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] text-[#777777] hover:text-white"
                     }
                   >
-                    {days}d
+                {days}d
                   </button>
                 ))}
               </div>
@@ -182,6 +189,10 @@ export function CostDashboard({ projectId }: { projectId: string }) {
                 sublabel="per day vs peak"
               />
             </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#2A2A2A] pt-4 font-mono text-[10px] text-[#777777]">
+            <span>Measured span spend · selected period · {stats?.unavailable ? "saved-summary fallback" : "analytics-backed"}</span>
+            <Link href={`/dashboard/${projectId}/runs`} className="text-[#CCCCCC] underline-offset-4 hover:text-white hover:underline">Open runs →</Link>
           </div>
         </div>
       </Card>
@@ -292,6 +303,7 @@ export function CostDashboard({ projectId }: { projectId: string }) {
             </p>
           </div>
           {stats?.modelCosts.length ? (
+            <>
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.modelCosts} layout="vertical">
@@ -324,6 +336,15 @@ export function CostDashboard({ projectId }: { projectId: string }) {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            <div className="mt-4 space-y-1 border-t border-[#2A2A2A] pt-3">
+              {stats.modelCosts.slice(0, 6).map((model) => (
+                <Link key={model.modelId} href={`/dashboard/${projectId}/runs?model=${encodeURIComponent(model.modelId)}&sort=cost`} className="flex items-center justify-between gap-3 px-2 py-2 font-mono text-[10px] text-[#999999] transition-colors hover:bg-[#171717] hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">
+                  <span className="truncate">Inspect {model.modelId}</span>
+                  <span className="shrink-0">{formatCurrency(model.totalCostUsd)} →</span>
+                </Link>
+              ))}
+            </div>
+            </>
           ) : (
             <div className="border border-dashed border-[#2A2A2A] p-6 font-mono text-[12px] text-[#666666]">
               No model cost data for this period.

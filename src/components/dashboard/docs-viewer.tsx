@@ -3,7 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
-import { BookOpen, Terminal, ChevronRight } from "lucide-react";
+import { BookOpen, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 const DOCS = {
@@ -152,9 +152,9 @@ export function DocsViewer() {
           {Object.entries(DOCS).map(([id, doc]) => (
             <button
               key={id}
-              onClick={() => setActiveTab(id as any)}
+              onClick={() => setActiveTab(id as keyof typeof DOCS)}
               className={cn(
-                "flex w-full items-center justify-between px-3 py-2 text-[12px] transition-colors outline-none",
+                "flex w-full items-center justify-between px-3 py-2 text-[12px] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-inset",
                 activeTab === id
                   ? "bg-[#161616] text-white"
                   : "text-[#666666] hover:bg-[#161616] hover:text-[#999999]"

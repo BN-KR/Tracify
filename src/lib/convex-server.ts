@@ -1,9 +1,8 @@
-import { auth } from "@clerk/nextjs/server";
+import { getToken } from "@/lib/auth-server";
 import { ConvexHttpClient } from "convex/browser";
 
 export async function getAuthedConvexClient() {
-  const { getToken } = await auth();
-  const token = await getToken({ template: "convex" });
+  const token = await getToken();
   const url = process.env.NEXT_PUBLIC_CONVEX_URL;
 
   if (!url) {

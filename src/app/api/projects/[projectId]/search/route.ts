@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { isAuthenticated } from "@/lib/auth-server";
 import { NextRequest, NextResponse } from "next/server";
 import type { Id } from "convex/_generated/dataModel";
 import { api } from "convex/_generated/api";
@@ -15,8 +15,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> },
 ) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { projectId } = await params;
   const convex = await getAuthedConvexClient();
   const project = await convex.query(api.projects.getProjectById, {

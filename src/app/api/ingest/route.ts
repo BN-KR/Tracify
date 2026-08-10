@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
   }
 
   const apiKey = authHeader.slice(7).trim();
-  if (!apiKey.startsWith("tracify_sk_live_")) {
+  if (!apiKey.startsWith("tracify_sk_live_") && !apiKey.startsWith("5t1r_sk_live_")) {
     return Response.json({ error: "Invalid API key" }, { status: 401 });
   }
 

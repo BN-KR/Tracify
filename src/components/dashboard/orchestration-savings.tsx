@@ -2,6 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Shield, RotateCcw, ArrowDownCircle, Ban } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -23,6 +24,7 @@ export function OrchestrationSavings({ projectId, range }: OrchestrationSavingsP
 
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
     fetch(`/api/orchestration-savings?projectId=${projectId}&days=${range}`)
@@ -92,7 +94,7 @@ function SavingsStat({
   value,
   description,
 }: {
-  icon: any;
+  icon: LucideIcon;
   label: string;
   value: number;
   description: string;

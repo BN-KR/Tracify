@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { useOrganization } from "@clerk/nextjs";
+import { authClient } from "@/lib/auth-client";
 import { api } from "@/../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ export function ReviewQueue({ projectId }: { projectId: string }) {
   const assignNext = useMutation(api.annotations.assignNext);
   const claim = useMutation(api.annotations.claim);
   const submitReview = useMutation(api.annotations.submitReview);
-  const { memberships } = useOrganization({ memberships: { pageSize: 50, keepPreviousData: true } });
+  const { data: organization } = authClient.useActiveOrganization();
   const [traceId, setTraceId] = useState("");
   const [label, setLabel] = useState("");
   const [notes, setNotes] = useState("");
@@ -33,7 +33,7 @@ export function ReviewQueue({ projectId }: { projectId: string }) {
     catch (error) { setMessage(error instanceof Error ? error.message : "Could not queue trace."); }
   }
   async function assign(strategy: "round_robin" | "least_loaded") {
-    const reviewerIds = memberships?.data?.map((membership) => membership.publicUserData?.userId).filter((id): id is string => Boolean(id)) ?? [];
+    const reviewerIds = organization?.members?.map((membership) => membership.userId) ?? [];
     try { const result = await assignNext({ projectId: projectId as never, reviewerIds, strategy }); setMessage(result ? `Assigned ${result.annotationId} to ${result.assignee}.` : "No queued traces to assign."); }
     catch (error) { setMessage(error instanceof Error ? error.message : "Could not assign review work."); }
   }
@@ -44,7 +44,7 @@ export function ReviewQueue({ projectId }: { projectId: string }) {
 
   return <div className="space-y-6">
     <section className="border border-zinc-800 bg-zinc-950/60 p-5">
-      <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Annotation queue</p><h2 className="mt-2 text-xl text-white">Review production traces</h2><p className="mt-2 text-xs text-zinc-500">Assign work by rotation, claim an item, and capture independent labels for agreement analysis.</p></div><div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => void assign("round_robin")} disabled={!memberships?.data?.length}>Round-robin</Button><Button size="sm" variant="outline" onClick={() => void assign("least_loaded")} disabled={!memberships?.data?.length}>Least-loaded</Button></div></div>
+      <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Annotation queue</p><h2 className="mt-2 text-xl text-white">Review production traces</h2><p className="mt-2 text-xs text-zinc-500">Assign work by rotation, claim an item, and capture independent labels for agreement analysis.</p></div><div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => void assign("round_robin")} disabled={!organization?.members?.length}>Round-robin</Button><Button size="sm" variant="outline" onClick={() => void assign("least_loaded")} disabled={!organization?.members?.length}>Least-loaded</Button></div></div>
       <div className="mt-4 grid gap-3 md:grid-cols-[1fr_180px_2fr_auto]"><Input value={traceId} onChange={(event) => setTraceId(event.target.value)} placeholder="Trace ID" /><Input value={label} onChange={(event) => setLabel(event.target.value)} placeholder="Label" /><Input value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Review notes" /><Button onClick={add} disabled={!traceId.trim()}>Queue</Button></div>
     </section>
     {message ? <p className="border border-zinc-800 p-3 text-xs text-zinc-400">{message}</p> : null}

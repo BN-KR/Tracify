@@ -67,7 +67,7 @@ function getOrgRole(identity: unknown) {
 }
 
 function isAdmin(identity: { subject: string; tokenIdentifier: string }) {
-  const adminIds = (process.env.FIVETOONE_ADMIN_CLERK_USER_IDS ?? "")
+  const adminIds = (process.env.TRACIFY_ADMIN_USER_IDS ?? "")
     .split(",")
     .map((id) => id.trim())
     .filter(Boolean);
@@ -95,7 +95,7 @@ function canAdminProject(
   const orgRole = getOrgRole(identity);
   return (
     Boolean(clerkOrgId && project.clerkOrgId === clerkOrgId) &&
-    (orgRole === "admin" || orgRole === "org:admin")
+    (orgRole === "owner" || orgRole === "admin" || orgRole === "org:admin")
   );
 }
 

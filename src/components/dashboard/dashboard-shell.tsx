@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 
@@ -11,6 +12,9 @@ const COLLAPSED_WIDTH = 64;
 const EXPANDED_WIDTH = 240;
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const params = useParams();
+  const projectId = params?.projectId as string | undefined;
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
     const stored = window.localStorage.getItem(COLLAPSED_STORAGE_KEY);
@@ -23,6 +27,26 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     setIsCollapsed(next);
     window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(next));
   }
+
+  useEffect(() => {
+    function handleShortcut(event: KeyboardEvent) {
+      if ((event.altKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === "o" && projectId) {
+        event.preventDefault();
+        router.push(`/dashboard/${projectId}`);
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key === "\\") {
+        event.preventDefault();
+        setIsCollapsed((current) => {
+          const next = !current;
+          window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(next));
+          return next;
+        });
+      }
+    }
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, [projectId, router]);
 
   const layoutSidebarWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 

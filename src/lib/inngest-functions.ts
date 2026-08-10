@@ -67,6 +67,8 @@ export const processSpan = inngest.createFunction(
         createdAt: span.createdAt,
         modelId: span.modelId || undefined,
         sessionId: span.sessionId || undefined,
+        environment: span.environment || undefined,
+        release: span.release || undefined,
       });
     });
 

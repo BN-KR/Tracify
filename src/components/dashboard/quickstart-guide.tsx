@@ -5,9 +5,7 @@ import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Copy, Check, Terminal, Code2, BookOpen, KeyRound } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface QuickstartGuideProps {
@@ -58,7 +56,6 @@ const agent = traceAgent(async () => {
 
   const installPy = "pip install 5to1r";
   const installTs = "npm install 5to1r";
-  const envVar = `TRACIFY_API_KEY=tracify_sk_live_...`;
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -123,7 +120,7 @@ const agent = traceAgent(async () => {
           <KeyRound className="size-4" /> 3. Set Environment Variable
         </h3>
         <p className="text-[11px] text-zinc-500 font-mono">
-          Inject your API key into your agent's environment.
+          Inject your API key into your agent&apos;s environment.
         </p>
         <CodeBlock
           code={`TRACIFY_API_KEY=${project?.apiKeyPrefix || 'tracify_sk_live_'}••••••••${project?.apiKeyLast4 || '••••'}`}

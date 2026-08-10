@@ -1,8 +1,10 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import { authComponent, createAuth } from "./betterAuth/auth";
 
 const http = httpRouter();
+authComponent.registerRoutes(http, createAuth);
 
 type ExecutionBody = {
   projectId: string;

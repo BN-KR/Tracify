@@ -40,6 +40,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (project) {
       setName(project.name);
@@ -54,6 +55,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
       setRetentionDays(project.retentionDays?.toString() || "365");
     }
   }, [project]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   async function handleSave() {
     const parsed = validateSettings({
