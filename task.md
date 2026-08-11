@@ -546,7 +546,8 @@
 - [x] Create test-mode Pro and Team products with monthly and annual prices.
 - [x] Add Checkout, Customer Portal, signed webhooks, and Convex subscription sync.
 - [x] Activate the Stripe account and configure the live catalog, portal, webhook, Vercel non-secret billing values, and production Convex sync.
-- [ ] Roll the exposed live secret, add a replacement restricted key to Vercel, and deploy the application.
+- [x] Push the verified release branch and deploy the application to Vercel production.
+- [ ] Roll the exposed live secret and add a replacement restricted key to Vercel to enable checkout.
 
 # 2026-08-11 — Make migrated public pages visually distinct
 
@@ -554,6 +555,15 @@
 - [x] Give each affected route family its own visual metaphor and layout.
 - [x] Preserve pages outside the prior public-site migration.
 - [x] Verify desktop and mobile rendering plus focused static checks.
+
+# 2026-08-12 — Initialize Payload on Neon
+
+- [x] Connect Payload to Neon locally and in Vercel environments.
+- [x] Install Neon’s official agent skills.
+- [x] Generate and apply the initial Payload Postgres migration.
+- [x] Verify the recorded migration and Payload API response.
+- [ ] Create the first Payload administrator account at `/cms`.
+- [ ] Deploy the integrated application after reviewing concurrent worktree changes.
 # Future 19 public-site migration — 2026-08-11
 
 - [x] Inventory legacy public route families outside the dashboard.

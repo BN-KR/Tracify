@@ -612,7 +612,8 @@ The single most important UI in the product.
 3. [completed] Implement hosted Checkout, Customer Portal, signed webhook verification, and Convex state sync.
 4. [completed] Configure and verify the test-mode Stripe catalog and portal.
 5. [completed] Confirm Stripe KYC/account activation and configure the live catalog, portal, webhook, Vercel billing values, and production Convex sync.
-6. [pending] Roll the exposed live secret, add a replacement restricted key directly to Vercel, deploy the application, and run a live-mode smoke test.
+6. [completed] Push the verified release branch and deploy the application to Vercel production.
+7. [pending] Roll the exposed live secret, add a replacement restricted key directly to Vercel, and run a live-mode checkout smoke test.
 # Future 19 public-site migration — 2026-08-11
 
 1. [completed] Establish composable Future 19 page primitives and typographic rules.
@@ -626,3 +627,13 @@ The single most important UI in the product.
 2. [completed] Recompose editorial, commercial, documentation, feature, use-case, operational, and legal pages around distinct page-specific concepts.
 3. [completed] Exercise representative static and dynamic routes at desktop and mobile widths.
 4. [completed] Pass focused ESLint, TypeScript, and diff-hygiene checks without modifying unrelated concurrent work.
+
+# Payload Neon initialization — 2026-08-12
+
+1. [completed] Configure the dedicated Neon connection for local development and Vercel.
+2. [completed] Install Neon’s official database-management agent skills.
+3. [completed] Generate the initial Payload schema migration.
+4. [completed] Apply the migration and verify it is recorded in Neon.
+5. [completed] Confirm the Payload posts endpoint responds successfully.
+6. [pending] Let the owner create the first administrator credentials at `/cms`.
+7. [pending] Review, commit, and deploy the integrated worktree safely.

@@ -1016,8 +1016,21 @@
 - Application deployment is intentionally pending: the live server secret was pasted into chat and must be rolled. Add a replacement restricted live key directly to Vercel as `STRIPE_SECRET_KEY`; never paste it into chat or commit it.
 - Stripe Tax remains disabled because an active tax registration has not been confirmed.
 
+## Git and Vercel Production Release (2026-08-12)
+- Published branch `codex/stripe-live-billing` with release commits `121ccdd` and `a6f40b5`.
+- Production Vercel deployment `dpl_7RgTFMWSVRfdsQEyZKaSghfuhRwB` reached Ready and `https://www.tracify.tech` points to it.
+- Hardened Stripe client initialization so builds and non-billing routes remain healthy when the server key is absent; billing endpoints return 503 until a replacement restricted live key is configured.
+- Removed the tracked `scratch/sync_envs.ps1` credential dump before publishing. Its historical credentials remain compromised and require rotation.
+
 ## Distinct Future 19 Public Pages (2026-08-11)
 - Replaced the repeated public-page masthead composition with route-specific visual systems across the public routes migrated in the Future 19 pass.
 - Blog, pricing, docs, product, use-case, changelog, contact, roadmap, status, security, privacy, and terms now use distinct editorial metaphors and responsive layouts while retaining the shared monochrome/yellow brand language.
 - Desktop and 375px browser checks passed on representative and dynamic variants; focused ESLint, TypeScript, and diff-hygiene checks passed.
 - A separate concurrent task moved the application into `(frontend)` and `(payload)` route groups; those unrelated Payload, Stripe, dashboard, and backend changes were preserved untouched.
+
+## Payload Neon Initialization (2026-08-12)
+- Connected Payload to the dedicated Neon Postgres database through `DATABASE_URL` in local development and all Vercel environments.
+- Generated `src/migrations/20260811_220842_initial_payload_schema.ts` and applied it successfully to Neon.
+- Verified migration batch 1 is recorded as run and the local Payload posts API responds with HTTP 200.
+- The remaining personal setup step is creating the first administrator account at `/cms`; application deployment remains separate because the worktree contains concurrent changes.
+- Installed Neon’s official `neon` and `neon-postgres` agent skills under `.agents/skills` for managed database access, branching, SQL, and migrations.
