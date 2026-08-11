@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 const footerGroups = [
   [
@@ -44,9 +45,10 @@ export function Footer() {
           <div>
             <Link
               href="/"
-              className="relative isolate inline-block px-1 font-pixel text-3xl tracking-[-0.05em] before:absolute before:-inset-x-1 before:bottom-0.5 before:-z-10 before:h-[68%] before:-rotate-1 before:skew-x-[-7deg] before:bg-[#f4d44d]/80 before:content-['']"
+              aria-label="Tracify home"
+              className="inline-block focus-visible:outline-2 focus-visible:outline-offset-4"
             >
-              tracify
+              <BrandLogo className="text-3xl" />
             </Link>
             <p className="mt-5 max-w-sm text-sm leading-7 text-black/55">
               The operating record for the agents your team ships.

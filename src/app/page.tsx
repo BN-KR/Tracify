@@ -1,4 +1,7 @@
 import { NavigationSystemExplorations } from "@/components/marketing/navigation-system-explorations";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function LandingPage() {
   return (

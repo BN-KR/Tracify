@@ -56,7 +56,7 @@ async function fetchJudge(url: string, init: RequestInit, retries = 1) {
 }
 
 async function hmacApiKey(apiKey: string) {
-  const secret = process.env.FIVETOONE_API_KEY_HASH_SECRET;
+  const secret = process.env.TRACIFY_API_KEY_HASH_SECRET;
   if (!secret) throw new Error("API key hashing is not configured");
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(apiKey));

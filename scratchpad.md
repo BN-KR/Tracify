@@ -239,7 +239,7 @@
   - Invalid key format returned `401`.
   - Missing required field returned `422`.
   - Payload over 1MB returned `413`.
-  - Valid-key end-to-end test requires a signed-in onboarding project key plus matching `FIVETOONE_API_KEY_HASH_SECRET` in Next.js and Convex and `TINYBIRD_TOKEN` for span writes.
+  - Valid-key end-to-end test requires a signed-in onboarding project key plus matching `TRACIFY_API_KEY_HASH_SECRET` in Next.js and Convex and `TINYBIRD_TOKEN` for span writes.
 - **Known TODOs:**
   - Run the valid-key curl test after generating a real onboarding key in the browser.
   - Add key rotation/revocation UI later.
@@ -280,7 +280,7 @@
 - **Security Notes:**
   - API key format: `5t1r_sk_live_` + 32 random hex chars.
   - API keys are generated with `crypto.getRandomValues`.
-  - API key hashes use HMAC-SHA256 with `FIVETOONE_API_KEY_HASH_SECRET`.
+  - API key hashes use HMAC-SHA256 with `TRACIFY_API_KEY_HASH_SECRET`.
   - Plaintext API key is returned once from `createProject` and stored only in `sessionStorage` under `5to1r.onboarding.apiKey`.
   - Plaintext API key is not stored in Convex, memory, scratchpad, or localStorage.
 - **Onboarding Client Storage:**
@@ -288,7 +288,7 @@
   - `5to1r.onboarding.projectId`
   - `5to1r.onboarding.projectName`
 - **Environment Variable Required:**
-  - Set `FIVETOONE_API_KEY_HASH_SECRET` in Convex deployment env before creating projects.
+  - Set `TRACIFY_API_KEY_HASH_SECRET` in Convex deployment env before creating projects.
 - **Temporary Mocks / Deferred Work:**
   - Project switcher now prefers real Convex projects and falls back to mock projects if none are returned.
   - API route ingestion still uses the older local hashing helper and is intentionally not updated in this Part 2 pass.

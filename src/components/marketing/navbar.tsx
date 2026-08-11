@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
+import { authClient } from "@/lib/auth-client";
 
 const menus = {
   Product: [
@@ -44,6 +47,14 @@ type MenuName = keyof typeof menus;
 export function Navbar() {
   const [active, setActive] = useState<MenuName | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
+  const { data: session } = authClient.useSession();
+
+  async function signOut() {
+    await authClient.signOut({
+      fetchOptions: { onSuccess: () => router.push("/") },
+    });
+  }
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <div
@@ -53,9 +64,10 @@ export function Navbar() {
         <div className="flex h-[54px] items-center justify-between px-4 sm:px-6">
           <Link
             href="/"
-            className="relative isolate px-1 font-pixel text-2xl tracking-[-0.06em] before:absolute before:-inset-x-1 before:bottom-0.5 before:-z-10 before:h-[68%] before:-rotate-1 before:skew-x-[-7deg] before:bg-[#f4d44d]/80 before:content-['']"
+            aria-label="Tracify home"
+            className="active-press focus-visible:outline-2 focus-visible:outline-offset-4"
           >
-            tracify
+            <BrandLogo />
           </Link>
           <nav className="hidden h-full items-center gap-7 font-mono text-[9px] uppercase tracking-[0.12em] md:flex">
             {(Object.keys(menus) as MenuName[]).map((name) => (
@@ -75,18 +87,30 @@ export function Navbar() {
             ))}
           </nav>
           <div className="hidden items-center gap-4 md:flex">
-            <Link
-              href="/admin/library"
-              className="font-mono text-[8px] uppercase tracking-[0.12em] text-black/55 hover:text-black"
-            >
-              Admin
-            </Link>
-            <Link
-              href="/sign-up"
-              className="bg-black px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black"
-            >
-              Start free
-            </Link>
+            {session ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => void signOut()}
+                  className="font-mono text-[8px] uppercase tracking-[0.12em] text-black/55 hover:text-black"
+                >
+                  Sign out
+                </button>
+                <Link
+                  href="/dashboard"
+                  className="bg-black px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black"
+                >
+                  Dashboard
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/sign-up"
+                className="bg-black px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black"
+              >
+                Start free
+              </Link>
+            )}
           </div>
           <button
             type="button"
@@ -156,6 +180,16 @@ function DesktopPanel({
 }
 
 function MobilePanel({ onClose }: { onClose: () => void }) {
+  const router = useRouter();
+  const { data: session } = authClient.useSession();
+
+  async function signOut() {
+    await authClient.signOut({
+      fetchOptions: { onSuccess: () => router.push("/") },
+    });
+    onClose();
+  }
+
   return (
     <div className="border-t border-black/15 p-4 md:hidden">
       {(Object.keys(menus) as MenuName[]).map((name) => (
@@ -178,20 +212,32 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
         </div>
       ))}
       <div className="mt-5 flex gap-3">
-        <Link
-          onClick={onClose}
-          href="/admin/library"
-          className="border border-black px-3 py-2 font-mono text-[8px] uppercase"
-        >
-          Admin
-        </Link>
-        <Link
-          onClick={onClose}
-          href="/sign-up"
-          className="bg-black px-3 py-2 font-mono text-[8px] uppercase text-white"
-        >
-          Start free
-        </Link>
+        {session ? (
+          <>
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              className="border border-black px-3 py-2 font-mono text-[8px] uppercase text-black/55"
+            >
+              Sign out
+            </button>
+            <Link
+              onClick={onClose}
+              href="/dashboard"
+              className="bg-black px-3 py-2 font-mono text-[8px] uppercase text-white"
+            >
+              Dashboard
+            </Link>
+          </>
+        ) : (
+          <Link
+            onClick={onClose}
+            href="/sign-up"
+            className="bg-black px-3 py-2 font-mono text-[8px] uppercase text-white"
+          >
+            Start free
+          </Link>
+        )}
       </div>
     </div>
   );

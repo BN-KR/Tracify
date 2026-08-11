@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Contact | tracify",
   description:
     "Talk to the tracify team about observability, runtime control, and enterprise deployment.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

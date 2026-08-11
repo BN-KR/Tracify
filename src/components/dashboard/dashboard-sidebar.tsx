@@ -32,6 +32,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/brand-logo";
+import { authClient } from "@/lib/auth-client";
+import { isDashboardAdmin } from "@/lib/admin-access";
 
 type GroupId = "observe" | "analyze" | "improve" | "operate" | "manage" | "resources";
 
@@ -74,6 +77,8 @@ export function DashboardSidebar({
   const projectId = (params?.projectId as string) || "";
   const projectDashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
   const projectSetupHref = projectId ? `/dashboard/${projectId}` : "/onboarding/project";
+  const { data: session } = authClient.useSession();
+  const canAccessAdmin = isDashboardAdmin(session?.user.email);
 
   const dynamicGroups = useMemo<NavGroup[]>(() => [
     {
@@ -223,9 +228,12 @@ export function DashboardSidebar({
           href: "/roadmap",
           external: true,
         },
+        ...(canAccessAdmin
+          ? [{ title: "Admin", icon: ShieldCheck, href: "/admin/library" }]
+          : []),
       ],
     },
-  ], [projectDashboardHref, projectId, projectSetupHref]);
+  ], [canAccessAdmin, projectDashboardHref, projectId, projectSetupHref]);
 
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
     if (typeof window === "undefined") {
@@ -297,9 +305,10 @@ export function DashboardSidebar({
         {showExpandedContent ? (
           <Link
             href={projectDashboardHref}
-            className="font-pixel text-lg leading-none text-white"
+            aria-label="Tracify dashboard"
+            className="text-white focus-visible:outline-1 focus-visible:outline-offset-4"
           >
-            tracify
+            <BrandLogo className="text-lg" highlighted={false} />
           </Link>
         ) : null}
 

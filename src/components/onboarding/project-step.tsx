@@ -119,14 +119,23 @@ export function ProjectStep() {
       />
       {error ? <p className="mt-3 text-sm text-[#EF4444]">{error}</p> : null}
 
-      <Button
-        type="submit"
-        variant="default"
-        disabled={!name.trim() || isCreating}
-        className="mt-6 h-10 px-4 uppercase"
-      >
-        {isCreating ? "Creating..." : "Create project"}
-      </Button>
+      <div className="mt-6 flex flex-wrap items-center gap-4">
+        <Button
+          type="submit"
+          variant="default"
+          disabled={!name.trim() || isCreating}
+          className="h-10 px-4 uppercase"
+        >
+          {isCreating ? "Creating..." : "Create project"}
+        </Button>
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard")}
+          className="h-10 font-mono text-[11px] text-[#999999] transition-colors hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#666666]"
+        >
+          Set up later
+        </button>
+      </div>
     </form>
   );
 }

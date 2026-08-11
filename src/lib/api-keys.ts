@@ -7,9 +7,9 @@ export function generateApiKey() {
 }
 
 export function hashApiKey(apiKey: string) {
-  const secret = process.env.FIVETOONE_API_KEY_HASH_SECRET;
+  const secret = process.env.TRACIFY_API_KEY_HASH_SECRET;
   if (!secret) {
-    throw new Error("FIVETOONE_API_KEY_HASH_SECRET is not set");
+    throw new Error("TRACIFY_API_KEY_HASH_SECRET is not set");
   }
 
   return createHmac("sha256", secret).update(apiKey).digest("hex");

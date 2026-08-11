@@ -230,7 +230,7 @@ export const processAlert = inngest.createFunction(
                       text: "View Trace",
                       emoji: true
                     },
-                    url: `https://tracify.tech/dashboard/${alert.projectId}/runs/${alert.runId}`,
+                    url: `https://www.tracify.tech/dashboard/${alert.projectId}/runs/${alert.runId}`,
                     style: "primary"
                   }
                 ]

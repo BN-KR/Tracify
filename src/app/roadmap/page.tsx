@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Roadmap | tracify",
   description: "A transparent view of tracify product delivery.",
+  alternates: { canonical: "/roadmap" },
 };
 
 const sections = [

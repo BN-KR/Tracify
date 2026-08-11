@@ -1,5 +1,29 @@
 # Project Memory
 
+## 2026-08-11 Sitewide SEO
+- Canonical host standardized to `https://www.tracify.tech` in the root metadata base, sitemap, robots host/sitemap declaration, JSON-LD, RSS feed, alert links, and Tracify-owned Sanity blog canonicals.
+- Added `robots.ts` to allow public content while blocking dashboard, admin, auth, onboarding, API, library, and preview paths from crawling; it advertises the canonical sitemap.
+- Improved root metadata with a title template, search-focused descriptions/keywords, Open Graph/Twitter defaults, and Organization plus SoftwareApplication JSON-LD.
+- Added canonical/page metadata across primary public pages and dynamic docs, product, and use-case pages; documentation now supplies static params for its known public routes.
+- Expanded the sitemap to include public docs, product features, use cases, changelog, and demo pages while preserving CMS blog URLs.
+- Verification: production build passed and generated 75 routes, including `/robots.txt` and `/sitemap.xml`. Focused lint only reports nine pre-existing quote-escaping violations in privacy, security, and terms content; none are from the SEO changes.
+
+## 2026-08-10 Development Password Reset Enabled
+- Synced the current Better Auth configuration to the Convex development deployment after localhost reported that password reset was disabled.
+- Confirmed the development Convex auth endpoint now accepts `request-password-reset` and returns the enumeration-safe success response for a non-existent test address.
+- The implementation keeps one-hour single-use tokens and revokes existing sessions after a successful password reset.
+
+## 2026-08-10 Simplified Auth Layout
+- Removed the shared auth-page editorial intro panel, including the Future 19/Auth System label, secure-connection badge, large mode headline, explanatory paragraph, and three benefit cells.
+- Every auth route now opens directly on its centered form/status card beneath the standardized Tracify header.
+- Verification: TypeScript, focused ESLint, diff check, and browser inspection pass with no horizontal overflow.
+
+## 2026-08-10 Standardized Tracify Wordmark
+- Added a canonical `BrandLogo` component matching the production Future 19 navbar wordmark: Geist Pixel Square, tight tracking, and the skewed translucent acid-yellow marker.
+- Replaced one-off logo markup in the marketing navbar/footer, auth shell, both dashboard sidebars, and onboarding shell/router.
+- Preserved plain-text product mentions and oversized editorial footer treatments because they are content/artwork rather than navigation wordmarks.
+- Verification: TypeScript, focused ESLint, diff check, and local browser inspection pass; the auth logo renders at the navbar's 24px metrics with no horizontal overflow.
+
 ## 2026-08-10 GitHub OAuth Enabled
 - Added the supplied GitHub OAuth App client ID and secret to both Convex development and production environments without committing them to the repository.
 - Redeployed the production Convex Better Auth server; the existing conditional `github` social provider is now active alongside Google.
@@ -352,7 +376,7 @@
 - **Local Ingest Dev Flow Fix (2026-05-16):**
   - **Issue:** Localhost showed internal server/proxy errors and the npm user-test script could not move onboarding past the listening state.
   - **Fix:** Restarted Next.js in normal `npm run dev` mode instead of binding to `127.0.0.1`, which avoided the localhost proxy hang.
-  - **Fix:** `.env.local` now uses the Convex dev `FIVETOONE_API_KEY_HASH_SECRET` and points `INNGEST_DEV` at `http://127.0.0.1:8288`.
+  - **Fix:** `.env.local` now uses the Convex dev `TRACIFY_API_KEY_HASH_SECRET` and points `INNGEST_DEV` at `http://127.0.0.1:8288`.
   - **Verification:** `http://localhost:3000` returns `200`, `/api/ingest` returns `202`, `scratch/user-test-5to1r` returns `Ingest status: 202 Accepted`, and Convex dev contains the generated run for project `jd74cdngtnqd2yw3gsb2602fv186t0hr`.
 
 - **Manual API Key Issuance + npm Package Rename (2026-05-16):**
@@ -402,7 +426,7 @@
   - **Clerk Production Keys:** Vercel production now has live Clerk keys and redeployed successfully as `dpl_3TiEbJ9qwnXEzuWYoLvYSYida3er`. Local ignored `.env.prod` was also updated with the live Clerk entries.
   - **Convex Production Switch:** Vercel production now points to Convex prod `focused-otter-289` (`https://focused-otter-289.convex.cloud` and `https://focused-otter-289.convex.site`) and redeployed successfully as `dpl_8rT1Ty4pWGnMveuRTd5LagdUu1rW`.
   - **Convex Auth:** `convex/auth.config.ts` now reads `CLERK_JWT_ISSUER_DOMAIN` with a dev fallback. Convex prod has `CLERK_JWT_ISSUER_DOMAIN=https://clerk.5to1r.com`.
-  - **Production Secret:** Generated and set `FIVETOONE_API_KEY_HASH_SECRET` in Vercel and Convex prod; a local backup is in `C:\tmp\fivetoone_api_key_hash_secret.txt`.
+  - **Production Secret:** Generated and set `TRACIFY_API_KEY_HASH_SECRET` in Vercel and Convex prod; a local backup is in `C:\tmp\fivetoone_api_key_hash_secret.txt`.
   - **Caution:** Inngest and Slack production values still need final real credentials; `INNGEST_DEV` was removed from Vercel production.
   - **Note:** `npm run lint` still reports pre-existing lint issues in `.agents`, `scratch`, and several marketing/UI files; these are not part of the Vercel production build blocker.
 
@@ -468,7 +492,7 @@
   - **Identity Mapping:** Shifted to `identity.subject` (Clerk User ID) for `clerkUserId` storage in projects to match frontend expectations.
   - **Timestamps:** Standardized project timestamps (`createdAt`, `updatedAt`, `apiKeyCreatedAt`, `apiKeyLastUsedAt`) as numeric `Date.now()` values.
   - **Legacy Compatibility:** Relaxed `projects` and `agentRuns` schema fields to optional to accommodate existing local development data.
-- **Required Secret:** Convex project creation requires `FIVETOONE_API_KEY_HASH_SECRET`.
+- **Required Secret:** Convex project creation requires `TRACIFY_API_KEY_HASH_SECRET`.
 - **Milestone 2 Part 1 - Onboarding UI Flow:** Started the onboarding UI-only pass without backend integration.
   - **Separate Shell:** `/onboarding/*` uses a standalone centered dark panel, not the dashboard shell, marketing navbar, or footer.
   - **Five Steps:** Project -> API key -> Install SDK -> Waiting -> First span success are implemented as route segments.
@@ -927,3 +951,43 @@
 - All directions share the navbar's light paper field, thin black rules, black feature panels, yellow interaction/accent color, square geometry, and pixel-display typography without collapsing into one repeated layout.
 - The private library now contains 114 indexed sections across 17 categories.
 - Verification: exactly 15 `navsys-*` component anchors match exactly 15 library entries; focused ESLint, standalone TypeScript, production build, and refreshed localhost production server pass.
+
+## Mobile Evaluation Scoreboard (2026-08-10)
+- The Future 19 evaluation scoreboard now replaces its wide five-column table with stacked candidate cards below the `md` breakpoint.
+- Its release heading scales down on narrow screens; desktop retains the original comparison table.
+- Browser QA at a 375px viewport confirmed the section matches the viewport width with no horizontal document overflow.
+
+## Official Third-Party Brand Marks (2026-08-10)
+- Added a shared `ThirdPartyLogo` registry for external product marks used by the public site.
+- Replaced invented homepage integration glyphs with official OpenAI, Anthropic, Vercel, LangChain, LlamaIndex, and OpenTelemetry marks.
+- The homepage integration index and `/integrations` directory now reuse the same registry; unavailable live Simple Icons slugs use pinned or official-project assets.
+- Browser QA confirmed every rendered third-party image loaded across all three public brand surfaces.
+
+## Public Integration Disclosure (2026-08-10)
+- Removed the public homepage Platform row that disclosed Tinybird, Redis, and Convex.
+- The integration area now communicates only customer-facing compatibility: models, frameworks, and telemetry standards.
+
+## Private Admin Navigation (2026-08-10)
+- Removed the Admin destination from public desktop and mobile navigation; it does not appear in the public footer.
+- Signed-in users see Dashboard and Sign out actions in the navbar; signed-out visitors retain Start free.
+- The Admin link now appears only in the dashboard for `kristoffer.bon@gmail.com`; the server-side library guard uses the same default allowlist in addition to configured environment allowlists.
+
+## Focused Onboarding and Product-Shell Branding (2026-08-10)
+- `/onboarding` and every nested onboarding route now render without the marketing navbar or footer.
+- `BrandLogo` supports a plain mode without the yellow marker; dashboard and onboarding shells use it while marketing retains the highlighted wordmark.
+- Browser verification confirms the onboarding project route contains no navbar, footer, or yellow logo highlight.
+
+## Development API-Key Hashing Secret (2026-08-10)
+- Local onboarding project creation failed because the development Convex deployment lacked `TRACIFY_API_KEY_HASH_SECRET`.
+- Production already had the variable; a separate cryptographically random 256-bit secret was generated, set, and verified for development without exposing its value.
+- Convex environment variables apply directly to the deployment, so no source or schema change was required.
+
+## Tracify API-Key Secret Rename (2026-08-10)
+- Renamed `FIVETOONE_API_KEY_HASH_SECRET` to `TRACIFY_API_KEY_HASH_SECRET` across Convex, Next.js, local environment files, examples, and operational documentation.
+- Preserved the existing secret value separately in development and production so previously issued API keys continue to hash identically.
+- Synced and deployed Convex development and production, verified the new variable, and removed the old variable from both Convex deployments.
+- Added the new production variable to Vercel; its old variable remains temporarily for the currently deployed pre-rename Next.js build and can be removed after the next site deployment.
+
+## Stripe Documentation Skills (2026-08-11)
+- Installed the seven Stripe-published agent skills under `.agents/skills`: Connect recommendations, Stripe Apps, best practices, directory, docs, projects, and upgrade guidance.
+- User-provided Stripe sandbox keys were not written to source control or local environment files.

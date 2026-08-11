@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Status | tracify",
   description: "Current operational status for tracify services.",
+  alternates: { canonical: "/status" },
 };
 
 const services = [

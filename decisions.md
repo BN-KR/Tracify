@@ -80,7 +80,7 @@
 - **Rationale:** Activation should prove the real SDK/API loop without prematurely building trace inspection or dashboard analytics surfaces.
 
 ## Milestone 2 Part 2 - Project Creation + API Key Backend (2026-05-14)
-- **Decision:** Use HMAC-SHA256 with `FIVETOONE_API_KEY_HASH_SECRET` for API key hashing.
+- **Decision:** Use HMAC-SHA256 with `TRACIFY_API_KEY_HASH_SECRET` for API key hashing.
 - **Decision:** Plaintext API keys are never stored server-side.
 - **Decision:** `sessionStorage` is allowed only during onboarding to pass the one-time plaintext key between the project and API key steps.
 - **Decision:** Project ownership is stored with Clerk `tokenIdentifier` as `clerkUserId`, plus optional `clerkOrgId` when Clerk org context is available.

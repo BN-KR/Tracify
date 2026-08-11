@@ -22,7 +22,7 @@ function formatRssDate(dateString: string) {
 }
 
 export async function GET() {
-  const baseUrl = "https://tracify.tech";
+  const baseUrl = "https://www.tracify.tech";
   const posts = await getPosts();
 
   const items = posts

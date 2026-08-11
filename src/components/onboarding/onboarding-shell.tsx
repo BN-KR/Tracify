@@ -5,6 +5,7 @@ import {
 import { OnboardingEscapeLink } from "@/components/onboarding/onboarding-escape-link";
 import { OnboardingBackButton } from "@/components/onboarding/onboarding-back-button";
 import { Suspense } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 
 export function OnboardingShell({
   currentStep,
@@ -19,7 +20,7 @@ export function OnboardingShell({
         <OnboardingEscapeLink currentStep={currentStep} />
       </Suspense>
       <div className="mx-auto flex min-h-[calc(100svh-64px)] w-full max-w-[720px] flex-col justify-center">
-        <div className="mb-4 font-pixel text-lg text-white">tracify</div>
+        <div className="mb-4 text-white"><BrandLogo className="text-lg" highlighted={false} /></div>
         <section className="border border-[#2A2A2A] bg-[#111111]">
           <OnboardingProgress currentStep={currentStep} />
           <div className="p-6 md:p-8">

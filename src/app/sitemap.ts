@@ -3,7 +3,7 @@ import { postSlugsQuery } from "@/lib/sanity/queries";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://tracify.tech";
+  const baseUrl = "https://www.tracify.tech";
 
   let slugs: string[] = [];
   if (client) {
@@ -17,8 +17,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  const productFeatures = ["trace-viewer", "cost-dashboard", "tool-calls", "llm-calls", "failures", "reports", "runtime-control", "evaluation-engine", "lifecycle"];
+  const useCases = ["research", "support", "automation", "tool-calling"];
+  const documentation = ["python", "typescript", "api", "prompts", "evaluation", "lifecycle", "integrations", "self-hosting"];
+
   return [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: "monthly", priority: 1.0 },
+    { url: baseUrl, changeFrequency: "weekly", priority: 1.0 },
     { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
     { url: `${baseUrl}/pricing`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/roadmap`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
@@ -28,6 +32,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/changelog`, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${baseUrl}/demo`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/docs`, changeFrequency: "monthly", priority: 0.8 },
+    ...documentation.map((slug) => ({ url: `${baseUrl}/docs/${slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
+    ...productFeatures.map((slug) => ({ url: `${baseUrl}/product/${slug}`, changeFrequency: "monthly" as const, priority: 0.8 })),
+    ...useCases.map((slug) => ({ url: `${baseUrl}/use-cases/${slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
     ...blogPosts,
   ];
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 const useCases: Record<string, { title: string; description: string }> = {
@@ -22,6 +23,12 @@ const useCases: Record<string, { title: string; description: string }> = {
 
 export function generateStaticParams() {
   return Object.keys(useCases).map((slug) => ({ slug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const page = useCases[slug];
+  return page ? { title: `${page.title} observability`, description: page.description, alternates: { canonical: `/use-cases/${slug}` } } : {};
 }
 
 export default async function UseCasePage({

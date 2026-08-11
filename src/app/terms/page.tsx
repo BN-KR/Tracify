@@ -1,5 +1,12 @@
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms of service",
+  description: "Tracify terms of service.",
+  alternates: { canonical: "/terms" },
+};
 
 export default function TermsPage() {
   return (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 const docPages: Record<string, { title: string; description: string }> = {
@@ -82,6 +83,20 @@ const codeExamples: Record<string, { install: string; code: string; notes: strin
     notes: ["Deploy the Next.js application to Vercel, Docker, or your own Node host.", "Create separate Convex and Tinybird environments for staging and production.", "Configure Better Auth secrets, site URL, and Convex auth before exposing dashboard routes.", "Set provider keys only in server environments; use a reverse proxy for custom domains and TLS."],
   },
 };
+
+export function generateStaticParams() {
+  return Object.keys(docPages)
+    .filter((slug) => slug !== "index")
+    .map((slug) => ({ slug: [slug] }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const docKey = slug?.[0] || "index";
+  const page = docPages[docKey];
+  if (!page) return {};
+  return { title: page.title, description: page.description, alternates: { canonical: docKey === "index" ? "/docs" : `/docs/${docKey}` } };
+}
 
 export default async function DocsPage({
   params,

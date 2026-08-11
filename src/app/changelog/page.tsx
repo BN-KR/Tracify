@@ -3,6 +3,7 @@ import Link from "next/link";
 export const metadata = {
   title: "Changelog — tracify",
   description: "Product updates and release notes from the tracify team.",
+  alternates: { canonical: "/changelog" },
 };
 
 const changes = [

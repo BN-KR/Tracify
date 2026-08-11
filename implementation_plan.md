@@ -1,3 +1,11 @@
+# Sitewide SEO — 2026-08-11
+
+5. [completed] Standardize sitemap, robots, JSON-LD, RSS, and canonical URLs on `www.tracify.tech`.
+1. [completed] Establish a single canonical domain and indexation policy.
+2. [completed] Add structured data and page-level metadata for public route families.
+3. [completed] Make the sitemap enumerate all intended public routes.
+4. [completed] Verify generated metadata routes and build output.
+
 # tracify Strategic Implementation Plan
 
 ## Better Auth Migration (2026-08-10)
@@ -530,3 +538,69 @@ The single most important UI in the product.
 2. [completed] Reuse the existing Google OAuth pair in both Convex environments.
 3. [completed] Confirm the auth server and UI already invoke both provider IDs.
 4. [completed] Configure the supplied GitHub OAuth App credentials in both Convex environments and deploy production.
+# Standard Tracify wordmark — 2026-08-10
+
+1. [completed] Capture the canonical Future 19 navbar logo treatment.
+2. [completed] Build a reusable accessible `BrandLogo` component.
+3. [completed] Adopt it across every production product-shell wordmark location.
+4. [completed] Run static checks and compare the auth header visually in-browser.
+# Simplified auth layout — 2026-08-10
+
+1. [completed] Remove the shared Future 19 intro/benefits region.
+2. [completed] Convert the auth body to a centered single-card layout.
+3. [completed] Verify all shared auth routes through static checks and browser QA.
+# Development password reset — 2026-08-10
+
+1. [completed] Confirm the reset handler exists in Better Auth configuration.
+2. [completed] Sync the current functions to development Convex.
+3. [completed] Verify the direct development reset endpoint succeeds without affecting a real account.
+
+# Responsive evaluation scoreboard — 2026-08-10
+
+1. [completed] Preserve the desktop comparison table from the `md` breakpoint upward.
+2. [completed] Add a compact stacked candidate comparison below `md`.
+3. [completed] Validate the section and document widths in a 375px browser viewport.
+
+# Official external logos — 2026-08-10
+
+1. [completed] Inventory external-brand visuals on public pages.
+2. [completed] Introduce a shared registry of official SVG/image sources.
+3. [completed] Replace homepage stand-ins and add matching integration-directory marks.
+4. [completed] Run lint, TypeScript, and browser image-load checks.
+
+# Public infrastructure disclosure — 2026-08-10
+
+1. [completed] Remove the Platform category from the customer-facing integration index.
+2. [completed] Retain only product compatibility and standards information.
+3. [completed] Verify the affected public section does not contain provider names.
+
+# Dashboard-only admin access — 2026-08-10
+
+1. [completed] Replace public Admin navigation with session-aware account actions.
+2. [completed] Create a shared owner-email allowlist for dashboard visibility and server access.
+3. [completed] Add the private Admin destination to the dashboard sidebar only.
+4. [completed] Validate lint, TypeScript, diff hygiene, and public navigation output.
+
+# Onboarding chrome and plain product branding — 2026-08-10
+
+1. [completed] Exclude `/onboarding` from the shared marketing shell.
+2. [completed] Add an explicit highlighted/plain option to the shared brand component.
+3. [completed] Use the plain mark in dashboard and onboarding application shells.
+4. [completed] Validate TypeScript and browser structure on the onboarding project route.
+
+# Onboarding API-key hashing configuration — 2026-08-10
+
+1. [completed] Identify which Convex deployment is missing the HMAC secret.
+2. [completed] Configure a cryptographically random secret only where missing.
+3. [completed] Verify development and preserve the existing production secret.
+
+# Tracify API-key secret naming — 2026-08-10
+
+1. [completed] Rename all runtime references to `TRACIFY_API_KEY_HASH_SECRET`.
+2. [completed] Copy each deployment's existing value to the new name without exposing it.
+3. [completed] Deploy Convex development and production against the new variable.
+4. [completed] Remove the obsolete Convex variables and verify static checks.
+
+# Stripe documentation skills — 2026-08-11
+
+1. [completed] Install the skills published through `https://docs.stripe.com`.

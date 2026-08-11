@@ -7,10 +7,10 @@ import type { QueryCtx } from "./_generated/server";
 const API_KEY_PREFIX = "tracify_sk_live_";
 
 function getHmacSecret() {
-  const secret = process.env.FIVETOONE_API_KEY_HASH_SECRET;
+  const secret = process.env.TRACIFY_API_KEY_HASH_SECRET;
   if (!secret) {
     throw new Error(
-      "FIVETOONE_API_KEY_HASH_SECRET is not set. Set it in Convex before creating API keys.",
+      "TRACIFY_API_KEY_HASH_SECRET is not set. Set it in Convex before creating API keys.",
     );
   }
   return secret;

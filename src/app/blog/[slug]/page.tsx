@@ -79,9 +79,12 @@ export async function generateMetadata({
         ? [{ url: urlFor(ogImage)?.width(1200).height(630).url() || "" }]
         : undefined,
     },
-    alternates: post.seo?.canonicalUrl
-      ? { canonical: post.seo.canonicalUrl }
-      : undefined,
+    alternates: {
+      canonical: post.seo?.canonicalUrl?.replace(
+        "https://tracify.tech",
+        "https://www.tracify.tech",
+      ) ?? `/blog/${slug}`,
+    },
     robots: {
       index: true,
       follow: true,

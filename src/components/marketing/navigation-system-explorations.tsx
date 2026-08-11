@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import {
   ArrowRight,
@@ -12,6 +11,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Future19Pricing } from "@/components/marketing/future19-pricing";
+import {
+  getThirdPartyBrand,
+  ThirdPartyLogo,
+} from "@/components/third-party-logo";
 
 const integrationMarks = [
   { name: "OpenAI", mark: "✳", className: "font-semibold tracking-[-0.05em]" },
@@ -63,15 +66,6 @@ const integrationRows = [
       ["Tracify", "tracify"],
       ["OpenTelemetry", "opentelemetry"],
       ["HTTP", "http"],
-    ],
-  ],
-  [
-    "Platform",
-    [
-      ["Slack", "slack"],
-      ["Tinybird", "tinybird"],
-      ["Redis", "redis"],
-      ["Convex", "convex"],
     ],
   ],
 ] as const;
@@ -275,14 +269,12 @@ export function NavigationSystemExplorations({
           </div>
         </div>
         <div className="mt-12 grid border-y border-black/15 sm:grid-cols-3 lg:grid-cols-6">
-          {integrationMarks.map(({ name, mark, className }) => (
+          {integrationMarks.map(({ name, className }) => (
             <div
               key={name}
               className="flex min-h-28 items-center justify-center gap-2 border-r border-black/15 bg-white px-4 text-xl last:border-r-0 hover:bg-[#f4d44d]"
             >
-              <span aria-hidden="true" className="text-base">
-                {mark}
-              </span>
+              <ThirdPartyLogo brand={name} className="size-5 shrink-0 object-contain" />
               <span className={className}>{name}</span>
             </div>
           ))}
@@ -398,7 +390,7 @@ export function NavigationSystemExplorations({
                   <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/45">
                     Candidate comparison
                   </p>
-                  <h3 className="mt-5 font-pixel text-6xl tracking-[-0.07em]">
+                  <h3 className="mt-5 font-pixel text-5xl leading-[0.9] tracking-[-0.07em] sm:text-6xl">
                     Release 2.4 wins.
                   </h3>
                 </div>
@@ -406,7 +398,7 @@ export function NavigationSystemExplorations({
                   Safe to promote
                 </span>
               </div>
-              <div className="mt-8 overflow-x-auto">
+              <div className="mt-8 hidden overflow-x-auto md:block">
                 <table className="w-full min-w-[560px] text-left">
                   <thead className="font-mono text-[8px] uppercase text-black/40">
                     <tr>
@@ -436,6 +428,39 @@ export function NavigationSystemExplorations({
                     ))}
                   </tbody>
                 </table>
+              </div>
+              <div className="mt-8 grid gap-px bg-black/15 md:hidden">
+                {[
+                  ["Current", "0.82", "3.4s", "$0.052", "Hold"],
+                  ["v2.4", "0.94", "2.8s", "$0.041", "Promote"],
+                  ["Fast", "0.77", "1.9s", "$0.035", "Reject"],
+                ].map(([candidate, quality, latency, cost, decision], index) => (
+                  <div
+                    key={candidate}
+                    className={`p-5 ${index === 1 ? "bg-[#f4d44d]" : "bg-white"}`}
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-base font-medium">{candidate}</p>
+                      <p className="font-mono text-[9px] uppercase tracking-[0.12em]">
+                        {decision}
+                      </p>
+                    </div>
+                    <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-black/15 pt-4">
+                      {[
+                        ["Quality", quality],
+                        ["Latency", latency],
+                        ["Cost", cost],
+                      ].map(([label, value]) => (
+                        <div key={label} className="min-w-0">
+                          <dt className="font-mono text-[7px] uppercase tracking-[0.1em] text-black/45">
+                            {label}
+                          </dt>
+                          <dd className="mt-2 text-sm">{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                ))}
               </div>
             </div>
             <div className="flex flex-col justify-between bg-black p-7 text-white">
@@ -534,21 +559,22 @@ export function NavigationSystemExplorations({
                     {category}
                   </span>
                   <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-                    {logos.map(([name, slug]) => (
+                    {logos.map(([name]) => {
+                      const brand = name === "Tracify" || name === "HTTP" ? null : getThirdPartyBrand(name);
+                      return (
                       <span
                         key={name}
                         title={name}
                         className="inline-flex size-7 items-center justify-center"
                       >
-                        <img
-                          src={`https://cdn.simpleicons.org/${slug}/111111`}
-                          alt={name}
-                          width={24}
-                          height={24}
-                          className="size-6 object-contain"
-                        />
+                        {brand ? (
+                          <ThirdPartyLogo brand={brand} className="size-6 object-contain" />
+                        ) : (
+                          <span className="font-mono text-[8px] font-semibold uppercase">{name}</span>
+                        )}
                       </span>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}

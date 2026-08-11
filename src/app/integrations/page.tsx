@@ -1,5 +1,16 @@
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
+import {
+  getThirdPartyBrand,
+  ThirdPartyLogo,
+} from "@/components/third-party-logo";
+
+export const metadata: Metadata = {
+  title: "AI agent integrations",
+  description: "Connect Tracify with OpenTelemetry, OpenAI, Anthropic, LangChain, CrewAI, Vercel AI SDK, Slack, and more.",
+  alternates: { canonical: "/integrations" },
+};
 
 type Integration = {
   name: string;
@@ -160,12 +171,20 @@ export default function IntegrationsPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {INTEGRATIONS.filter((i) => i.category === category).map(
-                (integration) => (
+                (integration) => {
+                  const brand = getThirdPartyBrand(integration.name);
+                  return (
                   <div
                     key={integration.name}
                     className="border border-[#1A1A1A] bg-[#0A0A0A] p-5 hover:border-[#333333] transition-colors"
                   >
                     <div className="flex items-center gap-2 mb-2">
+                      {brand ? (
+                        <ThirdPartyLogo
+                          brand={brand}
+                          className="size-4 shrink-0 object-contain invert"
+                        />
+                      ) : null}
                       <span className="text-white font-mono text-sm">
                         {integration.name}
                       </span>
@@ -179,7 +198,8 @@ export default function IntegrationsPage() {
                       {integration.description}
                     </p>
                   </div>
-                ),
+                  );
+                },
               )}
             </div>
           </div>

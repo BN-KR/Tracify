@@ -1,5 +1,12 @@
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Security",
+  description: "Learn how Tracify protects AI agent telemetry with encryption, project isolation, access controls, and incident response practices.",
+  alternates: { canonical: "/security" },
+};
 
 export default function SecurityPage() {
   return (

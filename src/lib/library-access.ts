@@ -1,6 +1,7 @@
 import { api } from "convex/_generated/api";
 import { notFound, redirect } from "next/navigation";
 import { fetchAuthQuery } from "@/lib/auth-server";
+import { DASHBOARD_ADMIN_EMAILS } from "@/lib/admin-access";
 
 function values(name: string) {
   return new Set(
@@ -23,7 +24,10 @@ export async function requireLibraryAccess(returnBackUrl = "/admin/library") {
     ...values("TRACIFY_ADMIN_USER_IDS"),
     ...values("TRACIFY_LIBRARY_USER_IDS"),
   ]);
-  const allowedEmails = values("TRACIFY_LIBRARY_ADMIN_EMAILS");
+  const allowedEmails = new Set([
+    ...DASHBOARD_ADMIN_EMAILS,
+    ...values("TRACIFY_LIBRARY_ADMIN_EMAILS"),
+  ]);
   const accessConfigured =
     allowedOrganizations.size > 0 ||
     allowedUsers.size > 0 ||

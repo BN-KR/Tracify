@@ -157,6 +157,13 @@
       "skillPath": "skills/features/clerk-webhooks/SKILL.md",
       "computedHash": "4764eeeef1e80ce9757759ef119a3a5e77322383e8a37975d7c8ea718c259ec9"
     },
+    "connect-recommend": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "ddf136d2fdc3fb24d5b4b932ec60cb714e941ca8b624b5f3fe8888728e5b5563",
+      "wellKnownDigest": "sha256:02aaebe4ca5578ab043ae666d5589a819281cef2f687926266e5ee05e7b3ab84"
+    },
     "convex": {
       "source": "get-convex/agent-skills",
       "sourceType": "github",
@@ -265,6 +272,41 @@
       "skillPath": "skills/streamdown/SKILL.md",
       "computedHash": "c842552c75b80abb74ef8f92481d34684c709884dd2df22c2ab3b183aee582fe"
     },
+    "stripe-apps": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "48d4cfa176f0f9c86a191602634ca84c4b87d17b28ce19e10e3ec36f31469da3",
+      "wellKnownDigest": "sha256:c0c38ad5cff101e0c57ee84e0baccd666f549178a6dcad5a1639ef73a1c6ac99"
+    },
+    "stripe-best-practices": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "14efa86bd74a8f8f330535fdf2fddd1def5faa27fe75cbb11d623dd17a507d24",
+      "wellKnownDigest": "sha256:44b81438ad4dfd034b68b2c820b3db6bc9e2fc06565db8e98027d969e25fb401"
+    },
+    "stripe-directory": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "ac27eb3601e0cde0a3cb92f884eb770ef4dcebd4ca8325dd4284dba1de97481d",
+      "wellKnownDigest": "sha256:ccd641e5f483cd1a4f38db80247a43605a7bc17202d1b6d0b712a8c58e38379e"
+    },
+    "stripe-docs": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "7f8b47057d65cdc55c60ed870bf6ad508907e5d981fca77781b4964de54d985f",
+      "wellKnownDigest": "sha256:a2d407ba808bce05731557fa7b92022376545e363a8958012253a3b82def71a6"
+    },
+    "stripe-projects": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "d75347f4e465c0e78032f7cb28b7bcd406cde9a34826b780958b059423fba778",
+      "wellKnownDigest": "sha256:1d0e134fc0b0e97e63b6f6078edeb6a6f802744a62485a05bef264fd89df1269"
+    },
     "tinybird": {
       "source": "tinybirdco/tinybird-agent-skills",
       "sourceType": "github",
@@ -306,6 +348,13 @@
       "sourceType": "github",
       "skillPath": "ucp/SKILL.md",
       "computedHash": "05987423e41eca47ea1f125b2fd9470539fd3f726a7eb50c282d38bf2846ff1c"
+    },
+    "upgrade-stripe": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "f4aa17ac21714309e3cafa4eb15b032b3d8ff8623c8731944ccbcaf6766fdb49",
+      "wellKnownDigest": "sha256:e90e738392f12ffefce8c18a57af6f4c3337a398baf1cc73900bdcc41a596308"
     },
     "vercel-cli-with-tokens": {
       "source": "vercel-labs/agent-skills",

@@ -8,44 +8,39 @@ import { GeistPixelSquare } from "geist/font/pixel";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tracify.tech"),
-  title: "tracify — Know why your agent failed",
-  description:
-    "Investigate AI agent failures with one operational record for traces, cost, quality, prompts, and alerts.",
+  metadataBase: new URL("https://www.tracify.tech"),
+  title: { default: "Tracify | AI agent observability and evaluation", template: "%s | Tracify" },
+  description: "Trace, evaluate, and improve AI agents with one operational record for failures, cost, quality, prompts, and releases.",
+  applicationName: "Tracify",
+  category: "AI agent observability",
+  keywords: ["AI agent observability", "LLM observability", "AI agent evaluation", "OpenTelemetry tracing", "agent tracing", "LLM cost monitoring"],
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
   openGraph: {
-    title: "tracify — Know why your agent failed",
-    description:
-      "Trace every decision, tool call, cost, quality signal, and deployment change in one debugging timeline.",
+    title: "Tracify | AI agent observability and evaluation",
+    description: "Trace every decision, tool call, cost, quality signal, and deployment change in one debugging timeline.",
     type: "website",
-    siteName: "tracify",
+    siteName: "Tracify",
+    url: "/",
+    locale: "en_US",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "tracify — Know why your agent failed",
-    description:
-      "Agent observability for traces, cost, quality, prompts, and alerts.",
-  },
+  twitter: { card: "summary_large_image", title: "Tracify | AI agent observability and evaluation", description: "Agent observability for traces, cost, quality, prompts, and alerts." },
 };
 
-export default async function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+const structuredData = [
+  { "@context": "https://schema.org", "@type": "Organization", name: "Tracify", url: "https://www.tracify.tech", logo: "https://www.tracify.tech/icon.png" },
+  { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Tracify", applicationCategory: "DeveloperApplication", operatingSystem: "Web", url: "https://www.tracify.tech", description: "AI agent observability and evaluation for tracing failures, cost, quality, prompts, and releases.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
+];
+
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${GeistPixelSquare.variable} h-full`}
-    >
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${GeistPixelSquare.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
         <ConvexClientProvider initialToken={await getToken()}>
-            <TooltipProvider>
-              <SiteChrome>{children}</SiteChrome>
-            </TooltipProvider>
+          <TooltipProvider><SiteChrome>{children}</SiteChrome></TooltipProvider>
         </ConvexClientProvider>
       </body>
     </html>

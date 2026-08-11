@@ -1,3 +1,11 @@
+# Sitewide SEO — 2026-08-11
+
+5. [completed] Standardize the canonical host to `https://www.tracify.tech`.
+1. [completed] Audit the public indexable routes, existing metadata, sitemap, and crawl controls.
+2. [completed] Add robots directives, canonical metadata, Open Graph defaults, and Organization/SoftwareApplication structured data.
+3. [completed] Expand sitemap coverage for public docs, product, use-case, demo, and changelog routes.
+4. [completed] Run type, lint, build, and internal-link verification.
+
 # tracify Execution Task List
 
 ## Better Auth Migration (2026-08-10)
@@ -466,3 +474,67 @@
 - [x] Synchronize the existing Google credentials to Convex development and production.
 - [ ] Add GitHub credentials after a GitHub OAuth App client ID and secret are available.
   - [x] Credentials received, configured in development and production, and deployed.
+# 2026-08-10 — Standardize Tracify logos
+
+- [x] Extract the production navbar wordmark into one shared component.
+- [x] Replace auth, footer, dashboard, and onboarding logo variants.
+- [x] Verify typography, marker treatment, accessibility labels, and browser rendering.
+# 2026-08-10 — Remove auth intro panel
+
+- [x] Remove the selected editorial panel from the shared auth shell.
+- [x] Center the auth card across every auth route.
+- [x] Verify rendering and static checks.
+# 2026-08-10 — Enable localhost password reset
+
+- [x] Sync the password-reset handler to the development Convex deployment.
+- [x] Probe the development auth endpoint with a non-existent test address.
+- [x] Confirm the reset endpoint returns the safe success response.
+
+# 2026-08-10 — Fix mobile evaluation scoreboard
+
+- [x] Replace the wide comparison table with mobile candidate cards.
+- [x] Scale the release heading for narrow screens.
+- [x] Verify lint and browser overflow at phone width.
+
+# 2026-08-10 — Standardize external brand logos
+
+- [x] Audit public third-party logo surfaces.
+- [x] Replace invented marks with real brand assets.
+- [x] Centralize brand asset lookup and reuse it on the integrations page.
+- [x] Verify every rendered brand image loads.
+
+# 2026-08-10 — Remove infrastructure disclosure
+
+- [x] Remove the public platform dependency row from the homepage integrations section.
+- [x] Verify internal provider names no longer render in that section.
+
+# 2026-08-10 — Move admin access into dashboard
+
+- [x] Remove Admin from public desktop and mobile navigation.
+- [x] Show Dashboard and Sign out to signed-in users.
+- [x] Add a dashboard-only Admin link for the whitelisted owner email.
+- [x] Keep the server-side private-library access guard aligned with the allowlist.
+
+# 2026-08-10 — Focus onboarding and dashboard branding
+
+- [x] Exclude onboarding routes from marketing chrome.
+- [x] Add a plain shared wordmark variant.
+- [x] Apply the plain wordmark to dashboard and onboarding shells.
+- [x] Verify the onboarding route in-browser and run static checks.
+
+# 2026-08-10 — Fix onboarding API-key secret
+
+- [x] Check development and production Convex secret availability safely.
+- [x] Generate and configure a strong development-only HMAC secret.
+- [x] Verify the development deployment contains the secret.
+
+# 2026-08-10 — Rename API-key secret to Tracify
+
+- [x] Rename active code, examples, and documentation.
+- [x] Preserve and migrate development and production secret values.
+- [x] Deploy the renamed Convex code and remove obsolete Convex variables.
+- [x] Add the renamed variable to Vercel production without breaking the current deployment.
+
+# 2026-08-11 — Install Stripe documentation skills
+
+- [x] Add the skills published at `https://docs.stripe.com` to the project agent-skill directory.

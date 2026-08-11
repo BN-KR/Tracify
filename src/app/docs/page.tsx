@@ -3,6 +3,7 @@ import Link from "next/link";
 export const metadata = {
   title: "Documentation — tracify",
   description: "Learn how to install the SDK and send your first span.",
+  alternates: { canonical: "/docs" },
 };
 
 export default function DocsRootPage() {

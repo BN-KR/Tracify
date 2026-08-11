@@ -126,8 +126,8 @@ export async function generateMetadata({
   const { feature } = await params;
   const page = productFeatures[feature];
   return page
-    ? { title: `${page.title} | tracify`, description: page.description }
-    : { title: "Product | tracify" };
+    ? { title: page.title, description: page.description, alternates: { canonical: `/product/${feature}` } }
+    : { title: "Product" };
 }
 
 export default async function ProductFeaturePage({
