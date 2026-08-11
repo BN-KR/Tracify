@@ -538,3 +538,11 @@
 # 2026-08-11 — Install Stripe documentation skills
 
 - [x] Add the skills published at `https://docs.stripe.com` to the project agent-skill directory.
+# Future 19 public-site migration — 2026-08-11
+
+- [x] Inventory legacy public route families outside the dashboard.
+- [x] Create shared Future 19 page primitives.
+- [x] Migrate blog, docs, pricing, product, use-case, and demo surfaces.
+- [x] Migrate integrations, changelog, contact, roadmap, status, security, privacy, and terms.
+- [x] Verify representative routes at desktop and mobile widths.
+- [x] Pass focused lint, TypeScript, diff hygiene, and production build.

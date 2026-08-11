@@ -1,64 +1,21 @@
-import Link from "next/link";
+import { FutureBand, FutureMasthead, FuturePage } from "@/components/marketing/future19-page";
 
-export const metadata = {
-  title: "Changelog — tracify",
-  description: "Product updates and release notes from the tracify team.",
-  alternates: { canonical: "/changelog" },
-};
+export const metadata = { title: "Changelog", description: "Product updates and release notes from the Tracify team.", alternates: { canonical: "/changelog" } };
 
 const changes = [
-  {
-    date: "June 2026",
-    items: [
-      "Blog launched with reading progress bar, table of contents, related posts, and more.",
-      "New navbar structure with dedicated Blog navigation link.",
-      "Sanity Studio deployed with internal linking support for blog posts.",
-    ],
-  },
-  {
-    date: "May 2026",
-    items: [
-      "Cost Dashboard now supports filtering by date range and model.",
-      "Trace Viewer performance improvements for long-running agent traces.",
-      "New alerts system: Slack and email notifications for span failures.",
-    ],
-  },
-];
+  { date: "August 2026", code: "26.08", title: "The operating record expands", items: ["Future 19 visual system promoted across the public product story.", "Better Auth migration with secure social and password flows.", "Sessions, evaluations, prompts, datasets, and release workflows connected."] },
+  { date: "June 2026", code: "26.06", title: "The publishing layer", items: ["Engineering journal launched with reading tools and related notes.", "Documentation and product navigation reorganized around workflows.", "Sanity publishing pipeline connected."] },
+  { date: "May 2026", code: "26.05", title: "Signals become operational", items: ["Cost analysis filters by date range and model.", "Trace viewer performance improved for long-running agents.", "Slack and email notification foundations added for failures."] },
+] as const;
 
 export default function ChangelogPage() {
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: "#050505" }}>
-      <div className="max-w-[720px] mx-auto px-6 py-24">
-        <Link
-          href="/"
-          className="font-mono text-[13px] text-[#666666] hover:text-white transition-colors inline-block mb-12"
-        >
-          ← Back to home
-        </Link>
-        <h1 className="font-mono text-[44px] font-bold text-white mb-4 tracking-tight">
-          Changelog
-        </h1>
-        <p className="font-sans text-[16px] text-[#999999] leading-relaxed mb-12 max-w-[600px]">
-          Product updates and release notes from the tracify team.
-        </p>
-        <div className="flex flex-col gap-10">
-          {changes.map((release) => (
-            <div key={release.date}>
-              <h2 className="font-mono text-[14px] font-bold text-white mb-4 tracking-tight">
-                {release.date}
-              </h2>
-              <ul className="flex flex-col gap-3">
-                {release.items.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 font-sans text-[14px] text-[#999999] leading-relaxed">
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#444444]" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  return <FuturePage><FutureMasthead eyebrow="Company / Changelog" title={<>A shipping record, not a highlight reel.</>} description="The meaningful changes to Tracify, organized as an evidence trail. Small fixes stay small; changes to how teams operate get the space they deserve." index="L01" />
+    <FutureBand label="Release tape"><div className="border-x border-black">
+      {changes.map((change, index) => <article key={change.code} className="grid border-b border-black last:border-b-0 lg:grid-cols-[170px_1fr_300px]">
+        <div className={`border-black p-6 lg:border-r ${index === 0 ? "bg-[#f4d44d]" : "bg-white/25"}`}><p className="font-pixel text-5xl tracking-[-0.06em]">{change.code}</p><time className="mt-3 block font-mono text-[9px] uppercase tracking-[0.14em]">{change.date}</time></div>
+        <div className="border-t border-black p-6 lg:border-t-0 lg:p-9"><h2 className="font-pixel text-4xl leading-none tracking-[-0.05em] md:text-5xl">{change.title}</h2><ul className="mt-8 space-y-4">{change.items.map((item, itemIndex) => <li key={item} className="grid grid-cols-[30px_1fr] text-sm leading-6 text-black/62"><span className="font-mono text-[9px] text-black/35">{itemIndex + 1}—</span>{item}</li>)}</ul></div>
+        <div className="flex min-h-44 items-end border-t border-black bg-black p-6 text-white lg:border-l lg:border-t-0"><p className="font-mono text-[9px] uppercase leading-5 tracking-[0.12em] text-white/45">Release class<br/><span className="text-[#f4d44d]">{index === 0 ? "System" : "Product"}</span></p></div>
+      </article>)}
+    </div></FutureBand>
+  </FuturePage>;
 }

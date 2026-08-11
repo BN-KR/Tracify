@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { FutureAction, FutureBand, FutureMasthead, FuturePage } from "@/components/marketing/future19-page";
 
 const docPages: Record<string, { title: string; description: string }> = {
   index: {
@@ -108,23 +108,14 @@ export default async function DocsPage({
   const page = docPages[docKey];
   if (!page) notFound();
 
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: "#050505" }}>
-      <div className="max-w-[720px] mx-auto px-6 py-24">
-        <Link
-          href="/"
-          className="font-mono text-[13px] text-[#666666] hover:text-white transition-colors inline-block mb-12"
-        >
-          ← Back to home
-        </Link>
-        <h1 className="font-mono text-[44px] font-bold text-white mb-6 tracking-tight">
-          {page.title}
-        </h1>
-        <p className="font-sans text-[16px] text-[#999999] leading-relaxed mb-8">
-          {page.description}
-        </p>
-        {codeExamples[docKey] ? <div className="space-y-6"><div className="border border-[#2A2A2A] bg-[#0A0A0A] p-6"><p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[#666666]">Install / configure</p><pre className="overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-6 text-zinc-300">{codeExamples[docKey].install}</pre></div><div className="border border-[#2A2A2A] bg-[#0A0A0A] p-6"><p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[#666666]">Example</p><pre className="overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-6 text-zinc-300">{codeExamples[docKey].code}</pre></div><ul className="space-y-3 border-l border-zinc-700 pl-5">{codeExamples[docKey].notes.map((note) => <li key={note} className="text-sm leading-6 text-zinc-400">{note}</li>)}</ul><Link href="/integrations" className="inline-flex text-xs font-mono uppercase tracking-widest text-white underline underline-offset-4">Browse integrations</Link></div> : null}
-      </div>
-    </div>
-  );
+  const example = codeExamples[docKey];
+  return <FuturePage>
+    <FutureMasthead eyebrow={`Documentation / ${docKey}`} title={page.title} description={page.description} index="D19" aside={<div><p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/40">Current chapter</p><p className="mt-5 border-l-4 border-[#f4d44d] pl-4 font-mono text-[10px] uppercase leading-5 tracking-[0.12em]">Read<br/>Run<br/>Verify</p></div>} />
+    {example ? <>
+      <FutureBand label="01 / Activate"><div className="grid border-x border-black md:grid-cols-[220px_1fr]"><div className="border-black bg-[#f4d44d] p-6 md:border-r"><p className="font-pixel text-5xl leading-none tracking-[-0.06em]">Start here.</p></div><pre className="overflow-x-auto whitespace-pre-wrap bg-black p-6 font-mono text-xs leading-6 text-[#f4d44d] md:p-8"><code>{example.install}</code></pre></div></FutureBand>
+      <FutureBand label="02 / Working example"><div className="border-x border-black bg-black"><div className="flex items-center justify-between border-b border-white/15 px-5 py-3 font-mono text-[8px] uppercase tracking-[0.13em] text-white/40"><span>example.{docKey === "python" ? "py" : "ts"}</span><span>copy → adapt → run</span></div><pre className="overflow-x-auto whitespace-pre-wrap p-5 font-mono text-xs leading-6 text-white/75 md:p-10"><code>{example.code}</code></pre></div></FutureBand>
+      <FutureBand label="03 / Operational notes"><ol className="border-x border-black">{example.notes.map((note, index) => <li key={note} className="grid grid-cols-[54px_1fr] border-b border-black last:border-b-0"><span className="flex items-center justify-center border-r border-black bg-white/35 font-pixel text-3xl text-black/22">0{index + 1}</span><p className="p-5 text-sm leading-6 text-black/62 md:p-7">{note}</p></li>)}</ol></FutureBand>
+    </> : null}
+    <FutureBand tone="ink"><div className="flex flex-col gap-7 px-5 py-10 md:flex-row md:items-center md:justify-between md:px-10"><div><p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/40">Next route</p><p className="mt-2 font-pixel text-4xl tracking-[-0.05em]">Connect the rest of your stack.</p></div><FutureAction href="/integrations" inverted>Browse integrations</FutureAction></div></FutureBand>
+  </FuturePage>;
 }

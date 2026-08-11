@@ -1,5 +1,13 @@
 # Project Memory
 
+## 2026-08-11 Future 19 Public-Site Migration
+- Migrated every previously dark/legacy public route family into the Future 19 paper, rule, pixel-type, black-panel, and acid-yellow signal language.
+- Added reusable public-page primitives for mastheads, ruled bands, actions, indexes, and article typography.
+- Gave each surface a distinct composition: blog signal-board bento, pricing ledger, docs field manual, product capability instrument, use-case failure anatomy, demo lab, integration directory, release tape, roadmap register, status ledger, contact router, trust matrix, and legal records.
+- Preserved existing route data and interactions, including Sanity blog content, documentation code examples, pricing billing toggle, demo tabs, integration logos, and dynamic product/use-case metadata.
+- Browser QA covered 11 representative public routes at desktop and 375px; all rendered without server errors or horizontal overflow after fixing the integrations mobile shell.
+- Verification: focused ESLint, TypeScript, diff check, and full Next.js production build pass; 69 static pages generated.
+
 ## 2026-08-11 Sitewide SEO
 - Canonical host standardized to `https://www.tracify.tech` in the root metadata base, sitemap, robots host/sitemap declaration, JSON-LD, RSS feed, alert links, and Tracify-owned Sanity blog canonicals.
 - Added `robots.ts` to allow public content while blocking dashboard, admin, auth, onboarding, API, library, and preview paths from crawling; it advertises the canonical sitemap.

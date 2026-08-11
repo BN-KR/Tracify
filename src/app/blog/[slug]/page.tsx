@@ -2,6 +2,7 @@ import { client, urlFor } from "@/lib/sanity/client";
 import { postQuery, postSlugsQuery } from "@/lib/sanity/queries";
 import { PortableText } from "@portabletext/react";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getReadingTime } from "@/components/blog/reading-time";
@@ -11,6 +12,7 @@ import { ProgressBar } from "@/components/blog/progress-bar";
 import { TableOfContents } from "@/components/blog/table-of-contents";
 import { NewsletterCta } from "@/components/blog/newsletter-cta";
 import { RelatedPosts } from "@/components/blog/related-posts";
+import { futureArticleClass } from "@/components/marketing/future19-page";
 
 export const revalidate = 60;
 
@@ -258,7 +260,7 @@ export default async function BlogPostPage({
   if (!post) notFound();
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#050505" }}>
+    <div className="min-h-screen bg-[#eceae3] pt-[54px] text-black">
       <ProgressBar />
       <script
         type="application/ld+json"
@@ -266,16 +268,16 @@ export default async function BlogPostPage({
           __html: JSON.stringify(jsonLd(post)),
         }}
       />
-      <div className="max-w-[1060px] mx-auto px-6 py-24">
+      <div className="mx-auto max-w-[1240px] border-x border-black">
         <Link
           href="/blog"
-          className="font-mono text-[13px] text-[#666666] hover:text-white transition-colors inline-block mb-12"
+          className="inline-block border-b border-r border-black bg-[#f4d44d] px-6 py-4 font-mono text-[9px] uppercase tracking-[0.13em] hover:bg-black hover:text-white"
         >
           ← Back to blog
         </Link>
 
         <article>
-          <header className="mb-10 max-w-[720px]">
+          <header className="border-b border-black px-6 py-14 md:px-10 md:py-20">
             <div className="flex items-center gap-3 text-[12px] font-mono text-[#666666] mb-4">
               <time dateTime={post.date}>{formatDate(post.date)}</time>
               {post.author && (
@@ -288,12 +290,12 @@ export default async function BlogPostPage({
               <span>{getReadingTime(post.body)} min read</span>
             </div>
 
-            <h1 className="font-mono text-[32px] md:text-[40px] font-bold text-white leading-tight mb-4">
+            <h1 className="mt-6 max-w-5xl font-pixel text-6xl leading-[0.84] tracking-[-0.065em] md:text-8xl">
               {post.title}
             </h1>
 
             {post.excerpt && (
-              <p className="font-sans text-[16px] text-[#999999] leading-relaxed max-w-[600px]">
+              <p className="mt-7 max-w-2xl text-base leading-7 text-black/58">
                 {post.excerpt}
               </p>
             )}
@@ -303,7 +305,7 @@ export default async function BlogPostPage({
                 {post.categories.map((cat) => (
                   <span
                     key={cat}
-                    className="font-mono text-[11px] text-[#666666] uppercase tracking-wider border border-[#2A2A2A] px-2 py-0.5"
+                    className="border border-black px-2 py-1 font-mono text-[8px] uppercase tracking-wider"
                   >
                     {cat}
                   </span>
@@ -313,28 +315,30 @@ export default async function BlogPostPage({
           </header>
 
           {post.coverImage && (
-            <div className="mb-10 border border-[#2A2A2A] overflow-hidden max-w-[720px]">
-              <img
+            <div className="relative min-h-[320px] overflow-hidden border-b border-black bg-black md:min-h-[520px]">
+              <Image
                 src={urlFor(post.coverImage)?.width(900).height(450).url() || ""}
                 alt={post.coverImage?.alt || post.title}
-                className="w-full h-auto object-cover"
+                fill
+                sizes="(min-width: 1240px) 1240px, 100vw"
+                className="object-cover grayscale"
               />
             </div>
           )}
 
-          <div className="flex gap-8">
-            <aside className="hidden lg:block w-[150px] shrink-0">
+          <div className="grid lg:grid-cols-[210px_1fr]">
+            <aside className="hidden border-r border-black bg-white/30 p-6 lg:block">
               <div className="sticky top-24">
                 <TableOfContents body={post.body} />
               </div>
             </aside>
 
-            <div className="min-w-0 flex-1 max-w-[720px]">
+            <div className="min-w-0 max-w-[780px] px-6 py-12 md:px-10">
               <div className="lg:hidden mb-8">
                 <TableOfContents body={post.body} collapsible />
               </div>
 
-              <div className="prose-custom">
+              <div className={`${futureArticleClass} prose-custom`}>
                 <PortableText
                   value={post.body}
                   components={portableTextComponents}

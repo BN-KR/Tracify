@@ -112,22 +112,22 @@ const CATEGORIES = [...new Set(INTEGRATIONS.map((i) => i.category))];
 
 export default function IntegrationsPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-yellow-300/40">
-      <main className="max-w-4xl mx-auto px-6 pt-32 pb-24">
-        <div className="mb-12">
+    <div className="min-h-screen overflow-x-hidden bg-[#eceae3] pt-[54px] text-black selection:bg-yellow-300/40">
+      <main className="mx-auto max-w-[1240px] border-x border-black">
+        <header className="border-b border-black px-6 py-14 md:px-10 md:py-20">
           <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#666666] mb-4">
             Platform / Integrations
           </div>
-          <h1 className="text-4xl md:text-5xl font-mono tracking-tight text-white">
+          <h1 className="max-w-4xl font-pixel text-6xl leading-[0.85] tracking-[-0.06em] md:text-8xl">
             Integrations
           </h1>
-          <p className="mt-4 text-zinc-500 font-mono text-sm max-w-xl">
+          <p className="mt-6 max-w-xl text-base leading-7 text-black/55">
             Connect Tracify to your existing tools, frameworks, and providers.
             Most integrations work via the OTLP endpoint — no vendor lock-in.
           </p>
-        </div>
+        </header>
 
-        <div className="mb-12 border border-[#1A1A1A] bg-[#0A0A0A] p-6">
+        <div className="grid border-b border-black bg-[#f4d44d] p-6 md:grid-cols-[0.6fr_1.4fr] md:gap-10 md:p-10">
           <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#666666] mb-2">
             Quick Start
           </div>
@@ -135,7 +135,7 @@ export default function IntegrationsPage() {
             Point any OTel exporter at the Tracify OTLP endpoint to start
             collecting spans immediately:
           </p>
-          <div className="bg-[#050505] border border-[#1A1A1A] p-4 font-mono text-xs text-zinc-500 overflow-x-auto">
+          <div className="overflow-x-auto border border-black bg-black p-5 font-mono text-xs leading-6 text-white/55">
             <span className="text-zinc-600"># .env</span>
             {"\n"}
             <span className="text-white">TRACIFY_OTLP_ENDPOINT</span>
@@ -165,36 +165,36 @@ export default function IntegrationsPage() {
         </div>
 
         {CATEGORIES.map((category) => (
-          <div key={category} className="mb-12">
-            <h2 className="text-white font-mono text-xs uppercase tracking-[0.3em] mb-6">
+          <section key={category} className="border-b border-black">
+            <h2 className="border-b border-black px-6 py-3 font-mono text-[9px] uppercase tracking-[0.16em] md:px-10">
               {category}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {INTEGRATIONS.filter((i) => i.category === category).map(
                 (integration) => {
                   const brand = getThirdPartyBrand(integration.name);
                   return (
                   <div
                     key={integration.name}
-                    className="border border-[#1A1A1A] bg-[#0A0A0A] p-5 hover:border-[#333333] transition-colors"
+                    className="min-h-52 border-b border-r border-black p-6 transition-colors hover:bg-white/55"
                   >
                     <div className="flex items-center gap-2 mb-2">
                       {brand ? (
                         <ThirdPartyLogo
                           brand={brand}
-                          className="size-4 shrink-0 object-contain invert"
+                          className="size-5 shrink-0 object-contain"
                         />
                       ) : null}
-                      <span className="text-white font-mono text-sm">
+                      <span className="font-pixel text-3xl leading-none tracking-[-0.04em]">
                         {integration.name}
                       </span>
                       {integration.badge && (
-                        <span className="text-[9px] font-mono uppercase tracking-widest text-[#666666] border border-[#333333] px-2 py-0.5">
+                        <span className="border border-black px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest">
                           {integration.badge}
                         </span>
                       )}
                     </div>
-                    <p className="text-zinc-500 font-mono text-xs leading-relaxed">
+                    <p className="mt-12 text-sm leading-6 text-black/55">
                       {integration.description}
                     </p>
                   </div>
@@ -202,7 +202,7 @@ export default function IntegrationsPage() {
                 },
               )}
             </div>
-          </div>
+          </section>
         ))}
 
         <div className="mt-24 pt-8 border-t border-zinc-900">

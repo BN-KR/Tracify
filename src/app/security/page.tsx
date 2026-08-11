@@ -10,21 +10,22 @@ export const metadata: Metadata = {
 
 export default function SecurityPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-yellow-300/40">
-      <main className="max-w-3xl mx-auto px-6 pt-32 pb-24">
-        <div className="mb-12">
+    <div className="min-h-screen bg-[#eceae3] pt-[54px] text-black selection:bg-yellow-300/40">
+      <main className="mx-auto max-w-[1240px] border-x border-black">
+        <header className="grid border-b border-black md:grid-cols-[1fr_280px]">
+        <div className="px-6 py-14 md:px-10 md:py-20">
           <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#666666] mb-4">
             Platform / Security
           </div>
-          <h1 className="text-4xl md:text-5xl font-mono tracking-tight text-white">
+          <h1 className="font-pixel text-6xl leading-none tracking-[-0.06em] md:text-8xl">
             Security
           </h1>
-          <p className="mt-4 text-zinc-500 font-mono text-sm">
+          <p className="mt-5 max-w-xl text-base leading-7 text-black/55">
             How we protect your data and infrastructure.
           </p>
-        </div>
+        </div><div className="flex items-end bg-black p-7 text-white"><div><div className="mb-5 h-2 w-20 bg-[#f4d44d]"/><p className="font-mono text-[9px] uppercase leading-5 tracking-[0.13em] text-white/55">Trust is a system<br/>Claims require evidence</p></div></div></header>
 
-        <div className="prose prose-invert max-w-none space-y-12 font-mono text-sm text-zinc-400 leading-relaxed">
+        <div className="grid gap-0 text-sm leading-6 text-black/62 md:grid-cols-2 [&_a]:!text-black [&_code]:!text-black [&_h2]:!text-black [&_h2]:mb-4 [&_h2]:font-pixel [&_h2]:text-4xl [&_h2]:tracking-[-0.05em] [&_li]:my-2 [&_section]:border-b [&_section]:border-black [&_section]:p-6 [&_ul]:list-square [&_ul]:pl-5 md:[&_section]:p-9 md:[&_section:nth-child(odd)]:border-r">
           <section>
             <h2 className="text-white text-lg uppercase tracking-widest mb-4">
               Encryption
@@ -45,7 +46,7 @@ export default function SecurityPage() {
             </h2>
             <ul className="list-disc pl-5 mt-4 space-y-2">
               <li>
-                Each project's telemetry is fully isolated — no cross-project
+                Each project&apos;s telemetry is fully isolated — no cross-project
                 data leakage.
               </li>
               <li>

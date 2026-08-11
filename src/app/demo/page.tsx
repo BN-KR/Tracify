@@ -56,17 +56,17 @@ export default function DemoPage() {
     ["experiments", "Experiments"],
   ];
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
-      <main className="mx-auto max-w-[1280px] px-6 pb-24 pt-32">
-        <div className="flex flex-col justify-between gap-8 border-b border-zinc-800 pb-10 md:flex-row md:items-end">
+    <div className="min-h-screen bg-[#eceae3] pt-[54px] text-black">
+      <main className="mx-auto max-w-[1240px] border-x border-black">
+        <div className="flex flex-col justify-between gap-8 border-b border-black bg-[#f4d44d] px-6 py-14 md:flex-row md:items-end md:px-10 md:py-20">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500">
               Interactive demo project / support-agent
             </p>
-            <h1 className="mt-4 max-w-3xl font-mono text-4xl tracking-tight md:text-6xl">
+            <h1 className="mt-5 max-w-4xl font-pixel text-6xl leading-[0.84] tracking-[-0.065em] md:text-8xl">
               From trace to better answers.
             </h1>
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-zinc-400">
+            <p className="mt-6 max-w-2xl text-sm leading-7 text-black/60">
               Explore the complete Tracify improvement loop with seeded data:
               inspect a run, compare prompt versions, review quality, and
               promote the change that wins.
@@ -74,12 +74,12 @@ export default function DemoPage() {
           </div>
           <Link
             href="/sign-up"
-            className="inline-flex items-center gap-2 border border-white px-5 py-3 font-mono text-xs uppercase tracking-widest text-white hover:bg-white hover:text-black"
+            className="inline-flex items-center gap-2 border border-black bg-black px-5 py-3 font-mono text-xs uppercase tracking-widest text-white hover:bg-white hover:text-black"
           >
             Create a project <ArrowRight className="size-4" />
           </Link>
         </div>
-        <div className="mt-8 flex flex-wrap gap-2">
+        <div className="bg-black px-6 pb-24 pt-8 text-white md:px-10"><div className="flex flex-wrap gap-2">
           {tabs.map(([id, label]) => (
             <button
               key={id}
@@ -98,7 +98,7 @@ export default function DemoPage() {
         {active === "prompts" ? <Prompts /> : null}
         {active === "evaluation" ? <Evaluation /> : null}
         {active === "datasets" ? <Datasets /> : null}
-        {active === "experiments" ? <Experiments /> : null}
+        {active === "experiments" ? <Experiments /> : null}</div>
       </main>
     </div>
   );

@@ -1,74 +1,26 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { FutureAction, FutureBand, FutureMasthead, FuturePage } from "@/components/marketing/future19-page";
 
-const useCases: Record<string, { title: string; description: string }> = {
-  research: {
-    title: "Research Agents",
-    description: "Trace browsing, summarization, and source gathering across research workflows.",
-  },
-  support: {
-    title: "Support Agents",
-    description: "Inspect conversations, tools, and escalation paths in customer support agents.",
-  },
-  automation: {
-    title: "Automation Agents",
-    description: "Debug multi-step workflows and retries in automated pipelines.",
-  },
-  "tool-calling": {
-    title: "Tool-Calling Agents",
-    description: "Catch loops, failed APIs, and hidden cost spikes in tool-using agents.",
-  },
-};
+const useCases = {
+  research: { title: "Research agents", statement: "Show the path from question to source.", description: "Trace browsing, extraction, synthesis, and citation decisions across long-running research workflows.", failure: "A plausible answer with an invisible evidence gap.", signals: ["Source retrieval", "Citation coverage", "Reasoning latency", "Model handoffs"], scene: ["Question received", "Search plan built", "12 sources opened", "3 claims unsupported", "Answer held for review"] },
+  support: { title: "Support agents", statement: "Find the decision behind every escalation.", description: "Inspect conversations, tools, policy checks, and handoffs across customer support agents.", failure: "A confident resolution built on stale account context.", signals: ["Tool permissions", "Knowledge freshness", "Escalation route", "Resolution quality"], scene: ["Ticket classified", "Account loaded", "Policy checked", "Refund tool blocked", "Human context attached"] },
+  automation: { title: "Automation agents", statement: "Debug the chain, not the final error.", description: "Follow multi-step automations through retries, queues, fallbacks, and external side effects.", failure: "A retry that quietly performs the same action twice.", signals: ["Retry lineage", "Idempotency", "Queue latency", "Fallback outcome"], scene: ["Trigger accepted", "Plan compiled", "Tool timed out", "Fallback executed", "Duplicate prevented"] },
+  "tool-calling": { title: "Tool-calling agents", statement: "See what the model asked the world to do.", description: "Catch invalid arguments, permission failures, loops, and hidden cost across tool-using agents.", failure: "A harmless-looking loop that turns into cost and latency.", signals: ["Arguments", "Tool result", "Loop count", "Token cost"], scene: ["Intent parsed", "Tool selected", "Schema rejected", "Arguments repaired", "Result verified"] },
+} as const;
 
-export function generateStaticParams() {
-  return Object.keys(useCases).map((slug) => ({ slug }));
-}
+type Slug = keyof typeof useCases;
+export function generateStaticParams() { return Object.keys(useCases).map((slug) => ({ slug })); }
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> { const { slug } = await params; const page = useCases[slug as Slug]; return page ? { title: `${page.title} observability`, description: page.description, alternates: { canonical: `/use-cases/${slug}` } } : {}; }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
-  const page = useCases[slug];
-  return page ? { title: `${page.title} observability`, description: page.description, alternates: { canonical: `/use-cases/${slug}` } } : {};
-}
-
-export default async function UseCasePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const page = useCases[slug];
-  if (!page) notFound();
-
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: "#050505" }}>
-      <div className="max-w-[720px] mx-auto px-6 py-24">
-        <Link
-          href="/"
-          className="font-mono text-[13px] text-[#666666] hover:text-white transition-colors inline-block mb-12"
-        >
-          ← Back to home
-        </Link>
-        <h1 className="font-mono text-[44px] font-bold text-white mb-6 tracking-tight">
-          {page.title}
-        </h1>
-        <p className="font-sans text-[16px] text-[#999999] leading-relaxed mb-8">
-          {page.description}
-        </p>
-        <div className="border border-[#2A2A2A] bg-[#0A0A0A] p-8">
-          <p className="font-sans text-[14px] text-[#666666] leading-relaxed">
-            This page is under construction. Check out the{" "}
-            <Link href="/blog" className="text-white underline underline-offset-4 decoration-[#444444] hover:decoration-white transition-colors">
-              blog
-            </Link>{" "}
-            for related content or{" "}
-            <Link href="/pricing" className="text-white underline underline-offset-4 decoration-[#444444] hover:decoration-white transition-colors">
-              view pricing
-            </Link>
-            .
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+export default async function UseCasePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params; const page = useCases[slug as Slug]; if (!page) notFound();
+  return <FuturePage><FutureMasthead eyebrow={`Use case / ${page.title}`} title={page.statement} description={page.description} index="U19" />
+    <FutureBand label="Failure anatomy"><div className="grid md:grid-cols-[0.8fr_1.2fr]">
+      <div className="border-black bg-[#f4d44d] p-7 md:border-r md:p-10"><span className="font-mono text-[9px] uppercase tracking-[0.14em]">The expensive unknown</span><p className="mt-20 font-pixel text-5xl leading-[0.9] tracking-[-0.055em]">{page.failure}</p></div>
+      <div className="bg-black p-6 text-white md:p-10"><div className="flex items-center justify-between border-b border-white/20 pb-4 font-mono text-[8px] uppercase tracking-[0.13em] text-white/45"><span>Live execution tape</span><span>05 events</span></div><ol>{page.scene.map((item, index) => <li key={item} className="grid grid-cols-[42px_1fr_auto] items-center border-b border-white/15 py-5 font-mono text-[10px] uppercase tracking-[0.09em]"><span className="text-white/30">0{index + 1}</span><span>{item}</span><span className={`size-2 ${index === 3 ? "bg-[#f4d44d]" : "bg-white/25"}`} /></li>)}</ol></div>
+    </div></FutureBand>
+    <FutureBand label="Signals that matter"><div className="grid sm:grid-cols-2 lg:grid-cols-4">{page.signals.map((signal, index) => <div key={signal} className="min-h-48 border-b border-black p-6 odd:border-r sm:border-b-0 lg:border-r lg:last:border-r-0"><span className="font-pixel text-4xl text-black/18">0{index + 1}</span><h2 className="mt-14 font-mono text-[10px] uppercase tracking-[0.12em]">{signal}</h2></div>)}</div></FutureBand>
+    <FutureBand tone="ink"><div className="flex flex-col gap-8 px-5 py-14 md:flex-row md:items-end md:justify-between md:px-10"><p className="max-w-2xl font-pixel text-5xl leading-[0.88] tracking-[-0.06em] md:text-7xl">Put your own run on the tape.</p><FutureAction href="/sign-up" inverted>Start tracing free</FutureAction></div></FutureBand>
+  </FuturePage>;
 }

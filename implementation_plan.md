@@ -604,3 +604,9 @@ The single most important UI in the product.
 # Stripe documentation skills — 2026-08-11
 
 1. [completed] Install the skills published through `https://docs.stripe.com`.
+# Future 19 public-site migration — 2026-08-11
+
+1. [completed] Establish composable Future 19 page primitives and typographic rules.
+2. [completed] Replace generic marketing grids with route-specific editorial compositions.
+3. [completed] Preserve dynamic content, metadata, and existing interactions.
+4. [completed] Validate desktop/mobile rendering, accessibility-oriented semantics, TypeScript, lint, and production build.
