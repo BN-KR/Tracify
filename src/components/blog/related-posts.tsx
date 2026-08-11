@@ -1,78 +1,33 @@
-import { client, urlFor } from "@/lib/sanity/client";
+import { getMediaUrl } from "@/lib/payload-blog";
+import type { Post } from "@/payload-types";
+import Image from "next/image";
 import Link from "next/link";
 
-interface RelatedPost {
-  _id: string;
-  title: string;
-  slug: string;
-  date: string;
-  excerpt: string;
-  coverImage: any;
-}
-
-export async function RelatedPosts({
-  categories,
-  currentId,
-}: {
-  categories: string[];
-  currentId?: string;
-}) {
-  if (!client || !categories?.length) return null;
-
-  const posts: RelatedPost[] = await client
-    .fetch(
-      `*[_type == "post" && _id != $currentId && count(categories[@ in $categories]) > 0 && defined(slug.current)] | order(publishedAt desc) [0...3] {
-        _id,
-        title,
-        "slug": slug.current,
-        "date": publishedAt,
-        excerpt,
-        coverImage
-      }`,
-      { categories, currentId: currentId || "" }
-    )
-    .catch(() => []);
-
-  if (!posts.length) return null;
-
-  function formatDate(dateString: string) {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  }
+export function RelatedPosts({ posts }: { posts?: Array<number | Post> | null }) {
+  const related = (posts ?? []).filter((post): post is Post => typeof post === "object").slice(0, 3);
+  if (!related.length) return null;
 
   return (
-    <div className="mt-12 pt-8 border-t border-[#2A2A2A]">
-      <h3 className="font-mono text-[16px] font-bold text-white mb-6">
-        Related posts
-      </h3>
+    <div className="mt-12 border-t border-black/20 pt-8">
+      <h3 className="mb-6 font-mono text-[16px] font-bold text-black">Related posts</h3>
       <div className="grid gap-4 md:grid-cols-3">
-        {posts.map((post) => (
-          <Link
-            key={post._id}
-            href={`/blog/${post.slug}`}
-            className="border border-[#2A2A2A] bg-[#0A0A0A] hover:border-[#444444] transition-colors p-4 flex flex-col gap-2"
-          >
-            {post.coverImage && (
-              <div className="overflow-hidden border border-[#2A2A2A]">
-                <img
-                  src={urlFor(post.coverImage)?.width(400).height(200).url() || ""}
-                  alt=""
-                  className="w-full h-auto object-cover"
-                  loading="lazy"
-                />
-              </div>
-            )}
-            <time className="font-mono text-[10px] text-[#666666]">
-              {formatDate(post.date)}
-            </time>
-            <span className="font-mono text-[13px] text-white leading-snug line-clamp-2">
-              {post.title}
-            </span>
-          </Link>
-        ))}
+        {related.map((post) => {
+          const image = getMediaUrl(post.heroImage, "card");
+          return (
+            <Link
+              key={post.id}
+              href={`/blog/${post.slug}`}
+              className="flex flex-col gap-3 border border-black bg-white/35 p-4 transition-colors hover:bg-[#f4d44d]"
+            >
+              {image ? (
+                <div className="relative aspect-video overflow-hidden border border-black">
+                  <Image src={image} alt="" fill sizes="(min-width: 768px) 240px, 100vw" className="object-cover grayscale" />
+                </div>
+              ) : null}
+              <span className="font-mono text-[13px] leading-snug text-black">{post.title}</span>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

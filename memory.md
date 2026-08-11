@@ -999,3 +999,25 @@
 ## Stripe Documentation Skills (2026-08-11)
 - Installed the seven Stripe-published agent skills under `.agents/skills`: Connect recommendations, Stripe Apps, best practices, directory, docs, projects, and upgrade guidance.
 - User-provided Stripe sandbox keys were not written to source control or local environment files.
+
+## Stripe Subscription Billing (2026-08-11)
+- Installed Stripe CLI 1.45.2, configured Stripe agent tooling, installed the Projects plugin, and accepted the hosted Checkout subscription integration plan.
+- Added Stripe SDK 22.4.0 plus authenticated Checkout and Customer Portal routes, signature-verified webhook handling, and Convex-backed customer/subscription state.
+- Created test-mode Tracify Pro ($19 monthly / $182.40 annual) and Team ($39 monthly / $374.40 annual) products and a customer portal with invoice history, payment-method updates, prorated plan changes, and cancel-at-period-end.
+- Test credentials and webhook secrets are stored only in ignored `.env.local`; public templates contain variable names only.
+- Live payments remain blocked because the Stripe account is not activated: charges and payouts are disabled and required business/representative/bank/TOS details are outstanding. Tax is intentionally disabled until an active tax registration is confirmed.
+
+## Stripe Live Billing Readiness (2026-08-12)
+- Stripe account activation is complete: card payments, transfers, charges, and payouts are enabled with no outstanding verification requirements.
+- The live catalog contains Pro ($19 monthly / $182.40 annual) and Team ($39 monthly / $374.40 annual). The live Customer Portal supports invoice history, payment-method updates, prorated plan changes, and cancel-at-period-end.
+- Created the live subscription webhook for `https://www.tracify.tech/api/stripe/webhook`; its signing secret, the billing sync secret, live publishable key, and all live price IDs are configured in Vercel production. The sync secret is also configured in production Convex.
+- Deployed the billing schema/functions to production Convex, including Stripe customer and subscription indexes.
+- Reconciled homepage, public pricing, dashboard, and Stripe prices/limits. Production build passes after making the Open Graph image dynamic to avoid a Windows libvips prerender failure.
+- Application deployment is intentionally pending: the live server secret was pasted into chat and must be rolled. Add a replacement restricted live key directly to Vercel as `STRIPE_SECRET_KEY`; never paste it into chat or commit it.
+- Stripe Tax remains disabled because an active tax registration has not been confirmed.
+
+## Distinct Future 19 Public Pages (2026-08-11)
+- Replaced the repeated public-page masthead composition with route-specific visual systems across the public routes migrated in the Future 19 pass.
+- Blog, pricing, docs, product, use-case, changelog, contact, roadmap, status, security, privacy, and terms now use distinct editorial metaphors and responsive layouts while retaining the shared monochrome/yellow brand language.
+- Desktop and 375px browser checks passed on representative and dynamic variants; focused ESLint, TypeScript, and diff-hygiene checks passed.
+- A separate concurrent task moved the application into `(frontend)` and `(payload)` route groups; those unrelated Payload, Stripe, dashboard, and backend changes were preserved untouched.

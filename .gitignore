@@ -60,5 +60,9 @@ teams-bot/sessions.json
 teams-bot/*-out.log
 teams-bot/*-err.log
 
+# local Payload development data and uploads
+/payload-local.db*
+/public/media/
+
 # clerk configuration (can include secrets)
 /.clerk/

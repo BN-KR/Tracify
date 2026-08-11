@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "convex/*": ["./convex/*"]
+      "convex/*": ["./convex/*"],
+      "@payload-config": ["./src/payload.config.ts"]
     }
   },
   "include": [

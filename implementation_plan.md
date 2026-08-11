@@ -604,9 +604,25 @@ The single most important UI in the product.
 # Stripe documentation skills — 2026-08-11
 
 1. [completed] Install the skills published through `https://docs.stripe.com`.
+
+# Stripe subscription billing — 2026-08-11
+
+1. [completed] Install Stripe CLI 1.45.2, agent tooling, and Projects plugin 0.32.0.
+2. [completed] Model flat-rate Pro and Team subscriptions with monthly and annual prices.
+3. [completed] Implement hosted Checkout, Customer Portal, signed webhook verification, and Convex state sync.
+4. [completed] Configure and verify the test-mode Stripe catalog and portal.
+5. [completed] Confirm Stripe KYC/account activation and configure the live catalog, portal, webhook, Vercel billing values, and production Convex sync.
+6. [pending] Roll the exposed live secret, add a replacement restricted key directly to Vercel, deploy the application, and run a live-mode smoke test.
 # Future 19 public-site migration — 2026-08-11
 
 1. [completed] Establish composable Future 19 page primitives and typographic rules.
 2. [completed] Replace generic marketing grids with route-specific editorial compositions.
 3. [completed] Preserve dynamic content, metadata, and existing interactions.
 4. [completed] Validate desktop/mobile rendering, accessibility-oriented semantics, TypeScript, lint, and production build.
+
+# Distinct Future 19 public-page compositions — 2026-08-11
+
+1. [completed] Identify the shared masthead and repeated section patterns across previously migrated routes.
+2. [completed] Recompose editorial, commercial, documentation, feature, use-case, operational, and legal pages around distinct page-specific concepts.
+3. [completed] Exercise representative static and dynamic routes at desktop and mobile widths.
+4. [completed] Pass focused ESLint, TypeScript, and diff-hygiene checks without modifying unrelated concurrent work.

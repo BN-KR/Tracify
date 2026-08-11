@@ -15,6 +15,12 @@ export default defineSchema({
       v.literal("team"),
       v.literal("enterprise"),
     )),
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    stripeSubscriptionStatus: v.optional(v.string()),
+    stripePriceId: v.optional(v.string()),
+    subscriptionCurrentPeriodEnd: v.optional(v.number()),
+    cancelAtPeriodEnd: v.optional(v.boolean()),
     clientName: v.optional(v.string()),
     reportNotes: v.optional(v.string()),
     apiKeyPrefix: v.optional(v.string()),
@@ -47,6 +53,8 @@ export default defineSchema({
     .index("by_clerkOrgId", ["clerkOrgId"])
     .index("by_clerkUserId", ["clerkUserId"])
     .index("by_slug", ["slug"])
+    .index("by_stripeCustomerId", ["stripeCustomerId"])
+    .index("by_stripeSubscriptionId", ["stripeSubscriptionId"])
     .index("by_apiKeyHash", ["apiKeyHash"]),
 
   agentRuns: defineTable({

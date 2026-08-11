@@ -1,9 +1,14 @@
-export function getReadingTime(body: any[]): number {
-  if (!body || !Array.isArray(body)) return 0;
-  const text = body
-    .filter((block: any) => block?._type === "block" && block?.children)
-    .flatMap((block: any) => block.children.map((child: any) => child.text || ""))
-    .join(" ");
+function collectText(value: unknown): string[] {
+  if (!value || typeof value !== "object") return [];
+  if (Array.isArray(value)) return value.flatMap(collectText);
+
+  const record = value as Record<string, unknown>;
+  const ownText = typeof record.text === "string" ? [record.text] : [];
+  return [...ownText, ...Object.values(record).flatMap(collectText)];
+}
+
+export function getReadingTime(body: unknown): number {
+  const text = collectText(body).join(" ");
   const wordCount = text.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(wordCount / 200));
 }

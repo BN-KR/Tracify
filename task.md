@@ -538,6 +538,22 @@
 # 2026-08-11 — Install Stripe documentation skills
 
 - [x] Add the skills published at `https://docs.stripe.com` to the project agent-skill directory.
+
+# 2026-08-11 — Stripe subscription billing
+
+- [x] Install and configure the Stripe CLI and agent tooling.
+- [x] Generate a Stripe-hosted subscription integration plan.
+- [x] Create test-mode Pro and Team products with monthly and annual prices.
+- [x] Add Checkout, Customer Portal, signed webhooks, and Convex subscription sync.
+- [x] Activate the Stripe account and configure the live catalog, portal, webhook, Vercel non-secret billing values, and production Convex sync.
+- [ ] Roll the exposed live secret, add a replacement restricted key to Vercel, and deploy the application.
+
+# 2026-08-11 — Make migrated public pages visually distinct
+
+- [x] Audit the migrated public pages for repeated compositions.
+- [x] Give each affected route family its own visual metaphor and layout.
+- [x] Preserve pages outside the prior public-site migration.
+- [x] Verify desktop and mobile rendering plus focused static checks.
 # Future 19 public-site migration — 2026-08-11
 
 - [x] Inventory legacy public route families outside the dashboard.

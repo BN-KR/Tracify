@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { Check, BarChart3, Users, Shield } from "lucide-react";
 
@@ -24,22 +25,22 @@ const PLANS = [
   {
     id: "pro",
     name: "Pro",
-    price: "$29",
-    note: "/mo — Beta",
+    price: "$19",
+    note: "/mo",
     audience: "Production agents",
     popular: true,
     icon: BarChart3,
-    features: ["500k spans / month", "90-day retention", "10 projects", "5 team members", "Slack alerts", "Run replay"],
+    features: ["500k spans / month", "30-day retention", "3 projects", "5 team members", "Evaluations + datasets", "Slack alerts"],
   },
   {
     id: "team",
     name: "Team",
-    price: "$99",
-    note: "/mo — Beta",
+    price: "$39",
+    note: "/mo",
     audience: "Shared agent operations",
     popular: false,
     icon: Users,
-    features: ["5M spans / month", "1-year retention", "Unlimited projects", "Eval engine", "SOC 2 reports", "SLA support"],
+    features: ["2M spans / month", "90-day retention", "Unlimited projects", "20 team members", "Release gates", "Priority support"],
   },
   {
     id: "enterprise",
@@ -54,6 +55,7 @@ const PLANS = [
 ] as const;
 
 export function BillingPlan({ projectId }: { projectId: string }) {
+  const [annual, setAnnual] = useState(false);
   const summary = useQuery(api.projects.getProjectManagementSummary, {
     projectId: projectId as Id<"projects">,
   });
@@ -99,25 +101,32 @@ export function BillingPlan({ projectId }: { projectId: string }) {
 
       <div className="border border-[#2A2A2A] bg-[#111111] p-5">
         <div className="font-mono text-[11px] uppercase tracking-widest text-white">
-          Beta billing status
+          Subscription billing
         </div>
         <p className="mt-2 max-w-3xl font-mono text-[12px] leading-relaxed text-[#777777]">
-          Stripe checkout is not enabled in this build. Usage above is real saved
-          project usage; plan changes are handled through the beta access process
-          until billing is connected.
+          Paid plans use secure Stripe Checkout. Existing subscribers can manage
+          payment methods, invoices, plan changes, and cancellation in Stripe.
         </p>
+        {summary.project.stripeCustomerId ? <PortalButton projectId={projectId} /> : null}
       </div>
 
       <div>
-        <h3 className="font-mono text-sm uppercase tracking-widest text-white">
-          Plans
-        </h3>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h3 className="font-mono text-sm uppercase tracking-widest text-white">Plans</h3>
+          <div className="flex border border-[#2A2A2A] p-1" aria-label="Billing interval">
+            <button type="button" aria-pressed={!annual} onClick={() => setAnnual(false)} className={cn("px-3 py-2 font-mono text-[9px] uppercase", !annual && "bg-white text-black")}>Monthly</button>
+            <button type="button" aria-pressed={annual} onClick={() => setAnnual(true)} className={cn("px-3 py-2 font-mono text-[9px] uppercase", annual && "bg-white text-black")}>Annual −20%</button>
+          </div>
+        </div>
         <div className="mt-5 grid gap-5 lg:grid-cols-4">
           {PLANS.map((plan) => (
             <PlanCard
               key={plan.id}
               plan={plan}
               current={plan.id === currentPlan}
+              projectId={projectId}
+              interval={annual ? "annual" : "monthly"}
+              hasSubscription={Boolean(summary.project.stripeSubscriptionId)}
             />
           ))}
         </div>
@@ -149,11 +158,22 @@ function UsageCard({
 function PlanCard({
   plan,
   current,
+  projectId,
+  interval,
+  hasSubscription,
 }: {
   plan: (typeof PLANS)[number];
   current: boolean;
+  projectId: string;
+  interval: "monthly" | "annual";
+  hasSubscription: boolean;
 }) {
   const Icon = plan.icon;
+  const displayPrice = interval === "annual" && plan.id === "pro"
+    ? "$15.20"
+    : interval === "annual" && plan.id === "team"
+      ? "$31.20"
+      : plan.price;
 
   return (
     <Card
@@ -194,10 +214,11 @@ function PlanCard({
         ) : null}
       </div>
       <div className="mt-5 flex items-baseline gap-1.5">
-        <span className="font-mono text-2xl text-white">{plan.price}</span>
+        <span className="font-mono text-2xl text-white">{displayPrice}</span>
         {plan.note && (
           <span className="font-mono text-[10px] text-[#555555]">{plan.note}</span>
         )}
+        {interval === "annual" && (plan.id === "pro" || plan.id === "team") ? <span className="font-mono text-[9px] text-[#777]">billed annually</span> : null}
       </div>
       <ul className="mt-5 flex-1 space-y-3">
         {plan.features.map((feature) => (
@@ -215,13 +236,44 @@ function PlanCard({
           Active plan
         </div>
       ) : (
-        <Link
-          href="/sign-up?intent=beta"
-          className="mt-8 block border border-[#2A2A2A] px-3 py-2 text-center font-mono text-[10px] uppercase text-[#CCCCCC] transition-colors hover:border-white hover:text-white"
-        >
-          Start building
-        </Link>
+        hasSubscription && (plan.id === "pro" || plan.id === "team") ? (
+          <div className="mt-8 border border-[#2A2A2A] px-3 py-2 text-center font-mono text-[10px] uppercase text-[#777]">Change in billing portal</div>
+        ) : plan.id === "pro" || plan.id === "team" ? (
+          <CheckoutButton projectId={projectId} plan={plan.id} interval={interval} />
+        ) : (
+          <Link href={plan.id === "enterprise" ? "/contact" : "/dashboard"} className="mt-8 block border border-[#2A2A2A] px-3 py-2 text-center font-mono text-[10px] uppercase text-[#CCCCCC] transition-colors hover:border-white hover:text-white">
+            {plan.id === "enterprise" ? "Contact us" : "Free plan"}
+          </Link>
+        )
       )}
     </Card>
   );
+}
+
+function CheckoutButton({ projectId, plan, interval }: { projectId: string; plan: "pro" | "team"; interval: "monthly" | "annual" }) {
+  const [pending, setPending] = useState(false);
+  const startCheckout = async () => {
+    setPending(true);
+    try {
+      const response = await fetch("/api/stripe/checkout", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ projectId, plan, interval }) });
+      const data = await response.json() as { url?: string; error?: string };
+      if (!response.ok || !data.url) throw new Error(data.error ?? "Checkout unavailable");
+      window.location.assign(data.url);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "Checkout unavailable");
+      setPending(false);
+    }
+  };
+  return <button type="button" onClick={startCheckout} disabled={pending} className="mt-8 border border-white bg-white px-3 py-2 font-mono text-[10px] uppercase text-black disabled:opacity-50">{pending ? "Opening checkout…" : `Choose ${plan}`}</button>;
+}
+
+function PortalButton({ projectId }: { projectId: string }) {
+  const [pending, setPending] = useState(false);
+  const openPortal = async () => {
+    setPending(true);
+    const response = await fetch("/api/stripe/portal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ projectId }) });
+    const data = await response.json() as { url?: string };
+    if (data.url) window.location.assign(data.url); else setPending(false);
+  };
+  return <button type="button" onClick={openPortal} disabled={pending} className="mt-4 border border-[#555] px-3 py-2 font-mono text-[10px] uppercase text-white">{pending ? "Opening…" : "Manage billing"}</button>;
 }

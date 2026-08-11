@@ -13,6 +13,7 @@ import type * as alerts from "../alerts.js";
 import type * as analyticsCache from "../analyticsCache.js";
 import type * as annotations from "../annotations.js";
 import type * as auth from "../auth.js";
+import type * as billing from "../billing.js";
 import type * as comments from "../comments.js";
 import type * as costCounters from "../costCounters.js";
 import type * as evaluation from "../evaluation.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   analyticsCache: typeof analyticsCache;
   annotations: typeof annotations;
   auth: typeof auth;
+  billing: typeof billing;
   comments: typeof comments;
   costCounters: typeof costCounters;
   evaluation: typeof evaluation;
