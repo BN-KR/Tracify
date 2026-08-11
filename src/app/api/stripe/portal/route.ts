@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import { getAuthedConvexClient } from "@/lib/convex-server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
+  if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: "Stripe is not configured" }, { status: 503 });
+  const stripe = getStripe();
   const { projectId } = await request.json() as { projectId?: string };
   if (!projectId) return NextResponse.json({ error: "Project is required" }, { status: 400 });
   const client = await getAuthedConvexClient();

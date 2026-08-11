@@ -1,9 +1,14 @@
 import "server-only";
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-07-29.dahlia",
-});
+let stripeClient: Stripe | undefined;
+
+export function getStripe() {
+  const apiKey = process.env.STRIPE_SECRET_KEY;
+  if (!apiKey) throw new Error("Stripe is not configured");
+  stripeClient ??= new Stripe(apiKey, { apiVersion: "2026-07-29.dahlia" });
+  return stripeClient;
+}
 
 export const stripePriceIds = {
   pro: { monthly: process.env.STRIPE_PRICE_PRO_MONTHLY, annual: process.env.STRIPE_PRICE_PRO_ANNUAL },

@@ -3,9 +3,11 @@ import { NextResponse } from "next/server";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
-import { planForPrice, stripe } from "@/lib/stripe";
+import { getStripe, planForPrice } from "@/lib/stripe";
 
 export async function POST(request: Request) {
+  if (!process.env.STRIPE_SECRET_KEY) return new NextResponse("Stripe is not configured", { status: 503 });
+  const stripe = getStripe();
   const signature = request.headers.get("stripe-signature");
   if (!signature || !process.env.STRIPE_WEBHOOK_SECRET) return new NextResponse("Webhook not configured", { status: 503 });
   let event: Stripe.Event;
