@@ -10,6 +10,7 @@ import {
   setReturnPath,
   getReturnPath,
   clearReturnPath,
+  dismissOnboarding,
 } from "@/lib/onboarding-client-state";
 
 const PROJECT_ID_STORAGE_KEY = "5to1r.onboarding.projectId";
@@ -68,6 +69,7 @@ export function OnboardingEscapeLink({
     returnPath || (projectId ? `/dashboard/${projectId}` : "/dashboard");
 
   function leaveOnboarding() {
+    dismissOnboarding();
     if (returnPath) {
       clearReturnPath();
     }

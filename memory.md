@@ -1,5 +1,11 @@
 # Project Memory
 
+## 2026-08-12 Dashboard onboarding escape and launch plan
+- Leaving onboarding now records a durable local dismissal, so the optional setup entry point no longer reappears during ordinary dashboard navigation.
+- The empty overview's activation list is now called **Launch plan** and routes to in-dashboard quickstart resources rather than sending an existing project back into onboarding.
+- The populated overview now includes a live Launch plan checklist for traces, costs, evaluations, and alert coverage.
+- Focused dashboard/onboarding ESLint passed. Full TypeScript verification is currently blocked by pre-existing malformed `.next/dev/types` generated files from another local dev process; no generated files were altered.
+
 ## 2026-08-12 Direct Pricing Checkout
 - Paid plan CTAs on the homepage and `/pricing` now preserve plan and billing interval and route through `/pricing/checkout`.
 - Authentication preserves the checkout destination for email and social sign-in/sign-up.

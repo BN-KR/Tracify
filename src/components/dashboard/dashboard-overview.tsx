@@ -109,6 +109,28 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
   const runTrend = buildRunTrendSeries(range, recentRuns);
   const qualityTrend = buildQualityTrendSeries(range, evaluationOverview?.recentResults ?? []);
   const runsWindow = `days=${range}`;
+  const launchPlan = [
+    {
+      label: "Capture a first trace",
+      complete: recentRuns.length > 0,
+      href: `/dashboard/${projectId}/runs?${runsWindow}`,
+    },
+    {
+      label: "Review runtime cost",
+      complete: totalSpend > 0,
+      href: `/dashboard/${projectId}/costs`,
+    },
+    {
+      label: "Add an evaluation",
+      complete: Boolean(evaluationOverview?.resultCount),
+      href: `/dashboard/${projectId}/evaluation`,
+    },
+    {
+      label: "Set alert coverage",
+      complete: Boolean(summary?.totals.alertCount),
+      href: `/dashboard/${projectId}/settings`,
+    },
+  ];
 
   return (
     <div className="dashboard-grid flex flex-col gap-8 p-1">
@@ -241,23 +263,22 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
         </Card>
         <Card className="border-[#2A2A2A] bg-[#111111] p-0 shadow-none">
           <div className="border-b border-[#2A2A2A] p-5">
-            <h3 className="font-mono text-sm uppercase tracking-widest text-white">Next best action</h3>
-            <p className="mt-1 font-mono text-[10px] text-[#777777]">Keep the feedback loop moving.</p>
+          <h3 className="font-mono text-sm uppercase tracking-widest text-white">Launch plan</h3>
+          <p className="mt-1 font-mono text-[10px] text-[#777777]">A lightweight path to a more useful workspace.</p>
           </div>
-          <div className="space-y-2 p-4">
-            <Link href={failedRuns > 0 ? `/dashboard/${projectId}/runs?status=failed&${runsWindow}` : `/dashboard/${projectId}/quickstart`} className="flex items-center justify-between border border-[#2A2A2A] p-3 font-mono text-xs text-[#CCCCCC] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-              <span>{failedRuns > 0 ? "Investigate latest failure" : "Verify instrumentation"}</span><ArrowUpRight className="size-3" aria-hidden="true" />
-            </Link>
-            <Link href={`/dashboard/${projectId}/costs`} className="flex items-center justify-between border border-[#2A2A2A] p-3 font-mono text-xs text-[#CCCCCC] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-              <span>Review spend trend</span><ArrowUpRight className="size-3" aria-hidden="true" />
-            </Link>
-            <Link href={`/dashboard/${projectId}/evaluation`} className="flex items-center justify-between border border-[#2A2A2A] p-3 font-mono text-xs text-[#CCCCCC] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-              <span>Check evaluation quality</span><ArrowUpRight className="size-3" aria-hidden="true" />
-            </Link>
-            <Link href={`/dashboard/${projectId}/settings`} className="flex items-center justify-between border border-[#2A2A2A] p-3 font-mono text-xs text-[#CCCCCC] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-              <span>Configure alert coverage</span><ArrowUpRight className="size-3" aria-hidden="true" />
-            </Link>
-          </div>
+          <ol className="space-y-2 p-4">
+            {launchPlan.map((item, index) => (
+              <li key={item.label}>
+                <Link href={item.href} className="flex items-center gap-3 border border-[#2A2A2A] p-3 font-mono text-xs text-[#CCCCCC] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                  <span className={item.complete ? "flex size-5 shrink-0 items-center justify-center bg-emerald-300 text-black" : "flex size-5 shrink-0 items-center justify-center border border-[#555555] text-[#777777]"}>
+                    {item.complete ? <CircleCheck className="size-3" aria-hidden="true" /> : index + 1}
+                  </span>
+                  <span className={item.complete ? "line-through text-[#777777]" : "flex-1"}>{item.label}</span>
+                  <ArrowUpRight className="size-3 shrink-0" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ol>
         </Card>
       </div>
 

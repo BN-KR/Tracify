@@ -15,7 +15,7 @@ import {
   Book
 } from "lucide-react";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
-import { setReturnPath } from "@/lib/onboarding-client-state";
+import { hasDismissedOnboarding, setReturnPath } from "@/lib/onboarding-client-state";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
@@ -151,16 +151,18 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
       <div className="flex items-center gap-2 text-[12px] text-[#999999]">
         <DashboardCommandMenu projectId={projectId} />
         <OrganizationSwitcher />
-        <button
-          onClick={handleOnboardingClick}
-          className={buttonVariants({
-            variant: "ghost",
-            size: "sm",
-            className: "h-8 px-3 text-[12px]",
-          })}
-        >
-          Onboarding
-        </button>
+        {!hasDismissedOnboarding() ? (
+          <button
+            onClick={handleOnboardingClick}
+            className={buttonVariants({
+              variant: "ghost",
+              size: "sm",
+              className: "h-8 px-3 text-[12px]",
+            })}
+          >
+            Setup
+          </button>
+        ) : null}
         <div className="hidden max-w-[360px] items-center gap-2 border border-[#2A2A2A] bg-[#111111] px-2 sm:flex">
           <span className="size-1.5 bg-emerald-300" aria-hidden="true" />
           <span className="truncate text-[10px] uppercase tracking-widest text-[#CCCCCC]">

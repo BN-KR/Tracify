@@ -657,3 +657,9 @@ The single most important UI in the product.
 2. Add an authenticated project-aware checkout page, including inline first-project creation. — Complete
 3. Preserve checkout redirects across email and social authentication. — Complete
 4. Verify lint/build, production environment, and deploy. — In progress
+# Dashboard onboarding escape and launch plan — 2026-08-12
+
+1. [completed] Identify the setup re-entry paths in onboarding and dashboard navigation.
+2. [completed] Make "Skip" an explicit durable preference.
+3. [completed] Replace setup-oriented overview actions with a dashboard-native Launch plan.
+4. [in progress] Verify, commit, and push to `main`.

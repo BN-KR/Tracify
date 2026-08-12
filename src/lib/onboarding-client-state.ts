@@ -28,6 +28,7 @@ export function clearOneTimeApiKey() {
 }
 
 const RETURN_PATH_STORAGE_KEY = "5to1r.onboarding.returnPath";
+const ONBOARDING_DISMISSED_STORAGE_KEY = "5to1r.onboarding.dismissed";
 
 export function setReturnPath(value: string) {
   if (typeof window !== "undefined") {
@@ -51,6 +52,22 @@ export function clearReturnPath() {
     window.sessionStorage.removeItem(RETURN_PATH_STORAGE_KEY);
     emit();
   }
+}
+
+/**
+ * Setup is always available from the dashboard, but leaving it must not make
+ * routine project navigation feel like a required setup flow.
+ */
+export function dismissOnboarding() {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(ONBOARDING_DISMISSED_STORAGE_KEY, "true");
+    emit();
+  }
+}
+
+export function hasDismissedOnboarding() {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(ONBOARDING_DISMISSED_STORAGE_KEY) === "true";
 }
 
 export function subscribeToOneTimeApiKey(listener: () => void) {

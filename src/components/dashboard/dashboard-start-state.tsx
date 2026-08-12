@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { buttonVariants } from "@/components/ui/button";
-import { getOnboardingHref } from "@/lib/onboarding-navigation";
 
 import {
   hasOneTimeApiKey,
@@ -65,7 +64,6 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
   };
   const active = quickstarts[tab];
   const effectiveProjectId = projectId ?? onboardingSession.projectId;
-  const quickstartHref = getOnboardingHref(effectiveProjectId);
   const hasProject = Boolean(effectiveProjectId);
   const checklist = [
     { label: "Create project", status: hasProject ? "completed" : "current" },
@@ -101,7 +99,7 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <section className="border border-[#2A2A2A] bg-[#111111] p-5">
           <div className="mb-5 flex items-center justify-between border-b border-[#2A2A2A] pb-4">
-            <h2 className="font-mono text-[15px] text-white">Start here</h2>
+            <h2 className="font-mono text-[15px] text-white">Launch plan</h2>
             <span className="text-[11px] uppercase tracking-wide text-[#666666]">
               activation
             </span>
@@ -121,13 +119,13 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
-              href={quickstartHref}
+              href={hasProject ? `/dashboard/${effectiveProjectId}/quickstart` : "/onboarding/project"}
               className={buttonVariants({
                 variant: "default",
                 className: "h-9 px-4 uppercase",
               })}
             >
-              {hasProject ? "View quickstart" : "Create project"}
+              {hasProject ? "Open quickstart" : "Create project"}
             </Link>
             <Link
               href="/demo"

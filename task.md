@@ -594,3 +594,9 @@
 - [x] Allow first-time customers to create a project and continue directly to Stripe Checkout.
 - [x] Add Pricing to desktop and mobile site navigation.
 - [ ] Confirm production Stripe server credential and production deployment.
+# Dashboard onboarding escape and launch plan — 2026-08-12
+
+1. [completed] Persist an intentional onboarding dismissal when the user leaves setup.
+2. [completed] Keep existing-project quickstart actions within the dashboard.
+3. [completed] Add a live, non-blocking Launch plan checklist to the dashboard overview.
+4. [in progress] Commit and push the verified dashboard changes to `main`.
