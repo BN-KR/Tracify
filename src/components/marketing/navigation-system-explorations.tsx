@@ -933,7 +933,7 @@ export function NavigationSystemExplorations({
                       "Developers",
                       [
                         ["Docs", "/docs"],
-                        ["Quickstart", "/docs/quickstart"],
+                        ["Quickstart", "/docs/typescript"],
                         ["API reference", "/docs/api"],
                       ],
                     ],

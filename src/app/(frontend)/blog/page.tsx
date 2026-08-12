@@ -47,17 +47,17 @@ export default async function BlogPage({
     <FuturePage>
       <header className="border-b border-black">
         <div className="mx-auto max-w-[1240px] border-x border-black">
-          <div className="grid min-h-[560px] lg:grid-cols-[150px_1fr_300px]">
+          <div className="grid lg:grid-cols-[96px_1fr_260px]">
             <div className="hidden border-r border-black bg-[#f4d44d] p-5 lg:flex lg:flex-col lg:justify-between">
               <span className="font-mono text-[8px] uppercase tracking-[0.16em]">Field journal</span>
-              <span className="origin-bottom-left -rotate-90 whitespace-nowrap font-pixel text-7xl tracking-[-0.07em]">ISSUE 01</span>
+              <span className="origin-bottom-left -rotate-90 whitespace-nowrap font-pixel text-5xl tracking-[-0.06em]">ISSUE 01</span>
             </div>
             <div className="flex flex-col justify-between px-5 py-12 sm:px-8 md:px-10 md:py-16">
               <div className="flex items-center justify-between border-b border-black pb-3 font-mono text-[8px] uppercase tracking-[0.14em]">
                 <span>Tracify editorial desk</span>
                 <span>{new Date().getFullYear()}</span>
               </div>
-              <h1 className="max-w-4xl font-pixel text-[clamp(4.5rem,10vw,9rem)] leading-[0.76] tracking-[-0.08em]">Notes from inside the agent loop.</h1>
+              <h1 className="max-w-3xl font-pixel text-[clamp(3rem,6vw,5.5rem)] leading-[0.88] tracking-[-0.055em]">Notes from inside the agent loop.</h1>
               <p className="max-w-2xl border-l-8 border-[#f4d44d] pl-5 text-base leading-7 text-black/58">Engineering reports on traces, evaluations, production failures, and the human decisions around them.</p>
             </div>
             <aside className="grid border-t border-black lg:border-l lg:border-t-0">

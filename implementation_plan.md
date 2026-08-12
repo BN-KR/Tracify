@@ -1,3 +1,9 @@
+# Sitewide link audit — 2026-08-12
+
+1. [completed] Compare internal navigational URLs against concrete and dynamic route definitions.
+2. [completed] Repair stale documentation and dashboard resource destinations.
+3. [pending] Complete a clean production-build verification once the existing build finishes.
+
 # Sitewide SEO — 2026-08-11
 
 5. [completed] Standardize sitemap, robots, JSON-LD, RSS, and canonical URLs on `www.tracify.tech`.
@@ -637,3 +643,17 @@ The single most important UI in the product.
 5. [completed] Confirm the Payload posts endpoint responds successfully.
 6. [pending] Let the owner create the first administrator credentials at `/cms`.
 7. [pending] Review, commit, and deploy the integrated worktree safely.
+8. [completed] Add a dashboard Content entry for allowlisted administrators and enforce the same allowlist at `/cms`.
+
+# Unified production release — 2026-08-12
+
+1. [completed] Audit the branch history and mixed worktree for the requested recent-chat scope.
+2. [completed] Stage SEO, public-site, Payload blog/CMS, Stripe, Site 1/dashboard, Neon, and admin-access changes while excluding scratch artifacts.
+3. [pending] Commit the unified release and push its branch.
+4. [pending] Fast-forward `main`, push it, and verify Vercel's Git-backed production deployment.
+## Direct pricing checkout (2026-08-12)
+
+1. Centralize paid-plan checkout links with plan and interval query parameters. — Complete
+2. Add an authenticated project-aware checkout page, including inline first-project creation. — Complete
+3. Preserve checkout redirects across email and social authentication. — Complete
+4. Verify lint/build, production environment, and deploy. — In progress

@@ -219,7 +219,7 @@ export function DashboardSidebar({
         {
           title: "Docs",
           icon: BookOpen,
-          href: "https://docs.tracify.tech",
+          href: "/docs",
           external: true,
         },
         {
@@ -229,7 +229,10 @@ export function DashboardSidebar({
           external: true,
         },
         ...(canAccessAdmin
-          ? [{ title: "Admin", icon: ShieldCheck, href: "/admin/library" }]
+          ? [
+              { title: "Content", icon: FileText, href: "/cms" },
+              { title: "Admin Library", icon: ShieldCheck, href: "/admin/library" },
+            ]
           : []),
       ],
     },

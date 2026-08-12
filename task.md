@@ -1,3 +1,10 @@
+# Sitewide link audit — 2026-08-12
+
+1. [completed] Audit static, generated, public, and dashboard internal link targets against the application route manifest.
+2. [completed] Replace stale `/docs/quickstart` links with the existing `/docs/typescript` quickstart.
+3. [completed] Replace stale `/docs/api-reference` with `/docs/api` and retire the unavailable `docs.tracify.tech` navigation target in favor of `/docs`.
+4. [pending] Re-run the production build after the currently active Next.js build releases `.next/lock`.
+
 # Sitewide SEO — 2026-08-11
 
 5. [completed] Standardize the canonical host to `https://www.tracify.tech`.
@@ -564,6 +571,14 @@
 - [x] Verify the recorded migration and Payload API response.
 - [ ] Create the first Payload administrator account at `/cms`.
 - [ ] Deploy the integrated application after reviewing concurrent worktree changes.
+- [x] Expose Payload as `Content` in the dashboard for whitelisted administrators.
+- [x] Protect `/cms` with the existing server-side administrator allowlist.
+
+# 2026-08-12 — Unified production release
+
+- [x] Consolidate recent SEO, blog/Payload, Stripe, and Site 1/dashboard changes.
+- [x] Exclude scratch logs and temporary reference downloads.
+- [ ] Commit the unified release, fast-forward `main`, push, and verify the Git-backed production deployment.
 # Future 19 public-site migration — 2026-08-11
 
 - [x] Inventory legacy public route families outside the dashboard.
@@ -572,3 +587,10 @@
 - [x] Migrate integrations, changelog, contact, roadmap, status, security, privacy, and terms.
 - [x] Verify representative routes at desktop and mobile widths.
 - [x] Pass focused lint, TypeScript, diff hygiene, and production build.
+## Direct pricing checkout (2026-08-12)
+
+- [x] Route paid homepage and pricing-page CTAs to a dedicated checkout handoff.
+- [x] Preserve selected plan and billing interval through authentication.
+- [x] Allow first-time customers to create a project and continue directly to Stripe Checkout.
+- [x] Add Pricing to desktop and mobile site navigation.
+- [ ] Confirm production Stripe server credential and production deployment.

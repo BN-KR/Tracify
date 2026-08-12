@@ -63,7 +63,7 @@ export default function DemoPage() {
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500">
               Interactive demo project / support-agent
             </p>
-            <h1 className="mt-5 max-w-4xl font-pixel text-6xl leading-[0.84] tracking-[-0.065em] md:text-8xl">
+            <h1 className="mt-5 max-w-3xl font-pixel text-5xl leading-[0.9] tracking-[-0.045em] md:text-7xl">
               From trace to better answers.
             </h1>
             <p className="mt-6 max-w-2xl text-sm leading-7 text-black/60">

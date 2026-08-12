@@ -1,5 +1,17 @@
 # Project Memory
 
+## 2026-08-12 Direct Pricing Checkout
+- Paid plan CTAs on the homepage and `/pricing` now preserve plan and billing interval and route through `/pricing/checkout`.
+- Authentication preserves the checkout destination for email and social sign-in/sign-up.
+- Existing customers select a project before hosted Stripe Checkout; new customers can create their first project directly on the checkout page and proceed immediately to payment without completing onboarding.
+- Pricing is directly accessible in desktop and mobile navigation. Focused ESLint and diff hygiene pass.
+
+## 2026-08-12 Sitewide Link Audit
+- Audited static and generated internal navigation links against the Next.js route manifest, including public marketing/docs/product/use-case/pricing flows and dashboard path templates.
+- Fixed stale `/docs/quickstart` links in the docs index, public footers, and exploration navigation by routing them to the existing TypeScript SDK quickstart at `/docs/typescript`.
+- Fixed a stale `/docs/api-reference` footer destination to `/docs/api` and changed dashboard documentation navigation from the unavailable `https://docs.tracify.tech` host to the first-party `/docs` route.
+- Focused ESLint and `git diff --check` pass. Final production build rerun is pending because another active Next.js process owns `.next/lock`.
+
 ## 2026-08-11 Future 19 Public-Site Migration
 - Migrated every previously dark/legacy public route family into the Future 19 paper, rule, pixel-type, black-panel, and acid-yellow signal language.
 - Added reusable public-page primitives for mastheads, ruled bands, actions, indexes, and article typography.
@@ -1034,3 +1046,10 @@
 - Verified migration batch 1 is recorded as run and the local Payload posts API responds with HTTP 200.
 - The remaining personal setup step is creating the first administrator account at `/cms`; application deployment remains separate because the worktree contains concurrent changes.
 - Installed Neon’s official `neon` and `neon-postgres` agent skills under `.agents/skills` for managed database access, branching, SQL, and migrations.
+- Added a whitelisted `Content` entry to the dashboard Resources navigation and protected `/cms` with the existing server-side private-library allowlist; Payload authentication remains a second security layer.
+- Browser verification confirmed the whitelisted signed-in session still reaches `Dashboard - Payload`. Full static/build validation was interrupted because the long-running Windows Next development process saturated Node and caused new checks/navigation to stall.
+
+## Unified Production Release (2026-08-12)
+- Consolidated the recent SEO/public-site, Payload blog and CMS, Stripe live billing, Site 1/dashboard navigation, Neon migration, and administrator-access work into the `codex/stripe-live-billing` release lineage.
+- Scratch logs and downloaded reference material remain excluded from version control.
+- The exact combined worktree passed Vercel's production compilation and TypeScript checks and deployment `dpl_5TUPyFowyzSBZhBZpftsTn2L2wjR` reached Ready before the Git history consolidation.

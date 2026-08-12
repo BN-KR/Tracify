@@ -114,11 +114,11 @@ export default function IntegrationsPage() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#eceae3] pt-[54px] text-black selection:bg-yellow-300/40">
       <main className="mx-auto max-w-[1240px] border-x border-black">
-        <header className="border-b border-black px-6 py-14 md:px-10 md:py-20">
+        <header className="border-b border-black px-6 py-10 md:px-10 md:py-12">
           <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#666666] mb-4">
             Platform / Integrations
           </div>
-          <h1 className="max-w-4xl font-pixel text-6xl leading-[0.85] tracking-[-0.06em] md:text-8xl">
+          <h1 className="max-w-3xl font-pixel text-5xl leading-[0.9] tracking-[-0.045em] md:text-7xl">
             Integrations
           </h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-black/55">

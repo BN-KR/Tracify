@@ -375,7 +375,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
           </DropdownMenu>
         )}
         <Link
-          href="https://docs.tracify.tech"
+          href="/docs"
           className="flex h-8 items-center gap-2 border border-[#2A2A2A] bg-[#111111] px-2 text-[#999999] transition-colors hover:bg-[#161616] hover:text-white"
         >
           <BookOpen className="size-4" />

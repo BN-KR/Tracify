@@ -3,7 +3,7 @@ import { ArrowRight, ArrowUpRight, Check, Code2, Rss } from "lucide-react";
 
 const linkGroups = [
   { title: "Product", links: [["Trace viewer", "/product/trace-viewer"], ["Evaluation", "/product/evaluation-engine"], ["Cost analysis", "/product/cost-dashboard"], ["Lifecycle", "/product/lifecycle"], ["Pricing", "/pricing"]] },
-  { title: "Developers", links: [["Documentation", "/docs"], ["Quickstart", "/docs/quickstart"], ["Integrations", "/integrations"], ["API reference", "/docs/api-reference"], ["Status", "/status"]] },
+  { title: "Developers", links: [["Documentation", "/docs"], ["Quickstart", "/docs/typescript"], ["Integrations", "/integrations"], ["API reference", "/docs/api"], ["Status", "/status"]] },
   { title: "Company", links: [["Blog", "/blog"], ["Changelog", "/changelog"], ["Roadmap", "/roadmap"], ["Security", "/security"], ["Contact", "/contact"]] },
   { title: "Resources", links: [["Agent tracing", "/use-cases/automation"], ["Support agents", "/use-cases/support"], ["Research agents", "/use-cases/research"], ["Privacy", "/privacy"], ["Terms", "/terms"]] },
 ] as const;

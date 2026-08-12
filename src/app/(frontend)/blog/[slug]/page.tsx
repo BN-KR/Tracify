@@ -115,7 +115,7 @@ export default async function BlogPostPage({
         </Link>
 
         <article>
-          <header className="border-b border-black px-6 py-14 md:px-10 md:py-20">
+          <header className="border-b border-black px-6 py-10 md:px-10 md:py-12">
             <div className="mb-4 flex items-center gap-3 font-mono text-[12px] text-[#666666]">
               <time dateTime={getPostDate(post)}>{formatDate(getPostDate(post))}</time>
               <span>/</span>
@@ -124,7 +124,7 @@ export default async function BlogPostPage({
               <span>{getReadingTime(post.content)} min read</span>
             </div>
 
-            <h1 className="mt-6 max-w-5xl font-pixel text-6xl leading-[0.84] tracking-[-0.065em] md:text-8xl">{post.title}</h1>
+            <h1 className="mt-6 max-w-4xl font-pixel text-5xl leading-[0.9] tracking-[-0.045em] md:text-7xl">{post.title}</h1>
             <p className="mt-7 max-w-2xl text-base leading-7 text-black/58">{post.excerpt}</p>
 
             {categories.length ? (
