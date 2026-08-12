@@ -662,4 +662,4 @@ The single most important UI in the product.
 1. [completed] Identify the setup re-entry paths in onboarding and dashboard navigation.
 2. [completed] Make "Skip" an explicit durable preference.
 3. [completed] Replace setup-oriented overview actions with a dashboard-native Launch plan.
-4. [in progress] Verify, commit, and push to `main`.
+4. [completed] Verify, commit, and push to `main` (`410ebfc`).

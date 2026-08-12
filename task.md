@@ -599,4 +599,4 @@
 1. [completed] Persist an intentional onboarding dismissal when the user leaves setup.
 2. [completed] Keep existing-project quickstart actions within the dashboard.
 3. [completed] Add a live, non-blocking Launch plan checklist to the dashboard overview.
-4. [in progress] Commit and push the verified dashboard changes to `main`.
+4. [completed] Commit and push the verified dashboard changes to `main` (`410ebfc`).
