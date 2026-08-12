@@ -70,6 +70,7 @@ export function Navbar() {
             <BrandLogo />
           </Link>
           <nav className="hidden h-full items-center gap-7 font-mono text-[9px] uppercase tracking-[0.12em] md:flex">
+            <Link href="/pricing" className="flex h-full items-center border-b-2 border-transparent hover:border-black/35">Pricing</Link>
             {(Object.keys(menus) as MenuName[]).map((name) => (
               <button
                 key={name}
@@ -192,6 +193,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="border-t border-black/15 p-4 md:hidden">
+      <Link onClick={onClose} href="/pricing" className="block border-b border-black/10 py-3 font-mono text-[9px] uppercase tracking-[0.13em]">Pricing</Link>
       {(Object.keys(menus) as MenuName[]).map((name) => (
         <div key={name} className="border-b border-black/10 py-3">
           <p className="font-mono text-[9px] uppercase tracking-[0.13em]">

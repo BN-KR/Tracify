@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Check, ArrowRight } from "lucide-react";
 import { FutureBand, FuturePage } from "@/components/marketing/future19-page";
+import { pricingCheckoutHref } from "@/lib/billing-links";
 
 const plans = [
   { name: "Free", monthly: 0, spans: "50k spans", retention: "7 days", scope: "1 project / 1 member", signal: "Start", features: ["Trace viewer", "Cost visibility", "Community support"], featured: false },
@@ -24,12 +25,12 @@ export default function PricingPage() {
           <div className="relative overflow-hidden px-5 py-16 sm:px-8 md:px-10 md:py-24">
             <div className="absolute -right-10 top-4 select-none font-pixel text-[14rem] leading-none text-white/[0.04]" aria-hidden="true">$</div>
             <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-[#f4d44d]">Pricing / Operating scale</p>
-            <h1 className="mt-16 max-w-5xl font-pixel text-[clamp(4rem,9vw,8rem)] leading-[0.8] tracking-[-0.075em]">The price of knowing what happened.</h1>
+            <h1 className="mt-10 max-w-4xl font-pixel text-[clamp(3rem,6vw,5.5rem)] leading-[0.88] tracking-[-0.055em]">The price of knowing what happened.</h1>
             <p className="mt-10 max-w-xl text-base leading-7 text-white/52">Start with real traces. Upgrade when the operating record needs deeper retention, evaluation, collaboration, and release control.</p>
           </div>
           <aside className="flex flex-col justify-between border-t border-white/25 bg-[#f4d44d] p-6 text-black lg:border-l lg:border-t-0 lg:p-8">
             <div className="flex justify-between font-mono text-[8px] uppercase tracking-[0.14em]"><span>Rate card</span><span>USD</span></div>
-            <div className="my-20"><span className="block font-pixel text-8xl leading-none tracking-[-0.08em]">$0</span><span className="font-mono text-[9px] uppercase tracking-[0.13em]">to begin</span></div>
+            <div className="my-12"><span className="block font-pixel text-6xl leading-none tracking-[-0.06em]">$0</span><span className="font-mono text-[9px] uppercase tracking-[0.13em]">to begin</span></div>
             <div><p className="mb-3 font-mono text-[8px] uppercase tracking-[0.13em]">Billing rhythm</p><div className="flex border border-black p-1"><button type="button" onClick={() => setAnnual(false)} aria-pressed={!annual} className={`flex-1 px-3 py-3 font-mono text-[8px] uppercase ${!annual ? "bg-black text-white" : "text-black/55"}`}>Monthly</button><button type="button" onClick={() => setAnnual(true)} aria-pressed={annual} className={`flex-1 px-3 py-3 font-mono text-[8px] uppercase ${annual ? "bg-black text-white" : "text-black/55"}`}>Annual −20%</button></div></div>
           </aside>
         </div>
@@ -42,7 +43,7 @@ export default function PricingPage() {
         <div className="mt-16 border-y border-current/25 py-6"><span className="font-pixel text-7xl tracking-[-0.08em]">${price % 1 ? price.toFixed(2) : price}</span><span className="ml-2 text-sm opacity-50">/mo</span>{annual && plan.monthly > 0 ? <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.12em] opacity-45">Billed annually</p> : null}</div>
         <dl className="mt-6 space-y-3 font-mono text-[9px] uppercase tracking-[0.1em]"><div className="flex justify-between gap-4"><dt className="opacity-45">Volume</dt><dd>{plan.spans}</dd></div><div className="flex justify-between gap-4"><dt className="opacity-45">Retention</dt><dd>{plan.retention}</dd></div><div className="flex justify-between gap-4"><dt className="opacity-45">Scope</dt><dd className="text-right">{plan.scope}</dd></div></dl>
         <ul className="mt-7 space-y-3">{plan.features.map((feature) => <li key={feature} className="flex items-center gap-3 text-sm"><Check className="size-3.5" aria-hidden="true" />{feature}</li>)}</ul>
-        <Link href="/sign-up" className={`mt-auto flex min-h-12 items-center justify-between border px-4 font-mono text-[9px] uppercase tracking-[0.12em] ${index === 2 ? "border-white bg-white text-black hover:bg-[#f4d44d]" : "border-black bg-black text-white hover:bg-white hover:text-black"}`}>Start {plan.name}<ArrowRight className="size-3.5" /></Link>
+        <Link href={plan.name === "Free" ? "/sign-up" : pricingCheckoutHref(plan.name.toLowerCase() as "pro" | "team", annual ? "annual" : "monthly")} className={`mt-auto flex min-h-12 items-center justify-between border px-4 font-mono text-[9px] uppercase tracking-[0.12em] ${index === 2 ? "border-white bg-white text-black hover:bg-[#f4d44d]" : "border-black bg-black text-white hover:bg-white hover:text-black"}`}>Start {plan.name}<ArrowRight className="size-3.5" /></Link>
       </article>;
     })}</div></FutureBand>
     <FutureBand label="Capability ledger"><div className="overflow-x-auto border-x border-black"><table className="w-full min-w-[680px] border-collapse text-left"><thead className="bg-black font-mono text-[8px] uppercase tracking-[0.13em] text-white"><tr><th className="p-4">Capability</th>{plans.map((plan) => <th key={plan.name} className="border-l border-white/20 p-4">{plan.name}</th>)}</tr></thead><tbody>{comparison.map((row, index) => <tr key={row[0]} className={index % 2 ? "bg-white/35" : undefined}>{row.map((cell, cellIndex) => <td key={cell} className={`border-t border-black p-4 text-sm ${cellIndex ? "border-l font-mono text-[10px] uppercase tracking-[0.08em]" : "font-medium"}`}>{cell}</td>)}</tr>)}</tbody></table></div></FutureBand>
