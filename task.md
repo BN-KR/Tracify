@@ -601,6 +601,12 @@
 - [x] Enable `managed_payments` on the existing linked Stripe Checkout route using the required preview API version.
 - [x] Retain signed `checkout.session.completed` webhook synchronization to the project billing record.
 - [x] Run focused tests, ESLint, TypeScript, and diff-hygiene checks.
+
+## Root robots.txt route (2026-08-13)
+
+- [x] Move the generated robots metadata route to `src/app/robots.ts`, as required by Next.js.
+- [x] Verify the production build emits `/robots.txt`.
+- [ ] Commit and deploy the fix without including unrelated workspace changes.
 # Dashboard onboarding escape and launch plan — 2026-08-12
 
 1. [completed] Persist an intentional onboarding dismissal when the user leaves setup.
