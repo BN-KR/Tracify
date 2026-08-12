@@ -1,5 +1,10 @@
 # Project Memory
 
+## 2026-08-13 Payload CMS dashboard access
+- Corrected the private-content bootstrap allowlist to the live owner account, `kristofferbon@gmail.com` (the previous address incorrectly included a period).
+- Dashboard Content visibility now comes from the same server-side access decision as `/cms`, preventing a client-session mismatch and supporting the existing user, email, and organization access configuration for the whole team.
+- Focused ESLint, TypeScript, and diff-hygiene checks pass. Production deployment and live browser verification are next.
+
 ## 2026-08-12 Dashboard onboarding escape and launch plan
 - Leaving onboarding now records a durable local dismissal, so the optional setup entry point no longer reappears during ordinary dashboard navigation.
 - The empty overview's activation list is now called **Launch plan** and routes to in-dashboard quickstart resources rather than sending an existing project back into onboarding.
@@ -1062,4 +1067,4 @@
 
 ## Root robots.txt route (2026-08-13)
 - Diagnosed the production `robots.txt` 404: Next.js requires `robots.ts` in the root App Router directory, but it was nested under the `(frontend)` route group and omitted from Vercel's build output.
-- Moved the metadata route to `src/app/robots.ts`; `npm run build` passed and explicitly emitted static `/robots.txt`. Deployment remains pending so unrelated concurrent workspace changes are not included.
+- Moved the metadata route to `src/app/robots.ts`; `npm run build` passed and explicitly emitted static `/robots.txt`. PR #4 merged to `main` and production deployment `dpl_BQ1D2JYfFkcp771WcRnYP5BVsJ7f` is Ready; live `/robots.txt` and `/sitemap.xml` return HTTP 200.

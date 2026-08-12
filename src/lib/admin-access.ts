@@ -1,8 +1,9 @@
-/** Safe-to-display allowlist used only for showing the private workspace link. */
+/**
+ * Bootstrap administrators for the private content workspace.
+ *
+ * Additional people and organizations can be granted access through the
+ * TRACIFY_LIBRARY_* environment variables in library-access.ts.
+ */
 export const DASHBOARD_ADMIN_EMAILS = new Set([
-  "kristoffer.bon@gmail.com",
+  "kristofferbon@gmail.com",
 ]);
-
-export function isDashboardAdmin(email: string | null | undefined) {
-  return Boolean(email && DASHBOARD_ADMIN_EMAILS.has(email.trim().toLowerCase()));
-}

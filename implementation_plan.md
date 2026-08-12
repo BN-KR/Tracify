@@ -674,4 +674,10 @@ The single most important UI in the product.
 
 1. [completed] Move `robots.ts` from the `(frontend)` route group to the App Router root.
 2. [completed] Verify the generated route in a fresh production build.
-3. [pending] Commit and deploy the isolated fix.
+3. [completed] Commit, merge, and deploy the isolated fix; live `/robots.txt` and `/sitemap.xml` both return HTTP 200.
+
+# Payload CMS dashboard access â€” 2026-08-13
+
+1. [completed] Trace the live dashboard and Payload authorization paths.
+2. [completed] Correct the owner email and share the server-side authorization result with the dashboard shell.
+3. [in progress] Commit, deploy to Vercel production, and verify the authenticated live experience.
