@@ -26,16 +26,20 @@ export async function POST(request: Request) {
     await client.mutation(api.billing.attachCustomer, { projectId, stripeCustomerId: customer });
   }
   const origin = new URL(request.url).origin;
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer,
-    line_items: [{ price, quantity: 1 }],
-    client_reference_id: projectId,
-    metadata: { projectId, plan: body.plan },
-    subscription_data: { metadata: { projectId, plan: body.plan }, billing_mode: { type: "flexible" } },
-    success_url: `${origin}/dashboard/${projectId}/billing?checkout=success`,
-    cancel_url: `${origin}/dashboard/${projectId}/billing?checkout=cancelled`,
-    integration_identifier: "tracify_checkout_qplmzvka",
-  });
+  const session = await stripe.checkout.sessions.create(
+    {
+      mode: "subscription",
+      managed_payments: { enabled: true },
+      customer,
+      line_items: [{ price, quantity: 1 }],
+      client_reference_id: projectId,
+      metadata: { projectId, plan: body.plan },
+      subscription_data: { metadata: { projectId, plan: body.plan }, billing_mode: { type: "flexible" } },
+      success_url: `${origin}/dashboard/${projectId}/billing?checkout=success`,
+      cancel_url: `${origin}/dashboard/${projectId}/billing?checkout=cancelled`,
+      integration_identifier: "tracify_checkout_qplmzvka",
+    },
+    { apiVersion: "2026-02-25.preview" },
+  );
   return NextResponse.json({ url: session.url });
 }

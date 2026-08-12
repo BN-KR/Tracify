@@ -594,6 +594,13 @@
 - [x] Allow first-time customers to create a project and continue directly to Stripe Checkout.
 - [x] Add Pricing to desktop and mobile site navigation.
 - [ ] Confirm production Stripe server credential and production deployment.
+
+## Managed Payments checkout (2026-08-13)
+
+- [x] Create the managed-payments product command with the blueprint's digital-product tax code and monthly price.
+- [x] Enable `managed_payments` on the existing linked Stripe Checkout route using the required preview API version.
+- [x] Retain signed `checkout.session.completed` webhook synchronization to the project billing record.
+- [x] Run focused tests, ESLint, TypeScript, and diff-hygiene checks.
 # Dashboard onboarding escape and launch plan — 2026-08-12
 
 1. [completed] Persist an intentional onboarding dismissal when the user leaves setup.

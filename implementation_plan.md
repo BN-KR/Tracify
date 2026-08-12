@@ -663,3 +663,9 @@ The single most important UI in the product.
 2. [completed] Make "Skip" an explicit durable preference.
 3. [completed] Replace setup-oriented overview actions with a dashboard-native Launch plan.
 4. [completed] Verify, commit, and push to `main` (`410ebfc`).
+
+# Managed Payments checkout â€” 2026-08-13
+
+1. [completed] Add the exact Stripe product creation command from the supplied blueprint.
+2. [completed] Apply `managed_payments[enabled]=true` and the required preview API version to Checkout Session creation.
+3. [completed] Verify the API change and product command with focused tests, linting, TypeScript, and diff checks.
