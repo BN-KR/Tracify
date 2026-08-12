@@ -669,3 +669,9 @@ The single most important UI in the product.
 1. [completed] Add the exact Stripe product creation command from the supplied blueprint.
 2. [completed] Apply `managed_payments[enabled]=true` and the required preview API version to Checkout Session creation.
 3. [completed] Verify the API change and product command with focused tests, linting, TypeScript, and diff checks.
+
+# Root robots.txt route — 2026-08-13
+
+1. [completed] Move `robots.ts` from the `(frontend)` route group to the App Router root.
+2. [completed] Verify the generated route in a fresh production build.
+3. [pending] Commit and deploy the isolated fix.
