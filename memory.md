@@ -1072,5 +1072,6 @@
 - The exact combined worktree passed Vercel's production compilation and TypeScript checks and deployment `dpl_5TUPyFowyzSBZhBZpftsTn2L2wjR` reached Ready before the Git history consolidation.
 
 ## Root robots.txt route (2026-08-13)
+- Removed the unsupported `Host` directive from `/robots.txt` after Google Search Console correctly reported it as ignored by Googlebot. Canonical-host selection remains enforced by the bare-domain redirect, `metadataBase`, canonical tags, and sitemap URLs.
 - Diagnosed the production `robots.txt` 404: Next.js requires `robots.ts` in the root App Router directory, but it was nested under the `(frontend)` route group and omitted from Vercel's build output.
 - Moved the metadata route to `src/app/robots.ts`; `npm run build` passed and explicitly emitted static `/robots.txt`. PR #4 merged to `main` and production deployment `dpl_BQ1D2JYfFkcp771WcRnYP5BVsJ7f` is Ready; live `/robots.txt` and `/sitemap.xml` return HTTP 200.

@@ -1,3 +1,7 @@
+# Robots standards cleanup — 2026-08-13
+
+1. [completed] Remove the Google-unsupported `Host` directive from the generated robots file.
+
 # Sitewide link audit — 2026-08-12
 
 1. [completed] Audit static, generated, public, and dashboard internal link targets against the application route manifest.

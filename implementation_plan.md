@@ -1,3 +1,7 @@
+# Robots standards cleanup — 2026-08-13
+
+1. [completed] Keep canonical-host signals in redirects, canonical URLs, and sitemap rather than robots.txt.
+
 # Sitewide link audit — 2026-08-12
 
 1. [completed] Compare internal navigational URLs against concrete and dynamic route definitions.
