@@ -659,4 +659,4 @@
 - [x] Remove the article-level newsletter CTA while retaining the global footer signup.
 - [x] Redesign the article author signature for the light editorial layout.
 - [x] Pass content tests, focused lint, TypeScript, diff hygiene, and production build.
-- [ ] Publish the migration to `main`, verify Vercel, and restart localhost.
+- [x] Publish the migration to `main`, verify Vercel, and restart localhost.

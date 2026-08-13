@@ -699,7 +699,7 @@ The single most important UI in the product.
 1. [completed] Publish the AI agent observability guide.
 2. [completed] Remove the post-level newsletter CTA and refine the author signature.
 3. [completed] Run content tests, focused lint, TypeScript, diff hygiene, and production build.
-4. [in progress] Commit, merge, push, verify Vercel, clean obsolete environment variables, and restart localhost.
+4. [completed] Commit, merge, push, verify Vercel, confirm no obsolete Payload variables remain, and restart localhost.
 
 # Root robots.txt route — 2026-08-13
 
