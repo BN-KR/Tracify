@@ -607,3 +607,34 @@
 2. [completed] Keep existing-project quickstart actions within the dashboard.
 3. [completed] Add a live, non-blocking Launch plan checklist to the dashboard overview.
 4. [completed] Commit and push the verified dashboard changes to `main` (`410ebfc`).
+# Payload-to-Markdoc assessment — 2026-08-13
+
+- [x] Read the supplied Markdoc objective and rendering/Next.js notes.
+- [x] Inventory Tracify's Payload dependencies, collections, CMS routes, blog rendering, and publishing features.
+- [x] Estimate a lean Git-backed migration and a feature-parity migration.
+- [x] Record the recommendation and principal migration risk.
+# Payload-to-Markdoc migration — 2026-08-13
+
+- [x] Export all Payload articles and media metadata to repository-backed Markdoc without publishing drafts.
+- [x] Add a validated, tested Markdoc content repository and React renderer.
+- [x] Switch blog pages, metadata, related posts, RSS, and sitemap to Markdoc.
+- [x] Remove Payload routes, configuration, generated files, dependencies, scripts, and dashboard navigation.
+- [x] Document Git-based article authoring and publishing.
+- [x] Verify content tests, focused lint, TypeScript, production build, removed routes, public feeds, and draft privacy.
+- [ ] Resolve the repository's 19 unrelated pre-existing full-lint errors in a separate cleanup task.
+# Tracify content-authoring skill — 2026-08-13
+
+- [x] Baseline-test existing guidance against content quality and storage-routing scenarios.
+- [x] Create the project-local `writing-tracify-content` skill and UI metadata.
+- [x] Document blog, internal-doc, public-doc, dashboard-doc, and media storage boundaries.
+- [x] Add evidence-led blog/docs quality criteria and reusable source templates.
+- [x] Validate skill structure, placeholder hygiene, length, and the Markdoc template contract.
+- [x] Register the skill as mandatory for future blog and documentation tasks.
+
+# Markdoc blog release — 2026-08-13
+
+- [x] Publish the first repository-backed article.
+- [x] Remove the article-level newsletter CTA while retaining the global footer signup.
+- [x] Redesign the article author signature for the light editorial layout.
+- [x] Pass content tests, focused lint, TypeScript, diff hygiene, and production build.
+- [ ] Publish the migration to `main`, verify Vercel, and restart localhost.

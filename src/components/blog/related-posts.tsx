@@ -1,10 +1,10 @@
-import { getMediaUrl } from "@/lib/payload-blog";
-import type { Post } from "@/payload-types";
+import { getPublishedPosts } from "@/lib/markdoc-blog";
 import Image from "next/image";
 import Link from "next/link";
 
-export function RelatedPosts({ posts }: { posts?: Array<number | Post> | null }) {
-  const related = (posts ?? []).filter((post): post is Post => typeof post === "object").slice(0, 3);
+export function RelatedPosts({ posts }: { posts?: string[] | null }) {
+  const slugs = new Set(posts ?? []);
+  const related = getPublishedPosts().filter((post) => slugs.has(post.slug)).slice(0, 3);
   if (!related.length) return null;
 
   return (
@@ -12,7 +12,7 @@ export function RelatedPosts({ posts }: { posts?: Array<number | Post> | null })
       <h3 className="mb-6 font-mono text-[16px] font-bold text-black">Related posts</h3>
       <div className="grid gap-4 md:grid-cols-3">
         {related.map((post) => {
-          const image = getMediaUrl(post.heroImage, "card");
+          const image = post.heroImage?.card || post.heroImage?.src;
           return (
             <Link
               key={post.id}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Tracify Content"
+  short_description: "Create strong Tracify blogs and documentation"
+  default_prompt: "Use $writing-tracify-content to draft and correctly store a Tracify blog post or documentation page."

@@ -14,6 +14,7 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 - `npm run dev` — Next.js dev server on :3000
 - `npm run build` — Builds Next.js (Convex generated bindings are committed, not generated at build time)
 - `npm run lint` — ESLint
+- `npm run test:content` — Validate the Markdoc blog loader, rendering inputs, reading time, and legacy conversion
 - `npm run deploy:convex` — Deploy Convex to production
 - `npm run smoke:beta` — Beta smoke tests (requires env vars for full coverage)
 - `npx convex dev` — Run Convex dev backend (runs alongside `npm run dev`)
@@ -39,7 +40,7 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 `/pricing` — Free/Pro/Team/Enterprise
 `/product/[feature]` — Static feature pages (trace-viewer, cost-dashboard, tool-calls, llm-calls, failures — all placeholder)
 `/use-cases/[slug]` — Use case pages (research, support, automation, tool-calling)
-`/blog`, `/blog/[slug]`, `/blog/rss.xml` — Sanity CMS blog
+`/blog`, `/blog/[slug]`, `/blog/rss.xml` — Repository-backed Markdoc blog
 `/changelog` — Product updates
 `/docs`, `/docs/[...slug]` — Documentation (rendered from markdown)
 `/privacy`, `/terms` — Legal
@@ -79,3 +80,14 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 - **Turbopack may OOM** on Windows during `npm run build` (Rust panic in `globals.css`). This is a system memory issue, not a code problem — use `npm run dev` to verify compilation.
 - **Marketing product feature pages** (`/product/[feature]`) are placeholders — they show "under construction" copy. Don't expect real content there.
 - **SDKs** (`packages/ts-sdk/`, `packages/python-sdk/`) are built but not yet published to npm/PyPI.
+
+## Markdoc Blog Rules
+- **Required skill:** Read `.agents/skills/writing-tracify-content/SKILL.md` before writing, editing, reviewing, storing, or publishing any blog post or documentation.
+- Blog content lives exclusively in `content/blog/*.mdoc`; do not add a database or CMS fallback.
+- Start new articles by copying an existing `.mdoc` file. Required frontmatter: `title`, `slug`, `excerpt`, `publishedAt` (ISO timestamp), and `author`. Keep `categories`, `tags`, and `relatedPosts` as string arrays; related posts reference slugs.
+- Preserve publication state. `draft: true` must remain private and return 404. Publish only when explicitly requested by changing it to `draft: false`; never publish migrated or unfinished content implicitly.
+- Store blog images in `public/media` and reference them with `/media/<filename>`. Every image requires meaningful `alt` text. `heroImage` may also define `card`, `hero`, `og`, and `caption` fields.
+- Write article bodies in CommonMark/Markdoc. Do not introduce raw JSX or MDX into `.mdoc` files. Add custom Markdoc tags through the centralized Markdoc configuration and React component map rather than one-off parsing in routes.
+- Keep blog data access centralized in `src/lib/markdoc-blog.ts` and rendering centralized in `src/components/blog/markdoc-rich-text.tsx`. Blog pages, RSS, sitemap, metadata, and related-post logic must consume that shared content layer.
+- Before completing any blog/content change, run `npm run test:content` and `npm run build`. Duplicate slugs, malformed frontmatter, invalid Markdoc, missing required fields, or accidental draft exposure are release blockers.
+- Publishing workflow documentation lives in `content/blog/README.md`; update it whenever the authoring contract changes.

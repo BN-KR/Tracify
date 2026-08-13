@@ -11,6 +11,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
@@ -20,8 +21,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "convex/*": ["./convex/*"],
-      "@payload-config": ["./src/payload.config.ts"]
+      "convex/*": ["./convex/*"]
     }
   },
   "include": [

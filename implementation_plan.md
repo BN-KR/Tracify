@@ -669,3 +669,30 @@ The single most important UI in the product.
 1. [completed] Add the exact Stripe product creation command from the supplied blueprint.
 2. [completed] Apply `managed_payments[enabled]=true` and the required preview API version to Checkout Session creation.
 3. [completed] Verify the API change and product command with focused tests, linting, TypeScript, and diff checks.
+# Payload-to-Markdoc assessment — 2026-08-13
+
+1. [completed] Review supplied Markdoc material and the repository-specific Next.js constraints.
+2. [completed] Map the Payload-backed content model and all public consumers.
+3. [completed] Separate renderer migration effort from CMS/editorial feature replacement effort.
+4. [completed] Produce a repository-specific schedule and recommendation.
+# Payload-to-Markdoc migration — 2026-08-13
+
+1. [completed] Audit and export the 10 Payload drafts plus their category, tag, SEO, and image metadata.
+2. [completed] Build the validated Markdoc filesystem repository and React rendering boundary with red-green tests.
+3. [completed] Move every public blog consumer from Payload queries to Markdoc files.
+4. [completed] Remove Payload CMS routes, runtime configuration, generated schema/types, dependencies, scripts, and navigation.
+5. [completed] Validate the content corpus, TypeScript, focused lint, diff hygiene, production build, public feeds, CMS removal, and draft privacy.
+# Tracify content-authoring skill — 2026-08-13
+
+1. [completed] Identify baseline failures in writing quality and storage selection.
+2. [completed] Initialize a discoverable project-local skill with UI metadata.
+3. [completed] Add a concise authoring workflow, exact storage map, and separate blog/documentation quality bar.
+4. [completed] Add reusable Markdoc blog and internal Markdown document examples.
+5. [completed] Validate the skill package and register it in repository-wide agent instructions.
+
+# Markdoc blog release — 2026-08-13
+
+1. [completed] Publish the AI agent observability guide.
+2. [completed] Remove the post-level newsletter CTA and refine the author signature.
+3. [completed] Run content tests, focused lint, TypeScript, diff hygiene, and production build.
+4. [in progress] Commit, merge, push, verify Vercel, clean obsolete environment variables, and restart localhost.

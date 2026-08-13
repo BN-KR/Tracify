@@ -1,26 +1,22 @@
 import { AuthorBio } from "@/components/blog/author-bio";
-import { NewsletterCta } from "@/components/blog/newsletter-cta";
-import { PayloadRichText } from "@/components/blog/payload-rich-text";
+import { MarkdocRichText } from "@/components/blog/markdoc-rich-text";
 import { ProgressBar } from "@/components/blog/progress-bar";
 import { RelatedPosts } from "@/components/blog/related-posts";
 import { ShareButtons } from "@/components/blog/share-buttons";
 import { getReadingTime } from "@/components/blog/reading-time";
 import {
-  getCategoryTitles,
-  getMedia,
-  getMediaUrl,
   getPostDate,
   getPublishedPost,
   getPublishedPosts,
-  getTagNames,
   type BlogPost,
-} from "@/lib/payload-blog";
+} from "@/lib/markdoc-blog";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export const revalidate = 60;
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   const posts = await getPublishedPosts();
@@ -38,7 +34,7 @@ export async function generateMetadata({
 
   const metaTitle = post.seo?.metaTitle || `${post.title} — Tracify Blog`;
   const metaDescription = post.seo?.metaDescription || post.excerpt;
-  const image = getMediaUrl(post.seo?.image || post.heroImage, "og");
+  const image = post.seo.image?.og || post.seo.image?.src || post.heroImage?.og || post.heroImage?.src;
 
   return {
     title: metaTitle,
@@ -82,7 +78,7 @@ function jsonLd(post: BlogPost) {
     author: post.author
       ? { "@type": "Person", name: post.author }
       : { "@type": "Organization", name: "Tracify" },
-    image: getMediaUrl(post.heroImage, "og") || undefined,
+    image: post.heroImage?.og || post.heroImage?.src || undefined,
   };
 }
 
@@ -95,9 +91,9 @@ export default async function BlogPostPage({
   const post = await getPublishedPost(slug);
   if (!post) notFound();
 
-  const categories = getCategoryTitles(post);
-  const tags = getTagNames(post);
-  const heroUrl = getMediaUrl(post.heroImage, "hero");
+  const categories = post.categories;
+  const tags = post.tags;
+  const heroUrl = post.heroImage?.hero || post.heroImage?.src;
 
   return (
     <div className="min-h-screen bg-[#eceae3] pt-[54px] text-black">
@@ -121,7 +117,7 @@ export default async function BlogPostPage({
               <span>/</span>
               <span>{post.author}</span>
               <span>/</span>
-              <span>{getReadingTime(post.content)} min read</span>
+              <span>{getReadingTime(post.plainText)} min read</span>
             </div>
 
             <h1 className="mt-6 max-w-4xl font-pixel text-5xl leading-[0.9] tracking-[-0.045em] md:text-7xl">{post.title}</h1>
@@ -140,7 +136,7 @@ export default async function BlogPostPage({
             <div className="relative min-h-[320px] overflow-hidden border-b border-black bg-black md:min-h-[520px]">
               <Image
                 src={heroUrl}
-                alt={getMedia(post.heroImage)?.alt || post.title}
+                alt={post.heroImage?.alt || post.title}
                 fill
                 sizes="(min-width: 1240px) 1240px, 100vw"
                 className="object-cover grayscale"
@@ -149,7 +145,7 @@ export default async function BlogPostPage({
           ) : null}
 
           <div className="mx-auto max-w-[820px] px-6 py-12 md:px-10 md:py-16">
-            <PayloadRichText data={post.content} />
+            <MarkdocRichText content={post.content} />
 
             <div className="mt-12 flex flex-col gap-6 border-t border-black/20 pt-8">
               <ShareButtons title={post.title} />
@@ -157,8 +153,6 @@ export default async function BlogPostPage({
             </div>
 
             <RelatedPosts posts={post.relatedPosts} />
-
-            <div className="mt-10"><NewsletterCta /></div>
 
             {tags.length ? (
               <div className="mt-12 border-t border-black/20 pt-8">

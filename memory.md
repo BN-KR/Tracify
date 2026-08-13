@@ -1,5 +1,24 @@
 # Project Memory
 
+## 2026-08-13 Tracify content-authoring skill
+- Added the project-local `writing-tracify-content` skill for drafting, editing, reviewing, storing, and publishing Tracify blogs and documentation.
+- The skill distinguishes live storage surfaces: public blogs in `content/blog/*.mdoc`, blog media in `public/media`, internal engineering Markdown in `docs/`, public `/docs` content in its current TypeScript registry, and dashboard reference content in `docs-viewer.tsx`.
+- Added an evidence-led writing quality bar, explicit draft/privacy and no-fabrication rules, a complete Markdoc blog example, and an internal-document example.
+- Registered the skill as required in `AGENTS.md`. Skill validation passes, the skill body is 405 words, its template parses through the real Markdoc repository, remains a draft, and contains no placeholders.
+
+## 2026-08-13 Payload replaced with Markdoc
+- Replaced the Payload-backed blog and CMS with repository-authored Markdoc. The App Router blog index, post pages, metadata, JSON-LD, category filtering, related posts, RSS feed, and sitemap now read `.mdoc` files through a validated server-side content repository.
+- Exported all 10 existing Payload articles (roughly 5,000 words each) and their metadata into `content/blog`; all remain drafts because their Payload `_status` was `draft`. Existing image originals and generated card/hero/OG variants remain under `public/media`.
+- Removed the Payload route group, `/cms` and `/cms-api`, Payload config/collections/generated types/migrations, dashboard Content link, Next wrapper, TypeScript alias, seven Payload dependencies, and Payload npm scripts. Added Markdoc/YAML dependencies, author documentation, a legacy SQLite-to-Markdoc importer, and focused content tests.
+- Verification: 7 content/conversion tests pass, focused ESLint passes, standalone TypeScript passes, diff hygiene passes, and the Next.js production build passes with 69 generated pages. Production runtime checks return 200 for `/blog`, `/blog/rss.xml`, and `/sitemap.xml`, and 404 for `/cms`, `/cms-api/posts`, draft slugs, and unknown blog slugs.
+- Full repository ESLint remains blocked by 19 pre-existing errors in unrelated orchestration, marketing, hook, and UI files; none are in the Markdoc migration scope.
+
+## 2026-08-13 Payload-to-Markdoc migration assessment
+- Payload currently powers only the public blog/CMS surface, but that surface includes four collections, draft/version and scheduled publishing workflows, media uploads with generated sizes, categories, related posts, SEO metadata, RSS/sitemap queries, and the protected `/cms` editor.
+- A Git-authored Markdoc replacement is estimated at 2-4 focused engineering days for application integration and verification, plus roughly 10-30 minutes per ordinary post for content/media conversion and QA.
+- Markdoc is a parser/rendering system rather than a browser CMS. Preserving visual editing, roles, drafts, scheduled publishing, and media management requires retaining Payload or adding another editorial layer; a comparable replacement is likely 1-3 weeks.
+- The supplied `@markdoc/next.js` example targets the Pages Router. Tracify uses Next.js 16 App Router, so the safer design is explicit server-side `@markdoc/markdoc` parsing within the existing `/blog/[slug]` route rather than adopting the example verbatim.
+
 ## 2026-08-12 Dashboard onboarding escape and launch plan
 - Leaving onboarding now records a durable local dismissal, so the optional setup entry point no longer reappears during ordinary dashboard navigation.
 - The empty overview's activation list is now called **Launch plan** and routes to in-dashboard quickstart resources rather than sending an existing project back into onboarding.
@@ -1059,3 +1078,10 @@
 - Consolidated the recent SEO/public-site, Payload blog and CMS, Stripe live billing, Site 1/dashboard navigation, Neon migration, and administrator-access work into the `codex/stripe-live-billing` release lineage.
 - Scratch logs and downloaded reference material remain excluded from version control.
 - The exact combined worktree passed Vercel's production compilation and TypeScript checks and deployment `dpl_5TUPyFowyzSBZhBZpftsTn2L2wjR` reached Ready before the Git history consolidation.
+
+## Markdoc Blog and Authoring Workflow (2026-08-13)
+- Replaced Payload CMS with validated repository-backed Markdoc content under `content/blog`; Payload routes and runtime packages are removed.
+- Future blog and documentation work must use `.agents/skills/writing-tracify-content/SKILL.md` for writing quality and storage routing.
+- The first published post is `ai-agent-observability-complete-guide`; the other migrated posts remain drafts.
+- Blog posts do not render a post-level newsletter CTA. The site-wide footer newsletter remains.
+- The article author signature uses a responsive light editorial treatment instead of the former dark card.

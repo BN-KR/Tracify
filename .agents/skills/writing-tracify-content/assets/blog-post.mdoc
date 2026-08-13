@@ -1,0 +1,39 @@
+---
+title: Debugging retry loops in production agents
+slug: debugging-retry-loops-production-agents
+excerpt: Learn how to trace repeated tool calls, identify the retry decision, and verify a bounded fix before release.
+publishedAt: 2026-08-13T12:00:00.000Z
+author: Tracify Team
+draft: true
+categories:
+  - engineering
+tags:
+  - AI agents
+  - debugging
+relatedPosts: []
+heroImage:
+  src: /media/debugging-retry-loops.jpg
+  alt: Trace timeline showing three repeated tool calls
+seo:
+  metaTitle: Debugging retry loops in production agents
+  metaDescription: Trace repeated agent tool calls, isolate retry conditions, and verify bounded fixes before production release.
+---
+
+## Why retry loops are difficult to diagnose
+
+A retry is useful only when the next attempt has a meaningful chance of producing a different result. In production agent workflows, repeated attempts can otherwise hide the original failure while increasing latency and cost.
+
+## Reconstruct the decision path
+
+Start with the complete trace. Identify the first failed tool call, the condition that selected another attempt, and any state that changed between attempts.
+
+1. Compare tool inputs across attempts.
+2. Check whether the error is transient or deterministic.
+3. Confirm the retry count and backoff policy.
+4. Inspect the final user-visible outcome.
+
+> A bounded retry policy should make the stop condition as observable as the retry condition.
+
+## Verify the fix
+
+Add the failure case to an evaluation dataset, run the old and new policies against the same input, and compare outcome quality, latency, cost, and failure classification before promotion.

@@ -1,4 +1,4 @@
-import { getPostDate, getPublishedPosts } from "@/lib/payload-blog";
+import { getPostDate, getPublishedPosts } from "@/lib/markdoc-blog";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

@@ -5,12 +5,9 @@ import { getReadingTime } from "@/components/blog/reading-time";
 import { FutureBand, FuturePage } from "@/components/marketing/future19-page";
 import {
   getCategoryOptions,
-  getMedia,
-  getMediaUrl,
   getPostDate,
   getPublishedPosts,
-  isPayloadConfigured,
-} from "@/lib/payload-blog";
+} from "@/lib/markdoc-blog";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -83,12 +80,10 @@ export default async function BlogPage({
       </FutureBand>
 
       <FutureBand label="Editorial signal board">
-        {!isPayloadConfigured() || !posts.length ? (
+        {!posts.length ? (
           <div className="border-x border-black bg-[#f4d44d] p-10">
             <p className="max-w-xl font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">
-              {isPayloadConfigured()
-                ? "The next field note is being prepared."
-                : "Connect Payload to open the publishing desk."}
+              The next field note is being prepared.
             </p>
           </div>
         ) : null}
@@ -97,11 +92,11 @@ export default async function BlogPage({
           <div className="grid border-x border-black lg:grid-cols-[1.3fr_0.7fr]">
             <article className="min-h-[520px] border-black lg:border-r">
               <Link href={`/blog/${featured.slug}`} className="group flex h-full flex-col">
-                {getMediaUrl(featured.heroImage, "hero") ? (
+                {featured.heroImage ? (
                   <div className="relative min-h-64 flex-1 overflow-hidden border-b border-black bg-black">
                     <Image
-                      src={getMediaUrl(featured.heroImage, "hero")!}
-                      alt={getMedia(featured.heroImage)?.alt || featured.title}
+                      src={featured.heroImage.hero || featured.heroImage.src}
+                      alt={featured.heroImage.alt || featured.title}
                       fill
                       sizes="(min-width: 1024px) 65vw, 100vw"
                       className="object-cover grayscale transition duration-500 group-hover:grayscale-0"
@@ -116,7 +111,7 @@ export default async function BlogPage({
                   <div className="flex flex-wrap gap-3 font-mono text-[8px] uppercase tracking-[0.13em]">
                     <time dateTime={getPostDate(featured)}>{formatDate(getPostDate(featured))}</time>
                     <span>/</span>
-                    <span>{getReadingTime(featured.content)} min read</span>
+                    <span>{getReadingTime(featured.plainText)} min read</span>
                   </div>
                   <h2 className="mt-5 max-w-3xl font-pixel text-5xl leading-[0.88] tracking-[-0.06em] md:text-7xl">{featured.title}</h2>
                   <p className="mt-5 max-w-2xl text-sm leading-6 text-black/60">{featured.excerpt}</p>

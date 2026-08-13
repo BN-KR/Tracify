@@ -435,24 +435,24 @@
   }
 }
 @layer components {
-  .payload-blog-richtext {
+  .markdoc-blog-richtext {
     color: rgb(0 0 0 / 72%);
     font-family: var(--font-geist-sans), sans-serif;
     font-size: 1rem;
     line-height: 1.8;
   }
 
-  .payload-blog-richtext p,
-  .payload-blog-richtext ul,
-  .payload-blog-richtext ol,
-  .payload-blog-richtext blockquote,
-  .payload-blog-richtext pre {
+  .markdoc-blog-richtext p,
+  .markdoc-blog-richtext ul,
+  .markdoc-blog-richtext ol,
+  .markdoc-blog-richtext blockquote,
+  .markdoc-blog-richtext pre {
     margin-block: 1.25rem;
   }
 
-  .payload-blog-richtext h2,
-  .payload-blog-richtext h3,
-  .payload-blog-richtext h4 {
+  .markdoc-blog-richtext h2,
+  .markdoc-blog-richtext h3,
+  .markdoc-blog-richtext h4 {
     color: #000;
     font-family: var(--font-geist-mono), monospace;
     font-weight: 700;
@@ -461,12 +461,13 @@
     margin-top: 2.5rem;
   }
 
-  .payload-blog-richtext h2 { font-size: 1.75rem; }
-  .payload-blog-richtext h3 { font-size: 1.25rem; }
-  .payload-blog-richtext h4 { font-size: 1rem; }
-  .payload-blog-richtext ul { list-style: disc; padding-left: 1.5rem; }
-  .payload-blog-richtext ol { list-style: decimal; padding-left: 1.5rem; }
-  .payload-blog-richtext blockquote { border-left: 4px solid #f4d44d; padding-left: 1rem; }
-  .payload-blog-richtext a { color: #000; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
-  .payload-blog-richtext code { background: #000; color: #fff; font-family: var(--font-geist-mono), monospace; padding: 0.125rem 0.3rem; }
+  .markdoc-blog-richtext h2 { font-size: 1.75rem; }
+  .markdoc-blog-richtext h3 { font-size: 1.25rem; }
+  .markdoc-blog-richtext h4 { font-size: 1rem; }
+  .markdoc-blog-richtext ul { list-style: disc; padding-left: 1.5rem; }
+  .markdoc-blog-richtext ol { list-style: decimal; padding-left: 1.5rem; }
+  .markdoc-blog-richtext blockquote { border-left: 4px solid #f4d44d; padding-left: 1rem; }
+  .markdoc-blog-richtext img { width: 100%; border: 1px solid #000; }
+  .markdoc-blog-richtext a { color: #000; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .markdoc-blog-richtext code { background: #000; color: #fff; font-family: var(--font-geist-mono), monospace; padding: 0.125rem 0.3rem; }
 }

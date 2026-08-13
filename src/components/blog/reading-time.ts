@@ -1,4 +1,5 @@
 function collectText(value: unknown): string[] {
+  if (typeof value === "string") return [value];
   if (!value || typeof value !== "object") return [];
   if (Array.isArray(value)) return value.flatMap(collectText);
 

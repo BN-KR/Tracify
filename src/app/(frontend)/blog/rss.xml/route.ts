@@ -1,4 +1,4 @@
-import { getCategoryTitles, getPostDate, getPublishedPosts } from "@/lib/payload-blog";
+import { getPostDate, getPublishedPosts } from "@/lib/markdoc-blog";
 
 export const dynamic = "force-static";
 
@@ -29,7 +29,7 @@ export async function GET() {
       <description>${escapeXml(post.excerpt)}</description>
       <pubDate>${formatRssDate(getPostDate(post))}</pubDate>
       <author>${escapeXml(post.author)}</author>
-      ${getCategoryTitles(post).map((category) => `<category>${escapeXml(category)}</category>`).join("")}
+      ${post.categories.map((category) => `<category>${escapeXml(category)}</category>`).join("")}
     </item>`,
     )
     .join("");
