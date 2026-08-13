@@ -697,3 +697,11 @@
 - [x] Add product and blog breadcrumbs plus richer BlogPosting identity and publisher fields.
 - [x] Verify focused lint, content tests, desktop/mobile rendering, accessibility semantics, and browser console output.
 - [x] Run the final production build and publish the branch update.
+
+# Vercel preview deployment recovery — 2026-08-13
+
+- [x] Inspect the failed branch deployment and isolate the Vercel build error.
+- [x] Confirm Preview lacked the two public Convex endpoints required at build time.
+- [x] Add isolated development Convex endpoints to Vercel Preview without exposing production data.
+- [x] Redeploy commit `45780f6` and verify Vercel reaches `READY`.
+- [x] Update the staging runbook with both required variables and the current project name.

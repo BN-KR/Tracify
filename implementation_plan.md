@@ -752,3 +752,11 @@ The single most important UI in the product.
 3. [completed] Build nine feature-specific product narratives and visual instruments without changing the landing page.
 4. [completed] Correct sitemap freshness and enrich blog/product structured data.
 5. [completed] Complete production verification, record the result, and publish the branch.
+
+# Vercel preview deployment recovery — 2026-08-13
+
+1. [completed] Read the failed deployment logs and identify the missing Preview configuration.
+2. [completed] Compare Vercel Preview variable names with the application auth configuration.
+3. [completed] Configure `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` for Preview using the isolated development deployment.
+4. [completed] Redeploy the exact failed commit and verify build completion plus final `READY` state.
+5. [completed] Record the durable staging requirement in repository documentation.

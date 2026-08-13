@@ -4,13 +4,14 @@ The repository uses `main` for production and `staging` for a persistent Vercel 
 
 ## One-time Vercel setup
 
-In the Vercel project **5to1r**:
+In the Vercel project **tracify**:
 
 1. Set **Production Branch** to `main`.
 2. Add a Preview environment for the `staging` branch (or assign a staging domain to that branch).
 3. Add the required environment variables to **Preview**. At minimum:
 
    - `NEXT_PUBLIC_CONVEX_URL`
+   - `NEXT_PUBLIC_CONVEX_SITE_URL`
    - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
    - `CLERK_SECRET_KEY`
    - `CLERK_JWT_ISSUER_DOMAIN`
@@ -31,4 +32,4 @@ git push origin staging
 
 Each push updates the staging Preview. Review its Vercel URL or assigned staging domain. When approved, open a PR from `staging` to `main`; merging it creates the production deployment.
 
-The current failure was caused by the Preview environment missing `NEXT_PUBLIC_CONVEX_URL`, which makes `ConvexReactClient` fail during prerendering.
+Both public Convex endpoints are required during the Next.js build. A missing `NEXT_PUBLIC_CONVEX_URL` makes `ConvexReactClient` fail during prerendering; a missing `NEXT_PUBLIC_CONVEX_SITE_URL` makes the Better Auth server integration fail while Next.js collects route data. Keep both variables scoped to Preview and point them at the isolated development or staging Convex deployment rather than production.

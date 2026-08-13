@@ -1,5 +1,11 @@
 # Project Memory
 
+## 2026-08-13 Vercel preview deployment recovery
+- The `codex/llms-seo` previews failed after compilation and TypeScript because Vercel Preview lacked `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL`; Better Auth failed during page-data collection for `/api/evaluation/run`.
+- Added both public endpoints to Vercel Preview using the isolated `diligent-dragon-604` development Convex deployment, avoiding production data access from branch previews.
+- Redeployed commit `45780f6` as deployment `dpl_F8Uk4ryBBfiDiJXvpc3CHe7PmcfS`; it completed the Next.js build and reached `READY` at the branch alias.
+- Updated `docs/vercel-staging.md` to name the current `tracify` Vercel project and require both Convex public endpoints for Preview.
+
 ## 2026-08-13 Product page depth and SEO hardening
 - Replaced the shared thin product-page template with nine substantial, source-backed pages for Trace Viewer, Cost Dashboard, Tool Calls, LLM Calls, Failure Analysis, Project Reports, Runtime Control, Evaluation Engine, and the AI Engineering Lifecycle.
 - Each route now has a feature-specific working-surface visual: trace waterfall, cost ledger, tool payload, model-call accounting, failure stack, report sheet, policy controls, evaluation matrix, or lifecycle rail. The pages share the Future 19 palette and typography but vary hero alignment, section ordering, workflow geometry, and content.
