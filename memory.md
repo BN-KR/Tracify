@@ -1134,3 +1134,4 @@
 - Added `npm run test:seo` to crawl rendered sitemap pages, metadata, headings, canonicals, social cards, internal destinations, duplicate canonicals, and indexable pages omitted from the sitemap.
 - Added a root IndexNow verification key plus `npm run seo:indexnow`; submission remains a post-production-deploy step because the key must be live on the canonical host first.
 - HTTP-to-HTTPS redirects are intentional. Vercel currently sends bare HTTP through `http apex -> https apex -> https www`; internal links and sitemap URLs point directly to canonical HTTPS `www` pages and do not enter that chain.
+- Commit `3474f98` is pushed on `codex/llms-seo`; Vercel preview deployment `dpl_EWzgKdv42EYBJM6PA3FXYtNmum3S` is Ready. Protected-preview checks confirmed the homepage H1/canonical, auth `noindex`, social metadata, and IndexNow key response.

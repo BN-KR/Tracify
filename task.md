@@ -712,4 +712,5 @@
 - [x] Eliminate reproducible H1, social metadata, snippet-length, thin-content, and utility-route indexability gaps.
 - [x] Add repeatable rendered SEO checks and an IndexNow verification/submission workflow.
 - [x] Pass content tests, production build, local rendered SEO crawl, script syntax, and diff hygiene.
-- [ ] Publish the branch update, verify the Vercel preview, merge after review, submit IndexNow, and request a fresh Ahrefs crawl.
+- [x] Publish the branch update and verify the protected Vercel preview.
+- [ ] After review: merge PR #5, submit IndexNow from production, and request a fresh Ahrefs crawl.

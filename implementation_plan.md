@@ -767,4 +767,4 @@ The single most important UI in the product.
 2. [completed] Fix semantic headings, metadata lengths, Open Graph completeness, thin use-case copy, and utility-route indexability.
 3. [completed] Add a reusable rendered SEO crawler and IndexNow key/submission command.
 4. [completed] Run content tests, build, syntax checks, diff hygiene, and a passing 44-page local production crawl.
-5. [in_progress] Commit and push the scoped branch, verify its protected Vercel preview, then hand off merge, IndexNow submission, and Ahrefs recrawl.
+5. [completed] Commit and push the scoped branch and verify the protected Vercel preview is Ready with the H1, noindex metadata, and IndexNow key rendered correctly.
