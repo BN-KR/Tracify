@@ -33,8 +33,6 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
-import { authClient } from "@/lib/auth-client";
-import { isDashboardAdmin } from "@/lib/admin-access";
 
 type GroupId = "observe" | "analyze" | "improve" | "operate" | "manage" | "resources";
 
@@ -66,9 +64,11 @@ function isActivePath(pathname: string, href: string, projectId: string) {
 }
 
 export function DashboardSidebar({
+  canAccessContent,
   isCollapsed,
   onCollapsedChange,
 }: {
+  canAccessContent: boolean;
   isCollapsed: boolean;
   onCollapsedChange: (next: boolean) => void;
 }) {
@@ -77,9 +77,6 @@ export function DashboardSidebar({
   const projectId = (params?.projectId as string) || "";
   const projectDashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
   const projectSetupHref = projectId ? `/dashboard/${projectId}` : "/onboarding/project";
-  const { data: session } = authClient.useSession();
-  const canAccessAdmin = isDashboardAdmin(session?.user.email);
-
   const dynamicGroups = useMemo<NavGroup[]>(() => [
     {
       id: "observe",
@@ -228,14 +225,14 @@ export function DashboardSidebar({
           href: "/roadmap",
           external: true,
         },
-        ...(canAccessAdmin
+        ...(canAccessContent
           ? [
               { title: "Admin Library", icon: ShieldCheck, href: "/admin/library" },
             ]
           : []),
       ],
     },
-  ], [canAccessAdmin, projectDashboardHref, projectId, projectSetupHref]);
+  ], [canAccessContent, projectDashboardHref, projectId, projectSetupHref]);
 
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
     if (typeof window === "undefined") {

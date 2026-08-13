@@ -1,9 +1,12 @@
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { getLibraryAccess } from "@/lib/library-access";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <DashboardShell>{children}</DashboardShell>;
+  const { authorized: canAccessContent } = await getLibraryAccess();
+
+  return <DashboardShell canAccessContent={canAccessContent}>{children}</DashboardShell>;
 }

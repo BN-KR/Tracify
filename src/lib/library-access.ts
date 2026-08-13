@@ -12,9 +12,9 @@ function values(name: string) {
   );
 }
 
-export async function requireLibraryAccess(returnBackUrl = "/admin/library") {
+export async function getLibraryAccess() {
   const identity = await fetchAuthQuery(api.auth.getCurrentIdentity, {});
-  if (!identity) redirect(`/sign-in?redirect=${encodeURIComponent(returnBackUrl)}`);
+  if (!identity) return { authenticated: false, authorized: false };
   const userId = identity.subject;
   const orgId = typeof identity.org_id === "string" ? identity.org_id : undefined;
   const orgRole = typeof identity.org_role === "string" ? identity.org_role : undefined;
@@ -39,5 +39,13 @@ export async function requireLibraryAccess(returnBackUrl = "/admin/library") {
     emailAuthorized ||
     (approvedOrganization && (orgRole === "owner" || orgRole === "admin"));
 
-  if (!accessConfigured || !authorized) notFound();
+  return { authenticated: true, authorized: accessConfigured && authorized };
+}
+
+export async function requireLibraryAccess(returnBackUrl = "/admin/library") {
+  const access = await getLibraryAccess();
+  if (!access.authenticated) {
+    redirect(`/sign-in?redirect=${encodeURIComponent(returnBackUrl)}`);
+  }
+  if (!access.authorized) notFound();
 }

@@ -1,3 +1,7 @@
+# Robots standards cleanup — 2026-08-13
+
+1. [completed] Keep canonical-host signals in redirects, canonical URLs, and sitemap rather than robots.txt.
+
 # Sitewide link audit — 2026-08-12
 
 1. [completed] Compare internal navigational URLs against concrete and dynamic route definitions.
@@ -696,3 +700,21 @@ The single most important UI in the product.
 2. [completed] Remove the post-level newsletter CTA and refine the author signature.
 3. [completed] Run content tests, focused lint, TypeScript, diff hygiene, and production build.
 4. [in progress] Commit, merge, push, verify Vercel, clean obsolete environment variables, and restart localhost.
+
+# Root robots.txt route — 2026-08-13
+
+1. [completed] Move `robots.ts` from the `(frontend)` route group to the App Router root.
+2. [completed] Verify the generated route in a fresh production build.
+3. [completed] Commit, merge, and deploy the isolated fix; live `/robots.txt` and `/sitemap.xml` both return HTTP 200.
+
+# Payload CMS dashboard access â€” 2026-08-13
+
+1. [completed] Trace the live dashboard and Payload authorization paths.
+2. [completed] Correct the owner email and share the server-side authorization result with the dashboard shell.
+3. [completed] Commit, deploy to Vercel production, and verify the authenticated live experience.
+
+# Admin hub â€” 2026-08-13
+
+1. [completed] Consolidate the dashboard's private navigation under one Admin entry.
+2. [completed] Add the access-controlled `/admin` choice page for the library and Payload CMS.
+3. [completed] Verify the production deployment and live authorized flow.

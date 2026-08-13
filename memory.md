@@ -18,6 +18,16 @@
 - A Git-authored Markdoc replacement is estimated at 2-4 focused engineering days for application integration and verification, plus roughly 10-30 minutes per ordinary post for content/media conversion and QA.
 - Markdoc is a parser/rendering system rather than a browser CMS. Preserving visual editing, roles, drafts, scheduled publishing, and media management requires retaining Payload or adding another editorial layer; a comparable replacement is likely 1-3 weeks.
 - The supplied `@markdoc/next.js` example targets the Pages Router. Tracify uses Next.js 16 App Router, so the safer design is explicit server-side `@markdoc/markdoc` parsing within the existing `/blog/[slug]` route rather than adopting the example verbatim.
+## 2026-08-13 Payload CMS dashboard access
+- Corrected the private-content bootstrap allowlist to the live owner account, `kristofferbon@gmail.com` (the previous address incorrectly included a period).
+- Dashboard Content visibility now comes from the same server-side access decision as `/cms`, preventing a client-session mismatch and supporting the existing user, email, and organization access configuration for the whole team.
+- Focused ESLint, TypeScript, and diff-hygiene checks pass. Production deployment `dpl_BZ6kJ19vD83ENr6KEQb6rGUDNJdj` is Ready; the live dashboard shows Content and `/cms` now reaches Payload's login screen rather than the previous Next.js 404.
+
+## 2026-08-13 Admin hub
+- Consolidated the dashboard's separate Content and Admin Library links into one protected **Admin** entry.
+- `/admin` offers authorized users two clear choices: **Admin Library** and **Payload CMS**.
+- The hub retains the shared `requireLibraryAccess` policy; the individual destinations remain separately protected.
+- Focused ESLint, TypeScript, the Admin-hub route contract check, and diff hygiene pass. Production deployment `dpl_CnFUPs1Jy5vz4u9LN4cwYNPLyurr` is Ready; live verification confirms the sidebar, hub, library, and CMS destinations.
 
 ## 2026-08-12 Dashboard onboarding escape and launch plan
 - Leaving onboarding now records a durable local dismissal, so the optional setup entry point no longer reappears during ordinary dashboard navigation.
@@ -1085,3 +1095,7 @@
 - The first published post is `ai-agent-observability-complete-guide`; the other migrated posts remain drafts.
 - Blog posts do not render a post-level newsletter CTA. The site-wide footer newsletter remains.
 - The article author signature uses a responsive light editorial treatment instead of the former dark card.
+## Root robots.txt route (2026-08-13)
+- Removed the unsupported `Host` directive from `/robots.txt` after Google Search Console correctly reported it as ignored by Googlebot. Canonical-host selection remains enforced by the bare-domain redirect, `metadataBase`, canonical tags, and sitemap URLs.
+- Diagnosed the production `robots.txt` 404: Next.js requires `robots.ts` in the root App Router directory, but it was nested under the `(frontend)` route group and omitted from Vercel's build output.
+- Moved the metadata route to `src/app/robots.ts`; `npm run build` passed and explicitly emitted static `/robots.txt`. PR #4 merged to `main` and production deployment `dpl_BQ1D2JYfFkcp771WcRnYP5BVsJ7f` is Ready; live `/robots.txt` and `/sitemap.xml` return HTTP 200.

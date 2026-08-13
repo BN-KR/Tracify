@@ -1,3 +1,7 @@
+# Robots standards cleanup — 2026-08-13
+
+1. [completed] Remove the Google-unsupported `Host` directive from the generated robots file.
+
 # Sitewide link audit — 2026-08-12
 
 1. [completed] Audit static, generated, public, and dashboard internal link targets against the application route manifest.
@@ -601,6 +605,24 @@
 - [x] Enable `managed_payments` on the existing linked Stripe Checkout route using the required preview API version.
 - [x] Retain signed `checkout.session.completed` webhook synchronization to the project billing record.
 - [x] Run focused tests, ESLint, TypeScript, and diff-hygiene checks.
+
+## Root robots.txt route (2026-08-13)
+
+- [x] Move the generated robots metadata route to `src/app/robots.ts`, as required by Next.js.
+- [x] Verify the production build emits `/robots.txt`.
+- [x] Commit, merge, and deploy the isolated fix without including unrelated workspace changes.
+
+## Payload CMS dashboard access (2026-08-13)
+
+- [x] Diagnose the missing live Content navigation and `/cms` 404 for the owner account.
+- [x] Correct the allowlisted account email and use the shared server-side CMS access rule for dashboard visibility.
+- [x] Deploy to production and verify the live dashboard Content link and `/cms` page.
+
+## Admin hub (2026-08-13)
+
+- [x] Replace the separate dashboard Content and Admin Library links with one Admin entry.
+- [x] Add the protected `/admin` choice page for Admin Library and Payload CMS.
+- [x] Verify the matching production deployment and live navigation.
 # Dashboard onboarding escape and launch plan — 2026-08-12
 
 1. [completed] Persist an intentional onboarding dismissal when the user leaves setup.
