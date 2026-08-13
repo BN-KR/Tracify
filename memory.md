@@ -1,5 +1,11 @@
 # Project Memory
 
+## 2026-08-13 llms.txt and SEO audit
+- Added `public/llms.txt` as a concise, curated entry point for agents, using canonical public Tracify URLs and explicit availability caveats.
+- Added a regression contract to keep the file canonical, deduplicated, concise, and connected to core public resources; it runs with `npm run test:content`.
+- Future agents must update the file when core public documentation or product routes change and must not list drafts, authenticated routes, secrets, or speculative capabilities.
+- `llms.txt` is maintained for agent discovery only. Google states that it neither helps nor harms Google Search visibility; canonical crawlable pages, useful original content, page experience, sitemap coverage, and valid structured data remain the SEO priorities.
+
 ## 2026-08-13 Tracify content-authoring skill
 - Added the project-local `writing-tracify-content` skill for drafting, editing, reviewing, storing, and publishing Tracify blogs and documentation.
 - The skill distinguishes live storage surfaces: public blogs in `content/blog/*.mdoc`, blog media in `public/media`, internal engineering Markdown in `docs/`, public `/docs` content in its current TypeScript registry, and dashboard reference content in `docs-viewer.tsx`.

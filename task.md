@@ -682,3 +682,9 @@
 
 - [x] Record branch, pull-request, direct-push, verification, and staging rules in root `AGENTS.md`.
 - [x] Preserve scratch artifacts and unrelated user changes outside published scope.
+# llms.txt and SEO audit — 2026-08-13
+
+- [x] Audit canonical, robots, sitemap, metadata, and structured-data coverage.
+- [x] Add a concise root `llms.txt` containing only canonical public resources.
+- [x] Add a regression test and future-agent maintenance rules.
+- [x] Run content tests and a production build.

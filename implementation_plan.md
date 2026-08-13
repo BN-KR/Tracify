@@ -739,3 +739,9 @@ The single most important UI in the product.
 1. [completed] Consolidate the dashboard's private navigation under one Admin entry.
 2. [completed] Add the access-controlled `/admin` choice page for the library and Payload CMS.
 3. [completed] Verify the production deployment and live authorized flow.
+# llms.txt and SEO audit — 2026-08-13
+
+1. [completed] Compare the public discovery surface with the llms.txt proposal and current Google guidance.
+2. [completed] Add a curated `/llms.txt` with canonical documentation, product, guide, and policy links.
+3. [completed] Add a content contract test and repository maintenance rules.
+4. [completed] Verify content tests, the production build, and staged scope.

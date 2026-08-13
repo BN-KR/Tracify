@@ -1,0 +1,40 @@
+# Tracify
+
+> Tracify is an observability and evaluation platform for AI agents. It helps engineering teams trace agent runs, inspect tool and model calls, monitor cost and quality, evaluate changes, and investigate production failures.
+
+Use the documentation for implementation details and the blog for explanatory guides. Public pages use the canonical origin https://www.tracify.tech. Do not infer that roadmap items or third-party integrations are generally available unless the linked page says so.
+
+## Documentation
+
+- [Documentation overview](https://www.tracify.tech/docs): Start here to install Tracify and send an agent trace.
+- [TypeScript SDK](https://www.tracify.tech/docs/typescript): TypeScript installation and instrumentation guidance.
+- [Python SDK](https://www.tracify.tech/docs/python): Python installation and instrumentation guidance.
+- [API reference](https://www.tracify.tech/docs/api): Tracify API concepts and endpoints.
+- [Evaluation](https://www.tracify.tech/docs/evaluation): Guidance for evaluating agent behavior and quality.
+- [Integrations](https://www.tracify.tech/docs/integrations): Implementation guidance for supported integrations.
+- [Self-hosting](https://www.tracify.tech/docs/self-hosting): Self-hosting guidance and constraints.
+
+## Product
+
+- [Product overview](https://www.tracify.tech/): Tracify's core agent observability and evaluation capabilities.
+- [Pricing](https://www.tracify.tech/pricing): Current plans and billing options.
+- [Integrations directory](https://www.tracify.tech/integrations): Available and planned integrations, with status shown on the page.
+- [Security](https://www.tracify.tech/security): Data handling, security controls, and compliance posture.
+- [Status](https://www.tracify.tech/status): Current service status.
+- [Roadmap](https://www.tracify.tech/roadmap): Public product direction; roadmap entries are not availability commitments.
+
+## Guides
+
+- [Blog](https://www.tracify.tech/blog): All published Tracify articles.
+- [AI agent observability guide](https://www.tracify.tech/blog/ai-agent-observability-complete-guide): Concepts, signals, and implementation considerations for agent observability.
+- [AI agent evaluation guide](https://www.tracify.tech/blog/ai-agent-evaluation-practical-guide): A practical approach to agent evaluation.
+- [Debugging AI agents in production](https://www.tracify.tech/blog/debug-ai-agents-in-production): A production debugging workflow for agent failures.
+- [LLM tracing explained](https://www.tracify.tech/blog/llm-tracing-explained): How tracing exposes model, tool, and workflow behavior.
+- [RSS feed](https://www.tracify.tech/blog/rss.xml): Machine-readable feed of published articles.
+
+## Optional
+
+- [Changelog](https://www.tracify.tech/changelog): Product updates and release notes.
+- [Contact](https://www.tracify.tech/contact): Sales and general contact options.
+- [Privacy](https://www.tracify.tech/privacy): Privacy policy.
+- [Terms](https://www.tracify.tech/terms): Terms of service.
