@@ -1,0 +1,72 @@
+[
+  {
+    "slug": "ai-agent-observability-complete-guide",
+    "sourceUrl": "https://unsplash.com/photos/a-rack-of-servers-in-a-server-room-2JJ3wBHu4_0",
+    "downloadUrl": "https://images.unsplash.com/photo-1695668548342-c0c1ad479aee?auto=format&fit=crop&w=1600&q=85",
+    "altText": "A rack of servers in a dark server room",
+    "localPath": "public/media/organic-series/ai-agent-observability-complete-guide.jpg"
+  },
+  {
+    "slug": "llm-observability-metrics-that-matter",
+    "sourceUrl": "https://unsplash.com/photos/graphical-user-interface--WXQm_NTK0U",
+    "downloadUrl": "https://images.unsplash.com/photo-1666875753105-c63a6f3bdc86?auto=format&fit=crop&w=1600&q=85",
+    "altText": "A graphical dashboard interface on a computer screen",
+    "localPath": "public/media/organic-series/llm-observability-metrics-that-matter.jpg"
+  },
+  {
+    "slug": "debug-ai-agents-in-production",
+    "sourceUrl": "https://unsplash.com/photos/black-computer-keyboard-DuHKoV44prg",
+    "downloadUrl": "https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?auto=format&fit=crop&w=1600&q=85",
+    "altText": "A black computer keyboard beside a developer workspace",
+    "localPath": "public/media/organic-series/debug-ai-agents-in-production.jpg"
+  },
+  {
+    "slug": "ai-agent-evaluation-practical-guide",
+    "sourceUrl": "https://unsplash.com/photos/person-working-on-blue-and-white-paper-on-board-qWwpHwip31M",
+    "downloadUrl": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=1600&q=85",
+    "altText": "A person arranging notes on a planning board",
+    "localPath": "public/media/organic-series/ai-agent-evaluation-practical-guide.jpg"
+  },
+  {
+    "slug": "reduce-llm-costs-without-hurting-quality",
+    "sourceUrl": "https://unsplash.com/photos/a-calculator-sitting-on-top-of-a-table-next-to-a-laptop-LgE3whpa5VA",
+    "downloadUrl": "https://images.unsplash.com/photo-1711606815631-38d32cdaec3e?auto=format&fit=crop&w=1600&q=85",
+    "altText": "A calculator beside a laptop on a worktable",
+    "localPath": "public/media/organic-series/reduce-llm-costs-without-hurting-quality.jpg"
+  },
+  {
+    "slug": "llm-tracing-explained",
+    "sourceUrl": "https://unsplash.com/photos/a-bunch-of-blue-wires-connected-to-each-other-PSpf_XgOM5w",
+    "downloadUrl": "https://images.unsplash.com/photo-1683322499436-f4383dd59f5a?auto=format&fit=crop&w=1600&q=85",
+    "altText": "Blue network cables connected in a data system",
+    "localPath": "public/media/organic-series/llm-tracing-explained.jpg"
+  },
+  {
+    "slug": "ai-agent-reliability-failures-retries-guardrails",
+    "sourceUrl": "https://unsplash.com/photos/red-hard-hat-on-pavement-9OB46apMbC4",
+    "downloadUrl": "https://images.unsplash.com/photo-1567954970774-58d6aa6c50dc?auto=format&fit=crop&w=1600&q=85",
+    "altText": "A red hard hat resting on pavement",
+    "localPath": "public/media/organic-series/ai-agent-reliability-failures-retries-guardrails.jpg"
+  },
+  {
+    "slug": "prompt-versioning-and-prompt-management",
+    "sourceUrl": "https://unsplash.com/photos/black-pen-on-white-notebook-Hx-4TbpsoIw",
+    "downloadUrl": "https://images.unsplash.com/photo-1620275765334-4ed948bb4502?auto=format&fit=crop&w=1600&q=85",
+    "altText": "A black pen resting on an open white notebook",
+    "localPath": "public/media/organic-series/prompt-versioning-and-prompt-management.jpg"
+  },
+  {
+    "slug": "ai-agent-testing-unit-tests-production-evals",
+    "sourceUrl": "https://unsplash.com/photos/woman-in-black-shirt-sitting-beside-black-flat-screen-computer-monitor-Im_cQ6hQo10",
+    "downloadUrl": "https://images.unsplash.com/photo-1629904853893-c2c8981a1dc5?auto=format&fit=crop&w=1600&q=85",
+    "altText": "An engineer working beside a computer monitor",
+    "localPath": "public/media/organic-series/ai-agent-testing-unit-tests-production-evals.jpg"
+  },
+  {
+    "slug": "building-production-ready-ai-agents",
+    "sourceUrl": "https://unsplash.com/photos/group-of-people-using-laptop-computer-QckxruozjRg",
+    "downloadUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=85",
+    "altText": "A group collaborating around a laptop computer",
+    "localPath": "public/media/organic-series/building-production-ready-ai-agents.jpg"
+  }
+]
