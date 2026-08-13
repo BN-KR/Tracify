@@ -716,6 +716,12 @@ The single most important UI in the product.
 3. [completed] Update the authoring skill, quality bar, publishing README, and AGENTS rules.
 4. [completed] Validate instructions, 14 content/UI tests, and the 80-page production build.
 
+# Agent Git workflow policy — 2026-08-13
+
+1. [completed] Make `codex/<description>` plus draft PR the default workflow.
+2. [completed] Limit direct `main` pushes to explicit, low-risk content fixes with passing checks.
+3. [completed] Require staged-diff review and exclusion of scratch or unrelated changes.
+
 # Root robots.txt route — 2026-08-13
 
 1. [completed] Move `robots.ts` from the `(frontend)` route group to the App Router root.

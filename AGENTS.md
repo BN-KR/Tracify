@@ -81,6 +81,14 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 - **Marketing product feature pages** (`/product/[feature]`) are placeholders — they show "under construction" copy. Don't expect real content there.
 - **SDKs** (`packages/ts-sdk/`, `packages/python-sdk/`) are built but not yet published to npm/PyPI.
 
+## Git workflow
+
+- Default to a `codex/<description>` branch and a draft pull request.
+- Use pull requests for features, backend or schema changes, authentication, billing, dependencies, migrations, and broad UI work.
+- Direct pushes to `main` are allowed only for small, low-risk content fixes after required checks pass.
+- Never push directly to `main` unless the user explicitly requests it.
+- Before publishing, inspect the staged diff and exclude unrelated scratch files or user changes.
+
 ## Markdoc Blog Rules
 - **Required skill:** Read `.agents/skills/writing-tracify-content/SKILL.md` before writing, editing, reviewing, storing, or publishing any blog post or documentation.
 - Blog content lives exclusively in `content/blog/*.mdoc`; do not add a database or CMS fallback.

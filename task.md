@@ -677,3 +677,8 @@
 - [x] Require centralized validated Markdoc tags and accessible isolated React components.
 - [x] Update the future-agent skill, quality bar, publishing guide, and repository rules.
 - [x] Validate the skill package and content contract.
+
+# Agent Git workflow policy — 2026-08-13
+
+- [x] Record branch, pull-request, direct-push, verification, and staging rules in root `AGENTS.md`.
+- [x] Preserve scratch artifacts and unrelated user changes outside published scope.
