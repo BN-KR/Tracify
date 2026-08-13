@@ -3,7 +3,13 @@
 ## 2026-08-13 Payload CMS dashboard access
 - Corrected the private-content bootstrap allowlist to the live owner account, `kristofferbon@gmail.com` (the previous address incorrectly included a period).
 - Dashboard Content visibility now comes from the same server-side access decision as `/cms`, preventing a client-session mismatch and supporting the existing user, email, and organization access configuration for the whole team.
-- Focused ESLint, TypeScript, and diff-hygiene checks pass. Production deployment and live browser verification are next.
+- Focused ESLint, TypeScript, and diff-hygiene checks pass. Production deployment `dpl_BZ6kJ19vD83ENr6KEQb6rGUDNJdj` is Ready; the live dashboard shows Content and `/cms` now reaches Payload's login screen rather than the previous Next.js 404.
+
+## 2026-08-13 Admin hub
+- Consolidated the dashboard's separate Content and Admin Library links into one protected **Admin** entry.
+- `/admin` offers authorized users two clear choices: **Admin Library** and **Payload CMS**.
+- The hub retains the shared `requireLibraryAccess` policy; the individual destinations remain separately protected.
+- Focused ESLint, TypeScript, the Admin-hub route contract check, and diff hygiene pass. Production deployment `dpl_CnFUPs1Jy5vz4u9LN4cwYNPLyurr` is Ready; live verification confirms the sidebar, hub, library, and CMS destinations.
 
 ## 2026-08-12 Dashboard onboarding escape and launch plan
 - Leaving onboarding now records a durable local dismissal, so the optional setup entry point no longer reappears during ordinary dashboard navigation.

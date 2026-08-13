@@ -612,7 +612,13 @@
 
 - [x] Diagnose the missing live Content navigation and `/cms` 404 for the owner account.
 - [x] Correct the allowlisted account email and use the shared server-side CMS access rule for dashboard visibility.
-- [ ] Deploy to production and verify the live dashboard Content link and `/cms` page.
+- [x] Deploy to production and verify the live dashboard Content link and `/cms` page.
+
+## Admin hub (2026-08-13)
+
+- [x] Replace the separate dashboard Content and Admin Library links with one Admin entry.
+- [x] Add the protected `/admin` choice page for Admin Library and Payload CMS.
+- [x] Verify the matching production deployment and live navigation.
 # Dashboard onboarding escape and launch plan — 2026-08-12
 
 1. [completed] Persist an intentional onboarding dismissal when the user leaves setup.

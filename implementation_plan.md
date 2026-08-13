@@ -680,4 +680,10 @@ The single most important UI in the product.
 
 1. [completed] Trace the live dashboard and Payload authorization paths.
 2. [completed] Correct the owner email and share the server-side authorization result with the dashboard shell.
-3. [in progress] Commit, deploy to Vercel production, and verify the authenticated live experience.
+3. [completed] Commit, deploy to Vercel production, and verify the authenticated live experience.
+
+# Admin hub â€” 2026-08-13
+
+1. [completed] Consolidate the dashboard's private navigation under one Admin entry.
+2. [completed] Add the access-controlled `/admin` choice page for the library and Payload CMS.
+3. [completed] Verify the production deployment and live authorized flow.
