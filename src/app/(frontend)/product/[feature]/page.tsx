@@ -210,7 +210,18 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ feature: string }> }): Promise<Metadata> {
   const { feature } = await params;
   const page = productFeatures[feature as Feature];
-  return page ? { title: page.title, description: page.description, alternates: { canonical: `/product/${feature}` } } : { title: "Product" };
+  if (!page) return { title: "Tracify product capabilities" };
+  const firstSentence = page.description.split(". ")[0];
+  const description = feature === "cost-dashboard"
+    ? "Break AI agent cost down by day, run, model, and tool, then open the traces behind expensive retries, fallbacks, and production changes."
+    : firstSentence.length <= 155
+    ? `${firstSentence}.`
+    : "Build versioned datasets, evaluate live traces and offline runs, review failures, gate releases, and monitor production quality in Tracify.";
+  return {
+    title: `${page.title} for AI agent observability`,
+    description,
+    alternates: { canonical: `/product/${feature}` },
+  };
 }
 
 function ProductBreadcrumb({ title, slug }: { title: string; slug: string }) {

@@ -3,8 +3,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy policy",
-  description: "Tracify privacy policy and information about how we handle data.",
+  title: "Tracify privacy and data handling policy",
+  description: "Read how Tracify collects, uses, stores, protects, and deletes account information and AI agent telemetry across the service.",
   alternates: { canonical: "/privacy" },
 };
 

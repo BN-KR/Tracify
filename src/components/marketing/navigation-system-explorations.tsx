@@ -165,9 +165,9 @@ export function NavigationSystemExplorations({
                   <Radio className="size-3 text-[#f4d44d]" /> production signal
                   connected
                 </span>
-                <h3 className="mt-9 max-w-[740px] font-pixel text-7xl leading-[0.8] tracking-[-0.08em] md:text-9xl">
+                <h1 className="mt-9 max-w-[740px] font-pixel text-7xl leading-[0.8] tracking-[-0.08em] md:text-9xl">
                   The run explains the release.
-                </h3>
+                </h1>
                 <p className="mt-7 max-w-xl text-lg leading-8 text-black/55">
                   Trace what happened. Test what changed. Ship the version that
                   proves itself.

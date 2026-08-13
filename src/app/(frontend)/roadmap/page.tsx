@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FutureAction, FuturePage } from "@/components/marketing/future19-page";
 
-export const metadata: Metadata = { title: "Roadmap", description: "A transparent view of Tracify product delivery.", alternates: { canonical: "/roadmap" } };
+export const metadata: Metadata = { title: "AI agent observability product roadmap", description: "Follow what Tracify supports today, what the team is actively building, and which observability capabilities still depend on customer evidence.", alternates: { canonical: "/roadmap" } };
 
 const sections = [
   { status: "Shipped", code: "NOW", title: "Observe and control the runs you have today", color: "bg-[#f4d44d]", items: ["Trace and run inspection", "Cost, model, and tool analytics", "Project reports and Slack alerts", "Runtime retry, fallback, latency, and cost policies", "Python and TypeScript instrumentation", "OpenTelemetry ingestion"] },

@@ -9,8 +9,8 @@ import Link from "next/link";
 
 export const revalidate = 60;
 export const metadata: Metadata = {
-  title: "Blog",
-  description: "Engineering insights, agent patterns, and production AI from the Tracify team.",
+  title: "AI agent observability engineering blog",
+  description: "Practical engineering guides for tracing, evaluating, debugging, and reducing the cost of production AI agents.",
   alternates: { canonical: "/blog" },
 };
 

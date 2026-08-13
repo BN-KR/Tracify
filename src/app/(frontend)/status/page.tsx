@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FutureBand, FuturePage } from "@/components/marketing/future19-page";
 
-export const metadata: Metadata = { title: "Status", description: "Current operational status for Tracify services.", alternates: { canonical: "/status" } };
+export const metadata: Metadata = { title: "Tracify service status and operations", description: "Check the current operational status of Tracify ingestion, dashboards, evaluation workflows, and supporting platform services.", alternates: { canonical: "/status" } };
 
 const services = ["Dashboard + authentication", "Telemetry ingestion", "Trace + analytics queries", "Notifications + runtime policies"];
 

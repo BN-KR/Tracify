@@ -705,3 +705,11 @@
 - [x] Add isolated development Convex endpoints to Vercel Preview without exposing production data.
 - [x] Redeploy commit `45780f6` and verify Vercel reaches `READY`.
 - [x] Update the staging runbook with both required variables and the current project name.
+
+# Ahrefs site-audit remediation — 2026-08-14
+
+- [x] Re-crawl all current production sitemap pages and internal destinations.
+- [x] Eliminate reproducible H1, social metadata, snippet-length, thin-content, and utility-route indexability gaps.
+- [x] Add repeatable rendered SEO checks and an IndexNow verification/submission workflow.
+- [x] Pass content tests, production build, local rendered SEO crawl, script syntax, and diff hygiene.
+- [ ] Publish the branch update, verify the Vercel preview, merge after review, submit IndexNow, and request a fresh Ahrefs crawl.

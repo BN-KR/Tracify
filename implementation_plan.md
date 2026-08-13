@@ -760,3 +760,11 @@ The single most important UI in the product.
 3. [completed] Configure `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` for Preview using the isolated development deployment.
 4. [completed] Redeploy the exact failed commit and verify build completion plus final `READY` state.
 5. [completed] Record the durable staging requirement in repository documentation.
+
+# Ahrefs site-audit remediation — 2026-08-14
+
+1. [completed] Compare the stale Ahrefs summary with a fresh crawl of the canonical production sitemap and internal links.
+2. [completed] Fix semantic headings, metadata lengths, Open Graph completeness, thin use-case copy, and utility-route indexability.
+3. [completed] Add a reusable rendered SEO crawler and IndexNow key/submission command.
+4. [completed] Run content tests, build, syntax checks, diff hygiene, and a passing 44-page local production crawl.
+5. [in_progress] Commit and push the scoped branch, verify its protected Vercel preview, then hand off merge, IndexNow submission, and Ahrefs recrawl.

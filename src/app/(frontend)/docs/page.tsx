@@ -1,6 +1,6 @@
 import { FutureAction, FutureBand, FuturePage } from "@/components/marketing/future19-page";
 
-export const metadata = { title: "Documentation", description: "Install Tracify and send your first agent trace.", alternates: { canonical: "/docs" } };
+export const metadata = { title: "Tracify AI agent observability documentation", description: "Install Tracify, instrument an AI agent, send your first trace, and learn the workflows for prompts, evaluations, and production releases.", alternates: { canonical: "/docs" } };
 
 const chapters = [
   ["Start", "Quickstart", "Install, authenticate, and send the first trace.", "/docs/typescript"],

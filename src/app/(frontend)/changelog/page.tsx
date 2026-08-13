@@ -1,6 +1,6 @@
 import { FutureBand, FuturePage } from "@/components/marketing/future19-page";
 
-export const metadata = { title: "Changelog", description: "Product updates and release notes from the Tracify team.", alternates: { canonical: "/changelog" } };
+export const metadata = { title: "Tracify product changelog and release notes", description: "Review meaningful Tracify product changes across agent tracing, evaluations, runtime controls, dashboards, and developer workflows.", alternates: { canonical: "/changelog" } };
 
 const changes = [
   { date: "August 2026", code: "26.08", title: "The operating record expands", items: ["Future 19 visual system promoted across the public product story.", "Better Auth migration with secure social and password flows.", "Sessions, evaluations, prompts, datasets, and release workflows connected."] },

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { FutureAction, FutureBand, FuturePage } from "@/components/marketing/future19-page";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  title: "Contact the Tracify engineering team",
   description: "Talk to Tracify about agent observability, runtime control, and enterprise deployment.",
   alternates: { canonical: "/contact" },
 };

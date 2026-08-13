@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Security",
+  title: "AI agent telemetry security practices",
   description: "Learn how Tracify protects AI agent telemetry with encryption, project isolation, access controls, and incident response practices.",
   alternates: { canonical: "/security" },
 };

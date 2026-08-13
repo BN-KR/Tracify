@@ -3,8 +3,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of service",
-  description: "Tracify terms of service.",
+  title: "Tracify service terms and conditions",
+  description: "Read the Tracify terms governing account use, service limits, billing, acceptable conduct, warranties, and responsibility.",
   alternates: { canonical: "/terms" },
 };
 

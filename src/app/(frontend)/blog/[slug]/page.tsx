@@ -42,6 +42,7 @@ export async function generateMetadata({
     openGraph: {
       title: metaTitle,
       description: metaDescription,
+      url: post.seo?.canonicalUrl || `/blog/${slug}`,
       type: "article",
       publishedTime: getPostDate(post),
       authors: post.author ? [post.author] : undefined,

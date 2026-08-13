@@ -1127,3 +1127,10 @@
 - Removed the unsupported `Host` directive from `/robots.txt` after Google Search Console correctly reported it as ignored by Googlebot. Canonical-host selection remains enforced by the bare-domain redirect, `metadataBase`, canonical tags, and sitemap URLs.
 - Diagnosed the production `robots.txt` 404: Next.js requires `robots.ts` in the root App Router directory, but it was nested under the `(frontend)` route group and omitted from Vercel's build output.
 - Moved the metadata route to `src/app/robots.ts`; `npm run build` passed and explicitly emitted static `/robots.txt`. PR #4 merged to `main` and production deployment `dpl_BQ1D2JYfFkcp771WcRnYP5BVsJ7f` is Ready; live `/robots.txt` and `/sitemap.xml` return HTTP 200.
+
+## Ahrefs SEO remediation (2026-08-14)
+- The 2026-08-08 Ahrefs crawl predates the canonical-host, sitemap, product-page, and blog SEO changes. A fresh crawl of all 44 production sitemap URLs found no sitemap redirects, broken internal links, redirecting internal links, non-200 sitemap pages, or canonical mismatches.
+- Added a semantic homepage H1, complete `og:url` values for blog articles, healthier public titles/descriptions, explicit `noindex` metadata for auth/onboarding/dashboard/checkout utility routes, and deeper copy on all four use-case pages flagged for thin content.
+- Added `npm run test:seo` to crawl rendered sitemap pages, metadata, headings, canonicals, social cards, internal destinations, duplicate canonicals, and indexable pages omitted from the sitemap.
+- Added a root IndexNow verification key plus `npm run seo:indexnow`; submission remains a post-production-deploy step because the key must be live on the canonical host first.
+- HTTP-to-HTTPS redirects are intentional. Vercel currently sends bare HTTP through `http apex -> https apex -> https www`; internal links and sitemap URLs point directly to canonical HTTPS `www` pages and do not enter that chain.

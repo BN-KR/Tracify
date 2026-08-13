@@ -2,41 +2,49 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FutureAction, FutureBand, FuturePage } from "@/components/marketing/future19-page";
 
-const docPages: Record<string, { title: string; description: string }> = {
+const docPages: Record<string, { title: string; metaTitle?: string; description: string }> = {
   index: {
     title: "Documentation",
     description: "Learn how to install the SDK and send your first span.",
   },
   python: {
     title: "Python SDK",
-    description: "Instrument your Python agents with a single decorator.",
+    metaTitle: "Python SDK for AI agent tracing",
+    description: "Install the Tracify Python SDK, instrument agent functions with a decorator, and send spans, sessions, costs, and model metadata.",
   },
   typescript: {
     title: "TypeScript SDK",
-    description: "Trace Node.js and Next.js agent workflows with the TypeScript SDK.",
+    metaTitle: "TypeScript SDK for AI agent tracing",
+    description: "Trace Node.js and Next.js agent workflows with the Tracify TypeScript SDK, including spans, sessions, models, tools, and prompt versions.",
   },
   api: {
     title: "API Reference",
-    description: "Ingest spans directly from custom runtimes using the tracify API.",
+    metaTitle: "AI agent tracing ingestion API reference",
+    description: "Send authenticated agent spans from custom runtimes to the Tracify ingestion and OpenTelemetry endpoints with the supported payload fields.",
   },
   prompts: {
     title: "Prompt deployment",
+    metaTitle: "Versioned prompt deployment documentation",
     description: "Resolve the labeled prompt version for an environment at runtime without redeploying your agent.",
   },
   evaluation: {
     title: "Evaluation Engine",
+    metaTitle: "AI agent evaluation engine documentation",
     description: "Score live traces and offline datasets with judges, deterministic rules, reviewers, regression gates, and monitors.",
   },
   lifecycle: {
     title: "AI engineering lifecycle",
+    metaTitle: "AI engineering lifecycle documentation",
     description: "Move from production traces to measured improvements and gated deployment in one workflow.",
   },
   integrations: {
     title: "Integrations",
+    metaTitle: "AI agent observability integrations",
     description: "Connect OpenAI, Anthropic, LangChain, LlamaIndex, and any OpenTelemetry-instrumented runtime.",
   },
   "self-hosting": {
     title: "Self-hosting",
+    metaTitle: "Self-hosting Tracify infrastructure",
     description: "Run the Tracify web application and connect it to your own Convex, Tinybird, Better Auth, and provider infrastructure.",
   },
 };
@@ -95,7 +103,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const docKey = slug?.[0] || "index";
   const page = docPages[docKey];
   if (!page) return {};
-  return { title: page.title, description: page.description, alternates: { canonical: docKey === "index" ? "/docs" : `/docs/${docKey}` } };
+  return { title: page.metaTitle || page.title, description: page.description, alternates: { canonical: docKey === "index" ? "/docs" : `/docs/${docKey}` } };
 }
 
 export default async function DocsPage({
