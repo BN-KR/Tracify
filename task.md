@@ -670,3 +670,10 @@
 - [x] Replace the oversized feature layout with a restrained responsive bento grid.
 - [x] Complete production build and responsive layout-contract verification.
 - [x] Commit, push, and run live checks.
+
+# Interactive Markdoc authoring rule — 2026-08-13
+
+- [x] Define when to use trace/evaluation demos, editable code sandboxes, focused widgets, or static prose.
+- [x] Require centralized validated Markdoc tags and accessible isolated React components.
+- [x] Update the future-agent skill, quality bar, publishing guide, and repository rules.
+- [x] Validate the skill package and content contract.

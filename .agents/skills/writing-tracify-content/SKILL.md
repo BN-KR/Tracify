@@ -15,8 +15,9 @@ Create useful, accurate content and place it where Tracify actually consumes it.
 4. For a new blog or internal document, copy the matching file from `assets/`. Preserve existing frontmatter and publication state when editing.
 5. Draft using the applicable criteria in `references/quality-bar.md`. Prefer concrete explanations, runnable examples, explicit prerequisites, and honest limitations.
 6. For a new or materially edited blog post, inspect published slugs and place at least two truthful links to distinct posts inside explanatory sentences. Use descriptive topic words as anchors; targets must exist and be published. Typo-only edits do not require retrofitting.
-7. Add meaningful image alt text. Put blog media in `public/media`; use `/media/<filename>` URLs.
-8. Review the rendered result, not only the source. Verify headings, code, links, mobile readability, metadata, and draft privacy.
+7. For a new post, read `references/interactive-content.md`. Add the one interaction that materially improves learning—trace/evaluation demo, editable code sandbox, or focused widget—or keep the article static when none helps.
+8. Add meaningful image alt text. Put blog media in `public/media`; use `/media/<filename>` URLs.
+9. Review the rendered result, not only the source. Verify headings, code, links, interaction accessibility, mobile readability, metadata, and draft privacy.
 
 ## Content Contract
 
@@ -30,6 +31,7 @@ Create useful, accurate content and place it where Tracify actually consumes it.
 ## Non-negotiable Rules
 
 - Keep blog bodies in CommonMark/Markdoc, never MDX or raw JSX.
+- Implement interactive content only as centralized, validated Markdoc tags with mapped React components; never add one-off route parsing or unsafe server-side code execution.
 - Keep `draft: true` private. Change it only when the user explicitly requests publication.
 - Never fabricate customers, benchmarks, compatibility, security posture, roadmap dates, or product behavior.
 - Never present code as runnable until checked against the current implementation and package names.

@@ -24,6 +24,8 @@ Use a strong explanatory arc:
 
 For new or materially edited posts, include at least two distinct contextual links to other published Tracify articles when eligible targets exist. Anchor the link in words that name the target topic, distribute links through explanatory prose, and confirm every `/blog/<slug>` target exists and is public. Do not use a standalone SEO link list, self-links, raw URLs, `click here`, `read more`, or `Related guide`.
 
+For each new post, decide whether reader-controlled state makes the central lesson clearer. Use a trace/evaluation demo for execution reasoning, editable sandboxed code for implementation learning, or a focused calculator/checklist/explorer for operational decisions. One purposeful interaction is better than several distractions; keep prose sufficient when interaction adds no learning value.
+
 Prefer specific failure modes, decisions, and operating consequences. Distinguish fact, recommendation, and opinion. Use headings every few paragraphs, but do not fragment the piece into shallow listicles.
 
 ## Documentation
@@ -62,3 +64,4 @@ Verify:
 - SEO metadata is specific and non-duplicative.
 - Draft/public status matches explicit intent.
 - The piece works on a narrow viewport and contains no broken overflow.
+- Any interaction has instructions, useful defaults, keyboard access, accessible labels, a static explanation/fallback, deterministic local behavior, and no secret or production-data access.
