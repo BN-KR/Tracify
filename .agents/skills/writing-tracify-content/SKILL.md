@@ -14,8 +14,9 @@ Create useful, accurate content and place it where Tracify actually consumes it.
 3. State the reader, their job, and the outcome in one sentence. Build an outline where every section advances that outcome.
 4. For a new blog or internal document, copy the matching file from `assets/`. Preserve existing frontmatter and publication state when editing.
 5. Draft using the applicable criteria in `references/quality-bar.md`. Prefer concrete explanations, runnable examples, explicit prerequisites, and honest limitations.
-6. Add descriptive links and meaningful image alt text. Put blog media in `public/media`; use `/media/<filename>` URLs.
-7. Review the rendered result, not only the source. Verify headings, code, links, mobile readability, metadata, and draft privacy.
+6. For a new or materially edited blog post, inspect published slugs and place at least two truthful links to distinct posts inside explanatory sentences. Use descriptive topic words as anchors; targets must exist and be published. Typo-only edits do not require retrofitting.
+7. Add meaningful image alt text. Put blog media in `public/media`; use `/media/<filename>` URLs.
+8. Review the rendered result, not only the source. Verify headings, code, links, mobile readability, metadata, and draft privacy.
 
 ## Content Contract
 
@@ -33,6 +34,7 @@ Create useful, accurate content and place it where Tracify actually consumes it.
 - Never fabricate customers, benchmarks, compatibility, security posture, roadmap dates, or product behavior.
 - Never present code as runnable until checked against the current implementation and package names.
 - Keep one canonical source for each fact; link instead of duplicating volatile procedures across files.
+- Put internal links in natural prose. Never use `click here`, `read more`, `Related guide`, a bare URL, a self-link, or a draft/missing target.
 - Preserve Tracify terminology and lowercase product name where the surrounding copy uses it.
 
 ## Verification

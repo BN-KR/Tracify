@@ -54,6 +54,8 @@ Reliable evaluation joins representative tasks, explicit criteria, and release d
 
 ## A working definition of AI agent evaluation
 
+A practical evaluation program depends on a deliberate [AI agent testing strategy](/blog/ai-agent-testing-unit-tests-production-evals), while its scores become actionable only when paired with [LLM observability metrics](/blog/llm-observability-metrics-that-matter).
+
 AI agent evaluation is the discipline of recording and interpreting enough execution evidence to understand how an AI-enabled workflow behaved, whether it met its intended outcome, and what should happen next. It includes technical telemetry, but it is broader than logging model requests. The unit that people care about is usually an end-to-end task: a user request, a retrieval step, one or more model calls, a tool action, a retry or approval, and a final result. The evidence must keep those events connected without pretending that one metric can stand in for the whole task.
 
 This definition makes room for different roles. An engineer needs causally useful context when investigating a failure. A product owner needs a stable way to see whether the workflow is helping users. A security or risk reviewer needs proof that boundaries and approvals were honored. An engineering leader needs a release decision that is based on representative behavior rather than a single memorable transcript. All of them use the same underlying story of a run, but they ask different questions of it.
@@ -205,15 +207,7 @@ Leaders should ask for decision-quality artifacts rather than a larger dashboard
 - Inspect criterion-level regressions, not only averages.
 - Keep failed cases in the next evaluation set.
 
-## Related reading and implementation resources
-
-This topic is strongest when it is connected to adjacent operating practices. Read the related guides below as a sequence, not as interchangeable keywords: each addresses a different decision in the lifecycle.
-
-[Related guide](/blog/ai-agent-testing-unit-tests-production-evals)
-
-[Related guide](/blog/llm-observability-metrics-that-matter)
-
-[Related guide](/blog/building-production-ready-ai-agents)
+## Explore in Tracify
 
 [Explore the relevant Tracify workflow](/product/failures)
 

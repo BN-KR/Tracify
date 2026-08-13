@@ -22,6 +22,8 @@ Use a strong explanatory arc:
 5. Examples use Tracify concepts naturally without turning the article into an advertisement.
 6. Ending gives a practical next action rather than repeating the introduction.
 
+For new or materially edited posts, include at least two distinct contextual links to other published Tracify articles when eligible targets exist. Anchor the link in words that name the target topic, distribute links through explanatory prose, and confirm every `/blog/<slug>` target exists and is public. Do not use a standalone SEO link list, self-links, raw URLs, `click here`, `read more`, or `Related guide`.
+
 Prefer specific failure modes, decisions, and operating consequences. Distinguish fact, recommendation, and opinion. Use headings every few paragraphs, but do not fragment the piece into shallow listicles.
 
 ## Documentation
@@ -55,6 +57,7 @@ Verify:
 - Code is syntactically valid and internally consistent.
 - Terms, route names, environment variables, and commands match the repository.
 - Internal links resolve and related-post slugs exist.
+- Blog body links pass `npm run test:content`: two distinct published targets, descriptive anchors, and no self/missing/draft targets.
 - Images exist, render at useful dimensions, and have correct alt text.
 - SEO metadata is specific and non-duplicative.
 - Draft/public status matches explicit intent.

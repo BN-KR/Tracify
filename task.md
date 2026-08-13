@@ -660,3 +660,13 @@
 - [x] Redesign the article author signature for the light editorial layout.
 - [x] Pass content tests, focused lint, TypeScript, diff hygiene, and production build.
 - [x] Publish the migration to `main`, verify Vercel, and restart localhost.
+
+# Blog discovery and internal linking — 2026-08-13
+
+- [x] Replace generic related-guide blocks with contextual anchored links across all 10 posts.
+- [x] Add automated validation for distinct published targets and descriptive anchors.
+- [x] Update the writing skill and template for future agents.
+- [x] Remove the duplicate blog-page newsletter and retain the global footer signup.
+- [x] Replace the oversized feature layout with a restrained responsive bento grid.
+- [x] Complete production build and responsive layout-contract verification.
+- [ ] Commit, push, and run live checks.

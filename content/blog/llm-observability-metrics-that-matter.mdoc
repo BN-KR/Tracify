@@ -54,6 +54,8 @@ The right metrics expose quality, speed, cost, and failure risk in a form that c
 
 ## A working definition of LLM observability metrics
 
+Metrics are useful when they extend [AI agent observability](/blog/ai-agent-observability-complete-guide) and make tradeoffs such as [reducing LLM costs without hurting quality](/blog/reduce-llm-costs-without-hurting-quality) visible at the task level.
+
 LLM observability metrics is the discipline of recording and interpreting enough execution evidence to understand how an AI-enabled workflow behaved, whether it met its intended outcome, and what should happen next. It includes technical telemetry, but it is broader than logging model requests. The unit that people care about is usually an end-to-end task: a user request, a retrieval step, one or more model calls, a tool action, a retry or approval, and a final result. The evidence must keep those events connected without pretending that one metric can stand in for the whole task.
 
 This definition makes room for different roles. An engineer needs causally useful context when investigating a failure. A product owner needs a stable way to see whether the workflow is helping users. A security or risk reviewer needs proof that boundaries and approvals were honored. An engineering leader needs a release decision that is based on representative behavior rather than a single memorable transcript. All of them use the same underlying story of a run, but they ask different questions of it.
@@ -205,15 +207,7 @@ Leaders should ask for decision-quality artifacts rather than a larger dashboard
 - Inspect metric disagreements with sampled runs.
 - Remove metrics that do not trigger an action.
 
-## Related reading and implementation resources
-
-This topic is strongest when it is connected to adjacent operating practices. Read the related guides below as a sequence, not as interchangeable keywords: each addresses a different decision in the lifecycle.
-
-[Related guide](/blog/ai-agent-observability-complete-guide)
-
-[Related guide](/blog/reduce-llm-costs-without-hurting-quality)
-
-[Related guide](/blog/ai-agent-evaluation-practical-guide)
+## Explore in Tracify
 
 [Explore the relevant Tracify workflow](/product/cost-dashboard)
 

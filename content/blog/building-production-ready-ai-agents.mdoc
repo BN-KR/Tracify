@@ -54,6 +54,8 @@ Production readiness is an operating capability: teams need measurable outcomes,
 
 ## A working definition of production-ready AI agents
 
+Production readiness depends on [AI agent observability](/blog/ai-agent-observability-complete-guide) for evidence and an explicit [AI agent reliability strategy](/blog/ai-agent-reliability-failures-retries-guardrails) for bounded failure handling.
+
 production-ready AI agents is the discipline of recording and interpreting enough execution evidence to understand how an AI-enabled workflow behaved, whether it met its intended outcome, and what should happen next. It includes technical telemetry, but it is broader than logging model requests. The unit that people care about is usually an end-to-end task: a user request, a retrieval step, one or more model calls, a tool action, a retry or approval, and a final result. The evidence must keep those events connected without pretending that one metric can stand in for the whole task.
 
 This definition makes room for different roles. An engineer needs causally useful context when investigating a failure. A product owner needs a stable way to see whether the workflow is helping users. A security or risk reviewer needs proof that boundaries and approvals were honored. An engineering leader needs a release decision that is based on representative behavior rather than a single memorable transcript. All of them use the same underlying story of a run, but they ask different questions of it.
@@ -205,15 +207,7 @@ Leaders should ask for decision-quality artifacts rather than a larger dashboard
 - Define on-call, fallback, and rollback responsibilities.
 - Review adoption, cost, safety, and reliability after launch.
 
-## Related reading and implementation resources
-
-This topic is strongest when it is connected to adjacent operating practices. Read the related guides below as a sequence, not as interchangeable keywords: each addresses a different decision in the lifecycle.
-
-[Related guide](/blog/ai-agent-observability-complete-guide)
-
-[Related guide](/blog/ai-agent-reliability-failures-retries-guardrails)
-
-[Related guide](/blog/ai-agent-evaluation-practical-guide)
+## Explore in Tracify
 
 [Explore the relevant Tracify workflow](/docs/typescript)
 

@@ -23,6 +23,8 @@ seo:
 
 A retry is useful only when the next attempt has a meaningful chance of producing a different result. In production agent workflows, repeated attempts can otherwise hide the original failure while increasing latency and cost.
 
+Start with [LLM tracing](/blog/llm-tracing-explained) to preserve the attempt sequence, then use an [AI agent reliability strategy](/blog/ai-agent-reliability-failures-retries-guardrails) to define bounded recovery behavior.
+
 ## Reconstruct the decision path
 
 Start with the complete trace. Identify the first failed tool call, the condition that selected another attempt, and any state that changed between attempts.

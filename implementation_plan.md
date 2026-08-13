@@ -701,6 +701,14 @@ The single most important UI in the product.
 3. [completed] Run content tests, focused lint, TypeScript, diff hygiene, and production build.
 4. [completed] Commit, merge, push, verify Vercel, confirm no obsolete Payload variables remain, and restart localhost.
 
+# Blog discovery and internal linking — 2026-08-13
+
+1. [completed] Add a tested contextual internal-link contract.
+2. [completed] Replace generic link blocks with natural anchored links in all published articles.
+3. [completed] Pressure-test and update the future-agent writing skill and template.
+4. [completed] Build a restrained three/two/one-column bento grid and remove the page-level newsletter.
+5. [in progress] Production and responsive layout-contract verification pass; publish and live verification remain.
+
 # Root robots.txt route — 2026-08-13
 
 1. [completed] Move `robots.ts` from the `(frontend)` route group to the App Router root.
