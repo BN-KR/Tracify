@@ -226,10 +226,7 @@ export function DashboardSidebar({
           external: true,
         },
         ...(canAccessContent
-          ? [
-              { title: "Content", icon: FileText, href: "/cms" },
-              { title: "Admin Library", icon: ShieldCheck, href: "/admin/library" },
-            ]
+          ? [{ title: "Admin", icon: ShieldCheck, href: "/admin" }]
           : []),
       ],
     },
