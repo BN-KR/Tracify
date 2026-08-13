@@ -677,3 +677,31 @@
 - [x] Require centralized validated Markdoc tags and accessible isolated React components.
 - [x] Update the future-agent skill, quality bar, publishing guide, and repository rules.
 - [x] Validate the skill package and content contract.
+
+# Agent Git workflow policy — 2026-08-13
+
+- [x] Record branch, pull-request, direct-push, verification, and staging rules in root `AGENTS.md`.
+- [x] Preserve scratch artifacts and unrelated user changes outside published scope.
+# llms.txt and SEO audit — 2026-08-13
+
+- [x] Audit canonical, robots, sitemap, metadata, and structured-data coverage.
+- [x] Add a concise root `llms.txt` containing only canonical public resources.
+- [x] Add a regression test and future-agent maintenance rules.
+- [x] Run content tests and a production build.
+# Product page depth and SEO hardening — 2026-08-13
+
+- [x] Replace the nine repeated placeholder product pages with substantial feature-specific content.
+- [x] Give each route a distinct restrained visual instrument while preserving the Tracify design language.
+- [x] Ground product claims in the implemented trace, analytics, runtime policy, evaluation, alerting, and reporting code.
+- [x] Replace false sitemap freshness dates with actual blog freshness or omitted dates.
+- [x] Add product and blog breadcrumbs plus richer BlogPosting identity and publisher fields.
+- [x] Verify focused lint, content tests, desktop/mobile rendering, accessibility semantics, and browser console output.
+- [x] Run the final production build and publish the branch update.
+
+# Vercel preview deployment recovery — 2026-08-13
+
+- [x] Inspect the failed branch deployment and isolate the Vercel build error.
+- [x] Confirm Preview lacked the two public Convex endpoints required at build time.
+- [x] Add isolated development Convex endpoints to Vercel Preview without exposing production data.
+- [x] Redeploy commit `45780f6` and verify Vercel reaches `READY`.
+- [x] Update the staging runbook with both required variables and the current project name.

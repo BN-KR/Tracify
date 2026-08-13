@@ -68,18 +68,37 @@ function formatDate(dateString: string) {
   });
 }
 
+function absoluteUrl(value: string) {
+  return value.startsWith("http") ? value : `https://www.tracify.tech${value}`;
+}
+
 function jsonLd(post: BlogPost) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.excerpt,
-    datePublished: getPostDate(post),
-    author: post.author
-      ? { "@type": "Person", name: post.author }
-      : { "@type": "Organization", name: "Tracify" },
-    image: post.heroImage?.og || post.heroImage?.src || undefined,
-  };
+  const canonical = post.seo?.canonicalUrl || `https://www.tracify.tech/blog/${post.slug}`;
+  const image = post.heroImage?.og || post.heroImage?.src;
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: post.title,
+      description: post.excerpt,
+      datePublished: getPostDate(post),
+      mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
+      author: post.author === "Tracify Team"
+        ? { "@type": "Organization", name: "Tracify", url: "https://www.tracify.tech" }
+        : { "@type": "Person", name: post.author },
+      publisher: { "@type": "Organization", name: "Tracify", url: "https://www.tracify.tech" },
+      image: image ? absoluteUrl(image) : undefined,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Tracify", item: "https://www.tracify.tech/" },
+        { "@type": "ListItem", position: 2, name: "Blog", item: "https://www.tracify.tech/blog" },
+        { "@type": "ListItem", position: 3, name: post.title, item: canonical },
+      ],
+    },
+  ];
 }
 
 export default async function BlogPostPage({
@@ -100,7 +119,7 @@ export default async function BlogPostPage({
       <ProgressBar />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(post)) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(post)).replace(/</g, "\\u003c") }}
       />
       <div className="mx-auto max-w-[1240px] border-x border-black">
         <Link

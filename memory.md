@@ -1,5 +1,26 @@
 # Project Memory
 
+## 2026-08-13 Vercel preview deployment recovery
+- The `codex/llms-seo` previews failed after compilation and TypeScript because Vercel Preview lacked `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL`; Better Auth failed during page-data collection for `/api/evaluation/run`.
+- Added both public endpoints to Vercel Preview using the isolated `diligent-dragon-604` development Convex deployment, avoiding production data access from branch previews.
+- Redeployed commit `45780f6` as deployment `dpl_F8Uk4ryBBfiDiJXvpc3CHe7PmcfS`; it completed the Next.js build and reached `READY` at the branch alias.
+- Updated `docs/vercel-staging.md` to name the current `tracify` Vercel project and require both Convex public endpoints for Preview.
+
+## 2026-08-13 Product page depth and SEO hardening
+- Replaced the shared thin product-page template with nine substantial, source-backed pages for Trace Viewer, Cost Dashboard, Tool Calls, LLM Calls, Failure Analysis, Project Reports, Runtime Control, Evaluation Engine, and the AI Engineering Lifecycle.
+- Each route now has a feature-specific working-surface visual: trace waterfall, cost ledger, tool payload, model-call accounting, failure stack, report sheet, policy controls, evaluation matrix, or lifecycle rail. The pages share the Future 19 palette and typography but vary hero alignment, section ordering, workflow geometry, and content.
+- The landing page was not changed.
+- Sitemap entries no longer claim that unchanged static pages were modified at every build; the blog index uses the newest published post date and other static routes omit unknown modification dates.
+- Blog JSON-LD now includes canonical page identity, publisher data, absolute images, and breadcrumbs. Product pages include BreadcrumbList JSON-LD.
+- All nine product routes rendered at desktop and 375px with no horizontal overflow. Browser structure, canonical/JSON-LD output, and console output were checked; a list-key warning found during QA was fixed.
+- Verification passed: focused ESLint, 15 content tests, diff hygiene, and the Next.js production build with 80 generated pages.
+
+## 2026-08-13 llms.txt and SEO audit
+- Added `public/llms.txt` as a concise, curated entry point for agents, using canonical public Tracify URLs and explicit availability caveats.
+- Added a regression contract to keep the file canonical, deduplicated, concise, and connected to core public resources; it runs with `npm run test:content`.
+- Future agents must update the file when core public documentation or product routes change and must not list drafts, authenticated routes, secrets, or speculative capabilities.
+- `llms.txt` is maintained for agent discovery only. Google states that it neither helps nor harms Google Search visibility; canonical crawlable pages, useful original content, page experience, sitemap coverage, and valid structured data remain the SEO priorities.
+
 ## 2026-08-13 Tracify content-authoring skill
 - Added the project-local `writing-tracify-content` skill for drafting, editing, reviewing, storing, and publishing Tracify blogs and documentation.
 - The skill distinguishes live storage surfaces: public blogs in `content/blog/*.mdoc`, blog media in `public/media`, internal engineering Markdown in `docs/`, public `/docs` content in its current TypeScript registry, and dashboard reference content in `docs-viewer.tsx`.
@@ -1101,6 +1122,7 @@
 - The blog index uses a restrained bento grid: the newest post spans two of three desktop columns with capped media, standard cards retain their own images, tablet uses two columns, and mobile uses one. The page-level newsletter was removed; only the global footer signup remains.
 - Blog discovery and internal linking shipped in `1717d19`; production deployment `tracify-h15vc5vcq-tracify-tech.vercel.app` reached Ready. Live checks confirmed `/blog` and a representative article return 200, all 10 cards render, the duplicate newsletter is absent, and contextual links are present.
 - Future posts must choose interaction by reader job: trace/evaluation demos for execution reasoning, editable sandboxed code for implementation learning, focused calculators/checklists/explorers for operational decisions, or static prose when interaction adds no value. Interactive content remains centralized Markdoc tags mapped to accessible leaf React components; arbitrary MDX/JSX, server-side code execution, secrets, and production-data access are prohibited.
+- Future Git work defaults to a `codex/<description>` branch and draft PR. Features and higher-risk application changes require PRs; direct `main` pushes are reserved for explicit user-approved, low-risk content fixes after checks pass. Agents must inspect staged scope and exclude scratch or unrelated changes.
 ## Root robots.txt route (2026-08-13)
 - Removed the unsupported `Host` directive from `/robots.txt` after Google Search Console correctly reported it as ignored by Googlebot. Canonical-host selection remains enforced by the bare-domain redirect, `metadataBase`, canonical tags, and sitemap URLs.
 - Diagnosed the production `robots.txt` 404: Next.js requires `robots.ts` in the root App Router directory, but it was nested under the `(frontend)` route group and omitted from Vercel's build output.

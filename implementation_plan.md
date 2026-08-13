@@ -716,6 +716,12 @@ The single most important UI in the product.
 3. [completed] Update the authoring skill, quality bar, publishing README, and AGENTS rules.
 4. [completed] Validate instructions, 14 content/UI tests, and the 80-page production build.
 
+# Agent Git workflow policy — 2026-08-13
+
+1. [completed] Make `codex/<description>` plus draft PR the default workflow.
+2. [completed] Limit direct `main` pushes to explicit, low-risk content fixes with passing checks.
+3. [completed] Require staged-diff review and exclusion of scratch or unrelated changes.
+
 # Root robots.txt route — 2026-08-13
 
 1. [completed] Move `robots.ts` from the `(frontend)` route group to the App Router root.
@@ -733,3 +739,24 @@ The single most important UI in the product.
 1. [completed] Consolidate the dashboard's private navigation under one Admin entry.
 2. [completed] Add the access-controlled `/admin` choice page for the library and Payload CMS.
 3. [completed] Verify the production deployment and live authorized flow.
+# llms.txt and SEO audit — 2026-08-13
+
+1. [completed] Compare the public discovery surface with the llms.txt proposal and current Google guidance.
+2. [completed] Add a curated `/llms.txt` with canonical documentation, product, guide, and policy links.
+3. [completed] Add a content contract test and repository maintenance rules.
+4. [completed] Verify content tests, the production build, and staged scope.
+# Product page depth and SEO hardening — 2026-08-13
+
+1. [completed] Audit all product routes, source-backed capabilities, and Next.js metadata conventions.
+2. [completed] Use comparable observability sites to inform information architecture without copying claims or visual design.
+3. [completed] Build nine feature-specific product narratives and visual instruments without changing the landing page.
+4. [completed] Correct sitemap freshness and enrich blog/product structured data.
+5. [completed] Complete production verification, record the result, and publish the branch.
+
+# Vercel preview deployment recovery — 2026-08-13
+
+1. [completed] Read the failed deployment logs and identify the missing Preview configuration.
+2. [completed] Compare Vercel Preview variable names with the application auth configuration.
+3. [completed] Configure `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` for Preview using the isolated development deployment.
+4. [completed] Redeploy the exact failed commit and verify build completion plus final `READY` state.
+5. [completed] Record the durable staging requirement in repository documentation.

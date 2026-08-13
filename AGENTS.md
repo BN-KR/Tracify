@@ -81,6 +81,14 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 - **Marketing product feature pages** (`/product/[feature]`) are placeholders — they show "under construction" copy. Don't expect real content there.
 - **SDKs** (`packages/ts-sdk/`, `packages/python-sdk/`) are built but not yet published to npm/PyPI.
 
+## Git workflow
+
+- Default to a `codex/<description>` branch and a draft pull request.
+- Use pull requests for features, backend or schema changes, authentication, billing, dependencies, migrations, and broad UI work.
+- Direct pushes to `main` are allowed only for small, low-risk content fixes after required checks pass.
+- Never push directly to `main` unless the user explicitly requests it.
+- Before publishing, inspect the staged diff and exclude unrelated scratch files or user changes.
+
 ## Markdoc Blog Rules
 - **Required skill:** Read `.agents/skills/writing-tracify-content/SKILL.md` before writing, editing, reviewing, storing, or publishing any blog post or documentation.
 - Blog content lives exclusively in `content/blog/*.mdoc`; do not add a database or CMS fallback.
@@ -92,3 +100,8 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 - Keep blog data access centralized in `src/lib/markdoc-blog.ts` and rendering centralized in `src/components/blog/markdoc-rich-text.tsx`. Blog pages, RSS, sitemap, metadata, and related-post logic must consume that shared content layer.
 - Before completing any blog/content change, run `npm run test:content` and `npm run build`. Duplicate slugs, malformed frontmatter, invalid Markdoc, missing required fields, or accidental draft exposure are release blockers.
 - Publishing workflow documentation lives in `content/blog/README.md`; update it whenever the authoring contract changes.
+
+## AI discovery
+- Keep the curated site guide at `public/llms.txt`. Use only canonical, public, non-draft URLs and concise descriptions grounded in the linked pages.
+- Update `public/llms.txt` when core documentation routes or major public product surfaces change. Do not list authenticated routes, unpublished content, secrets, or speculative capabilities.
+- Treat `llms.txt` as an emerging agent-discovery convention, not a replacement for crawlable HTML, canonical metadata, structured data, `robots.txt`, or `sitemap.xml`.
