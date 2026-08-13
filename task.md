@@ -688,3 +688,12 @@
 - [x] Add a concise root `llms.txt` containing only canonical public resources.
 - [x] Add a regression test and future-agent maintenance rules.
 - [x] Run content tests and a production build.
+# Product page depth and SEO hardening — 2026-08-13
+
+- [x] Replace the nine repeated placeholder product pages with substantial feature-specific content.
+- [x] Give each route a distinct restrained visual instrument while preserving the Tracify design language.
+- [x] Ground product claims in the implemented trace, analytics, runtime policy, evaluation, alerting, and reporting code.
+- [x] Replace false sitemap freshness dates with actual blog freshness or omitted dates.
+- [x] Add product and blog breadcrumbs plus richer BlogPosting identity and publisher fields.
+- [x] Verify focused lint, content tests, desktop/mobile rendering, accessibility semantics, and browser console output.
+- [x] Run the final production build and publish the branch update.

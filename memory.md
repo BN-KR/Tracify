@@ -1,5 +1,14 @@
 # Project Memory
 
+## 2026-08-13 Product page depth and SEO hardening
+- Replaced the shared thin product-page template with nine substantial, source-backed pages for Trace Viewer, Cost Dashboard, Tool Calls, LLM Calls, Failure Analysis, Project Reports, Runtime Control, Evaluation Engine, and the AI Engineering Lifecycle.
+- Each route now has a feature-specific working-surface visual: trace waterfall, cost ledger, tool payload, model-call accounting, failure stack, report sheet, policy controls, evaluation matrix, or lifecycle rail. The pages share the Future 19 palette and typography but vary hero alignment, section ordering, workflow geometry, and content.
+- The landing page was not changed.
+- Sitemap entries no longer claim that unchanged static pages were modified at every build; the blog index uses the newest published post date and other static routes omit unknown modification dates.
+- Blog JSON-LD now includes canonical page identity, publisher data, absolute images, and breadcrumbs. Product pages include BreadcrumbList JSON-LD.
+- All nine product routes rendered at desktop and 375px with no horizontal overflow. Browser structure, canonical/JSON-LD output, and console output were checked; a list-key warning found during QA was fixed.
+- Verification passed: focused ESLint, 15 content tests, diff hygiene, and the Next.js production build with 80 generated pages.
+
 ## 2026-08-13 llms.txt and SEO audit
 - Added `public/llms.txt` as a concise, curated entry point for agents, using canonical public Tracify URLs and explicit availability caveats.
 - Added a regression contract to keep the file canonical, deduplicated, concise, and connected to core public resources; it runs with `npm run test:content`.

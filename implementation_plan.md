@@ -745,3 +745,10 @@ The single most important UI in the product.
 2. [completed] Add a curated `/llms.txt` with canonical documentation, product, guide, and policy links.
 3. [completed] Add a content contract test and repository maintenance rules.
 4. [completed] Verify content tests, the production build, and staged scope.
+# Product page depth and SEO hardening — 2026-08-13
+
+1. [completed] Audit all product routes, source-backed capabilities, and Next.js metadata conventions.
+2. [completed] Use comparable observability sites to inform information architecture without copying claims or visual design.
+3. [completed] Build nine feature-specific product narratives and visual instruments without changing the landing page.
+4. [completed] Correct sitemap freshness and enrich blog/product structured data.
+5. [completed] Complete production verification, record the result, and publish the branch.
