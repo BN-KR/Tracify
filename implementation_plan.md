@@ -707,7 +707,7 @@ The single most important UI in the product.
 2. [completed] Replace generic link blocks with natural anchored links in all published articles.
 3. [completed] Pressure-test and update the future-agent writing skill and template.
 4. [completed] Build a restrained three/two/one-column bento grid and remove the page-level newsletter.
-5. [in progress] Production and responsive layout-contract verification pass; publish and live verification remain.
+5. [completed] Production and responsive layout-contract verification pass; commit `1717d19` is live and verified.
 
 # Root robots.txt route — 2026-08-13
 

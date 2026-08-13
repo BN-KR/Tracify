@@ -669,4 +669,4 @@
 - [x] Remove the duplicate blog-page newsletter and retain the global footer signup.
 - [x] Replace the oversized feature layout with a restrained responsive bento grid.
 - [x] Complete production build and responsive layout-contract verification.
-- [ ] Commit, push, and run live checks.
+- [x] Commit, push, and run live checks.

@@ -1099,6 +1099,7 @@
 - The linked `tracify` Vercel project has no environment variables, so there were no Payload-only variables to remove. Localhost was restarted from merged `main`, and the blog index and published article both returned HTTP 200.
 - Published articles require at least two distinct contextual links to other published posts when eligible targets exist. Generic `Related guide` blocks, self/draft/missing targets, bare URLs, `click here`, and `read more` fail `npm run test:content`.
 - The blog index uses a restrained bento grid: the newest post spans two of three desktop columns with capped media, standard cards retain their own images, tablet uses two columns, and mobile uses one. The page-level newsletter was removed; only the global footer signup remains.
+- Blog discovery and internal linking shipped in `1717d19`; production deployment `tracify-h15vc5vcq-tracify-tech.vercel.app` reached Ready. Live checks confirmed `/blog` and a representative article return 200, all 10 cards render, the duplicate newsletter is absent, and contextual links are present.
 ## Root robots.txt route (2026-08-13)
 - Removed the unsupported `Host` directive from `/robots.txt` after Google Search Console correctly reported it as ignored by Googlebot. Canonical-host selection remains enforced by the bare-domain redirect, `metadataBase`, canonical tags, and sitemap URLs.
 - Diagnosed the production `robots.txt` 404: Next.js requires `robots.ts` in the root App Router directory, but it was nested under the `(frontend)` route group and omitted from Vercel's build output.
