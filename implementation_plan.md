@@ -760,3 +760,10 @@ The single most important UI in the product.
 3. [completed] Configure `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` for Preview using the isolated development deployment.
 4. [completed] Redeploy the exact failed commit and verify build completion plus final `READY` state.
 5. [completed] Record the durable staging requirement in repository documentation.
+
+# SEO release guardrails — 2026-08-14
+
+1. [completed] Capture why commits pushed after PR #5 merged were absent from `main`.
+2. [completed] Define public-page SEO checks and explicit indexability rules.
+3. [completed] Define commit-ancestry, clean-tree, Vercel-project, production-alias, IndexNow, and Ahrefs verification gates.
+4. [completed] Register the checklist in `AGENTS.md` and durable project memory.

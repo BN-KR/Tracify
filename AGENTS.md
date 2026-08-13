@@ -89,6 +89,15 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 - Never push directly to `main` unless the user explicitly requests it.
 - Before publishing, inspect the staged diff and exclude unrelated scratch files or user changes.
 
+## SEO and production release guardrails
+
+- Read `docs/seo-release-checklist.md` before changing public routes, metadata, sitemap entries, robots rules, canonical URLs, social cards, redirects, or production deployment configuration.
+- Before merging, record the intended release commit and confirm every required commit is in the pull request head. A commit pushed after a pull request is merged is not part of `main`; open a follow-up pull request instead of assuming it shipped.
+- Before deploying, fetch `origin`, verify the intended commit is an ancestor of `origin/main`, and verify the deployment tree exactly matches `origin/main`. Never deploy a feature branch while describing it as the latest main release.
+- The production Vercel project is `tracify-tech/tracify`. Confirm `.vercel/project.json` names `tracify` before a CLI deployment. Deploy from a clean tracked tree or clean worktree so `scratch/`, logs, downloaded references, and unrelated user files are never uploaded.
+- A deployment is complete only after Vercel reports `Ready`, `https://www.tracify.tech` resolves to that deployment, and critical live routes return their expected status and metadata.
+- Submit IndexNow only after its verification key returns HTTP 200 from the canonical production host with the exact expected key. Then request a fresh Ahrefs crawl; never treat an older crawl as evidence for the new release.
+
 ## Markdoc Blog Rules
 - **Required skill:** Read `.agents/skills/writing-tracify-content/SKILL.md` before writing, editing, reviewing, storing, or publishing any blog post or documentation.
 - Blog content lives exclusively in `content/blog/*.mdoc`; do not add a database or CMS fallback.

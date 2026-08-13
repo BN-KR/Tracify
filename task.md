@@ -705,3 +705,10 @@
 - [x] Add isolated development Convex endpoints to Vercel Preview without exposing production data.
 - [x] Redeploy commit `45780f6` and verify Vercel reaches `READY`.
 - [x] Update the staging runbook with both required variables and the current project name.
+
+# SEO release guardrails — 2026-08-14
+
+- [x] Record the post-merge commit ancestry failure from PR #5.
+- [x] Add a mandatory public-page, merge, production deployment, IndexNow, and recrawl checklist for future agents.
+- [x] Point repository-wide agent instructions to the checklist.
+- [ ] Land SEO remediation commits `3474f98` and `191cbeb` through a follow-up pull request before claiming the audit fixes are live.
