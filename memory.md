@@ -1127,3 +1127,8 @@
 - Removed the unsupported `Host` directive from `/robots.txt` after Google Search Console correctly reported it as ignored by Googlebot. Canonical-host selection remains enforced by the bare-domain redirect, `metadataBase`, canonical tags, and sitemap URLs.
 - Diagnosed the production `robots.txt` 404: Next.js requires `robots.ts` in the root App Router directory, but it was nested under the `(frontend)` route group and omitted from Vercel's build output.
 - Moved the metadata route to `src/app/robots.ts`; `npm run build` passed and explicitly emitted static `/robots.txt`. PR #4 merged to `main` and production deployment `dpl_BQ1D2JYfFkcp771WcRnYP5BVsJ7f` is Ready; live `/robots.txt` and `/sitemap.xml` return HTTP 200.
+
+## SEO release ancestry and deployment guardrails (2026-08-14)
+- PR #5 merged branch state at `5e7807b`; later SEO commits `3474f98` and `191cbeb` were pushed after the merge and are not ancestors of `origin/main`.
+- Production deployment `dpl_GucMKe2AYetsPtixDMw1GMGJgGy6` correctly deployed exact main commit `f646ca7` and owns the canonical Tracify domains. The later IndexNow key remains absent because it is not in that commit.
+- Future agents must follow `docs/seo-release-checklist.md`: prove commit ancestry, deploy an exact clean `origin/main` tree to `tracify-tech/tracify`, verify canonical aliases, and submit IndexNow only after its key is live.
