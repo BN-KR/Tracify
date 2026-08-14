@@ -222,7 +222,7 @@ function DesktopPanel({
 function MobilePanel({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const { data: session } = authClient.useSession();
-  const [activeSection, setActiveSection] = useState<MenuName>("Product");
+  const [activeSection, setActiveSection] = useState<MenuName | null>(null);
 
   async function signOut() {
     await authClient.signOut({
@@ -248,7 +248,9 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
           >
             <button
               type="button"
-              onClick={() => setActiveSection(name)}
+              onClick={() =>
+                setActiveSection((current) => (current === name ? null : name))
+              }
               aria-expanded={expanded}
               aria-controls={`mobile-nav-${name.toLowerCase()}`}
               className="grid min-h-24 w-full grid-cols-[64px_1fr_32px] items-center gap-3 border-t border-black px-4 py-4 text-left focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px]"
