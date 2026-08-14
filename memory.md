@@ -1128,6 +1128,20 @@
 - Diagnosed the production `robots.txt` 404: Next.js requires `robots.ts` in the root App Router directory, but it was nested under the `(frontend)` route group and omitted from Vercel's build output.
 - Moved the metadata route to `src/app/robots.ts`; `npm run build` passed and explicitly emitted static `/robots.txt`. PR #4 merged to `main` and production deployment `dpl_BQ1D2JYfFkcp771WcRnYP5BVsJ7f` is Ready; live `/robots.txt` and `/sitemap.xml` return HTTP 200.
 
+## Page-specific redesign and mobile switchboard (2026-08-14)
+- The current redesign explicitly excludes the landing page, public blog, and public docs; those surfaces remain untouched until the owner asks otherwise.
+- The owner rejected applying one template across the site. Each route must use a composition shaped by its job while sharing only Tracify's paper, black, acid-yellow, pixel/mono, zero-radius identity.
+- The selected mobile **Section Switchboard** is implemented in `src/components/marketing/navbar.tsx`: large numbered accordion controls, 2x2 destination tiles, a dedicated Pricing tile, and a sticky account action replace the former 9px text-link list.
+- Browser verification passed at the 390px breakpoint: sections switch correctly, inactive destinations hide, clean `/contact` console output has no errors, and `design-qa.md` records a passed comparison.
+- Work continues on `codex/unique-page-redesign`; the requested page-by-page implementation is complete and is in final repository verification.
+- Pricing now uses an interactive team-size/trace-volume decision canvas with live plan recommendation, rate details, billing interval, and a comparison ledger; it no longer uses the shared masthead-plus-plan-card composition.
+- Integrations now uses a split OTLP protocol rail, sticky category index, and full-width adapter connection rows instead of a generic card grid.
+- The four `/use-cases/[slug]` routes no longer share one recolored template: research is an evidence trail, support an escalation record, automation an execution pipeline, and tool calling a payload/schema inspector.
+- Focused ESLint and diff hygiene pass for these routes. Browser checks at desktop and 390px show no horizontal overflow; recommendation and use-case rendering interactions produce no console errors.
+- The remaining redesign now covers all nine product features, status, roadmap, changelog, security, contact, privacy, terms, authentication shells, and onboarding shells.
+- Responsive browser checks found no horizontal overflow across the redesigned public and account routes. Focused lint passes for every changed source file; repository-wide lint still reports pre-existing unrelated failures.
+- Final verification: `npm run test:content` passed all 15 tests, the changed-file ESLint pass and `git diff --check` passed, and `npm run build` completed successfully with TypeScript and all 80 static pages.
+
 ## SEO release ancestry and deployment guardrails (2026-08-14)
 - PR #5 merged branch state at `5e7807b`; later SEO commits `3474f98` and `191cbeb` were pushed after the merge and are not ancestors of `origin/main`.
 - Production deployment `dpl_GucMKe2AYetsPtixDMw1GMGJgGy6` correctly deployed exact main commit `f646ca7` and owns the canonical Tracify domains. The later IndexNow key remains absent because it is not in that commit.

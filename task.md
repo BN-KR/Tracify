@@ -706,6 +706,20 @@
 - [x] Redeploy commit `45780f6` and verify Vercel reaches `READY`.
 - [x] Update the staging runbook with both required variables and the current project name.
 
+# Page-specific site redesign — 2026-08-14
+
+- [x] Audit the repeated public-page skeleton and current mobile navigation.
+- [x] Confirm that landing, blog, and docs are excluded from this pass.
+- [x] Replace the tiny mobile navigation list with the selected Section Switchboard design.
+- [x] Give every remaining public route a composition based on its specific user task.
+  - [x] Rebuild Pricing as an interactive decision canvas.
+  - [x] Rebuild Integrations as a protocol-and-connection map.
+  - [x] Split Research, Support, Automation, and Tool Calling into four distinct compositions.
+  - [x] Finish product, operational, company, legal, auth, and onboarding routes in the requested scope.
+- [x] Differentiate onboarding and auth surfaces without breaking their workflows.
+- [x] Complete repository type, content, and production-build verification (responsive, focused lint, content tests, TypeScript, and production build pass).
+- [ ] Commit, push, open the default draft PR, and verify the preview deployment.
+
 # SEO release guardrails — 2026-08-14
 
 - [x] Record the post-merge commit ancestry failure from PR #5.
