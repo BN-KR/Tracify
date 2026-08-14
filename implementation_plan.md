@@ -774,3 +774,10 @@ The single most important UI in the product.
 5. [completed] Recompose onboarding and auth routes around their individual tasks.
 6. [completed] Run route-coverage, responsive, interaction, accessibility, lint, type, content, and build gates.
 7. [pending] Review staged scope, commit the feature branch, publish a draft PR, and verify Preview.
+
+# SEO release guardrails — 2026-08-14
+
+1. [completed] Capture why commits pushed after PR #5 merged were absent from `main`.
+2. [completed] Define public-page SEO checks and explicit indexability rules.
+3. [completed] Define commit-ancestry, clean-tree, Vercel-project, production-alias, IndexNow, and Ahrefs verification gates.
+4. [completed] Register the checklist in `AGENTS.md` and durable project memory.

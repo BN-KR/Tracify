@@ -719,3 +719,10 @@
 - [x] Differentiate onboarding and auth surfaces without breaking their workflows.
 - [x] Complete repository type, content, and production-build verification (responsive, focused lint, content tests, TypeScript, and production build pass).
 - [ ] Commit, push, open the default draft PR, and verify the preview deployment.
+
+# SEO release guardrails — 2026-08-14
+
+- [x] Record the post-merge commit ancestry failure from PR #5.
+- [x] Add a mandatory public-page, merge, production deployment, IndexNow, and recrawl checklist for future agents.
+- [x] Point repository-wide agent instructions to the checklist.
+- [ ] Land SEO remediation commits `3474f98` and `191cbeb` through a follow-up pull request before claiming the audit fixes are live.

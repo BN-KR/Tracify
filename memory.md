@@ -1141,3 +1141,8 @@
 - The remaining redesign now covers all nine product features, status, roadmap, changelog, security, contact, privacy, terms, authentication shells, and onboarding shells.
 - Responsive browser checks found no horizontal overflow across the redesigned public and account routes. Focused lint passes for every changed source file; repository-wide lint still reports pre-existing unrelated failures.
 - Final verification: `npm run test:content` passed all 15 tests, the changed-file ESLint pass and `git diff --check` passed, and `npm run build` completed successfully with TypeScript and all 80 static pages.
+
+## SEO release ancestry and deployment guardrails (2026-08-14)
+- PR #5 merged branch state at `5e7807b`; later SEO commits `3474f98` and `191cbeb` were pushed after the merge and are not ancestors of `origin/main`.
+- Production deployment `dpl_GucMKe2AYetsPtixDMw1GMGJgGy6` correctly deployed exact main commit `f646ca7` and owns the canonical Tracify domains. The later IndexNow key remains absent because it is not in that commit.
+- Future agents must follow `docs/seo-release-checklist.md`: prove commit ancestry, deploy an exact clean `origin/main` tree to `tracify-tech/tracify`, verify canonical aliases, and submit IndexNow only after its key is live.
