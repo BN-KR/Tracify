@@ -98,6 +98,21 @@ export const tables = {
     .index("role", ["role"])
     .index("status", ["status"])
     .index("inviterId", ["inviterId"]),
+  ssoProvider: defineTable({
+    issuer: v.string(),
+    domain: v.string(),
+    oidcConfig: v.optional(v.union(v.null(), v.string())),
+    samlConfig: v.optional(v.union(v.null(), v.string())),
+    userId: v.optional(v.union(v.null(), v.string())),
+    providerId: v.string(),
+    organizationId: v.optional(v.union(v.null(), v.string())),
+    domainVerified: v.optional(v.boolean()),
+    domainVerificationToken: v.optional(v.union(v.null(), v.string())),
+  })
+    .index("providerId", ["providerId"])
+    .index("domain", ["domain"])
+    .index("userId", ["userId"])
+    .index("organizationId", ["organizationId"]),
   jwks: defineTable({
     publicKey: v.string(),
     privateKey: v.string(),

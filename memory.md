@@ -1,5 +1,11 @@
 # Project Memory
 
+## 2026-08-14 Better Auth SAML login integration
+- Added `@better-auth/sso` to the Convex-hosted Better Auth configuration and the React auth client.
+- Added the Convex-backed `ssoProvider` schema required by the plugin, with domain verification enabled and strict SAML timestamp/algorithm validation.
+- Added a sign-in-only “Continue with SAML SSO” action that resolves the provider from the user’s work-email domain and preserves the existing callback destination.
+- Validation: TypeScript and `git diff --check` pass. Full lint remains blocked by 19 pre-existing repository errors; Convex sync is blocked locally by an invalid deployment name containing a leading space.
+
 ## 2026-08-13 Vercel preview deployment recovery
 - The `codex/llms-seo` previews failed after compilation and TypeScript because Vercel Preview lacked `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL`; Better Auth failed during page-data collection for `/api/evaluation/run`.
 - Added both public endpoints to Vercel Preview using the isolated `diligent-dragon-604` development Convex deployment, avoiding production data access from branch previews.

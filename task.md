@@ -726,3 +726,9 @@
 - [x] Add a mandatory public-page, merge, production deployment, IndexNow, and recrawl checklist for future agents.
 - [x] Point repository-wide agent instructions to the checklist.
 - [ ] Land SEO remediation commits `3474f98` and `191cbeb` through a follow-up pull request before claiming the audit fixes are live.
+
+## SAML login
+- [x] Add Better Auth SSO server/client plugins.
+- [x] Add Convex `ssoProvider` schema fields and indexes.
+- [x] Add email-domain-resolved SAML login action to `/sign-in`.
+- [ ] Register each customer IdP provider with issuer, domain, entry point, certificate, and SAML mapping in the target Convex deployment.

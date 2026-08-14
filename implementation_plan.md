@@ -781,3 +781,10 @@ The single most important UI in the product.
 2. [completed] Define public-page SEO checks and explicit indexability rules.
 3. [completed] Define commit-ancestry, clean-tree, Vercel-project, production-alias, IndexNow, and Ahrefs verification gates.
 4. [completed] Register the checklist in `AGENTS.md` and durable project memory.
+
+## SAML login integration (2026-08-14)
+1. Install the official `@better-auth/sso` plugin.
+2. Enable SAML and domain verification in the Better Auth server and client.
+3. Add the plugin’s `ssoProvider` table to the Convex Better Auth schema.
+4. Start SAML login from the existing sign-in form using the entered email domain.
+5. For each enterprise customer, register and verify their SAML provider before enabling login.

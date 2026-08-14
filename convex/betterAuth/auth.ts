@@ -4,6 +4,7 @@ import { convex } from "@convex-dev/better-auth/plugins";
 import type { GenericCtx } from "@convex-dev/better-auth/utils";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { organization } from "better-auth/plugins";
+import { sso } from "@better-auth/sso";
 import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import authConfig from "../auth.config";
@@ -73,6 +74,15 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       membershipLimit: 100,
       invitationExpiresIn: 60 * 60 * 24 * 7,
       disableOrganizationDeletion: true,
+    }),
+    sso({
+      domainVerification: { enabled: true },
+      saml: {
+        enableInResponseToValidation: true,
+        allowIdpInitiated: true,
+        requireTimestamps: true,
+        algorithms: { onDeprecated: "reject" },
+      },
     }),
     dash({ apiKey: process.env.BETTER_AUTH_API_KEY }),
     sentinel({ apiKey: process.env.BETTER_AUTH_API_KEY }),

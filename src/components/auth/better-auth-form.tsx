@@ -49,6 +49,22 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
     }
   }
 
+  async function continueWithSaml() {
+    setPending(true);
+    setError("");
+    const result = await authClient.signIn.sso({
+      email: email.trim(),
+      providerType: "saml",
+      callbackURL: absolute(callbackPath),
+      errorCallbackURL: absolute("/auth/error"),
+      newUserCallbackURL: absolute(callbackPath),
+    });
+    if (result.error) {
+      setPending(false);
+      setError(result.error.message || "SAML sign-in failed.");
+    }
+  }
+
   return (
     <div>
       <h2 className="font-pixel text-4xl leading-none tracking-[-0.06em]">{mode === "sign-up" ? "Create your account" : "Sign in to tracify"}</h2>
@@ -58,6 +74,11 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
         <SocialButton label="GitHub" disabled={pending} onClick={() => void continueWith("github")} icon={<GitHubMark />} />
         <SocialButton label="Google" disabled={pending} onClick={() => void continueWith("google")} icon={<GoogleMark />} />
       </div>
+
+      {mode === "sign-in" ? <div className="mt-2">
+        <button type="button" disabled={pending || !email.trim()} onClick={() => void continueWithSaml()} className="active-press flex h-12 w-full items-center justify-center gap-3 border border-black/30 bg-white font-mono text-[9px] uppercase tracking-[0.12em] transition-colors hover:border-black hover:bg-[#f4d44d] disabled:cursor-not-allowed disabled:opacity-50">Continue with SAML SSO</button>
+        <p className="mt-2 text-center font-mono text-[8px] uppercase tracking-[0.1em] text-black/40">Enter your work email first</p>
+      </div> : null}
 
       <div className="my-6 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.15em] text-black/40"><span className="h-px flex-1 bg-black/20" />or continue with email<span className="h-px flex-1 bg-black/20" /></div>
 
