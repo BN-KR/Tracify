@@ -730,5 +730,5 @@
 ## SAML login
 - [x] Add Better Auth SSO server/client plugins.
 - [x] Add Convex `ssoProvider` schema fields and indexes.
-- [x] Add email-domain-resolved SAML login action to `/sign-in`.
+- [x] Add email-domain-resolved SAML login action to `/sign-in` and `/sign-up`.
 - [ ] Register each customer IdP provider with issuer, domain, entry point, certificate, and SAML mapping in the target Convex deployment.

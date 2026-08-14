@@ -3,7 +3,8 @@
 ## 2026-08-14 Better Auth SAML login integration
 - Added `@better-auth/sso` to the Convex-hosted Better Auth configuration and the React auth client.
 - Added the Convex-backed `ssoProvider` schema required by the plugin, with domain verification enabled and strict SAML timestamp/algorithm validation.
-- Added a sign-in-only “Continue with SAML SSO” action that resolves the provider from the user’s work-email domain and preserves the existing callback destination.
+- Added a “Continue with SAML SSO” action to both sign-in and sign-up that resolves the provider from the user’s work-email domain and preserves the existing callback destination.
+- Published the SAML integration directly to `main` at commit `64464a7` after syncing newer main history.
 - Validation: TypeScript and `git diff --check` pass. Full lint remains blocked by 19 pre-existing repository errors; Convex sync is blocked locally by an invalid deployment name containing a leading space.
 
 ## 2026-08-13 Vercel preview deployment recovery
