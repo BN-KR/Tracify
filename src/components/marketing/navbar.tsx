@@ -233,10 +233,6 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="max-h-[calc(100dvh-54px)] overflow-y-auto border-t border-black bg-[#eceae3] md:hidden">
-      <div className="px-4 py-4 font-mono text-[10px] uppercase tracking-[0.18em] text-black/60">
-        Section switchboard
-      </div>
-
       {(Object.keys(menus) as MenuName[]).map((name, sectionIndex) => {
         const expanded = activeSection === name;
         const meta = mobileMenuMeta[name];
