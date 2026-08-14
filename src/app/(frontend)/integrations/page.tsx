@@ -1,10 +1,7 @@
-import React from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
-import {
-  getThirdPartyBrand,
-  ThirdPartyLogo,
-} from "@/components/third-party-logo";
+import { ArrowUpRight, PlugZap } from "lucide-react";
+import { getThirdPartyBrand, ThirdPartyLogo } from "@/components/third-party-logo";
 
 export const metadata: Metadata = {
   title: "AI agent integrations",
@@ -12,208 +9,59 @@ export const metadata: Metadata = {
   alternates: { canonical: "/integrations" },
 };
 
-type Integration = {
-  name: string;
-  description: string;
-  badge?: string;
-  category: string;
-};
+type Integration = { name: string; description: string; badge?: string; category: string };
 
-const INTEGRATIONS: Integration[] = [
-  {
-    name: "OpenTelemetry (OTLP)",
-    description:
-      "Ingest spans via the standard OTLP HTTP JSON protocol. Any OTel-instrumented library or exporter works out of the box.",
-    badge: "Native",
-    category: "Tracing",
-  },
-  {
-    name: "OpenLLMetry",
-    description:
-      "Drop-in LLM observability instrumentation for OpenAI, Anthropic, Cohere, and more. Sends directly to the Tracify OTLP endpoint.",
-    badge: "Compatible",
-    category: "Tracing",
-  },
-  {
-    name: "LangChain",
-    description:
-      "Trace LangChain agents, chains, and tool calls via the built-in OTel callback handler.",
-    category: "Frameworks",
-  },
-  {
-    name: "CrewAI",
-    description:
-      "Monitor CrewAI multi-agent workflows with zero-config tracing through our Python SDK.",
-    category: "Frameworks",
-  },
-  {
-    name: "AutoGen",
-    description:
-      "Trace AutoGen conversations and tool executions via OTel instrumentation or the Python decorator.",
-    category: "Frameworks",
-  },
-  {
-    name: "OpenAI SDK",
-    description:
-      "Capture model, latency, tokens, and cost for every OpenAI API call automatically.",
-    category: "Providers",
-  },
-  {
-    name: "Anthropic SDK",
-    description:
-      "Full trace support for Claude models — tool calls, streaming, and extended thinking.",
-    category: "Providers",
-  },
-  {
-    name: "Vercel AI SDK",
-    description:
-      "Trace Vercel AI SDK streaming calls, tool use, and multi-step generations.",
-    category: "Providers",
-  },
-  {
-    name: "Next.js",
-    description:
-      "Server-side tracing for Next.js route handlers, server actions, and middleware. Works with our TypeScript SDK.",
-    category: "Runtimes",
-  },
-  {
-    name: "Python (FastAPI / Flask)",
-    description:
-      "Wrap any Python endpoint with the Tracify decorator for automatic span collection.",
-    category: "Runtimes",
-  },
-  {
-    name: "Redis",
-    description:
-      "Track cache hits/misses and rate limiter state as spans in your agent pipeline.",
-    category: "Infrastructure",
-  },
-  {
-    name: "Slack",
-    description:
-      "Route alerts and failed-trace notifications to Slack channels via webhook.",
-    category: "Alerts",
-  },
-  {
-    name: "PagerDuty",
-    description:
-      "Escalate high-severity alerts to PagerDuty for on-call coverage.",
-    category: "Alerts",
-  },
-  {
-    name: "Webhooks",
-    description:
-      "Custom HTTP webhooks for any event — spans, alerts, cost thresholds, or orchestration actions.",
-    category: "Alerts",
-  },
+const integrations: Integration[] = [
+  { name: "OpenTelemetry (OTLP)", description: "Ingest spans through the standard OTLP HTTP JSON protocol. Any OTel-instrumented library or exporter works out of the box.", badge: "Native", category: "Tracing" },
+  { name: "OpenLLMetry", description: "Drop-in LLM observability instrumentation for OpenAI, Anthropic, Cohere, and more.", badge: "Compatible", category: "Tracing" },
+  { name: "LangChain", description: "Trace LangChain agents, chains, and tool calls through the built-in OTel callback handler.", category: "Frameworks" },
+  { name: "CrewAI", description: "Monitor CrewAI multi-agent workflows through Python SDK instrumentation.", category: "Frameworks" },
+  { name: "AutoGen", description: "Trace AutoGen conversations and tool execution through OTel instrumentation or the Python decorator.", category: "Frameworks" },
+  { name: "OpenAI SDK", description: "Capture model, latency, tokens, and cost for every OpenAI API call automatically.", category: "Providers" },
+  { name: "Anthropic SDK", description: "Trace Claude model calls, tool use, streaming, and extended-thinking spans.", category: "Providers" },
+  { name: "Vercel AI SDK", description: "Trace streaming calls, tool use, and multi-step generations from the Vercel AI SDK.", category: "Providers" },
+  { name: "Next.js", description: "Server-side tracing for route handlers, Server Actions, and middleware through the TypeScript SDK.", category: "Runtimes" },
+  { name: "Python", description: "Wrap FastAPI, Flask, or ordinary Python functions for automatic span collection.", category: "Runtimes" },
+  { name: "Redis", description: "Track cache hits, misses, and rate-limiter state as spans in the agent pipeline.", category: "Infrastructure" },
+  { name: "Slack", description: "Route alerts and failed-trace notifications into Slack channels through webhooks.", category: "Alerts" },
+  { name: "PagerDuty", description: "Escalate high-severity agent failures into the on-call workflow.", category: "Alerts" },
+  { name: "Webhooks", description: "Send spans, alerts, cost thresholds, and orchestration events to any HTTP endpoint.", category: "Alerts" },
 ];
 
-const CATEGORIES = [...new Set(INTEGRATIONS.map((i) => i.category))];
+const categories = [...new Set(integrations.map((integration) => integration.category))];
 
 export default function IntegrationsPage() {
-  return (
-    <div className="min-h-screen overflow-x-hidden bg-[#eceae3] pt-[54px] text-black selection:bg-yellow-300/40">
-      <main className="mx-auto max-w-[1240px] border-x border-black">
-        <header className="border-b border-black px-6 py-10 md:px-10 md:py-12">
-          <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#666666] mb-4">
-            Platform / Integrations
-          </div>
-          <h1 className="max-w-3xl font-pixel text-5xl leading-[0.9] tracking-[-0.045em] md:text-7xl">
-            Integrations
-          </h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-black/55">
-            Connect Tracify to your existing tools, frameworks, and providers.
-            Most integrations work via the OTLP endpoint — no vendor lock-in.
-          </p>
-        </header>
-
-        <div className="grid border-b border-black bg-[#f4d44d] p-6 md:grid-cols-[0.6fr_1.4fr] md:gap-10 md:p-10">
-          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#666666] mb-2">
-            Quick Start
-          </div>
-          <p className="font-mono text-sm text-zinc-400 mb-4">
-            Point any OTel exporter at the Tracify OTLP endpoint to start
-            collecting spans immediately:
-          </p>
-          <div className="overflow-x-auto border border-black bg-black p-5 font-mono text-xs leading-6 text-white/55">
-            <span className="text-zinc-600"># .env</span>
-            {"\n"}
-            <span className="text-white">TRACIFY_OTLP_ENDPOINT</span>
-            =https://tracify.tech/api/otel
-            {"\n"}
-            <span className="text-white">TRACIFY_API_KEY</span>
-            =tracify_sk_live_...
-            {"\n\n"}
-            <span className="text-zinc-600"># Or with curl</span>
-            {"\n"}
-            <span className="text-zinc-400">
-              curl -X POST https://tracify.tech/api/otel \
-            </span>
-            {"\n"}
-            <span className="text-zinc-400">
-              {" "}
-              -H &quot;Authorization: Bearer tracify_sk_live_...&quot; \
-            </span>
-            {"\n"}
-            <span className="text-zinc-400">
-              {" "}
-              -H &quot;Content-Type: application/json&quot; \
-            </span>
-            {"\n"}
-            <span className="text-zinc-400"> -d @trace.json</span>
-          </div>
+  return <main className="min-h-screen overflow-x-hidden bg-[#eceae3] pt-[54px] text-black">
+    <header className="border-b border-black">
+      <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[minmax(0,0.72fr)_minmax(520px,1.28fr)]">
+        <div className="flex min-h-[520px] flex-col justify-between border-black bg-[#f4d44d] p-6 sm:p-8 md:p-10 lg:border-r">
+          <div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.16em]"><span>Connection map</span><span>{integrations.length} adapters</span></div>
+          <div><PlugZap className="mb-8 size-10" strokeWidth={1.25} aria-hidden="true" /><h1 className="font-pixel text-[clamp(3.3rem,7vw,7rem)] leading-[0.82] tracking-[-0.075em]">Bring your stack. Keep the standard.</h1><p className="mt-7 max-w-xl text-base leading-7 text-black/65">Providers, frameworks, runtimes, and alert channels converge on one OpenTelemetry ingest surface.</p></div>
         </div>
-
-        {CATEGORIES.map((category) => (
-          <section key={category} className="border-b border-black">
-            <h2 className="border-b border-black px-6 py-3 font-mono text-[9px] uppercase tracking-[0.16em] md:px-10">
-              {category}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {INTEGRATIONS.filter((i) => i.category === category).map(
-                (integration) => {
-                  const brand = getThirdPartyBrand(integration.name);
-                  return (
-                  <div
-                    key={integration.name}
-                    className="min-h-52 border-b border-r border-black p-6 transition-colors hover:bg-white/55"
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      {brand ? (
-                        <ThirdPartyLogo
-                          brand={brand}
-                          className="size-5 shrink-0 object-contain"
-                        />
-                      ) : null}
-                      <span className="font-pixel text-3xl leading-none tracking-[-0.04em]">
-                        {integration.name}
-                      </span>
-                      {integration.badge && (
-                        <span className="border border-black px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest">
-                          {integration.badge}
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-12 text-sm leading-6 text-black/55">
-                      {integration.description}
-                    </p>
-                  </div>
-                  );
-                },
-              )}
-            </div>
-          </section>
-        ))}
-
-        <div className="mt-24 pt-8 border-t border-zinc-900">
-          <Link
-            href="/"
-            className="text-white font-mono text-xs uppercase tracking-widest hover:opacity-70 transition-opacity"
-          >
-            ← Back to home
-          </Link>
+        <div className="flex flex-col justify-between border-t border-black bg-black text-white lg:border-t-0">
+          <div className="grid grid-cols-3 border-b border-white/20 font-mono text-[8px] uppercase tracking-[0.13em] text-white/45"><span className="p-4">Input / OTLP</span><span className="border-l border-white/20 p-4">Format / JSON</span><span className="border-l border-white/20 p-4">Auth / Bearer</span></div>
+          <pre className="overflow-x-auto p-6 font-mono text-[11px] leading-7 sm:p-10"><code><span className="text-white/35"># .env</span>{"\n"}<span className="text-[#f4d44d]">TRACIFY_OTLP_ENDPOINT</span>={"\n"}https://tracify.tech/api/otel{"\n\n"}<span className="text-[#f4d44d]">TRACIFY_API_KEY</span>={"\n"}tracify_sk_live_...</code></pre>
+          <div className="grid border-t border-white/20 sm:grid-cols-2"><p className="p-6 text-sm leading-6 text-white/58">Any OTel-compatible exporter can send traces without a proprietary agent.</p><Link href="/docs/api" className="flex min-h-20 items-center justify-between border-t border-white/20 px-6 font-mono text-[9px] uppercase tracking-[0.14em] text-[#f4d44d] hover:bg-[#f4d44d] hover:text-black sm:border-l sm:border-t-0">Open ingest reference <ArrowUpRight className="size-4" /></Link></div>
         </div>
-      </main>
-    </div>
-  );
+      </div>
+    </header>
+
+    <section className="border-b border-black">
+      <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[260px_1fr]">
+        <aside className="border-black bg-black text-white lg:border-r"><div className="sticky top-[54px] p-6 md:p-8"><p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/45">Signal routes</p><ol className="mt-8 divide-y divide-white/20 border-y border-white/20">{categories.map((category, index) => <li key={category}><a href={`#${category.toLowerCase()}`} className="flex min-h-14 items-center justify-between font-mono text-[9px] uppercase tracking-[0.12em] text-white/65 hover:text-[#f4d44d]"><span>0{index + 1} / {category}</span><span>→</span></a></li>)}</ol></div></aside>
+        <div>{categories.map((category, categoryIndex) => <section id={category.toLowerCase()} key={category} className="scroll-mt-16 border-b border-black last:border-b-0">
+          <div className="grid min-h-24 grid-cols-[80px_1fr] border-b border-black bg-white/30"><span className="flex items-center justify-center border-r border-black font-pixel text-4xl text-black/22">0{categoryIndex + 1}</span><h2 className="flex items-center px-5 font-pixel text-4xl tracking-[-0.055em] sm:px-8">{category}</h2></div>
+          <div className="divide-y divide-black">{integrations.filter((integration) => integration.category === category).map((integration, index) => {
+            const brand = getThirdPartyBrand(integration.name);
+            return <article key={integration.name} className="group grid min-h-36 transition-colors hover:bg-[#f4d44d] sm:grid-cols-[72px_minmax(190px,0.75fr)_1.25fr_auto]">
+              <div className="hidden items-center justify-center border-r border-black font-mono text-[9px] text-black/35 sm:flex">{String(index + 1).padStart(2, "0")}</div>
+              <div className="flex items-center gap-3 border-black p-5 sm:border-r sm:p-6">{brand ? <ThirdPartyLogo brand={brand} className="size-7 shrink-0 object-contain" /> : <PlugZap className="size-6" strokeWidth={1.25} aria-hidden="true" />}<h3 className="font-pixel text-3xl leading-none tracking-[-0.045em]">{integration.name}</h3></div>
+              <p className="border-t border-black px-5 py-5 text-sm leading-6 text-black/60 group-hover:text-black/72 sm:border-t-0 sm:px-6">{integration.description}</p>
+              <div className="flex items-center justify-between gap-4 border-t border-black px-5 py-4 sm:border-l sm:border-t-0"><span className="font-mono text-[8px] uppercase tracking-[0.12em]">{integration.badge ?? "Supported"}</span><ArrowUpRight className="size-4" aria-hidden="true" /></div>
+            </article>;
+          })}</div>
+        </section>)}</div>
+      </div>
+    </section>
+  </main>;
 }

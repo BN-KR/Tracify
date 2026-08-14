@@ -4,7 +4,7 @@ const steps = [
   { id: "install", label: "Install SDK" },
   { id: "waiting", label: "Waiting" },
   { id: "success", label: "First span" },
-];
+] as const;
 
 export type OnboardingStepId = (typeof steps)[number]["id"];
 
@@ -16,8 +16,8 @@ export function OnboardingProgress({
   const activeIndex = steps.findIndex((step) => step.id === currentStep);
 
   return (
-    <div className="border-b border-[#2A2A2A] p-4">
-      <div className="mb-4 text-[11px] uppercase tracking-wide text-[#999999]">
+    <div className="border-t border-current/25 pt-5">
+      <div className="mb-4 text-[9px] uppercase tracking-[0.14em] opacity-55">
         {activeIndex + 1} / {steps.length} {steps[activeIndex]?.label}
       </div>
       <ol className="grid grid-cols-5 gap-2">
@@ -30,15 +30,15 @@ export function OnboardingProgress({
               <div
                 className={
                   complete || active
-                    ? "mb-2 h-0.5 bg-white"
-                    : "mb-2 h-0.5 bg-[#2A2A2A]"
+                    ? "mb-2 h-0.5 bg-current"
+                    : "mb-2 h-0.5 bg-current opacity-20"
                 }
               />
               <div
                 className={
                   active
-                    ? "truncate text-[10px] uppercase tracking-wide text-white"
-                    : "truncate text-[10px] uppercase tracking-wide text-[#666666]"
+                    ? "truncate text-[8px] uppercase tracking-[0.08em]"
+                    : "truncate text-[8px] uppercase tracking-[0.08em] opacity-30"
                 }
               >
                 {step.label}

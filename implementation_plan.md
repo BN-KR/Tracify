@@ -760,3 +760,17 @@ The single most important UI in the product.
 3. [completed] Configure `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` for Preview using the isolated development deployment.
 4. [completed] Redeploy the exact failed commit and verify build completion plus final `READY` state.
 5. [completed] Record the durable staging requirement in repository documentation.
+
+# Page-specific site redesign — 2026-08-14
+
+1. [completed] Inventory in-scope routes and isolate the shared masthead/band repetition.
+2. [completed] Capture desktop and mobile evidence and select the mobile Section Switchboard direction.
+3. [completed] Implement and visually verify large mobile accordion and destination buttons.
+4. [completed] Assign and implement a distinct page-purpose composition for every in-scope public route.
+   - [completed] Pricing decision canvas.
+   - [completed] Integrations connection map.
+   - [completed] Four use-case-specific layouts.
+   - [completed] Product, operational, company, and legal routes.
+5. [completed] Recompose onboarding and auth routes around their individual tasks.
+6. [completed] Run route-coverage, responsive, interaction, accessibility, lint, type, content, and build gates.
+7. [pending] Review staged scope, commit the feature branch, publish a draft PR, and verify Preview.
