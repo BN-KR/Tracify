@@ -50,6 +50,11 @@
   ],
   "externalReadiness": [
     {
+      "service": "vercel-release",
+      "status": "manual-action-required",
+      "action": "After the regional change is merged and all required credentials are present, reconnect the shared Git repository and deploy the exact merged main commit to both projects."
+    },
+    {
       "service": "dns",
       "status": "manual-action-required",
       "action": "Create A records for eu.cloud.tracify.tech and us.cloud.tracify.tech pointing to 76.76.21.21 at the authoritative DNS provider."

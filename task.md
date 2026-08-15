@@ -747,11 +747,12 @@
 - [x] Add the EU/US region contract, selector, regional routing, and region-bound API keys.
 - [x] Update native/OTLP ingestion, SDKs, onboarding, billing metadata, status, and documentation.
 - [x] Create and initialize isolated EU and US Convex production deployments with unique runtime secrets.
-- [x] Create EU and US Vercel projects, connect the shared repository, configure Next.js, and apply region-specific production/preview settings.
+- [x] Create EU and US Vercel projects, configure Next.js, and apply region-specific production/preview settings; keep Git automation disconnected until merged release readiness.
 - [x] Attach `eu.cloud.tracify.tech` and `us.cloud.tracify.tech` to their matching Vercel projects.
 - [x] Add and deploy dependency-aware regional health endpoints; verify both live Convex health responses.
 - [ ] Add the two DNS A records at Domeneshop and verify Vercel TLS issuance.
 - [ ] Create and deploy independent Tinybird workspaces for EU and US; add unique hosts/tokens to Vercel.
 - [ ] Create independent regional Redis databases and Inngest environments; add unique credentials to Vercel.
 - [ ] Create regional Stripe webhooks and register Google/GitHub callback URLs.
-- [ ] Run full repository and browser verification, publish a draft PR, then deploy the merged commit to both regional projects.
+- [x] Run repository/build and selector browser verification and publish draft PR #14.
+- [ ] Reconnect Git and deploy the exact merged commit to both regional projects after all provider and DNS gates pass.

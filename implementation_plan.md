@@ -811,9 +811,9 @@ The single most important UI in the product.
 1. [completed] Establish one-codebase/two-region invariants and a pre-auth region selector.
 2. [completed] Bind new API keys, SDK hosts, ingestion, auth origins, and billing metadata to EU or US.
 3. [completed] Provision isolated Convex deployments and deploy a region-reporting health route to each.
-4. [completed] Provision and Git-connect two Vercel projects; apply matching production and preview environment configuration.
+4. [completed] Provision two Vercel projects and apply matching production and preview environment configuration; Git automation remains disconnected until merged release readiness.
 5. [completed] Attach the requested regional hostnames and record the authoritative DNS records still required.
 6. [in progress] Provision independent Tinybird, Redis, and Inngest resources; current provider credentials do not permit unattended workspace creation.
 7. [pending] Configure regional OAuth callbacks and Stripe webhook signing secrets.
 8. [pending] Verify DNS/TLS, deep health, authentication, onboarding, ingestion isolation, wrong-region rejection, and dashboards in both regions.
-9. [pending] Complete all repository gates and publish the scoped feature as a draft pull request.
+9. [completed] Complete build/type/content/SDK gates, browser-check the selector, and publish draft PR #14.

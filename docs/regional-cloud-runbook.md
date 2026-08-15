@@ -48,10 +48,12 @@ Rollback application code by reassigning the regional alias to the last verified
 
 ## Provisioned resources and handoff
 
-- Vercel EU: `tracify-tech/tracify-cloud-eu`; Git-connected to the shared Tracify repository; Next.js preset; production and preview region/Convex settings applied.
-- Vercel US: `tracify-tech/tracify-cloud-us`; Git-connected to the shared Tracify repository; Next.js preset; production and preview region/Convex settings applied.
+- Vercel EU: `tracify-tech/tracify-cloud-eu`; Next.js preset; production and preview region/Convex settings applied.
+- Vercel US: `tracify-tech/tracify-cloud-us`; Next.js preset; production and preview region/Convex settings applied.
 - Convex EU: `jovial-owl-711` in `eu-west-1`; isolated runtime secrets; `/health` must report `region: eu`.
 - Convex US: `flexible-anaconda-752` in `us-east-1`; isolated runtime secrets; `/health` must report `region: us`.
 - Domains are attached to their matching Vercel projects. DNS remains at Domeneshop and requires A records to Vercel before certificates can issue.
+
+Git automation is intentionally disconnected from both regional Vercel projects. Vercel classified the first branch deployment in each empty project as production even though the production branch was `main`. Those feature deployments were deleted. Reconnect `BN-KR/Tracify` only after this change is merged and all regional launch gates pass, then verify the deployed Git SHA is an ancestor of `origin/main` before assigning traffic.
 
 Regional deploy-key files are local operator artifacts under the ignored `scratch/tracify-regional/` directory. They must never be committed. Rotate them if that directory leaves the trusted workstation. Values are also stored as sensitive Vercel environment variables for production and preview.
