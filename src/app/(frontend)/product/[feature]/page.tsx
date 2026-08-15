@@ -226,22 +226,18 @@ function ProductBreadcrumb({ title, slug }: { title: string; slug: string }) {
 }
 
 function ProductHero({ page, index }: { page: FeaturePage; index: number }) {
-  const align = index % 3;
+  const instrumentFirst = ["cost", "reports", "control"].includes(page.visual);
+  const tone = page.visual === "failures" || page.visual === "models" ? "bg-black text-white" : page.visual === "cost" || page.visual === "lifecycle" ? "bg-[#f4d44d] text-black" : "bg-[#eceae3] text-black";
+  const columns = page.visual === "reports" ? "lg:grid-cols-[0.72fr_1.28fr]" : page.visual === "evaluation" ? "lg:grid-cols-[1fr_1fr]" : page.visual === "lifecycle" ? "lg:grid-cols-[0.82fr_1.18fr]" : "lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.82fr)]";
   return (
-    <header className={`border-b border-black ${align === 0 ? "bg-black text-white" : align === 1 ? "bg-[#eceae3]" : "bg-[#f4d44d]"}`}>
-      <div className={`mx-auto grid min-h-[440px] max-w-[1240px] border-x border-current ${align === 1 ? "md:grid-cols-[280px_1fr]" : "md:grid-cols-[1fr_340px]"}`}>
-        <div className={`flex flex-col justify-between px-5 py-10 sm:px-8 md:px-10 md:py-14 ${align === 1 ? "md:order-2 md:border-l" : "md:border-r"}`}>
-          <p className="max-w-xl font-mono text-[9px] uppercase tracking-[0.15em] opacity-55">{page.eyebrow}</p>
-          <div className="my-12">
-            <h1 className="max-w-4xl text-balance font-pixel text-[clamp(3.4rem,7vw,6.8rem)] leading-[0.84] tracking-[-0.065em]">{page.title}</h1>
-            <p className="mt-7 max-w-2xl text-pretty text-base leading-7 opacity-68 md:text-lg">{page.description}</p>
-          </div>
-          <div className="flex flex-wrap gap-3"><FutureAction href="/demo" inverted={align === 0}>Explore the demo</FutureAction><FutureAction href="/docs" inverted={align === 0}>Read the docs</FutureAction></div>
+    <header className={`border-b border-black ${tone}`}>
+      <div className={`mx-auto grid min-h-[560px] max-w-[1440px] ${columns}`}>
+        <div className={`flex flex-col justify-between px-5 py-10 sm:px-8 md:px-10 md:py-14 ${instrumentFirst ? "lg:order-2 lg:border-l" : "lg:border-r"} border-black`}>
+          <div className="flex items-start justify-between gap-6"><p className="max-w-xl font-mono text-[9px] uppercase tracking-[0.15em] opacity-55">{page.eyebrow}</p><span className="font-pixel text-5xl leading-none opacity-15">0{index + 1}</span></div>
+          <div className="my-12"><h1 className="max-w-5xl text-balance font-pixel text-[clamp(3.4rem,7vw,7.4rem)] leading-[0.8] tracking-[-0.075em]">{page.title}</h1><p className="mt-7 max-w-2xl text-pretty text-base leading-7 opacity-68 md:text-lg">{page.description}</p></div>
+          <div><p className="mb-6 max-w-2xl border-l-4 border-[#f4d44d] pl-4 font-mono text-[9px] uppercase leading-5 tracking-[0.12em] opacity-70">{page.outcome}</p><div className="flex flex-wrap gap-3"><FutureAction href="/demo" inverted={tone.includes("text-white")}>Explore the demo</FutureAction><FutureAction href="/docs" inverted={tone.includes("text-white")}>Read the docs</FutureAction></div></div>
         </div>
-        <div className={`flex min-h-48 flex-col justify-between p-6 ${align === 1 ? "md:order-1" : ""} ${align === 0 ? "bg-[#f4d44d] text-black" : "bg-black text-white"}`}>
-          <span className="font-pixel text-7xl leading-none opacity-16">0{index + 1}</span>
-          <div><div className="mb-5 h-2 w-16 bg-[#f4d44d]" /><p className="font-mono text-[9px] uppercase leading-5 tracking-[0.12em] opacity-65">{page.outcome}</p></div>
-        </div>
+        <div className={`flex min-h-[360px] flex-col justify-center bg-black text-white ${instrumentFirst ? "lg:order-1" : ""}`}><div className="border-b border-white/20 px-6 py-4 font-mono text-[8px] uppercase tracking-[0.14em] text-white/45">{page.title} / live instrument</div><div className="flex-1 content-center"><FeatureInstrument type={page.visual} /></div></div>
       </div>
     </header>
   );
@@ -264,8 +260,9 @@ function FeatureInstrument({ type }: { type: FeaturePage["visual"] }) {
 }
 
 function DetailGrid({ details, visual }: { details: readonly Detail[]; visual: FeaturePage["visual"] }) {
-  const reverse = ["cost", "tools", "control", "reports"].includes(visual);
-  return <div className={`grid border-x border-black lg:grid-cols-[1.05fr_0.95fr] ${reverse ? "lg:grid-cols-[0.95fr_1.05fr]" : ""}`}><div className={`bg-black text-white ${reverse ? "lg:order-2 lg:border-l" : "lg:border-r"}`}><FeatureInstrument type={visual} /></div><div className={reverse ? "lg:order-1" : ""}><div className="grid sm:grid-cols-2">{details.map((detail,index)=><article key={detail.title} className={`min-h-56 p-6 md:p-8 ${index < 2 ? "border-b border-black" : ""} ${index % 2 === 0 ? "sm:border-r sm:border-black" : ""}`}><span className="font-pixel text-4xl text-black/15">0{index+1}</span><h2 className="mt-8 font-mono text-[10px] uppercase tracking-[0.13em]">{detail.title}</h2><p className="mt-4 text-sm leading-6 text-black/58">{detail.body}</p></article>)}</div></div></div>;
+  const ledger = ["failures", "reports"].includes(visual);
+  const rail = ["trace", "tools", "lifecycle"].includes(visual);
+  return <div className={`border-x border-black ${ledger ? "divide-y divide-black" : rail ? "grid lg:grid-cols-4" : "grid sm:grid-cols-2"}`}>{details.map((detail,index)=><article key={detail.title} className={`${ledger ? "grid gap-6 p-6 md:grid-cols-[90px_260px_1fr] md:items-start md:p-9" : rail ? "min-h-72 border-b border-r border-black p-6 lg:border-b-0" : "min-h-56 border-b border-r border-black p-6 md:p-8"}`}><span className="font-pixel text-4xl text-black/15">0{index+1}</span><h2 className={`${ledger ? "md:pt-2" : "mt-8"} font-mono text-[10px] uppercase tracking-[0.13em]`}>{detail.title}</h2><p className={`${ledger ? "md:pt-1" : "mt-4"} text-sm leading-6 text-black/58`}>{detail.body}</p></article>)}</div>;
 }
 
 function Workflow({ page }: { page: FeaturePage }) {
@@ -282,7 +279,7 @@ export default async function ProductFeaturePage({ params }: { params: Promise<{
     <ProductBreadcrumb title={page.title} slug={feature} />
     <ProductHero page={page} index={index} />
     <FutureBand label="Operating outcome"><div className="grid border-x border-black md:grid-cols-[1fr_1.25fr]"><p className="border-b border-black bg-[#f4d44d] p-7 font-pixel text-4xl leading-[0.92] tracking-[-0.045em] md:border-b-0 md:border-r md:p-10">{page.outcome}</p><div className="p-7 md:p-10"><p className="font-mono text-[8px] uppercase tracking-[0.14em] text-black/45">Use it when</p><p className="mt-5 max-w-2xl text-base leading-7 text-black/65">{page.bestFor}</p></div></div></FutureBand>
-    <FutureBand label={`${page.title} / working surface`}><DetailGrid details={page.details} visual={page.visual} /></FutureBand>
+    <FutureBand label={`${page.title} / capability record`}><DetailGrid details={page.details} visual={page.visual} /></FutureBand>
     <FutureBand label="From signal to action"><Workflow page={page} /></FutureBand>
     <FutureBand tone="ink" label="Continue through the system"><div className="grid border-x border-white/20 md:grid-cols-[1fr_360px]"><div className="p-7 md:p-10"><p className="max-w-3xl font-pixel text-5xl leading-[0.9] tracking-[-0.055em] md:text-7xl">The evidence stays connected after the page ends.</p><div className="mt-9 flex flex-wrap gap-3"><FutureAction href="/demo" inverted>Open the demo</FutureAction><FutureAction href="/sign-up" inverted>Start free</FutureAction></div></div><nav aria-label="Related product capabilities" className="border-t border-white/20 md:border-l md:border-t-0">{page.related.map((slug)=><Link key={slug} href={`/product/${slug}`} className="flex min-h-24 items-center justify-between border-b border-white/20 px-6 font-mono text-[9px] uppercase tracking-[0.12em] last:border-b-0 hover:bg-[#f4d44d] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#f4d44d]"><span>{productFeatures[slug as Feature].title}</span><ArrowRight className="size-4" aria-hidden="true" /></Link>)}</nav></div></FutureBand>
   </FuturePage>;

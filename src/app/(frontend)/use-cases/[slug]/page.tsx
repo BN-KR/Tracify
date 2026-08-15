@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { FutureAction, FutureBand, FuturePage } from "@/components/marketing/future19-page";
+import { BookOpenCheck, Braces, Headphones, RotateCcw, Search, ShieldAlert, Workflow, Wrench } from "lucide-react";
+import { FutureAction, FuturePage } from "@/components/marketing/future19-page";
 
 const useCases = {
   research: { title: "Research agents", statement: "Show the path from question to source.", description: "Trace browsing, extraction, synthesis, and citation decisions across long-running research workflows.", failure: "A plausible answer with an invisible evidence gap.", signals: ["Source retrieval", "Citation coverage", "Reasoning latency", "Model handoffs"], scene: ["Question received", "Search plan built", "12 sources opened", "3 claims unsupported", "Answer held for review"] },
@@ -10,24 +11,56 @@ const useCases = {
 } as const;
 
 type Slug = keyof typeof useCases;
+type PageData = (typeof useCases)[Slug];
+
 export function generateStaticParams() { return Object.keys(useCases).map((slug) => ({ slug })); }
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> { const { slug } = await params; const page = useCases[slug as Slug]; return page ? { title: `${page.title} observability`, description: page.description, alternates: { canonical: `/use-cases/${slug}` } } : {}; }
 
 export default async function UseCasePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params; const page = useCases[slug as Slug]; if (!page) notFound();
-  const caseIndex = Object.keys(useCases).indexOf(slug);
-  const caseMarks = ["?", "↗", "⟳", "{}"];
-  const reverse = caseIndex % 2 === 1;
+  const { slug } = await params;
+  const page = useCases[slug as Slug];
+  if (!page) notFound();
+
   return <FuturePage>
-    <header className={`border-b border-black ${caseIndex === 1 ? "bg-black text-white" : caseIndex === 2 ? "bg-[#f4d44d]" : "bg-[#eceae3]"}`}><div className="mx-auto max-w-[1240px] border-x border-current"><div className={`grid min-h-[420px] md:grid-cols-[minmax(0,1fr)_300px] ${reverse ? "md:grid-cols-[300px_minmax(0,1fr)]" : ""}`}>
-      <div className={`flex flex-col justify-between px-5 py-10 sm:px-8 md:px-10 md:py-12 ${reverse ? "md:order-2 md:border-l" : "md:border-r"}`}><p className="font-mono text-[9px] uppercase tracking-[0.15em] opacity-50">Use case / {page.title}</p><h1 className="my-8 font-pixel text-[clamp(3rem,6vw,5.25rem)] leading-[0.88] tracking-[-0.055em]">{page.statement}</h1><p className="max-w-xl text-base leading-7 opacity-70">{page.description}</p></div>
-      <div className={`relative flex min-h-52 items-center justify-center overflow-hidden border-t border-current md:border-t-0 ${reverse ? "md:order-1" : ""} ${caseIndex === 1 ? "bg-[#f4d44d] text-black" : "bg-black text-white"}`}><span className="font-pixel text-[9rem] leading-none tracking-[-0.08em]">{caseMarks[caseIndex]}</span><div className="absolute inset-x-6 bottom-6 border-t border-current/30 pt-3 font-mono text-[8px] uppercase tracking-[0.13em]">Failure pattern / 0{caseIndex + 1}</div></div>
-    </div></div></header>
-    <FutureBand label="Failure anatomy"><div className={`grid md:grid-cols-[0.8fr_1.2fr] ${reverse ? "md:grid-cols-[1.2fr_0.8fr]" : ""}`}>
-      <div className={`border-black bg-[#f4d44d] p-7 md:p-10 ${reverse ? "md:order-2 md:border-l" : "md:border-r"}`}><span className="font-mono text-[9px] uppercase tracking-[0.14em]">The expensive unknown</span><p className="mt-20 font-pixel text-5xl leading-[0.9] tracking-[-0.055em]">{page.failure}</p></div>
-      <div className={`bg-black p-6 text-white md:p-10 ${reverse ? "md:order-1" : ""}`}><div className="flex items-center justify-between border-b border-white/20 pb-4 font-mono text-[8px] uppercase tracking-[0.13em] text-white/45"><span>Live execution tape</span><span>05 events</span></div><ol>{page.scene.map((item, index) => <li key={item} className="grid grid-cols-[42px_1fr_auto] items-center border-b border-white/15 py-5 font-mono text-[10px] uppercase tracking-[0.09em]"><span className="text-white/30">0{index + 1}</span><span>{item}</span><span className={`size-2 ${index === 3 ? "bg-[#f4d44d]" : "bg-white/25"}`} /></li>)}</ol></div>
-    </div></FutureBand>
-    <FutureBand label="Signals that matter"><div className="grid sm:grid-cols-2 lg:grid-cols-4">{page.signals.map((signal, index) => <div key={signal} className="min-h-48 border-b border-black p-6 odd:border-r sm:border-b-0 lg:border-r lg:last:border-r-0"><span className="font-pixel text-4xl text-black/18">0{index + 1}</span><h2 className="mt-14 font-mono text-[10px] uppercase tracking-[0.12em]">{signal}</h2></div>)}</div></FutureBand>
-    <FutureBand tone="ink"><div className="flex flex-col gap-8 px-5 py-14 md:flex-row md:items-end md:justify-between md:px-10"><p className="max-w-2xl font-pixel text-5xl leading-[0.88] tracking-[-0.06em] md:text-7xl">Put your own run on the tape.</p><FutureAction href="/sign-up" inverted>Start tracing free</FutureAction></div></FutureBand>
+    {slug === "research" ? <ResearchPage page={page} /> : null}
+    {slug === "support" ? <SupportPage page={page} /> : null}
+    {slug === "automation" ? <AutomationPage page={page} /> : null}
+    {slug === "tool-calling" ? <ToolCallingPage page={page} /> : null}
   </FuturePage>;
 }
+
+function ResearchPage({ page }: { page: PageData }) {
+  return <>
+    <header className="border-b border-black"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[minmax(0,1fr)_420px]"><div className="px-5 py-12 sm:px-8 md:px-10 md:py-20 lg:border-r lg:border-black"><p className="font-mono text-[9px] uppercase tracking-[0.16em] text-black/50">Research / evidence trail</p><h1 className="mt-9 max-w-5xl font-pixel text-[clamp(3.3rem,7vw,7rem)] leading-[0.82] tracking-[-0.075em]">{page.statement}</h1><p className="mt-8 max-w-2xl text-base leading-7 text-black/62">{page.description}</p></div><aside className="border-t border-black bg-[#f4d44d] p-6 lg:border-t-0 lg:p-8"><Search className="size-10" strokeWidth={1.25} /><p className="mt-24 font-pixel text-4xl leading-[0.92] tracking-[-0.055em]">Every claim needs a route back to evidence.</p><div className="mt-8 border-t border-black pt-4 font-mono text-[9px] uppercase tracking-[0.12em]">Coverage target / 100%</div></aside></div></header>
+    <section className="border-b border-black bg-black py-8 text-white"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[300px_1fr]"><div className="border-white/20 p-6 lg:border-r lg:p-8"><BookOpenCheck className="size-8 text-[#f4d44d]" /><h2 className="mt-12 font-pixel text-5xl tracking-[-0.06em]">Evidence trail</h2><p className="mt-5 text-sm leading-6 text-white/55">The answer stays held until unsupported claims are visible.</p></div><ol className="divide-y divide-white/20 border-t border-white/20 lg:border-t-0">{page.scene.map((item, index) => <li key={item} className="grid min-h-20 grid-cols-[64px_1fr_auto] items-center px-5"><span className="font-pixel text-3xl text-white/25">0{index + 1}</span><span className="font-mono text-[10px] uppercase tracking-[0.1em]">{item}</span><span className={`font-mono text-[8px] uppercase tracking-[0.1em] ${index === 3 ? "text-[#f4d44d]" : "text-white/35"}`}>{index === 3 ? "Gap" : "Verified"}</span></li>)}</ol></div></section>
+    <SignalFooter page={page} label="Inspect a research run" />
+  </>;
+}
+
+function SupportPage({ page }: { page: PageData }) {
+  return <>
+    <header className="border-b border-black bg-black text-white"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[360px_1fr]"><aside className="flex flex-col justify-between border-white/20 bg-[#f4d44d] p-6 text-black lg:min-h-[560px] lg:border-r lg:p-8"><div className="flex justify-between font-mono text-[9px] uppercase tracking-[0.14em]"><span>Case 1842</span><span>Escalated</span></div><Headphones className="size-12" strokeWidth={1.2} /><p className="font-pixel text-4xl leading-[0.9] tracking-[-0.055em]">The customer sees an answer. You need the decision behind it.</p></aside><div className="p-6 sm:p-8 md:p-10 lg:p-14"><p className="font-mono text-[9px] uppercase tracking-[0.16em] text-white/45">Support / decision record</p><h1 className="mt-9 max-w-5xl font-pixel text-[clamp(3.3rem,7vw,7rem)] leading-[0.82] tracking-[-0.075em]">{page.statement}</h1><p className="mt-8 max-w-2xl text-base leading-7 text-white/62">{page.description}</p><div className="mt-10 border border-white/25"><div className="border-b border-white/25 p-4 font-mono text-[8px] uppercase tracking-[0.13em] text-white/40">Conversation handoff</div>{page.scene.map((item,index)=><div key={item} className="grid grid-cols-[44px_1fr_auto] border-b border-white/15 p-4 last:border-b-0"><span className="font-mono text-[9px] text-white/30">0{index+1}</span><span className="text-sm">{item}</span>{index===3?<ShieldAlert className="size-4 text-[#f4d44d]"/>:null}</div>)}</div></div></div></header>
+    <section className="border-b border-black"><div className="mx-auto grid max-w-[1440px] md:grid-cols-[0.85fr_1.15fr]"><div className="bg-[#f4d44d] p-6 md:p-10"><p className="font-mono text-[9px] uppercase tracking-[0.14em]">Escalation risk</p><p className="mt-20 font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">{page.failure}</p></div><div className="grid grid-cols-2 border-t border-black md:border-l md:border-t-0">{page.signals.map((signal,index)=><div key={signal} className="min-h-44 border-b border-r border-black p-5"><span className="font-pixel text-3xl text-black/20">0{index+1}</span><h2 className="mt-12 font-mono text-[10px] uppercase tracking-[0.12em]">{signal}</h2></div>)}</div></div></section>
+    <CallToAction label="Trace the next escalation" />
+  </>;
+}
+
+function AutomationPage({ page }: { page: PageData }) {
+  return <>
+    <header className="border-b border-black bg-[#f4d44d]"><div className="mx-auto max-w-[1440px] px-5 py-12 sm:px-8 md:px-10 md:py-16"><div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.16em]"><span>Automation / execution chain</span><Workflow className="size-6" /></div><h1 className="mt-12 max-w-6xl font-pixel text-[clamp(3.3rem,8vw,8rem)] leading-[0.8] tracking-[-0.078em]">{page.statement}</h1><p className="mt-8 max-w-2xl text-base leading-7 text-black/65">{page.description}</p></div></header>
+    <section className="border-b border-black bg-black py-10 text-white"><div className="mx-auto max-w-[1440px] overflow-x-auto"><ol className="flex min-w-[980px] border-y border-white/20">{page.scene.map((item,index)=><li key={item} className={`flex min-h-64 w-1/5 flex-col justify-between border-r border-white/20 p-6 last:border-r-0 ${index===2?"bg-[#f4d44d] text-black":""}`}><div className="flex items-center justify-between"><span className="font-pixel text-4xl opacity-25">0{index+1}</span>{index===2?<RotateCcw className="size-5"/>:null}</div><p className="font-pixel text-3xl leading-[0.95] tracking-[-0.05em]">{item}</p><span className="font-mono text-[8px] uppercase tracking-[0.12em] opacity-50">{index===2?"Retry boundary":"Completed"}</span></li>)}</ol></div></section>
+    <section className="border-b border-black"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[1fr_420px]"><div className="grid sm:grid-cols-2">{page.signals.map((signal,index)=><div key={signal} className="min-h-48 border-b border-r border-black p-6"><span className="font-mono text-[9px] uppercase tracking-[0.12em] text-black/35">Signal / 0{index+1}</span><h2 className="mt-20 font-pixel text-4xl tracking-[-0.055em]">{signal}</h2></div>)}</div><aside className="border-t border-black bg-[#d9d5ca] p-6 lg:border-l lg:border-t-0 lg:p-9"><p className="font-mono text-[9px] uppercase tracking-[0.14em]">Duplicate risk</p><p className="mt-24 font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">{page.failure}</p></aside></div></section>
+    <CallToAction label="Inspect an automation" />
+  </>;
+}
+
+function ToolCallingPage({ page }: { page: PageData }) {
+  return <>
+    <header className="border-b border-black"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[minmax(0,1fr)_minmax(460px,0.8fr)]"><div className="p-6 sm:p-8 md:p-10 lg:py-16"><div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.15em]"><Wrench className="size-4" />Tool calling / payload inspector</div><h1 className="mt-12 max-w-5xl font-pixel text-[clamp(3.3rem,7vw,7rem)] leading-[0.82] tracking-[-0.075em]">{page.statement}</h1><p className="mt-8 max-w-2xl text-base leading-7 text-black/62">{page.description}</p></div><aside className="border-t border-black bg-black p-6 text-white lg:border-l lg:border-t-0 lg:p-8"><div className="flex items-center justify-between border-b border-white/20 pb-4 font-mono text-[8px] uppercase tracking-[0.13em] text-white/45"><span>Tool payload</span><Braces className="size-4" /></div><pre className="mt-8 overflow-x-auto font-mono text-[11px] leading-7"><code><span className="text-white/35">{"{"}</span>{"\n"}  <span className="text-[#f4d44d]">&quot;tool&quot;</span>: &quot;issue_refund&quot;,{"\n"}  <span className="text-[#f4d44d]">&quot;amount&quot;</span>: 149,{"\n"}  <span className="text-[#f4d44d]">&quot;currency&quot;</span>: &quot;USD&quot;{"\n"}<span className="text-white/35">{"}"}</span></code></pre><div className="mt-10 border border-[#f4d44d] p-4 font-mono text-[9px] uppercase leading-5 tracking-[0.1em] text-[#f4d44d]">Schema rejected<br/>currency must be lowercase</div></aside></div></header>
+    <section className="border-b border-black bg-[#f4d44d]"><div className="mx-auto grid max-w-[1440px] md:grid-cols-[360px_1fr]"><div className="border-black p-6 md:border-r md:p-9"><p className="font-mono text-[9px] uppercase tracking-[0.14em]">Loop risk</p><p className="mt-24 font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">{page.failure}</p></div><ol className="border-t border-black bg-[#eceae3] md:border-t-0">{page.scene.map((item,index)=><li key={item} className="grid min-h-20 grid-cols-[64px_1fr_auto] items-center border-b border-black px-5 last:border-b-0"><span className="font-pixel text-3xl text-black/20">0{index+1}</span><span className="font-mono text-[10px] uppercase tracking-[0.1em]">{item}</span><span className="font-mono text-[8px] uppercase tracking-[0.1em] text-black/40">{index===2?"Rejected":"Recorded"}</span></li>)}</ol></div></section>
+    <SignalFooter page={page} label="Inspect a tool call" />
+  </>;
+}
+
+function SignalFooter({ page, label }: { page: PageData; label: string }) { return <><section className="border-b border-black"><div className="mx-auto grid max-w-[1440px] sm:grid-cols-2 lg:grid-cols-4">{page.signals.map((signal,index)=><div key={signal} className="min-h-44 border-b border-r border-black p-6"><span className="font-pixel text-3xl text-black/20">0{index+1}</span><h2 className="mt-12 font-mono text-[10px] uppercase tracking-[0.12em]">{signal}</h2></div>)}</div></section><CallToAction label={label} /></>; }
+function CallToAction({ label }: { label: string }) { return <section className="border-b border-black bg-black text-white"><div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-5 py-12 md:flex-row md:items-end md:justify-between md:px-10"><p className="max-w-3xl font-pixel text-5xl leading-[0.88] tracking-[-0.06em] md:text-7xl">{label}</p><FutureAction href="/sign-up" inverted>Start tracing free</FutureAction></div></section>; }

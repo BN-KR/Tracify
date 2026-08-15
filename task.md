@@ -705,16 +705,35 @@
 - [x] Add isolated development Convex endpoints to Vercel Preview without exposing production data.
 - [x] Redeploy commit `45780f6` and verify Vercel reaches `READY`.
 - [x] Update the staging runbook with both required variables and the current project name.
-# Current task
 
-Rebuild `/docs` as a Langfuse-inspired, Tracify-branded documentation hub backed by a dedicated `content/docs/*.mdoc` Markdoc repository.
+# Page-specific site redesign — 2026-08-14
 
-Current implementation includes nine core chapters, grouped navigation, article navigation, search, utility links, and separate blog/docs repositories.
-# Follow-up from content review
+- [x] Audit the repeated public-page skeleton and current mobile navigation.
+- [x] Confirm that landing, blog, and docs are excluded from this pass.
+- [x] Replace the tiny mobile navigation list with the selected Section Switchboard design.
+- [x] Give every remaining public route a composition based on its specific user task.
+  - [x] Rebuild Pricing as an interactive decision canvas.
+  - [x] Rebuild Integrations as a protocol-and-connection map.
+  - [x] Split Research, Support, Automation, and Tool Calling into four distinct compositions.
+  - [x] Finish product, operational, company, legal, auth, and onboarding routes in the requested scope.
+- [x] Differentiate onboarding and auth surfaces without breaking their workflows.
+- [x] Complete repository type, content, and production-build verification (responsive, focused lint, content tests, TypeScript, and production build pass).
+- [ ] Commit, push, open the default draft PR, and verify the preview deployment.
 
-- [x] Align published SDK package references in docs and supporting public copy to `5to1r`.
-- [x] Add the trace-clinic promise to the contact destination.
-- [x] Fill support use-case signal cards with explanatory copy.
-- [x] Finish remaining one-line marketing snippets and normalize docs code-string rendering.
-- [x] Replace fabricated resource-desk titles with real guide language and a real published post link.
-- [x] Run focused lint, `git diff --check`, `npm run test:content`, and `npm run build`.
+# SEO release guardrails — 2026-08-14
+
+- [x] Record the post-merge commit ancestry failure from PR #5.
+- [x] Add a mandatory public-page, merge, production deployment, IndexNow, and recrawl checklist for future agents.
+- [x] Point repository-wide agent instructions to the checklist.
+- [ ] Land SEO remediation commits `3474f98` and `191cbeb` through a follow-up pull request before claiming the audit fixes are live.
+
+## SAML login
+- [x] Add Better Auth SSO server/client plugins.
+- [x] Add Convex `ssoProvider` schema fields and indexes.
+- [x] Add email-domain-resolved SAML login action to `/sign-in` and `/sign-up`.
+- [ ] Register each customer IdP provider with issuer, domain, entry point, certificate, and SAML mapping in the target Convex deployment.
+# Documentation migration follow-up
+
+- [x] Keep the Markdoc docs repository separate from blog content.
+- [x] Preserve the `5to1r` SDK contract in public examples.
+- [x] Preserve critique learnings for future agents and avoid fabricated resource promises.

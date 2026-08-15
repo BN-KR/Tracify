@@ -3,7 +3,27 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import {
+  Activity,
+  ArrowRight,
+  BookOpen,
+  Bot,
+  Braces,
+  ChartNoAxesCombined,
+  CircleGauge,
+  Code2,
+  FlaskConical,
+  Headphones,
+  Mail,
+  Menu,
+  Newspaper,
+  Orbit,
+  Rocket,
+  ShieldCheck,
+  Sparkles,
+  Wrench,
+  X,
+} from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { authClient } from "@/lib/auth-client";
 
@@ -41,6 +61,25 @@ const menus = {
     ["Contact", "Talk through your stack", "/contact"],
   ],
 } as const;
+
+const mobileMenuMeta = {
+  Product: {
+    summary: "Observe, improve, release, and operate with confidence.",
+    icons: [Activity, Sparkles, Rocket, CircleGauge],
+  },
+  Solutions: {
+    summary: "Purpose-built paths for the work your agents do.",
+    icons: [Headphones, FlaskConical, Orbit, Wrench],
+  },
+  Developers: {
+    summary: "Guides, SDKs, and the complete ingest surface.",
+    icons: [BookOpen, Code2, Braces, Bot],
+  },
+  Company: {
+    summary: "The record behind the product and the people building it.",
+    icons: [Newspaper, ChartNoAxesCombined, ShieldCheck, Mail],
+  },
+} satisfies Record<keyof typeof menus, { summary: string; icons: typeof Activity[] }>;
 
 type MenuName = keyof typeof menus;
 
@@ -183,6 +222,7 @@ function DesktopPanel({
 function MobilePanel({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const { data: session } = authClient.useSession();
+  const [activeSection, setActiveSection] = useState<MenuName | null>(null);
 
   async function signOut() {
     await authClient.signOut({
@@ -192,52 +232,122 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="border-t border-black/15 p-4 md:hidden">
-      <Link onClick={onClose} href="/pricing" className="block border-b border-black/10 py-3 font-mono text-[9px] uppercase tracking-[0.13em]">Pricing</Link>
-      {(Object.keys(menus) as MenuName[]).map((name) => (
-        <div key={name} className="border-b border-black/10 py-3">
-          <p className="font-mono text-[9px] uppercase tracking-[0.13em]">
-            {name}
-          </p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            {menus[name].map(([title, , href]) => (
-              <Link
-                onClick={onClose}
-                key={title}
-                href={href}
-                className="font-mono text-[9px] text-black/60 hover:text-black"
+    <div className="max-h-[calc(100dvh-54px)] overflow-y-auto border-t border-black bg-[#eceae3] md:hidden">
+      {(Object.keys(menus) as MenuName[]).map((name, sectionIndex) => {
+        const expanded = activeSection === name;
+        const meta = mobileMenuMeta[name];
+
+        return (
+          <section
+            key={name}
+            className={expanded ? "bg-[#f4d44d]" : "bg-[#eceae3]"}
+          >
+            <button
+              type="button"
+              onClick={() =>
+                setActiveSection((current) => (current === name ? null : name))
+              }
+              aria-expanded={expanded}
+              aria-controls={`mobile-nav-${name.toLowerCase()}`}
+              className="grid min-h-24 w-full grid-cols-[64px_1fr_32px] items-center gap-3 border-t border-black px-4 py-4 text-left focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px]"
+            >
+              <span className="font-pixel text-5xl leading-none tracking-[-0.07em]">
+                0{sectionIndex + 1}
+              </span>
+              <span>
+                <span className="block font-pixel text-3xl leading-none tracking-[-0.05em]">
+                  {name}
+                </span>
+                <span className="mt-2 block max-w-[28ch] text-sm leading-5 text-black/65">
+                  {meta.summary}
+                </span>
+              </span>
+              <span className="font-mono text-3xl leading-none" aria-hidden="true">
+                {expanded ? "−" : "+"}
+              </span>
+            </button>
+
+            {expanded ? (
+              <div
+                id={`mobile-nav-${name.toLowerCase()}`}
+                className="border-t border-black px-4 pb-4 pt-4"
               >
-                {title}
-              </Link>
-            ))}
-          </div>
-        </div>
-      ))}
-      <div className="mt-5 flex gap-3">
+                <div className="grid grid-cols-2 border-l border-t border-black">
+                  {menus[name].map(([title, body, href], itemIndex) => {
+                    const Icon = meta.icons[itemIndex];
+                    return (
+                      <Link
+                        onClick={onClose}
+                        key={title}
+                        href={href}
+                        className="group flex min-h-40 flex-col justify-between border-b border-r border-black bg-[#f4d44d] p-4 transition-colors hover:bg-black hover:text-white focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px]"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <Icon className="size-5" strokeWidth={1.5} aria-hidden="true" />
+                          <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                        </div>
+                        <div>
+                          <span className="font-pixel text-[1.65rem] leading-none tracking-[-0.05em]">
+                            {title}
+                          </span>
+                          <span className="mt-2 line-clamp-2 block text-sm leading-5 opacity-65">
+                            {body}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {name === "Product" ? (
+                  <Link
+                    onClick={onClose}
+                    href="/pricing"
+                    className="mt-4 flex min-h-20 items-center justify-between border border-black bg-[#f4d44d] px-5 py-4 font-pixel text-3xl tracking-[-0.05em] transition-colors hover:bg-black hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px]"
+                  >
+                    <span>Pricing</span>
+                    <span className="flex items-center gap-4 font-mono text-xs uppercase tracking-[0.14em]">
+                      Rate card
+                      <ArrowRight className="size-4" aria-hidden="true" />
+                    </span>
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
+          </section>
+        );
+      })}
+
+      <div className="sticky bottom-0 border-t border-black bg-black p-4 text-white">
         {session ? (
           <>
             <button
               type="button"
               onClick={() => void signOut()}
-              className="border border-black px-3 py-2 font-mono text-[8px] uppercase text-black/55"
+              className="mb-3 min-h-12 w-full border border-white/35 px-4 font-mono text-xs uppercase tracking-[0.14em] text-white/70 hover:border-white hover:text-white"
             >
               Sign out
             </button>
             <Link
               onClick={onClose}
               href="/dashboard"
-              className="bg-black px-3 py-2 font-mono text-[8px] uppercase text-white"
+              className="flex min-h-16 w-full items-center justify-between bg-white px-5 font-mono text-xs uppercase tracking-[0.14em] text-black"
             >
-              Dashboard
+              <span>Open dashboard</span>
+              <ArrowRight className="size-5" aria-hidden="true" />
             </Link>
           </>
         ) : (
           <Link
             onClick={onClose}
             href="/sign-up"
-            className="bg-black px-3 py-2 font-mono text-[8px] uppercase text-white"
+            className="flex min-h-16 w-full items-center justify-between bg-black px-1 font-mono text-xs uppercase tracking-[0.14em] text-white"
           >
-            Start free
+            <span>
+              <span className="block">Start free</span>
+              <span className="mt-1 block text-[9px] text-white/50">No credit card required</span>
+            </span>
+            <ArrowRight className="size-5" aria-hidden="true" />
           </Link>
         )}
       </div>
