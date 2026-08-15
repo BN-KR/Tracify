@@ -6,6 +6,7 @@ import posthog from "posthog-js";
 
 import { CodeCopyBlock } from "@/components/onboarding/code-copy-block";
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
+import { getDeploymentRegion, getTracifyRegion } from "@/lib/regions";
 
 const isPostHogConfigured = Boolean(
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
@@ -67,13 +68,16 @@ export function InstallStep() {
   const router = useRouter();
   const [tab, setTab] = useState<keyof typeof snippets>("python");
   const active = snippets[tab];
+  const region = getTracifyRegion(getDeploymentRegion());
 
   return (
     <div>
       <OnboardingHeader
         title="Install the SDK."
-        description="Choose your runtime and add Tracify to your agent."
+        description={`Choose your runtime and connect it to Tracify ${region.shortName}.`}
       />
+      <CodeCopyBlock label="Regional environment" value={`TRACIFY_REGION=${region.id}`} />
+      <div className="mb-4 mt-4 border border-[#2A2A2A] bg-[#111111] p-3 font-mono text-[10px] uppercase tracking-[0.1em] text-[#999999]">Ingest endpoint · {region.origin}/api/ingest</div>
       <div className="mb-4 grid border border-[#2A2A2A] sm:grid-cols-3">
         {Object.entries(snippets).map(([key, snippet]) => (
           <button

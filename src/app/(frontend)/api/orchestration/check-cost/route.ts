@@ -2,11 +2,7 @@ import { type NextRequest } from "next/server";
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import { getConvexClient } from "@/lib/convex";
-import { hashApiKey } from "@/lib/api-keys";
-
-// Cost counter mutations — typed manually until convex codegen picks up costCounters module
-// (blocked by pre-existing test document schema validation error)
-const costCounterApi = api as any;
+import { getWrongRegionApiKeyResponse, hashApiKey, isTracifyApiKey } from "@/lib/api-keys";
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -15,9 +11,11 @@ export async function POST(request: NextRequest) {
   }
 
   const apiKey = authHeader.slice(7).trim();
-  if (!apiKey.startsWith("tracify_sk_live_")) {
+  if (!isTracifyApiKey(apiKey)) {
     return Response.json({ error: "Invalid API key" }, { status: 401 });
   }
+  const wrongRegion = getWrongRegionApiKeyResponse(apiKey);
+  if (wrongRegion) return wrongRegion;
 
   let body: Record<string, unknown>;
   try {
@@ -62,7 +60,7 @@ export async function POST(request: NextRequest) {
   // Check per-run ceiling
   if (policy.maxCostPerRun !== undefined && policy.maxCostPerRun !== null) {
     const runPeriod = `run:${runId}`;
-    const result = await convex.mutation(costCounterApi.costCounters.checkAndIncrementCost, {
+    const result = await convex.mutation(api.costCounters.checkAndIncrementCost, {
       projectId: projectDocId,
       period: runPeriod,
       incrementUsd,
@@ -82,7 +80,7 @@ export async function POST(request: NextRequest) {
   // Check per-day ceiling
   if (policy.maxCostPerDay !== undefined && policy.maxCostPerDay !== null) {
     const dayPeriod = `day:${today}`;
-    const result = await convex.mutation(costCounterApi.costCounters.checkAndIncrementCost, {
+    const result = await convex.mutation(api.costCounters.checkAndIncrementCost, {
       projectId: projectDocId,
       period: dayPeriod,
       incrementUsd,

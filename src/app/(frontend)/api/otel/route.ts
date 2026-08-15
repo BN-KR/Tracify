@@ -4,7 +4,7 @@ import type { Id } from "convex/_generated/dataModel";
 
 import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
-import { hashApiKey } from "@/lib/api-keys";
+import { getWrongRegionApiKeyResponse, hashApiKey, isTracifyApiKey } from "@/lib/api-keys";
 import { DEFAULT_REDACTION_RULES, redactPayload, redactRecord } from "@/lib/redaction";
 
 const MAX_BODY_BYTES = 4 * 1024 * 1024; // 4MB for batched OTLP traces
@@ -272,9 +272,11 @@ export async function POST(request: NextRequest) {
   }
 
   const apiKey = authHeader.slice(7).trim();
-  if (!apiKey.startsWith("tracify_sk_live_")) {
+  if (!isTracifyApiKey(apiKey)) {
     return Response.json({ error: "Invalid API key" }, { status: 401 });
   }
+  const wrongRegion = getWrongRegionApiKeyResponse(apiKey);
+  if (wrongRegion) return wrongRegion;
 
   let body: OtlpTracesExportRequest;
   try {

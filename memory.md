@@ -1171,3 +1171,11 @@
 - PR #5 merged branch state at `5e7807b`; later SEO commits `3474f98` and `191cbeb` were pushed after the merge and are not ancestors of `origin/main`.
 - Production deployment `dpl_GucMKe2AYetsPtixDMw1GMGJgGy6` correctly deployed exact main commit `f646ca7` and owns the canonical Tracify domains. The later IndexNow key remains absent because it is not in that commit.
 - Future agents must follow `docs/seo-release-checklist.md`: prove commit ancestry, deploy an exact clean `origin/main` tree to `tracify-tech/tracify`, verify canonical aliases, and submit IndexNow only after its key is live.
+
+## EU/US regional cloud foundation (2026-08-15)
+- Regional cloud uses one Git repository and two fully separated deployments. Canonical hosts are `eu.cloud.tracify.tech` and `us.cloud.tracify.tech`; selection happens before authentication, and accounts/data do not automatically migrate.
+- Vercel projects `tracify-cloud-eu` and `tracify-cloud-us` are Git-connected to `BN-KR/Tracify`, configured as Next.js, and have region-specific production/preview settings. Both domains are attached; Domeneshop DNS still needs A records to `76.76.21.21` before TLS can issue.
+- Convex EU is `jovial-owl-711` in `eu-west-1`; Convex US is `flexible-anaconda-752` in `us-east-1`. They use unique runtime secrets and live `/health` endpoints that report `eu` and `us` respectively.
+- The existing Tinybird host is European and the existing Redis Cloud URL is one shared database. They may seed the EU setup, but must never be reused for US. Independent Tinybird, Redis, and Inngest resources remain launch blockers and their secrets are intentionally absent from regional Vercel projects.
+- Local deploy keys and copied environment artifacts live only under ignored `scratch/tracify-regional/`; never commit or print their values. The non-secret authoritative inventory and external launch gates live in `config/regional-cloud.json`.
+- The latent Better Auth SAML plugin was removed during regional deployment work because `@better-auth/sso` imports Node-only crypto/samlify and cannot bundle in Convex's HTTP runtime. Do not claim SAML support until it is reintroduced through a Convex-compatible architecture and verified in both regions.

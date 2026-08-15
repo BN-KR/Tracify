@@ -1,0 +1,46 @@
+---
+slug: data-regions
+title: Choose a Tracify Cloud region
+description: Select the EU or US cloud, configure the matching SDK endpoint, and understand the regional data boundary.
+section: Deploy
+order: 8
+---
+
+# Choose a Tracify Cloud region
+
+Tracify Cloud runs isolated EU and US environments. Select a region before creating an account so the application, account, projects, API keys, and telemetry use the same regional backend.
+
+| Region | Application URL | Location | SDK value |
+| --- | --- | --- | --- |
+| Europe | `https://eu.cloud.tracify.tech` | Ireland | `eu` |
+| United States | `https://us.cloud.tracify.tech` | Virginia | `us` |
+
+## Connect the SDK
+
+Set the API key and region together. New API keys include their region, and the SDK rejects a key configured for the other cloud.
+
+```bash
+TRACIFY_API_KEY=tracify_sk_live_eu_...
+TRACIFY_REGION=eu
+```
+
+For an explicit TypeScript configuration:
+
+```ts
+import { TracifyClient } from "5to1r";
+
+const tracify = new TracifyClient({
+  apiKey: process.env.TRACIFY_API_KEY,
+  region: "eu",
+});
+```
+
+Use `region="eu"` or `region="us"` with the Python client. A custom `host` remains available for self-hosted installations.
+
+## Understand the boundary
+
+Accounts and data are not shared between regions. Selecting another region does not migrate an account, project, API key, trace, prompt, dataset, or subscription. Sign in to the region where the account was created.
+
+API keys issued before regional cloud belong to the original EU environment. Rotate an old key after opening the EU project if you want the key itself to show the region.
+
+For another region, create an account there or contact Tracify before moving production telemetry. Export and migration must be completed deliberately so records are not split across two clouds.

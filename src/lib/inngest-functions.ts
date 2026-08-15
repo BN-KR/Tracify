@@ -4,6 +4,7 @@ import type { Id } from "convex/_generated/dataModel";
 import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
 import { ingestSpan } from "@/lib/tinybird";
+import { getTracifyRegion } from "@/lib/regions";
 
 /**
  * Milestone 2 activation pipeline:
@@ -230,7 +231,7 @@ export const processAlert = inngest.createFunction(
                       text: "View Trace",
                       emoji: true
                     },
-                    url: `https://www.tracify.tech/dashboard/${alert.projectId}/runs/${alert.runId}`,
+                    url: `${getTracifyRegion().origin}/dashboard/${alert.projectId}/runs/${alert.runId}`,
                     style: "primary"
                   }
                 ]

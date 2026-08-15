@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import {
   FiveToOneClient,
   RuntimePolicy,
+  TRACIFY_REGION_HOSTS,
 } from "../src/index";
 
 // ─── Helpers ──────────────────────────────────────────────────────
@@ -25,6 +26,23 @@ function makeClient(): FiveToOneClient {
     host: "http://localhost:9999",
   });
 }
+
+describe("regional cloud configuration", () => {
+  it("selects the requested regional host", () => {
+    const client = new FiveToOneClient({ apiKey: "test-key", region: "us" });
+    expect((client as any).host).toBe(TRACIFY_REGION_HOSTS.us);
+  });
+
+  it("rejects a regional key configured for the wrong cloud", () => {
+    expect(() => new FiveToOneClient({ apiKey: "tracify_sk_live_eu_example", region: "us" }))
+      .toThrow("belongs to EU");
+  });
+
+  it("assigns pre-region keys to the EU cloud", () => {
+    expect(() => new FiveToOneClient({ apiKey: "tracify_sk_live_legacy", region: "us" }))
+      .toThrow("belongs to EU");
+  });
+});
 
 function mockFetchForCostCheck(...responses: Array<{ ok: boolean; status?: number; body?: any }>) {
   let callIdx = 0;

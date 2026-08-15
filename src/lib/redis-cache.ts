@@ -15,11 +15,9 @@ type CachedPayload = {
 const DEFAULT_STALE_TTL_SECONDS = 24 * 60 * 60;
 
 declare global {
-  // eslint-disable-next-line no-var
   var __fivetooneRedisClient:
     | ReturnType<typeof createClient>
     | undefined;
-  // eslint-disable-next-line no-var
   var __fivetooneRedisConnectPromise: Promise<unknown> | undefined;
 }
 
@@ -48,6 +46,16 @@ async function connectRedis() {
   }
 
   return client;
+}
+
+export async function checkRedisHealth() {
+  const client = await connectRedis();
+  if (!client) throw new Error("REDIS_URL is not set");
+  const response = await Promise.race([
+    client.ping(),
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Redis health check timed out")), 4_000)),
+  ]);
+  if (response !== "PONG") throw new Error("Redis did not return PONG");
 }
 
 export async function getJsonCache<T extends CachedPayload>(
@@ -118,4 +126,3 @@ export function withCacheReason<T extends CachedPayload>(
     },
   };
 }
-

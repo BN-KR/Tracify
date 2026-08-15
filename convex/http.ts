@@ -6,6 +6,17 @@ import { authComponent, createAuth } from "./betterAuth/auth";
 const http = httpRouter();
 authComponent.registerRoutes(http, createAuth);
 
+http.route({
+  path: "/health",
+  method: "GET",
+  handler: httpAction(async () => Response.json({
+    ok: true,
+    service: "tracify-convex",
+    region: process.env.TRACIFY_REGION ?? "unknown",
+    checkedAt: new Date().toISOString(),
+  }, { headers: { "Cache-Control": "no-store" } })),
+});
+
 type ExecutionBody = {
   projectId: string;
   traceId: string;

@@ -9,6 +9,7 @@ import {
   clearOneTimeApiKey,
   getOneTimeApiKey,
 } from "@/lib/onboarding-client-state";
+import { getDeploymentRegion, getTracifyRegion } from "@/lib/regions";
 
 const API_KEY_COPIED_STORAGE_KEY = "5to1r.onboarding.apiKeyCopied";
 const isPostHogConfigured = Boolean(
@@ -20,9 +21,10 @@ export function ApiKeyStep() {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [apiKey] = useState(getOneTimeApiKey);
+  const region = getTracifyRegion(getDeploymentRegion());
   const envContent = useMemo(
-    () => (apiKey ? `TRACIFY_API_KEY=${apiKey}\n` : ""),
-    [apiKey],
+    () => (apiKey ? `TRACIFY_API_KEY=${apiKey}\nTRACIFY_REGION=${region.id}\n` : ""),
+    [apiKey, region.id],
   );
 
   async function copyKey() {
@@ -51,7 +53,7 @@ export function ApiKeyStep() {
     <div>
       <OnboardingHeader
         title="Your API key."
-        description="This key is shown once. Copy it now and store it securely."
+        description={`This key is shown once and belongs to Tracify ${region.shortName}. Copy it now and store it securely.`}
       />
       {apiKey ? (
         <>

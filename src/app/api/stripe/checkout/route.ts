@@ -3,10 +3,12 @@ import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import { getAuthedConvexClient } from "@/lib/convex-server";
 import { getStripe, stripePriceIds } from "@/lib/stripe";
+import { getDeploymentRegion } from "@/lib/regions";
 
 export async function POST(request: Request) {
   if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: "Stripe is not configured" }, { status: 503 });
   const stripe = getStripe();
+  const region = getDeploymentRegion();
   const body = await request.json() as { projectId?: string; plan?: "pro" | "team"; interval?: "monthly" | "annual" };
   if (!body.projectId || !body.plan || !body.interval) return NextResponse.json({ error: "Invalid checkout request" }, { status: 400 });
   const client = await getAuthedConvexClient();
@@ -21,7 +23,7 @@ export async function POST(request: Request) {
 
   let customer = project.stripeCustomerId ?? undefined;
   if (!customer) {
-    const created = await stripe.customers.create({ name: project.name, metadata: { projectId } });
+    const created = await stripe.customers.create({ name: project.name, metadata: { projectId, tracifyRegion: region } });
     customer = created.id;
     await client.mutation(api.billing.attachCustomer, { projectId, stripeCustomerId: customer });
   }
@@ -33,8 +35,8 @@ export async function POST(request: Request) {
       customer,
       line_items: [{ price, quantity: 1 }],
       client_reference_id: projectId,
-      metadata: { projectId, plan: body.plan },
-      subscription_data: { metadata: { projectId, plan: body.plan }, billing_mode: { type: "flexible" } },
+      metadata: { projectId, plan: body.plan, tracifyRegion: region },
+      subscription_data: { metadata: { projectId, plan: body.plan, tracifyRegion: region }, billing_mode: { type: "flexible" } },
       success_url: `${origin}/dashboard/${projectId}/billing?checkout=success`,
       cancel_url: `${origin}/dashboard/${projectId}/billing?checkout=cancelled`,
       integration_identifier: "tracify_checkout_qplmzvka",

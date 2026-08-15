@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AlertTriangle, ArrowUpRight, KeyRound, MailCheck, RotateCcw, ShieldCheck, UserPlus } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/components/brand-logo";
+import { getTracifyRegion } from "@/lib/regions";
 
 type AuthMode = "sign-in" | "sign-up" | "forgot-password" | "reset-password" | "invitation" | "error";
 
@@ -17,6 +18,7 @@ const copy = {
 export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactNode }) {
   const modeCopy = copy[mode];
   const ModeIcon = modeCopy.icon;
+  const region = getTracifyRegion();
 
   return (
     <main className="min-h-screen bg-[#eceae3] text-black selection:bg-[#f4d44d]">
@@ -24,14 +26,17 @@ export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactN
         <Link href="/" aria-label="Tracify home" className="active-press focus-visible:outline-2 focus-visible:outline-offset-4">
           <BrandLogo />
         </Link>
-        <Link href="/" className="active-press flex min-h-11 items-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] hover:text-black/55">
-          Return to site <ArrowUpRight className="size-3.5" />
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link href={`https://www.tracify.tech/cloud?next=/${mode === "sign-up" ? "sign-up" : "sign-in"}`} className="font-mono text-[9px] uppercase tracking-[0.14em] hover:text-black/55">{region.flag} {region.shortName} region · Change</Link>
+          <Link href="https://www.tracify.tech" className="active-press hidden min-h-11 items-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] hover:text-black/55 sm:flex">
+            Return to site <ArrowUpRight className="size-3.5" />
+          </Link>
+        </div>
       </header>
 
       <div className="mx-auto grid min-h-[calc(100vh-54px)] max-w-[1440px] lg:grid-cols-[minmax(360px,0.8fr)_minmax(0,1.2fr)]">
         <aside className={`flex min-h-72 flex-col justify-between border-b border-black p-6 sm:p-8 md:p-10 lg:min-h-0 lg:border-b-0 lg:border-r ${modeCopy.tone}`}>
-          <div className="flex items-center justify-between gap-4 font-mono text-[9px] uppercase tracking-[0.15em] opacity-55"><span>{modeCopy.marker}</span><span>Auth / {mode}</span></div>
+          <div className="flex items-center justify-between gap-4 font-mono text-[9px] uppercase tracking-[0.15em] opacity-55"><span>{modeCopy.marker}</span><span>{region.shortName} / Auth / {mode}</span></div>
           <ModeIcon className="my-12 size-12" strokeWidth={1.15} aria-hidden="true" />
           <div><h1 className="max-w-2xl font-pixel text-[clamp(3.2rem,6vw,6.4rem)] leading-[0.82] tracking-[-0.075em]">{modeCopy.title}</h1><p className="mt-7 max-w-xl text-base leading-7 opacity-62">{modeCopy.note}</p></div>
         </aside>

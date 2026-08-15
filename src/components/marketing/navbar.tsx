@@ -145,7 +145,7 @@ export function Navbar() {
               </>
             ) : (
               <Link
-                href="/sign-up"
+                href="/cloud?next=/sign-up"
                 className="bg-black px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black"
               >
                 Start free
@@ -340,7 +340,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
         ) : (
           <Link
             onClick={onClose}
-            href="/sign-up"
+            href="/cloud?next=/sign-up"
             className="flex min-h-16 w-full items-center justify-between bg-black px-1 font-mono text-xs uppercase tracking-[0.14em] text-white"
           >
             <span>

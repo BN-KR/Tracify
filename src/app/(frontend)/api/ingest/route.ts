@@ -4,7 +4,7 @@ import type { Id } from "convex/_generated/dataModel";
 
 import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
-import { hashApiKey } from "@/lib/api-keys";
+import { getWrongRegionApiKeyResponse, hashApiKey, isTracifyApiKey } from "@/lib/api-keys";
 import { DEFAULT_REDACTION_RULES, redactPayload, redactRecord } from "@/lib/redaction";
 
 const MAX_BODY_BYTES = 1024 * 1024;
@@ -144,9 +144,11 @@ export async function POST(request: NextRequest) {
   }
 
   const apiKey = authHeader.slice(7).trim();
-  if (!apiKey.startsWith("tracify_sk_live_") && !apiKey.startsWith("5t1r_sk_live_")) {
+  if (!isTracifyApiKey(apiKey)) {
     return Response.json({ error: "Invalid API key" }, { status: 401 });
   }
+  const wrongRegion = getWrongRegionApiKeyResponse(apiKey);
+  if (wrongRegion) return wrongRegion;
 
   let body: Record<string, unknown>;
   try {
