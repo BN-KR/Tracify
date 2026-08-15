@@ -1,0 +1,39 @@
+---
+slug: quickstart
+title: Start with your first trace
+description: Install Tracify, send one real agent run, and verify it in the trace viewer.
+section: Start here
+order: 1
+---
+
+# Start with your first trace
+
+Tracify connects the model calls, tool calls, prompts, costs, failures, and evaluation signals inside an agent run. This guide gets one useful trace into the dashboard.
+
+## Install the SDK
+
+```bash
+npm install @tracify/sdk
+```
+
+Create a project in Tracify and copy its API key. Keep the key in a server-side environment variable:
+
+```bash
+TRACIFY_API_KEY=tracify_sk_live_...
+```
+
+## Wrap one run
+
+```ts
+import { Tracify } from "@tracify/sdk";
+
+const tracify = new Tracify({ apiKey: process.env.TRACIFY_API_KEY });
+
+await tracify.trace("support-agent", async (trace) => trace.span("llm.call", () => callModel(question)));
+```
+
+## Verify the result
+
+Open the project dashboard and select the newest run. A healthy first trace has a root run, a child span, timing, and the model response. Add `environment`, `release`, and prompt version attributes as you expand the integration.
+
+Next, choose the runtime guide for the [TypeScript SDK](/docs/typescript) or [Python SDK](/docs/python).

@@ -705,3 +705,16 @@
 - [x] Add isolated development Convex endpoints to Vercel Preview without exposing production data.
 - [x] Redeploy commit `45780f6` and verify Vercel reaches `READY`.
 - [x] Update the staging runbook with both required variables and the current project name.
+# Current task
+
+Rebuild `/docs` as a Langfuse-inspired, Tracify-branded documentation hub backed by a dedicated `content/docs/*.mdoc` Markdoc repository.
+
+Current implementation includes nine core chapters, grouped navigation, article navigation, search, utility links, and separate blog/docs repositories.
+# Follow-up from content review
+
+- [x] Align published SDK package references in docs and supporting public copy to `5to1r`.
+- [x] Add the trace-clinic promise to the contact destination.
+- [x] Fill support use-case signal cards with explanatory copy.
+- [x] Finish remaining one-line marketing snippets and normalize docs code-string rendering.
+- [x] Replace fabricated resource-desk titles with real guide language and a real published post link.
+- [x] Run focused lint, `git diff --check`, `npm run test:content`, and `npm run build`.

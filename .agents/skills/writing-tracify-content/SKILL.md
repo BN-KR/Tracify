@@ -25,7 +25,7 @@ Create useful, accurate content and place it where Tracify actually consumes it.
 | ------------------------- | ----------------------------- | ----------------------------------------------------------------------- |
 | Public blog               | `content/blog/*.mdoc`         | Valid frontmatter, focused article, SEO, `draft` preserved              |
 | Internal engineering docs | `docs/**/*.md`                | Clear scope, current commands/paths, maintenance owner/context          |
-| Public `/docs`            | TypeScript registry currently | Update the live registry and render; do not add an unused Markdown file |
+| Public `/docs`            | `content/docs/*.mdoc` through the dedicated docs repository | Keep docs separate from `content/blog/*.mdoc`; update the loader/routes and render the affected route |
 | Blog images               | `public/media/*`              | Optimized dimensions, descriptive filename and alt text                 |
 
 ## Non-negotiable Rules

@@ -659,7 +659,7 @@ function DocsExplorations() {
             </h2>
             <div className="mt-12 grid border-l border-t border-black/20 lg:grid-cols-3">
               {[
-                ["01", "Install", "npm i tracify", "< 1 min"],
+                ["01", "Install", "npm install 5to1r", "< 1 min"],
                 ["02", "Trace", "wrap(agent.run)", "one function"],
                 ["03", "Inspect", "open run_0182", "full evidence"],
               ].map(([number, title, code, time]) => (

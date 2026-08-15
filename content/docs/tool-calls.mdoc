@@ -1,0 +1,15 @@
+---
+slug: tool-calls
+title: Instrument tool calls
+description: Capture the decision, arguments, result, and failure boundary for every tool.
+section: Observe
+order: 12
+---
+
+# Instrument tool calls
+
+Tool spans explain what an agent attempted outside the model. Record the tool name, sanitized arguments, result metadata, latency, and error state as a child of the generation or reasoning span that initiated it.
+
+Keep secrets and unnecessary personal data out of span payloads. When a tool fails, preserve the error category and retry outcome so the trace distinguishes a provider failure from a bad model decision.
+
+The same trace can contain model generations, retrieval, and multiple tool calls; use parent spans to keep the execution tree readable.

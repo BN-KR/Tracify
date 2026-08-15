@@ -1,5 +1,13 @@
 # Project Memory
 
+## 2026-08-15 Content critique fixes
+- The strongest reviewed public surfaces were `/product/trace-viewer` and `/security`: concrete, well-structured, and restrained. Use them as the copy bar when refining homepage and campaign sections.
+- The published TypeScript SDK package is `5to1r` (not `tracify` or `@tracify/sdk`); its public client export is `TracifyClient`, with `traceAgent` for wrapping async functions. Keep all public install/import examples identical and verify with a repo-wide search.
+- Public docs examples that embed escaped `\\n` sequences can render literal escape characters. Prefer real multiline template literals or normalize at the shared code-block boundary.
+- Never link resource cards to invented articles or generic `/blog` when a specific promise is made; use a real published slug or remove the promise.
+- Completed the critique pass: public SDK examples now use `5to1r` consistently; docs landing and Markdoc chapters use real multiline code; the homepage resource desk uses real guide language and a real published article where available; the trace-clinic destination states the promised 30-minute deliverable; support signal cards contain body copy.
+- The review’s blog-date observation is retained as editorial follow-up, not a correctness bug. The honest `/status` page likewise remains intentional until real uptime monitoring is provisioned.
+
 ## 2026-08-13 Vercel preview deployment recovery
 - The `codex/llms-seo` previews failed after compilation and TypeScript because Vercel Preview lacked `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL`; Better Auth failed during page-data collection for `/api/evaluation/run`.
 - Added both public endpoints to Vercel Preview using the isolated `diligent-dragon-604` development Convex deployment, avoiding production data access from branch previews.
@@ -1127,3 +1135,12 @@
 - Removed the unsupported `Host` directive from `/robots.txt` after Google Search Console correctly reported it as ignored by Googlebot. Canonical-host selection remains enforced by the bare-domain redirect, `metadataBase`, canonical tags, and sitemap URLs.
 - Diagnosed the production `robots.txt` 404: Next.js requires `robots.ts` in the root App Router directory, but it was nested under the `(frontend)` route group and omitted from Vercel's build output.
 - Moved the metadata route to `src/app/robots.ts`; `npm run build` passed and explicitly emitted static `/robots.txt`. PR #4 merged to `main` and production deployment `dpl_BQ1D2JYfFkcp771WcRnYP5BVsJ7f` is Ready; live `/robots.txt` and `/sitemap.xml` return HTTP 200.
+# 2026-08-15 Documentation hub migration
+- Replaced the hand-coded public docs registry with a separate `content/docs/*.mdoc` repository, parsed by `src/lib/markdoc-docs.ts` and rendered by the docs routes. Blog Markdoc remains isolated in `content/blog`.
+- Added a Langfuse-inspired docs information architecture: grouped chapter index, persistent article navigation, quickstart/code surfaces, and responsive two-column layout, adapted to Tracify’s monochrome/acid-yellow Future 19 design.
+- Added initial quickstart, TypeScript, Python, and ingestion API chapters. Broader source migration and verification remain.
+- Added prompt, evaluation, lifecycle, integrations, and self-hosting chapters; added a client-side docs search and utility navigation modeled on the supplied docs shell. Corrected stale `5to1r` placeholder examples back to the verified Tracify SDK examples.
+- Updated the writing skill contract to point at `content/docs/*.mdoc` and added `src/lib/markdoc-docs.test.ts`, proving docs load through their own repository and do not intersect blog slugs. Content tests now pass 16 tests.
+- Expanded the public docs corpus with observability, datasets, tool calls, costs, and API/data-platform chapters to cover the supplied mirror's major topic groups while keeping all technical claims Tracify-specific.
+- Grouped article-side navigation by documentation section, added an Overview entry, and kept the desktop sidebar sticky to better match the reference documentation shell.
+- Added practical subtopic chapters for public API, MCP, CLI, export, prompt playground, human review queues, prompt caching, and evaluation release gates.

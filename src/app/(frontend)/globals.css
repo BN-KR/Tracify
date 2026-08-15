@@ -470,4 +470,14 @@
   .markdoc-blog-richtext img { width: 100%; border: 1px solid #000; }
   .markdoc-blog-richtext a { color: #000; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
   .markdoc-blog-richtext code { background: #000; color: #fff; font-family: var(--font-geist-mono), monospace; padding: 0.125rem 0.3rem; }
+  .docs-markdoc { max-width: 760px; font-size: 1rem; line-height: 1.8; }
+  .docs-markdoc h1 { display: none; }
+  .docs-markdoc h2, .docs-markdoc h3 { margin: 2.5rem 0 0.75rem; font-family: var(--font-geist-pixel), monospace; line-height: .95; letter-spacing: -.04em; }
+  .docs-markdoc h2 { font-size: 2rem; }
+  .docs-markdoc h3 { font-size: 1.35rem; }
+  .docs-markdoc p { margin: 1rem 0; color: rgb(0 0 0 / .68); }
+  .docs-markdoc pre { margin: 1.5rem 0; overflow-x: auto; background: #050505; color: #f4d44d; padding: 1.25rem; font-family: var(--font-geist-mono), monospace; font-size: .8rem; line-height: 1.7; }
+  .docs-markdoc ul, .docs-markdoc ol { margin: 1rem 0; padding-left: 1.5rem; }
+  .docs-markdoc ul { list-style: disc; } .docs-markdoc ol { list-style: decimal; }
+  .docs-markdoc a { color: #000; text-decoration: underline; text-underline-offset: 4px; }
 }

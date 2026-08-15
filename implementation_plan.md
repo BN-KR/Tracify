@@ -760,3 +760,21 @@ The single most important UI in the product.
 3. [completed] Configure `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` for Preview using the isolated development deployment.
 4. [completed] Redeploy the exact failed commit and verify build completion plus final `READY` state.
 5. [completed] Record the durable staging requirement in repository documentation.
+# Documentation hub
+
+- [x] Inspect the Langfuse mirror and current Tracify docs surface.
+- [x] Add a separate validated Markdoc docs repository and renderer.
+- [x] Rebuild docs index/article routes with grouped navigation and Tracify visual language.
+- [x] Add broader migrated chapters and run full verification.
+- [x] Add a client-side docs search and correct stale placeholder SDK examples.
+- [x] Document and test the docs/blog repository boundary.
+- [x] Expand topic coverage beyond the quickstart into observability, datasets, tool calls, costs, and API/data-platform guidance.
+- [x] Group article navigation by section with a sticky desktop sidebar and overview link.
+- [x] Add practical API, MCP, CLI, export, playground, review, caching, and release-gate chapters.
+- [ ] Complete browser screenshot QA across desktop and mobile.
+# Content quality refinement
+
+1. Normalize the SDK contract across every public-facing snippet and verify with `rg`.
+2. Fix escaped-newline handling in the shared documentation/code rendering path.
+3. Ensure CTA destinations preserve the promise made in the source card.
+4. Run content tests, lint, and build; audit each critique item against rendered output. Complete: all checks pass and the public mismatch search is clean.

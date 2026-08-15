@@ -1,0 +1,18 @@
+---
+slug: evaluation
+title: Evaluation engine
+description: Score traces and datasets with repeatable evaluators, reviewers, and release gates.
+section: Improve
+order: 6
+---
+
+# Evaluation engine
+
+Start with a quality signal that answers a real operating question: did the answer follow policy, use the right evidence, or complete the requested task?
+
+```ts
+await tracify.feedback(traceId, { kind: "thumb", value: true });
+await tracify.score(traceId, "groundedness", 0.92);
+```
+
+Use production traces to build datasets, run prompt or model candidates against the same examples, and compare quality, cost, latency, and failure rate before promotion. Online evaluators run asynchronously so ingestion remains independent of scoring.

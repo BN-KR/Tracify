@@ -1,4 +1,5 @@
 import { getPostDate, getPublishedPosts } from "@/lib/markdoc-blog";
+import { getDocs } from "@/lib/markdoc-docs";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -14,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const productFeatures = ["trace-viewer", "cost-dashboard", "tool-calls", "llm-calls", "failures", "reports", "runtime-control", "evaluation-engine", "lifecycle"];
   const useCases = ["research", "support", "automation", "tool-calling"];
-  const documentation = ["python", "typescript", "api", "prompts", "evaluation", "lifecycle", "integrations", "self-hosting"];
+  const documentation = getDocs().map((doc) => doc.slug);
 
   return [
     { url: baseUrl, changeFrequency: "weekly", priority: 1.0 },

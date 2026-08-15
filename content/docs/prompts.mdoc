@@ -1,0 +1,21 @@
+---
+slug: prompts
+title: Prompt deployment
+description: Resolve labeled prompt versions at runtime and connect them to traces.
+section: Improve
+order: 5
+---
+
+# Prompt deployment
+
+Keep prompt content versioned separately from application releases. Request the version labeled for an environment, then attach its id to the generation span.
+
+```ts
+const response = await fetch("https://tracify.tech/api/prompts/support-agent?environment=production", {
+  headers: { Authorization: `Bearer ${process.env.TRACIFY_API_KEY}` },
+});
+const { version } = await response.json();
+const prompt = version.content;
+```
+
+Use development, staging, and production labels to promote deliberately. Keep the API key server-side and record `version.id` as `promptVersionId` during ingestion.
