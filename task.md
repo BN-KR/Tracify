@@ -739,3 +739,5 @@
 - [x] Preserve critique learnings for future agents and avoid fabricated resource promises.
 - [x] Include the Markdoc docs repository in Vercel output tracing.
 - [x] Refine the docs overview into a three-column, grouped information architecture inspired by the supplied Langfuse reference.
+- [x] Add responsive categorized docs navigation, article Markdown/share actions, and a public read-only docs MCP server.
+- [x] Complete final checks, commit the scoped docs follow-up, and publish draft PR #13 against `main`.

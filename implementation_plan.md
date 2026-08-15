@@ -798,3 +798,10 @@ The single most important UI in the product.
 - Keep persistent product-area navigation on the left.
 - Make quickstarts and product areas first-class overview sections.
 - Add an on-page rail and grouped all-guides index without copying reference branding or unsupported claims.
+
+# Docs navigation and AI handoff
+
+1. [completed] Make the documentation taxonomy available as a responsive, categorized sidebar.
+2. [completed] Add article-level Markdown copy and ChatGPT/Claude handoff controls with concise supporting copy.
+3. [completed] Implement a public read-only MCP surface for listing, searching, and reading the full documentation corpus.
+4. [completed] Run final checks, inspect the scoped diff, and publish the follow-up through draft PR #13.

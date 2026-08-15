@@ -1162,6 +1162,11 @@
 - Responsive browser checks found no horizontal overflow across the redesigned public and account routes. Focused lint passes for every changed source file; repository-wide lint still reports pre-existing unrelated failures.
 - Final verification: `npm run test:content` passed all 15 tests, the changed-file ESLint pass and `git diff --check` passed, and `npm run build` completed successfully with TypeScript and all 80 static pages.
 
+## Documentation navigation and agent access (2026-08-15)
+- Documentation articles and the docs overview now use a categorized navigation sidebar at every viewport: a compact expandable drawer on small screens and a sticky grouped rail on desktop.
+- Each documentation article has `Copy Markdown` and `Send to` actions with the understated helper copy “Copy or share.”; the send menu supports Markdown copy, ChatGPT, Claude, and the MCP setup guide.
+- Public documentation is available through the read-only Streamable HTTP MCP endpoint at `/api/docs/mcp`. It lists, searches, and reads every repository-backed public docs page, and deliberately exposes no traces, prompts, evaluations, API keys, or customer data.
+
 ## SEO release ancestry and deployment guardrails (2026-08-14)
 - PR #5 merged branch state at `5e7807b`; later SEO commits `3474f98` and `191cbeb` were pushed after the merge and are not ancestors of `origin/main`.
 - Production deployment `dpl_GucMKe2AYetsPtixDMw1GMGJgGy6` correctly deployed exact main commit `f646ca7` and owns the canonical Tracify domains. The later IndexNow key remains absent because it is not in that commit.
