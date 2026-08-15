@@ -6,8 +6,10 @@ import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
 import { getWrongRegionApiKeyResponse, hashApiKey, isTracifyApiKey } from "@/lib/api-keys";
 import { DEFAULT_REDACTION_RULES, redactPayload, redactRecord } from "@/lib/redaction";
+import { consumeRateLimit } from "@/lib/redis-cache";
 
 const MAX_BODY_BYTES = 4 * 1024 * 1024; // 4MB for batched OTLP traces
+const INGEST_LIMIT_PER_MINUTE = Number(process.env.TRACIFY_INGEST_LIMIT_PER_MINUTE ?? 6_000);
 
 // ─── OTLP protobuf-JSON types ────────────────────────────────────
 // See: https://opentelemetry.io/docs/specs/otlp/#otlphttp-response
@@ -303,6 +305,23 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Invalid API key" }, { status: 401 });
   }
 
+  const requestedSpanCount = body.resourceSpans.reduce(
+    (total, resource) => total + resource.scopeSpans.reduce((scopeTotal, scope) => scopeTotal + scope.spans.length, 0),
+    0,
+  );
+  let quota;
+  try {
+    quota = await consumeRateLimit(`ingest:${project._id}`, requestedSpanCount, INGEST_LIMIT_PER_MINUTE, 60);
+  } catch {
+    return Response.json({ error: "Ingestion quota service unavailable" }, { status: 503 });
+  }
+  if (!quota.allowed) {
+    return Response.json(
+      { error: "Ingestion rate limit exceeded", code: "rate_limit_exceeded", retryAfterSeconds: quota.retryAfterSeconds },
+      { status: 429, headers: { "Retry-After": String(quota.retryAfterSeconds), "X-RateLimit-Remaining": "0" } },
+    );
+  }
+
   const projectDocId = project._id as Id<"projects">;
   const now = Date.now();
   const redactionEnabled = project.redactionEnabled !== false;
@@ -391,7 +410,7 @@ export async function POST(request: NextRequest) {
 
   return Response.json(
     { ok: true, accepted: enqueued.length, failed },
-    { status: 202 },
+    { status: 202, headers: { "X-RateLimit-Remaining": String(quota.remaining) } },
   );
 }
 

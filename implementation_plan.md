@@ -813,6 +813,7 @@ The single most important UI in the product.
 3. [completed] Provision isolated Convex deployments and deploy a region-reporting health route to each.
 4. [completed] Provision two Vercel projects and apply matching production and preview environment configuration; Git automation remains disconnected until merged release readiness.
 5. [completed] Attach the requested regional hostnames and record the authoritative DNS records still required.
+5a. [completed] Add regional Redis-backed project ingestion quotas and explicit retry responses.
 6. [in progress] Provision independent Tinybird, Redis, and Inngest resources; current provider credentials do not permit unattended workspace creation.
 7. [pending] Configure regional OAuth callbacks and Stripe webhook signing secrets.
 8. [pending] Verify DNS/TLS, deep health, authentication, onboarding, ingestion isolation, wrong-region rejection, and dashboards in both regions.

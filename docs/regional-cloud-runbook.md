@@ -26,6 +26,8 @@ Set `NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND=cloud`. Set both `NEXT_PUBLIC_TRACIFY_R
 
 Better Auth `SITE_URL` and trusted origins must point to the same regional origin. OAuth applications require a callback URL for each region. Stripe requires a separately signed webhook endpoint per region. Do not reuse API-key hash secrets, webhook secrets, Tinybird tokens, Redis URLs, or Inngest signing keys across regions.
 
+`TRACIFY_INGEST_LIMIT_PER_MINUTE` defaults to 6,000 spans per project. The native and OTLP endpoints share an atomic Redis counter, return `429` with `Retry-After` when exhausted, and therefore inherit the regional Redis isolation boundary.
+
 ## Account and data migration
 
 There is no automatic region switch. Schedule a migration window and stop writes to the source project before export.

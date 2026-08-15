@@ -750,6 +750,7 @@
 - [x] Create EU and US Vercel projects, configure Next.js, and apply region-specific production/preview settings; keep Git automation disconnected until merged release readiness.
 - [x] Attach `eu.cloud.tracify.tech` and `us.cloud.tracify.tech` to their matching Vercel projects.
 - [x] Add and deploy dependency-aware regional health endpoints; verify both live Convex health responses.
+- [x] Add a shared atomic Redis quota for native and OTLP ingestion with regional isolation and `429` retry semantics.
 - [ ] Add the two DNS A records at Domeneshop and verify Vercel TLS issuance.
 - [ ] Create and deploy independent Tinybird workspaces for EU and US; add unique hosts/tokens to Vercel.
 - [ ] Create independent regional Redis databases and Inngest environments; add unique credentials to Vercel.
