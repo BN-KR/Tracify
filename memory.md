@@ -1,5 +1,11 @@
 # Project Memory
 
+## 2026-08-15 Documentation migration and content refinement
+- Public docs now live in `content/docs/*.mdoc`, separate from `content/blog/*.mdoc`, with Markdoc parsing, searchable navigation, and repository-boundary tests.
+- Keep public SDK examples aligned to the published `5to1r` package and `TracifyClient` API. The strongest editorial references remain `/product/trace-viewer` and `/security`: concrete, structured, and restrained.
+- Avoid fabricated resource titles or generic blog links when a card makes a specific promise; use a real published slug or clearly label the resource as a guide.
+- The trace-clinic CTA promise is 30 minutes, one real trace, a root-cause map, and a release-gate recommendation. Preserve that context at the contact destination.
+
 ## 2026-08-14 Better Auth SAML login integration
 - Added `@better-auth/sso` to the Convex-hosted Better Auth configuration and the React auth client.
 - Added the Convex-backed `ssoProvider` schema required by the plugin, with domain verification enabled and strict SAML timestamp/algorithm validation.

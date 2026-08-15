@@ -39,7 +39,7 @@ async def my_agent():
 ### TypeScript / Node.js
 Install the package:
 ```bash
-npm install tracify
+npm install 5to1r
 ```
 
 Instrument your agent:

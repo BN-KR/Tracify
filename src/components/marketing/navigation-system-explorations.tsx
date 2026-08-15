@@ -807,13 +807,13 @@ export function NavigationSystemExplorations({
             </article>
             <div className="grid">
               {[
-                ["Guide", "Debugging failed agents"],
-                ["Report", "Agent reliability benchmark"],
-                ["Release", "What shipped in v2.4"],
+                ["Guide", "The complete guide to AI agent observability"],
+                ["Guide", "How to debug failed agent runs"],
+                ["Guide", "Building reliable agent release gates"],
               ].map(([type, title], index) => (
                 <Link
                   key={title}
-                  href="/blog"
+                  href={index === 0 ? "/blog/ai-agent-observability-complete-guide" : "/blog"}
                   className={`border-b border-black/15 p-6 ${index === 1 ? "bg-[#f4d44d]" : "bg-white hover:bg-[#f4d44d]"}`}
                 >
                   <span className="font-mono text-[8px] uppercase text-black/45">

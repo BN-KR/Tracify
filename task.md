@@ -732,3 +732,8 @@
 - [x] Add Convex `ssoProvider` schema fields and indexes.
 - [x] Add email-domain-resolved SAML login action to `/sign-in` and `/sign-up`.
 - [ ] Register each customer IdP provider with issuer, domain, entry point, certificate, and SAML mapping in the target Convex deployment.
+# Documentation migration follow-up
+
+- [x] Keep the Markdoc docs repository separate from blog content.
+- [x] Preserve the `5to1r` SDK contract in public examples.
+- [x] Preserve critique learnings for future agents and avoid fabricated resource promises.

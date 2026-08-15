@@ -7,7 +7,7 @@
 | Blog post, announcement article, engineering essay              | `content/blog/<slug>.mdoc`                         | Do not add a database/CMS record                                             |
 | Blog image                                                      | `public/media/<descriptive-name>.<ext>`            | Do not use local filesystem paths in frontmatter                             |
 | Internal architecture, runbook, decision, troubleshooting guide | `docs/<topic>.md`                                  | Do not expect it to appear at `/docs`                                        |
-| Public SDK/API/product documentation                            | `src/app/(frontend)/docs/[...slug]/page.tsx` today | Do not create `content/docs/*.md` until a loader and route integration exist |
+| Public SDK/API/product documentation                            | `content/docs/*.mdoc` through `src/lib/markdoc-docs.ts` | Keep public docs separate from `content/blog/*.mdoc`; do not put docs in the blog repository |
 | In-dashboard quick reference                                    | `src/components/dashboard/docs-viewer.tsx` today   | Do not assume public-doc changes update it                                   |
 | Historical design material                                      | `docs/archived/`                                   | Do not update archived files as current guidance                             |
 
@@ -57,4 +57,4 @@ Use descriptive lowercase filenames. Prefer WebP/JPEG for photographs and SVG/PN
 
 ## Public documentation constraint
 
-The current public docs are data objects in `src/app/(frontend)/docs/[...slug]/page.tsx`: `docPages` controls metadata/routes and `codeExamples` controls install snippets, code, and notes. A public-doc edit must update this live source and `generateStaticParams` behavior as needed. A future migration to `content/docs/*.mdoc` is an application feature: add a validated loader, rendering, static params, metadata, sitemap/link coverage, tests, and build verification before storing public docs there.
+Public docs use a dedicated Markdoc repository in `content/docs/*.mdoc`, parsed by `src/lib/markdoc-docs.ts` and rendered by the docs route. Blog files remain exclusively in `content/blog/*.mdoc` and are never loaded by the docs repository.

@@ -1,28 +1,22 @@
-import { FutureAction, FutureBand, FuturePage } from "@/components/marketing/future19-page";
+import Link from "next/link";
+import { getDocs } from "@/lib/markdoc-docs";
+import { FuturePage } from "@/components/marketing/future19-page";
+import { DocsSearch } from "@/components/docs/docs-search";
 
-export const metadata = { title: "Documentation", description: "Install Tracify and send your first agent trace.", alternates: { canonical: "/docs" } };
-
-const chapters = [
-  ["Start", "Quickstart", "Install, authenticate, and send the first trace.", "/docs/typescript"],
-  ["Instrument", "TypeScript SDK", "Trace Node, Next.js, and AI SDK workloads.", "/docs/typescript"],
-  ["Instrument", "Python SDK", "Wrap agents and tools with decorators.", "/docs/python"],
-  ["Connect", "OTLP + integrations", "Send standard telemetry from existing stacks.", "/docs/integrations"],
-  ["Operate", "Ingestion API", "Build a custom runtime integration.", "/docs/api"],
-  ["Improve", "Prompt deployment", "Resolve evaluated prompts at runtime.", "/docs/prompts"],
-  ["Understand", "Agent lifecycle", "Connect traces, datasets, evals, and releases.", "/docs/lifecycle"],
-  ["Deploy", "Self-hosting", "Review the deployment model and constraints.", "/docs/self-hosting"],
-] as const;
+export const metadata = {
+  title: "Documentation",
+  description: "Install the SDK, instrument an agent, and inspect the execution record.",
+  alternates: { canonical: "/docs" },
+};
 
 export default function DocsRootPage() {
-  return <FuturePage>
-    <header className="border-b border-black"><div className="mx-auto max-w-[1240px] border-x border-black"><div className="grid lg:grid-cols-[1fr_1fr]">
-      <div className="flex min-h-[420px] flex-col justify-between px-5 py-10 sm:px-8 md:px-10 md:py-12"><div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.15em]"><span className="size-2 bg-[#f4d44d]"/>Developer field manual</div><h1 className="font-pixel text-[clamp(3rem,6vw,5.5rem)] leading-[0.88] tracking-[-0.055em]">Read.<br/>Run.<br/>Verify.</h1><p className="max-w-lg text-base leading-7 text-black/64">Instrument agents, inspect the execution record, and turn findings into safer releases.</p></div>
-      <div className="border-t border-black bg-black p-5 text-white lg:border-l lg:border-t-0 md:p-8"><div className="flex h-full min-h-[460px] flex-col border border-white/20"><div className="flex items-center justify-between border-b border-white/20 px-4 py-3 font-mono text-[8px] uppercase tracking-[0.12em] text-white/40"><span>tracify / quickstart</span><span>README.md</span></div><div className="flex-1 p-5 font-mono text-xs leading-7 md:p-8"><p className="text-[#f4d44d]">$ npm i tracify</p><p className="mt-8 text-white/35">{"// initialize the operating record"}</p><p><span className="text-violet-300">import</span> {'{ Tracify }'} <span className="text-violet-300">from</span> &quot;tracify&quot;</p><p className="mt-8 text-white/35">{"// trace the run that matters"}</p><p><span className="text-violet-300">await</span> tracify.trace(<span className="text-[#f4d44d]">&quot;support-agent&quot;</span>, run)</p></div><div className="border-t border-white/20 bg-[#f4d44d] px-4 py-3 font-mono text-[8px] uppercase tracking-[0.12em] text-black">First trace / under five minutes</div></div></div>
-    </div></div></header>
-    <FutureBand label="Documentation map"><div className="grid md:grid-cols-[240px_1fr]">
-      <div className="border-black bg-[#f4d44d] p-6 md:border-r md:p-8"><p className="font-mono text-[9px] uppercase tracking-[0.14em]">Read by intent</p><p className="mt-24 font-pixel text-5xl leading-[0.88] tracking-[-0.06em]">No dead-end reference maze.</p></div>
-      <div className="grid sm:grid-cols-2">{chapters.map(([group, title, body, href], index) => <a href={href} key={href} className="group min-h-52 border-b border-black p-6 hover:bg-white/55 sm:odd:border-r sm:last:border-b-0 sm:nth-last-2:border-b-0"><div className="flex items-center justify-between font-mono text-[8px] uppercase tracking-[0.13em] text-black/42"><span>{group}</span><span>0{index + 1}</span></div><h2 className="mt-12 font-pixel text-4xl leading-none tracking-[-0.05em]">{title}</h2><p className="mt-3 max-w-sm text-sm leading-6 text-black/55">{body}</p><span className="mt-5 inline-block font-mono text-[8px] uppercase tracking-[0.12em] decoration-[#d1af18] group-hover:underline">Open chapter ↗</span></a>)}</div>
-    </div></FutureBand>
-    <FutureBand tone="ink"><div className="flex flex-col gap-8 px-5 py-12 md:flex-row md:items-center md:justify-between md:px-10"><div><p className="font-mono text-[9px] uppercase tracking-[0.13em] text-white/45">Fastest route</p><p className="mt-3 font-pixel text-5xl tracking-[-0.06em]">Send one real trace.</p></div><FutureAction href="/docs/typescript" inverted>Open quickstart</FutureAction></div></FutureBand>
-  </FuturePage>;
+  const docs = getDocs();
+  const sections = [...new Set(docs.map((doc) => doc.section))];
+  return <FuturePage><div className="min-h-screen bg-[#f3f2ed] text-black"><div className="mx-auto max-w-[1240px] border-x border-b border-black"><div className="grid grid-cols-2 font-mono text-[9px] uppercase tracking-[.13em] sm:grid-cols-4"><Link href="/docs" className="border-r border-black px-4 py-3 hover:bg-[#f4d44d]">Documentation</Link><Link href="/integrations" className="border-r border-black px-4 py-3 hover:bg-[#f4d44d]">Integrations</Link><Link href="/status" className="border-r border-black px-4 py-3 hover:bg-[#f4d44d]">System status</Link><Link href="/contact" className="px-4 py-3 hover:bg-[#f4d44d]">Talk to Tracify</Link></div></div>
+    <header className="border-b border-black"><div className="mx-auto grid max-w-[1240px] border-x border-black lg:grid-cols-[1fr_0.9fr]">
+      <div className="flex min-h-[420px] flex-col justify-between p-6 md:p-12"><p className="font-mono text-[10px] uppercase tracking-[0.16em]">Tracify / developer documentation</p><h1 className="max-w-2xl font-pixel text-[clamp(4rem,9vw,8rem)] leading-[.8] tracking-[-.08em]">See what<br/>your agent<br/>actually did.</h1><p className="max-w-lg text-lg leading-8 text-black/60">A field guide for instrumenting runs, connecting telemetry, and turning production evidence into safer releases.</p></div>
+      <div className="border-t border-black bg-black p-6 text-white lg:border-l lg:border-t-0 md:p-10"><div className="flex h-full min-h-[420px] flex-col justify-between border border-white/20 p-5 md:p-8"><div className="flex justify-between font-mono text-[9px] uppercase tracking-[.14em] text-white/45"><span>Quickstart</span><span>01 / 09</span></div><pre className="overflow-x-auto font-mono text-sm leading-8 text-white/80"><code><span className="text-[#f4d44d]">$ npm install @tracify/sdk</span>{"\n\n"}<span className="text-violet-300">import</span> {'{ Tracify }'} <span className="text-violet-300">from</span> &quot;@tracify/sdk&quot;;{"\n\n"}<span className="text-violet-300">await</span> tracify.trace(&quot;support-agent&quot;, run);</code></pre><div className="border-t border-white/20 pt-5 font-mono text-[9px] uppercase tracking-[.14em] text-[#f4d44d]">First trace / inspect / improve</div></div></div>
+    </div></header>
+    <main className="mx-auto max-w-[1240px] border-x border-black"><DocsSearch docs={docs} /><div className="grid lg:grid-cols-[220px_1fr]"><aside className="border-b border-black bg-[#f4d44d] p-6 lg:border-b-0 lg:border-r"><p className="font-mono text-[9px] uppercase tracking-[.14em]">Documentation map</p><p className="mt-16 font-pixel text-5xl leading-[.86] tracking-[-.06em]">Read by intent.</p><p className="mt-8 text-sm leading-6 text-black/60">Short paths first. Reference follows the work you are actually doing.</p></aside><div>{sections.map((section) => <section key={section} className="border-b border-black last:border-b-0"><div className="border-b border-black px-6 py-4 font-mono text-[9px] uppercase tracking-[.14em] text-black/45">{section}</div><div className="grid sm:grid-cols-2">{docs.filter((doc) => doc.section === section).map((doc) => <Link key={doc.slug} href={`/docs/${doc.slug}`} className="group min-h-48 border-b border-black p-6 last:border-b-0 sm:border-r sm:nth-last-child(-n+2):border-b-0 sm:nth-child(even):border-r-0 hover:bg-white"><div className="flex justify-between font-mono text-[9px] uppercase tracking-[.12em] text-black/40"><span>Guide</span><span>{String(doc.order).padStart(2,"0")}</span></div><h2 className="mt-10 font-pixel text-4xl leading-none tracking-[-.05em]">{doc.title}</h2><p className="mt-3 max-w-sm text-sm leading-6 text-black/55">{doc.description}</p><span className="mt-5 inline-block font-mono text-[9px] uppercase tracking-[.12em] group-hover:underline">Open chapter →</span></Link>)}</div></section>)}</div></div></main>
+  </div></FuturePage>;
 }

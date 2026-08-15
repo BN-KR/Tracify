@@ -1,0 +1,34 @@
+---
+slug: typescript
+title: TypeScript SDK
+description: Trace Node.js, Next.js, and worker-based agent workloads.
+section: Instrument
+order: 2
+---
+
+# TypeScript SDK
+
+Use the TypeScript SDK when your agent runs in Node.js, a Next.js route handler, or a worker. Keep instrumentation at the boundary of a request so every downstream operation remains connected.
+
+## Install and configure
+
+```bash
+npm install @tracify/sdk
+```
+
+```ts
+import { Tracify } from "@tracify/sdk";
+
+const tracify = new Tracify({ apiKey: process.env.TRACIFY_API_KEY });
+```
+
+## Trace model and tool work
+
+```ts
+await tracify.trace("research-agent", async (trace) => {
+  const context = await trace.span("retrieval", () => searchDocs(question));
+  return trace.span("llm.call", () => callModel({ question, context }));
+});
+```
+
+Use session and release fields to compare runs across customers and deployments. Never expose a project API key in browser code.

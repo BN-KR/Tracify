@@ -1,0 +1,29 @@
+---
+slug: python
+title: Python SDK
+description: Instrument Python agents with a decorator and nested spans.
+section: Instrument
+order: 3
+---
+
+# Python SDK
+
+Install the package in the environment that runs your agent:
+
+```bash
+pip install tracify
+```
+
+```python
+from tracify import Tracify
+
+tracify = Tracify(api_key="tracify_sk_live_...")
+
+@tracify.trace(name="support-agent")
+def answer(question: str):
+    with tracify.span("retrieval"):
+        context = search_docs(question)
+    return llm.complete(question, context=context)
+```
+
+Set `TRACIFY_API_KEY` in production and attach session, user, environment, and release metadata when those dimensions matter to debugging.

@@ -20,7 +20,7 @@ export TRACIFY_API_KEY=your_sk_live_...
 3. Instrument your agent:
 
 ```python
-from tracify import trace_agent, llm_call, tool_call
+from 5to1r import trace_agent, llm_call, tool_call
 
 @trace_agent()
 async def my_agent(query: str):

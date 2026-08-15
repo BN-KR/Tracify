@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Contact", description: "Talk to Trac
 
 const routes = [
   { title: "Enterprise", body: "Architecture, security, procurement, and rollout planning.", email: "hello@tracify.tech", icon: MessagesSquare },
-  { title: "Product", body: "Migration questions, design partnerships, and workflow reviews.", email: "hello@tracify.tech", icon: Mail },
+  { title: "Product", body: "Migration questions, design partnerships, workflow reviews, and trace clinics: 30 minutes, one real trace, a root-cause map, and a release-gate recommendation.", email: "hello@tracify.tech", icon: Mail },
   { title: "Security", body: "Responsible disclosure and data-handling questions.", email: "security@tracify.tech", icon: ShieldCheck },
 ] as const;
 

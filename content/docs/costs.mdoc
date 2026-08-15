@@ -1,0 +1,13 @@
+---
+slug: costs
+title: Track model cost and latency
+description: Make token usage, provider pricing, and slow paths visible in the same run.
+section: Operate
+order: 13
+---
+
+# Track model cost and latency
+
+Cost analysis is most useful beside quality and latency. Send the model identifier and token usage on generation spans, then add environment and release metadata so the dashboard can compare deployments.
+
+Use the trace waterfall to find slow retrieval or tool calls, and the cost view to find expensive models or prompts. Optimize only after checking that the change preserves the quality signals tracked by [evaluation](/docs/evaluation).

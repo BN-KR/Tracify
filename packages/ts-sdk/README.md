@@ -5,7 +5,7 @@ Observability and tracing for AI agents. Gain full visibility into your agent's 
 ## Installation
 
 ```bash
-npm install tracify
+npm install 5to1r
 # or
 yarn add tracify
 ```
