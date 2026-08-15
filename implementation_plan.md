@@ -792,3 +792,9 @@ The single most important UI in the product.
 
 - Include dynamically loaded `content/docs/*.mdoc` files in Next/Vercel output tracing.
 - Verify content tests, TypeScript, and production build before updating the docs PR.
+
+# Docs information architecture refinement
+
+- Keep persistent product-area navigation on the left.
+- Make quickstarts and product areas first-class overview sections.
+- Add an on-page rail and grouped all-guides index without copying reference branding or unsupported claims.
