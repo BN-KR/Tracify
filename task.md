@@ -738,3 +738,4 @@
 - [x] Preserve the `5to1r` SDK contract in public examples.
 - [x] Preserve critique learnings for future agents and avoid fabricated resource promises.
 - [x] Include the Markdoc docs repository in Vercel output tracing.
+- [x] Refine the docs overview into a three-column, grouped information architecture inspired by the supplied Langfuse reference.

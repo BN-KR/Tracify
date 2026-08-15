@@ -1,5 +1,9 @@
 # Project Memory
 
+## 2026-08-15 Docs IA refinement from Langfuse reference
+- The requested reference pattern is an information architecture, not just a color/style reference: persistent left product navigation, central overview with quickstarts and product-area groupings, right-side “On this page” utility, searchable docs, and a clear docs utility/footer layer.
+- Future docs redesigns should preserve that hierarchy while keeping Tracify’s own monochrome/acid-yellow visual language and original claims/content.
+
 ## 2026-08-15 Vercel docs runtime fix
 - Public docs are loaded from `content/docs/*.mdoc` through runtime filesystem discovery. Next/Vercel output tracing may omit dynamically discovered Markdown files even when local builds pass, so `next.config.ts` explicitly includes `./content/docs/**/*.mdoc` in traced server functions.
 
