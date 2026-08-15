@@ -804,4 +804,4 @@ The single most important UI in the product.
 1. [completed] Make the documentation taxonomy available as a responsive, categorized sidebar.
 2. [completed] Add article-level Markdown copy and ChatGPT/Claude handoff controls with concise supporting copy.
 3. [completed] Implement a public read-only MCP surface for listing, searching, and reading the full documentation corpus.
-4. [in_progress] Run final checks, inspect the scoped diff, and publish the follow-up through a draft PR.
+4. [completed] Run final checks, inspect the scoped diff, and publish the follow-up through draft PR #13.
