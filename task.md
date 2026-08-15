@@ -737,3 +737,4 @@
 - [x] Keep the Markdoc docs repository separate from blog content.
 - [x] Preserve the `5to1r` SDK contract in public examples.
 - [x] Preserve critique learnings for future agents and avoid fabricated resource promises.
+- [x] Include the Markdoc docs repository in Vercel output tracing.

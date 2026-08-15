@@ -788,3 +788,7 @@ The single most important UI in the product.
 3. Add the plugin’s `ssoProvider` table to the Convex Better Auth schema.
 4. Start SAML login from the existing sign-in form using the entered email domain.
 5. For each enterprise customer, register and verify their SAML provider before enabling login.
+# Docs deployment reliability
+
+- Include dynamically loaded `content/docs/*.mdoc` files in Next/Vercel output tracing.
+- Verify content tests, TypeScript, and production build before updating the docs PR.

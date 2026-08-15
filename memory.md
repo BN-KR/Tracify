@@ -1,5 +1,8 @@
 # Project Memory
 
+## 2026-08-15 Vercel docs runtime fix
+- Public docs are loaded from `content/docs/*.mdoc` through runtime filesystem discovery. Next/Vercel output tracing may omit dynamically discovered Markdown files even when local builds pass, so `next.config.ts` explicitly includes `./content/docs/**/*.mdoc` in traced server functions.
+
 ## 2026-08-15 Documentation migration and content refinement
 - Public docs now live in `content/docs/*.mdoc`, separate from `content/blog/*.mdoc`, with Markdoc parsing, searchable navigation, and repository-boundary tests.
 - Keep public SDK examples aligned to the published `5to1r` package and `TracifyClient` API. The strongest editorial references remain `/product/trace-viewer` and `/security`: concrete, structured, and restrained.
