@@ -23,6 +23,7 @@ import type * as experiments from "../experiments.js";
 import type * as http from "../http.js";
 import type * as projects from "../projects.js";
 import type * as prompts from "../prompts.js";
+import type * as resilience from "../resilience.js";
 import type * as retention from "../retention.js";
 import type * as sessions from "../sessions.js";
 
@@ -48,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   projects: typeof projects;
   prompts: typeof prompts;
+  resilience: typeof resilience;
   retention: typeof retention;
   sessions: typeof sessions;
 }>;

@@ -37,6 +37,7 @@ export function DashboardCommandMenu({ projectId }: CommandMenuProps) {
       ["Search traces", `${base}/search`],
       ["Costs", `${base}/costs`],
       ["Evaluation", `${base}/evaluation`],
+      ["Resilience", `${base}/resilience`],
       ["Prompts", `${base}/prompts`],
       ["Settings", `${base}/settings`],
       ["Quickstart", `${base}/quickstart`],
