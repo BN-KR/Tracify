@@ -242,6 +242,40 @@ export const processAlert = inngest.createFunction(
       }
     });
 
+    await step.run("notify-teams", async () => {
+      const convex = getConvexClient();
+      const project = await convex.query(api.projects.getById, {
+        id: alert.projectId as Id<"projects">,
+      });
+
+      if (project?.teamsWebhookUrl) {
+        await fetch(project.teamsWebhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            summary: `Tracify Alert: ${alert.type}`,
+            themeColor: "000000",
+            title: `🚨 Tracify Alert: ${alert.type.replace('_', ' ').toUpperCase()}`,
+            text: alert.message,
+            potentialAction: [
+              {
+                "@type": "OpenUri",
+                name: "View Trace",
+                targets: [
+                  {
+                    os: "default",
+                    uri: `${getTracifyRegion().origin}/dashboard/${alert.projectId}/runs/${alert.runId}`,
+                  },
+                ],
+              },
+            ],
+          }),
+        });
+      }
+    });
+
     return { ok: true };
   },
 );

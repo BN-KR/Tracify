@@ -757,3 +757,19 @@
 - [ ] Create regional Stripe webhooks and register Google/GitHub callback URLs.
 - [x] Run repository/build and selector browser verification and publish draft PR #14.
 - [ ] Reconnect Git and deploy the exact merged commit to both regional projects after all provider and DNS gates pass.
+
+# Graph-derived feature opportunities — 2026-08-16
+
+Sourced from a graphify knowledge-graph audit (weakly-connected nodes, thin communities, docs-vs-implementation gaps).
+
+- [x] Surface the SDK chaos-engineering harness (`packages/ts-sdk/harness/chaos.ts`, `packages/python-sdk/harness/chaos.py`) as a documented resilience-testing workflow (`content/docs/resilience-testing.mdoc`, section "Evaluate"). Dashboard UI surfacing (a persisted run history) deferred — the harness itself is a local/CI tool, not a hosted feature.
+- [x] Add Microsoft Teams as an alert channel: `teamsWebhookUrl` project field (schema, Convex validation/mutations, Inngest `notify-teams` alert step, settings UI test-send action) alongside the existing Slack webhook, plus a Teams entry on `/integrations` with a real brand mark.
+  - [ ] `teams-bot/` (the separate BotFrameworkAdapter app) remains unwired into the alert pipeline — the webhook-based integration above covers the common case without standing up bot infrastructure; revisit if a full conversational bot is wanted.
+- [x] Show ingest-quota/rate-limit usage in the dashboard: new `GET /api/projects/[projectId]/ingest-quota` route (`peekRateLimit` in `redis-cache.ts`) + `IngestQuotaCard` on the Billing page, polling every 15s.
+- [x] Reconciled marketing vs. real Evaluation Engine: verified the "future" interaction prototypes (`ReleaseGateBuilder()`, `PersonaRouter()`, `CostSimulator()`) already live only in the private `/admin/library` gallery, not on public marketing pages — no public over-promising exists, so no change needed.
+- [x] List the docs MCP server (`/api/docs/mcp`) as an integration: added to `/integrations` (Agent tooling category) and `public/llms.txt`.
+- [x] Verified `/product/[feature]` pages already carry real, feature-specific content (commit `45780f6` "Deepen product pages and SEO structure") — the AGENTS.md placeholder note is stale; no change needed.
+
+Follow-ups still open:
+- [ ] Run `npx convex codegen` once a valid `CONVEX_DEPLOYMENT`/`CONVEX_URL` is available locally (codegen failed in this environment with `InvalidDeploymentName`) to refresh `convex/_generated/dataModel.d.ts` for the new `teamsWebhookUrl` schema field. `tsc --noEmit` and `eslint` both pass without it since the field is additive and optional.
+- [ ] Update AGENTS.md's stale "Useful Pages This Project is Missing" and product-page-placeholder notes now that both are confirmed resolved.

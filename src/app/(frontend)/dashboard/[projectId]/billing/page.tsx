@@ -1,5 +1,6 @@
 import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 import { BillingPlan } from "@/components/dashboard/billing-plan";
+import { IngestQuotaCard } from "@/components/dashboard/ingest-quota-card";
 
 export default async function BillingPage({
   params,
@@ -15,7 +16,8 @@ export default async function BillingPage({
         description="Real usage, current plan, and beta plan access."
       />
 
-      <div className="px-6 pb-20">
+      <div className="px-6 pb-20 space-y-6 max-w-3xl">
+        <IngestQuotaCard projectId={projectId} />
         <BillingPlan projectId={projectId} />
       </div>
     </div>

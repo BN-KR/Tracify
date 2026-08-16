@@ -38,11 +38,13 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
   const [maxDuration, setMaxDuration] = useState("");
   const [maxStall, setMaxStall] = useState("");
   const [slackWebhookUrl, setSlackWebhookUrl] = useState("");
+  const [teamsWebhookUrl, setTeamsWebhookUrl] = useState("");
   const [redactionEnabled, setRedactionEnabled] = useState(true);
   const [redactionRules, setRedactionRules] = useState<string[]>([...DEFAULT_REDACTION_RULES]);
   const [retentionDays, setRetentionDays] = useState("365");
   const [saving, setSaving] = useState(false);
   const [testingSlack, setTestingSlack] = useState(false);
+  const [testingTeams, setTestingTeams] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +58,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
       setMaxDuration(project.maxDurationSeconds?.toString() || "300");
       setMaxStall(project.maxStallMinutes?.toString() || "5");
       setSlackWebhookUrl(project.slackWebhookUrl || "");
+      setTeamsWebhookUrl(project.teamsWebhookUrl || "");
       setRedactionEnabled(project.redactionEnabled !== false);
       setRedactionRules(project.redactionRules?.length ? project.redactionRules : [...DEFAULT_REDACTION_RULES]);
       setRetentionDays(project.retentionDays?.toString() || "365");
@@ -72,6 +75,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
       maxDuration,
       maxStall,
       slackWebhookUrl,
+      teamsWebhookUrl,
       redactionEnabled,
       redactionRules,
       retentionDays,
@@ -95,6 +99,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
         maxDurationSeconds: parsed.value.maxDurationSeconds,
         maxStallMinutes: parsed.value.maxStallMinutes,
         slackWebhookUrl: parsed.value.slackWebhookUrl,
+        teamsWebhookUrl: parsed.value.teamsWebhookUrl,
         redactionEnabled: parsed.value.redactionEnabled,
         redactionRules: parsed.value.redactionRules,
         retentionDays: parsed.value.retentionDays,
@@ -121,7 +126,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
     setError(null);
     setNotice(null);
     try {
-      await sendTestAlert({ projectId: projectId as Id<"projects"> });
+      await sendTestAlert({ projectId: projectId as Id<"projects">, channel: "slack" });
       if (isPostHogConfigured) {
         posthog.capture("test_alert_sent");
       }
@@ -130,6 +135,29 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
       setError(err instanceof Error ? err.message : "Failed to send test alert");
     } finally {
       setTestingSlack(false);
+    }
+  }
+
+  async function handleSendTeamsTestAlert() {
+    if (!isValidTeamsWebhookUrl(teamsWebhookUrl.trim())) {
+      setNotice(null);
+      setError("Add a valid Teams webhook URL before sending a test alert");
+      return;
+    }
+
+    setTestingTeams(true);
+    setError(null);
+    setNotice(null);
+    try {
+      await sendTestAlert({ projectId: projectId as Id<"projects">, channel: "teams" });
+      if (isPostHogConfigured) {
+        posthog.capture("test_alert_sent_teams");
+      }
+      setNotice("Test alert sent");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send test alert");
+    } finally {
+      setTestingTeams(false);
     }
   }
 
@@ -281,6 +309,27 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
             {testingSlack ? "Sending..." : "Send test alert"}
           </Button>
         </div>
+
+        <div className="space-y-2 pt-4 border-t border-[#2A2A2A]">
+          <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono text-zinc-500">Teams Webhook URL</label>
+          <Input
+            value={teamsWebhookUrl}
+            onChange={(e) => setTeamsWebhookUrl(e.target.value)}
+            placeholder="https://*.webhook.office.com/webhookb2/..."
+            className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+          />
+          <p className="text-[9px] text-zinc-600 font-mono uppercase">Alerts will be sent to this Microsoft Teams channel when thresholds are exceeded.</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleSendTeamsTestAlert}
+            disabled={testingTeams || !teamsWebhookUrl.trim()}
+            className="mt-2 h-8 rounded-none border-zinc-800 font-mono text-[10px] uppercase"
+          >
+            <Send className="size-3" />
+            {testingTeams ? "Sending..." : "Send test alert"}
+          </Button>
+        </div>
       </Card>
 
       <div className="flex items-center justify-between pt-4">
@@ -333,6 +382,7 @@ function validateSettings(values: {
   maxDuration: string;
   maxStall: string;
   slackWebhookUrl: string;
+  teamsWebhookUrl: string;
   redactionEnabled: boolean;
   redactionRules: string[];
   retentionDays: string;
@@ -347,6 +397,7 @@ function validateSettings(values: {
         maxDurationSeconds: number;
         maxStallMinutes: number;
         slackWebhookUrl?: string;
+        teamsWebhookUrl?: string;
         redactionEnabled: boolean;
         redactionRules: string[];
         retentionDays: number;
@@ -358,6 +409,7 @@ function validateSettings(values: {
   const maxDurationSeconds = Number(values.maxDuration);
   const maxStallMinutes = Number(values.maxStall);
   const slackWebhookUrl = values.slackWebhookUrl.trim();
+  const teamsWebhookUrl = values.teamsWebhookUrl.trim();
   const retentionDays = Number(values.retentionDays);
 
   if (!name) return { ok: false, error: "Project name is required" };
@@ -373,6 +425,9 @@ function validateSettings(values: {
   if (slackWebhookUrl && !isValidSlackWebhookUrl(slackWebhookUrl)) {
     return { ok: false, error: "Slack webhook must be a valid Slack webhook URL" };
   }
+  if (teamsWebhookUrl && !isValidTeamsWebhookUrl(teamsWebhookUrl)) {
+    return { ok: false, error: "Teams webhook must be a valid Microsoft Teams webhook URL" };
+  }
   if (!Number.isInteger(retentionDays) || retentionDays < 1 || retentionDays > 3650) {
     return { ok: false, error: "Retention must be an integer between 1 and 3650 days" };
   }
@@ -387,6 +442,7 @@ function validateSettings(values: {
       maxDurationSeconds,
       maxStallMinutes,
       slackWebhookUrl: slackWebhookUrl || undefined,
+      teamsWebhookUrl: teamsWebhookUrl || undefined,
       redactionEnabled: values.redactionEnabled,
       redactionRules: values.redactionRules,
       retentionDays,
@@ -401,6 +457,18 @@ function isValidSlackWebhookUrl(value: string) {
       url.protocol === "https:" &&
       url.hostname === "hooks.slack.com" &&
       url.pathname.startsWith("/services/")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isValidTeamsWebhookUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      (url.hostname.endsWith(".webhook.office.com") || url.hostname.endsWith(".logic.azure.com"))
     );
   } catch {
     return false;
