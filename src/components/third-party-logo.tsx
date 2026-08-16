@@ -13,6 +13,7 @@ const brandLogos = {
   Google: simpleIcon("google"),
   LangChain: simpleIcon("langchain"),
   LlamaIndex: lobeIcon("llamaindex"),
+  "Microsoft Teams": pinnedSimpleIcon("microsoftteams"),
   "Mistral AI": simpleIcon("mistralai"),
   "Next.js": simpleIcon("nextdotjs"),
   OpenAI: pinnedSimpleIcon("openai"),

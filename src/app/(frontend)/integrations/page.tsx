@@ -24,8 +24,10 @@ const integrations: Integration[] = [
   { name: "Python", description: "Wrap FastAPI, Flask, or ordinary Python functions for automatic span collection.", category: "Runtimes" },
   { name: "Redis", description: "Track cache hits, misses, and rate-limiter state as spans in the agent pipeline.", category: "Infrastructure" },
   { name: "Slack", description: "Route alerts and failed-trace notifications into Slack channels through webhooks.", category: "Alerts" },
+  { name: "Microsoft Teams", description: "Route alerts and failed-trace notifications into a Teams channel through an incoming webhook or Power Automate flow.", category: "Alerts" },
   { name: "PagerDuty", description: "Escalate high-severity agent failures into the on-call workflow.", category: "Alerts" },
   { name: "Webhooks", description: "Send spans, alerts, cost thresholds, and orchestration events to any HTTP endpoint.", category: "Alerts" },
+  { name: "Docs MCP Server", description: "Give AI agents and MCP-compatible clients read access to Tracify's documentation as structured resources.", badge: "Native", category: "Agent tooling" },
 ];
 
 const categories = [...new Set(integrations.map((integration) => integration.category))];

@@ -83,6 +83,20 @@ export async function consumeRateLimit(
   };
 }
 
+export async function peekRateLimit(key: string, limit: number) {
+  const client = await connectRedis();
+  if (!client) throw new Error("REDIS_URL is not set");
+  const normalizedLimit = Math.max(1, Math.floor(limit));
+  const [rawCurrent, ttl] = await Promise.all([client.get(key), client.ttl(key)]);
+  const current = Number(rawCurrent ?? 0);
+  return {
+    used: current,
+    limit: normalizedLimit,
+    remaining: Math.max(0, normalizedLimit - current),
+    resetSeconds: Math.max(0, ttl),
+  };
+}
+
 export async function getJsonCache<T extends CachedPayload>(
   key: string,
 ): Promise<T | null> {

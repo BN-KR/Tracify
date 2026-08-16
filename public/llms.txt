@@ -13,6 +13,7 @@ Use the documentation for implementation details and the blog for explanatory gu
 - [Evaluation](https://www.tracify.tech/docs/evaluation): Guidance for evaluating agent behavior and quality.
 - [Integrations](https://www.tracify.tech/docs/integrations): Implementation guidance for supported integrations.
 - [Self-hosting](https://www.tracify.tech/docs/self-hosting): Self-hosting guidance and constraints.
+- [Docs MCP server](https://www.tracify.tech/api/docs/mcp): Read-only Model Context Protocol server exposing Tracify's documentation as structured resources for MCP-compatible agent clients.
 
 ## Product
 

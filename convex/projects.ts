@@ -130,6 +130,25 @@ function validateSlackWebhookUrl(value: string | undefined) {
   return value;
 }
 
+function validateTeamsWebhookUrl(value: string | undefined) {
+  if (!value) return undefined;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error("Teams webhook must be a valid Microsoft Teams webhook URL");
+  }
+
+  const isTeamsConnector = parsed.hostname.endsWith(".webhook.office.com");
+  const isPowerAutomate = parsed.hostname.endsWith(".logic.azure.com");
+  if (parsed.protocol !== "https:" || !(isTeamsConnector || isPowerAutomate)) {
+    throw new Error("Teams webhook must be a valid Microsoft Teams webhook URL");
+  }
+
+  return value;
+}
+
 function validateProjectSettings(args: {
   name?: string;
   clientName?: string;
@@ -138,6 +157,7 @@ function validateProjectSettings(args: {
   maxDurationSeconds?: number;
   maxStallMinutes?: number;
   slackWebhookUrl?: string;
+  teamsWebhookUrl?: string;
   redactionEnabled?: boolean;
   redactionRules?: string[];
   retentionDays?: number;
@@ -188,6 +208,7 @@ function validateProjectSettings(args: {
     maxDurationSeconds: args.maxDurationSeconds,
     maxStallMinutes: args.maxStallMinutes,
     slackWebhookUrl: validateSlackWebhookUrl(args.slackWebhookUrl),
+    teamsWebhookUrl: validateTeamsWebhookUrl(args.teamsWebhookUrl),
     redactionEnabled: args.redactionEnabled,
     redactionRules: args.redactionRules?.slice(0, 20),
     retentionDays: args.retentionDays,
@@ -293,6 +314,7 @@ function publicProject(project: Doc<"projects">) {
     maxDurationSeconds: project.maxDurationSeconds,
     maxStallMinutes: project.maxStallMinutes,
     slackWebhookUrl: project.slackWebhookUrl ?? null,
+    teamsWebhookUrl: project.teamsWebhookUrl ?? null,
     runtimePolicy: project.runtimePolicy ?? null,
     redactionEnabled: project.redactionEnabled ?? true,
     redactionRules: project.redactionRules ?? [],
@@ -686,6 +708,7 @@ export const updateProject = mutation({
     maxDurationSeconds: v.optional(v.number()),
     maxStallMinutes: v.optional(v.number()),
     slackWebhookUrl: v.optional(v.string()),
+    teamsWebhookUrl: v.optional(v.string()),
     redactionEnabled: v.optional(v.boolean()),
     redactionRules: v.optional(v.array(v.string())),
     retentionDays: v.optional(v.number()),
@@ -843,8 +866,11 @@ export const getRuntimePolicyByApiKey = query({
 });
 
 export const sendTestAlert = action({
-  args: { projectId: v.id("projects") },
-  handler: async (ctx, { projectId }) => {
+  args: {
+    projectId: v.id("projects"),
+    channel: v.optional(v.union(v.literal("slack"), v.literal("teams"))),
+  },
+  handler: async (ctx, { projectId, channel = "slack" }) => {
     const project = await ctx.runQuery(api.projects.getProjectForAdmin, {
       projectId,
     });
@@ -852,6 +878,36 @@ export const sendTestAlert = action({
     if (!project) {
       throw new Error("Project not found or access denied");
     }
+
+    if (channel === "teams") {
+      if (!project.teamsWebhookUrl) {
+        throw new Error("Add a Teams webhook URL before sending a test alert");
+      }
+
+      const response = await fetch(project.teamsWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          "@type": "MessageCard",
+          "@context": "http://schema.org/extensions",
+          summary: "tracify test alert",
+          themeColor: "000000",
+          title: "tracify test alert",
+          text: `Project ${project.name} is connected to this Teams channel.`,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Teams test alert failed", {
+          status: response.status,
+          statusText: response.statusText,
+        });
+        throw new Error("Teams test alert failed");
+      }
+
+      return { ok: true };
+    }
+
     if (!project.slackWebhookUrl) {
       throw new Error("Add a Slack webhook URL before sending a test alert");
     }
