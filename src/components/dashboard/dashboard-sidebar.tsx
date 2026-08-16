@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Terminal,
   Globe2,
+  Zap,
 } from "lucide-react";
 import { useMemo, useState, type ComponentType } from "react";
 import Link from "next/link";
@@ -151,6 +152,11 @@ export function DashboardSidebar({
           title: "Playground",
           icon: PlaygroundIcon,
           href: projectId ? "/dashboard/" + projectId + "/playground" : projectSetupHref,
+        },
+        {
+          title: "Resilience",
+          icon: Zap,
+          href: projectId ? "/dashboard/" + projectId + "/resilience" : projectSetupHref,
         },
       ],
     },

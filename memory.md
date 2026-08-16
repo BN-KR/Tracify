@@ -1,5 +1,10 @@
 # Project Memory
 
+## 2026-08-16 Pending work needs BN-KR's own machine
+- `task.md` has a `⚠ PENDING — needs BN-KR on their own machine` section pinned at the very top. Read it first whenever asked "what do I need to do" or "what's pending" — it's the maintained source of truth, not this file or conversation history.
+- It currently tracks: the 5 still-open EU/US regional cloud provisioning steps (DNS, Tinybird, Redis/Inngest, Stripe webhooks, final Git deploy), the uncommitted Resilience Testing dashboard branch (`codex/resilience-testing-dashboard`) and its remaining verification steps, a Convex codegen gap from merged PR #15 (`teamsWebhookUrl` field — hand-patched `convex/_generated/api.d.ts` for the resilience module too, both need a real `npx convex codegen` run), and setting up a GitHub account for Claude Code commit attribution.
+- Update that section as items resolve or new local-machine-only blockers appear; don't let it go stale.
+
 ## 2026-08-15 Docs IA refinement from Langfuse reference
 - The requested reference pattern is an information architecture, not just a color/style reference: persistent left product navigation, central overview with quickstarts and product-area groupings, right-side “On this page” utility, searchable docs, and a clear docs utility/footer layer.
 - Future docs redesigns should preserve that hierarchy while keeping Tracify’s own monochrome/acid-yellow visual language and original claims/content.

@@ -495,6 +495,58 @@ export default defineSchema({
     .index("by_projectId", ["projectId"])
     .index("by_projectId_and_active", ["projectId", "active"]),
 
+  resilienceRuns: defineTable({
+    projectId: v.id("projects"),
+    status: v.union(v.literal("running"), v.literal("completed"), v.literal("failed")),
+    iterations: v.number(),
+    failureMix: v.object({
+      success: v.number(),
+      timeout: v.number(),
+      "429": v.number(),
+      "500": v.number(),
+      cost_overrun: v.number(),
+    }),
+    policySnapshot: v.object({
+      enforcementMode: v.union(v.literal("observe"), v.literal("enforce")),
+      fallbackChain: v.array(v.string()),
+      maxCostPerRun: v.optional(v.number()),
+      maxCostPerDay: v.optional(v.number()),
+      latencyBudgetMs: v.optional(v.number()),
+      retryPolicy: v.object({
+        maxAttempts: v.number(),
+        backoffMs: v.number(),
+        backoffMultiplier: v.number(),
+        retryableErrors: v.array(v.string()),
+      }),
+    }),
+    successCount: v.number(),
+    failOpenCount: v.number(),
+    blockedCount: v.number(),
+    error: v.optional(v.string()),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_projectId", ["projectId"]),
+
+  resilienceIterations: defineTable({
+    projectId: v.id("projects"),
+    runId: v.id("resilienceRuns"),
+    iteration: v.number(),
+    model: v.string(),
+    failureMode: v.union(v.literal("success"), v.literal("timeout"), v.literal("429"), v.literal("500"), v.literal("cost_overrun")),
+    success: v.boolean(),
+    latencyMs: v.number(),
+    attempts: v.number(),
+    blocked: v.optional(v.boolean()),
+    fallbackReason: v.optional(v.string()),
+    failOpen: v.optional(v.boolean()),
+    error: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_runId", ["runId"])
+    .index("by_projectId", ["projectId"]),
+
   evaluationMonitorState: defineTable({
     projectId: v.id("projects"),
     monitorId: v.id("evaluationMonitors"),

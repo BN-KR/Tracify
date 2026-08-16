@@ -10,6 +10,10 @@ order: 23
 
 Both SDKs ship a chaos harness that drives your configured [runtime policy](/docs/release-gates) through a weighted mix of failure conditions — timeouts, rate limits, server errors, and cost overruns — against real HTTP calls. Use it to verify fallback chains, retry backoff, and cost ceilings actually behave the way your policy declares before an incident forces the question.
 
+## Run it from the dashboard
+
+The **Resilience** tab under a project's Improve section (`/dashboard/<projectId>/resilience`) runs the same fallback-chain, retry, and cost-ceiling logic as a policy simulation against your project's actual runtime policy — no real provider calls, no API keys, no cost. Configure iteration count and failure mix, run the test, and see per-failure-mode success rate, average latency, and fail-open counts without leaving the browser. Use this for a quick policy sanity check; use the CLI harness below when you need to exercise real provider latency and network conditions.
+
 ## What it tests
 
 Each iteration picks a failure mode at random from a configurable mix and drives it through `orchestrate()`:

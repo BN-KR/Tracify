@@ -1,3 +1,39 @@
+# ⚠ PENDING — needs BN-KR on their own machine (updated 2026-08-16)
+
+These require local credentials, live provider consoles, or a working internet
+connection that this environment doesn't reliably have right now. Read this
+section first whenever asked "what do I need to do."
+
+## EU/US regional cloud — still open (from 2026-08-15 work)
+- [ ] Add the two DNS A records at Domeneshop and verify Vercel TLS issuance.
+- [ ] Create and deploy independent Tinybird workspaces for EU and US; add unique hosts/tokens to Vercel.
+- [ ] Create independent regional Redis databases and Inngest environments; add unique credentials to Vercel.
+- [ ] Create regional Stripe webhooks and register Google/GitHub callback URLs.
+- [ ] Reconnect Git and deploy the exact merged commit to both regional projects after all provider and DNS gates pass.
+
+## Resilience Testing dashboard feature — built, not yet committed
+Branch `codex/resilience-testing-dashboard` has schema + Convex functions + dashboard UI
+for a new "Resilience" tab (policy simulation against synthetic chaos failures). Lint and
+`tsc --noEmit` pass; production build hasn't completed cleanly here (unrelated Google Fonts
+network fetch failure in this sandbox, not a code issue).
+- [ ] Re-run `npm run build` on a machine with normal internet access to confirm it's clean.
+- [ ] Run `npx convex codegen` with a real `CONVEX_DEPLOYMENT` — I hand-patched
+      `convex/_generated/api.d.ts` to add the `resilience` module type entry since codegen
+      couldn't run here; replace that hand-edit with a real generated file.
+- [ ] Manually click through `/dashboard/<projectId>/resilience`, run a test, confirm results render.
+- [ ] Commit and open the draft PR once the above checks out.
+
+## Convex codegen gap from the previous PR (#15, already merged)
+- [ ] Run `npx convex codegen` once a valid `CONVEX_DEPLOYMENT`/`CONVEX_URL` is available to
+      refresh `convex/_generated/dataModel.d.ts` for the `teamsWebhookUrl` schema field (additive/optional,
+      so nothing broke, but codegen should still be re-run for real).
+
+## Claude Code contributor attribution (from chat, not yet set up)
+- [ ] Create/decide on a GitHub account for Claude Code commit attribution and give me its
+      noreply email so future commits co-author correctly (see prior discussion in this session).
+
+---
+
 # Robots standards cleanup — 2026-08-13
 
 1. [completed] Remove the Google-unsupported `Host` directive from the generated robots file.
