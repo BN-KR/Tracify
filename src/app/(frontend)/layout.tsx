@@ -10,6 +10,8 @@ import "./globals.css";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
+const isCloudDeployment = process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND === "cloud";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.tracify.tech"),
   title: { default: "Tracify | AI agent observability and evaluation", template: "%s | Tracify" },
@@ -17,7 +19,9 @@ export const metadata: Metadata = {
   applicationName: "Tracify",
   category: "AI agent observability",
   keywords: ["AI agent observability", "LLM observability", "AI agent evaluation", "OpenTelemetry tracing", "agent tracing", "LLM cost monitoring"],
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
+  robots: isCloudDeployment
+    ? { index: false, follow: false }
+    : { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
   openGraph: {
     title: "Tracify | AI agent observability and evaluation",
     description: "Trace every decision, tool call, cost, quality signal, and deployment change in one debugging timeline.",

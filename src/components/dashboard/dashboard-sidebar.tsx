@@ -19,6 +19,7 @@ import {
   Settings2,
   ShieldCheck,
   Terminal,
+  Globe2,
 } from "lucide-react";
 import { useMemo, useState, type ComponentType } from "react";
 import Link from "next/link";
@@ -33,6 +34,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
+import { getTracifyRegion } from "@/lib/regions";
 
 type GroupId = "observe" | "analyze" | "improve" | "operate" | "manage" | "resources";
 
@@ -77,6 +79,7 @@ export function DashboardSidebar({
   const projectId = (params?.projectId as string) || "";
   const projectDashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
   const projectSetupHref = projectId ? `/dashboard/${projectId}` : "/onboarding/project";
+  const region = getTracifyRegion();
   const dynamicGroups = useMemo<NavGroup[]>(() => [
     {
       id: "observe",
@@ -353,6 +356,15 @@ export function DashboardSidebar({
           />
         ))}
       </nav>
+
+      <Link
+        href="https://www.tracify.tech/cloud?next=/dashboard"
+        className={cn("flex min-h-12 items-center border-t border-[#2A2A2A] px-4 text-[#777] hover:bg-[#161616] hover:text-white", showExpandedContent ? "gap-3" : "justify-center")}
+        aria-label={`${region.name} cloud region. Open region directory`}
+      >
+        <Globe2 className="size-4 shrink-0" />
+        {showExpandedContent ? <span className="font-mono text-[10px] uppercase tracking-[0.12em]">{region.flag} {region.shortName} cloud · Switch</span> : null}
+      </Link>
 
     </aside>
   );

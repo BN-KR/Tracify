@@ -21,6 +21,15 @@ function getHeaders() {
   };
 }
 
+export async function checkTinybirdHealth() {
+  const response = await fetch(sqlUrl("SELECT 1 AS healthy"), {
+    headers: getHeaders(),
+    cache: "no-store",
+    signal: AbortSignal.timeout(4_000),
+  });
+  if (!response.ok) throw new Error(`Tinybird returned ${response.status}`);
+}
+
 function sqlString(value: string) {
   return value.replace(/'/g, "''");
 }

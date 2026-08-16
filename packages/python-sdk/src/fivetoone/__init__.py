@@ -181,17 +181,39 @@ def _run_with_timeout(
 
 
 class FiveToOneClient:
-    def __init__(self, api_key: Optional[str] = None, host: str = "https://tracify.tech", project_id: Optional[str] = None):
+    REGION_HOSTS = {
+        "eu": "https://eu.cloud.tracify.tech",
+        "us": "https://us.cloud.tracify.tech",
+    }
+
+    def __init__(self, api_key: Optional[str] = None, host: Optional[str] = None, project_id: Optional[str] = None, region: Optional[str] = None):
         self.api_key = api_key or os.environ.get("TRACIFY_API_KEY") or os.environ.get("FIVETOONE_API_KEY")
         if not self.api_key:
             raise ValueError("TRACIFY_API_KEY or FIVETOONE_API_KEY must be provided or set as an environment variable")
-        self.host = host.rstrip("/")
+        selected_region = (region or os.environ.get("TRACIFY_REGION") or "eu").strip().lower()
+        if selected_region not in self.REGION_HOSTS:
+            raise ValueError("TRACIFY_REGION must be 'eu' or 'us'")
+        self.host = (host or os.environ.get("TRACIFY_HOST") or self.REGION_HOSTS[selected_region]).rstrip("/")
+        host_region = next((key for key, value in self.REGION_HOSTS.items() if value == self.host), None)
+        key_region = self._api_key_region(self.api_key)
+        if key_region and host_region and key_region != host_region:
+            raise ValueError(f"Tracify API key region mismatch: this key belongs to {key_region.upper()}, but the client is configured for {host_region.upper()}.")
         self.project_id = project_id
         self.ingest_url = f"{self.host}/api/ingest"
         self.check_cost_url = f"{self.host}/api/orchestration/check-cost"
         self._http = httpx.Client(timeout=10) if _HAS_HTTPX else None
         self._last_fail_open = False
         self._prompt_cache: Dict[str, Any] = {}
+
+    @staticmethod
+    def _api_key_region(api_key: str) -> Optional[str]:
+        if api_key.startswith("tracify_sk_live_eu_"):
+            return "eu"
+        if api_key.startswith("tracify_sk_live_us_"):
+            return "us"
+        if api_key.startswith("tracify_sk_live_") or api_key.startswith("5t1r_sk_live_"):
+            return "eu"
+        return None
 
     def _send_span(self, span: Dict[str, Any]):
         try:

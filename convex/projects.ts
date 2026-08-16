@@ -4,7 +4,17 @@ import { action, mutation, query } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 
-const API_KEY_PREFIX = "tracify_sk_live_";
+type DeploymentRegion = "eu" | "us";
+
+function deploymentRegion(): DeploymentRegion {
+  const value = process.env.TRACIFY_REGION?.trim().toLowerCase();
+  if (value === "us") return "us";
+  return "eu";
+}
+
+function apiKeyPrefix() {
+  return `tracify_sk_live_${deploymentRegion()}_`;
+}
 
 function getHmacSecret() {
   const secret = process.env.TRACIFY_API_KEY_HASH_SECRET;
@@ -313,7 +323,8 @@ export const createProject = mutation({
 
     const clerkOrgId = getOrgId(identity);
     const slug = `${slugify(name)}-${randomHex(3)}`;
-    const plaintextApiKey = `${API_KEY_PREFIX}${randomHex(16)}`;
+    const prefix = apiKeyPrefix();
+    const plaintextApiKey = `${prefix}${randomHex(16)}`;
     const apiKeyHash = await hmacSha256(plaintextApiKey);
     const now = Date.now();
 
@@ -325,7 +336,7 @@ export const createProject = mutation({
       createdAt: now,
       updatedAt: now,
       planTier: "free",
-      apiKeyPrefix: API_KEY_PREFIX,
+      apiKeyPrefix: prefix,
       apiKeyLast4: plaintextApiKey.slice(-4),
       apiKeyHash,
       apiKeyStatus: "active",
@@ -341,7 +352,7 @@ export const createProject = mutation({
       slug,
       plaintextApiKey,
       apiKey: plaintextApiKey,
-      apiKeyPrefix: API_KEY_PREFIX,
+      apiKeyPrefix: prefix,
       apiKeyLast4: plaintextApiKey.slice(-4),
     };
   },
@@ -373,7 +384,8 @@ export const createProjectForUser = mutation({
     }
 
     const slug = `${slugify(name)}-${randomHex(3)}`;
-    const plaintextApiKey = `${API_KEY_PREFIX}${randomHex(16)}`;
+    const prefix = apiKeyPrefix();
+    const plaintextApiKey = `${prefix}${randomHex(16)}`;
     const apiKeyHash = await hmacSha256(plaintextApiKey);
     const now = Date.now();
 
@@ -385,7 +397,7 @@ export const createProjectForUser = mutation({
       createdAt: now,
       updatedAt: now,
       planTier: "free",
-      apiKeyPrefix: API_KEY_PREFIX,
+      apiKeyPrefix: prefix,
       apiKeyLast4: plaintextApiKey.slice(-4),
       apiKeyHash,
       apiKeyStatus: "active",
@@ -401,7 +413,7 @@ export const createProjectForUser = mutation({
       slug,
       plaintextApiKey,
       apiKey: plaintextApiKey,
-      apiKeyPrefix: API_KEY_PREFIX,
+      apiKeyPrefix: prefix,
       apiKeyLast4: plaintextApiKey.slice(-4),
     };
   },
@@ -780,13 +792,14 @@ export const rotateApiKey = mutation({
       throw new Error("Admin access required");
     }
 
-    const plaintextApiKey = `${API_KEY_PREFIX}${randomHex(16)}`;
+    const prefix = apiKeyPrefix();
+    const plaintextApiKey = `${prefix}${randomHex(16)}`;
     const apiKeyHash = await hmacSha256(plaintextApiKey);
     const now = Date.now();
 
     await ctx.db.patch(args.projectId, {
       apiKeyHash,
-      apiKeyPrefix: API_KEY_PREFIX,
+      apiKeyPrefix: prefix,
       apiKeyLast4: plaintextApiKey.slice(-4),
       apiKeyStatus: "active",
       apiKeyCreatedAt: now,
@@ -796,7 +809,7 @@ export const rotateApiKey = mutation({
 
     return {
       plaintextApiKey,
-      apiKeyPrefix: API_KEY_PREFIX,
+      apiKeyPrefix: prefix,
       apiKeyLast4: plaintextApiKey.slice(-4),
     };
   },

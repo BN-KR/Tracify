@@ -86,6 +86,18 @@ class TestCancellationToken:
 
 
 class TestFiveToOneClient:
+    def test_selects_requested_region(self):
+        client = FiveToOneClient(api_key="test-key", region="us")
+        assert client.host == "https://us.cloud.tracify.tech"
+
+    def test_rejects_wrong_region_key(self):
+        with pytest.raises(ValueError, match="belongs to EU"):
+            FiveToOneClient(api_key="tracify_sk_live_eu_example", region="us")
+
+    def test_legacy_keys_belong_to_eu(self):
+        with pytest.raises(ValueError, match="belongs to EU"):
+            FiveToOneClient(api_key="tracify_sk_live_legacy", region="us")
+
     @patch(MOCK_TARGET)
     def test_ingest_sends_correct_payload(self, mock_http):
         mock_http.return_value = MagicMock(status_code=202)

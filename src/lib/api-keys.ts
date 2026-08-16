@@ -1,6 +1,7 @@
 import { createHmac, randomBytes } from "crypto";
+import { getRegionalApiKeyPrefix, getWrongRegion } from "@/lib/regions";
 
-export const API_KEY_PREFIX = "tracify_sk_live_";
+export const API_KEY_PREFIX = getRegionalApiKeyPrefix();
 
 export function generateApiKey() {
   return `${API_KEY_PREFIX}${randomBytes(16).toString("hex")}`;
@@ -13,6 +14,24 @@ export function hashApiKey(apiKey: string) {
   }
 
   return createHmac("sha256", secret).update(apiKey).digest("hex");
+}
+
+export function isTracifyApiKey(apiKey: string) {
+  return apiKey.startsWith("tracify_sk_live_") || apiKey.startsWith("5t1r_sk_live_");
+}
+
+export function getWrongRegionApiKeyResponse(apiKey: string) {
+  const correctRegion = getWrongRegion(apiKey);
+  if (!correctRegion) return null;
+  return Response.json(
+    {
+      error: `This API key belongs to the ${correctRegion.shortName} region. Send it to ${correctRegion.origin}.`,
+      code: "wrong_region",
+      region: correctRegion.id,
+      ingestUrl: `${correctRegion.origin}/api/ingest`,
+    },
+    { status: 401 },
+  );
 }
 
 export function getApiKeyDisplayParts(apiKey: string) {

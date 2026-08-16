@@ -11,6 +11,8 @@
     "start": "next start",
     "lint": "eslint src convex scripts",
     "test:content": "node --test --experimental-strip-types src/lib/markdoc-blog.test.ts src/lib/markdoc-docs.test.ts src/lib/blog-internal-links.test.ts src/components/blog/reading-time.test.ts scripts/lexical-to-markdoc.test.mjs scripts/blog-index-contract.test.mjs scripts/llms-txt-contract.test.mjs",
+    "test:regions": "node --test --experimental-strip-types src/lib/regions.test.ts",
+    "verify:regions": "node scripts/verify-regional-cloud.mjs",
     "test:sdk:ts": "npm test --prefix packages/ts-sdk",
     "test:sdk:python": "python -m pytest packages/python-sdk/tests -q",
     "lint:platform": "eslint src/app/demo src/app/docs src/app/api/otel src/app/api/evaluation src/app/api/playground src/app/api/evaluators src/app/api/feedback src/app/api/prompts src/app/dashboard/[projectId]/datasets src/components/dashboard/dashboard-sidebar.tsx src/components/dashboard/trace-viewer.tsx src/components/dashboard/project-members.tsx src/components/dashboard/prompt-management.tsx src/components/dashboard/prompt-playground.tsx src/components/dashboard/evaluation-lab.tsx src/components/dashboard/evaluator-manager.tsx src/components/dashboard/experiment-lab.tsx src/components/dashboard/review-queue.tsx scripts/platform-smoke.mjs",
@@ -22,7 +24,6 @@
   "dependencies": {
     "@base-ui/react": "^1.4.1",
     "@better-auth/infra": "^0.3.7",
-    "@better-auth/sso": "^1.7.0-rc.1",
     "@convex-dev/better-auth": "^0.12.5",
     "@markdoc/markdoc": "^0.5.9",
     "@radix-ui/react-dropdown-menu": "^2.1.16",

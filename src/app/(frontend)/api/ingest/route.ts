@@ -4,10 +4,12 @@ import type { Id } from "convex/_generated/dataModel";
 
 import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
-import { hashApiKey } from "@/lib/api-keys";
+import { getWrongRegionApiKeyResponse, hashApiKey, isTracifyApiKey } from "@/lib/api-keys";
 import { DEFAULT_REDACTION_RULES, redactPayload, redactRecord } from "@/lib/redaction";
+import { consumeRateLimit } from "@/lib/redis-cache";
 
 const MAX_BODY_BYTES = 1024 * 1024;
+const INGEST_LIMIT_PER_MINUTE = Number(process.env.TRACIFY_INGEST_LIMIT_PER_MINUTE ?? 6_000);
 
 type SpanPayload = {
   spanId: string;
@@ -144,9 +146,11 @@ export async function POST(request: NextRequest) {
   }
 
   const apiKey = authHeader.slice(7).trim();
-  if (!apiKey.startsWith("tracify_sk_live_") && !apiKey.startsWith("5t1r_sk_live_")) {
+  if (!isTracifyApiKey(apiKey)) {
     return Response.json({ error: "Invalid API key" }, { status: 401 });
   }
+  const wrongRegion = getWrongRegionApiKeyResponse(apiKey);
+  if (wrongRegion) return wrongRegion;
 
   let body: Record<string, unknown>;
   try {
@@ -172,6 +176,19 @@ export async function POST(request: NextRequest) {
 
   if (!project) {
     return Response.json({ error: "Invalid API key" }, { status: 401 });
+  }
+
+  let quota;
+  try {
+    quota = await consumeRateLimit(`ingest:${project._id}`, 1, INGEST_LIMIT_PER_MINUTE, 60);
+  } catch {
+    return Response.json({ error: "Ingestion quota service unavailable" }, { status: 503 });
+  }
+  if (!quota.allowed) {
+    return Response.json(
+      { error: "Ingestion rate limit exceeded", code: "rate_limit_exceeded", retryAfterSeconds: quota.retryAfterSeconds },
+      { status: 429, headers: { "Retry-After": String(quota.retryAfterSeconds), "X-RateLimit-Remaining": "0" } },
+    );
   }
 
   const projectDocId = project._id as Id<"projects">;
@@ -242,5 +259,8 @@ export async function POST(request: NextRequest) {
     console.error("Inngest send failed (span accepted but not queued):", err);
   }
 
-  return Response.json({ ok: true, spanId: payload.spanId }, { status: 202 });
+  return Response.json(
+    { ok: true, spanId: payload.spanId },
+    { status: 202, headers: { "X-RateLimit-Remaining": String(quota.remaining) } },
+  );
 }

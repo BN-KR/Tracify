@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "marketingOrigin": "https://www.tracify.tech",
+  "regions": {
+    "eu": {
+      "origin": "https://eu.cloud.tracify.tech",
+      "location": "Ireland",
+      "convexRegion": "aws-eu-west-1",
+      "legacyApiKeys": true,
+      "infrastructure": {
+        "vercelProject": "tracify-cloud-eu",
+        "convexDeployment": "jovial-owl-711",
+        "convexUrl": "https://jovial-owl-711.eu-west-1.convex.cloud",
+        "convexSiteUrl": "https://jovial-owl-711.eu-west-1.convex.site"
+      }
+    },
+    "us": {
+      "origin": "https://us.cloud.tracify.tech",
+      "location": "Virginia",
+      "convexRegion": "aws-us-east-1",
+      "legacyApiKeys": false,
+      "infrastructure": {
+        "vercelProject": "tracify-cloud-us",
+        "convexDeployment": "flexible-anaconda-752",
+        "convexUrl": "https://flexible-anaconda-752.convex.cloud",
+        "convexSiteUrl": "https://flexible-anaconda-752.convex.site"
+      }
+    }
+  },
+  "requiredIsolatedServices": [
+    "vercel",
+    "convex",
+    "tinybird",
+    "redis",
+    "inngest",
+    "better-auth"
+  ],
+  "requiredCloudEnvironment": [
+    "NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND",
+    "NEXT_PUBLIC_TRACIFY_REGION",
+    "TRACIFY_REGION",
+    "NEXT_PUBLIC_SITE_URL",
+    "NEXT_PUBLIC_CONVEX_URL",
+    "NEXT_PUBLIC_CONVEX_SITE_URL",
+    "TRACIFY_API_KEY_HASH_SECRET",
+    "TINYBIRD_HOST",
+    "TINYBIRD_TOKEN",
+    "REDIS_URL",
+    "INNGEST_EVENT_KEY"
+  ],
+  "externalReadiness": [
+    {
+      "service": "vercel-release",
+      "status": "manual-action-required",
+      "action": "After the regional change is merged and all required credentials are present, reconnect the shared Git repository and deploy the exact merged main commit to both projects."
+    },
+    {
+      "service": "dns",
+      "status": "manual-action-required",
+      "action": "Create A records for eu.cloud.tracify.tech and us.cloud.tracify.tech pointing to 76.76.21.21 at the authoritative DNS provider."
+    },
+    {
+      "service": "tinybird",
+      "status": "credentials-required",
+      "action": "Create independent EU and US workspaces, deploy the repository Tinybird project to both, and add unique host/token pairs to the matching Vercel project."
+    },
+    {
+      "service": "redis",
+      "status": "credentials-required",
+      "action": "Create independent EU and US Redis databases and add a unique REDIS_URL to each Vercel project."
+    },
+    {
+      "service": "inngest",
+      "status": "credentials-required",
+      "action": "Create independent EU and US Inngest environments and add unique event/signing keys to each Vercel project."
+    },
+    {
+      "service": "oauth",
+      "status": "manual-action-required",
+      "action": "Register both regional Better Auth callback origins with Google and GitHub."
+    },
+    {
+      "service": "stripe",
+      "status": "manual-action-required",
+      "action": "Create one signed webhook endpoint per regional origin and add its unique STRIPE_WEBHOOK_SECRET to the matching Vercel project."
+    }
+  ]
+}

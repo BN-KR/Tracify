@@ -4,6 +4,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import { getStripe, planForPrice } from "@/lib/stripe";
+import { getDeploymentRegion } from "@/lib/regions";
 
 export async function POST(request: Request) {
   if (!process.env.STRIPE_SECRET_KEY) return new NextResponse("Stripe is not configured", { status: 503 });
@@ -13,6 +14,13 @@ export async function POST(request: Request) {
   let event: Stripe.Event;
   try { event = stripe.webhooks.constructEvent(await request.text(), signature, process.env.STRIPE_WEBHOOK_SECRET); }
   catch { return new NextResponse("Invalid signature", { status: 400 }); }
+
+  const eventRegion = "metadata" in event.data.object
+    ? (event.data.object.metadata as Record<string, string> | null)?.tracifyRegion
+    : undefined;
+  if (eventRegion && eventRegion !== getDeploymentRegion()) {
+    return new NextResponse("Event belongs to another Tracify region", { status: 409 });
+  }
 
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
   const syncSecret = process.env.STRIPE_SYNC_SECRET;

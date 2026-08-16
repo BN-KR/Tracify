@@ -7,12 +7,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, Terminal, Code2, BookOpen, KeyRound } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getDeploymentRegion, getTracifyRegion } from "@/lib/regions";
 
 interface QuickstartGuideProps {
   projectId: string;
 }
 
 export function QuickstartGuide({ projectId }: QuickstartGuideProps) {
+  const region = getTracifyRegion(getDeploymentRegion());
   const project = useQuery(
     api.projects.getProjectById,
     projectId ? { projectId: projectId as Id<"projects"> } : "skip"
@@ -123,8 +125,8 @@ const agent = traceAgent(async () => {
           Inject your API key into your agent&apos;s environment.
         </p>
         <CodeBlock
-          code={`TRACIFY_API_KEY=${project?.apiKeyPrefix || 'tracify_sk_live_'}••••••••${project?.apiKeyLast4 || '••••'}`}
-          onCopy={() => copyToClipboard(`TRACIFY_API_KEY=YOUR_API_KEY`, 'env')}
+          code={`TRACIFY_API_KEY=${project?.apiKeyPrefix || `tracify_sk_live_${region.id}_`}••••••••${project?.apiKeyLast4 || '••••'}\nTRACIFY_REGION=${region.id}`}
+          onCopy={() => copyToClipboard(`TRACIFY_API_KEY=YOUR_API_KEY\nTRACIFY_REGION=${region.id}`, 'env')}
           copied={copied === 'env'}
         />
       </section>

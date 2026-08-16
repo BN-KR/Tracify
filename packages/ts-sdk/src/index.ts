@@ -1,10 +1,30 @@
 export interface FiveToOneConfig {
   apiKey?: string;
   host?: string;
+  /** Tracify Cloud data region. Ignored when `host` is provided. Defaults to TRACIFY_REGION or EU. */
+  region?: TracifyRegion;
   projectId?: string;
 }
 
 export type TracifyConfig = FiveToOneConfig;
+export type TracifyRegion = "eu" | "us";
+
+export const TRACIFY_REGION_HOSTS: Record<TracifyRegion, string> = {
+  eu: "https://eu.cloud.tracify.tech",
+  us: "https://us.cloud.tracify.tech",
+};
+
+function parseRegion(value: string | undefined): TracifyRegion | undefined {
+  const normalized = value?.trim().toLowerCase();
+  return normalized === "eu" || normalized === "us" ? normalized : undefined;
+}
+
+function apiKeyRegion(apiKey: string): TracifyRegion | undefined {
+  if (apiKey.startsWith("tracify_sk_live_eu_")) return "eu";
+  if (apiKey.startsWith("tracify_sk_live_us_")) return "us";
+  if (apiKey.startsWith("tracify_sk_live_") || apiKey.startsWith("5t1r_sk_live_")) return "eu";
+  return undefined;
+}
 
 export interface SpanData {
   spanId?: string;
@@ -130,7 +150,13 @@ export class FiveToOneClient {
     if (!this.apiKey) {
       console.warn('Tracify Warning: TRACIFY_API_KEY or FIVETOONE_API_KEY is not set');
     }
-    this.host = (config.host || 'https://tracify.tech').replace(/\/$/, '');
+    const configuredRegion = config.region ?? parseRegion(process.env.TRACIFY_REGION) ?? "eu";
+    this.host = (config.host || process.env.TRACIFY_HOST || TRACIFY_REGION_HOSTS[configuredRegion]).replace(/\/$/, '');
+    const selectedHostRegion = Object.entries(TRACIFY_REGION_HOSTS).find(([, host]) => host === this.host)?.[0] as TracifyRegion | undefined;
+    const keyRegion = apiKeyRegion(this.apiKey);
+    if (keyRegion && selectedHostRegion && keyRegion !== selectedHostRegion) {
+      throw new Error(`Tracify API key region mismatch: this key belongs to ${keyRegion.toUpperCase()}, but the client is configured for ${selectedHostRegion.toUpperCase()}.`);
+    }
     this.projectId = config.projectId;
     this.ingestUrl = `${this.host}/api/ingest`;
     this.checkCostUrl = `${this.host}/api/orchestration/check-cost`;
