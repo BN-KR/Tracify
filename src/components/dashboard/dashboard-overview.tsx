@@ -136,10 +136,10 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
     <div className="dashboard-grid flex flex-col gap-8 p-1">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-pixel text-xl uppercase tracking-wide text-white">
+          <h2 className="font-pixel text-xl uppercase tracking-wide text-black">
             Workspace health
           </h2>
-          <p className="mt-1 font-mono text-[11px] text-[#666666]">
+          <p className="mt-1 font-mono text-[11px] text-black/55">
             Find the next failure worth investigating.
           </p>
         </div>
@@ -163,8 +163,8 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
                 }}
                 className={
                   range === option.value
-                    ? "h-8 border border-white bg-white px-3 font-mono text-[11px] text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                    : "h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] text-[#777777] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    ? "h-8 border border-black bg-black px-3 font-mono text-[11px] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                    : "h-8 border border-black/15 bg-white px-3 font-mono text-[11px] text-black/55 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
                 }
               >
                 {option.label}
@@ -238,11 +238,11 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
-        <Card className="border-[#2A2A2A] bg-[#111111] p-0 shadow-none">
-          <div className="flex items-start justify-between gap-4 border-b border-[#2A2A2A] p-5">
+        <Card className="border-black/15 bg-white p-0 shadow-none">
+          <div className="flex items-start justify-between gap-4 border-b border-black/15 p-5">
             <div>
-              <h3 className="font-mono text-sm uppercase tracking-widest text-white">Attention queue</h3>
-              <p className="mt-1 font-mono text-[10px] text-[#777777]">The fastest path to your next useful action.</p>
+              <h3 className="font-mono text-sm uppercase tracking-widest text-black">Attention queue</h3>
+              <p className="mt-1 font-mono text-[10px] text-black/55">The fastest path to your next useful action.</p>
             </div>
             <SignalBadge signal={failedRuns > 0 ? "danger" : "success"}>{failedRuns > 0 ? `${failedRuns} open` : "Clear"}</SignalBadge>
           </div>
@@ -255,25 +255,25 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
             <div className="flex items-start gap-3 p-5">
               <CircleCheck className="mt-0.5 size-4 text-emerald-300" aria-hidden="true" />
               <div>
-                <p className="font-mono text-xs text-white">No failures in the current window.</p>
-                <p className="mt-1 font-mono text-[10px] text-[#777777]">Keep an eye on latency and spend as traffic grows.</p>
+                <p className="font-mono text-xs text-black">No failures in the current window.</p>
+                <p className="mt-1 font-mono text-[10px] text-black/55">Keep an eye on latency and spend as traffic grows.</p>
               </div>
             </div>
           )}
         </Card>
-        <Card className="border-[#2A2A2A] bg-[#111111] p-0 shadow-none">
-          <div className="border-b border-[#2A2A2A] p-5">
-          <h3 className="font-mono text-sm uppercase tracking-widest text-white">Launch plan</h3>
-          <p className="mt-1 font-mono text-[10px] text-[#777777]">A lightweight path to a more useful workspace.</p>
+        <Card className="border-black/15 bg-white p-0 shadow-none">
+          <div className="border-b border-black/15 p-5">
+          <h3 className="font-mono text-sm uppercase tracking-widest text-black">Launch plan</h3>
+          <p className="mt-1 font-mono text-[10px] text-black/55">A lightweight path to a more useful workspace.</p>
           </div>
           <ol className="space-y-2 p-4">
             {launchPlan.map((item, index) => (
               <li key={item.label}>
-                <Link href={item.href} className="flex items-center gap-3 border border-[#2A2A2A] p-3 font-mono text-xs text-[#CCCCCC] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-                  <span className={item.complete ? "flex size-5 shrink-0 items-center justify-center bg-emerald-300 text-black" : "flex size-5 shrink-0 items-center justify-center border border-[#555555] text-[#777777]"}>
+                <Link href={item.href} className="flex items-center gap-3 border border-black/15 p-3 font-mono text-xs text-black/70 transition-colors hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black">
+                  <span className={item.complete ? "flex size-5 shrink-0 items-center justify-center bg-emerald-600 text-white" : "flex size-5 shrink-0 items-center justify-center border border-black/30 text-black/55"}>
                     {item.complete ? <CircleCheck className="size-3" aria-hidden="true" /> : index + 1}
                   </span>
-                  <span className={item.complete ? "line-through text-[#777777]" : "flex-1"}>{item.label}</span>
+                  <span className={item.complete ? "line-through text-black/55" : "flex-1"}>{item.label}</span>
                   <ArrowUpRight className="size-3 shrink-0" aria-hidden="true" />
                 </Link>
               </li>
@@ -290,59 +290,59 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 gap-6">
-        <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none">
+        <Card className="p-6 rounded-none border-border bg-white shadow-none">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
-              <h3 className="font-mono text-[14px] text-white">Run Volume &amp; Failure Rate</h3>
-              <p className="mt-1 text-[11px] uppercase tracking-widest text-[#666666]">
+              <h3 className="font-mono text-[14px] text-black">Run Volume &amp; Failure Rate</h3>
+              <p className="mt-1 text-[11px] uppercase tracking-widest text-black/55">
                 {recentRuns.length ? `Recent ${recentRuns.length}-run sample · selected ${range}-day window` : "No run summaries in the selected window"}
               </p>
             </div>
-            <Activity className="size-4 text-[#666666]" aria-hidden="true" />
+            <Activity className="size-4 text-black/55" aria-hidden="true" />
           </div>
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={runTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
-                <XAxis dataKey="day" stroke="#666666" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
-                <YAxis yAxisId="runs" stroke="#666666" fontSize={10} allowDecimals={false} />
-                <YAxis yAxisId="failure" orientation="right" stroke="#666666" fontSize={10} tickFormatter={(value) => `${value}%`} />
-                <Tooltip contentStyle={{ backgroundColor: "#0A0A0A", border: "1px solid #2A2A2A", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }} />
-                <Bar yAxisId="runs" dataKey="runs" fill="#FFFFFF" barSize={18} name="Runs" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.12)" vertical={false} />
+                <XAxis dataKey="day" stroke="rgba(0,0,0,0.45)" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
+                <YAxis yAxisId="runs" stroke="rgba(0,0,0,0.45)" fontSize={10} allowDecimals={false} />
+                <YAxis yAxisId="failure" orientation="right" stroke="rgba(0,0,0,0.45)" fontSize={10} tickFormatter={(value) => `${value}%`} />
+                <Tooltip contentStyle={{ backgroundColor: "#ffffff", border: "1px solid rgba(0,0,0,0.15)", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }} />
+                <Bar yAxisId="runs" dataKey="runs" fill="#000000" barSize={18} name="Runs" />
                 <Line yAxisId="failure" type="monotone" dataKey="failureRate" stroke="#F59E0B" strokeWidth={2} dot={false} name="Failure rate" />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
         </Card>
-        <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none">
+        <Card className="p-6 rounded-none border-border bg-white shadow-none">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
-              <h3 className="font-mono text-[14px] text-white">Quality Score Trend</h3>
-              <p className="mt-1 text-[11px] uppercase tracking-widest text-[#666666]">
+              <h3 className="font-mono text-[14px] text-black">Quality Score Trend</h3>
+              <p className="mt-1 text-[11px] uppercase tracking-widest text-black/55">
                 {evaluationOverview?.resultCount ? `${evaluationOverview.resultCount} recent evaluation results` : "No evaluation results in the selected window"}
               </p>
             </div>
-            <CircleCheck className="size-4 text-[#666666]" aria-hidden="true" />
+            <CircleCheck className="size-4 text-black/55" aria-hidden="true" />
           </div>
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={qualityTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
-                <XAxis dataKey="day" stroke="#666666" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
-                <YAxis stroke="#666666" fontSize={10} domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
-                <Tooltip formatter={(value) => `${Number(value).toFixed(0)}%`} contentStyle={{ backgroundColor: "#0A0A0A", border: "1px solid #2A2A2A", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }} />
-                <Line type="monotone" dataKey="passRate" stroke="#FFFFFF" strokeWidth={2} dot={{ r: 2, fill: "#FFFFFF" }} name="Pass rate" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.12)" vertical={false} />
+                <XAxis dataKey="day" stroke="rgba(0,0,0,0.45)" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
+                <YAxis stroke="rgba(0,0,0,0.45)" fontSize={10} domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                <Tooltip formatter={(value) => `${Number(value).toFixed(0)}%`} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid rgba(0,0,0,0.15)", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }} />
+                <Line type="monotone" dataKey="passRate" stroke="#000000" strokeWidth={2} dot={{ r: 2, fill: "#000000" }} name="Pass rate" />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </Card>
-        <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none">
+        <Card className="p-6 rounded-none border-border bg-white shadow-none">
           <div className="mb-6">
             <div className="flex items-center justify-between gap-4">
-              <h3 className="font-mono text-[14px] text-white">Spend Over Time</h3>
-              <Clock3 className="size-4 text-[#666666]" aria-hidden="true" />
+              <h3 className="font-mono text-[14px] text-black">Spend Over Time</h3>
+              <Clock3 className="size-4 text-black/55" aria-hidden="true" />
             </div>
-            <p className="text-[11px] text-[#666666] uppercase tracking-widest mt-1">
+            <p className="text-[11px] text-black/55 uppercase tracking-widest mt-1">
               {analyticsDailyCosts.length
                 ? `LLM infrastructure costs, last ${range} day${range === 1 ? "" : "s"}`
                 : `Saved run summaries, last ${range} day${range === 1 ? "" : "s"}`}
@@ -351,27 +351,27 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dailyCosts}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.12)" vertical={false} />
                 <XAxis 
                   dataKey="day" 
-                  stroke="#666666" 
+                  stroke="rgba(0,0,0,0.45)" 
                   fontSize={10} 
                   tickFormatter={(val) => new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 />
                 <YAxis
-                  stroke="#666666"
+                  stroke="rgba(0,0,0,0.45)"
                   fontSize={10}
                   tickFormatter={(val) => formatGraphCurrency(Number(val))}
                 />
                 <Tooltip 
                   formatter={(value) => formatGraphCurrency(Number(value))}
-                  contentStyle={{ backgroundColor: "#0A0A0A", border: "1px solid #2A2A2A", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }}
-                  itemStyle={{ color: "#FFFFFF" }}
+                  contentStyle={{ backgroundColor: "#ffffff", border: "1px solid rgba(0,0,0,0.15)", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }}
+                  itemStyle={{ color: "#000000" }}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="totalCostUsd" 
-                  stroke="#FFFFFF" 
+                  stroke="#000000" 
                   strokeWidth={2} 
                   dot={false}
                   activeDot={{ r: 4, fill: "#FFFFFF", stroke: "#000000", strokeWidth: 2 }}
@@ -385,7 +385,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
       {/* Recent Runs */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">Recent Activity</h3>
+          <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">Recent Activity</h3>
           <Link
             href={`/dashboard/${projectId}/manage`}
             className={buttonVariants({

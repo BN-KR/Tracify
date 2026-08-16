@@ -56,7 +56,7 @@ export function PasswordRecoveryForm({ mode }: { mode: "request" | "reset" }) {
         {(error || invalidToken) ? <p role="alert" className="border border-black bg-[#f4d44d] p-3 text-xs leading-5">{error || "This reset link is invalid or has expired."}</p> : null}
         <button disabled={pending || (mode === "request" ? !email.trim() : password.length < 8 || confirmPassword.length < 8 || !token || invalidToken)} className="active-press flex h-12 w-full items-center justify-between bg-black px-4 font-mono text-[10px] uppercase tracking-[0.13em] text-white transition-colors hover:bg-[#f4d44d] hover:text-black disabled:opacity-50"><span>{pending ? "Working…" : mode === "request" ? "Send reset link" : "Update password"}</span><ArrowRight className="size-4" /></button>
       </form>
-      <Link href="/sign-in" className="active-press mt-6 inline-flex min-h-11 items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-black/50 hover:text-black"><ArrowLeft className="size-3.5" /> Back to sign in</Link>
+      <Link href="/sign-in" className="active-press mt-6 inline-flex min-h-11 items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-black/55 hover:text-black"><ArrowLeft className="size-3.5" /> Back to sign in</Link>
     </div>
   );
 }

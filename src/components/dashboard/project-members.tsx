@@ -35,18 +35,18 @@ export function ProjectMembers() {
 
   return <div className="space-y-6">
     <div className="flex flex-wrap items-end justify-between gap-4">
-      <div><h3 className="font-mono text-[14px] uppercase tracking-widest text-white">{organization.name} members</h3><p className="mt-1 text-[11px] text-[#666666]">Manage who has access to this workspace.</p></div>
+      <div><h3 className="font-mono text-[14px] uppercase tracking-widest text-black">{organization.name} members</h3><p className="mt-1 text-[11px] text-black/55">Manage who has access to this workspace.</p></div>
       <div className="flex flex-wrap gap-2">
-        <input value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="teammate@example.com" type="email" className="h-9 w-52 border border-zinc-800 bg-black px-3 font-mono text-[10px] text-zinc-300 outline-none focus:border-zinc-500" />
-        <select value={inviteRole} onChange={(event) => setInviteRole(event.target.value as "member" | "admin")} className="h-9 border border-zinc-800 bg-black px-2 font-mono text-[10px] uppercase text-zinc-300"><option value="member">Developer</option><option value="admin">Admin</option></select>
+        <input value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="teammate@example.com" type="email" className="h-9 w-52 border border-black/15 bg-white px-3 font-mono text-[10px] text-black/70 outline-none focus:border-black/30" />
+        <select value={inviteRole} onChange={(event) => setInviteRole(event.target.value as "member" | "admin")} className="h-9 border border-black/15 bg-white px-2 font-mono text-[10px] uppercase text-black/70"><option value="member">Developer</option><option value="admin">Admin</option></select>
         <Button onClick={() => void invite()} disabled={inviting || !inviteEmail.trim()} className="rounded-none font-mono text-[10px] uppercase"><UserPlus className="size-4" />{inviting ? "Sending..." : "Invite"}</Button>
       </div>
     </div>
-    <Card className="divide-y divide-[#2A2A2A] rounded-none border-border bg-[#111111] shadow-none">
+    <Card className="divide-y divide-black/15 rounded-none border-border bg-white shadow-none">
       {organization.members?.map((membership) => <MemberRow key={membership.id} name={membership.user.name} email={membership.user.email} role={formatRole(membership.role)} isMe={membership.userId === session?.user.id} />)}
     </Card>
-    {status ? <p className="border border-zinc-800 p-3 font-mono text-[10px] text-zinc-400">{status}</p> : null}
-    <div className="flex items-start gap-4 border border-zinc-800/50 bg-zinc-900/10 p-4"><Shield className="mt-0.5 size-5 shrink-0 text-zinc-500" /><p className="font-mono text-[10px] leading-relaxed text-zinc-500">Owners and admins manage workspace access. Project authorization is enforced by Convex.</p></div>
+    {status ? <p className="border border-black/15 p-3 font-mono text-[10px] text-black/60">{status}</p> : null}
+    <div className="flex items-start gap-4 border border-black/10 bg-black/5 p-4"><Shield className="mt-0.5 size-5 shrink-0 text-black/55" /><p className="font-mono text-[10px] leading-relaxed text-black/55">Owners and admins manage workspace access. Project authorization is enforced by Convex.</p></div>
   </div>;
 }
 
@@ -60,11 +60,11 @@ function PersonalMember({ name, email }: { name: string; email: string }) {
     if (result.data) await authClient.organization.setActive({ organizationId: result.data.id });
     setMessage("Workspace created.");
   }
-  return <div className="space-y-4"><div className="flex flex-wrap items-end justify-between gap-3"><div><h3 className="font-mono text-[14px] uppercase tracking-widest text-white">Personal project</h3><p className="mt-1 text-[11px] text-[#666666]">This project is only visible to you.</p></div><div className="flex gap-2"><input value={organizationName} onChange={(event) => setOrganizationName(event.target.value)} placeholder="Workspace name" className="h-9 border border-zinc-800 bg-black px-3 font-mono text-[10px] text-zinc-300 outline-none focus:border-zinc-500" /><Button onClick={() => void createOrganization()} disabled={!organizationName.trim()} className="rounded-none font-mono text-[10px] uppercase">Create workspace</Button></div></div><Card className="rounded-none border-border bg-[#111111] shadow-none"><MemberRow name={name} email={email} role="Owner" isMe /></Card>{message ? <p className="font-mono text-[10px] text-zinc-500">{message}</p> : null}</div>;
+  return <div className="space-y-4"><div className="flex flex-wrap items-end justify-between gap-3"><div><h3 className="font-mono text-[14px] uppercase tracking-widest text-black">Personal project</h3><p className="mt-1 text-[11px] text-black/55">This project is only visible to you.</p></div><div className="flex gap-2"><input value={organizationName} onChange={(event) => setOrganizationName(event.target.value)} placeholder="Workspace name" className="h-9 border border-black/15 bg-white px-3 font-mono text-[10px] text-black/70 outline-none focus:border-black/30" /><Button onClick={() => void createOrganization()} disabled={!organizationName.trim()} className="rounded-none font-mono text-[10px] uppercase">Create workspace</Button></div></div><Card className="rounded-none border-border bg-white shadow-none"><MemberRow name={name} email={email} role="Owner" isMe /></Card>{message ? <p className="font-mono text-[10px] text-black/55">{message}</p> : null}</div>;
 }
 
 function formatRole(role: string) { return role === "owner" ? "Owner" : role === "admin" ? "Admin" : role === "member" ? "Developer" : role === "viewer" ? "Viewer" : role; }
 
 function MemberRow({ name, email, role, isMe }: { name: string; email: string; role: string; isMe?: boolean }) {
-  return <div className="flex items-center justify-between p-4"><div className="flex items-center gap-3"><div className="flex size-8 items-center justify-center border border-zinc-800 bg-zinc-900 font-mono text-xs uppercase text-white">{name.slice(0, 1)}</div><div><p className="font-mono text-[13px] text-white">{name}{isMe ? <span className="ml-1 text-[#666666]">(me)</span> : null}</p><p className="flex items-center gap-2 font-mono text-[11px] text-[#666666]"><Mail className="size-3" />{email}</p></div></div><span className="bg-[#1A1A1A] px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-[#999999]">{role}</span></div>;
+  return <div className="flex items-center justify-between p-4"><div className="flex items-center gap-3"><div className="flex size-8 items-center justify-center border border-black/15 bg-[#f3f2ed] font-mono text-xs uppercase text-black">{name.slice(0, 1)}</div><div><p className="font-mono text-[13px] text-black">{name}{isMe ? <span className="ml-1 text-black/55">(me)</span> : null}</p><p className="flex items-center gap-2 font-mono text-[11px] text-black/55"><Mail className="size-3" />{email}</p></div></div><span className="bg-[#f3f2ed] px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-black/60">{role}</span></div>;
 }

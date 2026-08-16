@@ -36,7 +36,7 @@ export function FailOpenAlert({ projectId }: { projectId: string }) {
   return (
     <div className="flex items-center gap-3 rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-4 py-3 text-sm">
       <AlertTriangle className="h-4 w-4 text-yellow-500 shrink-0" />
-      <span className="text-zinc-400">
+      <span className="text-black/60">
         <span className="font-mono text-yellow-500">
           {(data.failOpenRate * 100).toFixed(1)}%
         </span>{" "}

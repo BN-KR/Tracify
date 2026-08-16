@@ -22,13 +22,13 @@ export function CodeCopyBlock({
   }
 
   return (
-    <div className="border border-[#2A2A2A] bg-[#0A0A0A]">
-      <div className="flex items-center justify-between border-b border-[#2A2A2A] px-3 py-2 text-[11px] uppercase tracking-wide text-[#666666]">
+    <div className="border border-black bg-[#050505]">
+      <div className="flex items-center justify-between border-b border-white/15 px-3 py-2 text-[11px] uppercase tracking-wide text-white/50">
         <span>{label}</span>
         <button
           type="button"
           onClick={copy}
-          className="text-[#999999] transition-colors hover:text-white"
+          className="text-white/70 transition-colors hover:text-[#f4d44d]"
         >
           {copied ? "Copied" : copyLabel}
         </button>
@@ -36,8 +36,8 @@ export function CodeCopyBlock({
       <pre
         className={
           multiline
-            ? "overflow-x-auto whitespace-pre p-3 text-sm leading-6 text-[#CCCCCC]"
-            : "overflow-x-auto whitespace-pre p-3 text-sm text-[#CCCCCC]"
+            ? "overflow-x-auto whitespace-pre p-3 text-sm leading-6 text-[#f4d44d]"
+            : "overflow-x-auto whitespace-pre p-3 text-sm text-[#f4d44d]"
         }
       >
         <code>{value}</code>

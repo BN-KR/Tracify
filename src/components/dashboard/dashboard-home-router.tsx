@@ -37,7 +37,7 @@ export function DashboardHomeRouter() {
           title="Dashboard"
           description="Checking workspace state."
         />
-        <div className="px-6 pb-10 font-mono text-sm text-[#666666]">
+        <div className="px-6 pb-10 font-mono text-sm text-black/55">
           Loading projects...
         </div>
       </div>
@@ -46,7 +46,7 @@ export function DashboardHomeRouter() {
 
   if (projects?.length) {
     return (
-      <div className="px-6 py-6 font-mono text-sm text-[#666666]">
+      <div className="px-6 py-6 font-mono text-sm text-black/55">
         Opening project...
       </div>
     );

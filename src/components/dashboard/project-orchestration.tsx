@@ -164,20 +164,20 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
   return (
     <div className="space-y-8 max-w-3xl">
       {/* Enforcement Mode */}
-      <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+      <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
         <div>
-          <h3 className="font-mono text-[14px] text-white uppercase tracking-widest flex items-center gap-2">
+          <h3 className="font-mono text-[14px] text-black uppercase tracking-widest flex items-center gap-2">
             <Zap className="size-4" />
             Runtime Orchestration
           </h3>
-          <p className="text-[11px] text-[#666666] mt-1">
+          <p className="text-[11px] text-black/55 mt-1">
             Enforce retries, fallbacks, and cost ceilings at the SDK level.
           </p>
         </div>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">
               Enforcement Mode
             </label>
             <div className="flex gap-4">
@@ -190,15 +190,15 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
                   }
                   className={`px-4 py-2 font-mono text-[11px] uppercase tracking-widest rounded-none border transition-colors ${
                     policy.enforcementMode === mode
-                      ? "border-white bg-white text-black"
-                      : "border-zinc-800 bg-transparent text-zinc-400 hover:border-zinc-600"
+                      ? "border-black bg-black text-white"
+                      : "border-black/15 bg-transparent text-black/60 hover:border-black/30"
                   }`}
                 >
                   {mode}
                 </button>
               ))}
             </div>
-            <p className="text-[9px] text-zinc-600 font-mono uppercase">
+            <p className="text-[9px] text-black/55 font-mono uppercase">
               {policy.enforcementMode === "observe"
                 ? "Logs what would happen without changing behavior. Safe for production."
                 : "Actively retries, falls back, and blocks calls that breach ceilings."}
@@ -208,19 +208,19 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
       </Card>
 
       {/* Cost Ceilings */}
-      <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+      <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
         <div>
-          <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">
+          <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">
             Cost Ceilings
           </h3>
-          <p className="text-[11px] text-[#666666] mt-1">
+          <p className="text-[11px] text-black/55 mt-1">
             Hard limits on spend per run and per day.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">
               Max Cost Per Run (USD)
             </label>
             <Input
@@ -232,14 +232,14 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
                 setPolicy((prev) => ({ ...prev, maxCostPerRun: e.target.value }))
               }
               placeholder="0.50"
-              className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              className="rounded-none border-black/15 bg-white text-black font-mono h-10"
             />
-            <p className="text-[9px] text-zinc-600 font-mono uppercase">
+            <p className="text-[9px] text-black/55 font-mono uppercase">
               Calls exceeding this trigger fallback or block.
             </p>
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">
               Max Cost Per Day (USD)
             </label>
             <Input
@@ -251,16 +251,16 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
                 setPolicy((prev) => ({ ...prev, maxCostPerDay: e.target.value }))
               }
               placeholder="10.00"
-              className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              className="rounded-none border-black/15 bg-white text-black font-mono h-10"
             />
-            <p className="text-[9px] text-zinc-600 font-mono uppercase">
+            <p className="text-[9px] text-black/55 font-mono uppercase">
               Daily budget cap across all runs.
             </p>
           </div>
         </div>
 
-        <div className="space-y-2 pt-4 border-t border-[#2A2A2A]">
-          <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+        <div className="space-y-2 pt-4 border-t border-black/15">
+          <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">
             Latency Budget (ms)
           </label>
           <Input
@@ -272,21 +272,21 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
               setPolicy((prev) => ({ ...prev, latencyBudgetMs: e.target.value }))
             }
             placeholder="5000"
-            className="rounded-none border-zinc-800 bg-black text-white font-mono h-10 max-w-xs"
+            className="rounded-none border-black/15 bg-white text-black font-mono h-10 max-w-xs"
           />
-          <p className="text-[9px] text-zinc-600 font-mono uppercase">
+          <p className="text-[9px] text-black/55 font-mono uppercase">
             Triggers fallback when response time exceeds this threshold.
           </p>
         </div>
       </Card>
 
       {/* Fallback Chain */}
-      <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+      <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
         <div>
-          <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">
+          <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">
             Fallback Chain
           </h3>
-          <p className="text-[11px] text-[#666666] mt-1">
+          <p className="text-[11px] text-black/55 mt-1">
             Ordered list of models. On failure or ceiling breach, the next model is tried.
           </p>
         </div>
@@ -296,17 +296,17 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
             {policy.fallbackChain.map((model, i) => (
               <div
                 key={`${model}-${i}`}
-                className="flex items-center gap-3 py-2 px-3 bg-black border border-zinc-800 rounded-none"
+                className="flex items-center gap-3 py-2 px-3 bg-white border border-black/15 rounded-none"
               >
-                <span className="text-[10px] font-mono text-zinc-500 w-6 shrink-0">
+                <span className="text-[10px] font-mono text-black/55 w-6 shrink-0">
                   {i + 1}.
                 </span>
-                <span className="font-mono text-[13px] text-white flex-1">{model}</span>
+                <span className="font-mono text-[13px] text-black flex-1">{model}</span>
                 <button
                   type="button"
                   onClick={() => moveModel(i, -1)}
                   disabled={i === 0}
-                  className="text-[10px] font-mono text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="text-[10px] font-mono text-black/55 hover:text-black disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   UP
                 </button>
@@ -314,14 +314,14 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
                   type="button"
                   onClick={() => moveModel(i, 1)}
                   disabled={i === policy.fallbackChain.length - 1}
-                  className="text-[10px] font-mono text-zinc-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="text-[10px] font-mono text-black/55 hover:text-black disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   DN
                 </button>
                 <button
                   type="button"
                   onClick={() => removeModelFromChain(i)}
-                  className="text-zinc-500 hover:text-red-500 transition-colors"
+                  className="text-black/55 hover:text-red-600 transition-colors"
                 >
                   <Trash2 className="size-3" />
                 </button>
@@ -329,7 +329,7 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
             ))}
           </div>
         ) : (
-          <p className="text-[11px] text-zinc-600 font-mono">
+          <p className="text-[11px] text-black/55 font-mono">
             No models in chain. Add models below.
           </p>
         )}
@@ -345,14 +345,14 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
               }
             }}
             placeholder="gpt-4o, claude-3-sonnet, etc."
-            className="rounded-none border-zinc-800 bg-black text-white font-mono h-10 flex-1"
+            className="rounded-none border-black/15 bg-white text-black font-mono h-10 flex-1"
           />
           <Button
             type="button"
             variant="outline"
             onClick={addModelToChain}
             disabled={!newModel.trim()}
-            className="h-10 rounded-none border-zinc-800 font-mono text-[10px] uppercase px-4"
+            className="h-10 rounded-none border-black/15 font-mono text-[10px] uppercase px-4"
           >
             <Plus className="size-3" />
             Add
@@ -361,19 +361,19 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
       </Card>
 
       {/* Retry Policy */}
-      <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+      <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
         <div>
-          <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">
+          <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">
             Retry Policy
           </h3>
-          <p className="text-[11px] text-[#666666] mt-1">
+          <p className="text-[11px] text-black/55 mt-1">
             Configure retry behavior for failed LLM calls.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">
               Max Attempts
             </label>
             <Input
@@ -390,11 +390,11 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
                   },
                 }))
               }
-              className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              className="rounded-none border-black/15 bg-white text-black font-mono h-10"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">
               Backoff (ms)
             </label>
             <Input
@@ -411,11 +411,11 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
                   },
                 }))
               }
-              className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              className="rounded-none border-black/15 bg-white text-black font-mono h-10"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">
               Backoff Multiplier
             </label>
             <Input
@@ -432,13 +432,13 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
                   },
                 }))
               }
-              className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              className="rounded-none border-black/15 bg-white text-black font-mono h-10"
             />
           </div>
         </div>
 
-        <div className="space-y-3 pt-4 border-t border-[#2A2A2A]">
-          <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+        <div className="space-y-3 pt-4 border-t border-black/15">
+          <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">
             Retryable Error Types
           </label>
           <div className="flex flex-wrap gap-2">
@@ -451,8 +451,8 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
                   onClick={() => toggleRetryableError(errorType)}
                   className={`px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest rounded-none border transition-colors ${
                     active
-                      ? "border-white bg-white text-black"
-                      : "border-zinc-800 bg-transparent text-zinc-500 hover:border-zinc-600"
+                      ? "border-black bg-black text-white"
+                      : "border-black/15 bg-transparent text-black/55 hover:border-black/30"
                   }`}
                 >
                   {errorType}
@@ -460,7 +460,7 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
               );
             })}
           </div>
-          <p className="text-[9px] text-zinc-600 font-mono uppercase">
+          <p className="text-[9px] text-black/55 font-mono uppercase">
             Only these error classes trigger a retry. Auth errors (401/403) are never retried.
           </p>
         </div>
@@ -469,12 +469,12 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
       {/* Footer */}
       <div className="flex items-center justify-between pt-4">
         {error ? (
-          <div className="flex items-center gap-2 text-red-500 text-[11px] font-mono">
+          <div className="flex items-center gap-2 text-red-600 text-[11px] font-mono">
             <AlertCircle className="size-3" />
             {error}
           </div>
         ) : notice ? (
-          <div className="text-[11px] font-mono text-zinc-400">{notice}</div>
+          <div className="text-[11px] font-mono text-black/60">{notice}</div>
         ) : null}
         <div />
         <Button

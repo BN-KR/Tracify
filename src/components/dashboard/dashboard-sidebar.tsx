@@ -300,13 +300,13 @@ export function DashboardSidebar({
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-30 flex flex-col border-r border-[#2A2A2A] bg-[#111111] transition-[width] duration-150 ease-out motion-reduce:transition-none",
+        "fixed inset-y-0 left-0 z-30 flex flex-col border-r border-black/15 bg-white transition-[width] duration-150 ease-out motion-reduce:transition-none",
       )}
       style={{ width: visualWidth }}
     >
       <div
         className={cn(
-          "flex h-[60px] items-center border-b border-[#2A2A2A]",
+          "flex h-[60px] items-center border-b border-black/15",
           showExpandedContent ? "justify-between px-4" : "justify-center px-0",
         )}
       >
@@ -314,7 +314,7 @@ export function DashboardSidebar({
           <Link
             href={projectDashboardHref}
             aria-label="Tracify dashboard"
-            className="text-white focus-visible:outline-1 focus-visible:outline-offset-4"
+            className="text-black focus-visible:outline-1 focus-visible:outline-offset-4"
           >
             <BrandLogo className="text-lg" highlighted={false} />
           </Link>
@@ -335,13 +335,13 @@ export function DashboardSidebar({
           />
           <TooltipContent
             side="right"
-            className="rounded-none border border-[#2A2A2A] bg-[#111111] font-mono text-xs text-[#CCCCCC] shadow-none"
+            className="rounded-none border border-black/15 bg-white font-mono text-xs text-black/70 shadow-none"
           >
             {collapseLabel} · Ctrl+\
           </TooltipContent>
         </Tooltip>
       </div>
-      <div className="border-b border-[#2A2A2A] p-3">
+      <div className="border-b border-black/15 p-3">
         <ProjectSwitcher isCollapsed={!showExpandedContent} />
       </div>
 
@@ -365,7 +365,7 @@ export function DashboardSidebar({
 
       <Link
         href="https://www.tracify.tech/cloud?next=/dashboard"
-        className={cn("flex min-h-12 items-center border-t border-[#2A2A2A] px-4 text-[#777] hover:bg-[#161616] hover:text-white", showExpandedContent ? "gap-3" : "justify-center")}
+        className={cn("flex min-h-12 items-center border-t border-black/15 px-4 text-black/55 hover:bg-[#f3f2ed] hover:text-black", showExpandedContent ? "gap-3" : "justify-center")}
         aria-label={`${region.name} cloud region. Open region directory`}
       >
         <Globe2 className="size-4 shrink-0" />
@@ -408,7 +408,7 @@ function SidebarGroup({
         <button
           type="button"
           onClick={onToggle}
-          className="mb-2 flex h-7 w-full items-center justify-between px-2 text-left font-mono text-[11px] uppercase tracking-wide text-[#666666] outline-none transition-colors hover:text-[#999999] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#666666]"
+          className="mb-2 flex h-7 w-full items-center justify-between px-2 text-left font-mono text-[11px] uppercase tracking-wide text-black/55 outline-none transition-colors hover:text-black/60 focus-visible:outline focus-visible:outline-1 focus-visible:outline-black/55"
         >
           <span>{group.label}</span>
           <ChevronDown
@@ -454,9 +454,9 @@ function NavLink({
 }) {
   const Icon = item.icon;
   const className = cn(
-    "flex h-9 items-center border-l-2 border-transparent px-2 font-mono text-[13px] font-normal text-[#666666] outline-none transition-colors hover:bg-[#161616] hover:text-[#CCCCCC] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#666666]",
+    "flex h-9 items-center border-l-2 border-transparent px-2 font-mono text-[13px] font-normal text-black/55 outline-none transition-colors hover:bg-[#f3f2ed] hover:text-black/70 focus-visible:outline focus-visible:outline-1 focus-visible:outline-black/55",
     showExpandedContent ? "gap-2" : "justify-center",
-    isActive && "border-l-white text-white hover:bg-[#161616]",
+    isActive && "border-l-white text-black hover:bg-[#f3f2ed]",
   );
   const link = (
     <Link
@@ -479,7 +479,7 @@ function NavLink({
       <TooltipTrigger render={link} />
       <TooltipContent
         side="right"
-        className="rounded-none border border-[#2A2A2A] bg-[#111111] font-mono text-xs text-[#CCCCCC] shadow-none"
+        className="rounded-none border border-black/15 bg-white font-mono text-xs text-black/70 shadow-none"
       >
         {item.title}
       </TooltipContent>

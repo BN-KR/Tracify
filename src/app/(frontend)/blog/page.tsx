@@ -56,7 +56,7 @@ export default async function BlogPage({
                 <span className="font-pixel text-[9rem] leading-none tracking-[-0.1em] text-[#f4d44d]">{String(posts.length).padStart(2, "0")}</span>
               </div>
               <div className="flex items-end border-t border-black p-6">
-                <p className="font-mono text-[9px] uppercase leading-5 tracking-[0.13em] text-black/50">Published field notes<br />in the current view</p>
+                <p className="font-mono text-[9px] uppercase leading-5 tracking-[0.13em] text-black/60">Published field notes<br />in the current view</p>
               </div>
             </aside>
           </div>
@@ -68,7 +68,7 @@ export default async function BlogPage({
           {allCategories.length ? (
             <CategoryPills categories={allCategories} active={category} />
           ) : (
-            <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/45">All field notes</p>
+            <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/60">All field notes</p>
           )}
         </div>
       </FutureBand>
@@ -103,14 +103,14 @@ export default async function BlogPage({
                     )}
 
                     <div className={`flex flex-1 flex-col ${isLead ? "bg-[#f4d44d] p-6 md:p-8" : "p-6"}`}>
-                      <div className="flex items-center justify-between gap-4 font-mono text-[8px] uppercase tracking-[0.13em] text-black/50">
+                      <div className="flex items-center justify-between gap-4 font-mono text-[8px] uppercase tracking-[0.13em] text-black/60">
                         <time dateTime={getPostDate(post)}>{formatDate(getPostDate(post))}</time>
                         <span>{getReadingTime(post.plainText)} min</span>
                       </div>
                       <h2 className={`mt-5 line-clamp-3 font-pixel leading-[0.92] tracking-[-0.05em] ${isLead ? "max-w-3xl text-4xl md:text-5xl" : "text-3xl"}`}>
                         {post.title}
                       </h2>
-                      <p className="mt-4 line-clamp-3 text-sm leading-6 text-black/55">{post.excerpt}</p>
+                      <p className="mt-4 line-clamp-3 text-sm leading-6 text-black/70">{post.excerpt}</p>
                       <span className="mt-auto pt-6 font-mono text-[8px] uppercase tracking-[0.12em] group-hover:underline group-hover:underline-offset-4">Read field note ↗</span>
                     </div>
                   </Link>

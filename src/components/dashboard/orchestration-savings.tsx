@@ -51,14 +51,14 @@ export function OrchestrationSavings({ projectId, range }: OrchestrationSavingsP
   }
 
   return (
-    <Card className="p-5 rounded-none border-border bg-[#111111] shadow-none">
+    <Card className="p-5 rounded-none border-border bg-white shadow-none">
       <div className="flex items-start gap-3 mb-4">
-        <Shield className="size-4 text-zinc-500 mt-0.5" />
+        <Shield className="size-4 text-black/55 mt-0.5" />
         <div>
-          <h4 className="font-mono text-[14px] text-white uppercase tracking-widest">
+          <h4 className="font-mono text-[14px] text-black uppercase tracking-widest">
             Orchestration Savings
           </h4>
-          <p className="text-[10px] text-[#666666] font-mono uppercase mt-1">
+          <p className="text-[10px] text-black/55 font-mono uppercase mt-1">
             {data.totalOrchestratedCalls.toLocaleString()} calls orchestrated in this period
           </p>
         </div>
@@ -102,13 +102,13 @@ function SavingsStat({
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-1.5">
-        <Icon className="size-3 text-zinc-500" />
-        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+        <Icon className="size-3 text-black/55" />
+        <span className="text-[10px] uppercase tracking-widest text-black/55 font-mono">
           {label}
         </span>
       </div>
-      <p className="text-xl font-mono text-white">{value.toLocaleString()}</p>
-      <p className="text-[9px] text-zinc-600 font-mono uppercase">{description}</p>
+      <p className="text-xl font-mono text-black">{value.toLocaleString()}</p>
+      <p className="text-[9px] text-black/55 font-mono uppercase">{description}</p>
     </div>
   );
 }

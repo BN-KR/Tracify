@@ -71,7 +71,7 @@ export function BillingPlan({ projectId }: { projectId: string }) {
 
   if (!summary) {
     return (
-      <div className="border border-[#2A2A2A] bg-[#111111] p-6 font-mono text-sm text-[#999999]">
+      <div className="border border-black/15 bg-white p-6 font-mono text-sm text-black/60">
         Project not found or access denied.
       </div>
     );
@@ -99,11 +99,11 @@ export function BillingPlan({ projectId }: { projectId: string }) {
         />
       </div>
 
-      <div className="border border-[#2A2A2A] bg-[#111111] p-5">
-        <div className="font-mono text-[11px] uppercase tracking-widest text-white">
+      <div className="border border-black/15 bg-white p-5">
+        <div className="font-mono text-[11px] uppercase tracking-widest text-black">
           Subscription billing
         </div>
-        <p className="mt-2 max-w-3xl font-mono text-[12px] leading-relaxed text-[#777777]">
+        <p className="mt-2 max-w-3xl font-mono text-[12px] leading-relaxed text-black/55">
           Paid plans use secure Stripe Checkout. Existing subscribers can manage
           payment methods, invoices, plan changes, and cancellation in Stripe.
         </p>
@@ -112,10 +112,10 @@ export function BillingPlan({ projectId }: { projectId: string }) {
 
       <div>
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h3 className="font-mono text-sm uppercase tracking-widest text-white">Plans</h3>
-          <div className="flex border border-[#2A2A2A] p-1" aria-label="Billing interval">
-            <button type="button" aria-pressed={!annual} onClick={() => setAnnual(false)} className={cn("px-3 py-2 font-mono text-[9px] uppercase", !annual && "bg-white text-black")}>Monthly</button>
-            <button type="button" aria-pressed={annual} onClick={() => setAnnual(true)} className={cn("px-3 py-2 font-mono text-[9px] uppercase", annual && "bg-white text-black")}>Annual −20%</button>
+          <h3 className="font-mono text-sm uppercase tracking-widest text-black">Plans</h3>
+          <div className="flex border border-black/15 p-1" aria-label="Billing interval">
+            <button type="button" aria-pressed={!annual} onClick={() => setAnnual(false)} className={cn("px-3 py-2 font-mono text-[9px] uppercase", !annual && "bg-black text-white")}>Monthly</button>
+            <button type="button" aria-pressed={annual} onClick={() => setAnnual(true)} className={cn("px-3 py-2 font-mono text-[9px] uppercase", annual && "bg-black text-white")}>Annual −20%</button>
           </div>
         </div>
         <div className="mt-5 grid gap-5 lg:grid-cols-4">
@@ -145,12 +145,12 @@ function UsageCard({
   detail: string;
 }) {
   return (
-    <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-5 shadow-none">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-[#666666]">
+    <Card className="rounded-none border-black/15 bg-white p-5 shadow-none">
+      <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">
         {label}
       </div>
-      <div className="mt-3 font-mono text-2xl uppercase text-white">{value}</div>
-      <div className="mt-2 font-mono text-[11px] text-[#777777]">{detail}</div>
+      <div className="mt-3 font-mono text-2xl uppercase text-black">{value}</div>
+      <div className="mt-2 font-mono text-[11px] text-black/55">{detail}</div>
     </Card>
   );
 }
@@ -180,15 +180,15 @@ function PlanCard({
       className={cn(
         "relative flex h-full flex-col rounded-none border p-5 shadow-none transition-all duration-200 hover:-translate-y-0.5",
         plan.popular && !current
-          ? "border-white bg-[#161616]"
+          ? "border-black bg-[#f3f2ed]"
           : current
-            ? "border-white bg-[#161616]"
-            : "border-[#2A2A2A] bg-[#111111] hover:border-[#555555]",
+            ? "border-black bg-[#f3f2ed]"
+            : "border-black/15 bg-white hover:border-black/30",
       )}
     >
       {plan.popular && !current && (
-        <div className="absolute -top-[1px] left-5 -translate-y-full bg-white px-2.5 py-1">
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-black">
+        <div className="absolute -top-[1px] left-5 -translate-y-full bg-black px-2.5 py-1">
+          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white">
             Most popular
           </span>
         </div>
@@ -196,52 +196,52 @@ function PlanCard({
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {Icon && (
-            <div className="flex size-8 items-center justify-center border border-[#2A2A2A]">
-              <Icon className="size-4 text-white" />
+            <div className="flex size-8 items-center justify-center border border-black/15">
+              <Icon className="size-4 text-black" />
             </div>
           )}
           <div>
-            <h4 className="font-mono text-base uppercase text-white">{plan.name}</h4>
-            <p className="mt-0.5 font-mono text-[11px] text-[#777777]">
+            <h4 className="font-mono text-base uppercase text-black">{plan.name}</h4>
+            <p className="mt-0.5 font-mono text-[11px] text-black/55">
               {plan.audience}
             </p>
           </div>
         </div>
         {current ? (
-          <span className="bg-white px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-black">
+          <span className="bg-black px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-white">
             Current
           </span>
         ) : null}
       </div>
       <div className="mt-5 flex items-baseline gap-1.5">
-        <span className="font-mono text-2xl text-white">{displayPrice}</span>
+        <span className="font-mono text-2xl text-black">{displayPrice}</span>
         {plan.note && (
-          <span className="font-mono text-[10px] text-[#555555]">{plan.note}</span>
+          <span className="font-mono text-[10px] text-black/55">{plan.note}</span>
         )}
-        {interval === "annual" && (plan.id === "pro" || plan.id === "team") ? <span className="font-mono text-[9px] text-[#777]">billed annually</span> : null}
+        {interval === "annual" && (plan.id === "pro" || plan.id === "team") ? <span className="font-mono text-[9px] text-black/55">billed annually</span> : null}
       </div>
       <ul className="mt-5 flex-1 space-y-3">
         {plan.features.map((feature) => (
           <li
             key={feature}
-            className="flex items-center gap-3 font-mono text-[11px] text-[#CCCCCC]"
+            className="flex items-center gap-3 font-mono text-[11px] text-black/70"
           >
-            <Check className="size-3 shrink-0 text-white" />
+            <Check className="size-3 shrink-0 text-black" />
             <span>{feature}</span>
           </li>
         ))}
       </ul>
       {current ? (
-        <div className="mt-8 border border-[#2A2A2A] px-3 py-2 text-center font-mono text-[10px] uppercase text-[#777777]">
+        <div className="mt-8 border border-black/15 px-3 py-2 text-center font-mono text-[10px] uppercase text-black/55">
           Active plan
         </div>
       ) : (
         hasSubscription && (plan.id === "pro" || plan.id === "team") ? (
-          <div className="mt-8 border border-[#2A2A2A] px-3 py-2 text-center font-mono text-[10px] uppercase text-[#777]">Change in billing portal</div>
+          <div className="mt-8 border border-black/15 px-3 py-2 text-center font-mono text-[10px] uppercase text-black/55">Change in billing portal</div>
         ) : plan.id === "pro" || plan.id === "team" ? (
           <CheckoutButton projectId={projectId} plan={plan.id} interval={interval} />
         ) : (
-          <Link href={plan.id === "enterprise" ? "/contact" : "/dashboard"} className="mt-8 block border border-[#2A2A2A] px-3 py-2 text-center font-mono text-[10px] uppercase text-[#CCCCCC] transition-colors hover:border-white hover:text-white">
+          <Link href={plan.id === "enterprise" ? "/contact" : "/dashboard"} className="mt-8 block border border-black/15 px-3 py-2 text-center font-mono text-[10px] uppercase text-black/70 transition-colors hover:border-black hover:text-black">
             {plan.id === "enterprise" ? "Contact us" : "Free plan"}
           </Link>
         )
@@ -264,7 +264,7 @@ function CheckoutButton({ projectId, plan, interval }: { projectId: string; plan
       setPending(false);
     }
   };
-  return <button type="button" onClick={startCheckout} disabled={pending} className="mt-8 border border-white bg-white px-3 py-2 font-mono text-[10px] uppercase text-black disabled:opacity-50">{pending ? "Opening checkout…" : `Choose ${plan}`}</button>;
+  return <button type="button" onClick={startCheckout} disabled={pending} className="mt-8 border border-black bg-black px-3 py-2 font-mono text-[10px] uppercase text-white disabled:opacity-50">{pending ? "Opening checkout…" : `Choose ${plan}`}</button>;
 }
 
 function PortalButton({ projectId }: { projectId: string }) {
@@ -275,5 +275,5 @@ function PortalButton({ projectId }: { projectId: string }) {
     const data = await response.json() as { url?: string };
     if (data.url) window.location.assign(data.url); else setPending(false);
   };
-  return <button type="button" onClick={openPortal} disabled={pending} className="mt-4 border border-[#555] px-3 py-2 font-mono text-[10px] uppercase text-white">{pending ? "Opening…" : "Manage billing"}</button>;
+  return <button type="button" onClick={openPortal} disabled={pending} className="mt-4 border border-black/30 px-3 py-2 font-mono text-[10px] uppercase text-black">{pending ? "Opening…" : "Manage billing"}</button>;
 }

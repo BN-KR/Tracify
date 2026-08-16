@@ -48,7 +48,7 @@ export function ProjectReport({ projectId }: { projectId: string }) {
 
   if (!summary) {
     return (
-      <div className="border border-[#2A2A2A] bg-[#111111] p-6 font-mono text-sm text-[#999999]">
+      <div className="border border-black/15 bg-white p-6 font-mono text-sm text-black/60">
         Project not found or access denied.
       </div>
     );
@@ -64,17 +64,17 @@ export function ProjectReport({ projectId }: { projectId: string }) {
   });
 
   return (
-    <div className="space-y-6 print:bg-white print:text-black">
-      <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-6 shadow-none print:border-black print:bg-white">
+    <div className="space-y-6 print:bg-black print:text-white">
+      <Card className="rounded-none border-black/15 bg-white p-6 shadow-none print:border-black print:bg-black">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <div className="font-mono text-[11px] uppercase tracking-widest text-[#666666] print:text-black">
+            <div className="font-mono text-[11px] uppercase tracking-widest text-black/55 print:text-white">
               project report
             </div>
-            <h1 className="mt-2 font-mono text-3xl text-white print:text-black">
+            <h1 className="mt-2 font-mono text-3xl text-black print:text-white">
               {summary.project.clientName || summary.project.name}
             </h1>
-            <p className="mt-2 max-w-2xl font-mono text-[12px] text-[#777777] print:text-black">
+            <p className="mt-2 max-w-2xl font-mono text-[12px] text-black/55 print:text-white">
               {summary.project.reportNotes ||
                 "Production agent activity, cost, reliability, alerts, and failed traces."}
             </p>
@@ -91,14 +91,14 @@ export function ProjectReport({ projectId }: { projectId: string }) {
             </Button>
             <Link
               href={`/dashboard/${projectId}/settings`}
-              className="flex h-9 items-center gap-2 border border-[#2A2A2A] px-3 font-mono text-[11px] uppercase text-[#CCCCCC] transition-colors hover:border-white hover:text-white"
+              className="flex h-9 items-center gap-2 border border-black/15 px-3 font-mono text-[11px] uppercase text-black/70 transition-colors hover:border-black hover:text-black"
             >
               Edit metadata
               <ExternalLink className="size-3" />
             </Link>
           </div>
         </div>
-        <div className="mt-6 grid gap-3 border-t border-[#2A2A2A] pt-5 sm:grid-cols-3 print:border-black">
+        <div className="mt-6 grid gap-3 border-t border-black/15 pt-5 sm:grid-cols-3 print:border-black">
           <ReportMeta label="project" value={summary.project.name} />
           <ReportMeta label="plan" value={summary.project.planTier ?? "free"} />
           <ReportMeta label="generated" value={reportDate} />
@@ -136,25 +136,25 @@ export function ProjectReport({ projectId }: { projectId: string }) {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-6 shadow-none print:border-black print:bg-white">
+        <Card className="rounded-none border-black/15 bg-white p-6 shadow-none print:border-black print:bg-black">
           <SectionTitle title="Recent Alerts" />
           {recentAlerts.length ? (
-            <div className="mt-5 divide-y divide-[#222222] border border-[#222222] print:divide-black print:border-black">
+            <div className="mt-5 divide-y divide-black/15 border border-black/15 print:divide-black print:border-black">
               {recentAlerts.map((alert) => (
                 <Link
                   key={alert._id}
                   href={`/dashboard/${projectId}/runs/${alert.runId}`}
-                  className="block p-4 transition-colors hover:bg-[#161616] print:text-black"
+                  className="block p-4 transition-colors hover:bg-[#f3f2ed] print:text-white"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="font-mono text-[11px] uppercase tracking-widest text-white print:text-black">
+                    <span className="font-mono text-[11px] uppercase tracking-widest text-black print:text-white">
                       {alert.type.replace("_", " ")}
                     </span>
-                    <span className="font-mono text-[10px] text-[#666666] print:text-black">
+                    <span className="font-mono text-[10px] text-black/55 print:text-white">
                       {formatRelativeTime(alert.triggeredAt)}
                     </span>
                   </div>
-                  <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#CCCCCC] print:text-black">
+                  <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-black/70 print:text-white">
                     {alert.message}
                   </p>
                 </Link>
@@ -165,17 +165,17 @@ export function ProjectReport({ projectId }: { projectId: string }) {
           )}
         </Card>
 
-        <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-6 shadow-none print:border-black print:bg-white">
+        <Card className="rounded-none border-black/15 bg-white p-6 shadow-none print:border-black print:bg-black">
           <SectionTitle title="Notable Failed Traces" />
           {failedRuns.length ? (
-            <div className="mt-5 divide-y divide-[#222222] border border-[#222222] print:divide-black print:border-black">
+            <div className="mt-5 divide-y divide-black/15 border border-black/15 print:divide-black print:border-black">
               {failedRuns.map((run) => (
                 <Link
                   key={run._id}
                   href={`/dashboard/${projectId}/runs/${run.runId}`}
-                  className="grid gap-3 p-4 font-mono text-[12px] text-[#999999] transition-colors hover:bg-[#161616] sm:grid-cols-[minmax(0,1fr)_90px_90px] print:text-black"
+                  className="grid gap-3 p-4 font-mono text-[12px] text-black/60 transition-colors hover:bg-[#f3f2ed] sm:grid-cols-[minmax(0,1fr)_90px_90px] print:text-white"
                 >
-                  <span className="truncate text-white print:text-black">
+                  <span className="truncate text-black print:text-white">
                     {run.runId}
                   </span>
                   <span>{run.spanCount} spans</span>
@@ -192,7 +192,7 @@ export function ProjectReport({ projectId }: { projectId: string }) {
       </div>
 
       {stats?.unavailable ? (
-        <div className="flex items-center gap-2 border border-[#2A2A2A] bg-[#111111] p-4 font-mono text-[11px] text-[#999999] print:border-black print:bg-white print:text-black">
+        <div className="flex items-center gap-2 border border-black/15 bg-white p-4 font-mono text-[11px] text-black/60 print:border-black print:bg-black print:text-white">
           <AlertTriangle className="size-4" />
           Analytics are unavailable. This report is using Convex saved summaries where possible.
         </div>
@@ -203,11 +203,11 @@ export function ProjectReport({ projectId }: { projectId: string }) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-5 shadow-none print:border-black print:bg-white">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-[#666666] print:text-black">
+    <Card className="rounded-none border-black/15 bg-white p-5 shadow-none print:border-black print:bg-black">
+      <div className="font-mono text-[10px] uppercase tracking-widest text-black/55 print:text-white">
         {label}
       </div>
-      <div className="mt-3 font-mono text-2xl text-white print:text-black">
+      <div className="mt-3 font-mono text-2xl text-black print:text-white">
         {value}
       </div>
     </Card>
@@ -217,10 +217,10 @@ function Metric({ label, value }: { label: string; value: string }) {
 function ReportMeta({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="font-mono text-[10px] uppercase tracking-widest text-[#666666] print:text-black">
+      <div className="font-mono text-[10px] uppercase tracking-widest text-black/55 print:text-white">
         {label}
       </div>
-      <div className="mt-1 truncate font-mono text-[12px] text-white print:text-black">
+      <div className="mt-1 truncate font-mono text-[12px] text-black print:text-white">
         {value}
       </div>
     </div>
@@ -229,7 +229,7 @@ function ReportMeta({ label, value }: { label: string; value: string }) {
 
 function SectionTitle({ title }: { title: string }) {
   return (
-    <h2 className="font-mono text-[14px] uppercase tracking-widest text-white print:text-black">
+    <h2 className="font-mono text-[14px] uppercase tracking-widest text-black print:text-white">
       {title}
     </h2>
   );
@@ -245,18 +245,18 @@ function ReportList({
   empty: string;
 }) {
   return (
-    <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-6 shadow-none print:border-black print:bg-white">
+    <Card className="rounded-none border-black/15 bg-white p-6 shadow-none print:border-black print:bg-black">
       <SectionTitle title={title} />
       {rows.length ? (
-        <div className="mt-5 divide-y divide-[#222222] border border-[#222222] print:divide-black print:border-black">
+        <div className="mt-5 divide-y divide-black/15 border border-black/15 print:divide-black print:border-black">
           {rows.map((row) => (
             <div
               key={row.key}
               className="grid gap-3 p-4 font-mono text-[12px] sm:grid-cols-[minmax(0,1fr)_100px_100px]"
             >
-              <span className="truncate text-white print:text-black">{row.label}</span>
-              <span className="text-[#777777] print:text-black">{row.meta}</span>
-              <span className="text-white sm:text-right print:text-black">{row.value}</span>
+              <span className="truncate text-black print:text-white">{row.label}</span>
+              <span className="text-black/55 print:text-white">{row.meta}</span>
+              <span className="text-black sm:text-right print:text-white">{row.value}</span>
             </div>
           ))}
         </div>
@@ -269,7 +269,7 @@ function ReportList({
 
 function EmptyReportState({ children }: { children: ReactNode }) {
   return (
-    <div className="mt-5 border border-dashed border-[#2A2A2A] p-6 font-mono text-[12px] text-[#666666] print:border-black print:text-black">
+    <div className="mt-5 border border-dashed border-black/15 p-6 font-mono text-[12px] text-black/55 print:border-black print:text-white">
       {children}
     </div>
   );

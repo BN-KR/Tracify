@@ -46,7 +46,7 @@ export function ProjectRouteGate({
 
   if (isLoading || !isAuthenticated || routeState?.status !== "ready") {
     return (
-      <div className="px-6 py-6 font-mono text-sm text-[#666666]">
+      <div className="px-6 py-6 font-mono text-sm text-black/55">
         Loading project...
       </div>
     );

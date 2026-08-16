@@ -124,14 +124,14 @@ export default async function BlogPostPage({
       <div className="mx-auto max-w-[1240px] border-x border-black">
         <Link
           href="/blog"
-          className="inline-block border-b border-r border-black bg-[#f4d44d] px-6 py-4 font-mono text-[9px] uppercase tracking-[0.13em] hover:bg-black hover:text-white"
+          className="inline-block border-b border-r border-black bg-[#f4d44d] px-6 py-4 font-mono text-[9px] uppercase tracking-[0.13em] hover:bg-black hover:text-black"
         >
           ← Back to blog
         </Link>
 
         <article>
           <header className="border-b border-black px-6 py-10 md:px-10 md:py-12">
-            <div className="mb-4 flex items-center gap-3 font-mono text-[12px] text-[#666666]">
+            <div className="mb-4 flex items-center gap-3 font-mono text-[12px] text-black/55">
               <time dateTime={getPostDate(post)}>{formatDate(getPostDate(post))}</time>
               <span>/</span>
               <span>{post.author}</span>

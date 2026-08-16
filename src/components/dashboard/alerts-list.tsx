@@ -59,20 +59,20 @@ export function AlertsList({ projectId }: AlertsListProps) {
       <div className="flex flex-wrap items-center justify-between gap-3 border border-border bg-muted/10 p-3">
         <div className="flex gap-2">
           {(["all", "active", "resolved", "muted"] as const).map((value) => (
-            <button key={value} type="button" aria-pressed={filter === value} onClick={() => { setFilter(value); const params = new URLSearchParams(searchParams.toString()); if (value === "all") params.delete("view"); else params.set("view", value); router.replace(`${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`, { scroll: false }); }} className={cn("border px-3 py-2 font-mono text-[10px] uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white", filter === value ? "border-white bg-white text-black" : "border-zinc-800 text-zinc-500 hover:border-zinc-500 hover:text-white")}>{value}</button>
+            <button key={value} type="button" aria-pressed={filter === value} onClick={() => { setFilter(value); const params = new URLSearchParams(searchParams.toString()); if (value === "all") params.delete("view"); else params.set("view", value); router.replace(`${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`, { scroll: false }); }} className={cn("border px-3 py-2 font-mono text-[10px] uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black", filter === value ? "border-black bg-black text-white" : "border-black/15 text-black/55 hover:border-black/30 hover:text-black")}>{value}</button>
           ))}
         </div>
-        <button type="button" onClick={() => void markAllRead({ projectId: projectId as Id<"projects"> })} disabled={!alerts.some((alert) => !alert.readAt)} className="border border-zinc-800 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-zinc-500 hover:border-white hover:text-white disabled:cursor-not-allowed disabled:opacity-40">Mark all read</button>
+        <button type="button" onClick={() => void markAllRead({ projectId: projectId as Id<"projects"> })} disabled={!alerts.some((alert) => !alert.readAt)} className="border border-black/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-black/55 hover:border-black hover:text-black disabled:cursor-not-allowed disabled:opacity-40">Mark all read</button>
       </div>
       {visibleAlerts.length === 0 ? <DashboardEmptyState title={`No ${filter} alerts`} description={filter === "all" ? "Alert rules will appear here when a run crosses a configured threshold." : `There are no ${filter} alerts in this project.`} /> : groupedAlerts.map(({ alert, count }) => (
         <div 
           key={alert._id} 
-          className={cn("group flex items-start justify-between border p-4 transition-colors hover:border-zinc-700", alert.readAt ? "border-border bg-[#111111]" : "border-white/30 bg-white/[0.04]")}
+          className={cn("group flex items-start justify-between border p-4 transition-colors hover:border-black/25", alert.readAt ? "border-border bg-white" : "border-black/30 bg-white/[0.04]")}
         >
           <div className="flex items-start gap-4">
             <div className={cn(
               "p-2 border border-border",
-              alert.type === "cost_exceeded" ? "text-amber-500" : "text-red-500"
+              alert.type === "cost_exceeded" ? "text-amber-500" : "text-red-600"
             )}>
               {alert.type === "cost_exceeded" ? <DollarSign className="size-4" /> : <AlertCircle className="size-4" />}
             </div>
@@ -80,24 +80,24 @@ export function AlertsList({ projectId }: AlertsListProps) {
               <div className="flex items-center gap-3">
                 <Badge variant="outline" className={cn(
                   "rounded-none border-0 px-0 font-mono text-[10px]",
-                  alert.type === "cost_exceeded" ? "text-amber-500" : "text-red-500"
+                  alert.type === "cost_exceeded" ? "text-amber-500" : "text-red-600"
                 )}>
                   {alert.type.replace("_", " ").toUpperCase()}
                 </Badge>
-                <span className="text-[10px] text-zinc-600 font-mono">
+                <span className="text-[10px] text-black/55 font-mono">
                   {formatRelativeTime(alert.triggeredAt)}
                 </span>
-                {count > 1 ? <span className="border border-zinc-700 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-zinc-400">{count} occurrences</span> : null}
+                {count > 1 ? <span className="border border-black/25 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-black/60">{count} occurrences</span> : null}
               </div>
-              <p className="text-xs text-white font-sans leading-relaxed max-w-2xl">
+              <p className="text-xs text-black font-sans leading-relaxed max-w-2xl">
                 {alert.message}
               </p>
-              <div className="flex flex-wrap gap-3 font-mono text-[10px] uppercase tracking-widest text-zinc-600">
+              <div className="flex flex-wrap gap-3 font-mono text-[10px] uppercase tracking-widest text-black/55">
                 <span>{alert.state ?? "active"}</span>
                 <span>run:{alert.runId}</span>
               </div>
-              <p className="mt-2 text-[11px] text-zinc-500">
-                <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">Recommended action · </span>
+              <p className="mt-2 text-[11px] text-black/55">
+                <span className="font-mono text-[9px] uppercase tracking-widest text-black/55">Recommended action · </span>
                 {alert.type === "cost_exceeded"
                   ? "Inspect the run cost and compare it with the recent baseline."
                   : "Open the triggering run and start at the first actionable error."}
@@ -106,11 +106,11 @@ export function AlertsList({ projectId }: AlertsListProps) {
           </div>
           
           <div className="flex shrink-0 flex-col items-end gap-2">
-            <Link href={`/dashboard/${projectId}/runs/${alert.runId}`} onClick={() => { if (!alert.readAt) void markRead({ alertId: alert._id }); }} className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-zinc-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Inspect Run <ArrowRight className="size-3" /></Link>
+            <Link href={`/dashboard/${projectId}/runs/${alert.runId}`} onClick={() => { if (!alert.readAt) void markRead({ alertId: alert._id }); }} className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-black/55 transition-colors hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black">Inspect Run <ArrowRight className="size-3" /></Link>
             <div className="flex gap-1">
-              {(alert.state ?? "active") === "active" ? <button type="button" aria-label={`Resolve alert ${alert.message}`} onClick={() => { if (window.confirm("Resolve this alert? You can reopen it later.")) void updateState({ alertId: alert._id, state: "resolved" }); }} className="border border-zinc-800 p-1.5 text-zinc-500 hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"><Check className="size-3" /></button> : null}
-              {(alert.state ?? "active") === "active" ? <button type="button" aria-label={`Mute alert ${alert.message}`} onClick={() => { if (window.confirm("Mute this alert? You can reopen it later from the muted tab.")) void updateState({ alertId: alert._id, state: "muted" }); }} className="border border-zinc-800 p-1.5 text-zinc-500 hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"><VolumeX className="size-3" /></button> : null}
-              {(alert.state ?? "active") !== "active" ? <button type="button" aria-label={`Reopen alert ${alert.message}`} onClick={() => void updateState({ alertId: alert._id, state: "active" })} className="border border-zinc-800 px-2 py-1 font-mono text-[9px] uppercase text-zinc-500 hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Reopen</button> : null}
+              {(alert.state ?? "active") === "active" ? <button type="button" aria-label={`Resolve alert ${alert.message}`} onClick={() => { if (window.confirm("Resolve this alert? You can reopen it later.")) void updateState({ alertId: alert._id, state: "resolved" }); }} className="border border-black/15 p-1.5 text-black/55 hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"><Check className="size-3" /></button> : null}
+              {(alert.state ?? "active") === "active" ? <button type="button" aria-label={`Mute alert ${alert.message}`} onClick={() => { if (window.confirm("Mute this alert? You can reopen it later from the muted tab.")) void updateState({ alertId: alert._id, state: "muted" }); }} className="border border-black/15 p-1.5 text-black/55 hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"><VolumeX className="size-3" /></button> : null}
+              {(alert.state ?? "active") !== "active" ? <button type="button" aria-label={`Reopen alert ${alert.message}`} onClick={() => void updateState({ alertId: alert._id, state: "active" })} className="border border-black/15 px-2 py-1 font-mono text-[9px] uppercase text-black/55 hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black">Reopen</button> : null}
             </div>
           </div>
         </div>

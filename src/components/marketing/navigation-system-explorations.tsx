@@ -72,7 +72,7 @@ const integrationRows = [
 
 function StudyLabel({ number, title }: { number: string; title: string }) {
   return (
-    <div className="future19-section-label flex items-center justify-between border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/45">
+    <div className="future19-section-label flex items-center justify-between border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/70">
       <span>
         Nav system {number} / {title}
       </span>
@@ -91,7 +91,7 @@ function TextLink({
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-2 border-b border-black pb-1 font-mono text-[9px] uppercase tracking-[0.12em] hover:border-[#f4d44d] hover:text-black/55"
+      className="inline-flex items-center gap-2 border-b border-black pb-1 font-mono text-[9px] uppercase tracking-[0.12em] hover:border-[#f4d44d] hover:text-black/70"
     >
       {children} <ArrowUpRight className="size-3" />
     </Link>
@@ -111,7 +111,7 @@ function FourGrid({
           className="group min-h-44 border-b border-r border-black/15 bg-white p-6 transition-colors hover:bg-[#f4d44d]"
         >
           <h3 className="font-pixel text-4xl tracking-[-0.06em]">{title}</h3>
-          <p className="mt-4 max-w-sm text-sm leading-6 text-black/55">
+          <p className="mt-4 max-w-sm text-sm leading-6 text-black/70">
             {body}
           </p>
         </div>
@@ -137,13 +137,13 @@ export function NavigationSystemExplorations({
       {showIntroduction ? (
         <div className="bg-[#eceae3] px-6 py-20 text-black md:px-10">
           <div className="mx-auto max-w-[1240px]">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/45">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/70">
               New exploration set / one visual system
             </p>
             <h2 className="mt-6 max-w-[1040px] font-pixel text-6xl leading-[0.84] tracking-[-0.075em] md:text-8xl">
               Fifteen sections cut from the same cloth.
             </h2>
-            <p className="mt-7 max-w-[720px] text-lg leading-8 text-black/55">
+            <p className="mt-7 max-w-[720px] text-lg leading-8 text-black/70">
               The light field, black feature panel, yellow interaction color,
               thin rules, and pixel typography from the new navigation—extended
               into a complete homepage kit.
@@ -168,7 +168,7 @@ export function NavigationSystemExplorations({
                 <h3 className="mt-9 max-w-[740px] font-pixel text-7xl leading-[0.8] tracking-[-0.08em] md:text-9xl">
                   The run explains the release.
                 </h3>
-                <p className="mt-7 max-w-xl text-lg leading-8 text-black/55">
+                <p className="mt-7 max-w-xl text-lg leading-8 text-black/70">
                   Trace what happened. Test what changed. Ship the version that
                   proves itself.
                 </p>
@@ -190,7 +190,7 @@ export function NavigationSystemExplorations({
             </div>
             <div className="grid grid-rows-[1fr_auto] bg-black text-white">
               <div className="p-7 md:p-9">
-                <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-zinc-600">
+                <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/62">
                   Live release proof
                 </p>
                 <div className="mt-16 flex items-end justify-between border-b border-white/15 pb-7">
@@ -203,15 +203,15 @@ export function NavigationSystemExplorations({
                 </div>
                 <div className="grid grid-cols-3 divide-x divide-white/15 py-7 font-mono">
                   <div>
-                    <p className="text-[8px] uppercase text-zinc-600">Runs</p>
+                    <p className="text-[8px] uppercase text-white/62">Runs</p>
                     <p className="mt-3 text-sm">18,204</p>
                   </div>
                   <div className="pl-4">
-                    <p className="text-[8px] uppercase text-zinc-600">p95</p>
+                    <p className="text-[8px] uppercase text-white/62">p95</p>
                     <p className="mt-3 text-sm">2.8s</p>
                   </div>
                   <div className="pl-4">
-                    <p className="text-[8px] uppercase text-zinc-600">Spend</p>
+                    <p className="text-[8px] uppercase text-white/62">Spend</p>
                     <p className="mt-3 text-sm">$0.041</p>
                   </div>
                 </div>
@@ -232,13 +232,13 @@ export function NavigationSystemExplorations({
           <StudyLabel number="02" title="signal directory" />
           <div className="mt-10 grid gap-px bg-black/15 lg:grid-cols-[0.7fr_1.3fr]">
             <div className="bg-black p-8 text-white md:p-10">
-              <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-zinc-600">
+              <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/62">
                 Product map
               </p>
               <h3 className="mt-12 font-pixel text-6xl leading-[0.85] tracking-[-0.07em]">
                 One system for every decision after deploy.
               </h3>
-              <p className="mt-6 text-sm leading-7 text-zinc-400">
+              <p className="mt-6 text-sm leading-7 text-white/72">
                 Each tile opens a different part of the operating loop.
               </p>
             </div>
@@ -259,7 +259,7 @@ export function NavigationSystemExplorations({
           <StudyLabel number="03" title="proof band" />
           <div className="mt-10 flex flex-col justify-between gap-8 md:flex-row md:items-end">
             <div>
-              <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/45">
+              <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
                 Integrations
               </p>
               <h3 className="mt-5 max-w-2xl font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
@@ -299,18 +299,18 @@ export function NavigationSystemExplorations({
                   key={title as string}
                   className={`min-h-72 border-b border-r border-black/15 p-6 md:border-b-0 ${index === 2 ? "bg-[#f4d44d]" : ""}`}
                 >
-                  <span className="font-mono text-[9px] text-black/40">
+                  <span className="font-mono text-[9px] text-black/70">
                     {number}
                   </span>
                   <h3 className="mt-20 font-pixel text-4xl tracking-[-0.06em]">
                     {title}
                   </h3>
-                  <p className="mt-4 text-sm leading-6 text-black/55">{body}</p>
+                  <p className="mt-4 text-sm leading-6 text-black/70">{body}</p>
                 </div>
               ))}
             </div>
             <div className="flex items-center justify-between border-t border-black/15 bg-black p-5 text-white">
-              <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-zinc-500">
+              <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-white/62">
                 A continuous production feedback loop
               </span>
               <Link
@@ -332,13 +332,13 @@ export function NavigationSystemExplorations({
           <StudyLabel number="05" title="trace report" />
           <div className="mt-10 grid border border-black/20 bg-white lg:grid-cols-[0.8fr_1.2fr]">
             <div className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
-              <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/45">
+              <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/70">
                 Incident / run_018204
               </p>
               <h3 className="mt-8 font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
                 The failure is a decision trail.
               </h3>
-              <p className="mt-6 text-sm leading-7 text-black/55">
+              <p className="mt-6 text-sm leading-7 text-black/70">
                 Follow the model, tool response, fallback, and evaluation
                 without stitching logs together.
               </p>
@@ -364,7 +364,7 @@ export function NavigationSystemExplorations({
                 ].map(([time, type, event], index) => (
                   <div
                     key={time}
-                    className={`grid grid-cols-[105px_70px_1fr] gap-3 p-4 font-mono text-[9px] ${index === 2 ? "bg-[#f4d44d] text-black" : "bg-[#090909] text-zinc-400"}`}
+                    className={`grid grid-cols-[105px_70px_1fr] gap-3 p-4 font-mono text-[9px] ${index === 2 ? "bg-[#f4d44d] text-black" : "bg-[#090909] text-white/72"}`}
                   >
                     <span>{time}</span>
                     <span className="uppercase opacity-55">{type}</span>
@@ -387,7 +387,7 @@ export function NavigationSystemExplorations({
             <div className="bg-white p-7 md:p-10">
               <div className="flex flex-col justify-between gap-6 border-b border-black/15 pb-7 sm:flex-row sm:items-end">
                 <div>
-                  <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/45">
+                  <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/70">
                     Candidate comparison
                   </p>
                   <h3 className="mt-5 font-pixel text-5xl leading-[0.9] tracking-[-0.07em] sm:text-6xl">
@@ -400,7 +400,7 @@ export function NavigationSystemExplorations({
               </div>
               <div className="mt-8 hidden overflow-x-auto md:block">
                 <table className="w-full min-w-[560px] text-left">
-                  <thead className="font-mono text-[8px] uppercase text-black/40">
+                  <thead className="font-mono text-[8px] uppercase text-black/70">
                     <tr>
                       <th className="pb-4">Candidate</th>
                       <th className="pb-4">Quality</th>
@@ -452,7 +452,7 @@ export function NavigationSystemExplorations({
                         ["Cost", cost],
                       ].map(([label, value]) => (
                         <div key={label} className="min-w-0">
-                          <dt className="font-mono text-[7px] uppercase tracking-[0.1em] text-black/45">
+                          <dt className="font-mono text-[7px] uppercase tracking-[0.1em] text-black/70">
                             {label}
                           </dt>
                           <dd className="mt-2 text-sm">{value}</dd>
@@ -467,7 +467,7 @@ export function NavigationSystemExplorations({
               <Sparkles className="size-6 text-[#f4d44d]" />
               <div>
                 <p className="font-pixel text-6xl tracking-[-0.07em]">+12%</p>
-                <p className="mt-3 text-sm leading-6 text-zinc-500">
+                <p className="mt-3 text-sm leading-6 text-white/62">
                   quality uplift on the same production-derived evaluation set
                 </p>
               </div>
@@ -488,31 +488,31 @@ export function NavigationSystemExplorations({
               <h3 className="mt-10 font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
                 One wrapper. A complete record.
               </h3>
-              <p className="mt-6 text-sm leading-7 text-black/55">
+              <p className="mt-6 text-sm leading-7 text-black/70">
                 Install, trace, and inspect without rebuilding your agent stack.
               </p>
               <div className="mt-10">
                 <TextLink href="/docs">Read quickstart</TextLink>
               </div>
             </div>
-            <div className="bg-black p-6 font-mono text-[12px] leading-7 text-zinc-300 md:p-9">
-              <div className="flex items-center justify-between border-b border-white/15 pb-4 text-[8px] uppercase tracking-[0.13em] text-zinc-600">
+            <div className="bg-black p-6 font-mono text-[12px] leading-7 text-white/80 md:p-9">
+              <div className="flex items-center justify-between border-b border-white/15 pb-4 text-[8px] uppercase tracking-[0.13em] text-white/62">
                 <span>agent.ts</span>
                 <span>typescript</span>
               </div>
               <pre className="mt-7 overflow-x-auto">
                 <code>
-                  <span className="text-zinc-600">01</span>
+                  <span className="text-white/62">01</span>
                   {"  import { trace } from 'tracify'\n"}
-                  <span className="text-zinc-600">02</span>
+                  <span className="text-white/62">02</span>
                   {"\n"}
-                  <span className="text-zinc-600">03</span>
+                  <span className="text-white/62">03</span>
                   {"  const response = await trace(\n"}
-                  <span className="text-zinc-600">04</span>
+                  <span className="text-white/62">04</span>
                   {"    'support-agent',\n"}
-                  <span className="text-zinc-600">05</span>
+                  <span className="text-white/62">05</span>
                   {"    () => agent.respond(ticket),\n"}
-                  <span className="text-zinc-600">06</span>
+                  <span className="text-white/62">06</span>
                   {"  )"}
                 </code>
               </pre>
@@ -532,13 +532,13 @@ export function NavigationSystemExplorations({
           <StudyLabel number="08" title="integration index" />
           <div className="mt-10 grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">
             <div>
-              <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/45">
+              <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
                 Connect your runtime
               </p>
               <h3 className="mt-5 font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
                 Your stack stays your stack.
               </h3>
-              <p className="mt-6 text-sm leading-7 text-black/55">
+              <p className="mt-6 text-sm leading-7 text-black/70">
                 Native SDKs and OTLP meet the frameworks and model providers you
                 already use.
               </p>
@@ -625,7 +625,7 @@ export function NavigationSystemExplorations({
                     {title}
                   </h3>
                   <p
-                    className={`mt-4 text-sm leading-6 ${index === 0 ? "text-zinc-500" : "text-black/55"}`}
+                    className={`mt-4 text-sm leading-6 ${index === 0 ? "text-white/62" : "text-black/70"}`}
                   >
                     {body}
                   </p>
@@ -649,7 +649,7 @@ export function NavigationSystemExplorations({
               <h3 className="mt-10 font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
                 Production context, controlled.
               </h3>
-              <p className="mt-6 max-w-md text-sm leading-7 text-black/55">
+              <p className="mt-6 max-w-md text-sm leading-7 text-black/70">
                 Clear data handling, retention, access control, and deployment
                 paths for technical review.
               </p>
@@ -672,7 +672,7 @@ export function NavigationSystemExplorations({
                   <h4 className="mt-12 font-pixel text-4xl tracking-[-0.06em]">
                     {title}
                   </h4>
-                  <p className="mt-3 text-sm text-black/55">{body}</p>
+                  <p className="mt-3 text-sm text-black/70">{body}</p>
                 </div>
               ))}
             </div>
@@ -689,7 +689,7 @@ export function NavigationSystemExplorations({
           <div className="mt-10 overflow-x-auto border border-black/20 bg-white">
             <table className="w-full min-w-[720px] text-left">
               <thead>
-                <tr className="border-b border-black/15 font-mono text-[8px] uppercase tracking-[0.12em] text-black/45">
+                <tr className="border-b border-black/15 font-mono text-[8px] uppercase tracking-[0.12em] text-black/70">
                   <th className="p-5">Operating model</th>
                   <th className="p-5">Logs</th>
                   <th className="p-5">Dashboards</th>
@@ -715,7 +715,7 @@ export function NavigationSystemExplorations({
                     {row.map((cell, index) => (
                       <td
                         key={cell}
-                        className={`p-5 text-sm ${index === 3 ? "bg-[#fff4b5] font-medium" : index === 0 ? "font-pixel text-2xl tracking-[-0.04em]" : "text-black/55"}`}
+                        className={`p-5 text-sm ${index === 3 ? "bg-[#fff4b5] font-medium" : index === 0 ? "font-pixel text-2xl tracking-[-0.04em]" : "text-black/70"}`}
                       >
                         {cell}
                       </td>
@@ -746,14 +746,14 @@ export function NavigationSystemExplorations({
                 key={name}
                 className={`flex min-h-[430px] flex-col p-7 ${index === 1 ? "bg-[#f4d44d]" : "bg-white"}`}
               >
-                <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/45">
+                <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/70">
                   {name}
                 </p>
                 <div className="mt-8 flex items-baseline gap-2">
                   <span className="font-pixel text-7xl tracking-[-0.07em]">
                     {price}
                   </span>
-                  <span className="text-sm text-black/45">/mo</span>
+                  <span className="text-sm text-black/70">/mo</span>
                 </div>
                 <div className="mt-8 space-y-4 border-t border-black/15 pt-6 text-sm">
                   <p className="flex items-center gap-3">
@@ -816,7 +816,7 @@ export function NavigationSystemExplorations({
                   href={index === 0 ? "/blog/ai-agent-observability-complete-guide" : "/blog"}
                   className={`border-b border-black/15 p-6 ${index === 1 ? "bg-[#f4d44d]" : "bg-white hover:bg-[#f4d44d]"}`}
                 >
-                  <span className="font-mono text-[8px] uppercase text-black/45">
+                  <span className="font-mono text-[8px] uppercase text-black/70">
                     {type}
                   </span>
                   <h4 className="mt-8 font-pixel text-4xl leading-[0.9] tracking-[-0.06em]">
@@ -837,13 +837,13 @@ export function NavigationSystemExplorations({
           <StudyLabel number="14" title="conversion workshop" />
           <div className="mt-10 grid border border-black/20 bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[1.25fr_0.75fr]">
             <div className="p-8 md:p-12">
-              <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/45">
+              <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
                 The next useful conversation
               </p>
               <h3 className="mt-8 max-w-[760px] font-pixel text-7xl leading-[0.82] tracking-[-0.075em] md:text-8xl">
                 Bring us a run you do not trust.
               </h3>
-              <p className="mt-7 max-w-xl text-lg leading-8 text-black/55">
+              <p className="mt-7 max-w-xl text-lg leading-8 text-black/70">
                 We will map the failure, missing signals, and first useful
                 quality gate together.
               </p>
@@ -858,7 +858,7 @@ export function NavigationSystemExplorations({
               <CircleDot className="size-6" />
               <div>
                 <p className="font-pixel text-6xl tracking-[-0.07em]">30 min</p>
-                <p className="mt-4 text-sm leading-6 text-black/55">
+                <p className="mt-4 text-sm leading-6 text-black/70">
                   one real trace · one root-cause map · one release-gate
                   recommendation
                 </p>
@@ -880,7 +880,7 @@ export function NavigationSystemExplorations({
                 <p className="relative isolate inline-block px-1 font-pixel text-3xl tracking-[-0.05em] before:absolute before:-inset-x-1 before:bottom-0.5 before:-z-10 before:h-[68%] before:-rotate-1 before:skew-x-[-7deg] before:bg-[#f4d44d]/80 before:content-['']">
                   tracify
                 </p>
-                <p className="mt-5 max-w-sm text-sm leading-7 text-black/55">
+                <p className="mt-5 max-w-sm text-sm leading-7 text-black/70">
                   The operating record for the agents your team ships.
                 </p>
                 <form
@@ -899,7 +899,7 @@ export function NavigationSystemExplorations({
                     autoComplete="email"
                     required
                     placeholder="you@company.com"
-                    className="min-w-0 flex-1 bg-transparent px-4 py-3 font-mono text-[10px] outline-none placeholder:text-black/35 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black"
+                    className="min-w-0 flex-1 bg-transparent px-4 py-3 font-mono text-[10px] outline-none placeholder:text-black/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black"
                   />
                   <button
                     type="submit"
@@ -908,7 +908,7 @@ export function NavigationSystemExplorations({
                     Subscribe
                   </button>
                 </form>
-                <p className="mt-3 font-mono text-[8px] uppercase tracking-[0.11em] text-black/45">
+                <p className="mt-3 font-mono text-[8px] uppercase tracking-[0.11em] text-black/70">
                   One technical dispatch a month. Unsubscribe anytime.
                 </p>
                 <Link
@@ -965,7 +965,7 @@ export function NavigationSystemExplorations({
                         <Link
                           key={href}
                           href={href}
-                          className="block text-black/45 hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                          className="block text-black/70 hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                         >
                           {label}
                         </Link>

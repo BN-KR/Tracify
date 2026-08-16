@@ -67,7 +67,7 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
 
   if (!project) {
     return (
-      <div className="border border-dashed border-border py-16 text-center font-mono text-sm uppercase tracking-widest text-zinc-500">
+      <div className="border border-dashed border-border py-16 text-center font-mono text-sm uppercase tracking-widest text-black/55">
         Project not found
       </div>
     );
@@ -75,38 +75,38 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
 
   return (
     <div className="space-y-8 max-w-3xl">
-      <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+      <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">Active API Key</h3>
-            <p className="text-[11px] text-[#666666] mt-1">This key grants write access to your project&apos;s ingestion pipeline.</p>
+            <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">Active API Key</h3>
+            <p className="text-[11px] text-black/55 mt-1">This key grants write access to your project&apos;s ingestion pipeline.</p>
           </div>
           <Button 
             variant="outline" 
             onClick={handleRotate}
             disabled={rotating}
-            className="rounded-none border-zinc-800 h-8 px-3 font-mono text-[10px] uppercase hover:bg-white hover:text-black"
+            className="rounded-none border-black/15 h-8 px-3 font-mono text-[10px] uppercase hover:bg-black hover:text-white"
           >
             {rotating ? "Rotating..." : <span className="flex items-center gap-2"><RefreshCw className="size-3" /> Rotate Key</span>}
           </Button>
         </div>
 
         {newKey ? (
-          <div className="p-4 border border-white bg-white/5 space-y-4 animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center gap-2 text-white text-[11px] font-mono uppercase font-bold">
+          <div className="p-4 border border-black bg-black/5 space-y-4 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-2 text-black text-[11px] font-mono uppercase font-bold">
               <AlertTriangle className="size-3" />
               Copy your new API key now
             </div>
-            <p className="text-[11px] text-zinc-400 font-sans">
+            <p className="text-[11px] text-black/60 font-sans">
               This key will only be shown once. If you lose it, you will have to rotate it again.
             </p>
             <div className="flex items-center gap-2">
-              <div className="flex-1 h-10 bg-black border border-white/20 px-3 flex items-center font-mono text-sm text-white overflow-x-auto whitespace-nowrap">
+              <div className="flex-1 h-10 bg-white border border-black/20 px-3 flex items-center font-mono text-sm text-black overflow-x-auto whitespace-nowrap">
                 {newKey}
               </div>
               <Button 
                 onClick={() => copyToClipboard(newKey)}
-                className="rounded-none h-10 px-4 bg-white text-black hover:bg-zinc-200"
+                className="rounded-none h-10 px-4 bg-black text-white hover:bg-black/80"
               >
                 {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
               </Button>
@@ -115,13 +115,13 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
         ) : (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="flex-1 h-10 bg-black border border-zinc-800 px-3 flex items-center font-mono text-sm text-zinc-500">
+              <div className="flex-1 h-10 bg-white border border-black/15 px-3 flex items-center font-mono text-sm text-black/55">
                 {project.apiKeyPrefix}************{project.apiKeyLast4}
               </div>
               <Button 
                 variant="outline"
                 disabled
-                className="rounded-none h-10 px-4 border-zinc-800 text-zinc-600 cursor-not-allowed"
+                className="rounded-none h-10 px-4 border-black/15 text-black/55 cursor-not-allowed"
               >
                 <Copy className="size-4" />
               </Button>
@@ -129,14 +129,14 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-widest text-zinc-600 font-mono">Created</label>
-                <div className="text-[11px] font-mono text-zinc-400">
+                <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Created</label>
+                <div className="text-[11px] font-mono text-black/60">
                   {project.apiKeyCreatedAt ? formatRelativeTime(project.apiKeyCreatedAt) : "Unknown"}
                 </div>
               </div>
               <div className="space-y-1 text-right">
-                <label className="text-[10px] uppercase tracking-widest text-zinc-600 font-mono">Last Used</label>
-                <div className="text-[11px] font-mono text-zinc-400">
+                <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Last Used</label>
+                <div className="text-[11px] font-mono text-black/60">
                   {project.apiKeyLastUsedAt ? formatRelativeTime(project.apiKeyLastUsedAt) : "Never"}
                 </div>
               </div>
@@ -145,9 +145,9 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
         )}
       </Card>
 
-      <div className="space-y-2 border border-dashed border-zinc-800 p-6">
-        <h4 className="font-mono text-[12px] text-zinc-400 uppercase tracking-widest">Security Note</h4>
-        <p className="text-[11px] text-zinc-600 leading-relaxed">
+      <div className="space-y-2 border border-dashed border-black/15 p-6">
+        <h4 className="font-mono text-[12px] text-black/60 uppercase tracking-widest">Security Note</h4>
+        <p className="text-[11px] text-black/55 leading-relaxed">
           API keys carry the same level of access as your login credentials for data ingestion. 
           Never commit them to version control or share them in public forums. 
           If a key is compromised, rotate it immediately.

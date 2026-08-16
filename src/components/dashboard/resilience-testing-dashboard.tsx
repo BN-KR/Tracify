@@ -89,10 +89,10 @@ export function ResilienceTestingDashboard({ projectId }: ResilienceTestingDashb
 
   return (
     <div className="space-y-8 max-w-4xl">
-      <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+      <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
         <div>
-          <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">Configure a run</h3>
-          <p className="text-[11px] text-[#666666] mt-1">
+          <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">Configure a run</h3>
+          <p className="text-[11px] text-black/55 mt-1">
             Replays fallback-chain, retry, and cost-ceiling behavior from this project&apos;s runtime policy against a synthetic
             mix of failures. No real provider calls, no cost — a policy simulation, not a live load test.
           </p>
@@ -100,31 +100,31 @@ export function ResilienceTestingDashboard({ projectId }: ResilienceTestingDashb
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Iterations</label>
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Iterations</label>
             <Input
               type="number"
               min="1"
               max="200"
               value={iterations}
               onChange={(e) => setIterations(e.target.value)}
-              className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              className="rounded-none border-black/15 bg-white text-black font-mono h-10"
             />
           </div>
         </div>
 
         <div className="space-y-3">
-          <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Failure mix (relative weights)</label>
+          <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Failure mix (relative weights)</label>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
             {(Object.keys(DEFAULT_FAILURE_MIX) as FailureMode[]).map((mode) => (
               <div key={mode} className="space-y-1">
-                <span className="text-[9px] text-zinc-600 font-mono uppercase">{FAILURE_MODE_LABELS[mode]}</span>
+                <span className="text-[9px] text-black/55 font-mono uppercase">{FAILURE_MODE_LABELS[mode]}</span>
                 <Input
                   type="number"
                   min="0"
                   step="0.05"
                   value={failureMix[mode]}
                   onChange={(e) => setFailureMix((current) => ({ ...current, [mode]: e.target.value }))}
-                  className="rounded-none border-zinc-800 bg-black text-white font-mono h-9"
+                  className="rounded-none border-black/15 bg-white text-black font-mono h-9"
                 />
               </div>
             ))}
@@ -132,7 +132,7 @@ export function ResilienceTestingDashboard({ projectId }: ResilienceTestingDashb
         </div>
 
         {error ? (
-          <div className="flex items-center gap-2 text-red-500 text-[11px] font-mono">
+          <div className="flex items-center gap-2 text-red-600 text-[11px] font-mono">
             <AlertCircle className="size-3" />
             {error}
           </div>
@@ -150,12 +150,12 @@ export function ResilienceTestingDashboard({ projectId }: ResilienceTestingDashb
       </Card>
 
       <div className="grid gap-6 md:grid-cols-[280px_1fr]">
-        <Card className="p-4 rounded-none border-border bg-[#111111] shadow-none space-y-3">
-          <h3 className="font-mono text-[11px] text-white uppercase tracking-widest">Past runs</h3>
+        <Card className="p-4 rounded-none border-border bg-white shadow-none space-y-3">
+          <h3 className="font-mono text-[11px] text-black uppercase tracking-widest">Past runs</h3>
           {runs === undefined ? (
             <Skeleton className="h-40 w-full rounded-none" />
           ) : runs.length === 0 ? (
-            <p className="text-[11px] font-mono text-zinc-600 uppercase">No runs yet</p>
+            <p className="text-[11px] font-mono text-black/55 uppercase">No runs yet</p>
           ) : (
             <div className="space-y-2">
               {runs.map((run) => (
@@ -164,14 +164,14 @@ export function ResilienceTestingDashboard({ projectId }: ResilienceTestingDashb
                   type="button"
                   onClick={() => setSelectedRunId(run._id)}
                   className={`w-full border px-3 py-2 text-left font-mono text-[10px] uppercase ${
-                    selectedRunId === run._id ? "border-white text-white" : "border-zinc-800 text-zinc-500 hover:border-zinc-600"
+                    selectedRunId === run._id ? "border-black text-black" : "border-black/15 text-black/55 hover:border-black/30"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span>{run.status}</span>
                     <span>{run.iterations} iter</span>
                   </div>
-                  <div className="mt-1 text-zinc-600">{new Date(run.createdAt).toLocaleString()}</div>
+                  <div className="mt-1 text-black/55">{new Date(run.createdAt).toLocaleString()}</div>
                 </button>
               ))}
             </div>
@@ -215,14 +215,14 @@ function RunDetail({
 
   if (!run) {
     return (
-      <Card className="flex items-center justify-center p-6 rounded-none border-border bg-[#111111] shadow-none">
-        <p className="text-[11px] font-mono text-zinc-600 uppercase">Select a run to see results</p>
+      <Card className="flex items-center justify-center p-6 rounded-none border-border bg-white shadow-none">
+        <p className="text-[11px] font-mono text-black/55 uppercase">Select a run to see results</p>
       </Card>
     );
   }
 
   return (
-    <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+    <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
           ["Status", run.run.status],
@@ -230,21 +230,21 @@ function RunDetail({
           ["Fail-open", run.run.failOpenCount],
           ["Blocked", run.run.blockedCount],
         ].map(([label, value]) => (
-          <div key={label} className="border border-zinc-800 p-3">
-            <p className="text-[9px] uppercase tracking-widest text-zinc-600 font-mono">{label}</p>
-            <p className="mt-2 font-mono text-lg text-white">{value}</p>
+          <div key={label} className="border border-black/15 p-3">
+            <p className="text-[9px] uppercase tracking-widest text-black/55 font-mono">{label}</p>
+            <p className="mt-2 font-mono text-lg text-black">{value}</p>
           </div>
         ))}
       </div>
 
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono mb-2">
+        <p className="text-[10px] uppercase tracking-widest text-black/55 font-mono mb-2">
           Policy: {run.run.policySnapshot.enforcementMode} · fallback chain {run.run.policySnapshot.fallbackChain.join(" → ")}
         </p>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse font-mono text-[11px]">
             <thead>
-              <tr className="border-b border-zinc-800 text-left text-zinc-500 uppercase text-[9px] tracking-widest">
+              <tr className="border-b border-black/15 text-left text-black/55 uppercase text-[9px] tracking-widest">
                 <th className="py-2 pr-4">Failure mode</th>
                 <th className="py-2 pr-4">Iterations</th>
                 <th className="py-2 pr-4">Success rate</th>
@@ -254,7 +254,7 @@ function RunDetail({
             </thead>
             <tbody>
               {breakdown.map((row) => (
-                <tr key={row.mode} className="border-b border-zinc-900 text-zinc-300">
+                <tr key={row.mode} className="border-b border-black/10 text-black/70">
                   <td className="py-2 pr-4">{FAILURE_MODE_LABELS[row.mode] ?? row.mode}</td>
                   <td className="py-2 pr-4">{row.total}</td>
                   <td className="py-2 pr-4">{Math.round(row.successRate * 100)}%</td>

@@ -173,60 +173,60 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
   return (
     <div className="space-y-8 max-w-3xl">
       {/* General Settings */}
-      <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+      <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
         <div>
-          <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">General Settings</h3>
-          <p className="text-[11px] text-[#666666] mt-1">Basic project identification and identity.</p>
+          <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">General Settings</h3>
+          <p className="text-[11px] text-black/55 mt-1">Basic project identification and identity.</p>
         </div>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Project Name</label>
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Project Name</label>
             <Input 
               value={name} 
               onChange={(e) => setName(e.target.value)}
-              className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              className="rounded-none border-black/15 bg-white text-black font-mono h-10"
             />
           </div>
           
           <div className="space-y-2 opacity-50">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Project ID</label>
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Project ID</label>
             <Input 
               value={projectId} 
               readOnly
-              className="rounded-none border-zinc-800 bg-black text-zinc-500 font-mono h-10 cursor-not-allowed"
+              className="rounded-none border-black/15 bg-white text-black/55 font-mono h-10 cursor-not-allowed"
             />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Client / Workspace Label</label>
+              <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Client / Workspace Label</label>
               <Input
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
                 placeholder="Acme Support Agent"
-                className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+                className="rounded-none border-black/15 bg-white text-black font-mono h-10"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Report Notes</label>
+              <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Report Notes</label>
               <Input
                 value={reportNotes}
                 onChange={(e) => setReportNotes(e.target.value)}
                 placeholder="Beta weekly reliability report"
-                className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+                className="rounded-none border-black/15 bg-white text-black font-mono h-10"
               />
             </div>
           </div>
         </div>
       </Card>
 
-      <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+      <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
         <div>
-          <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">Privacy & Retention</h3>
-          <p className="text-[11px] text-[#666666] mt-1">Sensitive payloads are scrubbed before they leave the ingest boundary.</p>
+          <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">Privacy & Retention</h3>
+          <p className="text-[11px] text-black/55 mt-1">Sensitive payloads are scrubbed before they leave the ingest boundary.</p>
         </div>
-        <label className="flex items-center gap-3 text-[11px] text-zinc-300 font-mono uppercase">
+        <label className="flex items-center gap-3 text-[11px] text-black/70 font-mono uppercase">
           <input type="checkbox" checked={redactionEnabled} onChange={(e) => setRedactionEnabled(e.target.checked)} className="accent-white" />
           Redact sensitive values on ingest
         </label>
@@ -238,7 +238,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
                 type="button"
                 key={rule}
                 onClick={() => setRedactionRules((current) => selected ? current.filter((item) => item !== rule) : [...current, rule])}
-                className={`border px-3 py-2 font-mono text-[10px] uppercase ${selected ? "border-white text-white" : "border-zinc-800 text-zinc-600"}`}
+                className={`border px-3 py-2 font-mono text-[10px] uppercase ${selected ? "border-black text-black" : "border-black/15 text-black/55"}`}
               >
                 {rule.replace("_", " ")}
               </button>
@@ -246,85 +246,85 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
           })}
         </div>
         <div className="max-w-xs space-y-2">
-          <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Retention (days)</label>
-          <Input type="number" min="1" max="3650" value={retentionDays} onChange={(e) => setRetentionDays(e.target.value)} className="rounded-none border-zinc-800 bg-black text-white font-mono h-10" />
+          <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Retention (days)</label>
+          <Input type="number" min="1" max="3650" value={retentionDays} onChange={(e) => setRetentionDays(e.target.value)} className="rounded-none border-black/15 bg-white text-black font-mono h-10" />
         </div>
       </Card>
 
       {/* Thresholds & Limits */}
-      <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-6">
+      <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
         <div>
-          <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">Alert Thresholds</h3>
-          <p className="text-[11px] text-[#666666] mt-1">Set boundaries for your agent&apos;s resource usage.</p>
+          <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">Alert Thresholds</h3>
+          <p className="text-[11px] text-black/55 mt-1">Set boundaries for your agent&apos;s resource usage.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Cost (USD)</label>
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Cost (USD)</label>
             <Input 
               type="number"
               step="0.01"
               value={costThreshold} 
               onChange={(e) => setCostThreshold(e.target.value)}
-              className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              className="rounded-none border-black/15 bg-white text-black font-mono h-10"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Duration (sec)</label>
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Duration (sec)</label>
             <Input 
               type="number"
               value={maxDuration} 
               onChange={(e) => setMaxDuration(e.target.value)}
-              className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              className="rounded-none border-black/15 bg-white text-black font-mono h-10"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">Stall (min)</label>
+            <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Stall (min)</label>
             <Input 
               type="number"
               value={maxStall} 
               onChange={(e) => setMaxStall(e.target.value)}
-              className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+              className="rounded-none border-black/15 bg-white text-black font-mono h-10"
             />
           </div>
         </div>
 
-        <div className="space-y-2 pt-4 border-t border-[#2A2A2A]">
-          <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono text-zinc-500">Slack Webhook URL</label>
+        <div className="space-y-2 pt-4 border-t border-black/15">
+          <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono text-black/55">Slack Webhook URL</label>
           <Input 
             value={slackWebhookUrl} 
             onChange={(e) => setSlackWebhookUrl(e.target.value)}
             placeholder="https://hooks.slack.com/services/..."
-            className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+            className="rounded-none border-black/15 bg-white text-black font-mono h-10"
           />
-          <p className="text-[9px] text-zinc-600 font-mono uppercase">Alerts will be sent to this channel when thresholds are exceeded.</p>
+          <p className="text-[9px] text-black/55 font-mono uppercase">Alerts will be sent to this channel when thresholds are exceeded.</p>
           <Button
             type="button"
             variant="outline"
             onClick={handleSendTestAlert}
             disabled={testingSlack || !slackWebhookUrl.trim()}
-            className="mt-2 h-8 rounded-none border-zinc-800 font-mono text-[10px] uppercase"
+            className="mt-2 h-8 rounded-none border-black/15 font-mono text-[10px] uppercase"
           >
             <Send className="size-3" />
             {testingSlack ? "Sending..." : "Send test alert"}
           </Button>
         </div>
 
-        <div className="space-y-2 pt-4 border-t border-[#2A2A2A]">
-          <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono text-zinc-500">Teams Webhook URL</label>
+        <div className="space-y-2 pt-4 border-t border-black/15">
+          <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono text-black/55">Teams Webhook URL</label>
           <Input
             value={teamsWebhookUrl}
             onChange={(e) => setTeamsWebhookUrl(e.target.value)}
             placeholder="https://*.webhook.office.com/webhookb2/..."
-            className="rounded-none border-zinc-800 bg-black text-white font-mono h-10"
+            className="rounded-none border-black/15 bg-white text-black font-mono h-10"
           />
-          <p className="text-[9px] text-zinc-600 font-mono uppercase">Alerts will be sent to this Microsoft Teams channel when thresholds are exceeded.</p>
+          <p className="text-[9px] text-black/55 font-mono uppercase">Alerts will be sent to this Microsoft Teams channel when thresholds are exceeded.</p>
           <Button
             type="button"
             variant="outline"
             onClick={handleSendTeamsTestAlert}
             disabled={testingTeams || !teamsWebhookUrl.trim()}
-            className="mt-2 h-8 rounded-none border-zinc-800 font-mono text-[10px] uppercase"
+            className="mt-2 h-8 rounded-none border-black/15 font-mono text-[10px] uppercase"
           >
             <Send className="size-3" />
             {testingTeams ? "Sending..." : "Send test alert"}
@@ -334,12 +334,12 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
 
       <div className="flex items-center justify-between pt-4">
         {error ? (
-          <div className="flex items-center gap-2 text-red-500 text-[11px] font-mono">
+          <div className="flex items-center gap-2 text-red-600 text-[11px] font-mono">
             <AlertCircle className="size-3" />
             {error}
           </div>
         ) : notice ? (
-          <div className="text-[11px] font-mono text-zinc-400">{notice}</div>
+          <div className="text-[11px] font-mono text-black/60">{notice}</div>
         ) : null}
         <div />
         <Button 
@@ -354,7 +354,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
       <div className="pt-12">
         <div className="border border-red-900/30 bg-red-950/5 p-6 rounded-none space-y-4">
           <div>
-            <h3 className="font-mono text-[14px] text-red-500 uppercase tracking-widest">Danger Zone</h3>
+            <h3 className="font-mono text-[14px] text-red-600 uppercase tracking-widest">Danger Zone</h3>
             <p className="text-[11px] text-red-500/60 mt-1 uppercase tracking-tighter">Permanently delete this project and all of its data.</p>
           </div>
           

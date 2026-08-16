@@ -17,7 +17,7 @@ export function OrganizationSwitcher() {
           organizationId: event.target.value === "personal" ? null : event.target.value,
         });
       }}
-      className="hidden h-8 rounded-none border border-[#2A2A2A] bg-[#111111] px-2 font-mono text-[10px] uppercase tracking-widest text-[#999999] outline-none hover:border-white hover:text-white sm:block"
+      className="hidden h-8 rounded-none border border-black/15 bg-white px-2 font-mono text-[10px] uppercase tracking-widest text-black/60 outline-none hover:border-black hover:text-black sm:block"
     >
       <option value="personal">Personal workspace</option>
       {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}

@@ -79,7 +79,7 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
 
   if (!summary) {
     return (
-      <div className="border border-[#2A2A2A] bg-[#111111] p-6 font-mono text-sm text-[#999999]">
+      <div className="border border-black/15 bg-white p-6 font-mono text-sm text-black/60">
         Project not found or access denied.
       </div>
     );
@@ -93,16 +93,16 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <div className="space-y-6">
-        <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-6 shadow-none">
+        <Card className="rounded-none border-black/15 bg-white p-6 shadow-none">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
-              <div className="mb-2 font-mono text-[11px] uppercase tracking-widest text-[#666666]">
+              <div className="mb-2 font-mono text-[11px] uppercase tracking-widest text-black/55">
                 project.management
               </div>
-              <h1 className="truncate font-mono text-2xl text-white">
+              <h1 className="truncate font-mono text-2xl text-black">
                 {project.name}
               </h1>
-              <div className="mt-3 grid gap-2 font-mono text-[11px] text-[#777777] sm:grid-cols-2">
+              <div className="mt-3 grid gap-2 font-mono text-[11px] text-black/55 sm:grid-cols-2">
                 <span>ID: {project._id}</span>
                 <span>Plan: {project.planTier ?? "free"}</span>
                 <span>API key: {project.apiKeyLast4 ? `...${project.apiKeyLast4}` : "not issued"}</span>
@@ -152,28 +152,28 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
           />
         </div>
 
-        <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-6 shadow-none">
+        <Card className="rounded-none border-black/15 bg-white p-6 shadow-none">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <h2 className="font-mono text-[14px] uppercase tracking-widest text-white">
+              <h2 className="font-mono text-[14px] uppercase tracking-widest text-black">
                 Recent Saved Runs
               </h2>
-              <p className="mt-1 font-mono text-[11px] text-[#666666]">
+              <p className="mt-1 font-mono text-[11px] text-black/55">
                 Convex-backed activity used when analytics storage is unavailable.
               </p>
             </div>
           </div>
-          <div className="divide-y divide-[#222222] border border-[#222222]">
+          <div className="divide-y divide-black/15 border border-black/15">
             {summary.recentRuns.length ? (
               summary.recentRuns.map((run) => (
                 <Link
                   key={run._id}
                   href={`/dashboard/${projectId}/runs/${run.runId}`}
-                  className="grid gap-3 px-4 py-3 font-mono text-[12px] text-[#999999] transition-colors hover:bg-[#161616] sm:grid-cols-[minmax(0,1fr)_120px_100px_24px]"
+                  className="grid gap-3 px-4 py-3 font-mono text-[12px] text-black/60 transition-colors hover:bg-[#f3f2ed] sm:grid-cols-[minmax(0,1fr)_120px_100px_24px]"
                 >
                   <div className="min-w-0">
-                    <div className="truncate text-white">{run.runId}</div>
-                    <div className="mt-1 text-[10px] uppercase tracking-widest text-[#666666]">
+                    <div className="truncate text-black">{run.runId}</div>
+                    <div className="mt-1 text-[10px] uppercase tracking-widest text-black/55">
                       {run.primaryModel ?? "no model"}
                     </div>
                   </div>
@@ -183,7 +183,7 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
                 </Link>
               ))
             ) : (
-              <div className="px-4 py-8 font-mono text-[12px] text-[#666666]">
+              <div className="px-4 py-8 font-mono text-[12px] text-black/55">
                 No saved runs yet.
               </div>
             )}
@@ -192,9 +192,9 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
       </div>
 
       <aside className="space-y-6">
-        <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-5 shadow-none">
-          <div className="mb-4 flex items-center gap-2 font-mono text-[12px] uppercase tracking-widest text-white">
-            <Calendar className="size-4 text-[#777777]" />
+        <Card className="rounded-none border-black/15 bg-white p-5 shadow-none">
+          <div className="mb-4 flex items-center gap-2 font-mono text-[12px] uppercase tracking-widest text-black">
+            <Calendar className="size-4 text-black/55" />
             Lifecycle
           </div>
           <InfoRow label="Created" value={formatDate(project.createdAt)} />
@@ -202,9 +202,9 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
           <InfoRow label="Key last used" value={formatDate(project.apiKeyLastUsedAt)} />
         </Card>
 
-        <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-5 shadow-none">
-          <div className="mb-4 flex items-center gap-2 font-mono text-[12px] uppercase tracking-widest text-white">
-            <CircleDollarSign className="size-4 text-[#777777]" />
+        <Card className="rounded-none border-black/15 bg-white p-5 shadow-none">
+          <div className="mb-4 flex items-center gap-2 font-mono text-[12px] uppercase tracking-widest text-black">
+            <CircleDollarSign className="size-4 text-black/55" />
             Limits
           </div>
           <InfoRow
@@ -220,9 +220,9 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
 
         <Card className="rounded-none border-red-900/50 bg-red-950/10 p-5 shadow-none">
           <div className="mb-4 flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-500" />
+            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600" />
             <div>
-              <h2 className="font-mono text-[12px] uppercase tracking-widest text-red-400">
+              <h2 className="font-mono text-[12px] uppercase tracking-widest text-red-600">
                 Delete Project
               </h2>
               <p className="mt-2 font-mono text-[11px] leading-5 text-red-300/60">
@@ -237,16 +237,16 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
               value={confirmationName}
               onChange={(event) => setConfirmationName(event.target.value)}
               placeholder={project.name}
-              className="h-10 border-red-900/50 bg-black text-red-100"
+              className="h-10 border-red-900/50 bg-white text-red-100"
             />
             <Input
               value={confirmationWord}
               onChange={(event) => setConfirmationWord(event.target.value)}
               placeholder="DELETE"
-              className="h-10 border-red-900/50 bg-black text-red-100"
+              className="h-10 border-red-900/50 bg-white text-red-100"
             />
             {error ? (
-              <div className="font-mono text-[11px] text-red-400">{error}</div>
+              <div className="font-mono text-[11px] text-red-600">{error}</div>
             ) : null}
             <Button
               type="button"
@@ -275,23 +275,23 @@ function ManagementStat({
   sublabel: string;
 }) {
   return (
-    <Card className="rounded-none border-[#2A2A2A] bg-[#111111] p-5 shadow-none">
-      <div className="font-mono text-[10px] uppercase tracking-widest text-[#666666]">
+    <Card className="rounded-none border-black/15 bg-white p-5 shadow-none">
+      <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">
         {label}
       </div>
-      <div className="mt-3 font-mono text-2xl text-white">{value}</div>
-      <div className="mt-2 font-mono text-[11px] text-[#777777]">{sublabel}</div>
+      <div className="mt-3 font-mono text-2xl text-black">{value}</div>
+      <div className="mt-2 font-mono text-[11px] text-black/55">{sublabel}</div>
     </Card>
   );
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between border-t border-[#222222] py-3 first:border-t-0 first:pt-0">
-      <span className="font-mono text-[11px] uppercase tracking-widest text-[#666666]">
+    <div className="flex items-center justify-between border-t border-black/15 py-3 first:border-t-0 first:pt-0">
+      <span className="font-mono text-[11px] uppercase tracking-widest text-black/55">
         {label}
       </span>
-      <span className="max-w-[170px] truncate text-right font-mono text-[11px] text-[#CCCCCC]">
+      <span className="max-w-[170px] truncate text-right font-mono text-[11px] text-black/70">
         {value}
       </span>
     </div>

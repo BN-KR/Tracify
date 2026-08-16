@@ -23,23 +23,23 @@ export function SessionsList({ projectId }: { projectId: string }) {
 
   return (
     <div className="border border-border">
-      <div className="hidden grid-cols-[minmax(0,1fr)_100px_100px_120px] gap-4 border-b border-border bg-muted/20 px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-zinc-500 md:grid">
+      <div className="hidden grid-cols-[minmax(0,1fr)_100px_100px_120px] gap-4 border-b border-border bg-muted/20 px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-black/55 md:grid">
         <span>Session</span><span>Traces</span><span>Spans</span><span>Last seen</span>
       </div>
       {sessions.map((session) => (
         <Link key={session._id} href={`/dashboard/${projectId}/sessions/${encodeURIComponent(session.sessionId)}`} className="group grid gap-3 border-b border-border px-4 py-4 transition-colors last:border-0 hover:bg-muted/20 focus-visible:outline focus-visible:outline-1 focus-visible:outline-white md:grid-cols-[minmax(0,1fr)_100px_100px_120px] md:items-center md:gap-4">
           <div className="min-w-0">
-            <div className="truncate font-mono text-sm text-white group-hover:underline">{session.sessionId}</div>
-            <div className="mt-1 flex flex-wrap gap-2 font-mono text-[10px] text-zinc-500">
+            <div className="truncate font-mono text-sm text-black group-hover:underline">{session.sessionId}</div>
+            <div className="mt-1 flex flex-wrap gap-2 font-mono text-[10px] text-black/55">
               {session.environment && <span>{session.environment}</span>}
               {session.endUserId && <span>user:{session.endUserId}</span>}
               <span className="dashboard-number">{formatCurrency(session.totalCostUsd)}</span>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3 md:contents">
-            <span className="font-mono text-sm text-zinc-300"><span className="mr-2 text-[9px] uppercase tracking-widest text-zinc-600 md:hidden">Traces</span>{session.traceCount}</span>
-            <span className="font-mono text-sm text-zinc-300"><span className="mr-2 text-[9px] uppercase tracking-widest text-zinc-600 md:hidden">Spans</span>{session.spanCount}</span>
-            <span className="font-mono text-xs text-zinc-500"><span className="mr-2 text-[9px] uppercase tracking-widest text-zinc-600 md:hidden">Seen</span>{formatRelativeTime(session.lastSeenAt)}</span>
+            <span className="font-mono text-sm text-black/70"><span className="mr-2 text-[9px] uppercase tracking-widest text-black/55 md:hidden">Traces</span>{session.traceCount}</span>
+            <span className="font-mono text-sm text-black/70"><span className="mr-2 text-[9px] uppercase tracking-widest text-black/55 md:hidden">Spans</span>{session.spanCount}</span>
+            <span className="font-mono text-xs text-black/55"><span className="mr-2 text-[9px] uppercase tracking-widest text-black/55 md:hidden">Seen</span>{formatRelativeTime(session.lastSeenAt)}</span>
           </div>
         </Link>
       ))}

@@ -22,40 +22,40 @@ export default async function SettingsPage({
 
       <div className="px-6 pb-20">
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="h-12 w-full justify-start gap-8 rounded-none border-b border-[#2A2A2A] bg-transparent p-0">
+          <TabsList className="h-12 w-full justify-start gap-8 rounded-none border-b border-black/15 bg-transparent p-0">
             <TabsTrigger
               value="general"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-white data-[state=active]:bg-transparent data-[state=active]:text-white"
+              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
             >
               General
             </TabsTrigger>
             <TabsTrigger
               value="members"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-white data-[state=active]:bg-transparent data-[state=active]:text-white"
+              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
             >
               Members
             </TabsTrigger>
             <TabsTrigger
               value="api-keys"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-white data-[state=active]:bg-transparent data-[state=active]:text-white"
+              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
             >
               API Keys
             </TabsTrigger>
             <TabsTrigger
               value="management"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-white data-[state=active]:bg-transparent data-[state=active]:text-white"
+              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
             >
               Management
             </TabsTrigger>
             <TabsTrigger
               value="orchestration"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-white data-[state=active]:bg-transparent data-[state=active]:text-white"
+              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
             >
               Orchestration
             </TabsTrigger>
             <TabsTrigger
               value="notifications"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest opacity-50 data-[state=active]:border-white data-[state=active]:bg-transparent data-[state=active]:text-white"
+              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest opacity-50 data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
               disabled
             >
               Notifications

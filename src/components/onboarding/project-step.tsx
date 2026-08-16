@@ -73,7 +73,7 @@ export function ProjectStep() {
 
   if (isSessionPending) {
     return (
-      <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
+      <div className="border border-black/15 bg-[#f3f2ed] px-4 py-3 font-mono text-[13px] text-black/55">
         Loading authentication...
       </div>
     );
@@ -81,7 +81,7 @@ export function ProjectStep() {
 
   if (!session) {
     return (
-      <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
+      <div className="border border-black/15 bg-[#f3f2ed] px-4 py-3 font-mono text-[13px] text-black/55">
         Sign in to create a project.
       </div>
     );
@@ -89,7 +89,7 @@ export function ProjectStep() {
 
   if (isConvexLoading || !isAuthenticated) {
     return (
-      <div className="border border-[#2A2A2A] bg-[#0A0A0A] px-4 py-3 font-mono text-[13px] text-[#666666]">
+      <div className="border border-black/15 bg-[#f3f2ed] px-4 py-3 font-mono text-[13px] text-black/55">
         Preparing project creation...
         <span className="ml-2 opacity-50">
           (Auth: {isAuthenticated ? "Connected" : "Waiting"} | Sync: {isConvexLoading ? "Loading" : "Ready"})
@@ -106,7 +106,7 @@ export function ProjectStep() {
       />
       <label
         htmlFor="project-name"
-        className="mb-2 block text-[11px] uppercase tracking-wide text-[#999999]"
+        className="mb-2 block text-[11px] uppercase tracking-wide text-black/60"
       >
         Project name
       </label>
@@ -115,7 +115,7 @@ export function ProjectStep() {
         value={name}
         onChange={(event) => setName(event.target.value)}
         placeholder="research-agent-prod"
-        className="h-11 w-full border border-[#2A2A2A] bg-[#1C1C1C] px-3 font-mono text-sm text-white outline-none transition-colors placeholder:text-[#666666] focus:border-[#999999]"
+        className="h-11 w-full border border-black/15 bg-[#e4e1d8] px-3 font-mono text-sm text-black outline-none transition-colors placeholder:text-black/55 focus:border-[#999999]"
       />
       {error ? <p className="mt-3 text-sm text-[#EF4444]">{error}</p> : null}
 
@@ -131,7 +131,7 @@ export function ProjectStep() {
         <button
           type="button"
           onClick={() => router.push("/dashboard")}
-          className="h-10 font-mono text-[11px] text-[#999999] transition-colors hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#666666]"
+          className="h-10 font-mono text-[11px] text-black/60 transition-colors hover:text-black focus-visible:outline focus-visible:outline-1 focus-visible:outline-black/55"
         >
           Set up later
         </button>

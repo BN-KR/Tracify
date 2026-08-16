@@ -42,7 +42,7 @@ export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactN
         </aside>
         <section className="flex items-center justify-center px-5 py-10 sm:px-8 md:px-12 md:py-16">
           <div className="w-full max-w-[560px] border border-black bg-white">
-            <div className="flex items-center justify-between border-b border-black px-5 py-4 font-mono text-[9px] uppercase tracking-[0.14em] text-black/45 md:px-7"><span>{modeCopy.eyebrow}</span><span>Secure form / 01</span></div>
+            <div className="flex items-center justify-between border-b border-black px-5 py-4 font-mono text-[9px] uppercase tracking-[0.14em] text-black/55 md:px-7"><span>{modeCopy.eyebrow}</span><span>Secure form / 01</span></div>
             <div className="p-5 md:p-8">{children}</div>
           </div>
         </section>

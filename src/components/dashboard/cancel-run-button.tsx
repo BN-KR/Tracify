@@ -67,7 +67,7 @@ export function CancelRunButton({
       className={cn(
         "uppercase",
         compact && "opacity-0 group-hover:opacity-100",
-        confirming && "bg-[#EF4444] text-black hover:bg-[#EF4444]",
+        confirming && "bg-[#EF4444] text-white hover:bg-[#EF4444]",
       )}
     >
       {compact ? (

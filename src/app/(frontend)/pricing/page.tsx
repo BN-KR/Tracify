@@ -99,18 +99,18 @@ export default function PricingPage() {
             <div className="flex flex-1 flex-col p-6 md:p-8">
               <div className="flex items-end justify-between gap-4">
                 <div>
-                  <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-white/45">{recommended.signal}</p>
+                  <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-white/62">{recommended.signal}</p>
                   <h2 className="mt-3 font-pixel text-7xl leading-none tracking-[-0.08em]">{recommended.name}</h2>
                 </div>
                 <div className="text-right">
                   <span className="font-pixel text-5xl tracking-[-0.07em]">${price % 1 ? price.toFixed(2) : price}</span>
-                  <span className="block font-mono text-[8px] uppercase tracking-[0.12em] text-white/45">per month</span>
+                  <span className="block font-mono text-[8px] uppercase tracking-[0.12em] text-white/62">per month</span>
                 </div>
               </div>
 
               <div className="mt-8 flex border border-white/30 p-1">
-                <button type="button" onClick={() => setAnnual(false)} aria-pressed={!annual} className={`min-h-11 flex-1 font-mono text-[9px] uppercase tracking-[0.12em] ${!annual ? "bg-white text-black" : "text-white/55"}`}>Monthly</button>
-                <button type="button" onClick={() => setAnnual(true)} aria-pressed={annual} className={`min-h-11 flex-1 font-mono text-[9px] uppercase tracking-[0.12em] ${annual ? "bg-[#f4d44d] text-black" : "text-white/55"}`}>Annual −20%</button>
+                <button type="button" onClick={() => setAnnual(false)} aria-pressed={!annual} className={`min-h-11 flex-1 font-mono text-[9px] uppercase tracking-[0.12em] ${!annual ? "bg-white text-black" : "text-white/62"}`}>Monthly</button>
+                <button type="button" onClick={() => setAnnual(true)} aria-pressed={annual} className={`min-h-11 flex-1 font-mono text-[9px] uppercase tracking-[0.12em] ${annual ? "bg-[#f4d44d] text-black" : "text-white/62"}`}>Annual −20%</button>
               </div>
 
               <dl className="mt-8 divide-y divide-white/20 border-y border-white/20 font-mono text-[10px] uppercase tracking-[0.1em]">
@@ -161,9 +161,9 @@ export default function PricingPage() {
 }
 
 function DecisionAxis({ label, suffix, options, selected, onChange }: { label: string; suffix: string; options: readonly string[]; selected: number; onChange: (index: number) => void }) {
-  return <div><div className="flex items-end justify-between gap-4"><div><p className="font-mono text-[9px] uppercase tracking-[0.14em]">{label}</p><p className="mt-1 text-sm text-black/50">{suffix}</p></div><div className="flex items-center border border-black"><button type="button" onClick={() => onChange(Math.max(0, selected - 1))} disabled={selected === 0} aria-label={`Decrease ${label}`} className="flex size-10 items-center justify-center border-r border-black disabled:opacity-25"><Minus className="size-3.5" /></button><span className="min-w-20 px-3 text-center font-mono text-xs">{options[selected]}</span><button type="button" onClick={() => onChange(Math.min(options.length - 1, selected + 1))} disabled={selected === options.length - 1} aria-label={`Increase ${label}`} className="flex size-10 items-center justify-center border-l border-black disabled:opacity-25"><Plus className="size-3.5" /></button></div></div><div className="mt-4 grid" style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>{options.map((option, index) => <button type="button" key={option} onClick={() => onChange(index)} aria-pressed={selected === index} className={`min-h-12 border border-r-0 border-black px-2 font-mono text-[8px] uppercase tracking-[0.08em] last:border-r ${selected === index ? "bg-black text-white" : "bg-white/25 hover:bg-white/65"}`}>{option}</button>)}</div></div>;
+  return <div><div className="flex items-end justify-between gap-4"><div><p className="font-mono text-[9px] uppercase tracking-[0.14em]">{label}</p><p className="mt-1 text-sm text-black/55">{suffix}</p></div><div className="flex items-center border border-black"><button type="button" onClick={() => onChange(Math.max(0, selected - 1))} disabled={selected === 0} aria-label={`Decrease ${label}`} className="flex size-10 items-center justify-center border-r border-black disabled:opacity-25"><Minus className="size-3.5" /></button><span className="min-w-20 px-3 text-center font-mono text-xs">{options[selected]}</span><button type="button" onClick={() => onChange(Math.min(options.length - 1, selected + 1))} disabled={selected === options.length - 1} aria-label={`Increase ${label}`} className="flex size-10 items-center justify-center border-l border-black disabled:opacity-25"><Plus className="size-3.5" /></button></div></div><div className="mt-4 grid" style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>{options.map((option, index) => <button type="button" key={option} onClick={() => onChange(index)} aria-pressed={selected === index} className={`min-h-12 border border-r-0 border-black px-2 font-mono text-[8px] uppercase tracking-[0.08em] last:border-r ${selected === index ? "bg-black text-white" : "bg-white/25 hover:bg-white/65"}`}>{option}</button>)}</div></div>;
 }
 
 function PlanFact({ label, value }: { label: string; value: string }) {
-  return <div className="flex items-center justify-between gap-4 py-4"><dt className="text-white/40">{label}</dt><dd>{value}</dd></div>;
+  return <div className="flex items-center justify-between gap-4 py-4"><dt className="text-white/62">{label}</dt><dd>{value}</dd></div>;
 }

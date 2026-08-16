@@ -95,7 +95,7 @@ export function OnboardingEscapeLink({
       <button
         type="button"
         onClick={onNavigate}
-        className="absolute left-4 top-4 font-mono text-[13px] text-[#666666] outline-none transition-colors hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#666666]"
+        className="absolute left-4 top-4 font-mono text-[13px] text-black/55 outline-none transition-colors hover:text-black focus-visible:outline focus-visible:outline-1 focus-visible:outline-black/55"
       >
         {label}
       </button>
@@ -107,14 +107,14 @@ export function OnboardingEscapeLink({
           aria-labelledby="api-key-leave-title"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
         >
-          <div className="w-full max-w-md border border-[#2A2A2A] bg-[#111111] p-5 text-[#CCCCCC]">
+          <div className="w-full max-w-md border border-black/15 bg-white p-5 text-black/70">
             <h2
               id="api-key-leave-title"
-              className="font-mono text-lg text-white"
+              className="font-mono text-lg text-black"
             >
               API key not copied.
             </h2>
-            <p className="mt-3 font-sans text-sm leading-6 text-[#999999]">
+            <p className="mt-3 font-sans text-sm leading-6 text-black/60">
               This key is shown once. If you leave now, you will need to rotate
               the key later.
             </p>
@@ -122,14 +122,14 @@ export function OnboardingEscapeLink({
               <button
                 type="button"
                 onClick={() => setIsConfirmingLeave(false)}
-                className="h-9 border border-[#2A2A2A] bg-[#0A0A0A] px-4 font-mono text-[13px] text-[#CCCCCC] transition-colors hover:bg-[#161616] hover:text-white"
+                className="h-9 border border-black/15 bg-[#f3f2ed] px-4 font-mono text-[13px] text-black/70 transition-colors hover:bg-[#f3f2ed] hover:text-black"
               >
                 Stay
               </button>
               <button
                 type="button"
                 onClick={leaveOnboarding}
-                className="h-9 border border-[#2A2A2A] bg-[#111111] px-4 font-mono text-[13px] text-[#EF4444] transition-colors hover:bg-[#161616] hover:text-white"
+                className="h-9 border border-black/15 bg-white px-4 font-mono text-[13px] text-[#EF4444] transition-colors hover:bg-[#f3f2ed] hover:text-black"
               >
                 Leave anyway
               </button>

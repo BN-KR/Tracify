@@ -63,27 +63,27 @@ export function DashboardCommandMenu({ projectId }: CommandMenuProps) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open command menu"
-        className="hidden h-8 items-center gap-2 border border-[#2A2A2A] bg-[#111111] px-3 font-mono text-[10px] uppercase tracking-widest text-[#777777] transition-colors hover:border-white hover:text-white md:flex"
+        className="hidden h-8 items-center gap-2 border border-black/15 bg-white px-3 font-mono text-[10px] uppercase tracking-widest text-black/55 transition-colors hover:border-black hover:text-black md:flex"
       >
         <Command className="size-3" aria-hidden="true" />
         <span>Command</span>
-        <kbd className="border border-[#333333] px-1.5 py-0.5 text-[9px] text-[#666666]">⌘K</kbd>
+        <kbd className="border border-black/25 px-1.5 py-0.5 text-[9px] text-black/55">⌘K</kbd>
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xl gap-0 overflow-hidden border-[#3A3A3A] bg-[#111111] p-0 shadow-2xl" showCloseButton={false}>
+        <DialogContent className="max-w-xl gap-0 overflow-hidden border-black/25 bg-white p-0 shadow-2xl" showCloseButton={false}>
           <DialogTitle className="sr-only">Dashboard command menu</DialogTitle>
           <DialogDescription className="sr-only">Navigate to a dashboard surface.</DialogDescription>
-          <div className="flex items-center gap-3 border-b border-[#2A2A2A] px-4">
-            <Search className="size-4 text-[#666666]" aria-hidden="true" />
+          <div className="flex items-center gap-3 border-b border-black/15 px-4">
+            <Search className="size-4 text-black/55" aria-hidden="true" />
             <input
               autoFocus
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search dashboard…"
               aria-label="Search dashboard destinations"
-              className="h-14 min-w-0 flex-1 bg-transparent font-mono text-sm text-white outline-none placeholder:text-[#555555]"
+              className="h-14 min-w-0 flex-1 bg-transparent font-mono text-sm text-black outline-none placeholder:text-black/55"
             />
-            <kbd className="border border-[#333333] px-1.5 py-0.5 font-mono text-[9px] text-[#666666]">ESC</kbd>
+            <kbd className="border border-black/25 px-1.5 py-0.5 font-mono text-[9px] text-black/55">ESC</kbd>
           </div>
           <div className="max-h-[420px] overflow-y-auto p-2">
             {items.length ? items.map(([label, href]) => (
@@ -91,16 +91,16 @@ export function DashboardCommandMenu({ projectId }: CommandMenuProps) {
                 key={href}
                 href={href}
                 onClick={close}
-                className="flex items-center justify-between border border-transparent px-3 py-3 font-mono text-xs text-[#CCCCCC] transition-colors hover:border-[#3A3A3A] hover:bg-[#181818] hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-white"
+                className="flex items-center justify-between border border-transparent px-3 py-3 font-mono text-xs text-black/70 transition-colors hover:border-black/25 hover:bg-[#f3f2ed] hover:text-black focus-visible:outline focus-visible:outline-1 focus-visible:outline-white"
               >
                 <span>{label}</span>
-                <ArrowUpRight className="size-3 text-[#666666]" aria-hidden="true" />
+                <ArrowUpRight className="size-3 text-black/55" aria-hidden="true" />
               </Link>
             )) : (
-              <div className="p-8 text-center font-mono text-[10px] uppercase tracking-widest text-[#666666]">No destinations found</div>
+              <div className="p-8 text-center font-mono text-[10px] uppercase tracking-widest text-black/55">No destinations found</div>
             )}
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-[#2A2A2A] px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-[#555555]"><span>Navigate workspace surfaces</span><span>⌘⇧O active project</span><span>Ctrl+\ sidebar</span></div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-black/15 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-black/55"><span>Navigate workspace surfaces</span><span>⌘⇧O active project</span><span>Ctrl+\ sidebar</span></div>
         </DialogContent>
       </Dialog>
     </>

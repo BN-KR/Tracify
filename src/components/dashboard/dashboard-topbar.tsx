@@ -112,14 +112,14 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
       : dashboardHref;
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#2A2A2A] bg-[#0A0A0A] px-4 font-mono lg:px-6">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-black/15 bg-[#f3f2ed] px-4 font-mono lg:px-6">
       <span className="sr-only">{title || "Dashboard"}{description ? `: ${description}` : ""}</span>
       <div className="flex min-w-0 items-center gap-4">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-[#666666]">
+        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-black/55">
           <div className="flex items-center gap-2 overflow-hidden">
             <Link
               href={dashboardHref}
-              className="shrink-0 text-white transition-colors hover:text-[#CCCCCC]"
+              className="shrink-0 text-black transition-colors hover:text-black/70"
             >
               Dashboard
             </Link>
@@ -129,26 +129,26 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                 {segments.length > 3 ? (
                   <Link
                     href={sectionHref}
-                    className="truncate text-white transition-colors hover:text-[#CCCCCC]"
+                    className="truncate text-black transition-colors hover:text-black/70"
                   >
                     {segments[2]}
                   </Link>
                 ) : (
-                  <span className="truncate text-white">{segments[2]}</span>
+                  <span className="truncate text-black">{segments[2]}</span>
                 )}
               </>
             )}
             {segments.length > 3 && (
               <>
                 <ChevronRight className="size-3 shrink-0" />
-                <span className="truncate text-[#999999]">{segments[3]}</span>
+                <span className="truncate text-black/60">{segments[3]}</span>
               </>
             )}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 text-[12px] text-[#999999]">
+      <div className="flex items-center gap-2 text-[12px] text-black/60">
         <DashboardCommandMenu projectId={projectId} />
         <OrganizationSwitcher />
         {!hasDismissedOnboarding() ? (
@@ -163,17 +163,17 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
             Setup
           </button>
         ) : null}
-        <div className="hidden max-w-[360px] items-center gap-2 border border-[#2A2A2A] bg-[#111111] px-2 sm:flex">
-          <span className="size-1.5 bg-emerald-300" aria-hidden="true" />
-          <span className="truncate text-[10px] uppercase tracking-widest text-[#CCCCCC]">
+        <div className="hidden max-w-[360px] items-center gap-2 border border-black/15 bg-white px-2 sm:flex">
+          <span className="size-1.5 bg-emerald-600" aria-hidden="true" />
+          <span className="truncate text-[10px] uppercase tracking-widest text-black/70">
             {organization?.name || "Personal workspace"}
           </span>
-          <span className="text-[#555555]">/</span>
-          <span className="truncate text-[10px] text-[#777777]">{project?.name || "Loading project…"}</span>
-          <span className="text-[#555555]">/</span>
-          <span className="truncate text-[10px] uppercase text-[#777777]" title="Environment context">{environmentContext}</span>
-          <span className="text-[#555555]">/</span>
-          <span className="shrink-0 text-[10px] uppercase text-[#777777]" title="Dashboard time range">{rangeContext}</span>
+          <span className="text-black/55">/</span>
+          <span className="truncate text-[10px] text-black/55">{project?.name || "Loading project…"}</span>
+          <span className="text-black/55">/</span>
+          <span className="truncate text-[10px] uppercase text-black/55" title="Environment context">{environmentContext}</span>
+          <span className="text-black/55">/</span>
+          <span className="shrink-0 text-[10px] uppercase text-black/55" title="Dashboard time range">{rangeContext}</span>
         </div>
 
         <DropdownMenu>
@@ -182,7 +182,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
               type="button"
               aria-label="Open account menu"
               title="Account menu"
-              className="flex h-8 w-8 items-center justify-center border border-[#2A2A2A] bg-[#111111] text-[#CCCCCC] transition-colors hover:border-white hover:text-white outline-none overflow-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
+              className="flex h-8 w-8 items-center justify-center border border-black/15 bg-white text-black/70 transition-colors hover:border-black hover:text-black outline-none overflow-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f2ed]"
             >
               {user?.image ? (
                 <Image
@@ -200,7 +200,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64" align="end" sideOffset={8}>
             <DropdownMenuLabel className="flex items-start gap-3 p-3">
-              <div className="size-8 shrink-0 bg-zinc-900 border border-zinc-800 flex items-center justify-center font-mono text-xs text-white uppercase overflow-hidden">
+              <div className="size-8 shrink-0 bg-[#f3f2ed] border border-black/15 flex items-center justify-center font-mono text-xs text-black uppercase overflow-hidden">
                 {user?.image ? (
                   <Image src={user.image} alt={user.name || "User"} width={32} height={32} unoptimized className="size-full object-cover grayscale" />
                 ) : (
@@ -208,10 +208,10 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                 )}
               </div>
               <div className="flex min-w-0 flex-col">
-                <span className="truncate text-[11px] font-mono text-white">
+                <span className="truncate text-[11px] font-mono text-black">
                   {user?.name || "User"}
                 </span>
-                <span className="truncate text-[10px] font-mono text-[#666666]">
+                <span className="truncate text-[10px] font-mono text-black/55">
                   {user?.email}
                 </span>
               </div>
@@ -266,27 +266,27 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                 aria-label={unreadAlertCount > 0 ? `Open alerts, ${unreadAlertCount} unread` : "Open alerts"}
                 title="Alerts"
                 className={cn(
-                  "relative flex h-8 items-center border px-2 outline-none transition-colors hover:bg-[#161616] hover:text-white focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]",
+                  "relative flex h-8 items-center border px-2 outline-none transition-colors hover:bg-[#f3f2ed] hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f2ed]",
                   unreadAlertCount > 0
-                    ? "border-white bg-[#181818] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.18)]"
-                    : "border-[#2A2A2A] bg-[#111111] text-[#999999]",
+                    ? "border-black bg-[#f3f2ed] text-black shadow-[0_0_0_1px_rgba(0,0,0,0.18)]"
+                    : "border-black/15 bg-white text-black/60",
                 )}
               >
                 <Bell className="size-4" />
                 {unreadAlertCount > 0 ? (
-                  <span className="absolute -right-1.5 -top-1.5 flex min-w-4 items-center justify-center bg-white px-1 text-[9px] font-bold leading-4 text-black shadow-[0_0_0_2px_#0A0A0A]">
+                  <span className="absolute -right-1.5 -top-1.5 flex min-w-4 items-center justify-center bg-black px-1 text-[9px] font-bold leading-4 text-white shadow-[0_0_0_2px_#f3f2ed]">
                     {unreadAlertCount > 9 ? "9+" : unreadAlertCount}
                   </span>
                 ) : null}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[360px] p-0" align="end" sideOffset={8}>
-              <div className="flex items-start justify-between gap-3 border-b border-[#2A2A2A] p-3">
+              <div className="flex items-start justify-between gap-3 border-b border-black/15 p-3">
                 <div>
-                  <div className="font-mono text-[11px] uppercase tracking-widest text-white">
+                  <div className="font-mono text-[11px] uppercase tracking-widest text-black">
                     Alerts
                   </div>
-                  <div className="mt-1 font-mono text-[10px] text-[#666666]">
+                  <div className="mt-1 font-mono text-[10px] text-black/55">
                     Cost, failure, and duration triggers
                   </div>
                 </div>
@@ -294,7 +294,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                   type="button"
                   onClick={handleReadAllAlerts}
                   disabled={unreadAlertCount === 0 || isMarkingAlertsRead}
-                  className="shrink-0 border border-[#333333] px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-[#CCCCCC] transition-colors hover:border-white hover:text-white disabled:cursor-not-allowed disabled:border-[#222222] disabled:text-[#555555]"
+                  className="shrink-0 border border-black/25 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-black/70 transition-colors hover:border-black hover:text-black disabled:cursor-not-allowed disabled:border-black/15 disabled:text-black/55"
                 >
                   Read all
                 </button>
@@ -305,12 +305,12 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                     {Array.from({ length: 3 }).map((_, index) => (
                       <div
                         key={index}
-                        className="h-16 border border-[#222222] bg-[#0A0A0A]"
+                        className="h-16 border border-black/15 bg-[#f3f2ed]"
                       />
                     ))}
                   </div>
                 ) : alerts.length === 0 ? (
-                  <div className="border border-dashed border-[#2A2A2A] p-6 text-center font-mono text-[11px] uppercase tracking-widest text-[#666666]">
+                  <div className="border border-dashed border-black/15 p-6 text-center font-mono text-[11px] uppercase tracking-widest text-black/55">
                     No alerts triggered
                   </div>
                 ) : (
@@ -328,19 +328,19 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                             }
                           }}
                           className={cn(
-                            "relative block border p-3 transition-colors hover:border-[#555555]",
+                            "relative block border p-3 transition-colors hover:border-black/30",
                             isUnread
-                              ? "border-[#555555] bg-[#171717] hover:bg-[#1C1C1C]"
-                              : "border-[#222222] bg-[#0A0A0A] hover:bg-[#111111]",
+                              ? "border-black/30 bg-[#f3f2ed] hover:bg-[#e4e1d8]"
+                              : "border-black/15 bg-[#f3f2ed] hover:bg-white",
                           )}
                         >
                           {isUnread ? (
-                            <span className="absolute left-0 top-0 h-full w-1 bg-white" />
+                            <span className="absolute left-0 top-0 h-full w-1 bg-black" />
                           ) : null}
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex min-w-0 items-center gap-2">
                               {isUnread ? (
-                                <span className="shrink-0 bg-white px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-black">
+                                <span className="shrink-0 bg-black px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-white">
                                   New
                                 </span>
                               ) : null}
@@ -348,21 +348,21 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                                 className={cn(
                                   "truncate font-mono text-[10px] uppercase tracking-widest",
                                   alert.type === "cost_exceeded"
-                                    ? "text-[#F59E0B]"
-                                    : "text-red-400",
+                                    ? "text-[#a67c00]"
+                                    : "text-red-600",
                                 )}
                               >
                                 {alert.type.replace("_", " ")}
                               </span>
                             </div>
-                            <span className="shrink-0 font-mono text-[9px] text-[#666666]">
+                            <span className="shrink-0 font-mono text-[9px] text-black/55">
                               {formatRelativeTime(alert.triggeredAt)}
                             </span>
                           </div>
                           <p
                             className={cn(
                               "mt-2 line-clamp-2 font-sans text-xs leading-relaxed",
-                              isUnread ? "text-white" : "text-[#CCCCCC]",
+                              isUnread ? "text-black" : "text-black/70",
                             )}
                           >
                             {alert.message}
@@ -378,7 +378,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
         )}
         <Link
           href="/docs"
-          className="flex h-8 items-center gap-2 border border-[#2A2A2A] bg-[#111111] px-2 text-[#999999] transition-colors hover:bg-[#161616] hover:text-white"
+          className="flex h-8 items-center gap-2 border border-black/15 bg-white px-2 text-black/60 transition-colors hover:bg-[#f3f2ed] hover:text-black"
         >
           <BookOpen className="size-4" />
           <span className="hidden sm:inline">Docs</span>
