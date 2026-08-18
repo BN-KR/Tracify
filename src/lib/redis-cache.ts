@@ -26,7 +26,14 @@ function getRedisClient() {
   if (!url) return null;
 
   if (!globalThis.__fivetooneRedisClient) {
-    const client = createClient({ url });
+    const client = createClient({
+      url,
+      socket: {
+        // Fail fast instead of burning the whole serverless function budget on a
+        // connect that will never complete.
+        connectTimeout: 5_000,
+      },
+    });
     client.on("error", (error) => {
       console.error("Redis cache error:", error);
     });
@@ -41,7 +48,15 @@ async function connectRedis() {
   if (!client) return null;
 
   if (!client.isOpen) {
-    globalThis.__fivetooneRedisConnectPromise ??= client.connect();
+    // Share only an in-flight connect. Caching the settled promise would (a) pin a
+    // rejection on globalThis so every later call rethrows it even after Redis
+    // recovers, and (b) resolve instantly after an idle disconnect without actually
+    // reconnecting, leaving commands to run against a closed client.
+    globalThis.__fivetooneRedisConnectPromise ??= client
+      .connect()
+      .finally(() => {
+        globalThis.__fivetooneRedisConnectPromise = undefined;
+      });
     await globalThis.__fivetooneRedisConnectPromise;
   }
 

@@ -1,9 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { parseTracifyRegion, TRACIFY_REGION_COOKIE, TRACIFY_REGIONS } from "@/lib/regions";
+import { isRegionAvailable, parseTracifyRegion, TRACIFY_REGION_COOKIE, TRACIFY_REGIONS } from "@/lib/regions";
 
 export function GET(request: NextRequest) {
   const regionId = parseTracifyRegion(request.nextUrl.searchParams.get("region"));
-  if (!regionId) {
+  // Reject dormant regions here too, not just in the UI — otherwise a hand-typed
+  // ?region=us would still set the cookie and redirect into a region that must not
+  // take production traffic.
+  if (!regionId || !isRegionAvailable(regionId)) {
     return NextResponse.redirect(new URL("/cloud", request.url));
   }
 

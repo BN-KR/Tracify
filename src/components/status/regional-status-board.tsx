@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Activity, CircleAlert, LoaderCircle } from "lucide-react";
-import { TRACIFY_REGIONS, type TracifyRegionId } from "@/lib/regions";
+import { getAvailableRegions, type TracifyRegionId } from "@/lib/regions";
 
 type RegionState = "checking" | "operational" | "unavailable";
 
@@ -10,7 +10,7 @@ export function RegionalStatusBoard() {
   const [states, setStates] = useState<Record<TracifyRegionId, RegionState>>({ eu: "checking", us: "checking" });
 
   useEffect(() => {
-    const controllers = Object.values(TRACIFY_REGIONS).map((region) => {
+    const controllers = getAvailableRegions().map((region) => {
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 5000);
       fetch(`${region.origin}/api/health/region`, { cache: "no-store", signal: controller.signal })
@@ -31,7 +31,7 @@ export function RegionalStatusBoard() {
       <div className="mx-auto max-w-[1440px]">
         <div className="border-b border-black px-5 py-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/50">Regional cloud probes</div>
         <div className="grid md:grid-cols-2">
-          {Object.values(TRACIFY_REGIONS).map((region) => {
+          {getAvailableRegions().map((region) => {
             const state = states[region.id];
             const Icon = state === "checking" ? LoaderCircle : state === "operational" ? Activity : CircleAlert;
             return (

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Database, Globe2, ShieldCheck } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
-import { TRACIFY_REGIONS } from "@/lib/regions";
+import { getAvailableRegions } from "@/lib/regions";
 
 export const metadata: Metadata = {
   title: "Select your Tracify Cloud region",
@@ -19,6 +19,7 @@ export default async function CloudRegionPage({
   const next = requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
     ? requestedNext
     : "/sign-in";
+  const regions = getAvailableRegions();
 
   return (
     <main className="min-h-screen bg-[#eceae3] text-black selection:bg-[#f4d44d]">
@@ -26,7 +27,7 @@ export default async function CloudRegionPage({
         <Link href="https://www.tracify.tech" aria-label="Tracify home">
           <BrandLogo />
         </Link>
-        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/45">Cloud directory / 02 regions</span>
+        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/45">Cloud directory / {String(regions.length).padStart(2, "0")} {regions.length === 1 ? "region" : "regions"}</span>
       </header>
 
       <div className="mx-auto grid min-h-[calc(100vh-54px)] max-w-[1440px] lg:grid-cols-[minmax(320px,0.72fr)_minmax(0,1.28fr)]">
@@ -49,7 +50,7 @@ export default async function CloudRegionPage({
               <Fact icon={Globe2} label="Closer access" />
             </div>
             <div className="border border-black bg-white">
-              {Object.values(TRACIFY_REGIONS).map((region) => (
+              {regions.map((region) => (
                 <Link
                   key={region.id}
                   href={`/api/region/select?region=${region.id}&next=${encodeURIComponent(next)}`}

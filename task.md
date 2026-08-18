@@ -4,33 +4,303 @@ These require local credentials, live provider consoles, or a working internet
 connection that this environment doesn't reliably have right now. Read this
 section first whenever asked "what do I need to do."
 
-## EU/US regional cloud — still open (from 2026-08-15 work)
-- [ ] Add the two DNS A records at Domeneshop and verify Vercel TLS issuance.
-- [ ] Create and deploy independent Tinybird workspaces for EU and US; add unique hosts/tokens to Vercel.
-- [ ] Create independent regional Redis databases and Inngest environments; add unique credentials to Vercel.
-- [ ] Create regional Stripe webhooks and register Google/GitHub callback URLs.
-- [ ] Reconnect Git and deploy the exact merged commit to both regional projects after all provider and DNS gates pass.
+## Regional cloud — EU-first launch (decision recorded 2026-08-16)
 
-## Resilience Testing dashboard feature — built, not yet committed
-Branch `codex/resilience-testing-dashboard` has schema + Convex functions + dashboard UI
-for a new "Resilience" tab (policy simulation against synthetic chaos failures). Lint and
-`tsc --noEmit` pass; production build hasn't completed cleanly here (unrelated Google Fonts
-network fetch failure in this sandbox, not a code issue).
-- [ ] Re-run `npm run build` on a machine with normal internet access to confirm it's clean.
-- [ ] Run `npx convex codegen` with a real `CONVEX_DEPLOYMENT` — I hand-patched
-      `convex/_generated/api.d.ts` to add the `resilience` module type entry since codegen
-      couldn't run here; replace that hand-edit with a real generated file.
+Free-plan provider environments do not necessarily guarantee physical EU/US data residency. Launch only EU for now and keep the US option hidden/disabled. Do not describe Tracify as multi-region until every US stateful provider has a verified US location.
+
+### ⚠ BLOCKER (found 2026-08-18): "europe-west2" is London, UK — not the EU
+
+Both stateful EU services are physically in the **United Kingdom**, which left the EU in 2020:
+
+- Tinybird `tracify_eu` → `api.europe-west2.gcp.tinybird.co` → GCP **europe-west2 = London, UK**.
+- Redis `database-MSZ2JEQR` → `start-crisp-coherent-91539.db.redis.io` → `35.246.69.33`, which
+  falls in `35.246.0.0/17`, published by Google in `https://www.gstatic.com/ipranges/cloud.json`
+  with `scope: europe-west2` — same London region.
+
+"It's only a cache" does not resolve this. Two different things share that Redis:
+- Rate-limit counters (`consumeRateLimit`/`peekRateLimit`) — just integers, genuinely low-risk.
+- The analytics/span cache — `src/app/(frontend)/api/projects/[projectId]/runs/[runId]/spans/route.ts`
+  stores full `SpanRow[]` under `analytics:spans:<projectId>:<runId>` with a **24-hour TTL**, and
+  `SpanRow` (`src/lib/tinybird.ts:413-437`) carries `input: string` and `output: string` — the raw
+  LLM prompts and completions from the customer's end users. That is the most sensitive data in
+  the product, sitting in a UK datacenter for up to a day.
+
+GDPR Art. 4(2) defines processing to include storage; there is no cache exemption, and a 24-hour
+TTL is not ephemeral. The UK holds a UK-GDPR regime and an EU adequacy decision, so transfers are lawful today — but
+adequacy is renewable and has been challenged, and "EU data residency" is a factual claim that
+London hosting does not satisfy. Many EU buyers (public sector, health, finance) exclude UK
+hosting outright. Shipping `eu.cloud.tracify.tech` on this infrastructure while calling it EU
+would repeat exactly the overclaim this EU-first decision was made to avoid.
+
+DECISION 2026-08-18: Option A. BN-KR is recreating the Tinybird workspace in `eu-west-1`
+(AWS Ireland — genuinely EU). Remaining work for that move:
+- [ ] Create the new `eu-west-1` Tinybird workspace.
+- [ ] Redeploy all four definitions from `tinybird/` into it — `spans.datasource`,
+      `evaluation_scores.datasource`, `endpoints/recent_runs_summary.pipe`,
+      `endpoints/spans_by_run.pipe`. The 2026-08-17 europe-west2 deployment does not carry over.
+      ⚠ SEQUENCING: as of 2026-08-18 Vercel's `TINYBIRD_HOST`/`TINYBIRD_TOKEN` already point at
+      the new workspace, but the schema has NOT been pushed there — so the EU deployment is
+      currently wired to an empty workspace. Ingestion (`/v0/events?name=spans`) and every
+      dashboard read (`recent_runs_summary`, `spans_by_run`) would fail until this push happens.
+      Push the schema BEFORE deploying or verifying anything else.
+- [x] FIXED 2026-08-18: `TINYBIRD_HOST` set to `https://api.eu-west-1.aws.tinybird.co`
+      (Production + Preview) via `npx vercel env add --force`. Host verified live before setting:
+      `GET /v0/sql` returns 403 (valid endpoint, no token supplied) and it resolves to
+      `52.211.129.79`, published by AWS as `eu-west-1` (Ireland) — genuinely EU. Note the write
+      flipped the variable from Non-sensitive to Sensitive, so its value is no longer visible in
+      `vercel env ls` for future audits.
+- [x] `INNGEST_EVENT_KEY` added by BN-KR 2026-08-18. All ten variables in the
+      `src/instrumentation.ts` required set are now present on `tracify-cloud-eu`.
+- [x] Tinybird MCP server wired for future agents 2026-08-18: `.mcp.json` registers an `http`
+      server at `https://mcp.tinybird.co?token=${TINYBIRD_MCP_TOKEN}`. The token is referenced by
+      env-var expansion, never written to the file — `.mcp.json` is NOT gitignored, so a literal
+      token there would be committed to the repo. Set `TINYBIRD_MCP_TOKEN` in the environment or
+      in the gitignored `.claude/settings.local.json`.
+- [ ] ROTATE the Tinybird MCP token — pasted unmasked into a chat transcript 2026-08-18. Its JWT
+      payload decodes to `host: aws-eu-west-1`, which independently corroborates that the new
+      Tinybird workspace is in AWS Ireland (EU).
+- [ ] ⚠ STILL SUSPECT — `TINYBIRD_TOKEN` has not been touched since the original swapped-value
+      entry and may contain the *host* string rather than the token. Re-add it with `--force` and
+      confirm. Symptom if wrong: every Tinybird call fails auth with 403.
+- [x] HISTORICAL — `TINYBIRD_HOST` originally held a TOKEN, not a URL. Audited via
+      `npx vercel env ls production --project tracify-cloud-eu` on 2026-08-18: the variable is
+      marked Non-sensitive so its value is visible, and it begins `eyJ2IjoidjIiLCJjIj…`, which
+      base64-decodes to `{"v":"v2","c"…` — a Tinybird JWT. The host and token values were
+      swapped when added. Every Tinybird call would throw on an invalid URL. Fix: set
+      `TINYBIRD_HOST` to the new eu-west-1 workspace host (`https://…`) and confirm
+      `TINYBIRD_TOKEN` holds the token.
+- [x] `REDIS_URL` added to `tracify-cloud-eu` (Production + Preview) 2026-08-18, confirmed by
+      `vercel env ls`. Value hidden, so the `rediss://` scheme could not be verified — if the
+      deployment can't reach Redis, check that first.
+- [ ] ⚠ STILL MISSING — `INNGEST_EVENT_KEY` is absent from `tracify-cloud-eu`. It is in the
+      `src/instrumentation.ts` required set, so the EU deployment still hard-throws at boot:
+      "Regional cloud deployment is missing required environment variables: INNGEST_EVENT_KEY".
+- [x] Generate a fresh `TINYBIRD_TOKEN` from the new workspace and update Vercel. Reported done
+      2026-08-18, same verification caveat.
+- [x] SECURITY FIX 2026-08-18: `.tinyb` — the Tinybird CLI credentials file — was **tracked in
+      git** with a live 205-char token committed (`git show HEAD:.tinyb` confirmed it). Untracked
+      via `git rm --cached` and added to `.gitignore`. This mattered urgently: the next `tb login`
+      would have written the new EU token into that same tracked file and committed it. The
+      exposed token is for the London workspace being deleted, which limits the damage.
+- [x] DONE 2026-08-18 — schema deployed to the new EU workspace. `tb login` (by BN-KR) then
+      `tb deploy` from the repo root (NOT `tinybird/` — `.tinyb` lives at the root, and running
+      from the subdirectory fails with "requires authentication"). Deployment #1 to workspace
+      `tracify_eu_west1` created all four objects, verified via the API:
+        datasources: `spans` (MergeTree), `evaluation_scores` (MergeTree)
+        pipes:       `recent_runs_summary` (endpoint), `spans_by_run` (endpoint)
+      Both endpoints smoke-tested: HTTP 200, 0 rows (expected — nothing ingested yet).
+      Note: `tb deploy` ends with a `'charmap' codec can't encode '✓'` error on Windows —
+      that is a console encoding failure printing a checkmark, NOT a deployment failure.
+- [x] HISTORICAL — the new eu-west-1 workspace is a **Tinybird Forward** workspace: schema changes
+      are only accepted through `tb deploy` (the deployments flow). Both `POST /v0/datasources`
+      and `POST /v0/pipes` return HTTP 403 "can only be done via deployments", so the REST API
+      cannot create them. Verified 2026-08-18 with a working token.
+      The MCP token (`https://mcp.tinybird.co?token=…`) authenticates for READS — `GET
+      /v0/datasources` returns 200 and confirms the workspace is empty (`{"datasources": []}`) —
+      but `tb deploy` rejects it with "This action requires authentication. Run 'tb login' first".
+      ONLY REMAINING STEP: BN-KR runs `tb login` (interactive browser), then `tb deploy` from
+      `C:\Tracify	inybird`. Nothing else is outstanding; all four datafiles are staged and valid.
+      `.tinyb` now points at `https://api.eu-west-1.aws.tinybird.co` so login targets the right host.
+- [x] The old TRAP note (local `.tinyb` pointed at London) is resolved — it now points at eu-west-1.
+- [ ] Superseded note: local `.tinyb` used to read `host: https://api.europe-west2.gcp.tinybird.co`,
+      `name: tracify_eu` — i.e. the CLI is still authenticated against the OLD London workspace.
+      Running `tb push`/`tb deploy` right now would deploy the four definitions to London, not to
+      the new eu-west-1 workspace. Re-auth (`tb auth`) before pushing anything.
+- [ ] Re-verify by IP once created, same method as below.
+- [ ] Delete the old europe-west2 workspace so nothing can silently write to London.
+- [x] Redis moved to a real EU region 2026-08-18. New database `tracify-eu-west1` at
+      `patient-microsteady-porter-27084.db.redis.io:19790` → `52.214.68.234`, which AWS publishes
+      in `https://ip-ranges.amazonaws.com/ip-ranges.json` as region `eu-west-1` (Ireland).
+      Independently verified — this one is genuinely EU.
+- [ ] ⚠ UNRESOLVED (2026-08-18): Upstash database `concrete-buffalo-140061.upstash.io` may be a
+      **Global** (multi-region replicated) database, which would break EU residency outright.
+      Evidence: the hostname CNAMEs to `p2-global.upstash.io` and `global-latency.upstash.io`.
+      All four IPs it returns here (63.182.22.87, 3.79.250.206, 35.158.17.96, 52.28.247.228)
+      are AWS `eu-central-1` (Frankfurt) — but Upstash Global databases use latency-based DNS,
+      so a lookup from Norway only ever reveals the *nearest* replica. A lookup from the US would
+      return US replicas. DNS from one location CANNOT prove single-region residency.
+      - [x] Checked 2026-08-18: it IS a Global-type database (it exposes "Manage Regions —
+            add/remove read regions"), but **Primary = Ireland `eu-west-1`**, which is EU. The
+            Frankfurt IPs seen via DNS are Upstash's latency-routing/proxy layer in
+            `eu-central-1` — also EU. So both the primary and the observed edge are in the EU.
+      - [ ] CONFIRM the read-region list is **empty**. Any read region outside the EU replicates
+            span `input`/`output` text out of the EU and breaks the residency claim.
+      - [ ] ONGOING GUARD: because this is a Global-type database, adding a non-EU read region is
+            a one-click, silent residency break with no code change and no deploy. Never add one;
+            re-check the read-region list as part of the pre-release sequence in
+            `docs/regional-cloud-runbook.md`.
+- [ ] `REDIS_URL` format: the Upstash console shows `redis-cli --tls -u redis://...`, where TLS
+      comes from the `--tls` flag. `node-redis` takes TLS from the URL scheme instead, so
+      `REDIS_URL` must start with **`rediss://`** (two s). Pasting the console's `redis://` value
+      verbatim silently disables TLS.
+- [ ] Redis hardening still open on the new database:
+      - [ ] TLS: NOT AVAILABLE on the Redis Cloud free 30MB Essentials tier — it is gated behind
+            a paid plan, so this cannot be toggled on. Decision 2026-08-18: move to Upstash Redis
+            instead, which includes TLS by default and has EU regions. Choose the **Redis**
+            product (not Ratelimit — `consumeRateLimit`'s Lua script runs fine on plain Redis,
+            and Upstash supports EVAL). Use the native `rediss://` connection string with the
+            existing `node-redis` client: zero code change, only the `REDIS_URL` value differs.
+            Do NOT use the `upstash-redis-start` skill — that provisions temporary 3-day
+            unauthenticated scratch databases explicitly not intended for production or PII.
+            Optional later: the `@upstash/redis` REST SDK removes connection limits entirely but
+            requires rewriting `src/lib/redis-cache.ts`; not needed now.
+      - [ ] ACL: still the all-privileges `default` user. Create a scoped user — the app only
+            needs GET, SET, INCRBY, EXPIRE, TTL, PING and EVAL on `analytics:*` plus the
+            rate-limit keys.
+      - [ ] Delete the old London database `database-MSZ2JEQR`, and treat its password as burned
+            (it was pasted in plaintext into a chat transcript on 2026-08-18).
+      - [ ] ROTATE the Upstash REST token for `concrete-buffalo-140061` — it was pasted
+            unmasked into a chat transcript on 2026-08-18 and must be considered compromised.
+            Upstash console → database → rotate/reset token.
+      - [ ] Also delete the short-lived Redis Cloud Ireland database `tracify-eu-west1`
+            (`patient-microsteady-porter-27084`), superseded by Upstash.
+
+- [ ] Option A (keeps the "EU" claim): recreate the Tinybird workspace **and** the Redis database
+      in a real EU region — `europe-west1` (Belgium), `europe-west3` (Frankfurt), `europe-west4`
+      (Netherlands), or `europe-north1` (Finland) — then re-verify by IP as above. Convex EU is
+      already `eu-west-1`, which is Ireland and genuinely EU.
+- [ ] Option B (keeps the current infrastructure): relabel the region as "UK/Europe" rather than
+      "EU" across the selector, docs, `/status`, `config/regional-cloud.json`, and marketing, and
+      state the actual hosting location plainly.
+- [ ] Re-check Inngest's processing region the same way; it has not been verified either.
+
+### EU launch — required
+- [x] Update PR #14 so the public selector and documentation expose EU only; retain the dormant
+      US architecture without offering it to customers. DONE 2026-08-18:
+      - `src/lib/regions.ts` — added an `available` flag to `TracifyRegion` (eu: true, us: false)
+        plus `getAvailableRegions()` / `isRegionAvailable()`. Public surfaces must iterate the
+        helper, never `TRACIFY_REGIONS` directly, so a dormant region can't be advertised by
+        accident.
+      - `src/app/(frontend)/cloud/page.tsx` — selector lists only available regions; the
+        hardcoded "02 regions" label is now derived from the count.
+      - `src/app/(frontend)/api/region/select/route.ts` — rejects dormant regions server-side, so
+        a hand-typed `?region=us` can no longer set the cookie and redirect into the US host.
+      - `src/components/status/regional-status-board.tsx` — only probes/lists available regions.
+      - `src/lib/regions.test.ts` — two new tests: EU-only is advertised, and the dormant US
+        region stays routable so US keys are still detected as wrong-region rather than silently
+        treated as EU.
+      - Verified: `tsc --noEmit` clean, `npm run test:regions` 6/6, `npm run verify:regions` OK.
+      - ⚠ DEPLOY TARGET: `/cloud` only renders when `NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND=marketing`
+        — `src/proxy.ts:22` redirects it to `www.tracify.tech` on a cloud deployment. So the
+        region selector lives on the **marketing** project (`tracify` / www.tracify.tech), NOT on
+        `tracify-cloud-eu`. This EU-only change must ship to the marketing project or the public
+        selector will keep offering the US region regardless of what the EU project runs.
+      - NOT visually verified: local `/cloud` 307-redirects to production because `.env.local`
+        sets `DEPLOYMENT_KIND=cloud`. Correctness rests on the unit tests, not a rendered page.
+- [!] ⚠ REGION CLAIM IS WRONG — see the "europe-west2 is not the EU" blocker below. Tinybird workspace `tracify_eu` (host `api.europe-west2.gcp.tinybird.co`, GCP europe-west2) was recorded as "confirmed EU-located" and deployed 2026-08-17, but europe-west2 is London, United Kingdom, which is not in the EU: `spans` and `evaluation_scores` datasources plus `recent_runs_summary`/`spans_by_run` endpoint pipes are live (deployment #4). Datasources are schema-only right now — no data has been ingested yet, since nothing in the app currently pushes events to this workspace. Auth for this project's `.tinyb` was broken (blank token) and had to be re-logged-in; CLI browser login kept timing out in this environment, so credentials were copied from a working session instead. Next: wire actual span/eval ingestion (Events API or existing logging hook) to `tracify_eu`.
+- [x] Redis confirmed EU (Upstash, Ireland primary — see below).
+- [ ] ⚠⚠ BLOCKER FOUND 2026-08-18 — **INNGEST RUNS IN THE UNITED STATES.** `inn.gs` (event
+      ingestion) and `api.inngest.com` both resolve exclusively to AWS `us-east-2` (Ohio):
+      `3.20.90.35`, `3.13.225.237`, `18.221.3.32`, `18.227.206.98` — all four confirmed against
+      Amazon's published ranges, with no latency-based routing aliases.
+      This is worse than the earlier Redis/Tinybird findings because Inngest is the PRIMARY
+      INGESTION PATH, not a cache. `src/app/(frontend)/api/ingest/route.ts:206` and
+      `src/app/(frontend)/api/otel/route.ts:401` both call `inngest.send()` with the full span
+      payload — `SpanIngestedEvent` (`src/lib/inngest.ts:6`) includes `input` and `output`, i.e.
+      raw LLM prompts and completions. So 100% of customer traces transit and are queued in Ohio,
+      and Inngest retains event payloads for replay/history. `eu.cloud.tracify.tech` cannot be
+      described as EU-resident while this is true.
+      Partial mitigation already in code: when a project enables redaction, `redactPayload()` runs
+      BEFORE the send, so redacted projects leak less. It is opt-in per project, not the default.
+      Options:
+      - [ ] A: move to an Inngest EU region if the plan supports data residency (check billing tier).
+      - [ ] B: replace Inngest on the EU deployment with an EU-region queue. Upstash QStash is
+            already available on this account (skills installed 2026-08-18) and is a direct
+            HTTP-queue equivalent with EU regions — but this is a real code change to both ingest
+            routes plus `src/lib/inngest-functions.ts`.
+      - [ ] C: keep Inngest and drop the EU-residency claim, stating US event processing plainly
+            on `/security` and `/status`.
+- [ ] Document the final choice; do not launch the EU region claim until one of A/B/C is done.
+- [x] FIXED 2026-08-18 (`tsc --noEmit` clean). BUG found 2026-08-17 while reviewing `src/lib/redis-cache.ts` against the newly installed
+      `redis/agent-skills` pack: `connectRedis()` caches the connect promise with `??=` and never
+      clears it. (a) If `client.connect()` rejects, the rejected promise is cached on `globalThis`
+      forever — every later call re-awaits it and throws even after Redis recovers, until the
+      serverless instance is recycled. (b) If the connection later drops, `client.isOpen` goes false
+      but `??=` re-awaits the old *resolved* promise, which returns instantly without reconnecting,
+      so the next command runs against a closed client. Both land on the ingest hot path
+      (`consumeRateLimit`) and on `/api/health/region`. Fix: clear the global in `.finally()` so only
+      an in-flight connect is shared. Also `createClient({ url })` sets no socket timeouts — add
+      `connectTimeout` so a hung connect fails fast instead of burning the function budget.
+- [ ] Use `rediss://` (TLS) for the EU `REDIS_URL`, not `redis://` — credentials and cached trace
+      data otherwise cross the wire in clear text.
+- [x] Add `eu.cloud.tracify.tech` at Domeneshop as an A record to `76.76.21.21` and verify Vercel TLS issuance. Confirmed done by BN-KR 2026-08-17.
+- [x] Reuse the existing Stripe account/catalog; created the EU webhook endpoint (`we_1U5YRMV05QqKbrt9FFuI0zWx`, live mode) at `https://eu.cloud.tracify.tech/api/stripe/webhook` with the same event set as production, 2026-08-17. Signing secret generated and added by BN-KR as `STRIPE_WEBHOOK_SECRET` in the `tracify-cloud-eu` Vercel project, confirmed 2026-08-17.
+- [x] Register the EU Google/GitHub callback URLs if authentication will run on `eu.cloud.tracify.tech`. Confirmed done by BN-KR 2026-08-17.
+- [ ] Add the existing EU Tinybird, Redis, and Inngest credentials to `tracify-cloud-eu` without printing or committing them. Env-var checklists live at `scratch/tracify-regional/env/{eu,us,production}.env`.
+    CORRECTION 2026-08-18: an earlier note here claimed Vercel env vars were unreachable from this
+    environment. That was wrong. `vercel` is not on PATH, but `npx vercel` works and the CLI is
+    still authenticated as `bnkr` (scope `tracify-tech`) — the same route
+    `scratch/tracify-regional/configure-vercel-env.mjs` used on 2026-08-15. So `vercel env ls`,
+    `add`, `rm`, and `pull` are all available; only *typing secret values* is off-limits, not
+    Vercel access itself. Use `npx vercel env ls production --project tracify-cloud-eu --scope
+    tracify-tech` to audit which names are set. EU's `STRIPE_WEBHOOK_SECRET` is already filled in there (created 2026-08-17); everything else needs BN-KR to fill in by hand from the Vercel dashboard / provider consoles. Older redacted `vercel env pull` dumps (`eu-vercel-production.env`, `us-vercel-production.env`, `marketing-production.env`) also exist in `scratch/tracify-regional/` from 2026-08-15 but only show `[SENSITIVE]` placeholders, not usable values.
+  - GOTCHA (found 2026-08-17): `TINYBIRD_HOST` must include the `https://` scheme —
+    `https://api.europe-west2.gcp.tinybird.co`, not the bare hostname. `src/lib/tinybird.ts:6`
+    interpolates it directly into `fetch()` (lines 13/76/103/379) with no normalization, and its
+    fallback is `https://api.tinybird.co`. A bare hostname makes every Tinybird call throw on an
+    invalid URL. A first draft of `env/eu.env` had the bare hostname; corrected.
+  - The authoritative required-at-boot list is `src/instrumentation.ts:9-20` (10 vars), which
+    hard-throws when `NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND=cloud` and any are blank. Note the
+    Tinybird fallback means a *missing* `TINYBIRD_HOST` on a non-cloud deployment would silently
+    hit the global `api.tinybird.co` host instead of the EU workspace.
+  - `INNGEST_SIGNING_KEY` is not read anywhere in `src/` or `convex/` — only `INNGEST_EVENT_KEY`.
+- [ ] Merge the regional PR, reconnect Git for `tracify-cloud-eu`, and deploy the exact merged `origin/main` commit.
+- [ ] Verify EU DNS/TLS, authentication, onboarding, API-key creation, native/OTLP ingestion, Tinybird storage, Redis quotas, Inngest processing, Stripe billing, dashboard reads, and `/api/health/region`.
+
+### US launch — deferred, must remain unavailable
+- [ ] Keep `us.cloud.tracify.tech` without customer traffic and keep US out of the region selector.
+- [ ] Before enabling US, obtain a physically US Tinybird workspace, Redis database, and event-processing environment with documented residency.
+- [ ] Configure unique US credentials, OAuth callbacks, Stripe webhook signing secret, backups, retention, monitoring, and end-to-end isolation tests.
+- [ ] Enable US only after proving an EU trace never appears in US and a US trace never appears in EU.
+
+## Resilience Testing dashboard feature — merged (PR #16)
+- [x] Built, committed, PR #16 opened and merged; Vercel + GitGuardian checks passed.
+- [x] Fixed 2026-08-17: ran `npx convex codegen` for real with a working `CONVEX_DEPLOYMENT`
+      (see "Local dev environment is broken" below) — replaced the hand-patched
+      `convex/_generated/api.d.ts` `resilience` module entry with a real generated file. This
+      also surfaced and fixed an invalid-identifier bug in the `failureMix` validator
+      (`"429"`/`"500"` object keys renamed to `rate_limited`/`server_error`).
 - [ ] Manually click through `/dashboard/<projectId>/resilience`, run a test, confirm results render.
-- [ ] Commit and open the draft PR once the above checks out.
 
-## Convex codegen gap from the previous PR (#15, already merged)
-- [ ] Run `npx convex codegen` once a valid `CONVEX_DEPLOYMENT`/`CONVEX_URL` is available to
-      refresh `convex/_generated/dataModel.d.ts` for the `teamsWebhookUrl` schema field (additive/optional,
-      so nothing broke, but codegen should still be re-run for real).
+## Light theme re-skin (2026-08-16) — dashboard now matches the marketing site
+The dashboard was converted from the dark palette to the marketing site's editorial light
+theme (`#eceae3` cream base, white cards, black borders, `#f4d44d` acid-yellow accent).
+Design tokens in `globals.css` now drive every shadcn primitive; ~1,500 hardcoded utility
+classes were rewritten across dashboard, onboarding, auth, and ui components. Code/payload
+panels stay deliberately dark (`#050505` + `#f4d44d`), matching the docs/marketing convention.
+Verified: `tsc --noEmit`, `eslint` (no new problems), `npm run test:content` (16/16),
+`npm run build`, plus an automated WCAG-AA contrast audit driven through the browser —
+`/`, `/pricing`, `/docs`, `/docs/quickstart`, `/integrations`, `/blog` all report **0 failures**
+(down from 23, 21, 16, 21 respectively).
+- [ ] Click through the authenticated dashboard visually (Overview, Runs, Trace Viewer,
+      Costs charts, Evaluation, Resilience). I could not log in locally, so dashboard
+      rendering is verified statically + by build only, not by eye. Charts (recharts)
+      and the trace waterfall are the highest-risk surfaces to eyeball.
+- [ ] Pre-existing, out of scope, worth a separate fix: the branded 404 in
+      `src/app/(frontend)/not-found.tsx` is never shown for unmatched URLs — Next serves its
+      built-in 404 because there is no `src/app/not-found.tsx`. Adding one naively would
+      render it without the root layout (no `globals.css`), so it needs a deliberate fix.
 
-## Claude Code contributor attribution (from chat, not yet set up)
-- [ ] Create/decide on a GitHub account for Claude Code commit attribution and give me its
-      noreply email so future commits co-author correctly (see prior discussion in this session).
+## Local dev environment is broken — root cause of the two Convex codegen gaps above
+Diagnosed 2026-08-16 while trying to preview the dashboard locally:
+- [x] Fixed 2026-08-17: `.env.local`'s `CONVEX_DEPLOYMENT` had an inline `# team: ...` comment
+      quoted into the value itself (`"dev:diligent-dragon-604 # team: kristoffer-bon-6fab2, project: 5to1r"`),
+      so `npx convex codegen` tried to parse the whole string as one deployment name. Trimmed
+      to `"dev:diligent-dragon-604"`.
+- [x] Fixed 2026-08-17: added `NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND=cloud` to `.env.local` to stop
+      the `/cloud` redirect for local dashboard testing.
+- [x] Fixed 2026-08-17: re-ran `npx convex codegen` for real. It then surfaced a second, real bug —
+      `resilience.ts`'s `failureMixValidator`/schema used object keys `"429"` and `"500"`, which
+      Convex rejects (`Invalid first character '4' in 429: Identifiers must start with an
+      alphabetic character or underscore`). Renamed the `FailureMode` variants and every
+      `failureMix`/schema/frontend reference from `"429"`/`"500"` to `rate_limited`/`server_error`
+      across `convex/resilience.ts`, `convex/schema.ts`, and
+      `src/components/dashboard/resilience-testing-dashboard.tsx`. `npx convex codegen` now
+      completes cleanly (Downloading deployment state → Uploading functions → Generating
+      TypeScript bindings → Running TypeScript, no errors) — no more hand-patched
+      `convex/_generated/api.d.ts`/`dataModel.d.ts`.
+- [ ] Do the manual dashboard click-through / resilience-run test noted elsewhere in this file
+      now that localhost auth/dashboard routing and real codegen both work.
 
 ---
 
@@ -787,7 +1057,7 @@ network fetch failure in this sandbox, not a code issue).
 - [x] Attach `eu.cloud.tracify.tech` and `us.cloud.tracify.tech` to their matching Vercel projects.
 - [x] Add and deploy dependency-aware regional health endpoints; verify both live Convex health responses.
 - [x] Add a shared atomic Redis quota for native and OTLP ingestion with regional isolation and `429` retry semantics.
-- [ ] Add the two DNS A records at Domeneshop and verify Vercel TLS issuance.
+- [ ] Add the two DNS A records at Domeneshop and verify Vercel TLS issuance. EU record confirmed done 2026-08-17 (see EU-first launch checklist above); US record remains deferred per the EU-only launch decision.
 - [ ] Create and deploy independent Tinybird workspaces for EU and US; add unique hosts/tokens to Vercel.
 - [ ] Create independent regional Redis databases and Inngest environments; add unique credentials to Vercel.
 - [ ] Create regional Stripe webhooks and register Google/GitHub callback URLs.

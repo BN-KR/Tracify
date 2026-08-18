@@ -47,6 +47,14 @@ scratch/temp.zip
 scratch/docx_extract/
 scratch/user-test-5to1r/node_modules/
 
+# regional operator artifacts: deploy keys, tokens, and filled-in env files.
+# docs/regional-cloud-runbook.md describes this directory as ignored; before
+# 2026-08-18 it was not, so real credentials here were one `git add .` from
+# being committed. Never remove this rule.
+scratch/tracify-regional/
+*.env
+!*.env.example
+
 # local reference documents; do not publish
 /Tracify - Docs/
 
@@ -66,3 +74,10 @@ teams-bot/*-err.log
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# graphify generated knowledge graph output
+/graphify-out/
+
+# Tinybird CLI credentials — contains a live API token. Was tracked until
+# 2026-08-18; untracked then so `tb auth` can no longer commit a workspace token.
+.tinyb
