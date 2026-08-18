@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { KeyRound, Layers3, LockKeyhole, ServerCog, ShieldCheck, Siren, UserRoundCog } from "lucide-react";
+import { Globe2, KeyRound, Layers3, LockKeyhole, ServerCog, ShieldCheck, Siren, UserRoundCog } from "lucide-react";
 
 export const metadata: Metadata = { title: "Security", description: "Learn how Tracify protects AI agent telemetry with encryption, project isolation, access controls, and incident response practices.", alternates: { canonical: "/security" } };
 
 const controls = [
   { title: "Encryption", icon: LockKeyhole, summary: "TLS 1.3 in transit and AES-256 at rest.", items: ["API keys are hashed before storage.", "Plaintext project keys are shown once."] },
   { title: "Data isolation", icon: Layers3, summary: "Telemetry is scoped to the project derived from the authenticated key.", items: ["No cross-project query path.", "Cost counters remain project-specific."] },
+  { title: "Data residency", icon: Globe2, summary: "EU region accounts, traces, and cache are stored in Ireland. Event processing currently runs in the United States.", items: ["Convex, Tinybird, and Redis for the EU region are hosted in Ireland.", "Queued events transit a US provider, with email, phone, card, SSN, and API-key redaction applied before they leave the EU."] },
   { title: "Access control", icon: UserRoundCog, summary: "Better Auth sessions and Convex authorization protect workspace data.", items: ["Encrypted OAuth tokens and CSRF protection.", "Organization roles are enforced at the data layer."] },
   { title: "Runtime enforcement", icon: ServerCog, summary: "Observe-first policies keep monitoring from silently changing production behavior.", items: ["Cost ceilings are evaluated server-side.", "Fail-open behavior protects production traffic."] },
   { title: "Infrastructure", icon: ShieldCheck, summary: "Convex, Tinybird, Inngest, and Redis have explicit jobs in the data path.", items: ["Durable event processing and retry semantics.", "Ephemeral cache and rate-limit state stay separate."] },

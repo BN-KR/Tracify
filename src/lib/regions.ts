@@ -9,6 +9,12 @@ export type TracifyRegion = {
   hostname: string;
   location: string;
   infrastructure: string;
+  /**
+   * Whether this region is offered to customers. The US deployment exists but must not
+   * take production traffic until every US stateful provider has a verified US location,
+   * so it stays dormant: routable and defined, but never listed in public surfaces.
+   */
+  available: boolean;
 };
 
 export const DEFAULT_TRACIFY_REGION: TracifyRegionId = "eu";
@@ -24,6 +30,7 @@ export const TRACIFY_REGIONS: Record<TracifyRegionId, TracifyRegion> = {
     hostname: "eu.cloud.tracify.tech",
     location: "Ireland",
     infrastructure: "EU West",
+    available: true,
   },
   us: {
     id: "us",
@@ -34,8 +41,22 @@ export const TRACIFY_REGIONS: Record<TracifyRegionId, TracifyRegion> = {
     hostname: "us.cloud.tracify.tech",
     location: "Virginia",
     infrastructure: "US East",
+    available: false,
   },
 };
+
+/**
+ * Regions offered to customers. Use this for every public-facing surface — the region
+ * selector, docs, status board, onboarding — rather than iterating TRACIFY_REGIONS
+ * directly, so a dormant region can never be advertised by accident.
+ */
+export function getAvailableRegions(): TracifyRegion[] {
+  return Object.values(TRACIFY_REGIONS).filter((region) => region.available);
+}
+
+export function isRegionAvailable(id: TracifyRegionId): boolean {
+  return TRACIFY_REGIONS[id].available;
+}
 
 export function parseTracifyRegion(value: string | null | undefined): TracifyRegionId | null {
   const normalized = value?.trim().toLowerCase();

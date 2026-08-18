@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tinybird": {
+      "type": "http",
+      "url": "https://mcp.tinybird.co?token=${TINYBIRD_MCP_TOKEN}"
+    }
+  }
+}
