@@ -13,7 +13,7 @@ Tracify connects the model calls, tool calls, prompts, costs, failures, and eval
 ## Install the SDK
 
 ```bash
-npm install @tracify/sdk
+npm install tracify-sdk
 ```
 
 Create a project in Tracify and copy its API key. Keep the key in a server-side environment variable:
@@ -25,7 +25,7 @@ TRACIFY_API_KEY=tracify_sk_live_...
 ## Wrap one run
 
 ```ts
-import { Tracify } from "@tracify/sdk";
+import { Tracify } from "tracify-sdk";
 
 const tracify = new Tracify({ apiKey: process.env.TRACIFY_API_KEY });
 

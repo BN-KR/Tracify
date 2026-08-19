@@ -9,7 +9,7 @@ Head to [tracify.tech/dashboard](https://tracify.tech/dashboard) and create your
 Ensure your agent can authenticate with our pipeline by setting the following environment variable:
 
 ```bash
-export TRACIFY_API_KEY=5t1r_sk_live_...
+export TRACIFY_API_KEY=tracify_sk_live_...
 ```
 
 ## 3. Choose Your SDK
@@ -17,7 +17,7 @@ export TRACIFY_API_KEY=5t1r_sk_live_...
 ### Python
 Install the package:
 ```bash
-pip install tracify
+pip install tracify-sdk
 ```
 
 Instrument your agent:
@@ -28,7 +28,7 @@ from tracify import trace_agent, llm_call
 async def my_agent():
     # Capture an LLM call
     llm_call(
-        input_data="What is 5to1r?",
+        input_data="What is tracify?",
         output_data="The best observability for agents.",
         model_id="gpt-4",
         cost_usd=0.001
@@ -39,16 +39,16 @@ async def my_agent():
 ### TypeScript / Node.js
 Install the package:
 ```bash
-npm install 5to1r
+npm install tracify-sdk
 ```
 
 Instrument your agent:
 ```typescript
-import { traceAgent, llmCall } from 'tracify';
+import { traceAgent, llmCall } from 'tracify-sdk';
 
 const agent = traceAgent(async () => {
   await llmCall({
-    input: "What is 5to1r?",
+    input: "What is tracify?",
     output: "The best observability for agents.",
     modelId: "gpt-4",
     costUsd: 0.001

@@ -316,7 +316,7 @@ Verified: `tsc --noEmit`, `eslint` (no new problems), `npm run test:content` (16
 ## Local dev environment is broken — root cause of the two Convex codegen gaps above
 Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 - [x] Fixed 2026-08-17: `.env.local`'s `CONVEX_DEPLOYMENT` had an inline `# team: ...` comment
-      quoted into the value itself (`"dev:diligent-dragon-604 # team: kristoffer-bon-6fab2, project: 5to1r"`),
+      quoted into the value itself (`"dev:diligent-dragon-604 # team: kristoffer-bon-6fab2, project: tracify"`),
       so `npx convex codegen` tried to parse the whole string as one deployment name. Trimmed
       to `"dev:diligent-dragon-604"`.
 - [x] Fixed 2026-08-17: added `NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND=cloud` to `.env.local` to stop
@@ -467,11 +467,11 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 - [x] Create honest beta Pricing page without fake checkout links
 - [ ] Connect Pricing page to real Stripe checkout links when Stripe is ready
 - [ ] Publish SDKs to PyPI and npm
-  - [x] Prepare `@5to1r/sdk` build output for npm package contents
-  - [x] Rename TypeScript package/install docs to public package name `5to1r`
+  - [x] Prepare `tracify` build output for npm package contents
+  - [x] Rename TypeScript package/install docs to public package name `tracify`
   - [x] Rename TypeScript package/install docs to new public package name `tracify`
   - [ ] Publish `tracify` with npm 2FA OTP or granular publish token
-  - [x] Rename Python SDK distribution/install docs to public package name `5to1r`
+  - [x] Rename Python SDK distribution/install docs to public package name `tracify`
   - [x] Rename Python SDK distribution/install docs to new public package name `tracify`
   - [ ] Publish Python `tracify` package to PyPI with a PyPI API token
 - [x] Add admin-only manual project/API key issuance through Convex
@@ -502,7 +502,7 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 - [x] Polish trace viewer with span overview, copyable payloads, error auto-expand, and model/tool summary panel
 - [x] Fix production Clerk/Convex auth by creating prod `convex` JWT template and deploying Convex prod
 - [x] Document Convex/Clerk dev-vs-production auth troubleshooting runbook
-- [x] Prepare Python SDK for `pip install 5to1r` and verify local wheel install
+- [x] Prepare Python SDK for `pip install tracify` and verify local wheel install
 - [x] Standardize site and AI setup prompt install commands for both `pip install tracify` and `npm install tracify`
 - [x] Add guarded cancel/stop control for running saved run summaries
 - [x] Make dashboard breadcrumbs clickable for parent navigation
@@ -513,7 +513,7 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 - [x] Add beta smoke script for ingest auth failures, invalid payloads, protected route reachability, and optional valid ingest/Convex run checks
 - [x] Deploy Tinybird endpoint pipes to the active Tinybird workspace and verify endpoint responses
 - [ ] Smoke test report page states: no data, normal runs, failed runs, and analytics unavailable
-- [ ] Run `npm run smoke:beta` with `FIVETOONE_SMOKE_API_KEY` and `FIVETOONE_SMOKE_PROJECT_ID`
+- [ ] Run `npm run smoke:beta` with `TRACIFY_SMOKE_API_KEY` and `TRACIFY_SMOKE_PROJECT_ID`
 
 ---
 
@@ -528,9 +528,9 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 - [x] Created the missing local Clerk `convex` JWT template required for browser Convex auth
 - [x] Removed nested dashboard shell wrappers so only one sidebar can render
 - [x] Verified with `npm run build`
-- [x] Updated all TypeScript SDK install/import snippets from `@5to1r/sdk` to `5to1r`
+- [x] Updated all TypeScript SDK install/import snippets from `tracify` to `tracify`
 - [x] Verified manual API key issuance via `projects:createProjectForUser`
-- [x] Fixed local ingest dev environment so `npm install 5to1r` user test returns `202 Accepted`
+- [x] Fixed local ingest dev environment so `npm install tracify` user test returns `202 Accepted`
 - [x] Made dashboard analytics resilient when Tinybird stats are unavailable
 - [x] Fixed Overview and Costs totals so newly ingested high-cost workflow runs appear immediately from Convex summaries
 - [x] Fixed Tinybird stats endpoint so model/cost charts can parse SQL results instead of treating TSV as broken JSON
@@ -1073,7 +1073,7 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 # Documentation migration follow-up
 
 - [x] Keep the Markdoc docs repository separate from blog content.
-- [x] Preserve the `5to1r` SDK contract in public examples.
+- [x] Preserve the `tracify` SDK contract in public examples.
 - [x] Preserve critique learnings for future agents and avoid fabricated resource promises.
 - [x] Include the Markdoc docs repository in Vercel output tracing.
 - [x] Refine the docs overview into a three-column, grouped information architecture inspired by the supplied Langfuse reference.

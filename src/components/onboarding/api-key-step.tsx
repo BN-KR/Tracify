@@ -11,7 +11,7 @@ import {
 } from "@/lib/onboarding-client-state";
 import { getDeploymentRegion, getTracifyRegion } from "@/lib/regions";
 
-const API_KEY_COPIED_STORAGE_KEY = "5to1r.onboarding.apiKeyCopied";
+const API_KEY_COPIED_STORAGE_KEY = "tracify.onboarding.apiKeyCopied";
 const isPostHogConfigured = Boolean(
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
     process.env.NEXT_PUBLIC_POSTHOG_HOST,

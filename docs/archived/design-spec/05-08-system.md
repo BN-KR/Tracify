@@ -487,11 +487,11 @@ Layout: two-column (50/50) on desktop, single column on mobile
 
 Left panel (dark brand):
   Background: --surface-1
-  Content: ■ 5to1r wordmark, tagline, ambient glow, terminal demo snippet
+  Content: ■ tracify wordmark, tagline, ambient glow, terminal demo snippet
   
 Right panel (form):
   Background: --bg
-  Content: Clerk-wrapped form, 5to1r styling overrides
+  Content: Clerk-wrapped form, tracify styling overrides
   Max-width of form: 400px, centered
 
 Mobile:
@@ -521,7 +521,7 @@ Sidebar:
   Width: 240px (desktop), 0 (mobile, drawer)
 
   Items:
-    [■ 5to1r] [project name dropdown]
+    [■ tracify] [project name dropdown]
     ─────────────────
     Overview
     Runs
@@ -550,7 +550,7 @@ Mobile:
 ## D. Docs Layout
 
 ```
-Routes: /docs/* or docs.5to1r.com/*
+Routes: /docs/* or docs.tracify.tech/*
 
 Left sidebar: 240px, nav tree
 Main: 720px prose, centered

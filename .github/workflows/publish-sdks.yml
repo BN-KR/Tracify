@@ -1,0 +1,94 @@
+name: Publish SDKs
+
+# Publishing is deliberately manual. Trigger it from the Actions tab, or by
+# pushing a tag like sdk-v0.2.0.
+#
+# Credentials are repository secrets: Settings -> Secrets and variables ->
+# Actions -> NPM_TOKEN and PYPI_API_TOKEN. Note these are readable by any
+# workflow run in this repo with no approval step. If collaborators are added
+# later, move them into a protected `release` environment with a required
+# reviewer, since publishing to npm/PyPI cannot be undone.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build and validate without publishing"
+        type: boolean
+        default: true
+  push:
+    tags:
+      - "sdk-v*"
+
+jobs:
+  npm:
+    name: "npm: tracify-sdk"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # required for npm --provenance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+      - name: Build and test the SDK
+        working-directory: packages/ts-sdk
+        run: |
+          npm run build
+          npm test
+      - name: Verify the tarball
+        working-directory: packages/ts-sdk
+        run: npm pack --dry-run
+      - name: Confirm which npm account will own the package
+        run: |
+          # Publishing is first-come: whoever runs this owns `tracify-sdk`
+          # permanently. Fail loudly if NPM_TOKEN belongs to the wrong account.
+          who=$(npm whoami)
+          echo "Publishing as npm user: $who"
+          if [ -n "${{ vars.EXPECTED_NPM_USER }}" ] && [ "$who" != "${{ vars.EXPECTED_NPM_USER }}" ]; then
+            echo "::error::NPM_TOKEN belongs to '$who', expected '${{ vars.EXPECTED_NPM_USER }}'."
+            exit 1
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish
+        if: ${{ github.event_name == 'push' || inputs.dry_run == false }}
+        working-directory: packages/ts-sdk
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  pypi:
+    name: "pypi: tracify-sdk"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install build tooling
+        run: python -m pip install --upgrade build twine
+      - name: Run the test suite
+        working-directory: packages/python-sdk
+        run: |
+          python -m pip install pytest
+          python -m pip install -e .
+          python -m pytest -q
+      - name: Build a clean distribution
+        working-directory: packages/python-sdk
+        run: |
+          rm -rf dist build
+          python -m build
+          python -m twine check dist/*
+      - name: Publish
+        if: ${{ github.event_name == 'push' || inputs.dry_run == false }}
+        working-directory: packages/python-sdk
+        run: python -m twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}

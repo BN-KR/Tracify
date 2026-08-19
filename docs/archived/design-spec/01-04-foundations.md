@@ -9,7 +9,7 @@
 ```
 ╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
-║   ■ 5to1r                                                    ║
+║   ■ tracify                                                    ║
 ║                                                              ║
 ║   Full Frontend Design Package                               ║
 ║   Dark-mode-only design system, pages, flows,                ║

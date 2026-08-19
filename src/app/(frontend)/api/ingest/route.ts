@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
 
   try {
     await inngest.send({
-      name: "5to1r/span.received",
+      name: "tracify/span.received",
       data: {
         spanId: payload.spanId,
         runId: payload.runId,

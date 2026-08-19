@@ -67,7 +67,7 @@ Status | Run ID | Spans | Cost | Duration | Model | Started
 
 ## §23 DOCS — Corrections
 
-**Deployment:** Separate subdomain `docs.5to1r.com`
+**Deployment:** Separate subdomain `docs.tracify.tech`
 **Platform:** Mintlify or Nextra (dark theme, maintains tracify visual identity)
 **Search:** Cmd+K
 

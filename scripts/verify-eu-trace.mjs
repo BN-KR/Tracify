@@ -15,7 +15,7 @@
  *                                   to prove the span was persisted, not just accepted.
  */
 const BASE = process.env.TRACIFY_SMOKE_BASE_URL ?? "https://eu.cloud.tracify.tech";
-const KEY = process.env.TRACIFY_SMOKE_API_KEY ?? process.env.FIVETOONE_SMOKE_API_KEY;
+const KEY = process.env.TRACIFY_SMOKE_API_KEY;
 const TB_HOST = process.env.TINYBIRD_HOST;
 const TB_TOKEN = process.env.TINYBIRD_TOKEN;
 

@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { api } from "convex/_generated/api";
 import { BrandLogo } from "@/components/brand-logo";
 
-const PROJECT_ID_STORAGE_KEY = "5to1r.onboarding.projectId";
-const LAST_PROJECT_STORAGE_KEY = "5to1r.lastProjectId";
+const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
+const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 
 export function OnboardingEntryRouter() {
   const router = useRouter();

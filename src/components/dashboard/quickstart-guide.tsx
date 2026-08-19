@@ -28,7 +28,7 @@ export function QuickstartGuide({ projectId }: QuickstartGuideProps) {
     setTimeout(() => setCopied(null), 2000);
   }
 
-  const pythonCode = `from 5to1r import trace_agent, llm_call
+  const pythonCode = `from tracify import trace_agent, llm_call
 
 @trace_agent()
 async function run_my_agent():
@@ -42,7 +42,7 @@ async function run_my_agent():
     )
     return "Success"`;
 
-  const tsCode = `import { traceAgent, llmCall } from '5to1r';
+  const tsCode = `import { traceAgent, llmCall } from 'tracify-sdk';
 
 const agent = traceAgent(async () => {
   // Your agent logic here
@@ -56,29 +56,29 @@ const agent = traceAgent(async () => {
   return "Success";
 });`;
 
-  const installPy = "pip install 5to1r";
-  const installTs = "npm install 5to1r";
+  const installPy = "pip install tracify-sdk";
+  const installTs = "npm install tracify-sdk";
 
   return (
     <div className="space-y-8 max-w-4xl">
       <div className="space-y-2">
-        <h2 className="font-mono text-lg text-white uppercase tracking-widest">Instrumentation</h2>
-        <p className="text-sm text-zinc-500 font-sans">
+        <h2 className="font-mono text-lg text-black uppercase tracking-widest">Instrumentation</h2>
+        <p className="text-sm text-black/55 font-sans">
           Connect your agent to Tracify in less than 5 minutes.
         </p>
       </div>
 
       <Tabs defaultValue="python" className="w-full">
-        <TabsList className="bg-[#111111] border border-border rounded-none p-1 h-12">
+        <TabsList className="bg-white border border-border rounded-none p-1 h-12">
           <TabsTrigger
             value="python"
-            className="rounded-none data-[state=active]:bg-white data-[state=active]:text-black font-mono text-xs uppercase"
+            className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white font-mono text-xs uppercase"
           >
             Python
           </TabsTrigger>
           <TabsTrigger
             value="typescript"
-            className="rounded-none data-[state=active]:bg-white data-[state=active]:text-black font-mono text-xs uppercase"
+            className="rounded-none data-[state=active]:bg-black data-[state=active]:text-white font-mono text-xs uppercase"
           >
             TypeScript
           </TabsTrigger>
@@ -86,14 +86,14 @@ const agent = traceAgent(async () => {
 
         <TabsContent value="python" className="space-y-6 mt-6">
           <section className="space-y-4">
-            <h3 className="flex items-center gap-2 font-mono text-xs text-zinc-400 uppercase">
+            <h3 className="flex items-center gap-2 font-mono text-xs text-black/60 uppercase">
               <Terminal className="size-4" /> 1. Install Library
             </h3>
             <CodeBlock code={installPy} onCopy={() => copyToClipboard(installPy, 'py-install')} copied={copied === 'py-install'} />
           </section>
 
           <section className="space-y-4">
-            <h3 className="flex items-center gap-2 font-mono text-xs text-zinc-400 uppercase">
+            <h3 className="flex items-center gap-2 font-mono text-xs text-black/60 uppercase">
               <Code2 className="size-4" /> 2. Instrument Agent
             </h3>
             <CodeBlock code={pythonCode} onCopy={() => copyToClipboard(pythonCode, 'py-code')} copied={copied === 'py-code'} language="python" />
@@ -102,14 +102,14 @@ const agent = traceAgent(async () => {
 
         <TabsContent value="typescript" className="space-y-6 mt-6">
           <section className="space-y-4">
-            <h3 className="flex items-center gap-2 font-mono text-xs text-zinc-400 uppercase">
+            <h3 className="flex items-center gap-2 font-mono text-xs text-black/60 uppercase">
               <Terminal className="size-4" /> 1. Install Library
             </h3>
             <CodeBlock code={installTs} onCopy={() => copyToClipboard(installTs, 'ts-install')} copied={copied === 'ts-install'} />
           </section>
 
           <section className="space-y-4">
-            <h3 className="flex items-center gap-2 font-mono text-xs text-zinc-400 uppercase">
+            <h3 className="flex items-center gap-2 font-mono text-xs text-black/60 uppercase">
               <Code2 className="size-4" /> 2. Instrument Agent
             </h3>
             <CodeBlock code={tsCode} onCopy={() => copyToClipboard(tsCode, 'ts-code')} copied={copied === 'ts-code'} language="typescript" />
@@ -118,10 +118,10 @@ const agent = traceAgent(async () => {
       </Tabs>
 
       <section className="space-y-4 pt-6">
-        <h3 className="flex items-center gap-2 font-mono text-xs text-zinc-400 uppercase">
+        <h3 className="flex items-center gap-2 font-mono text-xs text-black/60 uppercase">
           <KeyRound className="size-4" /> 3. Set Environment Variable
         </h3>
-        <p className="text-[11px] text-zinc-500 font-mono">
+        <p className="text-[11px] text-black/55 font-mono">
           Inject your API key into your agent&apos;s environment.
         </p>
         <CodeBlock
@@ -132,7 +132,7 @@ const agent = traceAgent(async () => {
       </section>
 
       <div className="pt-10 flex gap-4">
-        <Button variant="outline" className="rounded-none font-mono text-[10px] uppercase border-zinc-800 gap-2">
+        <Button variant="outline" className="rounded-none font-mono text-[10px] uppercase border-black/15 gap-2">
           <BookOpen className="size-4" /> Full Documentation
         </Button>
         <Button className="rounded-none font-mono text-[10px] uppercase gap-2">
@@ -146,19 +146,19 @@ const agent = traceAgent(async () => {
 function CodeBlock({ code, onCopy, copied, language }: { code: string, onCopy: () => void, copied: boolean, language?: string }) {
   return (
     <div className="group relative">
-      <pre className="p-4 bg-black border border-border text-[12px] font-mono text-zinc-300 overflow-x-auto leading-relaxed">
+      <pre className="p-4 bg-[#050505] border border-black text-[12px] font-mono text-[#f4d44d] overflow-x-auto leading-relaxed">
         {code}
       </pre>
       <Button
         variant="ghost"
         size="icon"
         onClick={onCopy}
-        className="absolute right-2 top-2 size-8 bg-black/50 border border-zinc-800 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute right-2 top-2 size-8 bg-black/50 border border-black/15 opacity-0 group-hover:opacity-100 transition-opacity"
       >
-        {copied ? <Check className="size-4 text-emerald-500" /> : <Copy className="size-4 text-zinc-500" />}
+        {copied ? <Check className="size-4 text-emerald-600" /> : <Copy className="size-4 text-black/55" />}
       </Button>
       {language && (
-        <span className="absolute left-4 -top-2.5 px-2 bg-black border border-border text-[9px] font-mono uppercase text-zinc-500">
+        <span className="absolute left-4 -top-2.5 px-2 bg-white border border-border text-[9px] font-mono uppercase text-black/55">
           {language}
         </span>
       )}

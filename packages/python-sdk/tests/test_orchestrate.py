@@ -2,15 +2,15 @@ import time
 import json
 import pytest
 from unittest.mock import patch, MagicMock, PropertyMock
-from fivetoone import (
-    FiveToOneClient,
+from tracify import (
+    TracifyClient,
     RuntimePolicy,
     CancellationToken,
     LatencyBudgetExceeded,
     _is_retryable_error,
 )
 
-HTTP_TARGET = "fivetoone.httpx.Client.post" if True else "fivetoone._requests_fallback.post"
+HTTP_TARGET = "tracify.httpx.Client.post" if True else "tracify._requests_fallback.post"
 
 try:
     import httpx
@@ -18,7 +18,7 @@ try:
 except ImportError:
     _HAS_HTTPX = False
 
-MOCK_TARGET = "fivetoone.httpx.Client.post" if _HAS_HTTPX else "fivetoone._requests_fallback.post"
+MOCK_TARGET = "tracify.httpx.Client.post" if _HAS_HTTPX else "tracify._requests_fallback.post"
 
 
 class TestRuntimePolicy:
@@ -85,24 +85,24 @@ class TestCancellationToken:
         t.check()
 
 
-class TestFiveToOneClient:
+class TestTracifyClient:
     def test_selects_requested_region(self):
-        client = FiveToOneClient(api_key="test-key", region="us")
+        client = TracifyClient(api_key="test-key", region="us")
         assert client.host == "https://us.cloud.tracify.tech"
 
     def test_rejects_wrong_region_key(self):
         with pytest.raises(ValueError, match="belongs to EU"):
-            FiveToOneClient(api_key="tracify_sk_live_eu_example", region="us")
+            TracifyClient(api_key="tracify_sk_live_eu_example", region="us")
 
     def test_legacy_keys_belong_to_eu(self):
         with pytest.raises(ValueError, match="belongs to EU"):
-            FiveToOneClient(api_key="tracify_sk_live_legacy", region="us")
+            TracifyClient(api_key="tracify_sk_live_legacy", region="us")
 
     @patch(MOCK_TARGET)
     def test_ingest_sends_correct_payload(self, mock_http):
         mock_http.return_value = MagicMock(status_code=202)
 
-        client = FiveToOneClient(api_key="test-key")
+        client = TracifyClient(api_key="test-key")
         client.ingest(
             runId="run-1",
             spanType="llm_call",
@@ -125,7 +125,7 @@ class TestFiveToOneClient:
     def test_ingest_preserves_custom_metadata(self, mock_http):
         mock_http.return_value = MagicMock(status_code=202)
 
-        client = FiveToOneClient(api_key="test-key")
+        client = TracifyClient(api_key="test-key")
         client.ingest(
             runId="run-1",
             spanType="llm_call",
@@ -144,7 +144,7 @@ class TestFiveToOneClient:
     @patch(MOCK_TARGET)
     def test_orchestrate_success_on_first_model(self, mock_http):
         mock_http.return_value = MagicMock(status_code=202)
-        client = FiveToOneClient(api_key="test-key")
+        client = TracifyClient(api_key="test-key")
 
         def mock_call(model, token):
             return {"result": "ok", "model": model}
@@ -161,7 +161,7 @@ class TestFiveToOneClient:
     @patch(MOCK_TARGET)
     def test_orchestrate_fallback_on_error(self, mock_http):
         mock_http.return_value = MagicMock(status_code=202)
-        client = FiveToOneClient(api_key="test-key")
+        client = TracifyClient(api_key="test-key")
 
         def mock_call(model, token):
             if model == "gpt-4o":
@@ -184,7 +184,7 @@ class TestFiveToOneClient:
     @patch(MOCK_TARGET)
     def test_orchestrate_terminal_error_when_all_fail(self, mock_http):
         mock_http.return_value = MagicMock(status_code=202)
-        client = FiveToOneClient(api_key="test-key")
+        client = TracifyClient(api_key="test-key")
 
         def mock_call(model, token):
             raise Exception(f"{model} failed")
@@ -204,7 +204,7 @@ class TestFiveToOneClient:
     @patch(MOCK_TARGET)
     def test_orchestrate_passes_cancellation_token(self, mock_http):
         mock_http.return_value = MagicMock(status_code=202)
-        client = FiveToOneClient(api_key="test-key")
+        client = TracifyClient(api_key="test-key")
         received_tokens = []
 
         def mock_call(model, token):
@@ -225,7 +225,7 @@ class TestFiveToOneClient:
     @patch(MOCK_TARGET)
     def test_orchestrate_latency_abort_falls_back(self, mock_http):
         mock_http.return_value = MagicMock(status_code=202)
-        client = FiveToOneClient(api_key="test-key")
+        client = TracifyClient(api_key="test-key")
 
         def mock_call(model, token):
             if model == "gpt-4o":
@@ -247,7 +247,7 @@ class TestFiveToOneClient:
     @patch(MOCK_TARGET)
     def test_orchestrate_failopen_on_check_cost_failure(self, mock_http):
         mock_http.return_value = MagicMock(status_code=500)
-        client = FiveToOneClient(api_key="test-key")
+        client = TracifyClient(api_key="test-key")
         policy = RuntimePolicy(
             enforcement_mode="enforce",
             fallback_chain=["gpt-4o"],
@@ -278,7 +278,7 @@ class TestFiveToOneClient:
             return ok
 
         mock_http.side_effect = side_effect
-        client = FiveToOneClient(api_key="test-key")
+        client = TracifyClient(api_key="test-key")
         policy = RuntimePolicy(
             enforcement_mode="enforce",
             fallback_chain=["gpt-4o"],

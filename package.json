@@ -22,7 +22,8 @@
     "content:import-payload": "node scripts/export-payload-to-markdoc.mjs",
     "verify:eu-trace": "node scripts/verify-eu-trace.mjs",
     "dev:marketing": "node scripts/dev-host.mjs marketing",
-    "dev:cloud": "node scripts/dev-host.mjs cloud"
+    "dev:cloud": "node scripts/dev-host.mjs cloud",
+    "publish:sdks": "node scripts/publish-sdks.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

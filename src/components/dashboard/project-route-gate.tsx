@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 
 import { api } from "convex/_generated/api";
 
-const LAST_PROJECT_STORAGE_KEY = "5to1r.lastProjectId";
-const PROJECT_ID_STORAGE_KEY = "5to1r.onboarding.projectId";
+const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
+const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
 
 export function ProjectRouteGate({
   projectId,

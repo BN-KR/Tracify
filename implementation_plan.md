@@ -62,7 +62,7 @@
 - Added a dashboard-specific not-found boundary with a clear explanation and project-selector recovery path.
 - Added confirmation before muting an alert; resolve/reopen remain reversible through the alert center.
 - Expanded Overview health summary with sample-labeled failure rate and p95 latency metrics, each linking directly to the relevant Runs investigation view.
-- Live beta smoke now passes 5/5 available checks; 2 credential-dependent ingestion checks are skipped without smoke credentials. Also restored legacy `5t1r_sk_live_` API-key prefix acceptance so malformed legacy-key payloads reach the documented 422 validation path.
+- Live beta smoke now passes 5/5 available checks; 2 credential-dependent ingestion checks are skipped without smoke credentials. Also restored legacy `tracify_sk_live_` API-key prefix acceptance so malformed legacy-key payloads reach the documented 422 validation path.
 - Final `npm run build` passes after the latest changes and generates 58 routes. In-app browser visual inspection was attempted against the local dashboard but timed out before a reliable authenticated render; manual authenticated visual QA remains pending.
 - Fresh browser inspection now confirms the public entry page renders its trace-first hierarchy and interactive controls; `/dashboard` consistently redirects to Clerk sign-in without an authenticated session, so authenticated dashboard visual QA remains the only browser-gated check.
 - Hardened trace payload copying with failure recovery, live-region feedback, accessible labels, and visible keyboard focus on copy actions.
@@ -242,11 +242,11 @@ The single most important UI in the product.
 
 ### 4d. Beta Smoke Tests [IN PROGRESS]
 - [x] **Smoke Script:** Added `npm run smoke:beta` for missing API key, invalid API key, invalid payload, report/billing route reachability, and optional valid-span/Convex-run checks.
-- [ ] **Full Smoke Run:** Execute with `FIVETOONE_SMOKE_API_KEY` and `FIVETOONE_SMOKE_PROJECT_ID` against local and production-like environments.
+- [ ] **Full Smoke Run:** Execute with `TRACIFY_SMOKE_API_KEY` and `TRACIFY_SMOKE_PROJECT_ID` against local and production-like environments.
 - [ ] **Alert Smoke:** Add a deterministic threshold alert verification once test project configuration can be safely controlled by script.
 
 ### 5. Alerting & Notifications [TODO]
-- [x] **Alert Inngest Function:** Triggers on `5to1r/alert.triggered` and logs alerts to Convex.
+- [x] **Alert Inngest Function:** Triggers on `tracify/alert.triggered` and logs alerts to Convex.
 - [x] **Slack Webhook Integration:** Project settings save a validated Slack webhook and can send an admin-gated test alert.
 - [x] **Alerts UI:** Topbar popup shows recent alerts, unread state, read-all, and read-on-click behavior.
 - [x] **Duplicate Guard:** Convex alert creation deduplicates repeated alerts for the same project/run/type event.
@@ -261,12 +261,12 @@ The single most important UI in the product.
 - [ ] **Viewer UI Guards:** Hide or disable settings/API-key/destructive controls for viewer roles once role claims are confirmed in the active JWT template.
 
 ### 6. Production SDKs [POLISHING]
-- [ ] **Python SDK:** Wrap `@trace_agent` decorator logic and publish to PyPI. Package metadata now builds as distribution `tracify`, docs use `pip install tracify`, the `tracify` import package re-exports the legacy SDK, and local import smoke test passes; upload is pending a PyPI API token.
-- [ ] **TS SDK:** Formalise `tracify` and publish to npm. Build packaging is fixed, app/docs install snippets now use `npm install tracify`, and publish is blocked only on npm 2FA/token requirements.
-- [x] **Documentation:** Quickstart/install surfaces now consistently use `pip install tracify` and `npm install tracify`, including SDK READMEs, dashboard docs, marketing CTA, and design specs.
+- [ ] **Python SDK:** Wrap `@trace_agent` decorator logic and publish to PyPI. Package metadata now builds as distribution `tracify`, docs use `pip install tracify-sdk`, the `tracify` import package re-exports the legacy SDK, and local import smoke test passes; upload is pending a PyPI API token.
+- [ ] **TS SDK:** Formalise `tracify` and publish to npm. Build packaging is fixed, app/docs install snippets now use `npm install tracify-sdk`, and publish is blocked only on npm 2FA/token requirements.
+- [x] **Documentation:** Quickstart/install surfaces now consistently use `pip install tracify-sdk` and `npm install tracify-sdk`, including SDK READMEs, dashboard docs, marketing CTA, and design specs.
 - [x] **PM Handoff Summary:** Added `docs/project-manager-project-summary.md` with detailed product, architecture, function, deployment, and open-work inventory.
 - [x] **Manual API Key Issuance:** Added admin-gated Convex `projects:createProjectForUser` for creating a project and one-time API key for a target Clerk user without bypassing the hashed-key storage model.
-- [x] **Local User Install Test:** Verified the published `5to1r` npm package can send a span through local Next.js/Inngest/Convex dev after aligning `.env.local` with the Convex dev API-key hash secret.
+- [x] **Local User Install Test:** Verified the published `tracify` npm package can send a span through local Next.js/Inngest/Convex dev after aligning `.env.local` with the Convex dev API-key hash secret.
 
 ---
 

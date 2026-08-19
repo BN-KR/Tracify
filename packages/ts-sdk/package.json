@@ -1,11 +1,11 @@
 {
-  "name": "5to1r",
+  "name": "tracify-sdk",
   "version": "0.2.0",
   "description": "Observability, runtime enforcement, and tracing for AI agents.",
   "homepage": "https://tracify.tech",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tracify/tracify.git",
+    "url": "git+https://github.com/BN-KR/Tracify.git",
     "directory": "packages/ts-sdk"
   },
   "main": "dist/index.js",

@@ -9,8 +9,8 @@ import {
   subscribeToOneTimeApiKey,
 } from "@/lib/onboarding-client-state";
 
-const PROJECT_ID_STORAGE_KEY = "5to1r.onboarding.projectId";
-const API_KEY_COPIED_STORAGE_KEY = "5to1r.onboarding.apiKeyCopied";
+const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
+const API_KEY_COPIED_STORAGE_KEY = "tracify.onboarding.apiKeyCopied";
 
 function getOnboardingSessionSnapshot() {
   const projectId = window.sessionStorage.getItem(PROJECT_ID_STORAGE_KEY) ?? "";
@@ -32,7 +32,7 @@ function getServerOnboardingSessionSnapshot() {
 const quickstarts = {
   python: {
     label: "Python",
-    code: `from 5to1r import trace_agent
+    code: `from tracify import trace_agent
 
 @trace_agent()
 async def research_agent(query):
@@ -40,7 +40,7 @@ async def research_agent(query):
   },
   typescript: {
     label: "TypeScript",
-    code: `import { traceAgent } from "5to1r"
+    code: `import { traceAgent } from "tracify"
 
 const researchAgent = traceAgent(async (query: string) => {
   return await run(query)

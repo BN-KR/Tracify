@@ -60,7 +60,7 @@ export default function PricingCheckoutPage() {
     setError("");
     try {
       const result = await createProject({ name });
-      window.localStorage.setItem("5to1r.lastProjectId", result.projectId);
+      window.localStorage.setItem("tracify.lastProjectId", result.projectId);
       await openCheckout(result.projectId);
     } catch (checkoutError) {
       setError(checkoutError instanceof Error ? checkoutError.message : "Checkout is unavailable right now.");

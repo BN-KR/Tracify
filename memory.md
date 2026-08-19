@@ -24,7 +24,7 @@
 
 ## 2026-08-15 Documentation migration and content refinement
 - Public docs now live in `content/docs/*.mdoc`, separate from `content/blog/*.mdoc`, with Markdoc parsing, searchable navigation, and repository-boundary tests.
-- Keep public SDK examples aligned to the published `5to1r` package and `TracifyClient` API. The strongest editorial references remain `/product/trace-viewer` and `/security`: concrete, structured, and restrained.
+- Keep public SDK examples aligned to the published `tracify` package and `TracifyClient` API. The strongest editorial references remain `/product/trace-viewer` and `/security`: concrete, structured, and restrained.
 - Avoid fabricated resource titles or generic blog links when a card makes a specific promise; use a real published slug or clearly label the resource as a guide.
 - The trace-clinic CTA promise is 30 minutes, one real trace, a root-cause map, and a release-gate recommendation. Preserve that context at the contact destination.
 
@@ -190,7 +190,7 @@
 - The homepage now leads with a realistic production incident rather than a generic trace: a selectable timeout/retry trace, root-cause inspector, recommended fix, and direct signup/demo path.
 - The page tells one consistent Detect → Inspect → Diagnose → Evaluate → Ship narrative, with incident-linked Trace, Cost, Evaluation, Prompts, and Alerts panels plus SDK/OTLP activation code and copy feedback.
 - Marketing metadata now positions Tracify around agent-failure diagnosis and `/opengraph-image` produces a bespoke social command-center card.
-- Legacy `5to1r` install strings in the final CTA now use `tracify`; the footer status label links to `/status`.
+- Legacy `tracify` install strings in the final CTA now use `tracify`; the footer status label links to `/status`.
 - Verification: `npx.cmd tsc --noEmit`, focused marketing ESLint, `git diff --check`, and a full `npm run build` pass. Next generates 58 routes, including the Open Graph image route.
 
 ## 2026-08-07 Dashboard Saved Runs Views
@@ -203,7 +203,7 @@
 - Missing dashboard routes now render an intentional not-found state with a return-to-projects action.
 - Alert muting now requires explicit confirmation and explains the available reopen path.
 - Overview now surfaces failure rate and p95 latency from the recent run sample, with honest sample/no-data labeling and filtered Runs links.
-- With the dev server running, `npm run smoke:beta` passes all 5 available checks and skips only the 2 checks requiring `FIVETOONE_SMOKE_API_KEY`/project credentials.
+- With the dev server running, `npm run smoke:beta` passes all 5 available checks and skips only the 2 checks requiring `TRACIFY_SMOKE_API_KEY`/project credentials.
 - Final production build passes after the dashboard/API changes, generating 58 routes. Browser-based visual QA could not complete because local dashboard navigation timed out before a reliable authenticated render.
 - A fresh browser tab successfully inspected the public trace-first entry page; the dashboard route redirects to `/sign-in?redirect_url=...` as expected, preventing authenticated dashboard screenshots in the current session.
 - Trace payload copy actions now handle clipboard failures, announce success/failure to assistive technology, and expose explicit accessible names/focus rings.
@@ -268,7 +268,7 @@
 - **Ingestion Pipeline:** SDK calls POST `/api/ingest` -> Inngest event -> validates, writes to Tinybird, upserts rollups to Convex, triggers alerts.
 - **Typography:** Uses **Geist Pixel Square** for logos (regular weight, normal tracking) and H1 headers, Geist Mono for UI/Data, and Geist Sans for prose.
 - **Aesthetics:** Strict "Developer-grade" look: **0px border radius**, monochrome palette (#000000 bg, #FFFFFF primary), and **Emil Kowalski** design engineering principles (tactile feedback, micro-animations, polish).
-- **Branding:** Site UI rebranded to **tracify** (lowercase logo with Geist Pixel Square, same monochrome styling). SDK packages already use `tracify`; internal storage keys and Inngest event IDs retain legacy `5to1r` prefixes for compatibility.
+- **Branding:** Site UI rebranded to **tracify** (lowercase logo with Geist Pixel Square, same monochrome styling). SDK packages already use `tracify`; internal storage keys and Inngest event IDs retain legacy `tracify` prefixes for compatibility.
 - **Navigation:** Integrated a custom monochromatic `DropdownMenu` for both Project Switching and Account management in the topbar.
 - **Legal:** Dedicated `/privacy` and `/terms` pages with a minimalist, linked **Footer** component.
 - **Auth:** Google OAuth credentials configured in `.env.prod`, `.env.local`, and Vercel production variables.
@@ -296,15 +296,15 @@
 ## Recent Important Changes
 - **Site Rebrand to Tracify (2026-06-14):**
   - **UI:** Marketing, auth, onboarding, dashboard, legal pages, and Slack alert copy now show **tracify** branding with unchanged monochrome styling (Geist Pixel Square logo, 0px radius, black/white palette).
-  - **Env copy:** Onboarding and quickstart surfaces now show `TRACIFY_API_KEY` instead of `FIVETOONE_API_KEY`.
+  - **Env copy:** Onboarding and quickstart surfaces now show `TRACIFY_API_KEY` instead of `TRACIFY_API_KEY`.
   - **Links:** Public docs/social/email links use **tracify.tech** domains.
   - **Unchanged:** localStorage keys, Inngest app/event IDs, and backend env var fallbacks kept for compatibility.
 
 - **Tracify SDK Package Rename (2026-06-14):**
   - **Public Packages:** Python distribution and TypeScript npm package metadata now use `tracify`.
-  - **Install Copy:** Marketing CTA, dashboard docs, SDK READMEs, quickstart docs, design specs, and project-manager summary now show `pip install tracify` and `npm install tracify`.
-  - **Imports:** Added Python `tracify` import package that re-exports the existing SDK, and added TypeScript `TracifyClient` export while preserving legacy `fivetoone` / `FiveToOneClient` compatibility.
-  - **Environment:** SDKs now prefer `TRACIFY_API_KEY` and `TRACIFY_CURRENT_RUN_ID`, with fallbacks for existing `FIVETOONE_*` variables.
+  - **Install Copy:** Marketing CTA, dashboard docs, SDK READMEs, quickstart docs, design specs, and project-manager summary now show `pip install tracify-sdk` and `npm install tracify-sdk`.
+  - **Imports:** Added Python `tracify` import package that re-exports the existing SDK, and added TypeScript `TracifyClient` export while preserving legacy `tracify` / `TracifyClient` compatibility.
+  - **Environment:** SDKs now prefer `TRACIFY_API_KEY` and `TRACIFY_CURRENT_RUN_ID`, with fallbacks for existing `TRACIFY_*` variables.
   - **Verification:** `npm run build` passes for the TypeScript SDK and full Next app. Python import smoke test passes using the repo virtualenv with local `PYTHONPATH`.
 
 - **Marketing Repositioning, Pricing, and Beta Smoke Script (2026-05-21):**
@@ -313,7 +313,7 @@
   - **Honest Pricing:** Added `/pricing` and rewrote the landing pricing teaser around Free/Pro/Team/Enterprise beta states without claiming replay, evals, email alerts, self-hosting, PDF export, or runtime controls as currently working.
   - **Navigation:** Marketing navigation no longer advertises Run Replay as a product surface; it points to reports instead.
   - **Smoke Tests:** Added `npm run smoke:beta` using `scripts/beta-smoke.mjs` for missing API key, invalid API key, invalid payload, protected route reachability, and optional valid-span/Convex-run verification when smoke env vars are provided.
-  - **Verification:** `npm run build`, `node --check scripts\beta-smoke.mjs`, and default `npm run smoke:beta` pass. Default smoke skips valid ingest/run checks until `FIVETOONE_SMOKE_API_KEY` and `FIVETOONE_SMOKE_PROJECT_ID` are set.
+  - **Verification:** `npm run build`, `node --check scripts\beta-smoke.mjs`, and default `npm run smoke:beta` pass. Default smoke skips valid ingest/run checks until `TRACIFY_SMOKE_API_KEY` and `TRACIFY_SMOKE_PROJECT_ID` are set.
 
 - **Reports, Honest Billing, and Tinybird Pipe Prep (2026-05-20):**
   - **Reports:** Added `/dashboard/[projectId]/reports` with a print-friendly project report covering run totals, failed runs, saved cost, span count, top models, top tools, recent alerts, and notable failed traces.
@@ -406,24 +406,24 @@
 
 - **SDK Install Copy Finalization (2026-05-17):**
   - **Goal:** Make every user-facing install path consistently show the now-published package names.
-  - **Change:** Onboarding Python install now uses `pip install 5to1r` instead of the old GitHub package URL.
-  - **Change:** Marketing final CTA terminal now shows both `pip install 5to1r` and `npm install 5to1r`.
-  - **Change:** The onboarding AI setup prompt now explicitly tells coding agents to use `pip install 5to1r` for Python and `npm install 5to1r` for TypeScript/Node.js.
-  - **Verification:** Searched source/docs for stale `pip install fivetoone`, GitHub Python install, `npm install @5to1r`, and `@5to1r/sdk` references outside dependency folders; `npm run build` passes.
+  - **Change:** Onboarding Python install now uses `pip install tracify-sdk` instead of the old GitHub package URL.
+  - **Change:** Marketing final CTA terminal now shows both `pip install tracify-sdk` and `npm install tracify-sdk`.
+  - **Change:** The onboarding AI setup prompt now explicitly tells coding agents to use `pip install tracify-sdk` for Python and `npm install tracify-sdk` for TypeScript/Node.js.
+  - **Verification:** Searched source/docs for stale `pip install tracify-sdk`, GitHub Python install, `npm install @tracify`, and `tracify` references outside dependency folders; `npm run build` passes.
 
 - **Python SDK PyPI Package Rename Prep (2026-05-17):**
-  - **Goal:** Make Python install match the public product/package name: `pip install 5to1r`.
-  - **Change:** `packages/python-sdk/pyproject.toml` now uses distribution name `5to1r` while keeping the import module as `fivetoone`.
-  - **Reason:** PyPI distribution names may be installed as `5to1r`, but Python import statements cannot cleanly use `from 5to1r import ...`; user code should install `5to1r` and import from `fivetoone`.
-  - **Docs:** Updated Python install snippets in app quickstart/docs and package README from `pip install fivetoone` to `pip install 5to1r`.
-  - **Verification:** `uv build` produced `dist/5to1r-0.1.0.tar.gz` and `dist/5to1r-0.1.0-py3-none-any.whl`; local wheel smoke test imported `FiveToOneClient`, `trace_agent`, `llm_call`, and `tool_call`; `uv publish --dry-run` passed. Real PyPI upload still needs a PyPI API token.
+  - **Goal:** Make Python install match the public product/package name: `pip install tracify-sdk`.
+  - **Change:** `packages/python-sdk/pyproject.toml` now uses distribution name `tracify` while keeping the import module as `tracify`.
+  - **Reason:** PyPI distribution names may be installed as `tracify`, but Python import statements cannot cleanly use `from tracify import ...`; user code should install `tracify` and import from `tracify`.
+  - **Docs:** Updated Python install snippets in app quickstart/docs and package README from `pip install tracify-sdk` to `pip install tracify-sdk`.
+  - **Verification:** `uv build` produced `dist/tracify-0.1.0.tar.gz` and `dist/tracify-0.1.0-py3-none-any.whl`; local wheel smoke test imported `TracifyClient`, `trace_agent`, `llm_call`, and `tool_call`; `uv publish --dry-run` passed. Real PyPI upload still needs a PyPI API token.
 
 - **Production Convex Auth Recovery (2026-05-17):**
   - **Issue:** Production project creation could stay on "waiting for auth", matching the previous dev failure.
   - **Cause:** The production Clerk instance had no JWT templates, so `ConvexProviderWithClerk` could not fetch `getToken({ template: "convex" })`.
   - **Fix:** Created production Clerk JWT template `convex` with `aud: "convex"` and standard user claims.
   - **Fix:** Deployed current Convex functions/auth config to prod deployment `focused-otter-289`.
-  - **Verification:** Production Clerk now lists JWT template `convex`, Convex prod env has `CLERK_JWT_ISSUER_DOMAIN=https://clerk.5to1r.com`, and Vercel production has the required Clerk/Convex env vars.
+  - **Verification:** Production Clerk now lists JWT template `convex`, Convex prod env has `CLERK_JWT_ISSUER_DOMAIN=https://clerk.tracify.tech`, and Vercel production has the required Clerk/Convex env vars.
   - **Runbook:** Detailed dev/prod troubleshooting steps are documented in `docs/troubleshooting-convex-clerk-auth.md`.
 
 - **Dashboard Layout Fix (2026-05-17):**
@@ -432,7 +432,7 @@
 42:   - **Fix:** Removed the height subtraction and set `main` to `h-svh pb-0` to fill the viewport and eliminate the gap.
 43: 
 44: - **Dashboard Decision Document Alignment Pass (2026-05-17):**
-  - **Source:** Read `5to1r - docs\5to1r_dashboard_decisions.docx` and used it as the dashboard MVP target.
+  - **Source:** Read `tracify - docs\tracify_dashboard_decisions.docx` and used it as the dashboard MVP target.
   - **Navigation:** Added `/dashboard/[projectId]/costs` and removed API Keys/Billing from primary sidebar navigation; those are now settings-owned actions per the decision doc.
   - **Settings Hub:** Settings now includes API Keys and Management tabs, making project operations discoverable without cluttering primary nav.
   - **Overview Scope:** Removed model distribution from the overview chart area; model breakdown now belongs on the Costs page.
@@ -452,7 +452,7 @@
   - **Verification:** Direct Tinybird query with `FORMAT JSON` returned JSON and `npm run build` passes.
 
 - **Historical Demo Data Seed (2026-05-17):**
-  - **Script:** Added `scratch/user-test-5to1r/seed-history.mjs` and `npm run seed:history` for local demo data generation.
+  - **Script:** Added `scratch/user-test-tracify/seed-history.mjs` and `npm run seed:history` for local demo data generation.
   - **Data Shape:** Seeds 13 previous days with 22 runs, 132 spans, varied costs, one failed run, and model coverage across `gpt-5.5`, `claude-3-opus-latest`, and `claude-3-5-sonnet-latest`.
   - **Verification:** Seed ran through the real `/api/ingest` path, Convex saved historical run summaries, Tinybird returned 14-day daily JSON rollups, and `npm run build` passes.
 
@@ -469,11 +469,11 @@
   - **UX:** Savings copy now always renders with `$0.00` when there is no computed saving instead of disappearing.
   - **UX:** Overview and Costs now keep spend as the primary number and show savings as smaller secondary sub-metrics in the same card.
   - **UX:** Dashboard Overview now has a 1d/7d/30d/90d range switcher and shows total potential savings for the selected period, not per-day savings.
-  - **Demo Data:** Added `scratch/user-test-5to1r/seed-savings.mjs` and `npm run seed:savings` to create a clear unoptimized-to-optimized savings pattern through the real ingest path.
+  - **Demo Data:** Added `scratch/user-test-tracify/seed-savings.mjs` and `npm run seed:savings` to create a clear unoptimized-to-optimized savings pattern through the real ingest path.
   - **Verification:** `npm run build` passes.
 
 - **Custom 404 Page (2026-05-17):**
-  - **Fix:** Added `src/app/not-found.tsx` using the existing monochrome 5to1r visual language for unmatched routes and `notFound()` cases.
+  - **Fix:** Added `src/app/not-found.tsx` using the existing monochrome tracify visual language for unmatched routes and `notFound()` cases.
   - **UX:** Includes direct actions back to `/dashboard` and `/`, plus a small trace-style status panel.
   - **Verification:** `npm run build` passes and Next generates the `_not-found` route.
 
@@ -488,17 +488,17 @@
   - **Issue:** Localhost showed internal server/proxy errors and the npm user-test script could not move onboarding past the listening state.
   - **Fix:** Restarted Next.js in normal `npm run dev` mode instead of binding to `127.0.0.1`, which avoided the localhost proxy hang.
   - **Fix:** `.env.local` now uses the Convex dev `TRACIFY_API_KEY_HASH_SECRET` and points `INNGEST_DEV` at `http://127.0.0.1:8288`.
-  - **Verification:** `http://localhost:3000` returns `200`, `/api/ingest` returns `202`, `scratch/user-test-5to1r` returns `Ingest status: 202 Accepted`, and Convex dev contains the generated run for project `jd74cdngtnqd2yw3gsb2602fv186t0hr`.
+  - **Verification:** `http://localhost:3000` returns `200`, `/api/ingest` returns `202`, `scratch/user-test-tracify` returns `Ingest status: 202 Accepted`, and Convex dev contains the generated run for project `jd74cdngtnqd2yw3gsb2602fv186t0hr`.
 
 - **Manual API Key Issuance + npm Package Rename (2026-05-16):**
-  - **SDK Install Copy:** Updated app onboarding, dashboard docs, quickstart docs, design spec, and TS SDK README so TypeScript installs use `npm install 5to1r` and imports use `from "5to1r"`.
-  - **Package Metadata:** `packages/ts-sdk/package.json` now publishes as `5to1r`; removed the accidental self-dependency from `package.json` and `package-lock.json`.
+  - **SDK Install Copy:** Updated app onboarding, dashboard docs, quickstart docs, design spec, and TS SDK README so TypeScript installs use `npm install tracify-sdk` and imports use `from "tracify-sdk"`.
+  - **Package Metadata:** `packages/ts-sdk/package.json` now publishes as `tracify`; removed the accidental self-dependency from `package.json` and `package-lock.json`.
   - **Admin Issuance:** Added `projects:createProjectForUser`, an admin-only Convex mutation that creates a project for a target Clerk user and returns the one-time plaintext API key using the same HMAC storage path as normal onboarding.
-  - **Access Control:** Dev Convex env `FIVETOONE_ADMIN_CLERK_USER_IDS` is set to the local admin Clerk user id `user_3DbExfanjwXgIVGD8jXscKuXf7S`.
+  - **Access Control:** Dev Convex env `TRACIFY_ADMIN_CLERK_USER_IDS` is set to the local admin Clerk user id `user_3DbExfanjwXgIVGD8jXscKuXf7S`.
   - **Verification:** Convex dev sync passed, manual project/API key creation succeeded for project `jd75ha4z0264kr6wsbes7vd8rs86trsa`, SDK package build passed, and root `npm run build` passes.
 
 - **npm SDK Publish Prep (2026-05-16):**
-  - **Issue:** `npm publish --access public` for `@5to1r/sdk@0.1.0` failed with npm `E403` because the npm account requires 2FA or a granular publish token with bypass 2FA.
+  - **Issue:** `npm publish --access public` for `tracify@0.1.0` failed with npm `E403` because the npm account requires 2FA or a granular publish token with bypass 2FA.
   - **Fix:** Added `packages/ts-sdk/tsconfig.json` so `npm run build` emits `dist/index.js` and `dist/index.d.ts`.
   - **Cleanup:** Removed stale `uuid` runtime/type dependencies from `packages/ts-sdk/package.json`; the SDK uses `crypto.randomUUID` with a fallback.
   - **Verification:** `npm run build` in `packages/ts-sdk` passes, and `npm pack --dry-run --cache C:\tmp\npm-cache` includes `README.md`, `dist/index.js`, `dist/index.d.ts`, and `package.json`.
@@ -512,7 +512,7 @@
 
 - **Dev Convex Project Seed + Clerk JWT Template Fix (2026-05-16):**
   - **Dev Data:** Created Convex dev project `Dev Terminal Project` for local Clerk user `user_3DbExfanjwXgIVGD8jXscKuXf7S`; project id is `jd77b4bxf1k3eq4ztxmphjgyy186vcf3`.
-  - **API Key Backup:** Saved the generated one-time dev API key to `C:\tmp\fivetoone_dev_terminal_project_api_key.txt`.
+  - **API Key Backup:** Saved the generated one-time dev API key to `C:\tmp\tracify_dev_terminal_project_api_key.txt`.
   - **Auth Fix:** Local Clerk instance had no JWT templates, so `ConvexProviderWithClerk` could not fetch `getToken({ template: "convex" })` and the app stayed in "waiting for auth". Created Clerk JWT template `convex` with `aud: "convex"` and standard user claims.
   - **Deployment Sync:** Ran `npx convex dev --once --typecheck disable` after the browser reported missing `projects:getProjectRouteState`; Convex dev now registers the route-state query.
   - **Verification:** `projects:getProjectsByUserOrOrg` returns the seeded project and `projects:getProjectRouteState` returns `{ status: "ready", projectId: "jd77b4bxf1k3eq4ztxmphjgyy186vcf3" }` when run against Convex dev with the matching Clerk identity.
@@ -531,13 +531,13 @@
   - **Fix:** Dashboard link buttons no longer pass unsupported `asChild` props to the local Base UI-backed `Button` component.
   - **Fix:** `agentRuns` project access typing now matches the legacy-compatible optional `projects.clerkUserId` schema field.
   - **Verification:** `npm run build` passes with Next.js 16.2.6.
-  - **Deployment:** Vercel project `5to1r/5to1r` was linked and production deployment `dpl_HsSNpJDGpET5miH4ji2MEZ8773JN` is Ready at `https://5to1r.vercel.app`.
+  - **Deployment:** Vercel project `tracify/tracify` was linked and production deployment `dpl_HsSNpJDGpET5miH4ji2MEZ8773JN` is Ready at `https://tracify.vercel.app`.
   - **Environment:** `.env.prod` values were applied to the Vercel production environment before the successful deploy.
   - **Runtime Correction:** `.env.prod` still contained template placeholders, causing Clerk runtime 500s (`Publishable key not valid`). Vercel production was temporarily overwritten with non-placeholder `.env.local` test/dev values and redeployed as `dpl_3AqxVmaB5qaP5LDnkJSeqL2QXjeZ`; recent 500 logs cleared.
   - **Clerk Production Keys:** Vercel production now has live Clerk keys and redeployed successfully as `dpl_3TiEbJ9qwnXEzuWYoLvYSYida3er`. Local ignored `.env.prod` was also updated with the live Clerk entries.
   - **Convex Production Switch:** Vercel production now points to Convex prod `focused-otter-289` (`https://focused-otter-289.convex.cloud` and `https://focused-otter-289.convex.site`) and redeployed successfully as `dpl_8rT1Ty4pWGnMveuRTd5LagdUu1rW`.
-  - **Convex Auth:** `convex/auth.config.ts` now reads `CLERK_JWT_ISSUER_DOMAIN` with a dev fallback. Convex prod has `CLERK_JWT_ISSUER_DOMAIN=https://clerk.5to1r.com`.
-  - **Production Secret:** Generated and set `TRACIFY_API_KEY_HASH_SECRET` in Vercel and Convex prod; a local backup is in `C:\tmp\fivetoone_api_key_hash_secret.txt`.
+  - **Convex Auth:** `convex/auth.config.ts` now reads `CLERK_JWT_ISSUER_DOMAIN` with a dev fallback. Convex prod has `CLERK_JWT_ISSUER_DOMAIN=https://clerk.tracify.tech`.
+  - **Production Secret:** Generated and set `TRACIFY_API_KEY_HASH_SECRET` in Vercel and Convex prod; a local backup is in `C:\tmp\tracify_api_key_hash_secret.txt`.
   - **Caution:** Inngest and Slack production values still need final real credentials; `INNGEST_DEV` was removed from Vercel production.
   - **Note:** `npm run lint` still reports pre-existing lint issues in `.agents`, `scratch`, and several marketing/UI files; these are not part of the Vercel production build blocker.
 
@@ -579,7 +579,7 @@
   - **Dashboard Entry:** `/dashboard` routes users with an existing project to `/dashboard/[projectId]` and users with no project to `/onboarding/project`, so onboarding does not run every login.
   - **API Key Handling:** API keys are generated on project creation, shown once, stored server-side only as HMAC-SHA256 hash plus prefix/last4, and the plaintext browser handoff is memory-only until copy.
   - **Install Step:** `/onboarding/install` now includes Python, TypeScript, and AI setup prompt modes.
-  - **Package Accuracy:** Real PyPI/npm install commands should only be shown when packages are published; current onboarding uses beta GitHub install commands because `5to1r` and `@5to1r/sdk` were not found in public registries.
+  - **Package Accuracy:** Real PyPI/npm install commands should only be shown when packages are published; current onboarding uses beta GitHub install commands because `tracify` and `tracify` were not found in public registries.
 - **Onboarding/Dashboard Navigation Escape Hatches:** Added navigation-only escape and re-entry paths between onboarding and dashboard.
   - **Onboarding Escape:** `/onboarding/project`, `/onboarding/api-key`, `/onboarding/install`, `/onboarding/waiting`, and `/onboarding/success` now show a quiet top-left Home/Dashboard link in the onboarding shell.
   - **API Key Protection:** The API key step warns before leaving if the one-time key is still available and has not been copied.
@@ -593,7 +593,7 @@
 - **Milestone 2 Part 3 - Ingestion + First Span Activation:** Added the minimum ingestion path needed for real onboarding activation.
   - **Ingest API:** `POST /api/ingest` accepts span JSON with Bearer API key auth, validates payloads up to 1MB, updates API key last-used metadata, and returns `202` after accepting valid spans.
   - **Key Validation:** API keys are validated by HMAC hash lookup; invalid/missing/revoked keys return `401` without revealing existence.
-  - **Processing:** `5to1r/span.received` Inngest event writes span rows to Tinybird and upserts Convex `agentRuns` summaries.
+  - **Processing:** `tracify/span.received` Inngest event writes span rows to Tinybird and upserts Convex `agentRuns` summaries.
   - **Activation:** `/onboarding/waiting` subscribes to `agentRuns.getProjectOnboardingState` and auto-advances only after a real run exists.
   - **Run Destination:** `/onboarding/success` now uses real `projectId` and `runId`; the destination remains the temporary run placeholder until the trace viewer milestone.
   - **Scope Control:** Full trace viewer, runs list, costs, alerts, billing, replay, evals, and integrations remain deferred.
@@ -607,21 +607,21 @@
 - **Milestone 2 Part 1 - Onboarding UI Flow:** Started the onboarding UI-only pass without backend integration.
   - **Separate Shell:** `/onboarding/*` uses a standalone centered dark panel, not the dashboard shell, marketing navbar, or footer.
   - **Five Steps:** Project -> API key -> Install SDK -> Waiting -> First span success are implemented as route segments.
-  - **Mock Key:** API key screen uses `5t1r_sk_live_mock_1234567890abcdef1234567890abcdef` and gates Continue on copying.
+  - **Mock Key:** API key screen uses `tracify_sk_live_mock_1234567890abcdef1234567890abcdef` and gates Continue on copying.
   - **No Fake Activation:** Waiting screen does not auto-advance from normal UI; success remains a separate route for the future real first-span activation.
   - **Backend Deferred:** Project creation, real key generation, ingestion, and first-span detection remain Part 2/Part 3 TODOs for this UI flow.
 - **Dashboard Sidebar Simplification:** Removed the recently added hover-peek and adjustable-width behavior because it made the expand control harder to use.
   - **Steady Widths:** Sidebar is back to fixed workspace widths: 240px expanded and 64px collapsed.
   - **No Hover Peek:** Collapsed sidebar no longer expands on hover; the top icon is the deliberate expand control.
-  - **No Resize Handle:** User drag-resizing was removed; `5to1r.sidebar.width` is no longer used by the shell.
-  - **Preserved Behavior:** Top header collapse/expand icon remains, collapsed state still persists in `5to1r.sidebar.collapsed`, and clicking a collapsed nav icon still expands before navigation.
+  - **No Resize Handle:** User drag-resizing was removed; `tracify.sidebar.width` is no longer used by the shell.
+  - **Preserved Behavior:** Top header collapse/expand icon remains, collapsed state still persists in `tracify.sidebar.collapsed`, and clicking a collapsed nav icon still expands before navigation.
 - **Dashboard Sidebar Workspace Assistance:** Refined the authenticated dashboard sidebar interaction model only.
-  - **Top Collapse Control:** Collapse/expand now lives as a quiet 28px icon in the 60px sidebar header, aligned with the `5to1r` logo when expanded.
+  - **Top Collapse Control:** Collapse/expand now lives as a quiet 28px icon in the 60px sidebar header, aligned with the `tracify` logo when expanded.
   - **Resizable Panel:** Permanent expanded sidebar width is user-resizable from 200px to 360px, with a 240px default and 64px collapsed width.
-  - **Persistent State:** Sidebar collapsed state persists in `5to1r.sidebar.collapsed`; custom width persists in `5to1r.sidebar.width`; group state remains preserved.
+  - **Persistent State:** Sidebar collapsed state persists in `tracify.sidebar.collapsed`; custom width persists in `tracify.sidebar.width`; group state remains preserved.
   - **Hover Peek:** Collapsed sidebar hover temporarily reveals labels/project switcher without shifting main content; peeking is overlay-only and not persisted.
   - **Assisted Nav:** Clicking a nav icon while collapsed or peeking permanently expands the sidebar, preserves/restores the saved width, opens that item's group when needed, and lets navigation continue.
-  - **Project Memory:** Mock project switcher stores the last selected project id in `5to1r.lastProjectId`.
+  - **Project Memory:** Mock project switcher stores the last selected project id in `tracify.lastProjectId`.
 - **Dashboard Shell Usability Pass:** Improved the authenticated dashboard entry point without building the full product surfaces.
   - **Collapsible Sidebar:** Sidebar now supports persisted expanded/collapsed widths (240px/64px), icon-only collapsed nav, and collapsed tooltips.
   - **Grouped Navigation:** Sidebar is organized into persisted OBSERVE, CONFIGURE, and RESOURCES groups while still hiding Replay, Evals, Integrations, Team, Memory, and Runtime.
@@ -631,13 +631,13 @@
 - **Dashboard Milestone 2:** Started onboarding plus the minimum ingestion pipeline needed for first-span activation.
   - **Onboarding Flow:** Create project -> copy API key -> install SDK -> wait for first span -> success.
   - **Activation Event:** Onboarding auto-advances only when a real first span creates the first Convex agent run.
-  - **API Key Security:** API keys use `5t1r_sk_live_` plus 32 hex chars, are shown once, and Convex stores only HMAC-SHA256 hash, prefix, last 4 chars, timestamps, and status.
+  - **API Key Security:** API keys use `tracify_sk_live_` plus 32 hex chars, are shown once, and Convex stores only HMAC-SHA256 hash, prefix, last 4 chars, timestamps, and status.
   - **Ingestion Minimum:** `POST /api/ingest` validates Bearer keys and span payloads, emits the Inngest span event, writes spans to Tinybird, and upserts Convex `agentRuns` for live onboarding detection.
   - **Activation Query:** `agentRuns.getProjectOnboardingState` returns project key display data plus the first real run so the waiting screen can advance without simulation.
   - **Run Placeholder:** `/dashboard/[projectId]/runs/[runId]` exists only as a received-run placeholder until the trace viewer milestone.
 - **Dashboard Shell Foundation:** Started the authenticated dashboard shell using `shadcn` `sidebar-03` as the structural base.
   - **Milestone:** Dashboard Milestone 1 started: authenticated shell and project selector only.
-  - **Visual Direction:** Adapted the shell to the 5to1r dashboard language: dark-only, sharp monochrome surfaces, no radius, no shadows, and no blue UI accents.
+  - **Visual Direction:** Adapted the shell to the tracify dashboard language: dark-only, sharp monochrome surfaces, no radius, no shadows, and no blue UI accents.
   - **Navigation:** MVP sidebar includes only Overview, Runs, Costs, Alerts, Settings, and Docs.
   - **Scope Control:** Deferred dashboard pages are hidden from nav; unfinished Phase 2/Phase 3 surfaces such as Replay, Evals, Integrations, Team, Runtime, and Memory are not exposed.
 - **Final landing page order:** Hero → Problem → DebugStream → FirstTrace → WhatYouGet → Use Cases → PricingTeaser → Final CTA → Footer
@@ -651,7 +651,7 @@
 - **Emil Kowalski Integration:** Adopted design engineering principles for UI polish, including scale-on-press, custom easing curves, and staggered entrances.
 - **Clerk v7 (Core 3) Compatibility:** Migrated from deprecated `<SignedIn>`/`<SignedOut>` components to the unified `<Show>` component.
 - **Build Configuration:** Excluded `scratch` directory from TypeScript compilation to prevent temporary scripts from blocking production builds.
-- **Custom Auth Pages Integration:** Created a production-grade authentication experience using Clerk with strict 5to1r design language.
+- **Custom Auth Pages Integration:** Created a production-grade authentication experience using Clerk with strict tracify design language.
   - **Auth Shell:** Split-screen layout (45% terminal panel, 55% auth form) with a "Home" back-link and mobile-optimized branding.
   - **Terminal Panel:** A looping agent trace simulation (`run-agent`, `llm_call`, `tool_call`) that signals technical capability. Now features staggered line entry with subtle y-translation.
   - **Clerk Appearance:** Comprehensive `Theme` override in `src/components/auth/clerk-appearance.ts` to enforce 0px radius, monochrome primary buttons (White/Black), and Geist Mono typography for all sub-components (inputs, cards, social buttons).
@@ -677,7 +677,7 @@
   - **Tech:** Uses `framer-motion` for subtle y-translation and opacity transitions on hover.
 - **Final CTA Overhaul:** Replaced the generic marketing banner with a compact, developer-centric `FinalCTA` component.
   - **Headline:** "Run your first trace." (Geist Mono).
-  - **Visual:** Compact terminal surface showing `pip install 5to1r` and `run-agent` with a `trace ready` confirmation.
+  - **Visual:** Compact terminal surface showing `pip install tracify-sdk` and `run-agent` with a `trace ready` confirmation.
   - **Purpose:** Transition from "learning" to "immediate action" after the pricing section.
 - **Full Frontend Design Package:** Complete 40-section design spec written to `docs/design-spec/`. Covers design tokens, all 30+ pages, component system, copy, SEO, file structure, build prompts, and QA checklist. Key decisions: `#0A0A0A` bg, `#6366F1` accent, 0px radius, Geist Pixel for logo, tagline "Five signals. One truth.", free tier 50K spans/month.
 
@@ -689,7 +689,7 @@
   - **Dataset:** `production`
 
 - **API Key Prefix Changed (2026-06-16):**
-  - **Change:** API keys now generated with `tracify_sk_live_` prefix instead of `5t1r_sk_live_`.
+  - **Change:** API keys now generated with `tracify_sk_live_` prefix instead of `tracify_sk_live_`.
   - **Validation:** Ingest API still accepts both prefixes for backward compatibility with existing keys.
 
 - **Google OAuth Updated (2026-06-16):**
@@ -698,14 +698,14 @@
 - **Convex Auth Config Deployed (2026-06-16):**
   - **Fix:** Deployed `convex/auth.config.ts` with `https://clerk.tracify.tech` to Convex production, resolving the "Auth: Waiting" hang during onboarding.
 
-- **Project Rename 5to1r → tracify (2026-06-15):**
-  - **Goal:** Complete the project/product rename from `5to1r` to `tracify`.
+- **Project Rename tracify → tracify (2026-06-15):**
+  - **Goal:** Complete the project/product rename from `tracify` to `tracify`.
   - **Change:** Updated `package.json` name to `tracify`.
   - **Change:** Updated all source code comments and visible product name references in docs.
   - **Change:** Updated `pyproject.toml` bug tracker URL to `github.com/tracify/python-sdk`.
   - **Change:** Updated Tinybird pipe/datasource descriptions.
   - **Change:** Updated Convex test alert text.
-  - **Retained:** Internal localStorage keys, Inngest event IDs (`5to1r/span.received`, `5to1r/alert.triggered`), and scratch scripts preserve legacy `5to1r` prefixes for backward compatibility.
+  - **Retained:** Internal localStorage keys, Inngest event IDs (`tracify/span.received`, `tracify/alert.triggered`), and scratch scripts preserve legacy `tracify` prefixes for backward compatibility.
   - **Verification:** `npm run build` pending.
 
 - **Blog CMS via Sanity (2026-06-15):**
@@ -753,7 +753,7 @@
 - Added `/docs/evaluation` documentation and expanded platform smoke coverage for the evaluation product/docs routes. Smoke requests now use per-request timeouts; the current local run timed out on the existing dev environment before completing, so production credential validation remains outstanding.
 - Configured a local-only `EVALUATION_INTERNAL_SECRET` consistently in `.env.local` and the Convex dev deployment; private evaluator endpoint checks returned 401 for the wrong secret and 422 for an authenticated but invalid payload. Formatted `tinybird/evaluation_scores.datasource` with the Tinybird CLI. Tinybird cloud deployment remains unavailable because the workspace is not logged in.
 - Corrected monitor aggregation to filter by configured score/evaluator name, count failed and error results, and honor hysteresis via `recoveryThreshold`; Convex codegen and Next production build pass afterward.
-- Routed online evaluation monitor breach/recovery events through the existing Inngest `5to1r/alert.triggered` flow so Convex alerts can reach configured Slack notifications with the standard deduplication path. Build and Convex codegen pass.
+- Routed online evaluation monitor breach/recovery events through the existing Inngest `tracify/alert.triggered` flow so Convex alerts can reach configured Slack notifications with the standard deduplication path. Build and Convex codegen pass.
 - Extended Tinybird evaluation score records and hourly aggregation to retain numeric, boolean, categorical, and text-derived score types instead of forwarding numeric values only. Tinybird formatting, Convex codegen, SDK build, Next build, targeted lint, and diff check pass.
 - Added `npm run deploy:tinybird:evaluation` with a guarded PowerShell deployment script and documented the required secret/authentication setup; it is ready to run after Tinybird CLI login.
 - Exposed monitor score name, aggregation, breach/recovery thresholds, and grouping controls in the Evaluation dashboard; build, Convex codegen, targeted lint, and diff check pass.
@@ -1094,7 +1094,7 @@
 - Convex environment variables apply directly to the deployment, so no source or schema change was required.
 
 ## Tracify API-Key Secret Rename (2026-08-10)
-- Renamed `FIVETOONE_API_KEY_HASH_SECRET` to `TRACIFY_API_KEY_HASH_SECRET` across Convex, Next.js, local environment files, examples, and operational documentation.
+- Renamed `TRACIFY_API_KEY_HASH_SECRET` to `TRACIFY_API_KEY_HASH_SECRET` across Convex, Next.js, local environment files, examples, and operational documentation.
 - Preserved the existing secret value separately in development and production so previously issued API keys continue to hash identically.
 - Synced and deployed Convex development and production, verified the new variable, and removed the old variable from both Convex deployments.
 - Added the new production variable to Vercel; its old variable remains temporarily for the currently deployed pre-rename Next.js build and can be removed after the next site deployment.
