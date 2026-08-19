@@ -16,7 +16,7 @@ export function SuccessStep({
         description="Your run is live. Click to inspect every step."
       />
       <div className="mb-6 border border-black/15 bg-[#f3f2ed] p-4 text-sm">
-        <div className="mb-2 text-[#10B981]">received</div>
+        <div className="mb-2 text-[#047857]">received</div>
         <div className="text-black/55">runId</div>
         <div className="break-all text-black/70">{runId}</div>
       </div>

@@ -87,7 +87,7 @@ export function ApiKeyStep() {
         </>
       ) : (
         <div className="border border-black/15 bg-[#f3f2ed] p-4">
-          <div className="text-sm text-[#F59E0B]">
+          <div className="text-sm text-[#92400E]">
             API key is no longer available.
           </div>
           <p className="mt-3 font-sans text-sm leading-6 text-black/60">

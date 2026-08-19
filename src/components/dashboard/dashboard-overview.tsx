@@ -309,7 +309,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
                 <YAxis yAxisId="failure" orientation="right" stroke="rgba(0,0,0,0.45)" fontSize={10} tickFormatter={(value) => `${value}%`} />
                 <Tooltip contentStyle={{ backgroundColor: "#ffffff", border: "1px solid rgba(0,0,0,0.15)", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }} />
                 <Bar yAxisId="runs" dataKey="runs" fill="#000000" barSize={18} name="Runs" />
-                <Line yAxisId="failure" type="monotone" dataKey="failureRate" stroke="#F59E0B" strokeWidth={2} dot={false} name="Failure rate" />
+                <Line yAxisId="failure" type="monotone" dataKey="failureRate" stroke="#B45309" strokeWidth={2} dot={false} name="Failure rate" />
               </ComposedChart>
             </ResponsiveContainer>
           </div>

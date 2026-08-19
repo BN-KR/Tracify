@@ -200,7 +200,7 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
 function StatusDot({ status }: { status: ChecklistStatus }) {
   if (status === "completed") {
     return (
-      <span className="flex items-center gap-2 text-[11px] text-[#0f9d6b]">
+      <span className="flex items-center gap-2 text-[11px] text-[#047857]">
         <span className="size-2 bg-[#10B981]" />
         completed
       </span>
@@ -210,7 +210,7 @@ function StatusDot({ status }: { status: ChecklistStatus }) {
   if (status === "current") {
     return (
       <span className="flex items-center gap-2 text-[11px] text-[#a67c00]">
-        <span className="size-2 bg-[#F59E0B]" />
+        <span className="size-2 bg-[#047857]" />
         current
       </span>
     );

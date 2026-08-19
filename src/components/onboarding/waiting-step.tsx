@@ -65,8 +65,8 @@ export function WaitingStep() {
         description="Run your agent. Tracify is listening on your project."
       />
       <div className="border border-black/15 bg-[#f3f2ed] p-4">
-        <div className="mb-4 flex items-center gap-2 text-[#F59E0B]">
-          <span className="size-2 animate-mono-pulse bg-[#F59E0B]" />
+        <div className="mb-4 flex items-center gap-2 text-[#92400E]">
+          <span className="size-2 animate-mono-pulse bg-[#B45309]" />
           <span className="text-[13px]">listening</span>
         </div>
         <dl className="grid gap-3 text-sm sm:grid-cols-3">
@@ -86,7 +86,7 @@ export function WaitingStep() {
             <dt className="text-[11px] uppercase tracking-wide text-black/55">
               Status
             </dt>
-            <dd className="mt-1 text-[#F59E0B]">listening</dd>
+            <dd className="mt-1 text-[#92400E]">listening</dd>
           </div>
         </dl>
       </div>
