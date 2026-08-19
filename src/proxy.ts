@@ -15,11 +15,26 @@ function isCloudAppPath(pathname: string) {
   return CLOUD_APP_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
+/**
+ * A cloud deployment sends non-app paths to the marketing host. That is correct in
+ * production, but on a developer machine it bounces you straight out of localhost and
+ * onto www.tracify.tech, so the site root can never be opened locally and the
+ * marketing/cloud boundary cannot be exercised. Keep local requests local.
+ */
+function isLocalHost(hostname: string) {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname.endsWith(".localhost");
+}
+
 export function proxy(request: NextRequest) {
   const deploymentKind = process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND ?? "marketing";
   const { pathname, search } = request.nextUrl;
 
-  if (deploymentKind === "cloud" && !isCloudAppPath(pathname) && !pathname.startsWith("/api/")) {
+  if (
+    deploymentKind === "cloud" &&
+    !isCloudAppPath(pathname) &&
+    !pathname.startsWith("/api/") &&
+    !isLocalHost(request.nextUrl.hostname)
+  ) {
     return NextResponse.redirect(new URL(`${pathname}${search}`, "https://www.tracify.tech"));
   }
 

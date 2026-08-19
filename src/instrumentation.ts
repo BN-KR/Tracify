@@ -30,7 +30,14 @@ export function register() {
   }
 
   const expectedOrigin = TRACIFY_REGIONS[publicRegion].origin;
-  if (process.env.NEXT_PUBLIC_SITE_URL !== expectedOrigin) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  // Outside production, allow a localhost origin. Pinning NEXT_PUBLIC_SITE_URL to the
+  // regional host on a developer machine makes the app treat production as its own
+  // origin, so post-authentication redirects leave localhost for the live site.
+  const isLocalOrigin =
+    process.env.NODE_ENV !== "production" &&
+    /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(siteUrl ?? "");
+  if (siteUrl !== expectedOrigin && !isLocalOrigin) {
     throw new Error(`NEXT_PUBLIC_SITE_URL must be ${expectedOrigin} for the ${publicRegion.toUpperCase()} deployment`);
   }
 }

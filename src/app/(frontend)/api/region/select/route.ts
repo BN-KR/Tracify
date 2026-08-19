@@ -14,7 +14,15 @@ export function GET(request: NextRequest) {
   const next = requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
     ? requestedNext
     : "/sign-in";
-  const destination = new URL(next, TRACIFY_REGIONS[regionId].origin);
+  // Selecting a region from a local marketing server must not jump to the live
+  // regional host, or local sign-in lands on production. TRACIFY_LOCAL_CLOUD_ORIGIN
+  // points at the locally running cloud host (see `npm run dev:cloud`).
+  const localCloudOrigin =
+    process.env.NODE_ENV !== "production" &&
+    (request.nextUrl.hostname === "localhost" || request.nextUrl.hostname === "127.0.0.1")
+      ? (process.env.TRACIFY_LOCAL_CLOUD_ORIGIN ?? "http://localhost:4000")
+      : null;
+  const destination = new URL(next, localCloudOrigin ?? TRACIFY_REGIONS[regionId].origin);
   const response = NextResponse.redirect(destination);
   response.cookies.set(TRACIFY_REGION_COOKIE, regionId, {
     domain: request.nextUrl.hostname.endsWith("tracify.tech") ? ".tracify.tech" : undefined,
