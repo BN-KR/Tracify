@@ -818,3 +818,50 @@ The single most important UI in the product.
 7. [pending] Configure regional OAuth callbacks and Stripe webhook signing secrets.
 8. [pending] Verify DNS/TLS, deep health, authentication, onboarding, ingestion isolation, wrong-region rejection, and dashboards in both regions.
 9. [completed] Complete build/type/content/SDK gates, browser-check the selector, and publish draft PR #14.
+
+# EU-first regional launch revision — 2026-08-16
+
+1. [pending] Revise PR #14 to expose only EU while preserving the dormant US implementation behind a disabled launch gate.
+2. [pending] Reuse and verify the existing free-plan EU service configuration; do not imply strict residency where Redis or Inngest cannot prove it.
+3. [pending] Configure only `eu.cloud.tracify.tech` DNS, TLS, authentication callbacks, EU Stripe webhook, and existing provider credentials.
+4. [pending] Merge through the pull-request workflow, deploy the exact merged `origin/main` commit to `tracify-cloud-eu`, and complete EU end-to-end verification.
+5. [deferred] Enable US only after physically US stateful infrastructure, unique credentials, operational controls, and cross-region isolation tests are available.
+
+# EU-first regional launch — SHIPPED 2026-08-19
+
+Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
+
+1. [completed] PR #17 restricts the public selector to EU via an `available` flag in
+   `src/lib/regions.ts`, rejects dormant regions server-side in `/api/region/select`, and filters
+   the status board. The US implementation stays defined and routable but unadvertised.
+2. [completed] Rebuilt the EU stateful services in genuinely EU regions after discovering that
+   GCP `europe-west2` is London, UK — not the EU. Tinybird workspace recreated as
+   `tracify_eu_west1` (AWS eu-west-1) with all four datafiles deployed; Redis moved to Upstash
+   (primary eu-west-1, TLS) because Redis Cloud's free tier gates TLS behind a paid plan.
+   Every region verified by IP against the provider's published ranges.
+3. [completed] `eu.cloud.tracify.tech` DNS via CNAME to `5ee7be47305fd6c5.vercel-dns-017.com`,
+   TLS issued, Google/GitHub callbacks registered, EU Stripe webhook
+   `we_1U5YRMV05QqKbrt9FFuI0zWx` created with its signing secret set.
+4. [completed] Merged `091d9da` and deployed it to both `tracify-cloud-eu` and the marketing
+   `tracify` project from a clean detached worktree. `/api/health/region` returns 200 with all
+   four dependencies healthy, which also proved the two write-only Vercel values
+   (`TINYBIRD_TOKEN`, `REDIS_URL`) are correct.
+5. [accepted limitation] Inngest Cloud runs in AWS us-east-2 (Ohio) with no EU region, and sits
+   on the primary ingestion path carrying span `input`/`output`. Decision: keep Inngest, apply
+   the existing default-on PII redaction before send, and disclose US event processing plainly in
+   the "Data residency" section of `/security` rather than claim end-to-end EU residency.
+6. [deferred] Enable US only after physically US stateful infrastructure, unique credentials,
+   operational controls, and cross-region isolation tests exist.
+
+## Follow-ups
+
+1. [pending] Rotate the `tracify_eu_west1` Tinybird token; this also invalidates the MCP URL,
+   which embeds the same token. Update `TINYBIRD_MCP_TOKEN` afterwards.
+2. [pending] Delete the superseded Redis Cloud databases `database-MSZ2JEQR` (London; its
+   password was exposed in a chat transcript) and `tracify-eu-west1` (Ireland).
+3. [pending] Add `STRIPE_SECRET_KEY` and the four `STRIPE_PRICE_*` values to `tracify-cloud-eu`;
+   billing on the EU host returns 503 until they exist.
+4. [pending] Reconnect Git automation for `tracify-cloud-eu`. Now safe: the project has a real
+   production deployment on `main`, so Vercel can no longer misclassify a first build.
+5. [optional] Replace Inngest with Upstash QStash on the EU deployment to close the residency
+   gap — 2 functions, 5 `inngest.send()` sites.
