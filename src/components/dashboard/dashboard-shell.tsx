@@ -5,8 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 
-const COLLAPSED_STORAGE_KEY = "5to1r.sidebar.collapsed";
-const LEGACY_COLLAPSED_STORAGE_KEY = "5to1r:dashboard-sidebar";
+const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
+const LEGACY_COLLAPSED_STORAGE_KEY = "tracify:dashboard-sidebar";
 
 const COLLAPSED_WIDTH = 64;
 const EXPANDED_WIDTH = 240;

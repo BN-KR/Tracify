@@ -15,7 +15,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 
-const LAST_PROJECT_STORAGE_KEY = "5to1r.lastProjectId";
+const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 
 export function ProjectSwitcher({ isCollapsed = false }: { isCollapsed?: boolean }) {
   const router = useRouter();

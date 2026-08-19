@@ -89,7 +89,7 @@ export function getApiKeyRegion(apiKey: string): TracifyRegionId | null {
   if (apiKey.startsWith(getRegionalApiKeyPrefix("eu"))) return "eu";
   if (apiKey.startsWith(getRegionalApiKeyPrefix("us"))) return "us";
   // Keys issued before regional cloud are assigned to the original EU deployment.
-  if (apiKey.startsWith("tracify_sk_live_") || apiKey.startsWith("5t1r_sk_live_")) return "eu";
+  if (apiKey.startsWith("tracify_sk_live_")) return "eu";
   return null;
 }
 

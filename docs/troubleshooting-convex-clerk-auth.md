@@ -203,7 +203,7 @@ name = convex
 aud = convex
 ```
 
-The template name is not cosmetic. `ConvexProviderWithClerk` asks for `template: "convex"`, so a template named `Convex`, `convex-prod`, or `5to1r` will not satisfy this flow.
+The template name is not cosmetic. `ConvexProviderWithClerk` asks for `template: "convex"`, so a template named `Convex`, `convex-prod`, or `tracify` will not satisfy this flow.
 
 ### 3. Convex auth provider config
 
@@ -306,7 +306,7 @@ Fix:
 
 ## Quick Recovery Commands
 
-Use these commands from `C:\5to1r`.
+Use these commands from `C:\tracify`.
 
 Check prod Convex env:
 

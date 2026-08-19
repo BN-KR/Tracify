@@ -10,8 +10,8 @@ import { useRouter } from "next/navigation";
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
 import { getOneTimeApiKey } from "@/lib/onboarding-client-state";
 
-const PROJECT_ID_STORAGE_KEY = "5to1r.onboarding.projectId";
-const PROJECT_NAME_STORAGE_KEY = "5to1r.onboarding.projectName";
+const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
+const PROJECT_NAME_STORAGE_KEY = "tracify.onboarding.projectName";
 const FALLBACK_PROJECT_NAME = "research-agent-prod";
 
 export function WaitingStep() {

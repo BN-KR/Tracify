@@ -398,7 +398,7 @@ export async function POST(request: NextRequest) {
         };
 
         try {
-          await inngest.send({ name: "5to1r/span.received", data: payload });
+          await inngest.send({ name: "tracify/span.received", data: payload });
           enqueued.push(otelSpan.spanId);
         } catch (err) {
           console.error("Inngest send failed for OTel span:", otelSpan.spanId, err);

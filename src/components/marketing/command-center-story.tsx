@@ -11,8 +11,8 @@ const products = [
 ] as const;
 
 const runtimes = {
-  TypeScript: ["npm install 5to1r", "import { traceAgent } from '5to1r'", "", "const tracedRun = traceAgent(", "  () => agent.run(input)", ")"],
-  Python: ["pip install 5to1r", "from 5to1r import trace_agent", "", "@trace_agent", "def run_agent(input):", "    return agent.run(input)"],
+  TypeScript: ["npm install tracify-sdk", "import { traceAgent } from 'tracify-sdk'", "", "const tracedRun = traceAgent(", "  () => agent.run(input)", ")"],
+  Python: ["pip install tracify-sdk", "from tracify import trace_agent", "", "@trace_agent", "def run_agent(input):", "    return agent.run(input)"],
   OTLP: ["POST /v1/traces", "x-tracify-key: $TRACIFY_API_KEY", "", "service.name=research-agent", "span.type=tool_call"],
 } as const;
 type Runtime = keyof typeof runtimes;

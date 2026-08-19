@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import {
-  FiveToOneClient,
+  TracifyClient,
   RuntimePolicy,
   TRACIFY_REGION_HOSTS,
 } from "../src/index";
@@ -20,8 +20,8 @@ function makePolicy(overrides: Partial<RuntimePolicy> = {}): RuntimePolicy {
   };
 }
 
-function makeClient(): FiveToOneClient {
-  return new FiveToOneClient({
+function makeClient(): TracifyClient {
+  return new TracifyClient({
     apiKey: "test-key",
     host: "http://localhost:9999",
   });
@@ -29,17 +29,17 @@ function makeClient(): FiveToOneClient {
 
 describe("regional cloud configuration", () => {
   it("selects the requested regional host", () => {
-    const client = new FiveToOneClient({ apiKey: "test-key", region: "us" });
+    const client = new TracifyClient({ apiKey: "test-key", region: "us" });
     expect((client as any).host).toBe(TRACIFY_REGION_HOSTS.us);
   });
 
   it("rejects a regional key configured for the wrong cloud", () => {
-    expect(() => new FiveToOneClient({ apiKey: "tracify_sk_live_eu_example", region: "us" }))
+    expect(() => new TracifyClient({ apiKey: "tracify_sk_live_eu_example", region: "us" }))
       .toThrow("belongs to EU");
   });
 
   it("assigns pre-region keys to the EU cloud", () => {
-    expect(() => new FiveToOneClient({ apiKey: "tracify_sk_live_legacy", region: "us" }))
+    expect(() => new TracifyClient({ apiKey: "tracify_sk_live_legacy", region: "us" }))
       .toThrow("belongs to EU");
   });
 });
@@ -93,17 +93,17 @@ describe("RuntimePolicy type structure", () => {
   });
 });
 
-// ─── FiveToOneClient construction ─────────────────────────────────
-describe("FiveToOneClient", () => {
+// ─── TracifyClient construction ─────────────────────────────────
+describe("TracifyClient", () => {
   it("constructs with API key", () => {
     const client = makeClient();
-    expect(client).toBeInstanceOf(FiveToOneClient);
+    expect(client).toBeInstanceOf(TracifyClient);
   });
 
   it("constructs with env fallback", () => {
     process.env.TRACIFY_API_KEY = "env-key";
-    const client = new FiveToOneClient({ host: "http://localhost:9999" });
-    expect(client).toBeInstanceOf(FiveToOneClient);
+    const client = new TracifyClient({ host: "http://localhost:9999" });
+    expect(client).toBeInstanceOf(TracifyClient);
     delete process.env.TRACIFY_API_KEY;
   });
 });

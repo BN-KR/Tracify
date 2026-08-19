@@ -1,10 +1,10 @@
 import { Inngest } from "inngest";
 
-export const inngest = new Inngest({ id: "5to1r" });
+export const inngest = new Inngest({ id: "tracify" });
 
 // Typed event map for all Inngest events used in this app
 export type SpanIngestedEvent = {
-  name: "5to1r/span.received";
+  name: "tracify/span.received";
   data: {
     spanId: string;
     runId: string;

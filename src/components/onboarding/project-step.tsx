@@ -11,10 +11,10 @@ import posthog from "posthog-js";
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
 import { setOneTimeApiKey } from "@/lib/onboarding-client-state";
 
-const API_KEY_COPIED_STORAGE_KEY = "5to1r.onboarding.apiKeyCopied";
-const PROJECT_ID_STORAGE_KEY = "5to1r.onboarding.projectId";
-const PROJECT_NAME_STORAGE_KEY = "5to1r.onboarding.projectName";
-const LAST_PROJECT_STORAGE_KEY = "5to1r.lastProjectId";
+const API_KEY_COPIED_STORAGE_KEY = "tracify.onboarding.apiKeyCopied";
+const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
+const PROJECT_NAME_STORAGE_KEY = "tracify.onboarding.projectName";
+const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 const isPostHogConfigured = Boolean(
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
     process.env.NEXT_PUBLIC_POSTHOG_HOST,

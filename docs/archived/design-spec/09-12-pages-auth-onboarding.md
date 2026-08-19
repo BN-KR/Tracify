@@ -99,11 +99,11 @@ without blocking your agent's execution.
 
 ```
 01 INSTALL
-pip install tracify
-or: npm install tracify
+pip install tracify-sdk
+or: npm install tracify-sdk
 
 02 INSTRUMENT
-@trace_agent(api_key="5t1r_sk_...")
+@trace_agent(api_key="tracify_sk_live_sk_...")
 async def my_agent(query):
     ...
 
@@ -136,7 +136,7 @@ Panel shows: span timeline, cost breakdown, LLM call details with token counts.
 ```python
 from tracify import trace_agent
 
-@trace_agent(api_key="5t1r_sk_your_key_here")
+@trace_agent(api_key="tracify_sk_live_sk_your_key_here")
 async def research_agent(query: str) -> str:
     result = await llm_call(query)
     sources = await search_tool(query)
@@ -145,7 +145,7 @@ async def research_agent(query: str) -> str:
 
 **TypeScript:**
 ```typescript
-import { traceAgent } from "tracify"
+import { traceAgent } from "tracify-sdk"
 
 const researchAgent = traceAgent(
   async (query: string) => {
@@ -153,7 +153,7 @@ const researchAgent = traceAgent(
     const sources = await searchTool(query)
     return result
   },
-  { apiKey: "5t1r_sk_your_key_here" }
+  { apiKey: "tracify_sk_live_sk_your_key_here" }
 )
 ```
 
@@ -241,7 +241,7 @@ Do you know what they're doing?
 #### SECTION 12 — Footer
 
 ```
-■ 5to1r                 Product      Developers   Company
+■ tracify                 Product      Developers   Company
                         Overview     Docs         Blog
 Agent observability     Trace Viewer Python SDK   Privacy
 infrastructure for      Pricing      TypeScript   Terms
@@ -291,7 +291,7 @@ Q: Do unused spans roll over?
 Q: What happens at the end of my trial?
 Q: Is there a startup discount?
 Q: Do you offer annual invoicing for Enterprise?
-Q: Can I self-host 5to1r?
+Q: Can I self-host tracify?
 ```
 
 **CTA:** "Talk to sales" link below Enterprise card.
@@ -370,7 +370,7 @@ const clerkAppearance = {
 
 ```
 Left panel:
-  ■ 5to1r
+  ■ tracify
   "You left something running."
   (animated terminal showing a trace arriving)
 
@@ -396,7 +396,7 @@ Right panel:
 
 ```
 Left panel:
-  ■ 5to1r
+  ■ tracify
   "Instrument your agent in 2 lines of code."
   (code snippet + animated span arriving)
 
@@ -549,7 +549,7 @@ This key authenticates your agent with tracify.
 Copy it now — you won't see it again.
 
 ┌─────────────────────────────────────────────────┐
-│ 5t1r_sk_a8f3c2b1d9e4f6a2b8c3d1e9f4a6b2        │ [Copy]
+│ tracify_sk_live_sk_a8f3c2b1d9e4f6a2b8c3d1e9f4a6b2        │ [Copy]
 └─────────────────────────────────────────────────┘
 
 ⚠ Store this key securely. Do not commit it to source control.
@@ -571,13 +571,13 @@ Choose your runtime:
 ─────────────────────────────────────────────────
 PYTHON
 
-pip install tracify
+pip install tracify-sdk
 
 ─────────────────────────────────────────────────
 
 from tracify import trace_agent
 
-@trace_agent(api_key="5t1r_sk_your_key")
+@trace_agent(api_key="tracify_sk_live_sk_your_key")
 async def my_agent(query: str) -> str:
     # your agent code here
     result = await llm_call(query)
@@ -586,19 +586,19 @@ async def my_agent(query: str) -> str:
 ─────────────────────────────────────────────────
 TYPESCRIPT
 
-npm install tracify
+npm install tracify-sdk
 # or: yarn add tracify
 
 ─────────────────────────────────────────────────
 
-import { traceAgent } from "tracify"
+import { traceAgent } from "tracify-sdk"
 
 const myAgent = traceAgent(
   async (query: string) => {
     const result = await llmCall(query)
     return result
   },
-  { apiKey: "5t1r_sk_your_key" }
+  { apiKey: "tracify_sk_live_sk_your_key" }
 )
 
 [My SDK is installed →]
@@ -676,7 +676,7 @@ What's next:
 
 ```
 ┌──────────────────────────────┐
-│  ■ 5to1r   [project name ▾] │  ← project switcher dropdown
+│  ■ tracify   [project name ▾] │  ← project switcher dropdown
 ├──────────────────────────────┤
 │  Overview                    │
 │  Runs                        │

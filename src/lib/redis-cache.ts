@@ -15,17 +15,17 @@ type CachedPayload = {
 const DEFAULT_STALE_TTL_SECONDS = 24 * 60 * 60;
 
 declare global {
-  var __fivetooneRedisClient:
+  var __tracifyRedisClient:
     | ReturnType<typeof createClient>
     | undefined;
-  var __fivetooneRedisConnectPromise: Promise<unknown> | undefined;
+  var __tracifyRedisConnectPromise: Promise<unknown> | undefined;
 }
 
 function getRedisClient() {
   const url = process.env.REDIS_URL;
   if (!url) return null;
 
-  if (!globalThis.__fivetooneRedisClient) {
+  if (!globalThis.__tracifyRedisClient) {
     const client = createClient({
       url,
       socket: {
@@ -37,10 +37,10 @@ function getRedisClient() {
     client.on("error", (error) => {
       console.error("Redis cache error:", error);
     });
-    globalThis.__fivetooneRedisClient = client;
+    globalThis.__tracifyRedisClient = client;
   }
 
-  return globalThis.__fivetooneRedisClient;
+  return globalThis.__tracifyRedisClient;
 }
 
 async function connectRedis() {
@@ -52,12 +52,12 @@ async function connectRedis() {
     // rejection on globalThis so every later call rethrows it even after Redis
     // recovers, and (b) resolve instantly after an idle disconnect without actually
     // reconnecting, leaving commands to run against a closed client.
-    globalThis.__fivetooneRedisConnectPromise ??= client
+    globalThis.__tracifyRedisConnectPromise ??= client
       .connect()
       .finally(() => {
-        globalThis.__fivetooneRedisConnectPromise = undefined;
+        globalThis.__tracifyRedisConnectPromise = undefined;
       });
-    await globalThis.__fivetooneRedisConnectPromise;
+    await globalThis.__tracifyRedisConnectPromise;
   }
 
   return client;

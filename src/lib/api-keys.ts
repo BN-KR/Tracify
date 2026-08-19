@@ -17,7 +17,7 @@ export function hashApiKey(apiKey: string) {
 }
 
 export function isTracifyApiKey(apiKey: string) {
-  return apiKey.startsWith("tracify_sk_live_") || apiKey.startsWith("5t1r_sk_live_");
+  return apiKey.startsWith("tracify_sk_live_");
 }
 
 export function getWrongRegionApiKeyResponse(apiKey: string) {

@@ -52,8 +52,8 @@ type NavGroup = {
   items: NavItem[];
 };
 
-const GROUP_STORAGE_KEY = "5to1r:dashboard-sidebar-groups";
-const COLLAPSED_STORAGE_KEY = "5to1r.sidebar.collapsed";
+const GROUP_STORAGE_KEY = "tracify:dashboard-sidebar-groups";
+const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
 const COLLAPSED_WIDTH = 64;
 const EXPANDED_WIDTH = 240;
 

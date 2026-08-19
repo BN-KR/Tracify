@@ -1,9 +1,12 @@
-export interface FiveToOneConfig {
+export interface TracifyConfig {
     apiKey?: string;
     host?: string;
+    /** Tracify Cloud data region. Ignored when `host` is provided. Defaults to TRACIFY_REGION or EU. */
+    region?: TracifyRegion;
     projectId?: string;
 }
-export type TracifyConfig = FiveToOneConfig;
+export type TracifyRegion = "eu" | "us";
+export declare const TRACIFY_REGION_HOSTS: Record<TracifyRegion, string>;
 export interface SpanData {
     spanId?: string;
     runId?: string;
@@ -77,7 +80,7 @@ export interface OrchestrateOptions<T> {
     calculateCost?: (result: T, model: string) => number;
     runId?: string;
 }
-export declare class FiveToOneClient {
+export declare class TracifyClient {
     protected apiKey: string;
     protected host: string;
     protected ingestUrl: string;
@@ -85,7 +88,7 @@ export declare class FiveToOneClient {
     private checkCostUrl;
     private _lastFailOpen;
     private promptCache;
-    constructor(config?: FiveToOneConfig);
+    constructor(config?: TracifyConfig);
     ingest(data: SpanData): Promise<void>;
     /** Resolve a prompt version labeled for an environment without redeploying application code. */
     getPrompt(name: string, environment?: string, options?: PromptResolutionOptions): Promise<PromptResolution>;
@@ -113,9 +116,7 @@ export declare class FiveToOneClient {
     private checkCost;
     orchestrate<T>(options: OrchestrateOptions<T>): Promise<T>;
 }
-export declare class TracifyClient extends FiveToOneClient {
-}
-export declare function traceAgent<T extends (...args: any[]) => Promise<any>>(func: T, config?: FiveToOneConfig): T;
+export declare function traceAgent<T extends (...args: any[]) => Promise<any>>(func: T, config?: TracifyConfig): T;
 export declare const llmCall: (data: Omit<SpanData, "spanType">) => Promise<void>;
 export declare const toolCall: (data: Omit<SpanData, "spanType">) => Promise<void>;
 export declare const decision: (data: Omit<SpanData, "spanType">) => Promise<void>;

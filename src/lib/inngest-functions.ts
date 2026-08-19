@@ -15,7 +15,7 @@ export const processSpan = inngest.createFunction(
     id: "process-span",
     name: "Process ingested span",
     retries: 3,
-    triggers: [{ event: "5to1r/span.received" }],
+    triggers: [{ event: "tracify/span.received" }],
   },
   async ({ event, step }) => {
     const span = event.data;
@@ -119,7 +119,7 @@ export const processSpan = inngest.createFunction(
         if (!response.ok) console.warn("Online evaluation returned", response.status);
         if (response.ok) {
           const body = await response.json().catch(() => null) as { results?: Array<{ resultId?: string; evaluatorId?: string; scoreName?: string; value?: number | boolean | string; status?: string }>; alerts?: Array<{ projectId: string; runId: string; type: string; message: string; triggeredAt: string }> } | null;
-          for (const alert of body?.alerts ?? []) await inngest.send({ name: "5to1r/alert.triggered", data: alert });
+          for (const alert of body?.alerts ?? []) await inngest.send({ name: "tracify/alert.triggered", data: alert });
           const tinybird = await import("@/lib/tinybird");
           for (const result of body?.results ?? []) {
             if (!result.resultId || !result.evaluatorId || !result.scoreName || result.value === undefined) continue;
@@ -146,7 +146,7 @@ export const processSpan = inngest.createFunction(
 
       if (project?.costThresholdUsd && run && run.totalCostUsd > project.costThresholdUsd) {
         await inngest.send({
-          name: "5to1r/alert.triggered",
+          name: "tracify/alert.triggered",
           data: {
             projectId: span.projectDocId,
             runId: span.runId,
@@ -159,7 +159,7 @@ export const processSpan = inngest.createFunction(
 
       if (span.spanType === "error") {
         await inngest.send({
-          name: "5to1r/alert.triggered",
+          name: "tracify/alert.triggered",
           data: {
             projectId: span.projectDocId,
             runId: span.runId,
@@ -179,7 +179,7 @@ export const processAlert = inngest.createFunction(
   {
     id: "process-alert",
     name: "Process alert",
-    triggers: [{ event: "5to1r/alert.triggered" }],
+    triggers: [{ event: "tracify/alert.triggered" }],
   },
   async ({ event, step }) => {
     const alert = event.data;

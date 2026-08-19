@@ -8,7 +8,7 @@ import { DashboardStartState } from "@/components/dashboard/dashboard-start-stat
 import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 import { api } from "convex/_generated/api";
 
-const LAST_PROJECT_STORAGE_KEY = "5to1r.lastProjectId";
+const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 
 export function DashboardHomeRouter() {
   const router = useRouter();

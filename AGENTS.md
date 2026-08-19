@@ -26,11 +26,11 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 - **Path aliases:** `@/*` → `./src/*`, `convex/*` → `./convex/*`
 - **Ingestion:** SDK → `POST /api/ingest` → Inngest → Tinybird (raw spans) + Convex (run summaries). Tinybird = time-series telemetry. Convex = app metadata (projects, agentRuns, alerts, comments). Redis = API cache between Tinybird and dashboard.
 - **Auth:** Clerk Keyless mode for local dev. Convex authenticates via Clerk JWT template named `convex` with `aud: "convex"`. Clerk v7 uses `<Show>`, not deprecated `<SignedIn>`/`<SignedOut>`.
-- **API keys:** HMAC-SHA256 with `TRACIFY_API_KEY_HASH_SECRET`. Prefix: `tracify_sk_live_` (legacy `5t1r_sk_live_` accepted). Plaintext never stored server-side — shown once during onboarding.
+- **API keys:** HMAC-SHA256 with `TRACIFY_API_KEY_HASH_SECRET`. Prefix: `tracify_sk_live_` (legacy `tracify_sk_live_` accepted). Plaintext never stored server-side — shown once during onboarding.
 
 ## Conventions
 - **Design:** Monochrome (#000000 bg, #FFFFFF text), 0px border-radius. Geist Pixel Square for logos/H1s, Geist Mono for UI/data, Geist Sans for prose. Tailwind v4 + shadcn/ui (`base-nova`). No blue accents.
-- **Dashboard localStorage keys:** `5to1r.sidebar.collapsed`, `5to1r.lastProjectId`, `5to1r:dashboard-sidebar-groups`, `5to1r.onboarding.*`
+- **Dashboard localStorage keys:** `tracify.sidebar.collapsed`, `tracify.lastProjectId`, `tracify:dashboard-sidebar-groups`, `tracify.onboarding.*`
 - **`legacy-peer-deps=true`** in `.npmrc`. Use `npx.cmd` on Windows for shadcn additions.
 - **React:** Server Components by default, Client Components at leaf nodes.
 

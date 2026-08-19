@@ -9,9 +9,9 @@ API KEYS                                           [+ Create key]
 
 ──────────────────────────────────────────────────────────────────
 Name            Key (masked)          Created    Last used  Actions
-Production      5t1r_sk_a3f2••••      Apr 20     2m ago     [Reveal] [Copy] [Rotate] [Revoke]
-Staging         5t1r_sk_b1c2••••      Apr 21     1h ago     [Reveal] [Copy] [Rotate] [Revoke]
-CI/CD           5t1r_sk_c3d4••••      Apr 22     Never      [Reveal] [Copy] [Rotate] [Revoke]
+Production      tracify_sk_live_sk_a3f2••••      Apr 20     2m ago     [Reveal] [Copy] [Rotate] [Revoke]
+Staging         tracify_sk_live_sk_b1c2••••      Apr 21     1h ago     [Reveal] [Copy] [Rotate] [Revoke]
+CI/CD           tracify_sk_live_sk_c3d4••••      Apr 22     Never      [Reveal] [Copy] [Rotate] [Revoke]
 ──────────────────────────────────────────────────────────────────
 ```
 
@@ -30,7 +30,7 @@ After creation — shown ONCE:
 
 YOUR NEW API KEY
 
-5t1r_sk_a3f2b1c9d4e5f6a7b8c9d0e1f2a3b4
+tracify_sk_live_sk_a3f2b1c9d4e5f6a7b8c9d0e1f2a3b4
 
 ⚠ Copy this key now. It will not be shown again.
 
@@ -62,7 +62,7 @@ Any agents using it will stop sending spans.
 WEBHOOKS                                           [+ Add endpoint]
 
 Endpoint                        Events            Status   Actions
-https://hooks.myapp.com/5to1r   run.failed        Active   [Edit] [Test] [Delete]
+https://hooks.myapp.com/tracify   run.failed        Active   [Edit] [Test] [Delete]
 https://hooks.myapp.com/alerts  alert.triggered   Active   [Edit] [Test] [Delete]
 ```
 
@@ -100,7 +100,7 @@ Integration card anatomy:
 
 # 23 DOCS WEBSITE
 
-**Route:** `/docs` or `docs.5to1r.com`
+**Route:** `/docs` or `docs.tracify.tech`
 
 ## Docs Navigation Tree
 
@@ -182,7 +182,7 @@ TIP:     left-border: 2px --success;   bg: --success-dim
 ──────────────────────────────────────────────────────────
  1  from tracify import trace_agent
  2  
- 3  @trace_agent(api_key="5t1r_sk_...")
+ 3  @trace_agent(api_key="tracify_sk_live_sk_...")
  4  async def research_agent(query: str) -> str:
  5      result = await llm_call(query)
  6      return result

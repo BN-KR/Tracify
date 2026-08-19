@@ -5,7 +5,7 @@ Observability and tracing for AI agents. Gain full visibility into your agent's 
 ## Installation
 
 ```bash
-npm install 5to1r
+npm install tracify-sdk
 # or
 yarn add tracify
 ```
@@ -22,7 +22,7 @@ export TRACIFY_API_KEY=your_sk_live_...
 3. Instrument your agent:
 
 ```typescript
-import { traceAgent, llmCall, toolCall } from 'tracify';
+import { traceAgent, llmCall, toolCall } from 'tracify-sdk';
 
 const agent = traceAgent(async (query: string) => {
   // LLM Call

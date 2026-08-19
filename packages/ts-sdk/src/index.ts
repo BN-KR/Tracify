@@ -1,4 +1,4 @@
-export interface FiveToOneConfig {
+export interface TracifyConfig {
   apiKey?: string;
   host?: string;
   /** Tracify Cloud data region. Ignored when `host` is provided. Defaults to TRACIFY_REGION or EU. */
@@ -6,7 +6,6 @@ export interface FiveToOneConfig {
   projectId?: string;
 }
 
-export type TracifyConfig = FiveToOneConfig;
 export type TracifyRegion = "eu" | "us";
 
 export const TRACIFY_REGION_HOSTS: Record<TracifyRegion, string> = {
@@ -22,7 +21,7 @@ function parseRegion(value: string | undefined): TracifyRegion | undefined {
 function apiKeyRegion(apiKey: string): TracifyRegion | undefined {
   if (apiKey.startsWith("tracify_sk_live_eu_")) return "eu";
   if (apiKey.startsWith("tracify_sk_live_us_")) return "us";
-  if (apiKey.startsWith("tracify_sk_live_") || apiKey.startsWith("5t1r_sk_live_")) return "eu";
+  if (apiKey.startsWith("tracify_sk_live_")) return "eu";
   return undefined;
 }
 
@@ -136,7 +135,7 @@ function isLatencyAbort(error: unknown): boolean {
   return error instanceof Error && error.name === "AbortError";
 }
 
-export class FiveToOneClient {
+export class TracifyClient {
   protected apiKey: string;
   protected host: string;
   protected ingestUrl: string;
@@ -145,10 +144,10 @@ export class FiveToOneClient {
   private _lastFailOpen: boolean = false;
   private promptCache = new Map<string, { value: PromptResolution; expiresAt: number }>();
 
-  constructor(config: FiveToOneConfig = {}) {
-    this.apiKey = config.apiKey || process.env.TRACIFY_API_KEY || process.env.FIVETOONE_API_KEY || '';
+  constructor(config: TracifyConfig = {}) {
+    this.apiKey = config.apiKey || process.env.TRACIFY_API_KEY || '';
     if (!this.apiKey) {
-      console.warn('Tracify Warning: TRACIFY_API_KEY or FIVETOONE_API_KEY is not set');
+      console.warn('Tracify Warning: TRACIFY_API_KEY is not set');
     }
     const configuredRegion = config.region ?? parseRegion(process.env.TRACIFY_REGION) ?? "eu";
     this.host = (config.host || process.env.TRACIFY_HOST || TRACIFY_REGION_HOSTS[configuredRegion]).replace(/\/$/, '');
@@ -167,7 +166,7 @@ export class FiveToOneClient {
 
     const span = {
       spanId: data.spanId || createId(),
-      runId: data.runId || process.env.TRACIFY_CURRENT_RUN_ID || process.env.FIVETOONE_CURRENT_RUN_ID || 'unknown',
+      runId: data.runId || process.env.TRACIFY_CURRENT_RUN_ID || 'unknown',
       createdAt: data.createdAt || new Date().toISOString(),
       metadata: data.metadata || {},
       input: typeof data.input === 'string' ? data.input : JSON.stringify(data.input || ''),
@@ -256,7 +255,7 @@ export class FiveToOneClient {
 
   async orchestrate<T>(options: OrchestrateOptions<T>): Promise<T> {
     const { policy, call, model, input, calculateCost, runId: explicitRunId } = options;
-    const runId = explicitRunId || process.env.TRACIFY_CURRENT_RUN_ID || process.env.FIVETOONE_CURRENT_RUN_ID || createId();
+    const runId = explicitRunId || process.env.TRACIFY_CURRENT_RUN_ID || createId();
     const allModels = [model, ...policy.fallbackChain.filter((m) => m !== model)];
 
     let lastError: unknown = null;
@@ -435,11 +434,10 @@ export class FiveToOneClient {
   }
 }
 
-export class TracifyClient extends FiveToOneClient {}
 
 export function traceAgent<T extends (...args: any[]) => Promise<any>>(
   func: T,
-  config: FiveToOneConfig = {}
+  config: TracifyConfig = {}
 ): T {
   const client = new TracifyClient(config);
 
@@ -448,7 +446,6 @@ export function traceAgent<T extends (...args: any[]) => Promise<any>>(
     const startTime = Date.now();
     
     process.env.TRACIFY_CURRENT_RUN_ID = runId;
-    process.env.FIVETOONE_CURRENT_RUN_ID = runId;
 
     try {
       const result = await func(...args);

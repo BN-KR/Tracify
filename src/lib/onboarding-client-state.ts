@@ -27,8 +27,8 @@ export function clearOneTimeApiKey() {
   emit();
 }
 
-const RETURN_PATH_STORAGE_KEY = "5to1r.onboarding.returnPath";
-const ONBOARDING_DISMISSED_STORAGE_KEY = "5to1r.onboarding.dismissed";
+const RETURN_PATH_STORAGE_KEY = "tracify.onboarding.returnPath";
+const ONBOARDING_DISMISSED_STORAGE_KEY = "tracify.onboarding.dismissed";
 
 export function setReturnPath(value: string) {
   if (typeof window !== "undefined") {

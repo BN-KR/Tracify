@@ -267,9 +267,9 @@ Zip `manifest.json`, `color.png` (192x192), and `outline.png` (32x32) — all at
 ## Key Files in This Project
 | File | Purpose |
 |------|---------|
-| `C:\5to1r\teams-bot\bot.js` | Bot server code |
-| `C:\5to1r\teams-bot\start-bot.bat` | Environment vars + launch script |
-| `C:\5to1r\teams-bot\sessions.json` | Persisted opencode session mappings |
-| `C:\5to1r\teams-bot\manifest\manifest.json` | Teams app manifest |
-| `C:\5to1r\teams-bot\manifest\tracify-bot.zip` | Packaged Teams app |
+| `C:\tracify\teams-bot\bot.js` | Bot server code |
+| `C:\tracify\teams-bot\start-bot.bat` | Environment vars + launch script |
+| `C:\tracify\teams-bot\sessions.json` | Persisted opencode session mappings |
+| `C:\tracify\teams-bot\manifest\manifest.json` | Teams app manifest |
+| `C:\tracify\teams-bot\manifest\tracify-bot.zip` | Packaged Teams app |
 | `C:\Users\krist\.config\opencode\opencode.jsonc` | opencode config with Composio MCP |

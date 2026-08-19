@@ -20,10 +20,10 @@ Depending on your environment, run one of the following commands:
 
 \`\`\`bash
 # Python
-pip install 5to1r
+pip install tracify-sdk
 
 # TypeScript / Node.js
-npm install 5to1r
+npm install tracify-sdk
 \`\`\`
 
 ## 2. Initialize the Client
@@ -31,7 +31,7 @@ npm install 5to1r
 Initialize the SDK with your Project API Key. You can find your API key in the [Settings](/dashboard/settings) page.
 
 \`\`\`python
-from 5to1r import TracifyClient
+from tracify import TracifyClient
 
 client = TracifyClient(api_key="tracify_sk_live_...")
 \`\`\`
@@ -41,7 +41,7 @@ client = TracifyClient(api_key="tracify_sk_live_...")
 Wrap your agent's main execution loop with the \`@trace_agent\` decorator.
 
 \`\`\`python
-from 5to1r import trace_agent
+from tracify import trace_agent
 
 @trace_agent(client=client)
 def run_agent(task):
@@ -96,12 +96,12 @@ High-performance observability for Node.js and Browser-based agents.
 
 ## Installation
 \`\`\`bash
-npm install 5to1r
+npm install tracify-sdk
 \`\`\`
 
 ## Usage
 \`\`\`typescript
-import { TracifyClient } from "5to1r";
+import { TracifyClient } from "tracify-sdk";
 
 const client = new TracifyClient({
   apiKey: process.env.TRACIFY_API_KEY
@@ -141,10 +141,10 @@ export function DocsViewer() {
   const [activeTab, setActiveTab] = useState<keyof typeof DOCS>("quickstart");
 
   return (
-    <div className="flex h-full min-h-[600px] border border-[#2A2A2A] bg-[#0A0A0A] font-mono">
+    <div className="flex h-full min-h-[600px] border border-black/15 bg-[#f3f2ed] font-mono">
       {/* Docs Sidebar */}
-      <div className="w-64 border-r border-[#2A2A2A] bg-[#111111]">
-        <div className="flex items-center gap-2 border-b border-[#2A2A2A] p-4 text-[12px] font-bold text-white uppercase tracking-widest">
+      <div className="w-64 border-r border-black/15 bg-white">
+        <div className="flex items-center gap-2 border-b border-black/15 p-4 text-[12px] font-bold text-black uppercase tracking-widest">
           <BookOpen className="size-4" />
           <span>Documentation</span>
         </div>
@@ -154,10 +154,10 @@ export function DocsViewer() {
               key={id}
               onClick={() => setActiveTab(id as keyof typeof DOCS)}
               className={cn(
-                "flex w-full items-center justify-between px-3 py-2 text-[12px] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-inset",
+                "flex w-full items-center justify-between px-3 py-2 text-[12px] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-inset",
                 activeTab === id
-                  ? "bg-[#161616] text-white"
-                  : "text-[#666666] hover:bg-[#161616] hover:text-[#999999]"
+                  ? "bg-[#f3f2ed] text-black"
+                  : "text-black/55 hover:bg-[#f3f2ed] hover:text-black/60"
               )}
             >
               <span>{doc.title}</span>
@@ -174,23 +174,23 @@ export function DocsViewer() {
             remarkPlugins={[remarkGfm]}
             components={{
               h1: ({ className, ...props }) => (
-                <h1 className={cn("text-2xl font-bold border-b border-[#2A2A2A] pb-4 mb-8 text-white", className)} {...props} />
+                <h1 className={cn("text-2xl font-bold border-b border-black/15 pb-4 mb-8 text-black", className)} {...props} />
               ),
               h2: ({ className, ...props }) => (
-                <h2 className={cn("text-lg font-bold text-white mt-10 mb-4", className)} {...props} />
+                <h2 className={cn("text-lg font-bold text-black mt-10 mb-4", className)} {...props} />
               ),
               code: ({ className, children, ...props }) => {
                 const match = /language-(\w+)/.exec(className || "");
                 const isInline = !match;
                 return isInline ? (
-                  <code className="bg-[#161616] px-1 py-0.5 rounded-none text-[#CCCCCC]" {...props}>
+                  <code className="bg-[#f3f2ed] px-1 py-0.5 rounded-none text-black/70" {...props}>
                     {children}
                   </code>
                 ) : (
                   <div className="relative group my-6">
-                    <div className="absolute -left-4 top-0 bottom-0 w-1 bg-white opacity-20" />
-                    <pre className="bg-[#111111] p-4 border border-[#2A2A2A] overflow-x-auto rounded-none">
-                      <code className={cn("font-mono text-xs text-[#999999]", className)} {...props}>
+                    <div className="absolute -left-4 top-0 bottom-0 w-1 bg-black opacity-20" />
+                    <pre className="bg-[#050505] p-4 border border-black overflow-x-auto rounded-none">
+                      <code className={cn("font-mono text-xs text-[#f4d44d]", className)} {...props}>
                         {children}
                       </code>
                     </pre>
@@ -198,10 +198,10 @@ export function DocsViewer() {
                 );
               },
               p: ({ className, ...props }) => (
-                <p className={cn("text-[#999999] leading-relaxed mb-4", className)} {...props} />
+                <p className={cn("text-black/60 leading-relaxed mb-4", className)} {...props} />
               ),
               ul: ({ className, ...props }) => (
-                <ul className={cn("list-square list-inside mb-4 text-[#999999]", className)} {...props} />
+                <ul className={cn("list-square list-inside mb-4 text-black/60", className)} {...props} />
               ),
             }}
           >

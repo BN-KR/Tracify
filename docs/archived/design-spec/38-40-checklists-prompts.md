@@ -230,7 +230,7 @@ Auth layout (layout.tsx):
 - Left panel: bg #111111, border-right 1px #2A2A2A
 
 Brand panel (brand-panel.tsx):
-- Logo: "■ 5to1r" in Geist Pixel
+- Logo: "■ tracify" in Geist Pixel
 - Tagline: "Five signals. One truth."
 - Feature list:
   • Real-time agent observability
@@ -272,7 +272,7 @@ forgot-password/page.tsx:
 ## Prompt D — Dashboard Shell
 
 ```
-Build the authenticated dashboard shell for 5to1r.
+Build the authenticated dashboard shell for tracify.
 
 Files:
 - src/app/dashboard/layout.tsx

@@ -40,11 +40,11 @@ export function FinalCTA() {
             <div className="flex flex-col gap-1">
               <div className="flex gap-2">
                 <span className="text-[#666666] shrink-0">$</span>
-                <span className="text-[#999999]">pip install tracify</span>
+                <span className="text-[#999999]">pip install tracify-sdk</span>
               </div>
               <div className="flex gap-2">
                 <span className="text-[#666666] shrink-0">$</span>
-                <span className="text-[#999999]">npm install 5to1r</span>
+                <span className="text-[#999999]">npm install tracify-sdk</span>
               </div>
               <div className="flex gap-2">
                 <span className="text-[#666666] shrink-0">$</span>

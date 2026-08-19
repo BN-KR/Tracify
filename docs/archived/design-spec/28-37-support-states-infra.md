@@ -63,7 +63,7 @@ Use case:    [________________________]
 
 ## Status
 
-`/status` redirects to `status.5to1r.com` (external Statuspage or Betterstack).
+`/status` redirects to `status.tracify.tech` (external Statuspage or Betterstack).
 
 ---
 
@@ -419,7 +419,7 @@ Payment failed:        Payment failed. Update your billing method.
 # 37 FRONTEND FILE STRUCTURE
 
 ```
-c:\5to1r\src\
+c:\tracify\src\
 │
 ├── app\
 │   ├── (marketing)\
