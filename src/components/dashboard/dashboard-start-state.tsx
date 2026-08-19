@@ -85,7 +85,7 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
               {hasProject ? "No spans received yet." : "Create your first project."}
             </h1>
           </div>
-          <div className="hidden border border-black/15 bg-[#f3f2ed] px-3 py-2 text-[12px] text-[#a67c00] sm:block">
+          <div className="hidden border border-black/15 bg-[#f3f2ed] px-3 py-2 text-[12px] text-[#7d5e00] sm:block">
             {hasProject ? "waiting for first span" : "no project"}
           </div>
         </div>
@@ -209,7 +209,7 @@ function StatusDot({ status }: { status: ChecklistStatus }) {
 
   if (status === "current") {
     return (
-      <span className="flex items-center gap-2 text-[11px] text-[#a67c00]">
+      <span className="flex items-center gap-2 text-[11px] text-[#7d5e00]">
         <span className="size-2 bg-[#047857]" />
         current
       </span>

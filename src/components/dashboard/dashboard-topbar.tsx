@@ -348,7 +348,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                                 className={cn(
                                   "truncate font-mono text-[10px] uppercase tracking-widest",
                                   alert.type === "cost_exceeded"
-                                    ? "text-[#a67c00]"
+                                    ? "text-[#7d5e00]"
                                     : "text-red-600",
                                 )}
                               >
