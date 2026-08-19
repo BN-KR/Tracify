@@ -147,8 +147,22 @@ DECISION 2026-08-18: Option A. BN-KR is recreating the Tinybird workspace in `eu
       - [ ] ACL: still the all-privileges `default` user. Create a scoped user — the app only
             needs GET, SET, INCRBY, EXPIRE, TTL, PING and EVAL on `analytics:*` plus the
             rate-limit keys.
-      - [ ] Delete the old London database `database-MSZ2JEQR`, and treat its password as burned
+      - [x] Both superseded Redis Cloud databases deleted 2026-08-19; EU health check still
+            returns `redis: ok`, confirming the live Upstash database was untouched.
+      - [x] (superseded) Delete the old London database `database-MSZ2JEQR`, and treat its password as burned
             (it was pasted in plaintext into a chat transcript on 2026-08-18).
+      - [x] Clerk DNS records deleted 2026-08-19 (accounts/clerk/clkmail/clk._domainkey/
+            clk2._domainkey all confirmed no longer resolving) — closes the dangling-CNAME
+            subdomain-takeover risk left over from the Better Auth migration.
+      - [x] The London Tinybird token committed in `.tinyb` history appears already dead: the
+            committed token returns HTTP 404 against `api.europe-west2.gcp.tinybird.co`, and
+            `tb workspace ls` earlier returned "workspace not found" — consistent with the
+            europe-west2 workspace having been deleted. Suggestive, not conclusive; if the
+            workspace is confirmed gone, no rotation is needed for that credential.
+      - [ ] STILL OUTSTANDING — rotate the **eu-west-1** workspace token. Rotating the API token
+            also invalidates the MCP URL, since `https://mcp.tinybird.co?token=…` embeds that
+            same token; one rotation covers both. This workspace is live and holds the deployed
+            schema, so this is the exposure that actually matters.
       - [ ] ROTATE the Upstash REST token for `concrete-buffalo-140061` — it was pasted
             unmasked into a chat transcript on 2026-08-18 and must be considered compromised.
             Upstash console → database → rotate/reset token.
@@ -244,7 +258,25 @@ DECISION 2026-08-18: Option A. BN-KR is recreating the Tinybird workspace in `eu
     Tinybird fallback means a *missing* `TINYBIRD_HOST` on a non-cloud deployment would silently
     hit the global `api.tinybird.co` host instead of the EU workspace.
   - `INNGEST_SIGNING_KEY` is not read anywhere in `src/` or `convex/` — only `INNGEST_EVENT_KEY`.
-- [ ] Merge the regional PR, reconnect Git for `tracify-cloud-eu`, and deploy the exact merged `origin/main` commit.
+- [x] DONE 2026-08-19 — PR #17 merged (squash, all checks green incl. GitGuardian) as
+      `091d9da`, now the tip of `origin/main`. Deployed that exact commit to BOTH projects from a
+      clean detached worktree (never from the dirty main tree, so no `scratch/` upload):
+        `tracify-cloud-eu`  -> tracify-cloud-d4pqdn0fh, Ready, production
+        `tracify` (marketing) -> tracify-1zmm63ov5, Ready, production, serving www.tracify.tech
+      Git automation remains disconnected on the regional project; deploys were done via
+      `vercel deploy --prod` with a locally written `.vercel/project.json`. Reconnecting Git is
+      still optional/outstanding.
+- [x] VERIFIED LIVE 2026-08-19 — `https://eu.cloud.tracify.tech/api/health/region` returns
+      HTTP 200 `{"ok":true,"region":"eu"}` with every dependency healthy:
+      convex ok (592ms), tinybird ok (334ms), redis ok (404ms), inngest ok (configuration).
+      This finally proves the two write-only Vercel values are correct: `TINYBIRD_TOKEN`
+      authenticated against the new eu-west-1 workspace, and `REDIS_URL` connected over
+      `rediss://`. The earlier suspicion that `TINYBIRD_TOKEN` held the host string was WRONG —
+      BN-KR was right that it was correct.
+- [x] EU-only selector verified live on www.tracify.tech: `/cloud` lists only "Europe" (US gone,
+      count label correctly singular "region"), and `/api/region/select?region=us` returns
+      307 back to `/cloud` instead of setting the cookie. `/security` shows the new
+      "Data residency" family stating EU storage and US event processing.
 - [ ] Verify EU DNS/TLS, authentication, onboarding, API-key creation, native/OTLP ingestion, Tinybird storage, Redis quotas, Inngest processing, Stripe billing, dashboard reads, and `/api/health/region`.
 
 ### US launch — deferred, must remain unavailable
@@ -1054,7 +1086,15 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 - [x] Update native/OTLP ingestion, SDKs, onboarding, billing metadata, status, and documentation.
 - [x] Create and initialize isolated EU and US Convex production deployments with unique runtime secrets.
 - [x] Create EU and US Vercel projects, configure Next.js, and apply region-specific production/preview settings; keep Git automation disconnected until merged release readiness.
-- [x] Attach `eu.cloud.tracify.tech` and `us.cloud.tracify.tech` to their matching Vercel projects.
+- [ ] ⚠ STALE CLAIM, corrected 2026-08-19 — "Attach `eu.cloud.tracify.tech` and
+      `us.cloud.tracify.tech` to their matching Vercel projects" was marked done, but the Vercel
+      API reports `domains: []` for `tracify-cloud-eu` (vs 7 domains on the main `tracify`
+      project, so the field is reliable). The domain is NOT attached. Evidence:
+      `eu.cloud.tracify.tech` resolves correctly to `76.76.21.21` (Vercel) but returns HTTP 404,
+      i.e. Vercel receives the request and has no project bound to that hostname.
+      Also `latestDeployment: null` — the EU project has never deployed anything, which is
+      expected: Git automation is intentionally disconnected per
+      `docs/regional-cloud-runbook.md:59`, to be reconnected only after the regional PR merges.
 - [x] Add and deploy dependency-aware regional health endpoints; verify both live Convex health responses.
 - [x] Add a shared atomic Redis quota for native and OTLP ingestion with regional isolation and `429` retry semantics.
 - [ ] Add the two DNS A records at Domeneshop and verify Vercel TLS issuance. EU record confirmed done 2026-08-17 (see EU-first launch checklist above); US record remains deferred per the EU-only launch decision.

@@ -1,8 +1,18 @@
 # Project Memory
 
+## 2026-08-16 Mandatory reply format: every reply starts with "TRACIFY"
+- Every reply in this repo, from any agent, must begin with the literal line `TRACIFY` on its own, a blank line, then the reply. See CLAUDE.md "Reply format" section — that's the enforced instruction; this entry is just the pointer so it isn't missed.
+
+## 2026-08-16 Regional cloud launch decision: EU first
+- Free-plan Tinybird, Redis, and Inngest environments must not be treated as physically regional merely because they have logical environment names. The owner accepted an EU-first launch.
+- PR #14's regional architecture may retain dormant US support, but customer-facing selection and documentation must expose EU only until physically US Tinybird, Redis, and event-processing infrastructure is available and verified.
+- Reuse the existing Stripe account and catalog. Only an EU-specific webhook signing secret and EU OAuth callback registration are needed when `eu.cloud.tracify.tech` becomes the application origin.
+- Do not promise strict EU residency unless the existing Redis and Inngest services' storage/processing locations are verified. Describe limitations honestly.
+- The maintained workflow and owner-action checklist is the pinned regional-cloud section at the top of `task.md`.
+
 ## 2026-08-16 Pending work needs BN-KR's own machine
 - `task.md` has a `⚠ PENDING — needs BN-KR on their own machine` section pinned at the very top. Read it first whenever asked "what do I need to do" or "what's pending" — it's the maintained source of truth, not this file or conversation history.
-- It currently tracks: the 5 still-open EU/US regional cloud provisioning steps (DNS, Tinybird, Redis/Inngest, Stripe webhooks, final Git deploy), the uncommitted Resilience Testing dashboard branch (`codex/resilience-testing-dashboard`) and its remaining verification steps, a Convex codegen gap from merged PR #15 (`teamsWebhookUrl` field — hand-patched `convex/_generated/api.d.ts` for the resilience module too, both need a real `npx convex codegen` run), and setting up a GitHub account for Claude Code commit attribution.
+- It currently tracks: the EU-first regional-cloud launch and deferred US gates, the uncommitted Resilience Testing dashboard branch (`codex/resilience-testing-dashboard`) and its remaining verification steps, a Convex codegen gap from merged PR #15 (`teamsWebhookUrl` field — hand-patched `convex/_generated/api.d.ts` for the resilience module too, both need a real `npx convex codegen` run), and setting up a GitHub account for Claude Code commit attribution.
 - Update that section as items resolve or new local-machine-only blockers appear; don't let it go stale.
 
 ## 2026-08-15 Docs IA refinement from Langfuse reference
@@ -1184,3 +1194,20 @@
 - The existing Tinybird host is European and the existing Redis Cloud URL is one shared database. They may seed the EU setup, but must never be reused for US. Independent Tinybird, Redis, and Inngest resources remain launch blockers and their secrets are intentionally absent from regional Vercel projects.
 - Local deploy keys and copied environment artifacts live only under ignored `scratch/tracify-regional/`; never commit or print their values. The non-secret authoritative inventory and external launch gates live in `config/regional-cloud.json`.
 - The latent Better Auth SAML plugin was removed during regional deployment work because `@better-auth/sso` imports Node-only crypto/samlify and cannot bundle in Convex's HTTP runtime. Do not claim SAML support until it is reintroduced through a Convex-compatible architecture and verified in both regions.
+
+## EU regional cloud is LIVE (2026-08-19) — and "europe" is not "the EU"
+- `eu.cloud.tracify.tech` is live and healthy on merged commit `091d9da`. `/api/health/region` returns 200 with convex, tinybird, redis, and inngest all `ok`. This supersedes the 2026-08-15 entry above, which is now stale in several places: both regional domains were NOT already attached (the EU domain was attached on 2026-08-19; US remains unattached by design), and DNS now uses a CNAME to `5ee7be47305fd6c5.vercel-dns-017.com`, not the legacy `76.76.21.21` A record.
+- **The costliest lesson: a cloud region named `europe-*` is not necessarily in the EU.** GCP `europe-west2` is London (UK) and `europe-west6` is Zurich (CH); the UK left the EU in 2020. Both the Tinybird workspace and the first Redis database were built in `europe-west2` and recorded as "confirmed EU-located" before anyone checked. Always verify by resolving the endpoint and matching the IP against `https://ip-ranges.amazonaws.com/ip-ranges.json` or `https://www.gstatic.com/ipranges/cloud.json`. Never trust a region's name.
+- Verified EU: Convex `jovial-owl-711` (aws eu-west-1), Tinybird `tracify_eu_west1` at `https://api.eu-west-1.aws.tinybird.co` (`52.211.129.79`), Upstash Redis `concrete-buffalo-140061` primary eu-west-1 (`52.214.68.234`).
+- **Inngest runs in AWS us-east-2 (Ohio) and has no EU region.** It is the primary ingestion path — `inngest.send()` carries span `input`/`output`, so every trace transits the US. Default-on PII redaction runs before the send. Decision: keep Inngest, disclose it plainly in the "Data residency" section of `/security`, and do not claim end-to-end EU residency. Replacement candidate if a customer ever demands it: Upstash QStash (2 functions, 5 send sites).
+- Redis moved from Redis Cloud to Upstash because Redis Cloud's free 30 MB tier gates TLS behind a paid plan. Upstash gives TLS by default. It is a **Global-type** database: a non-EU read region can be added in one click with no code change and no deploy, silently breaking residency. Re-check the read-region list before each release.
+- Public region selector now offers EU only. `src/lib/regions.ts` carries an `available` flag with `getAvailableRegions()`/`isRegionAvailable()`; `/api/region/select` rejects dormant regions server-side so a hand-typed `?region=us` cannot set the cookie. US stays defined and routable so US-issued keys are still detected as wrong-region.
+- `/cloud` renders only when `NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND=marketing` (`src/proxy.ts` redirects it away on cloud deployments), so **the region selector ships with the marketing `tracify` project, not the regional ones**. A regional-only deploy will not update it.
+
+## Tooling and credential facts learned the hard way (2026-08-19)
+- `vercel` is not on PATH but `npx vercel` works and the CLI is authenticated as `bnkr` (scope `tracify-tech`). Env vars can be listed/added/removed. Do not claim Vercel is unreachable from this environment.
+- Vercel env vars marked *Sensitive* are **write-only**: `vercel env pull` returns `[SENSITIVE]`, so nobody can read them back. Audit names with `npx vercel env ls production --project <p> --scope tracify-tech`. A wrong value is only provable at runtime — `/api/health/region` is the check.
+- `TINYBIRD_HOST` must include `https://`. `src/lib/tinybird.ts` interpolates it directly into `fetch()` and falls back to the global `https://api.tinybird.co`, so a bare hostname breaks every call and a missing value silently targets the wrong region. A swapped host/token pair was caught this way: `TINYBIRD_HOST` held a `p.eyJ…` JWT.
+- Tinybird Forward workspaces reject `POST /v0/datasources` and `/v0/pipes` ("can only be done via deployments"). Schema must go through `tb deploy`, run **from the repository root** where `.tinyb` lives. Its trailing `'charmap' codec can't encode '\u2713'` error on Windows is console encoding, not failure.
+- `.tinyb` holds a live Tinybird token and was **tracked in git** with the token committed until 2026-08-18. Now gitignored; never re-add it. `scratch/tracify-regional/` was likewise unignored despite the runbook claiming otherwise — also fixed.
+- `INNGEST_SIGNING_KEY` does not exist in this codebase; only `INNGEST_EVENT_KEY` is read.
