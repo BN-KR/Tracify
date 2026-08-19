@@ -19,7 +19,8 @@
     "smoke:beta": "node scripts/beta-smoke.mjs",
     "smoke:platform": "node scripts/platform-smoke.mjs",
     "stripe:create-managed-product": "node scripts/create-managed-payments-product.mjs",
-    "content:import-payload": "node scripts/export-payload-to-markdoc.mjs"
+    "content:import-payload": "node scripts/export-payload-to-markdoc.mjs",
+    "verify:eu-trace": "node scripts/verify-eu-trace.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
