@@ -354,7 +354,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.12)" vertical={false} />
                 <XAxis 
                   dataKey="day" 
-                  stroke="rgba(0,0,0,0.45)" 
+                  stroke="rgba(0,0,0,0.45)"
                   fontSize={10} 
                   tickFormatter={(val) => new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 />
@@ -371,7 +371,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
                 <Line 
                   type="monotone" 
                   dataKey="totalCostUsd" 
-                  stroke="#000000" 
+                  stroke="#000000"
                   strokeWidth={2} 
                   dot={false}
                   activeDot={{ r: 4, fill: "#FFFFFF", stroke: "#000000", strokeWidth: 2 }}

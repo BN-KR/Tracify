@@ -319,7 +319,7 @@ export function RunsTable({ projectId }: RunsTableProps) {
               className={cn(
                 "border px-3 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black",
                 statusFilter === status 
-                  ? "bg-black text-white border-black" 
+                  ? "bg-black text-white border-black"
                   : "bg-transparent text-black/55 border-black/15 hover:border-black/30"
               )}
             >
