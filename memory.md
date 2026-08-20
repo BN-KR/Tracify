@@ -1,5 +1,13 @@
 # Project Memory
 
+## 2026-08-20 gstack activation implementation
+- Started `codex/gstack-activation` from `origin/main`; preserved unrelated untracked `graphify-out/`.
+- Onboarding now checks project access, regional cloud health, API-key region alignment, and last request state immediately. It can send a real, bounded onboarding probe to `/api/ingest` using the in-memory one-time key and reports the response without exposing the key.
+- The one-time key remains in memory through the waiting step so the probe can work, then is cleared when the waiting step unmounts. It is never persisted to browser storage.
+- Added activation events for project creation, API-key copy, install readiness, probe success/failure, and first trace receipt. Dashboard Launch plan uses client and Convex evidence for its first four steps.
+- Corrected public and dashboard examples to the published `tracify-sdk` package and actual `traceAgent` / `trace_agent` APIs. `npm run test:activation` protects the contract.
+- Focused ESLint, activation contract, content tests, and diff hygiene pass. Production build reaches compilation but fails in TypeScript because an active local Next process has malformed generated `.next/dev/types/validator.ts`; do not edit generated output as the fix.
+
 ## 2026-08-16 Mandatory reply format: every reply starts with "TRACIFY"
 - Every reply in this repo, from any agent, must begin with the literal line `TRACIFY` on its own, a blank line, then the reply. See CLAUDE.md "Reply format" section — that's the enforced instruction; this entry is just the pointer so it isn't missed.
 

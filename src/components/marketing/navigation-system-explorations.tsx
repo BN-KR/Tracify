@@ -503,11 +503,11 @@ export function NavigationSystemExplorations({
               <pre className="mt-7 overflow-x-auto">
                 <code>
                   <span className="text-white/62">01</span>
-                  {"  import { trace } from 'tracify'\n"}
+                  {"  import { traceAgent } from 'tracify-sdk'\n"}
                   <span className="text-white/62">02</span>
                   {"\n"}
                   <span className="text-white/62">03</span>
-                  {"  const response = await trace(\n"}
+                  {"  const response = await traceAgent(\n"}
                   <span className="text-white/62">04</span>
                   {"    'support-agent',\n"}
                   <span className="text-white/62">05</span>

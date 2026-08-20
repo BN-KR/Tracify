@@ -1,5 +1,13 @@
 # Robots standards cleanup — 2026-08-13
 
+## gstack activation slice — 2026-08-20
+
+- Onboarding now exposes immediate diagnostics instead of waiting for a timer: authenticated project state, cloud health, key-region compatibility, and the last ingest request.
+- The waiting step can send a bounded synthetic `run_end` span through the real regional ingest route. The API key stays memory-only and is cleared when the step unmounts.
+- PostHog activation events cover project creation, key copy, install readiness, probe outcomes, and first-trace receipt. The empty dashboard Launch plan now derives progress from session state and the existing Convex onboarding query.
+- Public docs, dashboard docs, and onboarding snippets use the published `tracify-sdk` package and real `traceAgent` / `trace_agent` APIs. `scripts/activation-contract.test.mjs` and `npm run test:activation` enforce this.
+- Verification: activation contract, public content tests, focused ESLint, and `git diff --check` pass. The production build compiled but its TypeScript phase was blocked by malformed generated `.next/dev/types/validator.ts` from an active local dev process.
+
 1. [completed] Keep canonical-host signals in redirects, canonical URLs, and sitemap rather than robots.txt.
 
 # Sitewide link audit — 2026-08-12

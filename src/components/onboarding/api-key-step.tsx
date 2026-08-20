@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
-import {
-  clearOneTimeApiKey,
-  getOneTimeApiKey,
-} from "@/lib/onboarding-client-state";
+import { getOneTimeApiKey } from "@/lib/onboarding-client-state";
 import { getDeploymentRegion, getTracifyRegion } from "@/lib/regions";
 
 const API_KEY_COPIED_STORAGE_KEY = "tracify.onboarding.apiKeyCopied";
@@ -34,7 +31,6 @@ export function ApiKeyStep() {
       posthog.capture("api_key_copied", { issuance_flow: "onboarding" });
     }
     window.sessionStorage.setItem(API_KEY_COPIED_STORAGE_KEY, "true");
-    clearOneTimeApiKey();
     setCopied(true);
   }
 

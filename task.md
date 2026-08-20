@@ -336,6 +336,17 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 
 ---
 
+# 2026-08-20 — gstack activation slice
+
+- [x] Move implementation onto `codex/gstack-activation` from current `origin/main` without touching the unrelated `graphify-out/` directory.
+- [x] Replace onboarding's timer-led waiting experience with project, cloud, API-key-region, and last-request diagnostics.
+- [x] Add a real onboarding test-span action against `/api/ingest` with accepted/failed feedback.
+- [x] Instrument first-trace receipt and onboarding probe outcomes through PostHog.
+- [x] Make the dashboard Launch plan reflect project creation, API-key copy, SDK install, and first-trace backend evidence.
+- [x] Canonicalize public onboarding/docs examples on the published `tracify-sdk` package and `traceAgent`/`trace_agent` APIs.
+- [x] Add `npm run test:activation` to reject stale package and API examples.
+- [ ] Re-run production build after the active local Next dev process releases its malformed `.next/dev/types/validator.ts` output.
+
 # Robots standards cleanup — 2026-08-13
 
 1. [completed] Remove the Google-unsupported `Host` directive from the generated robots file.

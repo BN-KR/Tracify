@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint src convex scripts",
     "test:content": "node --test --experimental-strip-types src/lib/markdoc-blog.test.ts src/lib/markdoc-docs.test.ts src/lib/blog-internal-links.test.ts src/components/blog/reading-time.test.ts scripts/lexical-to-markdoc.test.mjs scripts/blog-index-contract.test.mjs scripts/llms-txt-contract.test.mjs",
+    "test:activation": "node scripts/activation-contract.test.mjs",
     "test:regions": "node --test --experimental-strip-types src/lib/regions.test.ts",
     "verify:regions": "node scripts/verify-regional-cloud.mjs",
     "test:sdk:ts": "npm test --prefix packages/ts-sdk",
