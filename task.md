@@ -3,6 +3,7 @@
 - [x] Add Investigation Mode at `/dashboard/[projectId]/investigate` with a URL-selected run, confirmed telemetry signals, and an evidence board that separates observations from hypotheses.
 - [x] Add a clipboard-ready, run-linked investigation summary for handoff without claiming team-synced notes.
 - [x] Add Investigation Mode to dashboard navigation and protected-route smoke coverage.
+- [x] Link every trace header directly into Investigation Mode and Trace Compare so a surprising run has an immediate next action.
 - [ ] Re-run the production build after the active dev process releases malformed `.next/dev/types/validator.ts`.
 
 # ⚠ PENDING — needs BN-KR on their own machine (updated 2026-08-16)
@@ -1155,3 +1156,15 @@ Follow-ups still open:
 - [x] Merge the scoped workflow fix that runs `npm ci` from `packages/ts-sdk`, rerun the dry run, and confirm `NPM_TOKEN` belongs to npm user `tracifytech`.
 - [x] Publish `tracify-sdk@0.2.0` to PyPI through the verified workflow and to npm through the owner's interactive 2FA session.
 - [x] Verify both public registry records and clean-install/import the published npm and PyPI artifacts.
+# Browser-agent observability wedge — 2026-08-20
+
+Decision: use Playwright as an instrumentation source, not as a product category. Tracify should help teams test, release, and monitor AI agents that act through browsers and APIs. Ponytail/gstack remain internal agent-development workflow tools; they are not customer-facing product brands.
+
+- [x] Install the Ponytail Codex plugin globally from `DietrichGebert/ponytail`.
+- [ ] Define the first supported Playwright event contract: run, test step, browser action, network request, console error, assertion, screenshot, trace artifact, CI metadata.
+- [ ] Build a small `@tracify/playwright` reporter/adapter that sends Playwright execution into the existing run/span ingestion model.
+- [ ] Add an Agent Journey view joining LLM decisions, browser actions, tool/API calls, failures, evaluation results, and cost.
+- [ ] Link the original Playwright `trace.zip` from the Tracify run for deep artifact inspection.
+- [ ] Add release-gate checks for task success, failure rate, retries, latency, and cost regression.
+- [ ] Validate the wedge with three real browser-agent workflows before expanding into production journey monitoring.
+- [ ] Do not build a competing Codegen recorder, Playwright runner, or Trace Viewer.

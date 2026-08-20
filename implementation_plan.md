@@ -4,6 +4,7 @@
 
 - Added Investigation Mode at `/dashboard/[projectId]/investigate` with URL-persisted run selection, existing telemetry evidence, and a local confirmed/inference board.
 - Added an evidence-summary clipboard handoff and explicit full-trace link; kept the workflow honest about local-only notes and avoided inventing root causes.
+- Added direct Trace Viewer actions into Investigation Mode and Trace Compare so the incident workflow starts from the run that exposed the problem.
 - Added navigation and protected-route smoke coverage. Focused lint, activation, content, platform smoke, and diff checks pass.
 
 ## gstack activation slice — 2026-08-20
@@ -906,3 +907,21 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 4. [completed] Validate that `NPM_TOKEN` belongs to intended npm owner `tracifytech`; enforce that owner through `EXPECTED_NPM_USER`.
 5. [completed] First-publish `tracify-sdk@0.2.0` to PyPI through CI and npm through the owner's interactive 2FA session, then clean-install and import both public artifacts.
 6. [follow-up] Configure npm and PyPI trusted publishers for tokenless future releases; npm staged publishing is now available because the package exists.
+# Browser-agent observability wedge — 2026-08-20
+
+## Product decision
+
+Build Tracify as the reliability and release layer for AI agents that act through browsers and APIs. Playwright is the capture layer. Do not compete with Playwright's Codegen or Trace Viewer. Ponytail and gstack inform our internal build/QA loop but should not become customer-facing branding.
+
+## Delivery sequence
+
+1. Specify a Playwright-to-Tracify event mapping using the existing runs, spans, metadata, environments, releases, evaluations, annotations, and failure states.
+2. Implement the smallest `@tracify/playwright` reporter/adapter and fixture needed to emit a complete test/agent run.
+3. Preserve a link to the Playwright trace artifact rather than reimplementing its viewer.
+4. Build the Agent Journey surface: LLM decision → browser action → network/tool call → console/assertion failure → evaluation → cost.
+5. Add release gates and regression grouping after the journey view is useful.
+6. Test with three real browser-agent journeys. Expand to production monitoring only if the workflow proves valuable.
+
+## Success condition
+
+A developer can install the adapter, run a browser-based agent, open the run in Tracify, understand why it failed, inspect the original Playwright evidence, and compare the result with a prior release.

@@ -4,6 +4,7 @@
 - Added `/dashboard/[projectId]/investigate` as a guided incident workflow over existing run summaries and cached spans; no new backend or causal claims were introduced.
 - The page selects a run through the `run` URL parameter, surfaces confirmed status/error/latency/model-tool signals, and stores a per-project/run evidence board locally with separate `confirmed` and `inference` labels.
 - “Copy evidence summary” includes the selected run URL and board contents for handoff. It is intentionally clipboard-based until shared server-backed incident records are designed.
+- Trace Viewer run controls now link directly to Investigation Mode and Trace Compare, closing the path from a surprising run to evidence capture or baseline comparison.
 - Dashboard navigation and `npm run smoke:platform` cover the protected route. Focused ESLint, activation, content, smoke, and diff checks pass.
 
 ## 2026-08-20 gstack activation implementation
@@ -1247,3 +1248,8 @@
 - GitHub workflow run `32365691091` published PyPI successfully. npm rejected the CI token with `EOTP`, so the identical verified npm package was published locally through the owner's interactive npm 2FA session.
 - Registry verification and clean consumer smoke tests pass: npm exposes `TracifyClient`, `traceAgent`, `llmCall`, `toolCall`, `decision`, and region constants; Python imports `TracifyClient`, `trace_agent`, `llm_call`, and `tool_call` from `tracify`.
 - Follow-up: configure trusted publishers for both registries. npm staged publishing can now be enabled because the npm package exists; it was unavailable for the first release.
+# 2026-08-20 Ponytail and browser-agent observability direction
+- Installed the Ponytail Codex plugin globally from `DietrichGebert/ponytail` using the official marketplace flow; it is installed outside the repository and does not modify the Tracify worktree.
+- Board direction: use Playwright as an instrumentation source, not as a competing browser-testing product. The proposed wedge is a `@tracify/playwright` reporter plus an Agent Journey view joining LLM decisions, browser actions, network/tool calls, failures, evaluations, cost, releases, and Playwright trace artifacts.
+- gstack/Ponytail are internal workflow aids for plan/build/QA/review discipline, not customer-facing Tracify branding. Do not build a competing Codegen recorder, Playwright runner, or Trace Viewer.
+- Validate with three real browser-agent workflows before expanding into release gates and production journey monitoring.
