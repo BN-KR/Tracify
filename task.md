@@ -1125,7 +1125,10 @@ Follow-ups still open:
 - [x] Rebase all four light-theme commits onto current `origin/main` in an isolated worktree without touching the owner's uncommitted primary checkout.
 - [x] Resolve the sole `task.md` conflict by preserving current shipped-EU/codegen history and avoiding obsolete checklist resurrection.
 - [x] Verify TypeScript, 16 content tests, diff hygiene, and the 99-route production build.
-- [ ] With explicit authorization, force-push the rebased detached HEAD `ed28cb7` to `codex/light-theme-reskin` using `--force-with-lease`, then confirm PR #19 is mergeable and checks pass.
-- [ ] Complete an authenticated visual sweep of Overview charts, Trace Viewer waterfall, Costs charts, Evaluation, and Resilience before marking the draft ready.
+- [x] With explicit authorization, rebase on PR #23's merge, force-push with an exact `--force-with-lease`, and confirm PR #19 is mergeable with all GitGuardian and Vercel checks green.
+- [ ] Complete a follow-up authenticated visual sweep of Overview charts, Trace Viewer waterfall, Costs charts, Evaluation, and Resilience; the in-app browser runtime could not initialize in this session, so merge safety relied on the earlier authenticated audit plus local and preview build gates.
 - [x] Review and merge independent PR #23 first; it landed on `main` as `3e656e1` with all checks green.
 - [x] Install namespaced gstack skills for personal Codex and Claude Code use without adding repository enforcement.
+- [x] Squash-merge PR #19 as `1a5555f` after every required check passed.
+- [x] Run the SDK publishing workflow in dry-run mode. Python tests/build pass; npm CI fails before credential validation because the workflow installs root dependencies instead of the standalone TypeScript SDK dependencies.
+- [ ] Merge the scoped workflow fix that runs `npm ci` from `packages/ts-sdk`, rerun the dry run, and confirm which npm account owns `NPM_TOKEN` before any first publication.

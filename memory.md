@@ -1219,3 +1219,8 @@
 - The remote PR branch has not been rewritten. Updating PR #19 requires an explicitly authorized `git push --force-with-lease origin HEAD:codex/light-theme-reskin`.
 - On 2026-08-20 the owner explicitly authorized safe updates and merges for PRs #23 and #19. PR #23 passed review and merged to `main` as `3e656e1`; PR #19 must include that new base before its protected branch rewrite.
 - gstack 1.68.2 was installed as a personal, namespaced skill set for both Codex and Claude Code. Bun 1.3.14 and the gstack browser runtime are installed; telemetry, automatic upgrades, update checks, team enforcement, and plan-tune hooks are disabled.
+
+## 2026-08-20 PR merges and SDK publishing dry run
+- PR #19 was rebased again onto PR #23's merge, force-pushed with an exact lease, and squash-merged as `1a5555f` only after GitGuardian and both Vercel previews passed. PR #23 had already merged as `3e656e1`.
+- The repository's first `Publish SDKs` dry run (`32358700372`) uploaded nothing. Python tests/build passed. npm failed at `vitest: not found` because the workflow ran `npm ci` at the repository root even though `packages/ts-sdk` has its own lockfile and dev dependencies.
+- `tracify-sdk` still returns 404 on both npm and PyPI. npm staged publishing cannot create a brand-new package. PyPI can create one through a pending trusted publisher. Do not first-publish either distribution without explicit approval and confirmed registry ownership.
