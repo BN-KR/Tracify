@@ -1131,4 +1131,6 @@ Follow-ups still open:
 - [x] Install namespaced gstack skills for personal Codex and Claude Code use without adding repository enforcement.
 - [x] Squash-merge PR #19 as `1a5555f` after every required check passed.
 - [x] Run the SDK publishing workflow in dry-run mode. Python tests/build pass; npm CI fails before credential validation because the workflow installs root dependencies instead of the standalone TypeScript SDK dependencies.
-- [ ] Merge the scoped workflow fix that runs `npm ci` from `packages/ts-sdk`, rerun the dry run, and confirm which npm account owns `NPM_TOKEN` before any first publication.
+- [x] Merge the scoped workflow fix that runs `npm ci` from `packages/ts-sdk`, rerun the dry run, and confirm `NPM_TOKEN` belongs to npm user `tracifytech`.
+- [x] Publish `tracify-sdk@0.2.0` to PyPI through the verified workflow and to npm through the owner's interactive 2FA session.
+- [x] Verify both public registry records and clean-install/import the published npm and PyPI artifacts.

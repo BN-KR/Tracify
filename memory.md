@@ -1224,3 +1224,10 @@
 - PR #19 was rebased again onto PR #23's merge, force-pushed with an exact lease, and squash-merged as `1a5555f` only after GitGuardian and both Vercel previews passed. PR #23 had already merged as `3e656e1`.
 - The repository's first `Publish SDKs` dry run (`32358700372`) uploaded nothing. Python tests/build passed. npm failed at `vitest: not found` because the workflow ran `npm ci` at the repository root even though `packages/ts-sdk` has its own lockfile and dev dependencies.
 - `tracify-sdk` still returns 404 on both npm and PyPI. npm staged publishing cannot create a brand-new package. PyPI can create one through a pending trusted publisher. Do not first-publish either distribution without explicit approval and confirmed registry ownership.
+
+## 2026-08-20 SDKs published to npm and PyPI
+- The owner explicitly approved the irreversible first releases and completed registry login/2FA in normal Chrome.
+- `tracify-sdk@0.2.0` is public on npm under maintainer `tracifytech <admin@tracify.tech>` and on PyPI as `tracify-sdk 0.2.0` with both wheel and source distribution.
+- GitHub workflow run `32365691091` published PyPI successfully. npm rejected the CI token with `EOTP`, so the identical verified npm package was published locally through the owner's interactive npm 2FA session.
+- Registry verification and clean consumer smoke tests pass: npm exposes `TracifyClient`, `traceAgent`, `llmCall`, `toolCall`, `decision`, and region constants; Python imports `TracifyClient`, `trace_agent`, `llm_call`, and `tool_call` from `tracify`.
+- Follow-up: configure trusted publishers for both registries. npm staged publishing can now be enabled because the npm package exists; it was unavailable for the first release.

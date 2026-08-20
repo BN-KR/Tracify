@@ -886,6 +886,7 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 
 1. [completed] Confirm `tracify-sdk` is absent from npm and PyPI and the publishing workflow had never run.
 2. [completed] Trigger a non-publishing workflow dry run. Python tests and distributions pass; npm fails because `vitest` is not installed.
-3. [in progress] Install dependencies from the standalone `packages/ts-sdk` package in CI and verify its build, tests, and tarball.
-4. [pending] Validate that `NPM_TOKEN` belongs to the intended npm owner before any first release.
-5. [pending] First-publish npm with 2FA/a valid granular token and PyPI with a pending trusted publisher only after explicit publication approval.
+3. [completed] Install dependencies from the standalone `packages/ts-sdk` package in CI and verify its build, 27 tests, and tarball.
+4. [completed] Validate that `NPM_TOKEN` belongs to intended npm owner `tracifytech`; enforce that owner through `EXPECTED_NPM_USER`.
+5. [completed] First-publish `tracify-sdk@0.2.0` to PyPI through CI and npm through the owner's interactive 2FA session, then clean-install and import both public artifacts.
+6. [follow-up] Configure npm and PyPI trusted publishers for tokenless future releases; npm staged publishing is now available because the package exists.
