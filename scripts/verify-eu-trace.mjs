@@ -11,16 +11,34 @@
  *
  * Optional:
  *   TRACIFY_SMOKE_BASE_URL   defaults to https://eu.cloud.tracify.tech
- *   TINYBIRD_HOST / TINYBIRD_TOKEN  if set, the script also polls Tinybird directly
- *                                   to prove the span was persisted, not just accepted.
+ *   TINYBIRD_HOST / TINYBIRD_TOKEN  read from .tinyb automatically when present, so
+ *                                   the script also polls Tinybird directly to prove
+ *                                   the span was persisted, not merely accepted.
  */
+import { readFileSync } from "node:fs";
+
+// The Tinybird host/token are already on disk in .tinyb after `tb login`, so fall
+// back to them. That reduces the operator's job to supplying the one value only a
+// signed-in human can produce: the project API key.
+function tinybirdFromCli() {
+  try {
+    const c = JSON.parse(readFileSync(new URL("../.tinyb", import.meta.url), "utf8"));
+    return { host: c.host, token: c.token };
+  } catch {
+    return { host: undefined, token: undefined };
+  }
+}
+const cli = tinybirdFromCli();
+
 const BASE = process.env.TRACIFY_SMOKE_BASE_URL ?? "https://eu.cloud.tracify.tech";
 const KEY = process.env.TRACIFY_SMOKE_API_KEY;
-const TB_HOST = process.env.TINYBIRD_HOST;
-const TB_TOKEN = process.env.TINYBIRD_TOKEN;
+const TB_HOST = process.env.TINYBIRD_HOST ?? cli.host;
+const TB_TOKEN = process.env.TINYBIRD_TOKEN ?? cli.token;
 
 if (!KEY) {
-  console.error("TRACIFY_SMOKE_API_KEY is required. Create a project on the EU host, issue a key, then re-run.");
+  console.error("TRACIFY_SMOKE_API_KEY is required.");
+  console.error("Create a project at https://eu.cloud.tracify.tech, copy the key shown once, then:");
+  console.error('  $env:TRACIFY_SMOKE_API_KEY="tracify_sk_live_eu_..."; npm run verify:eu-trace');
   process.exit(2);
 }
 
