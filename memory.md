@@ -1253,3 +1253,18 @@
 - Board direction: use Playwright as an instrumentation source, not as a competing browser-testing product. The proposed wedge is a `@tracify/playwright` reporter plus an Agent Journey view joining LLM decisions, browser actions, network/tool calls, failures, evaluations, cost, releases, and Playwright trace artifacts.
 - gstack/Ponytail are internal workflow aids for plan/build/QA/review discipline, not customer-facing Tracify branding. Do not build a competing Codegen recorder, Playwright runner, or Trace Viewer.
 - Validate with three real browser-agent workflows before expanding into release gates and production journey monitoring.
+
+## 2026-08-20 Playwright internal QA foundation
+- Added `@playwright/test` and Chromium to the workspace, with `test:e2e` and `test:e2e:ui` scripts.
+- Added `playwright.config.ts` with failure-retained trace, screenshot, and video capture.
+- Added `tests/e2e/public-smoke.spec.ts`; both tests pass. Authenticated dashboard journeys remain the next step.
+
+## 2026-08-20 Playwright adapter first slice
+- Added `packages/playwright` as a standalone `@tracify/playwright` package with a lockfile, TypeScript declarations, and Node tests.
+- The typed event contract covers run, test step, browser action, network request, console error, assertion, screenshot, trace artifact, and CI metadata. The reporter maps Playwright lifecycle events to existing ingest-compatible spans and emits a terminal `run_end` span.
+- Manual helpers cover browser/network/assertion/error/artifact events. The default transport sends to `/api/ingest`; tests can inject a transport without network access. Artifact URLs are references only, so Playwright remains the artifact viewer.
+- Public docs live at `/docs/playwright` and state that the package is workspace-installed until its first registry release. Package tests, public content tests, and the existing Playwright public smoke suite pass.
+# 2026-08-20 Authenticated Playwright QA journey
+- Added `tests/e2e/authenticated-journey.spec.ts` using the existing Better Auth sign-up flow, onboarding project/key/install flow, real “Send test span” ingestion probe, dashboard runs table, Trace Viewer, and Investigation Mode.
+- The test generates a per-run `example.test` identity and never persists or commits credentials, tokens, cookies, or storage state. `playwright.config.ts` already retains traces, screenshots, and video on failure.
+- Verification remains pending; the first-trace assertion depends on the local Better Auth/Convex/Inngest/Tinybird/Redis environment being healthy.

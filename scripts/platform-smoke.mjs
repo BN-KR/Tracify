@@ -5,6 +5,7 @@ const routes = [
   ["/docs", 200],
   ["/docs/python", 200],
   ["/docs/typescript", 200],
+  ["/docs/playwright", 200],
   ["/docs/api", 200],
   ["/docs/prompts", 200],
   ["/docs/evaluation", 200],

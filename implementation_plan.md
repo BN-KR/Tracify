@@ -1,3 +1,9 @@
+# Authenticated Playwright QA journey — 2026-08-20
+
+1. [completed] Confirm the existing Playwright failure evidence configuration and inspect the real auth/onboarding/ingest/dashboard/trace/investigation paths.
+2. [completed] Implement `tests/e2e/authenticated-journey.spec.ts` with generated local-only credentials, meaningful steps, user-facing locators, and no arbitrary waits.
+3. [pending] Verify the focused test, `npm run test`, lint/type validation, and `git diff --check`; record any environment blocker.
+
 # Robots standards cleanup — 2026-08-13
 
 ## gstack investigation workflow — 2026-08-20
@@ -915,8 +921,8 @@ Build Tracify as the reliability and release layer for AI agents that act throug
 
 ## Delivery sequence
 
-1. Specify a Playwright-to-Tracify event mapping using the existing runs, spans, metadata, environments, releases, evaluations, annotations, and failure states.
-2. Implement the smallest `@tracify/playwright` reporter/adapter and fixture needed to emit a complete test/agent run.
+1. [completed] Specify a Playwright-to-Tracify event mapping using the existing runs, spans, metadata, environments, releases, evaluations, annotations, and failure states.
+2. [completed] Implement the smallest `@tracify/playwright` reporter/adapter and fixture needed to emit a complete test/agent run. The package has a typed contract, lifecycle reporter, manual browser/network/assertion helpers, artifact references, and an injectable transport.
 3. Preserve a link to the Playwright trace artifact rather than reimplementing its viewer.
 4. Build the Agent Journey surface: LLM decision → browser action → network/tool call → console/assertion failure → evaluation → cost.
 5. Add release gates and regression grouping after the journey view is useful.
@@ -925,3 +931,7 @@ Build Tracify as the reliability and release layer for AI agents that act throug
 ## Success condition
 
 A developer can install the adapter, run a browser-based agent, open the run in Tracify, understand why it failed, inspect the original Playwright evidence, and compare the result with a prior release.
+
+## Internal first step completed
+
+Playwright is installed as development tooling with Chromium, `npm run test:e2e`, `npm run test:e2e:ui`, failure-retained traces/screenshots/video, and a passing public-surface smoke suite. The next internal QA step is an authenticated dashboard journey covering onboarding, first trace, Trace Viewer, and Investigation Mode.

@@ -16,6 +16,8 @@
     "verify:regions": "node scripts/verify-regional-cloud.mjs",
     "test:sdk:ts": "npm test --prefix packages/ts-sdk",
     "test:sdk:python": "python -m pytest packages/python-sdk/tests -q",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "lint:platform": "eslint src/app/demo src/app/docs src/app/api/otel src/app/api/evaluation src/app/api/playground src/app/api/evaluators src/app/api/feedback src/app/api/prompts src/app/dashboard/[projectId]/datasets src/components/dashboard/dashboard-sidebar.tsx src/components/dashboard/trace-viewer.tsx src/components/dashboard/project-members.tsx src/components/dashboard/prompt-management.tsx src/components/dashboard/prompt-playground.tsx src/components/dashboard/evaluation-lab.tsx src/components/dashboard/evaluator-manager.tsx src/components/dashboard/experiment-lab.tsx src/components/dashboard/review-queue.tsx scripts/platform-smoke.mjs",
     "smoke:beta": "node scripts/beta-smoke.mjs",
     "smoke:platform": "node scripts/platform-smoke.mjs",
@@ -60,6 +62,7 @@
   },
   "devDependencies": {
     "@libsql/client": "^0.17.4",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
