@@ -40,7 +40,7 @@ export function Future19Pricing() {
       <div className="mx-auto max-w-[1240px]">
         <div className="flex flex-col justify-between gap-6 border-b border-black/15 pb-5 sm:flex-row sm:items-end">
           <div>
-            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/45">
+            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
               Pricing
             </p>
             <h2 className="mt-3 font-pixel text-5xl leading-[0.9] tracking-[-0.07em] md:text-6xl">
@@ -67,7 +67,7 @@ export function Future19Pricing() {
               ))}
             </div>
             <span
-              className={`inline-flex min-h-9 min-w-[166px] items-center border px-3 font-mono text-[8px] uppercase tracking-[0.11em] transition-colors ${billing === "annual" ? "border-[#d2b32f] bg-[#f4d44d] text-black" : "border-black/15 bg-white text-black/45"}`}
+              className={`inline-flex min-h-9 min-w-[166px] items-center border px-3 font-mono text-[8px] uppercase tracking-[0.11em] transition-colors ${billing === "annual" ? "border-[#d2b32f] bg-[#f4d44d] text-black" : "border-black/15 bg-white text-black/70"}`}
             >
               {billing === "annual"
                 ? "Billed annually · save 20%"
@@ -83,7 +83,7 @@ export function Future19Pricing() {
               className={`flex flex-col p-5 md:p-6 ${plan.featured ? "bg-[#f4d44d]" : "bg-white"}`}
             >
               <div className="flex items-start justify-between gap-4">
-                <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/55">
+                <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/70">
                   {plan.name}
                 </p>
                 {plan.featured ? (
@@ -96,7 +96,7 @@ export function Future19Pricing() {
                 <span className="font-pixel text-5xl tracking-[-0.07em] md:text-6xl">
                   {billing === "annual" ? plan.annual : plan.monthly}
                 </span>
-                <span className="text-sm text-black/55">/mo</span>
+                <span className="text-sm text-black/70">/mo</span>
               </div>
               <ul className="mt-5 space-y-2.5 border-t border-black/15 pt-5 text-sm">
                 {plan.features.map((feature) => (
@@ -108,7 +108,7 @@ export function Future19Pricing() {
               </ul>
               <Link
                 href={plan.name === "Free" ? "/sign-up" : pricingCheckoutHref(plan.name.toLowerCase() as "pro" | "team", billing)}
-                className="mt-6 flex min-h-10 items-center justify-between border-t border-black/15 pt-4 font-mono text-[9px] uppercase tracking-[0.12em] hover:text-black/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black"
+                className="mt-6 flex min-h-10 items-center justify-between border-t border-black/15 pt-4 font-mono text-[9px] uppercase tracking-[0.12em] hover:text-black/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black"
               >
                 Choose {plan.name}
                 <ArrowRight className="size-3" />

@@ -69,7 +69,7 @@ export function Footer() {
                 autoComplete="email"
                 required
                 placeholder="you@company.com"
-                className="min-w-0 flex-1 bg-transparent px-4 py-3 font-mono text-[10px] outline-none placeholder:text-black/35 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black"
+                className="min-w-0 flex-1 bg-transparent px-4 py-3 font-mono text-[10px] outline-none placeholder:text-black/55 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black"
               />
               <button
                 type="submit"
@@ -78,7 +78,7 @@ export function Footer() {
                 Subscribe
               </button>
             </form>
-            <p className="mt-3 font-mono text-[8px] uppercase tracking-[0.11em] text-black/45">
+            <p className="mt-3 font-mono text-[8px] uppercase tracking-[0.11em] text-black/55">
               One technical dispatch a month. Unsubscribe anytime.
             </p>
             <Link
@@ -99,7 +99,7 @@ export function Footer() {
                   <Link
                     key={href}
                     href={href}
-                    className="block text-black/45 hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                    className="block text-black/55 hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                   >
                     {label}
                   </Link>

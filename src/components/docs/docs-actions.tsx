@@ -44,7 +44,7 @@ export function DocsActions({ markdown, installUrl }: DocsActionsProps) {
           ) : null}
         </div>
       </div>
-      <p className="mt-2 font-mono text-[9px] uppercase tracking-[.11em] text-black/45">Copy or share.</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[.11em] text-black/55">Copy or share.</p>
     </div>
   );
 }

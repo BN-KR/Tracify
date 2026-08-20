@@ -317,10 +317,10 @@ export function RunsTable({ projectId }: RunsTableProps) {
                 updateQuery({ q: search, status, limit: pageSize });
               }}
               className={cn(
-                "border px-3 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
+                "border px-3 py-1 font-mono text-[10px] uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black",
                 statusFilter === status 
-                  ? "bg-white text-black border-white" 
-                  : "bg-transparent text-zinc-500 border-zinc-800 hover:border-zinc-500"
+                  ? "bg-black text-white border-black"
+                  : "bg-transparent text-black/55 border-black/15 hover:border-black/30"
               )}
             >
               {status}
@@ -328,7 +328,7 @@ export function RunsTable({ projectId }: RunsTableProps) {
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">Views</span>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-black/55">Views</span>
           {[
             ["newest", "Newest"],
             ["cost", "Most expensive"],
@@ -345,10 +345,10 @@ export function RunsTable({ projectId }: RunsTableProps) {
                 updateQuery({ q: search, status: statusFilter, sort: value, limit: pageSize });
               }}
               className={cn(
-                "border px-2 py-1 font-mono text-[10px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
+                "border px-2 py-1 font-mono text-[10px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black",
                 sort === value
-                  ? "border-white bg-white text-black"
-                  : "border-zinc-800 text-zinc-500 hover:border-zinc-500 hover:text-white",
+                  ? "border-black bg-black text-white"
+                  : "border-black/15 text-black/55 hover:border-black/30 hover:text-black",
               )}
             >
               {label}
@@ -357,13 +357,13 @@ export function RunsTable({ projectId }: RunsTableProps) {
           <button
             type="button"
             onClick={saveCurrentView}
-            className="border border-dashed border-zinc-700 px-2 py-1 font-mono text-[10px] text-zinc-400 transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="border border-dashed border-black/25 px-2 py-1 font-mono text-[10px] text-black/60 transition-colors hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
           >
             Save view
           </button>
         </div>
         <div className="relative w-full md:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-zinc-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-black/55" />
           <Input 
             placeholder="Search run ID..."
             value={search}
@@ -371,10 +371,10 @@ export function RunsTable({ projectId }: RunsTableProps) {
               setSearch(e.target.value);
               updateQuery({ q: e.target.value, status: statusFilter, limit: pageSize });
             }}
-            className="pl-9 h-9 rounded-none border-zinc-800 bg-black font-mono text-[11px] placeholder:text-zinc-700"
+            className="pl-9 h-9 rounded-none border-black/15 bg-white font-mono text-[11px] placeholder:text-black/55"
           />
           {search.trim() ? (
-            <div className="mt-2 font-mono text-[9px] uppercase tracking-widest text-zinc-600">
+            <div className="mt-2 font-mono text-[9px] uppercase tracking-widest text-black/55">
               Exact run ID lookup searches all saved runs
             </div>
           ) : null}
@@ -383,13 +383,13 @@ export function RunsTable({ projectId }: RunsTableProps) {
 
       {savedViews.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2 border border-border bg-muted/5 px-3 py-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">Saved</span>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-black/55">Saved</span>
           {savedViews.map((view) => (
-            <div key={view.id} className="flex items-center border border-zinc-800 bg-black">
+            <div key={view.id} className="flex items-center border border-black/15 bg-white">
               <button
                 type="button"
                 onClick={() => restoreView(view)}
-                className="px-2 py-1 font-mono text-[10px] text-zinc-300 transition-colors hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+                className="px-2 py-1 font-mono text-[10px] text-black/70 transition-colors hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black"
               >
                 {view.name}
               </button>
@@ -397,7 +397,7 @@ export function RunsTable({ projectId }: RunsTableProps) {
                 type="button"
                 aria-label={`Delete saved view ${view.name}`}
                 onClick={() => persistSavedViews(savedViews.filter((savedView) => savedView.id !== view.id))}
-                className="border-l border-zinc-800 px-1.5 py-1 text-zinc-600 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+                className="border-l border-black/15 px-1.5 py-1 text-black/55 transition-colors hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black"
               >
                 <X className="size-3" />
               </button>
@@ -408,7 +408,7 @@ export function RunsTable({ projectId }: RunsTableProps) {
 
       <div className="flex flex-col gap-3 border border-border bg-muted/10 p-3 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-black/55">
             rows
           </span>
           {[10, 25, 50].map((size) => (
@@ -423,8 +423,8 @@ export function RunsTable({ projectId }: RunsTableProps) {
               className={cn(
                 "h-8 border px-3 font-mono text-[11px] transition-colors",
                 pageSize === size
-                  ? "border-white bg-white text-black"
-                  : "border-zinc-800 bg-black text-zinc-500 hover:border-zinc-500 hover:text-white",
+                  ? "border-black bg-black text-white"
+                  : "border-black/15 bg-white text-black/55 hover:border-black/30 hover:text-black",
               )}
             >
               {size}
@@ -440,12 +440,12 @@ export function RunsTable({ projectId }: RunsTableProps) {
               updateQuery({ q: search, status: statusFilter, page: nextPage + 1, limit: pageSize });
             }}
             disabled={!canGoPrevious}
-            className="flex h-8 items-center gap-2 border border-zinc-800 bg-black px-3 font-mono text-[11px] uppercase text-zinc-500 hover:border-zinc-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-8 items-center gap-2 border border-black/15 bg-white px-3 font-mono text-[11px] uppercase text-black/55 hover:border-black/30 hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ArrowLeft className="size-3" />
             Prev
           </button>
-          <span className="min-w-32 text-center font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+          <span className="min-w-32 text-center font-mono text-[10px] uppercase tracking-widest text-black/55">
             Page {currentPageIndex + 1}
             {totalPages ? ` of ${totalPages}${runCounts?.capped ? "+" : ""}` : ""}
           </span>
@@ -453,7 +453,7 @@ export function RunsTable({ projectId }: RunsTableProps) {
             type="button"
             onClick={handleNextPage}
             disabled={!canGoNext || pendingNextPage || runsPage.status === "LoadingMore"}
-            className="flex h-8 items-center gap-2 border border-zinc-800 bg-black px-3 font-mono text-[11px] uppercase text-zinc-500 hover:border-zinc-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-8 items-center gap-2 border border-black/15 bg-white px-3 font-mono text-[11px] uppercase text-black/55 hover:border-black/30 hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
           >
             Next
             <ArrowRight className="size-3" />
@@ -462,13 +462,13 @@ export function RunsTable({ projectId }: RunsTableProps) {
       </div>
 
       <div className="grid gap-2 border border-border bg-muted/5 p-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
-        <Input value={modelFilter} onChange={(event) => { setModelFilter(event.target.value); updateQuery({ q: search, status: statusFilter, model: event.target.value, session: sessionFilter, minCost, minSpans, limit: pageSize }); }} placeholder="Model…" aria-label="Filter runs by model" className="h-9 rounded-none border-zinc-800 bg-black font-mono text-[11px]" />
-        <Input value={sessionFilter} onChange={(event) => { setSessionFilter(event.target.value); updateQuery({ q: search, status: statusFilter, model: modelFilter, session: event.target.value, minCost, minSpans, limit: pageSize }); }} placeholder="Session ID…" aria-label="Filter runs by session" className="h-9 rounded-none border-zinc-800 bg-black font-mono text-[11px]" />
-        <Input value={environmentFilter} onChange={(event) => { setEnvironmentFilter(event.target.value); updateQuery({ q: search, status: statusFilter, environment: event.target.value, release: releaseFilter, model: modelFilter, session: sessionFilter, minCost, minSpans, limit: pageSize }); }} placeholder="Environment…" aria-label="Filter runs by environment" className="h-9 rounded-none border-zinc-800 bg-black font-mono text-[11px]" />
-        <Input value={releaseFilter} onChange={(event) => { setReleaseFilter(event.target.value); updateQuery({ q: search, status: statusFilter, environment: environmentFilter, release: event.target.value, model: modelFilter, session: sessionFilter, minCost, minSpans, limit: pageSize }); }} placeholder="Release…" aria-label="Filter runs by release" className="h-9 rounded-none border-zinc-800 bg-black font-mono text-[11px]" />
-        <Input value={minCost} onChange={(event) => { setMinCost(event.target.value); updateQuery({ q: search, status: statusFilter, model: modelFilter, session: sessionFilter, minCost: event.target.value, minSpans, limit: pageSize }); }} placeholder="Minimum cost USD…" aria-label="Filter runs by minimum cost" inputMode="decimal" className="h-9 rounded-none border-zinc-800 bg-black font-mono text-[11px]" />
-        <Input value={minSpans} onChange={(event) => { setMinSpans(event.target.value); updateQuery({ q: search, status: statusFilter, model: modelFilter, session: sessionFilter, minCost, minSpans: event.target.value, limit: pageSize }); }} placeholder="Minimum spans…" aria-label="Filter runs by minimum span count" inputMode="numeric" className="h-9 rounded-none border-zinc-800 bg-black font-mono text-[11px]" />
-        <select value={days} onChange={(event) => { setDays(event.target.value); setStartedAtAfter(new Date(Date.now() - Math.max(1, Number(event.target.value)) * 86400000).toISOString()); setPageIndex(0); updateQuery({ q: search, status: statusFilter, days: event.target.value, limit: pageSize }); }} aria-label="Filter runs by time window" className="h-9 border border-zinc-800 bg-black px-3 font-mono text-[11px] text-zinc-300">
+        <Input value={modelFilter} onChange={(event) => { setModelFilter(event.target.value); updateQuery({ q: search, status: statusFilter, model: event.target.value, session: sessionFilter, minCost, minSpans, limit: pageSize }); }} placeholder="Model…" aria-label="Filter runs by model" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
+        <Input value={sessionFilter} onChange={(event) => { setSessionFilter(event.target.value); updateQuery({ q: search, status: statusFilter, model: modelFilter, session: event.target.value, minCost, minSpans, limit: pageSize }); }} placeholder="Session ID…" aria-label="Filter runs by session" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
+        <Input value={environmentFilter} onChange={(event) => { setEnvironmentFilter(event.target.value); updateQuery({ q: search, status: statusFilter, environment: event.target.value, release: releaseFilter, model: modelFilter, session: sessionFilter, minCost, minSpans, limit: pageSize }); }} placeholder="Environment…" aria-label="Filter runs by environment" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
+        <Input value={releaseFilter} onChange={(event) => { setReleaseFilter(event.target.value); updateQuery({ q: search, status: statusFilter, environment: environmentFilter, release: event.target.value, model: modelFilter, session: sessionFilter, minCost, minSpans, limit: pageSize }); }} placeholder="Release…" aria-label="Filter runs by release" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
+        <Input value={minCost} onChange={(event) => { setMinCost(event.target.value); updateQuery({ q: search, status: statusFilter, model: modelFilter, session: sessionFilter, minCost: event.target.value, minSpans, limit: pageSize }); }} placeholder="Minimum cost USD…" aria-label="Filter runs by minimum cost" inputMode="decimal" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
+        <Input value={minSpans} onChange={(event) => { setMinSpans(event.target.value); updateQuery({ q: search, status: statusFilter, model: modelFilter, session: sessionFilter, minCost, minSpans: event.target.value, limit: pageSize }); }} placeholder="Minimum spans…" aria-label="Filter runs by minimum span count" inputMode="numeric" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
+        <select value={days} onChange={(event) => { setDays(event.target.value); setStartedAtAfter(new Date(Date.now() - Math.max(1, Number(event.target.value)) * 86400000).toISOString()); setPageIndex(0); updateQuery({ q: search, status: statusFilter, days: event.target.value, limit: pageSize }); }} aria-label="Filter runs by time window" className="h-9 border border-black/15 bg-white px-3 font-mono text-[11px] text-black/70">
           <option value="1">Last 24 hours</option>
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
@@ -477,11 +477,11 @@ export function RunsTable({ projectId }: RunsTableProps) {
       </div>
 
       {selectedRunIds.size > 0 ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 border border-white/20 bg-white/[0.03] p-3">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-300">{selectedRunIds.size} run{selectedRunIds.size === 1 ? "" : "s"} selected</span>
+        <div className="flex flex-wrap items-center justify-between gap-3 border border-black/20 bg-white/[0.03] p-3">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-black/70">{selectedRunIds.size} run{selectedRunIds.size === 1 ? "" : "s"} selected</span>
           <div className="flex items-center gap-2">
-            <button type="button" onClick={exportSelectedRuns} className="flex items-center gap-2 border border-zinc-700 px-3 py-2 font-mono text-[10px] uppercase text-zinc-300 transition-colors hover:border-white hover:text-white"><Download className="size-3" />Export visible</button>
-            <button type="button" onClick={() => setSelectedRunIds(new Set())} className="border border-zinc-800 px-3 py-2 font-mono text-[10px] uppercase text-zinc-500 hover:border-zinc-500 hover:text-white">Clear</button>
+            <button type="button" onClick={exportSelectedRuns} className="flex items-center gap-2 border border-black/25 px-3 py-2 font-mono text-[10px] uppercase text-black/70 transition-colors hover:border-black hover:text-black"><Download className="size-3" />Export visible</button>
+            <button type="button" onClick={() => setSelectedRunIds(new Set())} className="border border-black/15 px-3 py-2 font-mono text-[10px] uppercase text-black/55 hover:border-black/30 hover:text-black">Clear</button>
           </div>
         </div>
       ) : null}
@@ -549,7 +549,7 @@ export function RunsTable({ projectId }: RunsTableProps) {
                         router.push(`/dashboard/${projectId}/runs/${run.runId}`);
                       }
                     }}
-                    className="group border-b border-border last:border-0 transition-colors hover:bg-muted/20 focus-visible:bg-muted/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-white"
+                    className="group border-b border-border last:border-0 transition-colors hover:bg-muted/20 focus-visible:bg-muted/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-black"
                   >
                     <TableCell>
                       <input type="checkbox" checked={selectedRunIds.has(run._id)} onChange={() => setSelectedRunIds((current) => { const next = new Set(current); if (next.has(run._id)) next.delete(run._id); else next.add(run._id); return next; })} aria-label={`Select run ${run.runId}`} className="size-3.5 accent-white" />
@@ -566,22 +566,22 @@ export function RunsTable({ projectId }: RunsTableProps) {
                       </Link>
                     </TableCell>
                     <TableCell className="hidden max-w-[150px] lg:table-cell">
-                      <div className="min-w-0 space-y-1 font-mono text-[10px] text-zinc-500">
-                        <div className="truncate text-zinc-300">{run.primaryModel || "model not reported"}</div>
+                      <div className="min-w-0 space-y-1 font-mono text-[10px] text-black/55">
+                        <div className="truncate text-black/70">{run.primaryModel || "model not reported"}</div>
                         <div className="truncate">{run.sessionId ? `session:${run.sessionId}` : "no session context"}</div>
                         <div className="truncate">{run.environment ? `env:${run.environment}` : "no environment"}{run.release ? ` · release:${run.release}` : ""}</div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-mono text-xs text-zinc-500">
+                    <TableCell className="text-right font-mono text-xs text-black/55">
                       {run.spanCount}
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs">
                       {formatCurrency(run.totalCostUsd)}
                     </TableCell>
-                    <TableCell className="text-right font-mono text-xs text-zinc-500">
+                    <TableCell className="text-right font-mono text-xs text-black/55">
                       {formatDuration(durationMs)}
                     </TableCell>
-                    <TableCell className="text-right font-mono text-xs text-zinc-500">
+                    <TableCell className="text-right font-mono text-xs text-black/55">
                       {formatRelativeTime(run.startedAt)}
                     </TableCell>
                     <TableCell>
@@ -596,9 +596,9 @@ export function RunsTable({ projectId }: RunsTableProps) {
                         <Link
                           href={`/dashboard/${projectId}/runs/${run.runId}`}
                           aria-label={`Open run ${run.runId}`}
-                          className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                          className="opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
                         >
-                          <ArrowUpRight className="size-4 text-zinc-400 hover:text-white" />
+                          <ArrowUpRight className="size-4 text-black/60 hover:text-black" />
                         </Link>
                       </div>
                     </TableCell>
@@ -618,8 +618,8 @@ function StatusBadge({ status }: { status: string }) {
     case "running":
       return (
         <div className="flex items-center gap-2">
-          <div className="size-1.5 bg-white animate-pulse" />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-white">
+          <div className="size-1.5 bg-black animate-pulse" />
+          <span className="font-mono text-[10px] uppercase tracking-widest text-black">
             Live
           </span>
         </div>
@@ -627,8 +627,8 @@ function StatusBadge({ status }: { status: string }) {
     case "completed":
       return (
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="size-3 text-zinc-500" />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+          <CheckCircle2 className="size-3 text-black/55" />
+          <span className="font-mono text-[10px] uppercase tracking-widest text-black/55">
             Done
           </span>
         </div>
@@ -636,8 +636,8 @@ function StatusBadge({ status }: { status: string }) {
     case "failed":
       return (
         <div className="flex items-center gap-2">
-          <XCircle className="size-3 text-zinc-500" />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+          <XCircle className="size-3 text-black/55" />
+          <span className="font-mono text-[10px] uppercase tracking-widest text-black/55">
             Fail
           </span>
         </div>
@@ -654,8 +654,8 @@ function StatusBadge({ status }: { status: string }) {
     default:
       return (
         <div className="flex items-center gap-2">
-          <Clock className="size-3 text-zinc-500" />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+          <Clock className="size-3 text-black/55" />
+          <span className="font-mono text-[10px] uppercase tracking-widest text-black/55">
             {status}
           </span>
         </div>

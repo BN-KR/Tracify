@@ -59,7 +59,7 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
         <SocialButton label="Google" disabled={pending} onClick={() => void continueWith("google")} icon={<GoogleMark />} />
       </div>
 
-      <div className="my-6 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.15em] text-black/40"><span className="h-px flex-1 bg-black/20" />or continue with email<span className="h-px flex-1 bg-black/20" /></div>
+      <div className="my-6 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.15em] text-black/55"><span className="h-px flex-1 bg-black/20" />or continue with email<span className="h-px flex-1 bg-black/20" /></div>
 
       <form onSubmit={submit} className="space-y-4">
         {mode === "sign-up" ? <Field label="Full name" value={name} onChange={setName} autoComplete="name" /> : null}
@@ -67,13 +67,13 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
         <div>
           <div className="flex items-center justify-between">
             <label htmlFor="auth-password" className="font-mono text-[9px] uppercase tracking-[0.13em]">Password</label>
-            {mode === "sign-in" ? <Link href="/forgot-password" className="font-mono text-[9px] uppercase tracking-[0.1em] text-black/50 underline underline-offset-4 hover:text-black">Forgot password?</Link> : null}
+            {mode === "sign-in" ? <Link href="/forgot-password" className="font-mono text-[9px] uppercase tracking-[0.1em] text-black/55 underline underline-offset-4 hover:text-black">Forgot password?</Link> : null}
           </div>
           <div className="relative mt-2">
             <input id="auth-password" required minLength={8} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} type={showPassword ? "text" : "password"} autoComplete={mode === "sign-up" ? "new-password" : "current-password"} className="h-12 w-full border border-black/30 bg-[#f7f6f1] px-3 pr-12 text-sm text-black outline-none transition-colors focus:border-black focus:bg-white" />
-            <button type="button" onClick={() => setShowPassword((value) => !value)} className="active-press absolute inset-y-0 right-0 flex w-12 items-center justify-center text-black/45 hover:text-black" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button>
+            <button type="button" onClick={() => setShowPassword((value) => !value)} className="active-press absolute inset-y-0 right-0 flex w-12 items-center justify-center text-black/55 hover:text-black" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button>
           </div>
-          {mode === "sign-up" ? <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.1em] text-black/40">8–128 characters</p> : null}
+          {mode === "sign-up" ? <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.1em] text-black/55">8–128 characters</p> : null}
         </div>
 
         {error ? <p role="alert" aria-live="polite" className="border border-black bg-[#f4d44d] p-3 text-xs leading-5 text-black">{error}</p> : null}
@@ -83,11 +83,11 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-xs text-black/50">
+      <p className="mt-6 text-center text-xs text-black/55">
         {mode === "sign-up" ? "Already have an account? " : "New to tracify? "}
         <Link className="font-medium text-black underline underline-offset-4" href={`${mode === "sign-up" ? "/sign-in" : "/sign-up"}?redirect_url=${encodeURIComponent(callbackPath)}`}>{mode === "sign-up" ? "Sign in" : "Create one"}</Link>
       </p>
-      {mode === "sign-up" ? <p className="mt-4 text-center text-[10px] leading-5 text-black/40">By continuing, you agree to our <Link href="/terms" className="underline underline-offset-2">Terms</Link> and <Link href="/privacy" className="underline underline-offset-2">Privacy Policy</Link>.</p> : null}
+      {mode === "sign-up" ? <p className="mt-4 text-center text-[10px] leading-5 text-black/55">By continuing, you agree to our <Link href="/terms" className="underline underline-offset-2">Terms</Link> and <Link href="/privacy" className="underline underline-offset-2">Privacy Policy</Link>.</p> : null}
     </div>
   );
 }

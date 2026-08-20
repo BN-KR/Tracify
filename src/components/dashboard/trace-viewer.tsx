@@ -142,7 +142,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   if (!run) {
     return (
       <div className="flex flex-col items-center justify-center py-20 border border-dashed border-border">
-        <p className="text-zinc-500 font-mono text-sm uppercase tracking-widest">Run not found</p>
+        <p className="text-black/55 font-mono text-sm uppercase tracking-widest">Run not found</p>
       </div>
     );
   }
@@ -180,10 +180,10 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
       <div className="border border-border bg-muted/10 p-5">
         <div className="mb-5 flex items-center justify-between gap-4 border-b border-border pb-4">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">
               Run control
             </div>
-            <div className="mt-1 font-mono text-sm text-white">
+            <div className="mt-1 font-mono text-sm text-black">
               {run.status === "running"
                 ? "This only marks the observed run as cancelled."
                 : "Run is no longer active."}
@@ -193,7 +193,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             <button
               type="button"
               onClick={() => void copyShareLink()}
-              className="flex h-8 items-center gap-2 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="flex h-8 items-center gap-2 border border-black/15 bg-white px-3 font-mono text-[11px] uppercase text-black/60 hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
             >
               {shareCopied ? <Check className="size-3" /> : <Share2 className="size-3" />}
               {shareCopied ? "Link copied" : shareError ? "Copy failed" : "Share trace"}
@@ -203,7 +203,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
                 type="button"
                 onClick={() => void fetchSpans("manual")}
                 disabled={refreshingSpans}
-                className="h-8 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-8 border border-black/15 bg-white px-3 font-mono text-[11px] uppercase text-black/60 hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {refreshingSpans ? "Refreshing" : "Refresh spans"}
               </button>
@@ -231,7 +231,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
           <StatItem label="Duration" value={formatDuration(durationMs)} />
         </div>
         {traceContext ? <TraceContextStrip projectId={projectId} span={traceContext} /> : null}
-        <div className="mt-4 border-t border-border pt-3 font-mono text-[10px] uppercase tracking-widest text-zinc-600">
+        <div className="mt-4 border-t border-border pt-3 font-mono text-[10px] uppercase tracking-widest text-black/55">
           {run.status === "running" ? "Live trace · polling every 3s · " : ""}{spansMessage}
         </div>
         {spansError ? (
@@ -248,10 +248,10 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
       <div className="border border-border bg-muted/10 p-4 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Session replay</div>
-            <div className="mt-1 font-mono text-[11px] text-zinc-400">Scrub the trace one span at a time like a debugger.</div>
+            <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">Session replay</div>
+            <div className="mt-1 font-mono text-[11px] text-black/60">Scrub the trace one span at a time like a debugger.</div>
           </div>
-          <div className="font-mono text-[10px] uppercase text-zinc-600">{safeSpans.length ? `${activeReplayIndex + 1}/${safeSpans.length}` : "0/0"}</div>
+          <div className="font-mono text-[10px] uppercase text-black/55">{safeSpans.length ? `${activeReplayIndex + 1}/${safeSpans.length}` : "0/0"}</div>
         </div>
         <input
           type="range"
@@ -263,8 +263,8 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
           className="w-full accent-white"
         />
         {replaySpan ? (
-          <div className="border border-white/20 bg-black/30 p-3 font-mono text-[11px] text-zinc-300">
-            <span className="text-white">{replaySpan.spanType}</span> · {replaySpan.modelId || replaySpan.toolName || "span"} · {formatDuration(replaySpan.latencyMs)}
+          <div className="border border-black/20 bg-black/5 p-3 font-mono text-[11px] text-black/70">
+            <span className="text-black">{replaySpan.spanType}</span> · {replaySpan.modelId || replaySpan.toolName || "span"} · {formatDuration(replaySpan.latencyMs)}
           </div>
         ) : null}
       </div>
@@ -275,10 +275,10 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
       <div className="relative pl-8 space-y-6 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-[1px] before:bg-border">
         {safeSpans.length === 0 && run.status !== "running" ? (
           <div className="border border-dashed border-border p-8 text-center">
-            <div className="font-mono text-[11px] uppercase tracking-widest text-zinc-500">
+            <div className="font-mono text-[11px] uppercase tracking-widest text-black/55">
               No spans found for this run
             </div>
-            <p className="mt-2 text-xs text-zinc-600">
+            <p className="mt-2 text-xs text-black/55">
               The run summary exists, but no span timeline is available yet.
             </p>
           </div>
@@ -289,9 +289,9 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
         ))}
         
         {run.status === "running" && (
-          <div className="relative flex items-center gap-4 text-zinc-500">
-            <div className="absolute -left-[23px] size-4 rounded-full border border-border bg-black flex items-center justify-center">
-              <div className="size-1.5 bg-white animate-pulse" />
+          <div className="relative flex items-center gap-4 text-black/55">
+            <div className="absolute -left-[23px] size-4 rounded-full border border-border bg-white flex items-center justify-center">
+              <div className="size-1.5 bg-black animate-pulse" />
             </div>
             <span className="font-mono text-[10px] uppercase tracking-widest animate-pulse">
               Agent is thinking...
@@ -320,10 +320,10 @@ function TraceContextStrip({ projectId, span }: { projectId: string; span: SpanR
   return (
     <div className="mt-5 flex flex-wrap gap-2 border-t border-border pt-4">
       {values.map(([label, value]) => (
-        <div key={label} className="min-w-0 max-w-full border border-border bg-black/30 px-3 py-2">
-          <div className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">{label}</div>
-          <div className="mt-1 max-w-[220px] truncate font-mono text-[11px] text-zinc-200">
-            {label === "Session" ? <Link href={`/dashboard/${projectId}/sessions/${encodeURIComponent(String(value))}`} className="underline decoration-zinc-700 underline-offset-4 hover:text-white hover:decoration-white">{value}</Link> : label === "Environment" || label === "Release" ? <Link href={`/dashboard/${projectId}/search?${label.toLowerCase()}=${encodeURIComponent(String(value))}`} className="underline decoration-zinc-700 underline-offset-4 hover:text-white hover:decoration-white">{value}</Link> : value}
+        <div key={label} className="min-w-0 max-w-full border border-border bg-black/5 px-3 py-2">
+          <div className="font-mono text-[9px] uppercase tracking-widest text-black/55">{label}</div>
+          <div className="mt-1 max-w-[220px] truncate font-mono text-[11px] text-black/80">
+            {label === "Session" ? <Link href={`/dashboard/${projectId}/sessions/${encodeURIComponent(String(value))}`} className="underline decoration-black/30 underline-offset-4 hover:text-black hover:decoration-black">{value}</Link> : label === "Environment" || label === "Release" ? <Link href={`/dashboard/${projectId}/search?${label.toLowerCase()}=${encodeURIComponent(String(value))}`} className="underline decoration-black/30 underline-offset-4 hover:text-black hover:decoration-black">{value}</Link> : value}
           </div>
         </div>
       ))}
@@ -334,22 +334,22 @@ function TraceContextStrip({ projectId, span }: { projectId: string; span: SpanR
 function SelectedSpanPanel({ span }: { span: SpanRow }) {
   const label = span.modelId || span.toolName || span.spanType.replace("_", " ");
   return (
-    <section className="border border-white/25 bg-white/[0.04] p-4">
+    <section className="border border-black/25 bg-white/[0.04] p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Selected span</div>
-          <div className="mt-1 truncate font-mono text-sm text-white">{label}</div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">Selected span</div>
+          <div className="mt-1 truncate font-mono text-sm text-black">{label}</div>
         </div>
-        <span className="shrink-0 border border-white/20 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-zinc-300">{span.spanType.replace("_", " ")}</span>
+        <span className="shrink-0 border border-black/20 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-black/70">{span.spanType.replace("_", " ")}</span>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2">
         <MiniMetric label="Latency" value={formatDuration(span.latencyMs)} />
         <MiniMetric label="Cost" value={formatCurrency(span.costUsd)} />
       </div>
-      {span.errorMessage ? <div className="mt-3 border border-red-400/30 bg-red-400/5 p-3 font-mono text-[10px] leading-relaxed text-red-200">{span.errorMessage}</div> : null}
+      {span.errorMessage ? <div className="mt-3 border border-red-600/30 bg-red-600/5 p-3 font-mono text-[10px] leading-relaxed text-red-700">{span.errorMessage}</div> : null}
       <div className="mt-3 border-t border-border pt-3">
-        <div className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">Output preview</div>
-        <pre className="mt-2 max-h-28 overflow-auto whitespace-pre-wrap break-words font-mono text-[10px] leading-relaxed text-zinc-400">{formatJson(span.output).slice(0, 1200)}</pre>
+        <div className="font-mono text-[9px] uppercase tracking-widest text-black/55">Output preview</div>
+        <pre className="mt-2 max-h-28 overflow-auto whitespace-pre-wrap break-words font-mono text-[10px] leading-relaxed text-black/60">{formatJson(span.output).slice(0, 1200)}</pre>
       </div>
     </section>
   );
@@ -366,11 +366,11 @@ function TraceQualityPanel({ projectId, runId }: { projectId: string; runId: str
     setFeedbackSent(true);
     setFeedbackNote("");
   }
-  return <section className="border border-white/20 bg-white/[0.03] p-4">
-    <div className="flex items-center justify-between gap-3"><div><div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Quality</div><div className="mt-1 text-sm text-white">Evaluation evidence attached to this trace</div></div><span className="font-mono text-[10px] uppercase text-zinc-600">{scoreCount} signals</span></div>
-    {scoreCount ? <div className="mt-4 grid gap-2 sm:grid-cols-2">{quality?.scores.slice(0, 8).map((score) => <div key={score._id} className="border border-zinc-800 bg-black/40 p-3"><div className="flex justify-between text-xs text-white"><span>{score.name}</span><span className="font-mono text-zinc-300">{String(score.value)}</span></div><p className="mt-1 font-mono text-[9px] uppercase text-zinc-600">{score.source} · {score.dataType}</p></div>)}{quality?.results.slice(0, 8).map((result) => <div key={result._id} className="border border-zinc-800 bg-black/40 p-3"><div className="flex justify-between text-xs text-white"><span>Evaluator result</span><span className={result.status === "passed" ? "font-mono text-emerald-300" : "font-mono text-red-300"}>{result.status}</span></div><p className="mt-1 truncate text-xs text-zinc-500">{result.explanation || String(result.value)}</p></div>)}</div> : <p className="mt-4 text-xs text-zinc-600">No evaluator results yet. Use Evaluation Engine to enable a live evaluator or queue this trace for review.</p>}
-    <div className="mt-4 border-t border-zinc-800 pt-4"><p className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Human feedback</p><div className="mt-2 flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => void submitFeedback(true)}>Helpful</Button><Button size="sm" variant="outline" onClick={() => void submitFeedback(false)}>Needs review</Button>{feedbackSent ? <span className="self-center font-mono text-[10px] uppercase text-emerald-400">Feedback recorded</span> : null}</div><Input className="mt-2" value={feedbackNote} onChange={(event) => setFeedbackNote(event.target.value)} placeholder="Optional reviewer note" /></div>
-    {quality?.feedback.length ? <p className="mt-3 font-mono text-[10px] uppercase text-zinc-500">{quality.feedback.length} user feedback item{quality.feedback.length === 1 ? "" : "s"} linked</p> : null}
+  return <section className="border border-black/20 bg-white/[0.03] p-4">
+    <div className="flex items-center justify-between gap-3"><div><div className="font-mono text-[10px] uppercase tracking-widest text-black/55">Quality</div><div className="mt-1 text-sm text-black">Evaluation evidence attached to this trace</div></div><span className="font-mono text-[10px] uppercase text-black/55">{scoreCount} signals</span></div>
+    {scoreCount ? <div className="mt-4 grid gap-2 sm:grid-cols-2">{quality?.scores.slice(0, 8).map((score) => <div key={score._id} className="border border-black/15 bg-black/5 p-3"><div className="flex justify-between text-xs text-black"><span>{score.name}</span><span className="font-mono text-black/70">{String(score.value)}</span></div><p className="mt-1 font-mono text-[9px] uppercase text-black/55">{score.source} · {score.dataType}</p></div>)}{quality?.results.slice(0, 8).map((result) => <div key={result._id} className="border border-black/15 bg-black/5 p-3"><div className="flex justify-between text-xs text-black"><span>Evaluator result</span><span className={result.status === "passed" ? "font-mono text-emerald-300" : "font-mono text-red-300"}>{result.status}</span></div><p className="mt-1 truncate text-xs text-black/55">{result.explanation || String(result.value)}</p></div>)}</div> : <p className="mt-4 text-xs text-black/55">No evaluator results yet. Use Evaluation Engine to enable a live evaluator or queue this trace for review.</p>}
+    <div className="mt-4 border-t border-black/15 pt-4"><p className="font-mono text-[10px] uppercase tracking-widest text-black/55">Human feedback</p><div className="mt-2 flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => void submitFeedback(true)}>Helpful</Button><Button size="sm" variant="outline" onClick={() => void submitFeedback(false)}>Needs review</Button>{feedbackSent ? <span className="self-center font-mono text-[10px] uppercase text-emerald-600">Feedback recorded</span> : null}</div><Input className="mt-2" value={feedbackNote} onChange={(event) => setFeedbackNote(event.target.value)} placeholder="Optional reviewer note" /></div>
+    {quality?.feedback.length ? <p className="mt-3 font-mono text-[10px] uppercase text-black/55">{quality.feedback.length} user feedback item{quality.feedback.length === 1 ? "" : "s"} linked</p> : null}
   </section>;
 }
 
@@ -406,8 +406,8 @@ function formatAge(ageMs: number) {
 function StatItem({ label, value }: { label: string, value: React.ReactNode }) {
   return (
     <div className="space-y-1">
-      <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">{label}</div>
-      <div className="text-sm font-mono text-white">{value}</div>
+      <div className="text-[10px] uppercase tracking-widest text-black/55 font-mono">{label}</div>
+      <div className="text-sm font-mono text-black">{value}</div>
     </div>
   );
 }
@@ -418,17 +418,17 @@ function SpanOverview({ spans }: { spans: SpanRow[] }) {
   return (
     <div className="border border-border bg-muted/10 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">
           Span latency overview
         </div>
-        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">
           {spans.length} spans
         </div>
       </div>
       {spans.length === 0 ? (
-        <div className="h-12 border border-dashed border-border bg-black/30" />
+        <div className="h-12 border border-dashed border-border bg-black/5" />
       ) : (
-        <div className="flex h-12 overflow-hidden border border-border bg-black">
+        <div className="flex h-12 overflow-hidden border border-border bg-white">
           {spans.map((span) => {
             const config = getSpanTypeConfig(span.spanType);
             const width =
@@ -459,8 +459,8 @@ function LatencyWaterfall({ spans }: { spans: SpanRow[] }) {
   return (
     <div className="border border-border bg-muted/10 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Latency waterfall</div>
-        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">wall-clock span overlap</div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">Latency waterfall</div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">wall-clock span overlap</div>
       </div>
       <div className="space-y-1.5">
         {spans.map((span) => {
@@ -469,8 +469,8 @@ function LatencyWaterfall({ spans }: { spans: SpanRow[] }) {
           const width = Math.max(1.5, (Math.max(0, span.latencyMs) / total) * 100);
           return (
             <div key={span.spanId} className="grid grid-cols-[110px_minmax(0,1fr)] items-center gap-2">
-              <span className="truncate font-mono text-[9px] text-zinc-500">{span.modelId || span.toolName || span.spanType}</span>
-              <div className="relative h-3 bg-black/50">
+              <span className="truncate font-mono text-[9px] text-black/55">{span.modelId || span.toolName || span.spanType}</span>
+              <div className="relative h-3 bg-black/10">
                 <div className={cn("absolute h-full", getSpanTypeConfig(span.spanType).segment)} style={{ left: `${left}%`, width: `${width}%` }} title={`${formatDuration(span.latencyMs)} from ${span.createdAt}`} />
               </div>
             </div>
@@ -491,7 +491,7 @@ function TraceSummaryPanel({
   return (
     <aside className="space-y-4 xl:sticky xl:top-20 xl:self-start">
       <div className="border border-border bg-muted/10 p-4">
-        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">
           Trace summary
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">
@@ -512,11 +512,11 @@ function TraceSummaryPanel({
 
 function MiniMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-border bg-black/30 p-3">
-      <div className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">
+    <div className="border border-border bg-black/5 p-3">
+      <div className="font-mono text-[9px] uppercase tracking-widest text-black/55">
         {label}
       </div>
-      <div className="mt-1 truncate font-mono text-xs text-white">{value}</div>
+      <div className="mt-1 truncate font-mono text-xs text-black">{value}</div>
     </div>
   );
 }
@@ -534,11 +534,11 @@ function SummaryList({
 
   return (
     <div className="border border-border bg-muted/10 p-4">
-      <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+      <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-black/55">
         {title}
       </div>
       {rows.length === 0 ? (
-        <div className="border border-dashed border-border p-4 text-center font-mono text-[10px] uppercase tracking-widest text-zinc-600">
+        <div className="border border-dashed border-border p-4 text-center font-mono text-[10px] uppercase tracking-widest text-black/55">
           {empty}
         </div>
       ) : (
@@ -546,22 +546,22 @@ function SummaryList({
           {rows.map((row) => (
             <div key={row.label} className="space-y-1.5">
               <div className="flex items-center justify-between gap-3">
-                <span className="truncate font-mono text-[11px] text-white">
+                <span className="truncate font-mono text-[11px] text-black">
                   {row.label}
                 </span>
-                <span className="shrink-0 font-mono text-[10px] text-zinc-500">
+                <span className="shrink-0 font-mono text-[10px] text-black/55">
                   {row.count}x
                 </span>
               </div>
-              <div className="h-1 bg-zinc-900">
+              <div className="h-1 bg-[#f3f2ed]">
                 <div
-                  className="h-full bg-white"
+                  className="h-full bg-black"
                   style={{
                     width: `${maxCost > 0 ? Math.max(4, (row.cost / maxCost) * 100) : 4}%`,
                   }}
                 />
               </div>
-              <div className="flex justify-between font-mono text-[9px] uppercase tracking-widest text-zinc-600">
+              <div className="flex justify-between font-mono text-[9px] uppercase tracking-widest text-black/55">
                 <span>{formatCurrency(row.cost)}</span>
                 <span>{formatDuration(row.latencyMs)}</span>
               </div>
@@ -628,7 +628,7 @@ function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: Sp
     <div id={`trace-span-${span.spanId}`} className="relative scroll-mt-24">
       {/* Timeline Node */}
       <div className={cn(
-        "absolute -left-[23px] top-4 size-4 rounded-full border bg-black flex items-center justify-center z-10",
+        "absolute -left-[23px] top-4 size-4 rounded-full border bg-white flex items-center justify-center z-10",
         typeConfig.border
       )}>
         <Icon className={cn("size-2.5", typeConfig.color)} />
@@ -637,7 +637,7 @@ function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: Sp
       {/* Card */}
       <div className={cn(
         "border transition-all duration-200",
-        replayActive ? "border-white bg-white/5 shadow-lg" : isExpanded ? "border-zinc-700 bg-muted/20 shadow-lg" : "border-border bg-transparent hover:border-zinc-700 hover:bg-muted/5"
+        replayActive ? "border-black bg-black/5 shadow-lg" : isExpanded ? "border-black/25 bg-muted/20 shadow-lg" : "border-border bg-transparent hover:border-black/25 hover:bg-muted/5"
       )}>
         <button 
           onClick={() => { onSelect?.(); setIsExpanded(!isExpanded); }}
@@ -649,7 +649,7 @@ function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: Sp
             <Badge variant="outline" className={cn("rounded-none border-0 px-0 font-mono", typeConfig.color)}>
               {span.spanType.replace("_", " ")}
             </Badge>
-            <div className="truncate font-mono text-xs text-white max-w-[200px] md:max-w-md">
+            <div className="truncate font-mono text-xs text-black max-w-[200px] md:max-w-md">
               {span.modelId || span.toolName || "Processing..."}
             </div>
             {span.retryCount > 0 ? <Badge variant="outline" className="rounded-none border-amber-400/40 px-1.5 font-mono text-[9px] text-amber-300">retry ×{span.retryCount}</Badge> : null}
@@ -658,11 +658,11 @@ function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: Sp
           </div>
           
           <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center gap-4 text-[10px] font-mono text-zinc-500 uppercase tracking-tighter">
+            <div className="hidden md:flex items-center gap-4 text-[10px] font-mono text-black/55 uppercase tracking-tighter">
               <span className="flex items-center gap-1"><Clock className="size-3" /> {formatDuration(span.latencyMs)}</span>
               <span className="flex items-center gap-1"><DollarSign className="size-3" /> {formatCurrency(span.costUsd)}</span>
             </div>
-            {isExpanded ? <ChevronDown className="size-4 text-zinc-500" /> : <ChevronRight className="size-4 text-zinc-500" />}
+            {isExpanded ? <ChevronDown className="size-4 text-black/55" /> : <ChevronRight className="size-4 text-black/55" />}
           </div>
         </button>
 
@@ -683,7 +683,7 @@ function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: Sp
                       copied={copiedPayload === "input"}
                       onCopy={() => void handleCopyPayload("input")}
                     />
-                    <pre className="p-3 bg-black/40 border border-border/30 text-[11px] font-mono overflow-auto max-h-[300px] text-zinc-300">
+                    <pre className="p-3 bg-[#050505] border border-black text-[11px] font-mono overflow-auto max-h-[300px] text-[#f4d44d]">
                       {formatJson(span.input)}
                     </pre>
                   </div>
@@ -693,7 +693,7 @@ function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: Sp
                       copied={copiedPayload === "output"}
                       onCopy={() => void handleCopyPayload("output")}
                     />
-                    <pre className="p-3 bg-black/40 border border-border/30 text-[11px] font-mono overflow-auto max-h-[300px] text-zinc-300">
+                    <pre className="p-3 bg-[#050505] border border-black text-[11px] font-mono overflow-auto max-h-[300px] text-[#f4d44d]">
                       {formatJson(span.output)}
                     </pre>
                   </div>
@@ -702,20 +702,20 @@ function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: Sp
                   {copiedPayload ? `${copiedPayload} payload copied.` : copyError ? "Payload could not be copied." : ""}
                 </div>
                 {(span.errorType || span.errorMessage || span.stackTrace || span.timedOut || span.isStreamChunk || span.payloadFormat !== "json") ? (
-                  <div className="flex flex-wrap gap-2 border-t border-border/30 pt-3 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+                  <div className="flex flex-wrap gap-2 border-t border-border/30 pt-3 font-mono text-[10px] uppercase tracking-widest text-black/55">
                     {span.errorType ? <span className="border border-red-400/30 px-2 py-1 text-red-300">{span.errorType}</span> : null}
                     {span.errorMessage ? <span className="max-w-full truncate border border-red-400/30 px-2 py-1 text-red-300">{span.errorMessage}</span> : null}
                     {span.timedOut ? <span className="border border-amber-400/30 px-2 py-1 text-amber-300">timeout {span.timeoutMs ? `${span.timeoutMs}ms` : ""}</span> : null}
                     {span.isStreamChunk ? <span className="border border-indigo-400/30 px-2 py-1 text-indigo-300">stream chunk #{span.streamSequence}</span> : null}
-                    {span.payloadFormat !== "json" ? <span className="border border-zinc-700 px-2 py-1">{span.payloadFormat}</span> : null}
+                    {span.payloadFormat !== "json" ? <span className="border border-black/25 px-2 py-1">{span.payloadFormat}</span> : null}
                   </div>
                 ) : null}
-                {span.stackTrace ? <pre className="max-h-48 overflow-auto border border-red-400/20 bg-black/40 p-3 font-mono text-[10px] text-red-200">{span.stackTrace}</pre> : null}
-                {span.attachments && span.attachments !== "[]" ? <pre className="max-h-40 overflow-auto border border-indigo-400/20 bg-black/40 p-3 font-mono text-[10px] text-indigo-200">attachments · {formatJson(span.attachments)}</pre> : null}
+                {span.stackTrace ? <pre className="max-h-48 overflow-auto border border-black bg-[#050505] p-3 font-mono text-[10px] text-[#ff655a]">{span.stackTrace}</pre> : null}
+                {span.attachments && span.attachments !== "[]" ? <pre className="max-h-40 overflow-auto border border-black bg-[#050505] p-3 font-mono text-[10px] text-[#8b7cff]">attachments · {formatJson(span.attachments)}</pre> : null}
 
                 {/* Comments Section */}
                 <div className="pt-4 border-t border-border/30 space-y-4">
-                  <div className="flex items-center gap-2 font-mono text-[10px] text-zinc-500 uppercase tracking-widest">
+                  <div className="flex items-center gap-2 font-mono text-[10px] text-black/55 uppercase tracking-widest">
                     <MessageSquare className="size-3" />
                     Human-in-the-loop Comments
                   </div>
@@ -723,12 +723,12 @@ function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: Sp
                   {comments && comments.length > 0 && (
                     <div className="space-y-3">
                       {comments.map((comment) => (
-                        <div key={comment._id} className="bg-black/20 p-3 border border-border/20 space-y-1">
+                        <div key={comment._id} className="bg-black/5 p-3 border border-border/20 space-y-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-tighter">{comment.userName}</span>
-                            <span className="text-[9px] font-mono text-zinc-600">{formatRelativeTime(comment.createdAt.toString())}</span>
+                            <span className="text-[10px] font-mono text-black/60 uppercase tracking-tighter">{comment.userName}</span>
+                            <span className="text-[9px] font-mono text-black/55">{formatRelativeTime(comment.createdAt.toString())}</span>
                           </div>
-                          <p className="text-[11px] font-mono text-zinc-300">{comment.content}</p>
+                          <p className="text-[11px] font-mono text-black/70">{comment.content}</p>
                         </div>
                       ))}
                     </div>
@@ -739,7 +739,7 @@ function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: Sp
                       value={commentContent}
                       onChange={(e) => setCommentContent(e.target.value)}
                       placeholder="Add an annotation or correction..."
-                      className="rounded-none border-zinc-800 bg-black/40 text-[11px] font-mono h-9"
+                      className="rounded-none border-black/15 bg-black/5 text-[11px] font-mono h-9"
                     />
                     <Button 
                       size="icon" 
@@ -747,7 +747,7 @@ function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: Sp
                       title="Add annotation"
                       onClick={handleAddComment}
                       disabled={isCommenting || !commentContent.trim()}
-                      className="size-9 rounded-none bg-zinc-800 hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white shrink-0"
+                      className="size-9 rounded-none bg-black/10 hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black shrink-0"
                     >
                       <Send className="size-4" />
                     </Button>
@@ -769,22 +769,22 @@ function SpanGraph({ spans }: { spans: SpanRow[] }) {
   return (
     <div className="border border-border bg-muted/10 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Agent handoff graph</div>
-        <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">{spans.length} nodes · {Math.max(0, spans.length - roots.length)} edges</div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">Agent handoff graph</div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">{spans.length} nodes · {Math.max(0, spans.length - roots.length)} edges</div>
       </div>
-      {spans.length === 0 ? <div className="border border-dashed border-border p-4 text-center font-mono text-[10px] uppercase text-zinc-600">No handoffs captured</div> : (
+      {spans.length === 0 ? <div className="border border-dashed border-border p-4 text-center font-mono text-[10px] uppercase text-black/55">No handoffs captured</div> : (
         <div className="space-y-2">
           {edges.map((span) => {
             const parent = byId.get(span.parentSpanId);
             return (
               <div key={span.spanId} className="flex flex-wrap items-center gap-2 font-mono text-[10px]">
-                <span className="border border-zinc-700 px-2 py-1 text-zinc-400">{parent?.modelId || parent?.toolName || parent?.spanType}</span>
+                <span className="border border-black/25 px-2 py-1 text-black/60">{parent?.modelId || parent?.toolName || parent?.spanType}</span>
                 <span className="text-indigo-300">→ handoff →</span>
                 <span className="border border-indigo-400/40 px-2 py-1 text-indigo-300">{span.modelId || span.toolName || span.spanType}</span>
               </div>
             );
           })}
-          {roots.map((span) => <span key={span.spanId} className="mr-2 inline-block border border-zinc-700 px-2 py-1 font-mono text-[10px] text-zinc-300">root · {span.modelId || span.toolName || span.spanType}</span>)}
+          {roots.map((span) => <span key={span.spanId} className="mr-2 inline-block border border-black/25 px-2 py-1 font-mono text-[10px] text-black/70">root · {span.modelId || span.toolName || span.spanType}</span>)}
         </div>
       )}
     </div>
@@ -802,14 +802,14 @@ function PayloadHeader({
 }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <label className="font-mono text-[10px] uppercase tracking-widest text-zinc-600">
+      <label className="font-mono text-[10px] uppercase tracking-widest text-black/55">
         {label}
       </label>
       <button
         type="button"
         onClick={onCopy}
         aria-label={`Copy ${label.toLowerCase()} payload`}
-        className="flex h-6 items-center gap-1 border border-zinc-800 px-2 font-mono text-[9px] uppercase tracking-widest text-zinc-500 transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        className="flex h-6 items-center gap-1 border border-black/15 px-2 font-mono text-[9px] uppercase tracking-widest text-black/55 transition-colors hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
       >
         {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
         {copied ? "Copied" : "Copy"}
@@ -831,45 +831,45 @@ function getSpanTypeConfig(spanType: string) {
   return {
     llm_call: {
       icon: Cpu,
-      color: "text-indigo-400",
+      color: "text-indigo-600",
       bg: "bg-indigo-400/10",
       border: "border-indigo-400/20",
-      segment: "bg-indigo-400",
+      segment: "bg-indigo-500",
     },
     tool_call: {
       icon: Wrench,
-      color: "text-emerald-400",
+      color: "text-emerald-600",
       bg: "bg-emerald-400/10",
       border: "border-emerald-400/20",
-      segment: "bg-emerald-400",
+      segment: "bg-emerald-500",
     },
     decision: {
       icon: Lightbulb,
-      color: "text-amber-400",
+      color: "text-amber-600",
       bg: "bg-amber-400/10",
       border: "border-amber-400/20",
-      segment: "bg-amber-400",
+      segment: "bg-amber-500",
     },
     error: {
       icon: AlertCircle,
-      color: "text-red-400",
+      color: "text-red-600",
       bg: "bg-red-400/10",
       border: "border-red-400/20",
-      segment: "bg-red-400",
+      segment: "bg-red-500",
     },
     run_end: {
       icon: Flag,
-      color: "text-zinc-400",
-      bg: "bg-zinc-400/10",
-      border: "border-zinc-400/20",
-      segment: "bg-zinc-500",
+      color: "text-black/60",
+      bg: "bg-black/5",
+      border: "border-black/15",
+      segment: "bg-black/45",
     },
   }[spanType] || {
     icon: Activity,
-    color: "text-zinc-400",
-    bg: "bg-zinc-400/10",
-    border: "border-zinc-400/20",
-    segment: "bg-zinc-500",
+    color: "text-black/60",
+    bg: "bg-black/5",
+    border: "border-black/15",
+    segment: "bg-black/45",
   };
 }
 

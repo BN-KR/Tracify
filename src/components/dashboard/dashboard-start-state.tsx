@@ -75,21 +75,21 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-      <header className="border border-[#2A2A2A] bg-[#111111] p-5">
-        <div className="mb-3 flex items-center justify-between gap-4 border-b border-[#2A2A2A] pb-4">
+      <header className="border border-black/15 bg-white p-5">
+        <div className="mb-3 flex items-center justify-between gap-4 border-b border-black/15 pb-4">
           <div className="min-w-0">
-            <div className="mb-2 text-[11px] uppercase tracking-wide text-[#666666]">
+            <div className="mb-2 text-[11px] uppercase tracking-wide text-black/55">
               {hasProject ? "overview.empty_state" : "workspace.empty_state"}
             </div>
-            <h1 className="font-mono text-2xl normal-case tracking-normal text-white">
+            <h1 className="font-mono text-2xl normal-case tracking-normal text-black">
               {hasProject ? "No spans received yet." : "Create your first project."}
             </h1>
           </div>
-          <div className="hidden border border-[#2A2A2A] bg-[#0A0A0A] px-3 py-2 text-[12px] text-[#F59E0B] sm:block">
+          <div className="hidden border border-black/15 bg-[#f3f2ed] px-3 py-2 text-[12px] text-[#7d5e00] sm:block">
             {hasProject ? "waiting for first span" : "no project"}
           </div>
         </div>
-        <p className="max-w-2xl font-sans text-sm leading-6 text-[#999999]">
+        <p className="max-w-2xl font-sans text-sm leading-6 text-black/60">
           {hasProject
             ? "Install the SDK and run your agent. Your first span will appear here in real time."
             : "Projects hold your API keys, agent runs, alerts, and trace history."}
@@ -97,10 +97,10 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <section className="border border-[#2A2A2A] bg-[#111111] p-5">
-          <div className="mb-5 flex items-center justify-between border-b border-[#2A2A2A] pb-4">
-            <h2 className="font-mono text-[15px] text-white">Launch plan</h2>
-            <span className="text-[11px] uppercase tracking-wide text-[#666666]">
+        <section className="border border-black/15 bg-white p-5">
+          <div className="mb-5 flex items-center justify-between border-b border-black/15 pb-4">
+            <h2 className="font-mono text-[15px] text-black">Launch plan</h2>
+            <span className="text-[11px] uppercase tracking-wide text-black/55">
               activation
             </span>
           </div>
@@ -108,10 +108,10 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
             {checklist.map((item, index) => (
               <li
                 key={item.label}
-                className="grid grid-cols-[24px_1fr_auto] items-center gap-3 border border-[#2A2A2A] bg-[#0A0A0A] px-3 py-3"
+                className="grid grid-cols-[24px_1fr_auto] items-center gap-3 border border-black/15 bg-[#f3f2ed] px-3 py-3"
               >
-                <span className="text-[12px] text-[#666666]">{index + 1}</span>
-                <span className="text-[13px] text-[#CCCCCC]">{item.label}</span>
+                <span className="text-[12px] text-black/55">{index + 1}</span>
+                <span className="text-[13px] text-black/70">{item.label}</span>
                 <StatusDot status={item.status} />
               </li>
             ))}
@@ -139,16 +139,16 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
           </div>
         </section>
 
-        <section className="border border-[#2A2A2A] bg-[#111111] p-5">
-          <div className="mb-5 flex items-center justify-between border-b border-[#2A2A2A] pb-4">
-            <h2 className="font-mono text-[15px] text-white">
+        <section className="border border-black/15 bg-white p-5">
+          <div className="mb-5 flex items-center justify-between border-b border-black/15 pb-4">
+            <h2 className="font-mono text-[15px] text-black">
               Send your first span
             </h2>
-            <span className="text-[11px] uppercase tracking-wide text-[#666666]">
+            <span className="text-[11px] uppercase tracking-wide text-black/55">
               sdk
             </span>
           </div>
-          <div className="mb-4 flex border border-[#2A2A2A]">
+          <div className="mb-4 flex border border-black/15">
             {Object.entries(quickstarts).map(([key, value]) => (
               <button
                 key={key}
@@ -156,29 +156,29 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
                 onClick={() => setTab(key as keyof typeof quickstarts)}
                 className={
                   key === tab
-                    ? "h-9 flex-1 bg-white text-[13px] text-black"
-                    : "h-9 flex-1 bg-[#0A0A0A] text-[13px] text-[#666666] transition-colors hover:bg-[#161616] hover:text-[#CCCCCC]"
+                    ? "h-9 flex-1 bg-black text-[13px] text-white"
+                    : "h-9 flex-1 bg-[#f3f2ed] text-[13px] text-black/55 transition-colors hover:bg-[#f3f2ed] hover:text-black/70"
                 }
               >
                 {value.label}
               </button>
             ))}
           </div>
-          <pre className="min-h-48 overflow-x-auto border border-[#2A2A2A] bg-[#1C1C1C] p-4 text-sm leading-6 text-[#CCCCCC]">
+          <pre className="min-h-48 overflow-x-auto border border-black bg-[#050505] p-4 text-sm leading-6 text-[#f4d44d]">
             <code>{active.code}</code>
           </pre>
         </section>
       </div>
 
-      <section className="grid gap-6 border border-[#2A2A2A] bg-[#111111] p-5 lg:grid-cols-[1fr_auto] lg:items-center">
+      <section className="grid gap-6 border border-black/15 bg-white p-5 lg:grid-cols-[1fr_auto] lg:items-center">
         <div>
-          <div className="mb-2 text-[11px] uppercase tracking-wide text-[#666666]">
+          <div className="mb-2 text-[11px] uppercase tracking-wide text-black/55">
             sample trace
           </div>
-          <h2 className="font-mono text-[15px] text-white">
+          <h2 className="font-mono text-[15px] text-black">
             Inspect a completed run while your first span is pending.
           </h2>
-          <p className="mt-2 max-w-2xl font-sans text-sm leading-6 text-[#999999]">
+          <p className="mt-2 max-w-2xl font-sans text-sm leading-6 text-black/60">
             The sample entry point is temporary until the trace viewer milestone
             creates the real run inspection UI.
           </p>
@@ -200,7 +200,7 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
 function StatusDot({ status }: { status: ChecklistStatus }) {
   if (status === "completed") {
     return (
-      <span className="flex items-center gap-2 text-[11px] text-[#10B981]">
+      <span className="flex items-center gap-2 text-[11px] text-[#047857]">
         <span className="size-2 bg-[#10B981]" />
         completed
       </span>
@@ -209,16 +209,16 @@ function StatusDot({ status }: { status: ChecklistStatus }) {
 
   if (status === "current") {
     return (
-      <span className="flex items-center gap-2 text-[11px] text-[#F59E0B]">
-        <span className="size-2 bg-[#F59E0B]" />
+      <span className="flex items-center gap-2 text-[11px] text-[#7d5e00]">
+        <span className="size-2 bg-[#047857]" />
         current
       </span>
     );
   }
 
   return (
-    <span className="flex items-center gap-2 text-[11px] text-[#666666]">
-      <span className="size-2 bg-[#666666]" />
+    <span className="flex items-center gap-2 text-[11px] text-black/55">
+      <span className="size-2 bg-black/40" />
       pending
     </span>
   );

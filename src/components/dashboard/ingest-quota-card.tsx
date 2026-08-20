@@ -52,31 +52,31 @@ export function IngestQuotaCard({ projectId }: { projectId: string }) {
   const nearLimit = usedPct >= 80;
 
   return (
-    <Card className="p-6 rounded-none border-border bg-[#111111] shadow-none space-y-4">
+    <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-4">
       <div>
-        <h3 className="font-mono text-[14px] text-white uppercase tracking-widest">Ingest Rate Limit</h3>
-        <p className="text-[11px] text-[#666666] mt-1">
+        <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">Ingest Rate Limit</h3>
+        <p className="text-[11px] text-black/55 mt-1">
           Spans accepted per rolling 60-second window. Requests beyond the limit return HTTP 429.
         </p>
       </div>
 
       {error || !quota?.available ? (
-        <p className="text-[11px] font-mono text-zinc-500 uppercase">Quota data unavailable right now.</p>
+        <p className="text-[11px] font-mono text-black/55 uppercase">Quota data unavailable right now.</p>
       ) : (
         <>
           <div className="flex items-baseline justify-between font-mono">
-            <span className={`text-2xl ${nearLimit ? "text-red-500" : "text-white"}`}>
+            <span className={`text-2xl ${nearLimit ? "text-red-600" : "text-black"}`}>
               {quota.used.toLocaleString()}
             </span>
-            <span className="text-[11px] text-zinc-500">/ {quota.limit.toLocaleString()} per minute</span>
+            <span className="text-[11px] text-black/55">/ {quota.limit.toLocaleString()} per minute</span>
           </div>
-          <div className="h-2 w-full border border-zinc-800 bg-black">
+          <div className="h-2 w-full border border-black/15 bg-white">
             <div
-              className={`h-full ${nearLimit ? "bg-red-500" : "bg-white"}`}
+              className={`h-full ${nearLimit ? "bg-red-500" : "bg-black"}`}
               style={{ width: `${usedPct}%` }}
             />
           </div>
-          <p className="text-[9px] text-zinc-600 font-mono uppercase">
+          <p className="text-[9px] text-black/55 font-mono uppercase">
             {quota.remaining.toLocaleString()} requests remaining this window
             {quota.resetSeconds > 0 ? ` · resets in ${quota.resetSeconds}s` : ""}
           </p>

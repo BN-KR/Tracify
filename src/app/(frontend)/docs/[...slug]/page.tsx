@@ -37,7 +37,7 @@ export default async function DocsArticlePage({ params }: { params: Promise<{ sl
             </Link>
             <div className="mt-10 flex flex-col gap-6 border-b border-black pb-8 xl:flex-row xl:items-start xl:justify-between">
               <div>
-                <p className="font-mono text-[9px] uppercase tracking-[.14em] text-black/45">{doc.section} / guide {String(doc.order).padStart(2, "0")}</p>
+                <p className="font-mono text-[9px] uppercase tracking-[.14em] text-black/55">{doc.section} / guide {String(doc.order).padStart(2, "0")}</p>
                 <h1 className="mt-6 max-w-3xl font-pixel text-[clamp(3.25rem,7vw,6.5rem)] leading-[.84] tracking-[-.07em]">{doc.title}</h1>
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-black/60">{doc.description}</p>
               </div>
@@ -46,16 +46,16 @@ export default async function DocsArticlePage({ params }: { params: Promise<{ sl
             <article className="docs-markdoc mt-10 max-w-3xl"><MarkdocDoc content={doc.content} /></article>
             {next ? (
               <Link href={`/docs/${next.slug}`} className="mt-16 flex max-w-3xl items-center justify-between border-t border-black py-6 transition-colors hover:bg-[#f4d44d]">
-                <span><span className="font-mono text-[9px] uppercase tracking-[.13em] text-black/45">Next guide</span><span className="mt-2 block font-pixel text-3xl tracking-[-.05em]">{next.title}</span></span>
+                <span><span className="font-mono text-[9px] uppercase tracking-[.13em] text-black/55">Next guide</span><span className="mt-2 block font-pixel text-3xl tracking-[-.05em]">{next.title}</span></span>
                 <ArrowRight className="size-5" />
               </Link>
             ) : null}
           </main>
           <aside className="hidden border-l border-black bg-[#eceae3] p-5 xl:block">
             <div className="sticky top-6">
-              <p className="font-mono text-[9px] uppercase tracking-[.14em] text-black/45">Page actions</p>
+              <p className="font-mono text-[9px] uppercase tracking-[.14em] text-black/55">Page actions</p>
               <DocsActions markdown={markdown} installUrl="/docs/mcp-server" />
-              <p className="mt-12 font-mono text-[9px] uppercase tracking-[.14em] text-black/45">Agent access</p>
+              <p className="mt-12 font-mono text-[9px] uppercase tracking-[.14em] text-black/55">Agent access</p>
               <p className="mt-3 text-sm leading-6 text-black/55">Install the read-only docs MCP server for full documentation retrieval.</p>
               <Link href="/docs/mcp-server" className="mt-4 inline-flex font-mono text-[9px] uppercase tracking-[.12em] underline underline-offset-4">MCP setup →</Link>
             </div>

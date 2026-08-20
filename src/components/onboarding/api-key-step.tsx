@@ -57,21 +57,21 @@ export function ApiKeyStep() {
       />
       {apiKey ? (
         <>
-          <div className="border border-[#2A2A2A] bg-[#1C1C1C] p-4 font-mono text-sm text-white">
+          <div className="border border-black/15 bg-[#e4e1d8] p-4 font-mono text-sm text-black">
             <code className="break-all">{apiKey}</code>
           </div>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
               onClick={copyKey}
-              className="h-10 border border-white bg-white px-4 text-[13px] text-black transition-colors hover:bg-[#CCCCCC]"
+              className="h-10 border border-black bg-black px-4 text-[13px] text-white transition-colors hover:bg-[#CCCCCC]"
             >
               {copied ? "Copied" : "Copy key"}
             </button>
             <button
               type="button"
               onClick={downloadEnv}
-              className="h-10 border border-[#2A2A2A] bg-[#0A0A0A] px-4 text-[13px] text-[#CCCCCC] transition-colors hover:bg-[#161616] hover:text-white"
+              className="h-10 border border-black/15 bg-[#f3f2ed] px-4 text-[13px] text-black/70 transition-colors hover:bg-[#f3f2ed] hover:text-black"
             >
               Download .env
             </button>
@@ -79,25 +79,25 @@ export function ApiKeyStep() {
               type="button"
               disabled={!copied}
               onClick={() => router.push("/onboarding/install")}
-              className="h-10 border border-[#2A2A2A] bg-[#111111] px-4 text-[13px] text-[#CCCCCC] transition-colors hover:bg-[#161616] hover:text-white disabled:cursor-not-allowed disabled:text-[#666666]"
+              className="h-10 border border-black/15 bg-white px-4 text-[13px] text-black/70 transition-colors hover:bg-[#f3f2ed] hover:text-black disabled:cursor-not-allowed disabled:text-black/55"
             >
               Continue
             </button>
           </div>
         </>
       ) : (
-        <div className="border border-[#2A2A2A] bg-[#0A0A0A] p-4">
-          <div className="text-sm text-[#F59E0B]">
+        <div className="border border-black/15 bg-[#f3f2ed] p-4">
+          <div className="text-sm text-[#92400E]">
             API key is no longer available.
           </div>
-          <p className="mt-3 font-sans text-sm leading-6 text-[#999999]">
+          <p className="mt-3 font-sans text-sm leading-6 text-black/60">
             API keys are shown once. Rotate key from settings or create a new
             project.
           </p>
           <button
             type="button"
             onClick={() => router.push("/onboarding/project")}
-            className="mt-5 h-10 border border-white bg-white px-4 text-[13px] text-black transition-colors hover:bg-[#CCCCCC]"
+            className="mt-5 h-10 border border-black bg-black px-4 text-[13px] text-white transition-colors hover:bg-[#CCCCCC]"
           >
             Back to project creation
           </button>

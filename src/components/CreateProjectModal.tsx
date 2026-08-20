@@ -78,18 +78,18 @@ export function CreateProjectModal({ children }: { children?: React.ReactNode })
           )
         }
       />
-      <DialogContent className="sm:max-w-[425px] border-zinc-800 bg-black rounded-none">
+      <DialogContent className="sm:max-w-[425px] border-black/15 bg-white rounded-none">
         {!apiKey ? (
           <form onSubmit={handleSubmit}>
             <DialogHeader className="space-y-3">
-              <DialogTitle className="font-mono uppercase text-xl text-white">Create Project</DialogTitle>
-              <DialogDescription className="text-zinc-500 font-sans">
+              <DialogTitle className="font-mono uppercase text-xl text-black">Create Project</DialogTitle>
+              <DialogDescription className="text-black/55 font-sans">
                 Create a new observability project to get your SDK API key.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-8">
               <div className="flex flex-col gap-3">
-                <label htmlFor="name" className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+                <label htmlFor="name" className="text-[10px] font-mono uppercase tracking-[0.2em] text-black/55">
                   Project Name
                 </label>
                 <Input
@@ -99,7 +99,7 @@ export function CreateProjectModal({ children }: { children?: React.ReactNode })
                   placeholder="e.g. Production Agent"
                   autoComplete="off"
                   autoFocus
-                  className="bg-zinc-950 border-zinc-800 rounded-none h-10 font-mono text-white focus-visible:ring-white/20 transition-all"
+                  className="bg-white border-black/15 rounded-none h-10 font-mono text-black focus-visible:ring-white/20 transition-all"
                 />
               </div>
             </div>
@@ -120,25 +120,25 @@ export function CreateProjectModal({ children }: { children?: React.ReactNode })
         ) : (
           <div className="py-8 space-y-8">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="w-12 h-12 rounded-none bg-white text-black flex items-center justify-center animate-in zoom-in duration-500 ease-[0.23,1,0.32,1]">
+              <div className="w-12 h-12 rounded-none bg-black text-white flex items-center justify-center animate-in zoom-in duration-500 ease-[0.23,1,0.32,1]">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-mono font-bold tracking-tight text-xl text-white uppercase">Project Created</h3>
-                <p className="text-sm text-zinc-500 font-sans px-4">
+                <h3 className="font-mono font-bold tracking-tight text-xl text-black uppercase">Project Created</h3>
+                <p className="text-sm text-black/55 font-sans px-4">
                   Copy your API key now. You will not be able to see it again.
                 </p>
               </div>
             </div>
 
             <div className="relative group">
-              <div className="relative flex items-center justify-between p-4 rounded-none border border-zinc-800 bg-zinc-950 font-mono text-sm group-hover:border-zinc-700 transition-colors">
-                <span className="truncate mr-4 text-white uppercase tracking-tighter">{apiKey}</span>
+              <div className="relative flex items-center justify-between p-4 rounded-none border border-black/15 bg-white font-mono text-sm group-hover:border-black/25 transition-colors">
+                <span className="truncate mr-4 text-black uppercase tracking-tighter">{apiKey}</span>
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={copyToClipboard}
-                  className="shrink-0 h-8 px-3 font-mono text-[10px] uppercase bg-zinc-900 hover:bg-white hover:text-black transition-all"
+                  className="shrink-0 h-8 px-3 font-mono text-[10px] uppercase bg-[#f3f2ed] hover:bg-black hover:text-white transition-all"
                 >
                   {copied ? "Copied" : <Copy className="w-3.5 h-3.5" />}
                 </Button>
@@ -149,7 +149,7 @@ export function CreateProjectModal({ children }: { children?: React.ReactNode })
               <Button
                 onClick={() => handleOpenChange(false)}
                 variant="outline"
-                className="w-full h-10 font-mono uppercase border-zinc-800 hover:bg-white hover:text-black"
+                className="w-full h-10 font-mono uppercase border-black/15 hover:bg-black hover:text-white"
               >
                 Done
               </Button>

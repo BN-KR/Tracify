@@ -1119,3 +1119,13 @@ Sourced from a graphify knowledge-graph audit (weakly-connected nodes, thin comm
 Follow-ups still open:
 - [ ] Run `npx convex codegen` once a valid `CONVEX_DEPLOYMENT`/`CONVEX_URL` is available locally (codegen failed in this environment with `InvalidDeploymentName`) to refresh `convex/_generated/dataModel.d.ts` for the new `teamsWebhookUrl` schema field. `tsc --noEmit` and `eslint` both pass without it since the field is additive and optional.
 - [ ] Update AGENTS.md's stale "Useful Pages This Project is Missing" and product-page-placeholder notes now that both are confirmed resolved.
+
+# PR #19 light-theme rebase recovery — 2026-08-20
+
+- [x] Rebase all four light-theme commits onto current `origin/main` in an isolated worktree without touching the owner's uncommitted primary checkout.
+- [x] Resolve the sole `task.md` conflict by preserving current shipped-EU/codegen history and avoiding obsolete checklist resurrection.
+- [x] Verify TypeScript, 16 content tests, diff hygiene, and the 99-route production build.
+- [ ] With explicit authorization, force-push the rebased detached HEAD `ed28cb7` to `codex/light-theme-reskin` using `--force-with-lease`, then confirm PR #19 is mergeable and checks pass.
+- [ ] Complete an authenticated visual sweep of Overview charts, Trace Viewer waterfall, Costs charts, Evaluation, and Resilience before marking the draft ready.
+- [x] Review and merge independent PR #23 first; it landed on `main` as `3e656e1` with all checks green.
+- [x] Install namespaced gstack skills for personal Codex and Claude Code use without adding repository enforcement.

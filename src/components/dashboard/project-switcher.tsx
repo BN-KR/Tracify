@@ -43,7 +43,7 @@ export function ProjectSwitcher({ isCollapsed = false }: { isCollapsed?: boolean
         <button
           type="button"
           className={cn(
-            "flex items-center border border-[#2A2A2A] bg-[#0A0A0A] font-mono text-[#CCCCCC] outline-none transition-colors hover:border-white hover:text-white focus-visible:border-white",
+            "flex items-center border border-black/15 bg-[#f3f2ed] font-mono text-black/70 outline-none transition-colors hover:border-black hover:text-black focus-visible:border-black",
             isCollapsed ? "size-9 justify-center text-[12px]" : "h-10 w-full justify-between px-3 text-[13px]"
           )}
         >
@@ -52,7 +52,7 @@ export function ProjectSwitcher({ isCollapsed = false }: { isCollapsed?: boolean
           ) : (
             <>
               <span className="truncate">{label}</span>
-              <ChevronDown className="size-4 shrink-0 text-[#666666]" />
+              <ChevronDown className="size-4 shrink-0 text-black/55" />
             </>
           )}
         </button>
@@ -72,10 +72,10 @@ export function ProjectSwitcher({ isCollapsed = false }: { isCollapsed?: boolean
               onClick={() => selectProject(project._id)}
               className="flex flex-col items-start gap-0"
             >
-              <span className={project._id === currentProjectId ? "text-white" : ""}>
+              <span className={project._id === currentProjectId ? "text-black" : ""}>
                 {project.name}
               </span>
-              <span className="text-[10px] text-[#666666] uppercase">{project.planTier}</span>
+              <span className="text-[10px] text-black/55 uppercase">{project.planTier}</span>
             </DropdownMenuItem>
           ))
         ) : (

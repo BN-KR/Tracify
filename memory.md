@@ -1211,3 +1211,11 @@
 - Tinybird Forward workspaces reject `POST /v0/datasources` and `/v0/pipes` ("can only be done via deployments"). Schema must go through `tb deploy`, run **from the repository root** where `.tinyb` lives. Its trailing `'charmap' codec can't encode '\u2713'` error on Windows is console encoding, not failure.
 - `.tinyb` holds a live Tinybird token and was **tracked in git** with the token committed until 2026-08-18. Now gitignored; never re-add it. `scratch/tracify-regional/` was likewise unignored despite the runbook claiming otherwise — also fixed.
 - `INNGEST_SIGNING_KEY` does not exist in this codebase; only `INNGEST_EVENT_KEY` is read.
+
+## 2026-08-20 PR #19 rebase recovery
+- Rebased the four light-theme commits from `codex/light-theme-reskin` onto `origin/main` in the isolated `scratch/pr19-rebase` worktree, leaving the owner's dirty primary checkout untouched.
+- The only conflict was `task.md`: the branch carried stale EU-launch and Convex-codegen instructions. The current `main` version was retained because it already includes the light-theme record and the newer, completed infrastructure history.
+- Rebased detached HEAD is `ed28cb7`. Verification passes: TypeScript, 16 content tests, diff hygiene, and the Next.js production build (99 routes). Focused ESLint reports only the pre-existing `no-explicit-any` in `src/components/ui/dot-pattern.tsx`; the PR changes only that file's SVG fill color.
+- The remote PR branch has not been rewritten. Updating PR #19 requires an explicitly authorized `git push --force-with-lease origin HEAD:codex/light-theme-reskin`.
+- On 2026-08-20 the owner explicitly authorized safe updates and merges for PRs #23 and #19. PR #23 passed review and merged to `main` as `3e656e1`; PR #19 must include that new base before its protected branch rewrite.
+- gstack 1.68.2 was installed as a personal, namespaced skill set for both Codex and Claude Code. Bun 1.3.14 and the gstack browser runtime are installed; telemetry, automatic upgrades, update checks, team enforcement, and plan-tune hooks are disabled.

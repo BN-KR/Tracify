@@ -14,7 +14,7 @@ export function ProjectDashboardContent({ projectId }: { projectId: string }) {
 
   if (firstRun === undefined) {
     return (
-      <div className="font-mono text-sm text-[#666666]">
+      <div className="font-mono text-sm text-black/55">
         Loading project activity...
       </div>
     );

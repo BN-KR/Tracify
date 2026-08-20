@@ -23,12 +23,12 @@ export function AnalyticsRefreshControl({
         onClick={onRefresh}
         disabled={refreshing}
         aria-label={refreshing ? "Refreshing analytics" : "Refresh analytics"}
-        className="flex h-8 items-center gap-2 border border-[#2A2A2A] bg-black px-3 font-mono text-[11px] uppercase text-[#999999] transition-colors hover:border-white hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-8 items-center gap-2 border border-black/15 bg-white px-3 font-mono text-[11px] uppercase text-black/60 transition-colors hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:cursor-not-allowed disabled:opacity-50"
       >
         <RefreshCw className={cn("size-3", refreshing && "animate-spin")} />
         Refresh
       </button>
-      <span className="font-mono text-[10px] uppercase tracking-widest text-[#666666]">
+      <span className="font-mono text-[10px] uppercase tracking-widest text-black/55">
         {label}
       </span>
     </div>

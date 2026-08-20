@@ -77,8 +77,8 @@ export function InstallStep() {
         description={`Choose your runtime and connect it to Tracify ${region.shortName}.`}
       />
       <CodeCopyBlock label="Regional environment" value={`TRACIFY_REGION=${region.id}`} />
-      <div className="mb-4 mt-4 border border-[#2A2A2A] bg-[#111111] p-3 font-mono text-[10px] uppercase tracking-[0.1em] text-[#999999]">Ingest endpoint · {region.origin}/api/ingest</div>
-      <div className="mb-4 grid border border-[#2A2A2A] sm:grid-cols-3">
+      <div className="mb-4 mt-4 border border-black/15 bg-white p-3 font-mono text-[10px] uppercase tracking-[0.1em] text-black/60">Ingest endpoint · {region.origin}/api/ingest</div>
+      <div className="mb-4 grid border border-black/15 sm:grid-cols-3">
         {Object.entries(snippets).map(([key, snippet]) => (
           <button
             key={key}
@@ -86,8 +86,8 @@ export function InstallStep() {
             onClick={() => setTab(key as keyof typeof snippets)}
             className={
               key === tab
-                ? "h-10 flex-1 bg-white text-[13px] text-black"
-                : "h-10 flex-1 bg-[#0A0A0A] text-[13px] text-[#666666] transition-colors hover:bg-[#161616] hover:text-[#CCCCCC]"
+                ? "h-10 flex-1 bg-black text-[13px] text-white"
+                : "h-10 flex-1 bg-[#f3f2ed] text-[13px] text-black/55 transition-colors hover:bg-[#f3f2ed] hover:text-black/70"
             }
           >
             {snippet.label}
@@ -96,7 +96,7 @@ export function InstallStep() {
       </div>
       {tab === "prompt" ? (
         <>
-          <div className="mb-4 border border-[#2A2A2A] bg-[#0A0A0A] p-4 font-sans text-sm leading-6 text-[#F59E0B]">
+          <div className="mb-4 border border-black/15 bg-[#f3f2ed] p-4 font-sans text-sm leading-6 text-[#92400E]">
             Do not paste live API keys into AI coding tools unless you trust the
             environment. Prefer adding the key locally to .env.
           </div>
@@ -123,7 +123,7 @@ export function InstallStep() {
           }
           router.push("/onboarding/waiting");
         }}
-        className="mt-6 h-10 border border-white bg-white px-4 text-[13px] text-black transition-colors hover:bg-[#CCCCCC]"
+        className="mt-6 h-10 border border-black bg-black px-4 text-[13px] text-white transition-colors hover:bg-[#CCCCCC]"
       >
         I&apos;m ready
       </button>

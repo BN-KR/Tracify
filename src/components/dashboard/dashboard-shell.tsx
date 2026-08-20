@@ -57,17 +57,17 @@ export function DashboardShell({
   const layoutSidebarWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
   return (
-    <div className="flex min-h-svh w-full bg-[#0A0A0A] font-mono text-[#CCCCCC]">
+    <div className="flex min-h-svh w-full bg-[#eceae3] font-mono text-black/70">
       <DashboardSidebar
         canAccessContent={canAccessContent}
         isCollapsed={isCollapsed}
         onCollapsedChange={updateCollapsed}
       />
       <div
-        className="flex min-h-svh min-w-0 flex-1 flex-col bg-[#0A0A0A] transition-[padding] duration-150 motion-reduce:transition-none"
+        className="flex min-h-svh min-w-0 flex-1 flex-col bg-[#eceae3] transition-[padding] duration-150 motion-reduce:transition-none"
         style={{ paddingLeft: layoutSidebarWidth }}
       >
-        <main className="h-svh pb-0 overflow-y-auto bg-[#0A0A0A] p-4 lg:p-6 scrollbar-hide">
+        <main className="h-svh pb-0 overflow-y-auto bg-[#eceae3] p-4 lg:p-6 scrollbar-hide">
           {children}
         </main>
       </div>

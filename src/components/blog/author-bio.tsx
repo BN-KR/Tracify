@@ -9,7 +9,7 @@ export function AuthorBio({ author }: { author: string }) {
         </span>
       </div>
       <div className="flex flex-col justify-center bg-[#f3f1ea] px-5 py-5 sm:px-7">
-        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-black/50">
+        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-black/60">
           Written by
         </span>
         <span className="mt-2 font-pixel text-2xl leading-none tracking-[-0.03em] text-black">

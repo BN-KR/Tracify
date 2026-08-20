@@ -64,35 +64,35 @@ export function WaitingStep() {
         title="Waiting for your first span"
         description="Run your agent. Tracify is listening on your project."
       />
-      <div className="border border-[#2A2A2A] bg-[#0A0A0A] p-4">
-        <div className="mb-4 flex items-center gap-2 text-[#F59E0B]">
-          <span className="size-2 animate-mono-pulse bg-[#F59E0B]" />
+      <div className="border border-black/15 bg-[#f3f2ed] p-4">
+        <div className="mb-4 flex items-center gap-2 text-[#92400E]">
+          <span className="size-2 animate-mono-pulse bg-[#B45309]" />
           <span className="text-[13px]">listening</span>
         </div>
         <dl className="grid gap-3 text-sm sm:grid-cols-3">
           <div>
-            <dt className="text-[11px] uppercase tracking-wide text-[#666666]">
+            <dt className="text-[11px] uppercase tracking-wide text-black/55">
               Project
             </dt>
-            <dd className="mt-1 text-[#CCCCCC]">{projectName}</dd>
+            <dd className="mt-1 text-black/70">{projectName}</dd>
           </div>
           <div>
-            <dt className="text-[11px] uppercase tracking-wide text-[#666666]">
+            <dt className="text-[11px] uppercase tracking-wide text-black/55">
               API key
             </dt>
-            <dd className="mt-1 text-[#CCCCCC]">{keyDisplay}</dd>
+            <dd className="mt-1 text-black/70">{keyDisplay}</dd>
           </div>
           <div>
-            <dt className="text-[11px] uppercase tracking-wide text-[#666666]">
+            <dt className="text-[11px] uppercase tracking-wide text-black/55">
               Status
             </dt>
-            <dd className="mt-1 text-[#F59E0B]">listening</dd>
+            <dd className="mt-1 text-[#92400E]">listening</dd>
           </div>
         </dl>
       </div>
 
       {!projectId ? (
-        <div className="mt-5 border border-[#2A2A2A] bg-[#0A0A0A] p-4 font-sans text-sm leading-6 text-[#999999]">
+        <div className="mt-5 border border-black/15 bg-[#f3f2ed] p-4 font-sans text-sm leading-6 text-black/60">
           Project context is no longer available in this browser session. Create
           a project again to listen for first-span activation.
         </div>
@@ -101,17 +101,17 @@ export function WaitingStep() {
       {elapsed >= 30 ? (
         <Link
           href="/demo"
-          className="mt-5 block text-sm text-[#999999] underline underline-offset-4 transition-colors hover:text-white"
+          className="mt-5 block text-sm text-black/60 underline underline-offset-4 transition-colors hover:text-black"
         >
           Explore sample trace
         </Link>
       ) : null}
       {elapsed >= 60 ? (
-        <details className="mt-5 border border-[#2A2A2A] bg-[#0A0A0A] p-4">
-          <summary className="cursor-pointer text-sm text-[#CCCCCC]">
+        <details className="mt-5 border border-black/15 bg-[#f3f2ed] p-4">
+          <summary className="cursor-pointer text-sm text-black/70">
             Common issues
           </summary>
-          <ul className="mt-4 space-y-2 font-sans text-sm text-[#999999]">
+          <ul className="mt-4 space-y-2 font-sans text-sm text-black/60">
             <li>TRACIFY_API_KEY is not set</li>
             <li>API key copied incorrectly</li>
             <li>agent is not running</li>
@@ -123,7 +123,7 @@ export function WaitingStep() {
       {elapsed >= 120 ? (
         <a
           href="mailto:support@tracify.tech"
-          className="mt-5 inline-block text-sm text-[#999999] underline underline-offset-4 transition-colors hover:text-white"
+          className="mt-5 inline-block text-sm text-black/60 underline underline-offset-4 transition-colors hover:text-black"
         >
           Still stuck? Email support
         </a>
