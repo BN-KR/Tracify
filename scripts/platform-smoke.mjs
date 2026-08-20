@@ -21,6 +21,7 @@ const routes = [
   ["/dashboard/not-a-project/datasets", [200, 302, 307, 308]],
   ["/dashboard/not-a-project/experiments", [200, 302, 307, 308]],
   ["/dashboard/not-a-project/compare", [200, 302, 307, 308]],
+  ["/dashboard/not-a-project/investigate", [200, 302, 307, 308]],
   ["/dashboard/not-a-project/playground", [200, 302, 307, 308]],
 ];
 

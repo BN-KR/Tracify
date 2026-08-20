@@ -127,6 +127,11 @@ export function DashboardSidebar({
           icon: GitCompare,
           href: projectId ? `/dashboard/${projectId}/compare` : projectSetupHref,
         },
+        {
+          title: "Investigation",
+          icon: Search,
+          href: projectId ? `/dashboard/${projectId}/investigate` : projectSetupHref,
+        },
       ],
     },
     {

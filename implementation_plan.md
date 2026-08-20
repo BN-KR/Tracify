@@ -1,5 +1,11 @@
 # Robots standards cleanup — 2026-08-13
 
+## gstack investigation workflow — 2026-08-20
+
+- Added Investigation Mode at `/dashboard/[projectId]/investigate` with URL-persisted run selection, existing telemetry evidence, and a local confirmed/inference board.
+- Added an evidence-summary clipboard handoff and explicit full-trace link; kept the workflow honest about local-only notes and avoided inventing root causes.
+- Added navigation and protected-route smoke coverage. Focused lint, activation, content, platform smoke, and diff checks pass.
+
 ## gstack activation slice — 2026-08-20
 
 - Onboarding now exposes immediate diagnostics instead of waiting for a timer: authenticated project state, cloud health, key-region compatibility, and the last ingest request.

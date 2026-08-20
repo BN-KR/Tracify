@@ -1,3 +1,10 @@
+# 2026-08-20 — gstack investigation workflow
+
+- [x] Add Investigation Mode at `/dashboard/[projectId]/investigate` with a URL-selected run, confirmed telemetry signals, and an evidence board that separates observations from hypotheses.
+- [x] Add a clipboard-ready, run-linked investigation summary for handoff without claiming team-synced notes.
+- [x] Add Investigation Mode to dashboard navigation and protected-route smoke coverage.
+- [ ] Re-run the production build after the active dev process releases malformed `.next/dev/types/validator.ts`.
+
 # ⚠ PENDING — needs BN-KR on their own machine (updated 2026-08-16)
 
 These require local credentials, live provider consoles, or a working internet

@@ -1,5 +1,11 @@
 # Project Memory
 
+## 2026-08-20 gstack Investigation Mode
+- Added `/dashboard/[projectId]/investigate` as a guided incident workflow over existing run summaries and cached spans; no new backend or causal claims were introduced.
+- The page selects a run through the `run` URL parameter, surfaces confirmed status/error/latency/model-tool signals, and stores a per-project/run evidence board locally with separate `confirmed` and `inference` labels.
+- “Copy evidence summary” includes the selected run URL and board contents for handoff. It is intentionally clipboard-based until shared server-backed incident records are designed.
+- Dashboard navigation and `npm run smoke:platform` cover the protected route. Focused ESLint, activation, content, smoke, and diff checks pass.
+
 ## 2026-08-20 gstack activation implementation
 - Started `codex/gstack-activation` from `origin/main`; preserved unrelated untracked `graphify-out/`.
 - Onboarding now checks project access, regional cloud health, API-key region alignment, and last request state immediately. It can send a real, bounded onboarding probe to `/api/ingest` using the in-memory one-time key and reports the response without exposing the key.
