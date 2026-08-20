@@ -311,7 +311,7 @@ export function CostDashboard({ projectId }: { projectId: string }) {
                   <YAxis
                     dataKey="modelId"
                     type="category"
-                    stroke="rgba(0,0,0,0.45)"
+                    stroke="rgba(0,0,0,0.6)"
                     fontSize={10}
                     width={96}
                   />

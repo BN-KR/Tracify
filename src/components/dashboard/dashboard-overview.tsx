@@ -304,9 +304,9 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={runTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.12)" vertical={false} />
-                <XAxis dataKey="day" stroke="rgba(0,0,0,0.45)" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
-                <YAxis yAxisId="runs" stroke="rgba(0,0,0,0.45)" fontSize={10} allowDecimals={false} />
-                <YAxis yAxisId="failure" orientation="right" stroke="rgba(0,0,0,0.45)" fontSize={10} tickFormatter={(value) => `${value}%`} />
+                <XAxis dataKey="day" stroke="rgba(0,0,0,0.6)" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
+                <YAxis yAxisId="runs" stroke="rgba(0,0,0,0.6)" fontSize={10} allowDecimals={false} />
+                <YAxis yAxisId="failure" orientation="right" stroke="rgba(0,0,0,0.6)" fontSize={10} tickFormatter={(value) => `${value}%`} />
                 <Tooltip contentStyle={{ backgroundColor: "#ffffff", border: "1px solid rgba(0,0,0,0.15)", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }} />
                 <Bar yAxisId="runs" dataKey="runs" fill="#000000" barSize={18} name="Runs" />
                 <Line yAxisId="failure" type="monotone" dataKey="failureRate" stroke="#B45309" strokeWidth={2} dot={false} name="Failure rate" />
@@ -328,8 +328,8 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={qualityTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.12)" vertical={false} />
-                <XAxis dataKey="day" stroke="rgba(0,0,0,0.45)" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
-                <YAxis stroke="rgba(0,0,0,0.45)" fontSize={10} domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                <XAxis dataKey="day" stroke="rgba(0,0,0,0.6)" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
+                <YAxis stroke="rgba(0,0,0,0.6)" fontSize={10} domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
                 <Tooltip formatter={(value) => `${Number(value).toFixed(0)}%`} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid rgba(0,0,0,0.15)", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }} />
                 <Line type="monotone" dataKey="passRate" stroke="#000000" strokeWidth={2} dot={{ r: 2, fill: "#000000" }} name="Pass rate" />
               </LineChart>
