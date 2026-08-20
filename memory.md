@@ -7,6 +7,8 @@
 - Added activation events for project creation, API-key copy, install readiness, probe success/failure, and first trace receipt. Dashboard Launch plan uses client and Convex evidence for its first four steps.
 - Corrected public and dashboard examples to the published `tracify-sdk` package and actual `traceAgent` / `trace_agent` APIs. `npm run test:activation` protects the contract.
 - Focused ESLint, activation contract, content tests, and diff hygiene pass. Production build reaches compilation but fails in TypeScript because an active local Next process has malformed generated `.next/dev/types/validator.ts`; do not edit generated output as the fix.
+- Added `/dashboard/[projectId]/compare` as the first keyboard-native investigation building block: two URL-persisted runs, metadata comparison, cached span evidence, and explicit distinction between observed differences and diagnosis. Platform smoke covers its protected route.
+- Added `.github/workflows/activation-contract.yml` to run activation and public-content contracts on pushes and pull requests.
 
 ## 2026-08-16 Mandatory reply format: every reply starts with "TRACIFY"
 - Every reply in this repo, from any agent, must begin with the literal line `TRACIFY` on its own, a blank line, then the reply. See CLAUDE.md "Reply format" section — that's the enforced instruction; this entry is just the pointer so it isn't missed.

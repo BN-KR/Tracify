@@ -345,6 +345,9 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 - [x] Make the dashboard Launch plan reflect project creation, API-key copy, SDK install, and first-trace backend evidence.
 - [x] Canonicalize public onboarding/docs examples on the published `tracify-sdk` package and `traceAgent`/`trace_agent` APIs.
 - [x] Add `npm run test:activation` to reject stale package and API examples.
+- [x] Add Trace Compare with URL-persisted run selection and evidence-backed metadata/span differences.
+- [x] Add Trace Compare to the dashboard navigation and platform smoke coverage.
+- [x] Add CI coverage for the activation contract and public content tests.
 - [ ] Re-run production build after the active local Next dev process releases its malformed `.next/dev/types/validator.ts` output.
 
 # Robots standards cleanup — 2026-08-13

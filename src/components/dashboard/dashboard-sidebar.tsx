@@ -122,6 +122,11 @@ export function DashboardSidebar({
           icon: FileText,
           href: projectId ? `/dashboard/${projectId}/reports` : projectSetupHref,
         },
+        {
+          title: "Trace Compare",
+          icon: GitCompare,
+          href: projectId ? `/dashboard/${projectId}/compare` : projectSetupHref,
+        },
       ],
     },
     {
