@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 
+test.skip(process.env.TRACIFY_E2E_AUTH !== "1", "Set TRACIFY_E2E_AUTH=1 with a cloud-auth test host to run the live journey.");
+
 test("authenticated onboarding to investigation journey", async ({ page }) => {
   test.setTimeout(120_000);
 
@@ -14,7 +16,10 @@ test("authenticated onboarding to investigation journey", async ({ page }) => {
   let runId = "";
 
   await test.step("create an isolated account through the existing auth flow", async () => {
+    // The local cloud dev host already represents the EU deployment. Bypass the
+    // marketing region selector so this test never leaves the local server.
     await page.goto("/sign-up");
+    await expect(page).toHaveURL(/\/sign-up$/);
     await page.getByLabel("Full name").fill("Playwright QA");
     await page.getByLabel("Email address").fill(email);
     await page.getByLabel("Password").fill(credential);
