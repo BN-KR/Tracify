@@ -13,7 +13,7 @@
 - The waiting step can send a bounded synthetic `run_end` span through the real regional ingest route. The API key stays memory-only and is cleared when the step unmounts.
 - PostHog activation events cover project creation, key copy, install readiness, probe outcomes, and first-trace receipt. The empty dashboard Launch plan now derives progress from session state and the existing Convex onboarding query.
 - Public docs, dashboard docs, and onboarding snippets use the published `tracify-sdk` package and real `traceAgent` / `trace_agent` APIs. `scripts/activation-contract.test.mjs` and `npm run test:activation` enforce this.
-- Verification: activation contract, public content tests, focused ESLint, and `git diff --check` pass. The production build compiled but its TypeScript phase was blocked by malformed generated `.next/dev/types/validator.ts` from an active local dev process.
+- Verification: activation contract, public content tests, focused ESLint, `git diff --check`, and the optimized production build pass. The earlier TypeScript blockage came from malformed generated `.next/dev/types/validator.ts` while an active local dev process was writing it; no generated output was edited.
 - Added the first Trace Compare workflow at `/dashboard/[projectId]/compare`. It keeps run choices in `left`/`right` URL parameters and compares run metadata plus available span models, tools, and errors. The UI labels differences as observed evidence and does not invent causal conclusions.
 - Added a pull-request/push activation workflow for the canonical SDK and public content contracts.
 

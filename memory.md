@@ -13,7 +13,7 @@
 - The one-time key remains in memory through the waiting step so the probe can work, then is cleared when the waiting step unmounts. It is never persisted to browser storage.
 - Added activation events for project creation, API-key copy, install readiness, probe success/failure, and first trace receipt. Dashboard Launch plan uses client and Convex evidence for its first four steps.
 - Corrected public and dashboard examples to the published `tracify-sdk` package and actual `traceAgent` / `trace_agent` APIs. `npm run test:activation` protects the contract.
-- Focused ESLint, activation contract, content tests, and diff hygiene pass. Production build reaches compilation but fails in TypeScript because an active local Next process has malformed generated `.next/dev/types/validator.ts`; do not edit generated output as the fix.
+- Focused ESLint, activation contract, content tests, and diff hygiene pass. The optimized production build now completes successfully after the active local Next process released its malformed generated `.next/dev/types/validator.ts`; do not edit generated output as the fix.
 - Added `/dashboard/[projectId]/compare` as the first keyboard-native investigation building block: two URL-persisted runs, metadata comparison, cached span evidence, and explicit distinction between observed differences and diagnosis. Platform smoke covers its protected route.
 - Added `.github/workflows/activation-contract.yml` to run activation and public-content contracts on pushes and pull requests.
 

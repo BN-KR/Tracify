@@ -4,7 +4,7 @@
 - [x] Add a clipboard-ready, run-linked investigation summary for handoff without claiming team-synced notes.
 - [x] Add Investigation Mode to dashboard navigation and protected-route smoke coverage.
 - [x] Link every trace header directly into Investigation Mode and Trace Compare so a surprising run has an immediate next action.
-- [ ] Re-run the production build after the active dev process releases malformed `.next/dev/types/validator.ts`.
+- [x] Re-run the production build after the active dev process released malformed `.next/dev/types/validator.ts`; the optimized build now completes successfully.
 
 # ⚠ PENDING — needs BN-KR on their own machine (updated 2026-08-16)
 
