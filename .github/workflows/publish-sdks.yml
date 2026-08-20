@@ -33,6 +33,7 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
+        working-directory: packages/ts-sdk
         run: npm ci --legacy-peer-deps
       - name: Build and test the SDK
         working-directory: packages/ts-sdk

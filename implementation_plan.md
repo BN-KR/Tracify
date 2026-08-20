@@ -871,13 +871,21 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 1. [completed] Reproduce the conflicting PR in an isolated detached worktree.
 2. [completed] Rebase its four commits onto current `origin/main` and resolve the planning-file conflict without restoring stale infrastructure instructions.
 3. [completed] Compare old and rebased commit ranges and run TypeScript, content, diff-hygiene, focused lint, and production-build gates.
-4. [pending] Obtain explicit authorization for the required force-with-lease push, update the existing PR branch, and verify GitHub mergeability/checks.
-5. [pending] Run the authenticated browser smoke test over the high-risk dashboard visualization surfaces.
+4. [completed] Obtain explicit authorization, update the existing PR branch with an exact force-with-lease, and verify GitHub mergeability/checks.
+5. [follow-up] Run the authenticated browser smoke test over the high-risk dashboard visualization surfaces; the app browser runtime could not initialize during recovery.
 
 # gstack and safe PR merges — 2026-08-20
 
 1. [completed] Install Bun and gstack 1.68.2 outside the repository.
 2. [completed] Register namespaced gstack skills for Codex and Claude Code with telemetry, auto-upgrades, update checks, team mode, and plan-tune hooks disabled.
 3. [completed] Review PR #23's `.tinyb` fallback, validate its real file shape and failure behavior, and squash-merge it as `3e656e1`.
-4. [in progress] Rebase the validated PR #19 series plus tracking updates onto the new `origin/main`, push with force-with-lease, and wait for required checks.
-5. [pending] Merge PR #19 only after GitHub reports it mergeable and all required checks succeed; then verify `origin/main` ancestry.
+4. [completed] Rebase the validated PR #19 series plus tracking updates onto the new `origin/main`, then push with an exact force-with-lease.
+5. [completed] Merge PR #19 only after GitHub reports it mergeable and all GitGuardian/Vercel checks succeed; `origin/main` contains squash commit `1a5555f`.
+
+# SDK publishing dry-run repair — 2026-08-20
+
+1. [completed] Confirm `tracify-sdk` is absent from npm and PyPI and the publishing workflow had never run.
+2. [completed] Trigger a non-publishing workflow dry run. Python tests and distributions pass; npm fails because `vitest` is not installed.
+3. [in progress] Install dependencies from the standalone `packages/ts-sdk` package in CI and verify its build, tests, and tarball.
+4. [pending] Validate that `NPM_TOKEN` belongs to the intended npm owner before any first release.
+5. [pending] First-publish npm with 2FA/a valid granular token and PyPI with a pending trusted publisher only after explicit publication approval.
