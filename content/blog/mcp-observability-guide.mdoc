@@ -8,12 +8,17 @@ draft: false
 categories: [engineering]
 tags: [MCP observability, tool calling, AI agents]
 relatedPosts: [llm-tracing-explained, prompt-injection-defense]
+heroImage:
+  src: /media/ai-agent-security-hero.png
+  alt: Guarded tool gateway connecting an AI agent trace to external server actions
 seo:
   metaTitle: MCP Observability Guide for AI Agents
   metaDescription: Trace MCP tool calls with server identity, arguments, results, errors, approvals, and release context.
 ---
 
 An agent that uses MCP can cross more boundaries than an agent with local functions. Tool discovery, server identity, arguments, results, latency, and approval decisions need to remain visible across that boundary.
+
+{% trace-scenario title="Is the MCP failure discovery or execution?" prompt="A tool call never starts after a server update. Which span should explain the incident?" outcome="Inspect discovery, schema validation, authorization, and execution as separate stages; the first missing stage narrows the fault." /%}
 
 ## Minimum useful span fields
 
@@ -36,3 +41,199 @@ When a tool fails, compare server, schema, release, and input class before blami
 ## Operate the boundary
 
 Set timeouts, concurrency limits, retries, and circuit breakers per tool. Make destructive tools explicit and approval-aware. Add representative MCP calls to evaluations and inspect them in the same trace viewer as model decisions. The goal is a complete task story, not another disconnected log stream.
+
+## Treat the server boundary as a trace boundary
+
+MCP makes tool discovery and invocation portable, but portability does not remove the need for identity. A trace should tell an investigator which server supplied a tool, which schema revision it advertised, which client selected it, and which release was running. Use a stable server identifier rather than a display name that can change between environments.
+
+At the parent level, preserve the user task and terminal outcome. At the model span, record the selected tool and normalized argument shape. At the MCP span, record server, tool, request status, duration, and error class. At the approval span, record whether the action was allowed, rejected, or held. This structure lets a team distinguish model selection from server behavior.
+
+## Observe discovery as well as execution
+
+Tool discovery affects model behavior. A new description, schema, or ordering can change which tool the model chooses even if the application code did not change. Version the discovered tool catalog and attach it to the run. Record discovery failures, missing tools, unsupported schema versions, and duplicate names.
+
+Do not assume that a tool name is globally unique. Namespace tools by server and environment, and validate that the selected server is allowed for the current tenant. A malicious or misconfigured server should not be able to introduce a tool that looks like a trusted internal capability.
+
+## Build a typed MCP span
+
+```ts
+type McpCall = {
+  server: string;
+  tool: string;
+  schemaVersion: string;
+  argumentKeys: string[];
+  approval: "not_required" | "pending" | "approved" | "rejected";
+};
+
+async function callMcp(input: McpCall, execute: () => Promise<unknown>) {
+  const span = trace.startSpan("mcp.call", { attributes: {
+    "mcp.server": input.server,
+    "mcp.tool": input.tool,
+    "mcp.schema_version": input.schemaVersion,
+    "mcp.approval": input.approval,
+  }});
+  try {
+    const result = await execute();
+    span.end({ status: "success" });
+    return result;
+  } catch (error) {
+    span.end({ status: "error", errorClass: classify(error) });
+    throw error;
+  }
+}
+```
+
+Avoid recording full arguments by default. Keep argument keys, sizes, sensitivity class, and a secure reference where authorized. The trace should make the path legible without becoming a second database of customer content.
+
+## Make trust explicit
+
+An MCP result is data. It can be useful, but it should not silently redefine the system policy or grant a new permission. Mark result provenance and apply the same untrusted-content rules used for web pages and retrieved documents. [Prompt injection defense](/blog/prompt-injection-defense) explains why the distinction matters when a tool returns instructions embedded in its output.
+
+Separate servers by trust and capability. A read-only knowledge server should not share a trust tier with a server that sends email or changes records. Require approval for high-impact actions even if the model selected a tool from a trusted catalog. Keep the approval decision in the trace rather than inferring it from the absence of an error.
+
+## Bound network behavior
+
+Set connection, request, and total-run timeouts. Limit concurrency per server and per tenant. Retry only errors that are plausibly transient, and record the changed attempt. Use a circuit breaker when a dependency repeatedly fails. A tool call that blocks the agent should be visible as queue time, server time, or client time so the team knows which layer owns the fix.
+
+When a server streams partial results, define whether a partial result can influence a decision. If not, buffer and validate it before returning it to the model. If yes, record the chunks or a safe summary and ensure an incomplete stream cannot be mistaken for a complete success.
+
+## Test schema drift
+
+Keep fixtures for missing tools, unknown fields, changed enums, invalid IDs, oversized arguments, partial results, timeout, authentication failure, and duplicate side effects. Run them against each server catalog revision. A client that accepts an older schema too generously can create a silent semantic mismatch.
+
+Compare tool sequences across releases. A prompt or catalog change may cause the agent to choose a different server even when the final answer remains similar. For consequential workflows, evaluate the intermediate action, not only the text shown to the user.
+
+## Connect MCP to the user journey
+
+The [LLM tracing guide](/blog/llm-tracing-explained) gives the parent-child vocabulary. MCP adds another layer to the same journey: model decision, server call, external result, policy check, and task outcome. Render those events in order and keep a direct link to the original tool artifact when one exists.
+
+When an incident opens, ask four questions. Did the model choose the intended tool? Did the client send the intended arguments? Did the server perform the intended operation? Did the application interpret the result correctly? A trace that answers all four reduces the temptation to blame the model by default.
+
+## Measure operational value
+
+Track call success, latency distribution, timeout rate, schema rejection, retry count, approval wait, tool selection by workflow, and task completion. Segment by server version and environment. Add cost where a server or downstream API charges per request. Do not celebrate a high tool-call success rate if the task still fails after the call.
+
+Review representative successful runs as well as failures. A tool may return success while providing incomplete data. Sample the result against a deterministic contract or human review. Feed confirmed problems into [AI agent regression testing](/blog/ai-agent-regression-testing) so a server change becomes visible before it reaches every workflow.
+
+## Roll out a new server safely
+
+Introduce a catalog revision, run offline cases, and shadow the candidate where data handling permits. Compare tool selection, argument validation, latency, cost, approval rate, and task outcome with the baseline. Keep the old server or catalog available for rollback. Make the active pointer explicit rather than depending on whichever server responds first.
+
+Document ownership: who maintains the server, who approves new tools, who responds to failures, and who can revoke access. A portable protocol still needs a local operating model.
+
+## MCP observability checklist
+
+- Does every tool call link to a parent task and model decision?
+- Are server identity and catalog/schema versions recorded?
+- Are arguments redacted, validated, and authorized outside the model?
+- Are tool results treated as data rather than permissions?
+- Are timeouts, retries, partial results, and approvals visible?
+- Can a release compare tool sequence and task outcome?
+
+MCP observability is successful when a cross-server agent run reads like one explainable journey. Protocol portability is valuable; connected evidence is what makes it operable.
+## Protocol review: a field guide
+
+This extended guide applies the same production discipline to MCP: discovery, schemas, authorization, network behavior, server identity, and rollout.
+
+## Start with the failure you need to prevent
+
+A strong MCP observability practice begins with a failure that matters to a user. Write the failure in observable terms: the task stopped, the wrong action happened, the answer lacked evidence, the reviewer could not decide, or the system consumed more resources than the outcome justified. This wording gives the team a testable target and prevents the article from drifting into a collection of attractive but disconnected recommendations.
+
+## Name the boundary
+
+Most production incidents happen at a boundary: model to application, application to tool, retrieved data to instruction, browser action to page state, or metric to operational decision. For MCP observability, draw that boundary in plain language before choosing an implementation. Identify what is trusted, what is untrusted, what must be validated, and what evidence crosses the boundary. A boundary that cannot be named cannot be monitored consistently.
+
+## Preserve the decision context
+
+A final answer or status flag rarely explains a failure by itself. Preserve the inputs, versions, policies, selected evidence, attempted actions, retries, and resulting state that shaped the decision. For MCP observability, use stable identifiers and redaction so an investigator can reconstruct the path without copying secrets into every log line. The goal is not maximal data collection; it is enough context to test a plausible explanation.
+
+## Measure the user-visible outcome
+
+Choose a primary outcome for MCP observability and define it before choosing a dashboard. Completion, correctness, groundedness, safe refusal, review quality, time to useful result, and cost per successful task answer different questions. Pair the outcome with failure dimensions such as model version, prompt version, cohort, provider, tool, language, and task type. An aggregate score is useful only when a person can move from the score to representative traces.
+
+## Make the unhappy path explicit
+
+A mature MCP observability workflow names what happens when evidence is missing, a dependency is slow, a schema changes, a permission is denied, a reviewer does not respond, or the system cannot establish confidence. These are product states, not merely exceptions. Give each state an owner, a user-facing explanation, a safe fallback, and a trace event. This is how a graceful degradation policy becomes something an operator can verify.
+
+## Use small, reviewable examples
+
+Examples teach the boundary faster than abstract claims. Keep a representative MCP observability example small enough to inspect, but include the field that changes the decision. Show the expected result and one plausible failure. Explain which part is illustrative and which part should be adapted to the repository. Avoid examples that imply a guarantee the implementation cannot make; precision is more persuasive than spectacle.
+
+## Test variation deliberately
+
+The happy path is only one member of the MCP observability distribution. Add cases for empty input, ambiguous intent, stale state, partial failure, duplicate work, adversarial content, long context, and a dependency that returns a valid-looking but wrong result. Test cohorts and release versions separately. When behavior is probabilistic, record the evidence and evaluator version so a changed score can be distinguished from a changed system.
+
+## Roll out in stages
+
+Use shadow mode, a narrow cohort, explicit comparison, and a rollback condition when changing MCP observability. Shadow mode reveals what the system would have done without changing user behavior. A cohort exposes regressions hidden by averages. A rollback condition turns caution into an operational decision. Keep the release, prompt, model, data, and configuration identifiers together so the comparison remains meaningful after deployment.
+
+## Create a learning loop
+
+Production feedback should become a queue of explainable cases for MCP observability, not a pile of screenshots or vague tickets. Attach the user report, trace, expected behavior, actual behavior, and disposition. Classify the mechanism, add a compact regression case when appropriate, and record whether the fix changed code, data, prompt, policy, or operations. This closes the loop between observability and engineering instead of treating incidents as isolated surprises.
+
+## Review the economics and ownership
+
+Every MCP observability decision has an operating cost. Include reviewer time, evaluator calls, storage, retries, provider spend, and the cost of a wrong action when they matter. Assign an owner for quality, reliability, security, and budget signals. A workflow is not production-ready because it can run; it is ready when the organization can understand, afford, and improve it.
+
+## Build the runbook around evidence
+
+The runbook for MCP observability should begin with the trace or artifact an operator opens, then provide a short decision tree. If the parent task is missing, investigate ingestion. If the task exists but the child span is missing, inspect propagation. If evidence is present but the outcome is wrong, compare versions and evaluator results. Keep the first response steps concrete and link to the source of truth rather than asking an operator to search the whole repository.
+
+## Know when not to automate
+
+Automation is not always the correct endpoint for MCP observability. If the consequence is irreversible, the evidence is incomplete, or the policy cannot be expressed safely, stop and route to a person or a trusted system. A bounded refusal is often a better product result than a confident action. Document the boundary so future optimization does not quietly remove the control that made the workflow acceptable.
+
+## A practical review sequence
+
+Review MCP observability in this order: define the task, identify boundaries, preserve evidence, measure the outcome, exercise failures, test variation, stage the rollout, and assign ownership. The sequence matters because a polished implementation with no observable outcome is difficult to validate, while a clear contract makes later instrumentation and testing much cheaper.
+
+## Final field checklist
+
+Before shipping MCP observability, confirm that the happy path and degraded paths are documented, the rendered page or workflow is accessible, examples are safe to copy, identifiers are stable, sensitive values are redacted, links point to canonical content, and a real person can investigate one representative failure. Then run the repository checks and review the exact diff. Quality is the combination of useful behavior, explainable evidence, and a release process that can recover.
+## Questions to ask in review
+
+Ask whether the current MCP observability design makes the next failure easier or harder to explain. Where is the source of truth? Which value is user-controlled? Which decision is irreversible? What happens when a dependency returns a partial result? Which version can be rolled back? These questions expose missing contracts faster than adding another dashboard or another prompt instruction.
+
+## The smallest useful implementation
+
+Start with the smallest implementation that creates evidence for MCP observability. One parent run, a few stable fields, one representative fixture, and one clear outcome are often enough to reveal the largest gap. Expand only when a real investigation needs another dimension. This keeps instrumentation affordable and prevents the team from confusing volume of telemetry with quality of understanding.
+
+## Keep the page and system honest
+
+Documentation about MCP observability should describe the behavior a reader can actually reproduce. Mark illustrative examples clearly, keep names consistent, and avoid claims that depend on an unmentioned environment. On the rendered page, make the important artifact easy to inspect: use a labelled code block, a readable trace scenario, or a compact decision table. The presentation is part of the teaching contract.
+
+## Accessibility is a reliability feature
+
+A MCP observability workflow should remain understandable when a reader cannot hover, drag, or run the example. Provide a static explanation, meaningful labels, visible focus, keyboard access, and mobile-safe overflow. The same principle applies in production: a trace should expose text and structured fields, not require an operator to infer meaning from color or animation alone.
+
+## Signals that justify a change
+
+Change MCP observability when evidence shows a repeated failure mechanism, a measurable user benefit, or an unacceptable operational cost. Record the baseline, candidate, cohort, and decision owner. If the change improves one dimension while harming another, state the trade-off instead of hiding it in an average. This creates a durable record future agents can use when the same decision returns.
+
+## Closing principle
+
+The best MCP observability practice makes good behavior easier to produce and bad behavior easier to see. It gives the user a useful outcome, gives the operator an explainable trace, and gives the team a safe way to improve the system. That is the standard to apply when reviewing both the implementation and this article.
+## Turn principles into an operating artifact
+
+A principle becomes useful when someone can apply it during a real change. For this topic, create a compact artifact: a trace field list, a test fixture, a rollout table, a budget rule, a review form, or a runbook. Keep the artifact close to the decision it supports. If it lives in a separate document with no owner, it will become stale while the system continues to change.
+
+## Compare like with like
+
+When evaluating a change, compare the same task distribution, evidence policy, model or release metadata, and outcome definition. A baseline gathered from easy cases cannot prove an improvement on difficult cases. Preserve the sampling rule and the exclusions. When the data is sparse, say so; a small honest sample is more useful than a precise-looking number that hides its uncertainty.
+
+## Make failure visible to the right person
+
+Visibility is not the same as exposure. A user needs a clear explanation and safe next step. An operator needs a trace, timing, versions, and likely cause. An engineer needs a reproducible fixture. A security owner needs the trust boundary and containment event. Design the evidence for the person who must act, and avoid copying sensitive content into places where no action is possible.
+
+## Review changes as a system
+
+A prompt, model, schema, retrieval index, browser selector, evaluator, and dashboard threshold can each change behavior. Review the connected system rather than approving one file in isolation. Record what changed, which outcomes could move, which tests cover the risk, and how to revert. This practice keeps small changes from becoming untraceable production behavior.
+
+## The standard for completion
+
+Completion means more than a passing happy-path test. A reader should understand the contract, an operator should be able to investigate a failure, and the team should have a bounded path to improve or roll back the behavior. Apply that standard to the article too: the examples should render clearly, the interaction should teach something, the image should have a job, and the validation command should pass.
+
+
+## Continue with the related production guides
+
+The most useful next step depends on the failure you are trying to understand. For system boundaries and execution design, read [AI agent architecture](/blog/ai-agent-architecture), [AI agent cost calculator](/blog/ai-agent-cost-optimization), [AI agent evaluation](/blog/ai-agent-evaluation-practical-guide), [AI agent memory design](/blog/ai-agent-memory-design), [AI agent monitoring](/blog/ai-agent-monitoring), [AI agent observability](/blog/ai-agent-observability-complete-guide), [AI agent production checklist](/blog/ai-agent-production-checklist), [AI agent regression testing](/blog/ai-agent-regression-testing), [AI agent reliability](/blog/ai-agent-reliability-failures-retries-guardrails), [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals), [browser agent observability](/blog/browser-agent-observability), [production-ready AI agents](/blog/building-production-ready-ai-agents), [debugging AI agents](/blog/debug-ai-agents-in-production), [writing Tracify blog posts](/blog/how-to-write-tracify-blog-posts), [human-in-the-loop agents](/blog/human-in-the-loop-ai-agents), [LLM hallucination detection](/blog/llm-hallucination-detection), [LLM latency optimization](/blog/llm-latency-optimization), [LLM observability metrics](/blog/llm-observability-metrics-that-matter). Use the linked guides as a connected path: compare the trace contract, evaluation method, rollout advice, and operational ownership instead of treating any one article as a complete solution.
