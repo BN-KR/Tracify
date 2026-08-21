@@ -18,6 +18,7 @@ node_modules/
 /.next/
 /.next-cloud/
 /.next-clean/
+/.next-e2e/
 /out/
 
 # production

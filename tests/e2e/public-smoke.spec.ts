@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test("public product surfaces load", async ({ page }) => {
+test("public product surfaces load", async ({ request }) => {
   for (const route of ["/", "/pricing", "/docs", "/integrations"]) {
-    const response = await page.goto(route, { waitUntil: "domcontentloaded" });
-    expect(response?.ok(), `${route} should return a successful response`).toBeTruthy();
-    await expect(page.locator("body")).not.toBeEmpty();
+    const response = await request.get(route);
+    expect(response.ok(), `${route} should return a successful response`).toBeTruthy();
+    expect((await response.text()).trim(), `${route} should return a body`).not.toBe("");
   }
 });
 

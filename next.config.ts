@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   // impossible to run the marketing host and a regional cloud host side by side
   // the way they exist in production.
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
+  allowedDevOrigins: ["localhost", "127.0.0.1"],
   typescript: {
     tsconfigPath: process.env.NODE_ENV === "production" ? "tsconfig.build.json" : "tsconfig.json",
   },
