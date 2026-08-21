@@ -16,6 +16,8 @@ node_modules/
 
 # next.js
 /.next/
+/.next-cloud/
+/.next-clean/
 /out/
 
 # production

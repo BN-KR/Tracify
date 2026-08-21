@@ -17,6 +17,7 @@ const routes = [
   ["/product/lifecycle", 200],
   ["/roadmap", 200],
   ["/api/otel", 200],
+  ["/this-route-should-not-exist", 404],
   ["/dashboard/not-a-project/prompts", [200, 302, 307, 308]],
   ["/dashboard/not-a-project/evaluation", [200, 302, 307, 308]],
   ["/dashboard/not-a-project/datasets", [200, 302, 307, 308]],
