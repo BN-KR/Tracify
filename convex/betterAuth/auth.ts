@@ -44,6 +44,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
   trustedOrigins: [
     process.env.SITE_URL,
     "http://localhost:3000",
+    "http://localhost:4000",
     "https://tracifytech.vercel.app",
   ].filter((origin): origin is string => Boolean(origin)),
   rateLimit: {
