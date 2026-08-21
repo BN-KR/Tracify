@@ -32,6 +32,8 @@ seo:
     og: /media/organic-series/ai-agent-testing-unit-tests-production-evals.jpg
 ---
 
+{% trace-scenario title="What belongs at this test layer?" prompt="A tool schema is deterministic, but the final answer depends on retrieval and model behavior. How should it be tested?" outcome="Unit-test the schema boundary, then cover the end-to-end behavior with scenario evaluation and production feedback." /%}
+
 ## Introduction: why AI agent testing needs an operating model
 
 AI Agent Testing: From Unit Tests to Production Evals is a guide for AI engineers and quality-minded leaders building repeatable release practices. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?

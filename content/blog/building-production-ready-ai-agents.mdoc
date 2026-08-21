@@ -32,6 +32,8 @@ seo:
     og: /media/organic-series/building-production-ready-ai-agents.jpg
 ---
 
+{% trace-scenario title="Is this agent ready to launch?" prompt="The happy path works, but there is no owner for quality regressions after release. What is missing?" outcome="Production readiness includes ownership, observable outcomes, failure handling, evaluation, and rollback—not only a successful demo." /%}
+
 ## Introduction: why production-ready AI agents needs an operating model
 
 Building Production-Ready AI Agents is a guide for engineering leaders and delivery teams moving agent prototypes into accountable production services. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?

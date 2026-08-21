@@ -32,6 +32,8 @@ seo:
     og: /media/organic-series/ai-agent-reliability-failures-retries-guardrails.jpg
 ---
 
+{% trace-scenario title="Should this agent retry?" prompt="A tool returned a deterministic validation error twice. What should the control loop do?" outcome="Stop the retry loop, classify the failure, and expose a bounded recovery or escalation path instead of repeating the same request." /%}
+
 ## Introduction: why AI agent reliability needs an operating model
 
 AI Agent Reliability: Failures, Retries, and Guardrails is a guide for engineers and leaders designing agent workflows that must behave safely under uncertainty. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?

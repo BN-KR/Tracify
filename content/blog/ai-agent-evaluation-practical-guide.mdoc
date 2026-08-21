@@ -32,6 +32,8 @@ seo:
     og: /media/organic-series/ai-agent-evaluation-practical-guide.jpg
 ---
 
+{% trace-scenario title="Which evaluation signal should gate release?" prompt="A candidate improves average score but regresses one high-risk workflow. What should happen?" outcome="Segment the result by task and consequence, inspect representative traces, and hold promotion until the high-risk regression has an explicit disposition." /%}
+
 ## Introduction: why AI agent evaluation needs an operating model
 
 AI Agent Evaluation: A Practical Guide is a guide for AI engineers, product owners, and engineering leaders designing quality evidence for agent releases. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?

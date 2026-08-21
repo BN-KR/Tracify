@@ -13,4 +13,23 @@ Required frontmatter fields are `title`, `slug`, `excerpt`, `publishedAt`, and `
 
 Markdoc supports CommonMark plus Markdoc tags and annotations. The application validates every file before rendering, so malformed frontmatter or Markdoc fails the build instead of publishing a broken article.
 
+## Mandatory Tracify editorial framework
+
+Every published post follows the same editorial shape. This is a product requirement for the blog, not an optional style preference:
+
+1. **Promise:** a specific title, useful excerpt, author/date metadata, and a meaningful hero image.
+2. **Orientation:** open with the reader’s production situation, the decision they need to make, and the boundary of the article.
+3. **Navigation:** the page automatically renders a collapsible table of contents from the article’s H2/H3 headings.
+4. **Operating model:** name the article’s framework or decision model and explain its parts before diving into implementation.
+5. **Evidence:** include at least one concrete example, code block, table, formula, trace, screenshot, or diagram where it improves understanding.
+6. **Interaction:** include one deterministic, accessible Markdoc interaction—normally a trace scenario, evaluation explorer, calculator, checklist, or focused decision widget.
+7. **Trade-offs:** state limitations, failure modes, security boundaries, and what the recommendation does not solve.
+8. **Action:** close with a practical checklist, next step, or release decision and contextual links to the next Tracify guides.
+
+Use this article rhythm for each major section:
+
+> Point → evidence → example → trade-off → reader action
+
+Do not satisfy the framework with decorative headings or a link dump. The content test checks the structural requirements for every published post, and the renderer supplies the shared table of contents and heading anchors automatically.
+
 New posts must consider one purposeful interactive learning element at the point where it helps most: a trace/evaluation demo, an editable code sandbox, or a focused calculator, checklist, explorer, or scenario widget. Static prose is correct when reader-controlled state adds no value. Do not use MDX or raw JSX. Reuse an approved Markdoc tag, or add a validated tag in the centralized Markdoc configuration and map it to an accessible component in `src/components/blog/markdoc-rich-text.tsx`. Interactive examples must be deterministic and local; never execute arbitrary code on the server or access secrets or production data.

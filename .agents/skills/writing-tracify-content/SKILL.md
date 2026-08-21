@@ -19,6 +19,21 @@ Create useful, accurate content and place it where Tracify actually consumes it.
 8. Add meaningful image alt text. Put blog media in `public/media`; use `/media/<filename>` URLs.
 9. Review the rendered result, not only the source. Verify headings, code, links, interaction accessibility, mobile readability, metadata, and draft privacy.
 
+## Mandatory editorial framework
+
+Every published Tracify blog post must use the Semrush-inspired editorial pattern documented in content/blog/README.md:
+
+- Make a clear promise with title, excerpt, metadata, and hero image.
+- Orient the reader in the opening: situation, job, outcome, and scope boundary.
+- Use the automatic table of contents generated from H2/H3 headings.
+- Name and teach a topic-specific operating model or decision framework.
+- Support the explanation with evidence such as a worked example, code, table, formula, trace, screenshot, or diagram.
+- Include one purposeful deterministic interaction using an approved Markdoc tag.
+- Explain limitations, failure modes, security boundaries, and trade-offs.
+- End with a checklist or next action plus contextual internal links.
+
+This framework is mandatory even when the user does not mention it. The content contract test is authoritative for published posts.
+
 ## Content Contract
 
 | Content                   | Source                        | Required finish                                                         |
