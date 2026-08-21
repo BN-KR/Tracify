@@ -8,6 +8,9 @@ draft: false
 categories: [evaluations]
 tags: [RAG evaluation, retrieval augmented generation, AI testing]
 relatedPosts: [ai-agent-evaluation-practical-guide, ai-agent-testing-unit-tests-production-evals]
+heroImage:
+  src: /media/ai-agent-evaluation-hero.png
+  alt: Evaluation matrix comparing AI agent runs with evidence links and release signals
 seo:
   metaTitle: RAG Evaluation Guide for Production Systems
   metaDescription: Learn how to evaluate retrieval quality, grounded answers, citations, and user outcomes in RAG applications.
@@ -44,3 +47,193 @@ Set a minimum on each critical dimension rather than one blended score. A retrie
 ## What to ship
 
 Ship the dataset, evaluator versions, thresholds, and a review queue with the application. A number is useful only when it identifies the examples that need a decision. Keep representative production traces in the dataset, remove sensitive values, and re-run the suite whenever retrieval, chunking, ranking, prompts, or model settings change.
+
+## Define what “good retrieval” means
+
+Retrieval quality is not a single universal score. For a policy assistant, the relevant document may be one exact version. For a research workflow, several sources may be acceptable if they cover the required claims. For a support workflow, a stale but topically relevant article may still be wrong. Write the retrieval contract in terms of the task: expected sources, acceptable freshness, required fields, and forbidden sources.
+
+Separate the corpus contract from the retriever contract. The corpus contract says which documents are canonical, how they are versioned, and what metadata is required. The retriever contract says how queries are built, how many candidates are returned, how filters work, and what happens when nothing meets the threshold. Without this separation, teams often tune embeddings to compensate for bad document ownership or missing metadata.
+
+## Build a dataset that explains failures
+
+Start with a small, labeled set of real questions. Include easy cases, ambiguous questions, missing-information cases, stale-document cases, adversarial wording, and questions that should be refused. For each row, store the task type, expected sources, required claims, forbidden claims, answer shape, and sensitivity class. The expected answer can be a rubric rather than exact text.
+
+Avoid building the dataset only from cases that are convenient to label. Sample successful production traces as well as incidents. A suite made entirely of hard failures can improve a benchmark while regressing the ordinary user journey. Tag examples by workflow, document family, language, user role, and release so a change can be evaluated by the cohort it affects.
+
+## Evaluate retrieval independently
+
+Run a retrieval-only evaluation before asking a model to answer. For each question, check whether the expected evidence appears in the top-k results, whether the rank is acceptable, and whether the metadata filters behaved correctly. Inspect the query sent to the retriever, not only the final documents. A missing synonym, over-aggressive filter, or accidental tenant boundary can explain a failure that looks like hallucination later.
+
+```ts
+type RetrievalCase = {
+  query: string;
+  expectedSources: string[];
+  requiredMetadata?: Record<string, string>;
+};
+
+function scoreRetrieval(item: RetrievalCase, hits: Array<{ id: string; rank: number }>) {
+  const ranks = item.expectedSources
+    .map((source) => hits.find((hit) => hit.id === source)?.rank)
+    .filter((rank): rank is number => rank !== undefined);
+  return {
+    recall: ranks.length / item.expectedSources.length,
+    firstUsefulRank: ranks.length ? Math.min(...ranks) : null,
+  };
+}
+```
+
+The metric is only useful when paired with examples. A recall drop tells you to inspect retrieval cases; it does not tell you which index or query rule to change.
+
+## Evaluate groundedness claim by claim
+
+An answer can cite a relevant document and still make unsupported claims. Break the answer into atomic claims and map each one to evidence. The evaluator should distinguish supported, contradicted, missing, and not-applicable. Citation coverage is useful, but a citation attached to an entire paragraph does not prove that every sentence is grounded.
+
+Use deterministic rules for fields and source IDs. Use a model judge or human reviewer for nuanced entailment, but keep the evaluator version and rationale. Sample judge outputs against human labels. If the judge is too generous, improve its rubric; if it is too strict, document the acceptable interpretation rather than silently lowering the threshold.
+
+## Measure task usefulness separately
+
+The user may not care whether the answer used the perfect chunk if it did not resolve their task. Add a task-level label: completed, partially useful, asks a necessary clarification, refuses correctly, or fails. Define the label before reading the answer so reviewers do not move the goalposts. For action-oriented workflows, check whether the user could safely take the next step from the output.
+
+This is where [AI agent evaluation](/blog/ai-agent-evaluation-practical-guide) and [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals) meet RAG. The retrieval and answer scores are evidence, not the product outcome. Keep the final label attached to the same run as the retrieved chunks and evaluator results.
+
+## Design for empty and conflicting evidence
+
+The most important RAG behavior may be what happens when no source supports the answer. Define an explicit abstention path. The agent can ask for clarification, say that the corpus does not contain the answer, or route the question to a human. Do not instruct the model to “be helpful” without explaining how uncertainty should appear to the user.
+
+Conflicting sources need a policy too. Prefer a canonical version, show the disagreement, or escalate. Store the source timestamps and ranking decisions so a reviewer can determine whether the conflict came from stale indexing, duplicated content, or a legitimate policy change. A confident synthesis of conflicting documents is a quality failure even if each individual citation exists.
+
+## Trace the full retrieval path
+
+A useful RAG trace has spans for query construction, embedding or lexical search, metadata filtering, reranking, context assembly, model generation, citation extraction, and evaluation. Add document IDs and ranks but avoid exporting raw sensitive passages by default. Record the context budget and the reason a document was selected if the retriever supports explanations.
+
+When comparing two releases, inspect whether the failure comes from a new index, changed chunk boundaries, a ranking model, a prompt, or a generation model. Keep those versions separate. Otherwise a single “RAG version” label hides the variable that changed and makes regression analysis slow.
+
+## Treat chunking as a product decision
+
+Chunking controls what the model can see as one unit. Small chunks improve targeting but can separate definitions from exceptions. Large chunks preserve context but increase noise and token usage. Test chunking by document type; legal policy, API reference, and troubleshooting runbooks have different structural boundaries.
+
+Use headings, tables, identifiers, and version metadata when creating chunks. Preserve a link back to the source location. If a user asks “where did that come from?”, the system should be able to answer with a stable reference rather than a vector ID that no one can interpret.
+
+## Roll out retrieval changes safely
+
+Run candidate and baseline retrieval over the same dataset. Compare source recall, rank, context size, latency, cost, groundedness, and task usefulness. Review disagreement cases instead of only aggregate deltas. A retriever can improve average recall while returning a more dangerous source for a small but important user group.
+
+Shadow a candidate retriever against live traffic when permitted, but do not expose candidate results or send sensitive data to an unapproved service. Log only the fields needed for comparison. Promote with a cohort or feature flag, and keep the prior index available until the new path has passed its monitoring window.
+
+## A reviewer’s RAG checklist
+
+- Can the dataset distinguish retrieval, groundedness, and task failure?
+- Does every case name the expected evidence or explain why none exists?
+- Are source IDs, versions, ranks, and filters visible in the trace?
+- Is abstention evaluated as a deliberate outcome?
+- Are judge versions and human disagreements recorded?
+- Can the team compare baseline and candidate on the same examples?
+- Is there a rollback path for an index or chunking change?
+
+The best RAG evaluation system does not promise that every answer will be perfect. It gives the team a reliable way to tell whether a failure came from the corpus, retrieval, synthesis, or task design—and a concrete next experiment for each class.
+## Evaluation review: a field guide
+
+This extended guide applies the same production discipline to RAG: retrieval quality, groundedness, datasets, chunking, empty evidence, and rollout.
+
+## Start with the failure you need to prevent
+
+A strong RAG evaluation practice begins with a failure that matters to a user. Write the failure in observable terms: the task stopped, the wrong action happened, the answer lacked evidence, the reviewer could not decide, or the system consumed more resources than the outcome justified. This wording gives the team a testable target and prevents the article from drifting into a collection of attractive but disconnected recommendations.
+
+## Name the boundary
+
+Most production incidents happen at a boundary: model to application, application to tool, retrieved data to instruction, browser action to page state, or metric to operational decision. For RAG evaluation, draw that boundary in plain language before choosing an implementation. Identify what is trusted, what is untrusted, what must be validated, and what evidence crosses the boundary. A boundary that cannot be named cannot be monitored consistently.
+
+## Preserve the decision context
+
+A final answer or status flag rarely explains a failure by itself. Preserve the inputs, versions, policies, selected evidence, attempted actions, retries, and resulting state that shaped the decision. For RAG evaluation, use stable identifiers and redaction so an investigator can reconstruct the path without copying secrets into every log line. The goal is not maximal data collection; it is enough context to test a plausible explanation.
+
+## Measure the user-visible outcome
+
+Choose a primary outcome for RAG evaluation and define it before choosing a dashboard. Completion, correctness, groundedness, safe refusal, review quality, time to useful result, and cost per successful task answer different questions. Pair the outcome with failure dimensions such as model version, prompt version, cohort, provider, tool, language, and task type. An aggregate score is useful only when a person can move from the score to representative traces.
+
+## Make the unhappy path explicit
+
+A mature RAG evaluation workflow names what happens when evidence is missing, a dependency is slow, a schema changes, a permission is denied, a reviewer does not respond, or the system cannot establish confidence. These are product states, not merely exceptions. Give each state an owner, a user-facing explanation, a safe fallback, and a trace event. This is how a graceful degradation policy becomes something an operator can verify.
+
+## Use small, reviewable examples
+
+Examples teach the boundary faster than abstract claims. Keep a representative RAG evaluation example small enough to inspect, but include the field that changes the decision. Show the expected result and one plausible failure. Explain which part is illustrative and which part should be adapted to the repository. Avoid examples that imply a guarantee the implementation cannot make; precision is more persuasive than spectacle.
+
+## Test variation deliberately
+
+The happy path is only one member of the RAG evaluation distribution. Add cases for empty input, ambiguous intent, stale state, partial failure, duplicate work, adversarial content, long context, and a dependency that returns a valid-looking but wrong result. Test cohorts and release versions separately. When behavior is probabilistic, record the evidence and evaluator version so a changed score can be distinguished from a changed system.
+
+## Roll out in stages
+
+Use shadow mode, a narrow cohort, explicit comparison, and a rollback condition when changing RAG evaluation. Shadow mode reveals what the system would have done without changing user behavior. A cohort exposes regressions hidden by averages. A rollback condition turns caution into an operational decision. Keep the release, prompt, model, data, and configuration identifiers together so the comparison remains meaningful after deployment.
+
+## Create a learning loop
+
+Production feedback should become a queue of explainable cases for RAG evaluation, not a pile of screenshots or vague tickets. Attach the user report, trace, expected behavior, actual behavior, and disposition. Classify the mechanism, add a compact regression case when appropriate, and record whether the fix changed code, data, prompt, policy, or operations. This closes the loop between observability and engineering instead of treating incidents as isolated surprises.
+
+## Review the economics and ownership
+
+Every RAG evaluation decision has an operating cost. Include reviewer time, evaluator calls, storage, retries, provider spend, and the cost of a wrong action when they matter. Assign an owner for quality, reliability, security, and budget signals. A workflow is not production-ready because it can run; it is ready when the organization can understand, afford, and improve it.
+
+## Build the runbook around evidence
+
+The runbook for RAG evaluation should begin with the trace or artifact an operator opens, then provide a short decision tree. If the parent task is missing, investigate ingestion. If the task exists but the child span is missing, inspect propagation. If evidence is present but the outcome is wrong, compare versions and evaluator results. Keep the first response steps concrete and link to the source of truth rather than asking an operator to search the whole repository.
+
+## Know when not to automate
+
+Automation is not always the correct endpoint for RAG evaluation. If the consequence is irreversible, the evidence is incomplete, or the policy cannot be expressed safely, stop and route to a person or a trusted system. A bounded refusal is often a better product result than a confident action. Document the boundary so future optimization does not quietly remove the control that made the workflow acceptable.
+
+## A practical review sequence
+
+Review RAG evaluation in this order: define the task, identify boundaries, preserve evidence, measure the outcome, exercise failures, test variation, stage the rollout, and assign ownership. The sequence matters because a polished implementation with no observable outcome is difficult to validate, while a clear contract makes later instrumentation and testing much cheaper.
+
+## Final field checklist
+
+Before shipping RAG evaluation, confirm that the happy path and degraded paths are documented, the rendered page or workflow is accessible, examples are safe to copy, identifiers are stable, sensitive values are redacted, links point to canonical content, and a real person can investigate one representative failure. Then run the repository checks and review the exact diff. Quality is the combination of useful behavior, explainable evidence, and a release process that can recover.
+## Questions to ask in review
+
+Ask whether the current RAG evaluation design makes the next failure easier or harder to explain. Where is the source of truth? Which value is user-controlled? Which decision is irreversible? What happens when a dependency returns a partial result? Which version can be rolled back? These questions expose missing contracts faster than adding another dashboard or another prompt instruction.
+
+## The smallest useful implementation
+
+Start with the smallest implementation that creates evidence for RAG evaluation. One parent run, a few stable fields, one representative fixture, and one clear outcome are often enough to reveal the largest gap. Expand only when a real investigation needs another dimension. This keeps instrumentation affordable and prevents the team from confusing volume of telemetry with quality of understanding.
+
+## Keep the page and system honest
+
+Documentation about RAG evaluation should describe the behavior a reader can actually reproduce. Mark illustrative examples clearly, keep names consistent, and avoid claims that depend on an unmentioned environment. On the rendered page, make the important artifact easy to inspect: use a labelled code block, a readable trace scenario, or a compact decision table. The presentation is part of the teaching contract.
+
+## Accessibility is a reliability feature
+
+A RAG evaluation workflow should remain understandable when a reader cannot hover, drag, or run the example. Provide a static explanation, meaningful labels, visible focus, keyboard access, and mobile-safe overflow. The same principle applies in production: a trace should expose text and structured fields, not require an operator to infer meaning from color or animation alone.
+
+## Signals that justify a change
+
+Change RAG evaluation when evidence shows a repeated failure mechanism, a measurable user benefit, or an unacceptable operational cost. Record the baseline, candidate, cohort, and decision owner. If the change improves one dimension while harming another, state the trade-off instead of hiding it in an average. This creates a durable record future agents can use when the same decision returns.
+
+## Closing principle
+
+The best RAG evaluation practice makes good behavior easier to produce and bad behavior easier to see. It gives the user a useful outcome, gives the operator an explainable trace, and gives the team a safe way to improve the system. That is the standard to apply when reviewing both the implementation and this article.
+## Turn principles into an operating artifact
+
+A principle becomes useful when someone can apply it during a real change. For this topic, create a compact artifact: a trace field list, a test fixture, a rollout table, a budget rule, a review form, or a runbook. Keep the artifact close to the decision it supports. If it lives in a separate document with no owner, it will become stale while the system continues to change.
+
+## Compare like with like
+
+When evaluating a change, compare the same task distribution, evidence policy, model or release metadata, and outcome definition. A baseline gathered from easy cases cannot prove an improvement on difficult cases. Preserve the sampling rule and the exclusions. When the data is sparse, say so; a small honest sample is more useful than a precise-looking number that hides its uncertainty.
+
+## Make failure visible to the right person
+
+Visibility is not the same as exposure. A user needs a clear explanation and safe next step. An operator needs a trace, timing, versions, and likely cause. An engineer needs a reproducible fixture. A security owner needs the trust boundary and containment event. Design the evidence for the person who must act, and avoid copying sensitive content into places where no action is possible.
+
+## Review changes as a system
+
+A prompt, model, schema, retrieval index, browser selector, evaluator, and dashboard threshold can each change behavior. Review the connected system rather than approving one file in isolation. Record what changed, which outcomes could move, which tests cover the risk, and how to revert. This practice keeps small changes from becoming untraceable production behavior.
+
+## The standard for completion
+
+Completion means more than a passing happy-path test. A reader should understand the contract, an operator should be able to investigate a failure, and the team should have a bounded path to improve or roll back the behavior. Apply that standard to the article too: the examples should render clearly, the interaction should teach something, the image should have a job, and the validation command should pass.
+
+
+## Continue with the related production guides
+
+The most useful next step depends on the failure you are trying to understand. For system boundaries and execution design, read [AI agent architecture](/blog/ai-agent-architecture), [AI agent cost calculator](/blog/ai-agent-cost-optimization), [AI agent evaluation](/blog/ai-agent-evaluation-practical-guide), [AI agent memory design](/blog/ai-agent-memory-design), [AI agent monitoring](/blog/ai-agent-monitoring), [AI agent observability](/blog/ai-agent-observability-complete-guide), [AI agent production checklist](/blog/ai-agent-production-checklist), [AI agent regression testing](/blog/ai-agent-regression-testing), [AI agent reliability](/blog/ai-agent-reliability-failures-retries-guardrails), [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals), [browser agent observability](/blog/browser-agent-observability), [production-ready AI agents](/blog/building-production-ready-ai-agents), [debugging AI agents](/blog/debug-ai-agents-in-production), [writing Tracify blog posts](/blog/how-to-write-tracify-blog-posts), [human-in-the-loop agents](/blog/human-in-the-loop-ai-agents), [LLM hallucination detection](/blog/llm-hallucination-detection), [LLM latency optimization](/blog/llm-latency-optimization), [LLM observability metrics](/blog/llm-observability-metrics-that-matter). Use the linked guides as a connected path: compare the trace contract, evaluation method, rollout advice, and operational ownership instead of treating any one article as a complete solution.
