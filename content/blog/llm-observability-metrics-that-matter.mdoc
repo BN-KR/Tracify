@@ -34,6 +34,27 @@ seo:
 
 {% trace-scenario title="Which metric deserves an alert?" prompt="Latency improved while correction rate increased. Which signal should determine whether to roll back?" outcome="Review outcome quality with latency, cost, and failure class. A faster workflow is not healthier if users must correct it more often." /%}
 
+## At a glance
+
+This guide is for **platform leads choosing operational signals**. It helps you **select metrics that change decisions without creating dashboard noise** so you can leave with **a small hierarchy connecting quality, speed, cost, and failure risk**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The LLM observability metrics framework
+
+Use **Outcome → Dimension → Threshold → Action** as the decision path:
+
+1. **Outcome:** establish the task, context, or boundary before changing behavior.
+2. **Dimension:** make the relevant evidence or control explicit.
+3. **Threshold:** compare the decision with a concrete example, trace, or test.
+4. **Action:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Start with the outcome, segment it by useful dimensions, set a meaningful threshold, and define the action.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Introduction: why LLM observability metrics needs an operating model
 
 LLM Observability: Metrics That Actually Matter is a guide for engineers and leaders selecting metrics for production language-model workflows. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?

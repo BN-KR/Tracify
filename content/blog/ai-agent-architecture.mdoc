@@ -20,6 +20,27 @@ An AI agent is not just a prompt wrapped around a model. In production it is a c
 
 {% trace-scenario title="Architecture decision point" prompt="A tool returns a valid response, but the user-visible task is still incomplete. What should the trace make obvious?" outcome="The trace should show the parent task, the model decision, the tool result, the state update, and the next terminal decision. A successful tool span is not the same thing as a successful task." /%}
 
+## At a glance
+
+This guide is for **platform engineers designing tool-using workflows**. It helps you **choose safe boundaries for tasks, tools, state, and evidence** so you can leave with **a reviewable architecture that makes decisions and failures explainable**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The AI agent architecture framework
+
+Use **Contract → Boundary → State → Evidence** as the decision path:
+
+1. **Contract:** establish the task, context, or boundary before changing behavior.
+2. **Boundary:** make the relevant evidence or control explicit.
+3. **State:** compare the decision with a concrete example, trace, or test.
+4. **Evidence:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Define the task contract, isolate trust boundaries, make state explicit, and attach evidence to every consequential decision.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## The six layers
 
 1. **Task boundary** defines the input, intended outcome, and terminal states.

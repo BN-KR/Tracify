@@ -20,6 +20,27 @@ OpenTelemetry gives teams a portable vocabulary for traces, spans, attributes, a
 
 {% trace-scenario title="Where should the parent span live?" prompt="A model call runs inside a retrying agent loop. What should the trace hierarchy preserve?" outcome="Keep the user task as the parent, model attempts as children, and retries as distinct events so outcome and wasted work remain visible." /%}
 
+## At a glance
+
+This guide is for **telemetry engineers standardizing agent spans**. It helps you **map model, retrieval, tools, retries, and outcomes into portable traces** so you can leave with **semantic telemetry that remains useful without leaking content**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The OpenTelemetry for LLM tracing framework
+
+Use **Parent → Propagate → Redact → Sample** as the decision path:
+
+1. **Parent:** establish the task, context, or boundary before changing behavior.
+2. **Propagate:** make the relevant evidence or control explicit.
+3. **Redact:** compare the decision with a concrete example, trace, or test.
+4. **Sample:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Keep the task parent, propagate context, redact sensitive content, and sample without losing decision evidence.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Start with one parent run
 
 Create a parent span for the task, then child spans for retrieval, model calls, tools, validation, approvals, and retries. Add environment, release, workflow, model, and status attributes. Keep high-cardinality raw input out of ordinary dimensions and apply redaction before export.

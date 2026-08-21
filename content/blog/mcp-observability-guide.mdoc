@@ -20,6 +20,27 @@ An agent that uses MCP can cross more boundaries than an agent with local functi
 
 {% trace-scenario title="Is the MCP failure discovery or execution?" prompt="A tool call never starts after a server update. Which span should explain the incident?" outcome="Inspect discovery, schema validation, authorization, and execution as separate stages; the first missing stage narrows the fault." /%}
 
+## At a glance
+
+This guide is for **platform and security engineers operating tool servers**. It helps you **observe discovery, validation, authorization, and execution across the server boundary** so you can leave with **protocol telemetry that makes cross-server failures diagnosable**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The MCP observability framework
+
+Use **Discover → Validate → Authorize → Observe** as the decision path:
+
+1. **Discover:** establish the task, context, or boundary before changing behavior.
+2. **Validate:** make the relevant evidence or control explicit.
+3. **Authorize:** compare the decision with a concrete example, trace, or test.
+4. **Observe:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Record what was discovered, validate the schema, authorize the action, and observe the complete execution.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Minimum useful span fields
 
 For each MCP call, capture a parent run ID, server identity, tool name, schema version, sanitized arguments, result status, error class, duration, and approval state. Keep secrets and unnecessary raw payloads out of telemetry. Preserve a secure reference only when authorized investigation requires it.

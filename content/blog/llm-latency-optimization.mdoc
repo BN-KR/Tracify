@@ -20,6 +20,27 @@ seo:
 
 {% trace-scenario title="Which latency should you optimize?" prompt="Time to first token improved, but users still wait before they can act. Which measurement should lead?" outcome="Measure time to useful result and the critical path, not only the first streamed token." /%}
 
+## At a glance
+
+This guide is for **performance engineers and product owners**. It helps you **reduce the wait users actually feel** so you can leave with **a latency plan based on critical paths, tail behavior, and useful results**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The LLM latency optimization framework
+
+Use **Measure → Waterfall → Optimize → Tail** as the decision path:
+
+1. **Measure:** establish the task, context, or boundary before changing behavior.
+2. **Waterfall:** make the relevant evidence or control explicit.
+3. **Optimize:** compare the decision with a concrete example, trace, or test.
+4. **Tail:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Measure the meaningful wait, inspect the waterfall, remove avoidable serial work, and protect the tail.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Build a latency waterfall
 
 Record a parent run and child spans for each stage. Keep start and finish timestamps in one clock domain, and include model, provider, release, input class, and retry number. [LLM tracing](/blog/llm-tracing-explained) provides the basic vocabulary; [metrics that matter](/blog/llm-observability-metrics-that-matter) explains why averages are insufficient.

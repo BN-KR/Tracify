@@ -20,6 +20,27 @@ A prompt change can alter tool selection, latency, cost, refusal behavior, and u
 
 {% trace-scenario title="Can this prompt ship?" prompt="The new prompt scores better overall but fails a high-value cohort. What should happen?" outcome="Hold the release, inspect segmented traces, and require an explicit decision about the cohort regression before rollout." /%}
 
+## At a glance
+
+This guide is for **engineers shipping prompt changes**. It helps you **promote a prompt safely across cohorts and release gates** so you can leave with **a production release process for probabilistic behavior**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The production prompt versioning framework
+
+Use **Contract → Evaluate → Cohort → Rollback** as the decision path:
+
+1. **Contract:** establish the task, context, or boundary before changing behavior.
+2. **Evaluate:** make the relevant evidence or control explicit.
+3. **Cohort:** compare the decision with a concrete example, trace, or test.
+4. **Rollback:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Define the behavior contract, evaluate the candidate, stage it by cohort, and retain a fast rollback.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## What to version
 
 Version the complete instruction set: system message, templates, tool descriptions, output schema, model settings, and retrieval policy. A label such as `prompt-v12` is useful only if it resolves to an immutable record with an owner and change note.
