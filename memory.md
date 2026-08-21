@@ -1,5 +1,11 @@
 # Project Memory
 
+## 2026-08-20 17-post blog visibility content set
+- Added 17 published Markdoc articles under `content/blog` targeting distinct, durable AI engineering searches: architecture, RAG evaluation, prompt injection, structured outputs, latency, hallucinations, cost, memory, MCP, OpenTelemetry, human review, regression testing, production readiness, browser agents, prompt versioning, monitoring, and the Tracify writing workflow.
+- Added `how-to-write-tracify-blog-posts.mdoc` so future agents have a public, reader-facing version of the required writing process. The repository-level must-follow process remains in `AGENTS.md`, `.agents/skills/writing-tracify-content/SKILL.md`, and `content/blog/README.md`.
+- Added the centralized `trace-scenario` Markdoc tag in `src/lib/markdoc-blog.ts` and its accessible disclosure renderer in `src/components/blog/markdoc-rich-text.tsx`; it is deterministic, local, and used by the RAG and cost articles.
+- `npm run test:content` passes all 16 tests. The first Turbopack build hit a Windows `spawn UNKNOWN` TypeScript-worker error; the full Webpack build then passed after temporarily enabling Node worker threads for verification. The temporary setting was removed, so `next.config.ts` remains unchanged.
+
 ## 2026-08-16 Mandatory reply format: every reply starts with "TRACIFY"
 - Every reply in this repo, from any agent, must begin with the literal line `TRACIFY` on its own, a blank line, then the reply. See CLAUDE.md "Reply format" section — that's the enforced instruction; this entry is just the pointer so it isn't missed.
 

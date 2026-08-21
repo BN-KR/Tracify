@@ -4,6 +4,18 @@ import path from "node:path";
 import Markdoc, { type Tag } from "@markdoc/markdoc";
 import { parse as parseYaml } from "yaml";
 
+export const blogMarkdocConfig = {
+  tags: {
+    "trace-scenario": {
+      attributes: {
+        title: { type: String, required: true },
+        prompt: { type: String, required: true },
+        outcome: { type: String, required: true },
+      },
+    },
+  },
+};
+
 export type BlogImage = {
   src: string;
   alt: string;
@@ -119,11 +131,11 @@ function parsePost(source: string, filename: string): BlogPost {
   }
 
   const ast = Markdoc.parse(body);
-  const errors = Markdoc.validate(ast);
+  const errors = Markdoc.validate(ast, blogMarkdocConfig);
   if (errors.length) {
     throw new Error(`${filename}: invalid Markdoc: ${errors.map((error) => error.error.message).join("; ")}`);
   }
-  const content = Markdoc.transform(ast);
+  const content = Markdoc.transform(ast, blogMarkdocConfig);
   if (!Markdoc.Tag.isTag(content)) {
     throw new Error(`${filename}: expected a Markdoc document root`);
   }

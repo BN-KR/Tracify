@@ -1,3 +1,12 @@
+# 17-post visibility content set — 2026-08-20
+
+1. [completed] Read the project memory, content map, quality bar, interactive-content rules, and blog README.
+2. [completed] Inventory the existing published corpus and choose 17 keyword-led topics with distinct reader jobs.
+3. [completed] Add 17 Markdoc articles, natural internal links, code examples, and the future-agent writing workflow article.
+4. [completed] Add and centrally register a deterministic `<trace-scenario>` interaction for articles where reader-controlled state improves the lesson.
+5. [completed] Run the complete content test suite.
+6. [completed] Complete the production build with the Webpack path and a temporary Node worker-thread verification setting, then remove the temporary setting.
+
 # Robots standards cleanup — 2026-08-13
 
 1. [completed] Keep canonical-host signals in redirects, canonical URLs, and sitemap rather than robots.txt.

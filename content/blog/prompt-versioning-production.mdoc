@@ -1,0 +1,36 @@
+---
+title: "Prompt Versioning in Production: Connect Changes to Outcomes"
+slug: prompt-versioning-production
+excerpt: Version prompts like code, carry the revision into traces and evaluations, and make rollback decisions from comparable evidence.
+publishedAt: 2026-08-20T10:10:00.000Z
+author: Tracify Team
+draft: false
+categories: [engineering]
+tags: [prompt versioning, prompt management, AI releases]
+relatedPosts: [prompt-versioning-and-prompt-management, ai-agent-regression-testing]
+seo:
+  metaTitle: Prompt Versioning in Production
+  metaDescription: Version production prompts, connect revisions to traces and evals, and roll back safely when outcomes regress.
+---
+
+A prompt change can alter tool selection, latency, cost, refusal behavior, and user outcomes even when application code is unchanged. Give each prompt a stable revision and carry it through the run.
+
+## What to version
+
+Version the complete instruction set: system message, templates, tool descriptions, output schema, model settings, and retrieval policy. A label such as `prompt-v12` is useful only if it resolves to an immutable record with an owner and change note.
+
+The [prompt management guide](/blog/prompt-versioning-and-prompt-management) covers the operating model. Pair it with [AI regression testing](/blog/ai-agent-regression-testing) so real failures remain attached to the revision that caused or fixed them.
+
+```ts
+const prompt = prompts.resolve("support-agent", { environment: "production" });
+trace.setAttribute("tracify.prompt_revision", prompt.revision);
+const decision = await model.generate({ messages: prompt.messages, tools });
+```
+
+## Compare before promoting
+
+Run old and new revisions against the same representative set. Review final outcome, tool sequence, refusal or escalation rate, latency, tokens, cost, and evaluator explanations. Segment results by input class; an average can hide a regression in a critical workflow.
+
+## Make rollback boring
+
+Keep the prior revision available, define who can change the active pointer, and record the promotion decision. If a live signal regresses, revert the pointer before debating the perfect fix. Then preserve the failing trace as a regression case.

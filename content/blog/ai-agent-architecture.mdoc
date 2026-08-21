@@ -1,0 +1,62 @@
+---
+title: "AI Agent Architecture: The Production Building Blocks"
+slug: ai-agent-architecture
+excerpt: A practical map of the model, tools, state, policy, and telemetry layers that make an AI agent understandable in production.
+publishedAt: 2026-08-20T09:00:00.000Z
+author: Tracify Team
+draft: false
+categories: [engineering]
+tags: [AI agent architecture, AI agents, production]
+relatedPosts: [building-production-ready-ai-agents, ai-agent-observability-complete-guide]
+seo:
+  metaTitle: AI Agent Architecture for Production
+  metaDescription: Design an AI agent architecture with clear boundaries for state, tools, policy, evaluation, and observability.
+---
+
+An AI agent is not just a prompt wrapped around a model. In production it is a control loop: receive a task, choose a next action, call a tool, inspect the result, and decide whether to continue or stop. The architecture should make each transition visible and testable.
+
+## The six layers
+
+1. **Task boundary** defines the input, intended outcome, and terminal states.
+2. **Policy layer** decides what the agent may do and when approval is required.
+3. **Model layer** produces a structured next action, not an invisible side effect.
+4. **Tool layer** validates arguments, performs work, and returns typed results.
+5. **State layer** stores only the context needed for the next decision.
+6. **Evidence layer** records the run, spans, versions, costs, and outcome.
+
+This separation makes [AI agent observability](/blog/ai-agent-observability-complete-guide) a design property rather than a dashboard added after launch. It also gives [production-ready AI agents](/blog/building-production-ready-ai-agents) a concrete review surface.
+
+## A small control loop
+
+```ts
+type Decision = { tool?: string; input?: unknown; done?: boolean };
+
+async function runAgent(task: string) {
+  const trace = startTrace({ task, release: process.env.RELEASE ?? "local" });
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const decision: Decision = await model.next({ task, state: trace.state });
+    if (decision.done) return trace.finish("success");
+    if (!decision.tool || !allowedTools.has(decision.tool)) return trace.finish("blocked");
+    const result = await tools[decision.tool](decision.input);
+    trace.span("tool", { name: decision.tool, result });
+    trace.state = reduceState(trace.state, result);
+  }
+  return trace.finish("limit_reached");
+}
+```
+
+The important detail is not the loop count. It is that every decision has a bounded path, a validated tool boundary, and a terminal status. Capture the same identifiers across model and tool spans so an investigator can reconstruct the run.
+
+## Where teams get stuck
+
+Shared mutable state makes retries hard to reason about. Unstructured tool outputs make the next model decision ambiguous. A single “success” flag hides partial failures. Fix those problems at the boundary: use typed results, explicit status values, immutable release identifiers, and an event schema that preserves parent-child relationships.
+
+Start with one workflow and one failure class. When a run is surprising, compare the trace with a healthy run before changing the prompt. That is the fastest way to learn whether the problem is policy, state, tool behavior, or model selection.
+
+## Architecture review checklist
+
+- Can you name the allowed tools and terminal states?
+- Does every side effect have an owner and an approval rule?
+- Can you compare two runs by release and input class?
+- Are retries bounded and visible?
+- Can a reviewer understand the result without reading application logs?
