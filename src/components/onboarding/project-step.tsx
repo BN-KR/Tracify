@@ -61,7 +61,7 @@ export function ProjectStep() {
       window.sessionStorage.setItem(PROJECT_ID_STORAGE_KEY, result.projectId);
       window.sessionStorage.setItem(PROJECT_NAME_STORAGE_KEY, result.name);
       window.localStorage.setItem(LAST_PROJECT_STORAGE_KEY, result.projectId);
-      router.push("/onboarding/api-key");
+      window.location.assign("/onboarding/api-key");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Project creation failed.",

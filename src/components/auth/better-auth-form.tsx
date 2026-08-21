@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
 export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,13 +24,17 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
     event.preventDefault();
     setPending(true);
     setError("");
-    const result = mode === "sign-up"
-      ? await authClient.signUp.email({ name: name.trim(), email: email.trim(), password, callbackURL: absolute(callbackPath) })
-      : await authClient.signIn.email({ email: email.trim(), password, callbackURL: absolute(callbackPath) });
-    setPending(false);
-    if (result.error) return setError(result.error.message || "Authentication failed.");
-    router.push(callbackPath);
-    router.refresh();
+    try {
+      const result = mode === "sign-up"
+        ? await authClient.signUp.email({ name: name.trim(), email: email.trim(), password, callbackURL: absolute(callbackPath) })
+        : await authClient.signIn.email({ email: email.trim(), password, callbackURL: absolute(callbackPath) });
+      if (result.error) return setError(result.error.message || "Authentication failed.");
+      window.location.assign(callbackPath);
+    } catch (submissionError) {
+      setError(submissionError instanceof Error ? submissionError.message : "Authentication failed.");
+    } finally {
+      setPending(false);
+    }
   }
 
   async function continueWith(provider: "google" | "github") {

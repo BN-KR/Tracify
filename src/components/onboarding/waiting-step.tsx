@@ -5,7 +5,6 @@ import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { AlertTriangle, Check, Loader2, Send } from "lucide-react";
 import posthog from "posthog-js";
 
@@ -18,7 +17,6 @@ const PROJECT_NAME_STORAGE_KEY = "tracify.onboarding.projectName";
 const FALLBACK_PROJECT_NAME = "research-agent-prod";
 
 export function WaitingStep() {
-  const router = useRouter();
   const [elapsed, setElapsed] = useState(0);
   const [health, setHealth] = useState<"checking" | "healthy" | "unavailable">("checking");
   const [probeState, setProbeState] = useState<"idle" | "sending" | "accepted" | "failed">("idle");
@@ -57,10 +55,10 @@ export function WaitingStep() {
     if (!onboardingState?.hasReceivedFirstSpan || !onboardingState.firstRunId) {
       return;
     }
-    router.push(
+    window.location.assign(
       `/onboarding/success?projectId=${onboardingState.projectId}&runId=${onboardingState.firstRunId}`,
     );
-  }, [onboardingState, router]);
+  }, [onboardingState]);
 
   useEffect(() => {
     if (!onboardingState?.hasReceivedFirstSpan || capturedFirstTrace.current) return;

@@ -74,7 +74,7 @@ export function ApiKeyStep() {
             <button
               type="button"
               disabled={!copied}
-              onClick={() => router.push("/onboarding/install")}
+              onClick={() => window.location.assign("/onboarding/install")}
               className="h-10 border border-black/15 bg-white px-4 text-[13px] text-black/70 transition-colors hover:bg-[#f3f2ed] hover:text-black disabled:cursor-not-allowed disabled:text-black/55"
             >
               Continue

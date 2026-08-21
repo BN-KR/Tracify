@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 
 import { CodeCopyBlock } from "@/components/onboarding/code-copy-block";
@@ -66,7 +65,6 @@ TRACIFY_API_KEY=your_key_here`,
 };
 
 export function InstallStep() {
-  const router = useRouter();
   const [tab, setTab] = useState<keyof typeof snippets>("python");
   const active = snippets[tab];
   const region = getTracifyRegion(getDeploymentRegion());
@@ -123,7 +121,7 @@ export function InstallStep() {
             posthog.capture("onboarding_install_ready", { runtime: tab });
           }
           window.sessionStorage.setItem(INSTALL_READY_STORAGE_KEY, "true");
-          router.push("/onboarding/waiting");
+          window.location.assign("/onboarding/waiting");
         }}
         className="mt-6 h-10 border border-black bg-black px-4 text-[13px] text-white transition-colors hover:bg-[#CCCCCC]"
       >
