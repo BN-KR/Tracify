@@ -1,0 +1,39 @@
+---
+title: "LLM Latency Optimization: Find the Slowest Step First"
+slug: llm-latency-optimization
+excerpt: Reduce AI application latency by tracing model, retrieval, tool, queue, and retry time instead of guessing from one request duration.
+publishedAt: 2026-08-20T09:20:00.000Z
+author: Tracify Team
+draft: false
+categories: [performance]
+tags: [LLM latency, AI performance, tracing]
+relatedPosts: [llm-observability-metrics-that-matter, llm-tracing-explained]
+seo:
+  metaTitle: LLM Latency Optimization Guide
+  metaDescription: Diagnose and reduce LLM latency by measuring model time, retrieval, tools, queues, retries, and time to first token.
+---
+
+“The model is slow” is usually an incomplete diagnosis. End-to-end latency may include queueing, retrieval, prompt construction, provider time, tool calls, retries, and rendering. Optimize the slowest meaningful segment, not the most visible one.
+
+## Build a latency waterfall
+
+Record a parent run and child spans for each stage. Keep start and finish timestamps in one clock domain, and include model, provider, release, input class, and retry number. [LLM tracing](/blog/llm-tracing-explained) provides the basic vocabulary; [metrics that matter](/blog/llm-observability-metrics-that-matter) explains why averages are insufficient.
+
+```text
+request       0ms ───────────────────────────── 1850ms
+queue         0ms ───── 120ms
+retrieval     120ms ─────── 360ms
+model         360ms ───────────────── 1440ms
+tool          1440ms ───── 1760ms
+render        1760ms ─ 1850ms
+```
+
+## Optimize in order
+
+First remove unnecessary serial work. Then reduce oversized context, cache stable retrieval, stream when the user benefits from partial output, and choose a faster model for bounded subtasks. Avoid trading away correctness without an evaluation set. A faster wrong answer is a regression.
+
+Track p50, p95, and tail behavior by workflow. A single p95 can hide that only one tool or tenant is slow. Annotate retries and timeouts so a “successful” response does not erase the cost of recovery.
+
+## Define the product target
+
+Latency is a service promise, not just an infrastructure metric. Decide whether the target is time to first token, time to first useful action, or time to completed task. Then measure the user-visible event and the internal spans that control it.

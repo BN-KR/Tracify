@@ -1,0 +1,40 @@
+---
+title: "AI Agent Production Checklist: Before You Turn It On"
+slug: ai-agent-production-checklist
+excerpt: A practical preflight for AI agents covering boundaries, observability, evaluations, recovery, security, and ownership.
+publishedAt: 2026-08-20T10:00:00.000Z
+author: Tracify Team
+draft: false
+categories: [operations]
+tags: [AI agent checklist, production readiness, AI operations]
+relatedPosts: [building-production-ready-ai-agents, debug-ai-agents-in-production]
+seo:
+  metaTitle: AI Agent Production Checklist
+  metaDescription: Use this AI agent production checklist to verify tools, limits, traces, evaluations, security, recovery, and ownership.
+---
+
+Production readiness is a set of answers, not a feeling. Before enabling an agent, someone should be able to explain what it may do, how it stops, how failures are detected, and who responds.
+
+## Boundary checklist
+
+- The task, allowed tools, and terminal states are explicit.
+- Tool arguments and side effects are validated outside the model.
+- Retries, timeouts, concurrency, and token limits are bounded.
+- Irreversible actions require the intended approval boundary.
+- Untrusted content cannot grant permissions.
+
+## Evidence checklist
+
+Capture a connected run with model, retrieval, tool, retry, approval, release, latency, token, cost, and final-status context. Redact sensitive values before export. The [production-ready agent guide](/blog/building-production-ready-ai-agents) frames the system design, while [debugging in production](/blog/debug-ai-agents-in-production) gives the incident path.
+
+## Verification checklist
+
+Run unit tests for validators and tools, evaluations for representative outcomes, and a failure rehearsal with a real trace. Test provider errors, malformed outputs, stale context, duplicate requests, partial tool success, and human-review timeouts.
+
+## Ownership checklist
+
+Name the workflow owner, on-call path, release approver, data-retention owner, and rollback action. Define what happens when quality drops, spend spikes, or latency crosses the service target. A dashboard without an owner is a report, not an operational control.
+
+## The launch decision
+
+Write the evidence for “enable,” “enable with limits,” or “do not enable.” Record the known boundary and the next review date. Launching smaller with observable limits is often the fastest way to learn safely.

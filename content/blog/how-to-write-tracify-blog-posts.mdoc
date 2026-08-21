@@ -1,0 +1,49 @@
+---
+title: How to Write a Tracify Blog Post Like a Pro
+slug: how-to-write-tracify-blog-posts
+excerpt: The durable workflow for future contributors writing accurate, useful, search-friendly Tracify articles in Markdoc.
+publishedAt: 2026-08-20T10:15:00.000Z
+author: Tracify Team
+draft: false
+categories: [company]
+tags: [content workflow, technical writing, SEO]
+relatedPosts: [ai-agent-production-checklist, ai-agent-observability-complete-guide]
+seo:
+  metaTitle: How to Write a Tracify Blog Post Like a Pro
+  metaDescription: Follow Tracify’s practical workflow for keyword-led technical blog posts, Markdoc, links, interactions, code, and verification.
+---
+
+This is the must-follow workflow for new Tracify blog posts. The goal is not to fill a calendar. It is to help a specific reader complete a real job with evidence they can trust.
+
+Use the [AI agent production checklist](/blog/ai-agent-production-checklist) to choose an operational problem, then use [AI agent observability](/blog/ai-agent-observability-complete-guide) to verify that the article’s technical claims match the product’s evidence model.
+
+## 1. Choose the reader and keyword
+
+Write one sentence: “This article helps [reader] do [job] so they can [outcome].” Use a search phrase that names the problem or decision, then narrow it with production context. Avoid vague titles such as “The Future of AI.” Prefer “AI Agent Regression Testing: Turn Production Failures Into Coverage.”
+
+## 2. Verify before drafting
+
+Inspect the current product, SDK, routes, commands, and nearby articles. Never invent benchmarks, customers, integrations, guarantees, or compatibility. Mark a recommendation as a recommendation and link to the canonical source for volatile details.
+
+## 3. Draft the useful arc
+
+Open with the production situation. Explain the model or framework, show a concrete example, name the trade-off, and end with a next action. Use code only when it is internally consistent and checked against the current implementation. A checklist is valuable when it helps a reader make a decision, not when it pads the word count.
+
+## 4. Add the right interaction
+
+Use one purposeful Markdoc interaction when reader-controlled state clarifies the lesson: a trace scenario for debugging, an evaluation explorer for quality decisions, or a focused calculator for cost and thresholds. Keep a static explanation, keyboard access, safe deterministic behavior, and no secrets. If interaction adds no learning, write strong static prose instead.
+
+## 5. Store and link correctly
+
+Public posts belong in `content/blog/*.mdoc`, with required frontmatter and meaningful image alt text. Use at least two natural links to distinct published Tracify posts when targets exist. Never link to drafts, missing slugs, or a standalone SEO list. Keep drafts private unless publication is explicitly requested.
+
+## 6. Review the rendered article
+
+Check headings, code blocks, links, metadata, reading time, mobile width, image loading, interaction labels, and the draft route. Then run:
+
+```powershell
+npm run test:content
+npm run build
+```
+
+If a check fails, fix the source rather than editing generated output. This workflow belongs in the repository’s content skill and README as well as here, so future agents see it before drafting. A post is finished when it is useful, accurate, discoverable, and verifiably safe to publish—not when the Markdown file exists.

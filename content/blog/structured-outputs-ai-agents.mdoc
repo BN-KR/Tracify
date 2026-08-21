@@ -1,0 +1,44 @@
+---
+title: "Structured Outputs for AI Agents: A Safer Tool-Calling Pattern"
+slug: structured-outputs-ai-agents
+excerpt: Use typed decisions, validation, and explicit terminal states to make model outputs safer to execute and easier to debug.
+publishedAt: 2026-08-20T09:15:00.000Z
+author: Tracify Team
+draft: false
+categories: [engineering]
+tags: [structured outputs, tool calling, AI agents]
+relatedPosts: [ai-agent-architecture, debug-ai-agents-in-production]
+seo:
+  metaTitle: Structured Outputs for AI Agents
+  metaDescription: Design validated structured model outputs for reliable tool calling, clear failures, and safer AI agent execution.
+---
+
+Free-form model text is a poor interface for a program that must choose a tool. Structured output does not make a model deterministic, but it moves failure into a boundary you can validate, measure, and handle.
+
+## Model a decision, not a response
+
+```ts
+type AgentDecision =
+  | { kind: "call_tool"; name: "search" | "lookup"; arguments: Record<string, string> }
+  | { kind: "ask_user"; question: string }
+  | { kind: "finish"; status: "success" | "cannot_complete"; summary: string };
+
+function validateDecision(value: unknown): AgentDecision {
+  // Validate enums, required fields, argument lengths, and allowed tools.
+  return decisionSchema.parse(value);
+}
+```
+
+Keep the schema close to the policy. Validate strings, ranges, IDs, and cross-field rules before execution. Tool implementations should validate again because a model boundary is not a security boundary.
+
+## Preserve the rejected decision
+
+When validation fails, record the schema error and model/version identifiers, then choose a bounded recovery: ask for clarification, retry with a changed context, or stop. Do not replace the invalid output with a guessed action. The rejected decision is often the most useful part of the trace when debugging.
+
+This connects directly to [debugging AI agents in production](/blog/debug-ai-agents-in-production) and the layered [AI agent architecture](/blog/ai-agent-architecture). Both depend on separating intent, execution, and evidence.
+
+## Test the boundary
+
+Create fixtures for missing fields, extra fields, wrong enum values, oversized arguments, and valid-but-disallowed actions. Run them in CI and in an evaluation suite with real examples. Measure repair rate, stop rate, tool error rate, and user outcome; a high repair rate can hide a fragile prompt.
+
+Structured outputs work best when the schema is small enough to explain, the tool contract is narrow, and every terminal state is explicit.

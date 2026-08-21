@@ -1,0 +1,43 @@
+---
+title: Prompt Injection Defense for Tool-Using AI Agents
+slug: prompt-injection-defense
+excerpt: A layered approach to detecting prompt injection, separating data from instructions, and limiting what an agent can do after an untrusted input.
+publishedAt: 2026-08-20T09:10:00.000Z
+author: Tracify Team
+draft: false
+categories: [security]
+tags: [prompt injection, AI security, tool calling]
+relatedPosts: [building-production-ready-ai-agents, ai-agent-reliability-failures-retries-guardrails]
+seo:
+  metaTitle: Prompt Injection Defense for AI Agents
+  metaDescription: Protect tool-using AI agents with trust boundaries, least privilege, approvals, and traceable security decisions.
+---
+
+Prompt injection is a control-boundary problem. An agent reads untrusted text, then the model may treat that text as an instruction. The fix is not a magic phrase in the system prompt. It is a set of boundaries around data, decisions, tools, and side effects.
+
+## Start with trust levels
+
+Label user input, retrieved documents, web pages, tool results, and system policy separately. Preserve those labels in the trace. The model may summarize untrusted text, but untrusted text should not silently grant a permission.
+
+```ts
+const action = await model.decide({
+  policy: trustedPolicy,
+  data: [{ source: "web", text: pageText, trust: "untrusted" }],
+});
+
+if (!policy.allows(action, { trust: "untrusted" })) {
+  return { status: "blocked", reason: "untrusted-content-requested-side-effect" };
+}
+```
+
+## Use least privilege and approvals
+
+Give each tool the smallest argument and permission surface it needs. Read-only search and irreversible mutation should not share a role. Require an approval or a second validation step before sending messages, changing records, or spending money. A refusal is a valid terminal state, not an exception to hide.
+
+The reliability practices in [failures, retries, and guardrails](/blog/ai-agent-reliability-failures-retries-guardrails) help bound behavior, while [production-ready agent design](/blog/building-production-ready-ai-agents) gives the surrounding architecture a place for those decisions.
+
+## Make security reviewable
+
+Record the input trust class, selected tool, policy decision, approval identity, and final status. Do not store secrets or raw sensitive content just to make an incident easier. Redact at ingestion and keep a secure reference when authorized investigators need the original evidence.
+
+Test attacks as workflows, not isolated strings: malicious search results, poisoned documents, indirect instructions, tool errors, and attempts to escalate after a refusal. The success condition is not “the model said no.” It is “the system prevented the side effect and left enough evidence to explain why.”

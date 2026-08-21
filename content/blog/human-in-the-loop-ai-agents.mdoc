@@ -1,0 +1,37 @@
+---
+title: "Human-in-the-Loop AI Agents: Design the Approval Boundary"
+slug: human-in-the-loop-ai-agents
+excerpt: Decide where people should approve, review, correct, or take over an AI workflow without turning every run into a manual queue.
+publishedAt: 2026-08-20T09:50:00.000Z
+author: Tracify Team
+draft: false
+categories: [operations]
+tags: [human in the loop, AI governance, AI agents]
+relatedPosts: [ai-agent-reliability-failures-retries-guardrails, ai-agent-evaluation-practical-guide]
+seo:
+  metaTitle: Human-in-the-Loop AI Agent Design
+  metaDescription: Design useful approval and review boundaries for AI agents using risk, reversibility, confidence, and trace evidence.
+---
+
+Human review is a control surface, not a confession that the system failed. Place it where a person can change the consequence: before an irreversible side effect, after an ambiguous decision, or when a policy threshold is crossed.
+
+## Choose the right intervention
+
+Use **approval** before a consequential action, **review** after a result that needs judgment, **correction** when the user can repair a draft, and **takeover** when the automated path should stop. Define the response time and fallback for each. “Human in the loop” without a named action is not an operating design.
+
+Connect the decision to the trace. Preserve the proposed action, policy rule, evidence, reviewer identity, decision, and final outcome. This gives [reliability guardrails](/blog/ai-agent-reliability-failures-retries-guardrails) a visible boundary and makes [evaluation practice](/blog/ai-agent-evaluation-practical-guide) useful beyond offline scores.
+
+```text
+low risk + reversible  → automatic execution
+medium risk + uncertain → review queue
+high risk + irreversible → explicit approval
+policy violation        → stop and escalate
+```
+
+## Avoid review theater
+
+If reviewers cannot see the evidence, they are rubber-stamping. If every case is escalated, the queue becomes the system. Sample successful runs, route only meaningful uncertainty, and measure reviewer agreement, turnaround time, override rate, and downstream correction.
+
+## Make the boundary testable
+
+Write fixtures for threshold crossings, missing evidence, expired approvals, duplicate actions, and reviewer timeouts. The correct output may be “wait,” “ask,” or “stop.” Treat those as explicit terminal states and include them in release evaluations.

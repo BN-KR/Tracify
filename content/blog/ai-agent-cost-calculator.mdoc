@@ -1,0 +1,34 @@
+---
+title: "AI Agent Cost Optimization: A Trace-Based Method"
+slug: ai-agent-cost-optimization
+excerpt: Find the calls and retry paths driving agent spend, then reduce cost without hiding quality regressions.
+publishedAt: 2026-08-20T09:30:00.000Z
+author: Tracify Team
+draft: false
+categories: [operations]
+tags: [AI cost optimization, LLM costs, token usage]
+relatedPosts: [reduce-llm-costs-without-hurting-quality, llm-observability-metrics-that-matter]
+seo:
+  metaTitle: AI Agent Cost Optimization with Traces
+  metaDescription: Optimize AI agent costs by attributing tokens, tools, retries, and model choices to completed user tasks.
+---
+
+Cost optimization is safest when it starts at the task level. A provider invoice tells you what was spent; a trace can show which user workflow, model call, tool loop, or retry caused the spend and whether the task succeeded.
+
+## Attribute spend to a run
+
+Record input and output tokens, model, provider, price-card version, tool costs, and retry number on child spans. Roll them up to a run and group by workflow, release, and outcome. Read [how to reduce LLM costs](/blog/reduce-llm-costs-without-hurting-quality) for the quality side of the trade-off, and [LLM observability metrics](/blog/llm-observability-metrics-that-matter) for the operational context.
+
+{% trace-scenario title="Cost scenario" prompt="A run uses a cheap model twice, then retries with a premium model after a tool timeout. Which change should you investigate first?" outcome="Inspect the timeout and retry decision before swapping models. A bounded tool retry or faster dependency may remove the premium call while preserving answer quality. Compare the candidate against the same success and latency criteria." /%}
+
+## A simple planning formula
+
+```text
+monthly spend = runs × model calls per run × average tokens × price per token
+```
+
+Use it for planning, not accounting. Real systems have different models, cached tokens, tools, failed runs, and contract prices. Break the estimate into cohorts and compare it with observed trace-linked spend.
+
+## Reduce waste in sequence
+
+Remove duplicate calls, bound retries, trim irrelevant context, cache stable work, route simple subtasks to smaller models, and stop unsuccessful loops early. After each change, compare quality, latency, completion rate, and cost per successful task. A lower average can conceal a worse tail or more human rework.

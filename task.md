@@ -1,3 +1,11 @@
+# 2026-08-20 — 17-post visibility content set
+
+- [x] Add 17 keyword-led, non-overlapping Markdoc posts covering AI agent architecture, evaluation, security, performance, cost, operations, browser agents, MCP, and prompt management.
+- [x] Add the future-agent workflow article at `/blog/how-to-write-tracify-blog-posts` and retain the required workflow in `AGENTS.md`, the writing skill, and `content/blog/README.md`.
+- [x] Add a centralized, deterministic `<trace-scenario>` Markdoc interaction with accessible disclosure behavior and use it in the RAG and cost articles.
+- [x] Run `npm run test:content` successfully (16 tests passed).
+- [x] Verify the production build end-to-end with the Webpack path and temporary Node worker-thread workaround; compilation, TypeScript, static generation, and route finalization all passed. The workaround was removed afterward, leaving `next.config.ts` unchanged.
+
 # ⚠ PENDING — needs BN-KR on their own machine (updated 2026-08-16)
 
 These require local credentials, live provider consoles, or a working internet
