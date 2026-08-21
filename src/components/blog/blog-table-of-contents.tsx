@@ -38,7 +38,7 @@ export function BlogTableOfContents({ headings }: { headings: BlogHeading[] }) {
   const sectionCount = tree.filter((heading) => heading.level === 2).length;
 
   return (
-    <details className="blog-table-of-contents" open>
+    <details className="blog-table-of-contents">
       <summary>
         <span>In this guide</span>
         <span className="blog-table-of-contents__count">{sectionCount} sections</span>

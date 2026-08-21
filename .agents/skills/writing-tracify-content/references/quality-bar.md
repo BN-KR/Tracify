@@ -8,6 +8,7 @@ Before drafting, define:
 - Job: the decision or task they need to complete.
 - Evidence: source files, commands, API behavior, or approved product facts.
 - Boundary: what the piece deliberately does not cover.
+- Archetype: the primary structure selected from the repertoire in `content/blog/README.md`.
 
 The finished content must be accurate, useful without insider context, and scannable. Cut sentences that only restate the heading or make unsupported claims.
 
@@ -27,6 +28,8 @@ For new or materially edited posts, include at least two distinct contextual lin
 For each new post, decide whether reader-controlled state makes the central lesson clearer. Use a trace/evaluation demo for execution reasoning, editable sandboxed code for implementation learning, or a focused calculator/checklist/explorer for operational decisions. One purposeful interaction is better than several distractions; keep prose sufficient when interaction adds no learning value.
 
 Prefer specific failure modes, decisions, and operating consequences. Distinguish fact, recommendation, and opinion. Use headings every few paragraphs, but do not fragment the piece into shallow listicles.
+
+Match the article modules to its archetype. A guide needs sequential steps and visual proof; a decision framework needs criteria, a worked decision, and trade-offs; a practical library needs a fast starter set, grouped entries, copyable artifacts, and a method for adapting them. Tutorials need prerequisites, runnable steps, expected output, and troubleshooting. Comparisons need explicit criteria, evidence, scenarios, and conditions that could change the recommendation.
 
 ## Documentation
 

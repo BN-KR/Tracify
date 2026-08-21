@@ -21,6 +21,14 @@ export const blogMarkdocConfig = {
         answer: { type: String, required: true },
       },
     },
+    runthrough: {
+      render: "runthrough",
+      attributes: {
+        step: { type: Number, required: true },
+        title: { type: String, required: true },
+        decision: { type: String, required: true },
+      },
+    },
   },
 };
 
