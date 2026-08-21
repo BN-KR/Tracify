@@ -2,7 +2,7 @@
 
 1. [completed] Confirm the existing Playwright failure evidence configuration and inspect the real auth/onboarding/ingest/dashboard/trace/investigation paths.
 2. [completed] Implement `tests/e2e/authenticated-journey.spec.ts` with generated local-only credentials, meaningful steps, user-facing locators, and no arbitrary waits.
-3. [pending] Verify the focused test, `npm run test`, lint/type validation, and `git diff --check`; record any environment blocker.
+3. [in progress] Verify the focused test, `npm run test`, lint/type validation, and `git diff --check`; scoped ESLint and diff hygiene pass, while the focused cloud run is blocked by Windows `VirtualAlloc failed` and TypeScript by malformed generated `.next/dev/types/routes.d.ts`.
 
 # Robots standards cleanup — 2026-08-13
 
@@ -913,6 +913,15 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 4. [completed] Validate that `NPM_TOKEN` belongs to intended npm owner `tracifytech`; enforce that owner through `EXPECTED_NPM_USER`.
 5. [completed] First-publish `tracify-sdk@0.2.0` to PyPI through CI and npm through the owner's interactive 2FA session, then clean-install and import both public artifacts.
 6. [follow-up] Configure npm and PyPI trusted publishers for tokenless future releases; npm staged publishing is now available because the package exists.
+# 17-post visibility content set — 2026-08-20
+
+1. [completed] Read the project memory, content map, quality bar, interactive-content rules, and blog README.
+2. [completed] Inventory the existing published corpus and choose 17 keyword-led topics with distinct reader jobs.
+3. [completed] Add 17 Markdoc articles, natural internal links, code examples, and the future-agent writing workflow article.
+4. [completed] Add and centrally register a deterministic `<trace-scenario>` interaction for articles where reader-controlled disclosure improves the lesson.
+5. [completed] Run the complete content test suite.
+6. [completed] Complete the production build with the Webpack path and a temporary Node worker-thread verification setting, then remove the temporary setting.
+
 # Browser-agent observability wedge — 2026-08-20
 
 ## Product decision

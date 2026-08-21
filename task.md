@@ -2,7 +2,15 @@
 
 - [x] Inspect the existing Better Auth, onboarding, ingest, dashboard, Trace Viewer, and Investigation Mode flows.
 - [x] Add one minimal authenticated Playwright journey using a generated per-run account and the real onboarding probe; no credentials, tokens, cookies, or fake product behavior are committed.
-- [ ] Run the focused journey and repository verification. The local environment must have working Better Auth, Convex, Inngest, Tinybird, and Redis services for first-trace ingestion.
+- [ ] Run the focused journey and repository verification. The journey reaches the local cloud auth host when explicitly enabled with `PLAYWRIGHT_DEPLOYMENT=cloud TRACIFY_E2E_AUTH=1`; the latest attempt was stopped by a Windows `VirtualAlloc failed` browser/dev-runtime memory error before ingestion. `npm run test` was missing and now aliases the existing Playwright suite.
+
+# 2026-08-20 — 17-post visibility content set
+
+- [x] Add 17 keyword-led, non-overlapping Markdoc posts covering AI agent architecture, evaluation, security, performance, cost, operations, browser agents, MCP, and prompt management.
+- [x] Add the future-agent workflow article at `/blog/how-to-write-tracify-blog-posts` and retain the required workflow in `AGENTS.md`, the writing skill, and `content/blog/README.md`.
+- [x] Add a centralized, deterministic `<trace-scenario>` Markdoc interaction with accessible disclosure behavior and use it in the RAG and cost articles.
+- [x] Run `npm run test:content` successfully (16 tests passed).
+- [x] Verify the production build end-to-end with the Webpack path and temporary Node worker-thread workaround; compilation, TypeScript, static generation, and route finalization all passed. The workaround was removed afterward, leaving `next.config.ts` unchanged.
 
 # 2026-08-20 — gstack investigation workflow
 

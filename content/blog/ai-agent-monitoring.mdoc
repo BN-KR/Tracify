@@ -1,0 +1,37 @@
+---
+title: "AI Agent Monitoring: Alerts That Lead to a Decision"
+slug: ai-agent-monitoring
+excerpt: Build AI agent monitoring around user outcomes, failure classes, cost, latency, and bounded actions instead of noisy model logs.
+publishedAt: 2026-08-20T10:20:00.000Z
+author: Tracify Team
+draft: false
+categories: [operations]
+tags: [AI agent monitoring, observability, incident response]
+relatedPosts: [llm-observability-metrics-that-matter, debug-ai-agents-in-production]
+seo:
+  metaTitle: AI Agent Monitoring That Operators Can Use
+  metaDescription: Design AI agent monitoring with trace-linked alerts for failures, latency, cost, quality, and clear response ownership.
+---
+
+AI agent monitoring should answer “what changed, who is affected, and what do we do next?” A dashboard full of token counts and model logs can be technically rich while leaving an operator unable to decide whether to roll back, pause, retry, or accept the behavior.
+
+## Alert on the task
+
+Start with a parent run and group signals by workflow, release, environment, and input class. Useful signals include completion rate, terminal failure class, evaluator outcomes, p95 latency, cost per successful task, retry rate, and approval backlog. [LLM observability metrics](/blog/llm-observability-metrics-that-matter) explains the measurement choices; [production debugging](/blog/debug-ai-agents-in-production) shows how an alert becomes an investigation.
+
+```text
+signal: failed_runs{workflow="support"} > baseline + 3σ
+owner: support-agent team
+action: compare current release with prior release
+stop condition: pause promotion if policy failures increase
+```
+
+## Make alerts actionable
+
+Every alert needs a threshold, owner, evidence link, and bounded response. Route a provider outage differently from a prompt regression. A cost spike may require sampling expensive traces; a safety violation may require immediate pause. Do not use one severity for every deviation.
+
+## Avoid alert blindness
+
+Review alert precision and missed incidents. Group correlated failures so one dependency outage does not create a hundred identical pages. Suppress expected maintenance windows with explicit annotations, not hidden filters. Keep a small set of alerts that change behavior and review their usefulness after incidents.
+
+Good monitoring closes the loop: the alert opens a trace, the trace produces a classification, the classification creates a test or operating change, and the next release proves whether the change worked.

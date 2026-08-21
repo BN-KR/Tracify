@@ -1,0 +1,41 @@
+---
+title: "AI Agent Memory: What to Store and What to Forget"
+slug: ai-agent-memory-design
+excerpt: Design useful AI agent memory with explicit scope, expiry, provenance, and controls that keep context from becoming hidden state.
+publishedAt: 2026-08-20T09:35:00.000Z
+author: Tracify Team
+draft: false
+categories: [engineering]
+tags: [AI agent memory, context management, AI agents]
+relatedPosts: [ai-agent-architecture, prompt-versioning-and-prompt-management]
+seo:
+  metaTitle: AI Agent Memory Design for Production
+  metaDescription: Design AI agent memory with clear scope, provenance, expiration, correction, and observability.
+---
+
+Memory is persistent state with a friendly name. Treat it like a database feature, not a larger prompt. Every remembered fact should have a scope, source, freshness rule, and correction path.
+
+## Separate memory types
+
+Working context belongs to one run. Session memory supports a bounded conversation. Long-term memory survives sessions and needs stronger consent, access, and deletion rules. Operational state—such as an approval or workflow status—should live in a typed system of record, not only in retrieved text.
+
+```ts
+type Memory = {
+  value: string;
+  scope: "run" | "session" | "user";
+  source: string;
+  observedAt: string;
+  expiresAt?: string;
+  confidence: "verified" | "inferred";
+};
+```
+
+Log which memories were retrieved and which affected a decision. This makes [AI agent architecture](/blog/ai-agent-architecture) inspectable and complements [prompt versioning](/blog/prompt-versioning-and-prompt-management) when context changes behavior.
+
+## Design for correction
+
+Users change their minds and systems change their data. Allow a memory to be corrected, expired, or deleted. Prefer source references over copied sensitive content. If the agent cannot explain where a fact came from, it should ask or abstain instead of presenting memory as truth.
+
+## Measure memory, not just recall
+
+Track retrieval rate, useful-memory rate, stale-memory incidents, correction rate, context growth, and task outcome. More recalled facts are not automatically better. The target is the smallest relevant context that improves a user-visible result without creating surprising behavior.

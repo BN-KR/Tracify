@@ -1,0 +1,38 @@
+---
+title: "OpenTelemetry for LLM Tracing: A Practical Starting Point"
+slug: opentelemetry-llm-tracing
+excerpt: Map model calls, retrieval, tools, and agent runs into traceable spans without losing the business outcome that gives telemetry meaning.
+publishedAt: 2026-08-20T09:45:00.000Z
+author: Tracify Team
+draft: false
+categories: [engineering]
+tags: [OpenTelemetry, LLM tracing, observability]
+relatedPosts: [llm-tracing-explained, ai-agent-observability-complete-guide]
+seo:
+  metaTitle: OpenTelemetry for LLM Tracing
+  metaDescription: Learn how to structure OpenTelemetry traces for LLM calls, retrieval, tools, retries, cost, and task outcomes.
+---
+
+OpenTelemetry gives teams a portable vocabulary for traces, spans, attributes, and context propagation. For LLM applications, the hard part is not emitting spans. It is preserving the task boundary and the decisions that connect those spans to a user-visible outcome.
+
+## Start with one parent run
+
+Create a parent span for the task, then child spans for retrieval, model calls, tools, validation, approvals, and retries. Add environment, release, workflow, model, and status attributes. Keep high-cardinality raw input out of ordinary dimensions and apply redaction before export.
+
+```ts
+const span = tracer.startSpan("agent.run", { attributes: {
+  "tracify.workflow": "support-answer",
+  "tracify.release": release,
+  "tracify.environment": "production",
+} });
+```
+
+The [LLM tracing guide](/blog/llm-tracing-explained) explains the event model, while [AI agent observability](/blog/ai-agent-observability-complete-guide) connects it to cost, quality, and incident response.
+
+## Choose attributes that answer questions
+
+Useful fields let you compare a failed run with a healthy one: retry count, tool outcome, prompt revision, evaluator result, latency, token usage, and final status. Avoid collecting fields merely because they are available. Every attribute should support an investigation, alert, evaluation, or release decision.
+
+## Check propagation
+
+Test that context survives async boundaries, queues, tool clients, and retries. A trace that stops at the API edge is not a trace of the agent. Verify parent-child relationships with a small fixture and inspect the rendered result, not only exporter logs.

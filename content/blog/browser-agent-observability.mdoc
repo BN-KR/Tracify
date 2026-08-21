@@ -1,0 +1,38 @@
+---
+title: "Browser Agent Observability: Trace the User Journey, Not Just the Clicks"
+slug: browser-agent-observability
+excerpt: Connect model decisions, browser actions, network calls, console errors, assertions, and evaluation results in one agent journey.
+publishedAt: 2026-08-20T10:05:00.000Z
+author: Tracify Team
+draft: false
+categories: [engineering]
+tags: [browser agents, Playwright, observability]
+relatedPosts: [ai-agent-observability-complete-guide, debug-ai-agents-in-production]
+seo:
+  metaTitle: Browser Agent Observability Guide
+  metaDescription: Trace browser agents across model decisions, clicks, network calls, console errors, assertions, and evaluations.
+---
+
+A browser agent can fail even when every click was syntactically valid. The page may have changed, a network request may have returned an error, a selector may have matched the wrong element, or the model may have chosen the wrong next action. Observe the journey across those layers.
+
+## Build the journey
+
+Use one parent run for the task and child spans for model decisions, browser actions, network requests, console errors, screenshots or trace artifacts, assertions, and evaluation. Add URL, page, selector or semantic target, release, and environment context while redacting credentials and personal data.
+
+This extends [AI agent observability](/blog/ai-agent-observability-complete-guide) and gives [production debugging](/blog/debug-ai-agents-in-production) a concrete timeline. Preserve the original browser artifact instead of trying to rebuild every pixel in the observability UI.
+
+```text
+model: “find invoice”
+  → browser: navigate /billing
+  → network: GET /api/invoices 500
+  → assertion: invoice table visible = false
+  → evaluation: failed / dependency_error
+```
+
+## Classify the failure
+
+Separate model-choice failures, browser synchronization failures, application failures, and environment failures. The same visible symptom—“agent could not finish”—can require a prompt change, a wait strategy, a product fix, or a dependency rollback.
+
+## Release with journey evidence
+
+Compare the same browser journey across releases. Track completion, action count, retries, time, cost, and failure class. Keep a small set of critical flows as evaluations and retain the artifact link for investigation. The useful unit is the user outcome, not the number of successful clicks.

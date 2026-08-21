@@ -1,0 +1,38 @@
+---
+title: "LLM Hallucination Detection: A Practical Production Playbook"
+slug: llm-hallucination-detection
+excerpt: Detect unsupported AI answers with groundedness checks, source-aware traces, human review, and production feedback loops.
+publishedAt: 2026-08-20T09:25:00.000Z
+author: Tracify Team
+draft: false
+categories: [reliability]
+tags: [hallucination detection, LLM evaluation, groundedness]
+relatedPosts: [rag-evaluation-guide, ai-agent-evaluation-practical-guide]
+seo:
+  metaTitle: LLM Hallucination Detection in Production
+  metaDescription: Build a practical hallucination detection workflow with groundedness checks, citations, review queues, and trace evidence.
+---
+
+Hallucination detection starts with a definition. An answer is unsupported when it asserts a claim that the permitted evidence does not justify. That is different from an answer that is incomplete, poorly phrased, or unhelpful.
+
+## Preserve evidence with the answer
+
+Store the retrieved passages, source identifiers, prompt or policy version, answer, and evaluator result together. Without that context, a reviewer can label a response but cannot tell whether retrieval failed or generation drifted.
+
+Use layered checks: citation presence, claim-to-source overlap, required refusal behavior, deterministic business rules, and sampled human review. [RAG evaluation](/blog/rag-evaluation-guide) separates retrieval from groundedness, while the [AI evaluation guide](/blog/ai-agent-evaluation-practical-guide) covers versioning and review.
+
+## Avoid the false-confidence trap
+
+A judge model can be confidently wrong. Treat its output as a signal, not a ground truth. Version the judge prompt, compare it with a labeled sample, and track disagreement. For high-impact decisions, keep a human approval path and prefer abstention over invented certainty.
+
+```ts
+const result = evaluate({ answer, evidence, rules });
+if (result.groundedness === "fail" || result.citationCoverage < 1) {
+  return { status: "needs_review", answer: null, reason: result.reason };
+}
+return { status: "pass", answer };
+```
+
+## Turn incidents into coverage
+
+Every confirmed hallucination should become a regression example with a clear expected behavior: answer, cite, ask, or refuse. Group failures by source freshness, query type, model, and release. The goal is not a perfect score; it is a visible path from a bad answer to a safer change.

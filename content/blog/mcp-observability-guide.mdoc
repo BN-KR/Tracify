@@ -1,0 +1,38 @@
+---
+title: "MCP Observability: Trace Tool Calls Across Agent Servers"
+slug: mcp-observability-guide
+excerpt: Apply familiar tracing practices to MCP-based agents so tool discovery, arguments, results, errors, and approvals remain connected.
+publishedAt: 2026-08-20T09:40:00.000Z
+author: Tracify Team
+draft: false
+categories: [engineering]
+tags: [MCP observability, tool calling, AI agents]
+relatedPosts: [llm-tracing-explained, prompt-injection-defense]
+seo:
+  metaTitle: MCP Observability Guide for AI Agents
+  metaDescription: Trace MCP tool calls with server identity, arguments, results, errors, approvals, and release context.
+---
+
+An agent that uses MCP can cross more boundaries than an agent with local functions. Tool discovery, server identity, arguments, results, latency, and approval decisions need to remain visible across that boundary.
+
+## Minimum useful span fields
+
+For each MCP call, capture a parent run ID, server identity, tool name, schema version, sanitized arguments, result status, error class, duration, and approval state. Keep secrets and unnecessary raw payloads out of telemetry. Preserve a secure reference only when authorized investigation requires it.
+
+The core concepts are the same as [LLM tracing](/blog/llm-tracing-explained), but the trust boundary deserves extra attention. [Prompt injection defense](/blog/prompt-injection-defense) shows why an untrusted tool result must not become an instruction or permission by accident.
+
+```text
+run
+└── model.decision
+    └── mcp.call server=inventory tool=get_stock
+        ├── approval.check
+        └── mcp.result status=success
+```
+
+## Debug across servers
+
+When a tool fails, compare server, schema, release, and input class before blaming the model. A timeout may be a dependency issue; an invalid argument may be a schema drift; an unsafe action may be a policy failure. Keep error classes stable enough to group, but retain a human-readable explanation for review.
+
+## Operate the boundary
+
+Set timeouts, concurrency limits, retries, and circuit breakers per tool. Make destructive tools explicit and approval-aware. Add representative MCP calls to evaluations and inspect them in the same trace viewer as model decisions. The goal is a complete task story, not another disconnected log stream.

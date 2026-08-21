@@ -1,0 +1,46 @@
+---
+title: "RAG Evaluation: How to Measure Retrieval and Answer Quality"
+slug: rag-evaluation-guide
+excerpt: Build a retrieval-augmented generation evaluation loop that separates search quality, groundedness, and user-visible usefulness.
+publishedAt: 2026-08-20T09:05:00.000Z
+author: Tracify Team
+draft: false
+categories: [evaluations]
+tags: [RAG evaluation, retrieval augmented generation, AI testing]
+relatedPosts: [ai-agent-evaluation-practical-guide, ai-agent-testing-unit-tests-production-evals]
+seo:
+  metaTitle: RAG Evaluation Guide for Production Systems
+  metaDescription: Learn how to evaluate retrieval quality, grounded answers, citations, and user outcomes in RAG applications.
+---
+
+RAG failures are often misdiagnosed. A wrong answer may come from missing evidence, irrelevant evidence, a synthesis error, or a correct answer that does not solve the user’s task. Evaluate those stages separately before tuning the model.
+
+## Define the evaluation record
+
+For each example, keep the question, expected evidence, retrieved chunks, answer, citations, evaluator version, and final label. Link them to the same trace or request ID. This lets you inspect the execution path instead of debating a score without context.
+
+```json
+{
+  "question": "When does the refund policy apply?",
+  "expectedSources": ["refund-policy-v3"],
+  "retrievedSources": ["refund-policy-v3", "shipping-faq"],
+  "answer": "The policy applies within 30 days...",
+  "labels": { "retrieval": "pass", "groundedness": "pass", "task": "pass" }
+}
+```
+
+## Three checks, three decisions
+
+**Retrieval relevance** asks whether the context contains the evidence needed to answer. **Groundedness** asks whether the answer is supported by that context. **Task correctness** asks whether the user can act on the result. A system can pass the first two and still fail the third because the answer is incomplete or poorly scoped.
+
+Use deterministic checks where possible: expected document IDs, citation coverage, required fields, and refusal rules. Use model judges or human review for nuanced criteria, but version the evaluator and sample disagreements. The [practical AI agent evaluation guide](/blog/ai-agent-evaluation-practical-guide) explains how to keep that review loop explicit, while [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals) covers the path from fixtures to production examples.
+
+## A useful release gate
+
+Set a minimum on each critical dimension rather than one blended score. A retrieval regression should not disappear inside an average. Compare the candidate and baseline on the same dataset, then inspect failures by query type, document age, and answer length.
+
+{% trace-scenario title="RAG failure explorer" prompt="The answer sounds confident, but the citation points to a shipping FAQ." outcome="The first signal is retrieval mismatch, not necessarily hallucination. Inspect the retrieved source IDs and the citation span before changing the prompt. If the required policy document was absent, fix indexing or query construction first." /%}
+
+## What to ship
+
+Ship the dataset, evaluator versions, thresholds, and a review queue with the application. A number is useful only when it identifies the examples that need a decision. Keep representative production traces in the dataset, remove sensitive values, and re-run the suite whenever retrieval, chunking, ranking, prompts, or model settings change.

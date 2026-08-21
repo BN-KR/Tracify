@@ -1,5 +1,11 @@
 # Project Memory
 
+## 2026-08-20 17-post blog visibility content set
+- Added 17 published Markdoc articles under `content/blog` targeting distinct, durable AI engineering searches: architecture, RAG evaluation, prompt injection, structured outputs, latency, hallucinations, cost, memory, MCP, OpenTelemetry, human review, regression testing, production readiness, browser agents, prompt versioning, monitoring, and the Tracify writing workflow.
+- Added `how-to-write-tracify-blog-posts.mdoc` so future agents have a public, reader-facing version of the required writing process. The repository-level must-follow process remains in `AGENTS.md`, `.agents/skills/writing-tracify-content/SKILL.md`, and `content/blog/README.md`.
+- Added the centralized `trace-scenario` Markdoc tag in `src/lib/markdoc-blog.ts` and its accessible disclosure renderer in `src/components/blog/markdoc-rich-text.tsx`; it is deterministic, local, and used by the RAG and cost articles.
+- `npm run test:content` passes all 16 tests. The first Turbopack build hit a Windows `spawn UNKNOWN` TypeScript-worker error; the full Webpack build then passed after temporarily enabling Node worker threads for verification. The temporary setting was removed, so `next.config.ts` remains unchanged.
+
 ## 2026-08-20 gstack Investigation Mode
 - Added `/dashboard/[projectId]/investigate` as a guided incident workflow over existing run summaries and cached spans; no new backend or causal claims were introduced.
 - The page selects a run through the `run` URL parameter, surfaces confirmed status/error/latency/model-tool signals, and stores a per-project/run evidence board locally with separate `confirmed` and `inference` labels.
@@ -1268,3 +1274,5 @@
 - Added `tests/e2e/authenticated-journey.spec.ts` using the existing Better Auth sign-up flow, onboarding project/key/install flow, real “Send test span” ingestion probe, dashboard runs table, Trace Viewer, and Investigation Mode.
 - The test generates a per-run `example.test` identity and never persists or commits credentials, tokens, cookies, or storage state. `playwright.config.ts` already retains traces, screenshots, and video on failure.
 - Verification remains pending; the first-trace assertion depends on the local Better Auth/Convex/Inngest/Tinybird/Redis environment being healthy.
+- The marketing Playwright host redirects protected paths through the region directory, so `playwright.config.ts` now supports `PLAYWRIGHT_DEPLOYMENT=cloud` and starts the existing `npm run dev:cloud` host on port 4000. The spec retains the existing explicit `TRACIFY_E2E_AUTH=1` live-run gate.
+- The live cloud run reached sign-up but the Windows runtime then failed with `VirtualAlloc failed`; `npm run test` was also absent and now aliases `test:e2e`. Scoped ESLint and `git diff --check` pass; TypeScript is blocked by malformed generated `.next/dev/types/routes.d.ts`.
