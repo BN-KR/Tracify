@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { createBlogRepository } from "./markdoc-blog.ts";
+import { blogMarkdocConfig, createBlogRepository } from "./markdoc-blog.ts";
 
 function withContentDirectory(files: Record<string, string>, run: (directory: string) => void) {
   const directory = mkdtempSync(path.join(tmpdir(), "tracify-markdoc-"));
@@ -107,6 +107,11 @@ test("a post exposes validated metadata and a transformed Markdoc tree", () => {
     assert.equal((post.content.children[0] as { name: string }).name, "h1");
     assert.equal(post.plainText, "First heading Section heading First paragraph.");
   });
+});
+
+test("interactive blog tags declare their renderer targets", () => {
+  assert.equal(blogMarkdocConfig.tags["trace-scenario"].render, "trace-scenario");
+  assert.equal(blogMarkdocConfig.tags["faq-item"].render, "faq-item");
 });
 
 test("invalid frontmatter fails with the source filename", () => {

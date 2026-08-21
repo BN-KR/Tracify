@@ -7,10 +7,18 @@ import { parse as parseYaml } from "yaml";
 export const blogMarkdocConfig = {
   tags: {
     "trace-scenario": {
+      render: "trace-scenario",
       attributes: {
         title: { type: String, required: true },
         prompt: { type: String, required: true },
         outcome: { type: String, required: true },
+      },
+    },
+    "faq-item": {
+      render: "faq-item",
+      attributes: {
+        question: { type: String, required: true },
+        answer: { type: String, required: true },
       },
     },
   },
