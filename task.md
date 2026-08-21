@@ -1142,3 +1142,11 @@ Follow-ups still open:
 - [x] Merge the scoped workflow fix that runs `npm ci` from `packages/ts-sdk`, rerun the dry run, and confirm `NPM_TOKEN` belongs to npm user `tracifytech`.
 - [x] Publish `tracify-sdk@0.2.0` to PyPI through the verified workflow and to npm through the owner's interactive 2FA session.
 - [x] Verify both public registry records and clean-install/import the published npm and PyPI artifacts.
+
+# AI agent monitoring article polish — 2026-08-21
+
+- [x] Refine only `ai-agent-monitoring` with a closed structured TOC, yellow reading progress, command-prompt H2 treatment, and mobile-safe code/artifact styling.
+- [x] Distribute six operator runthrough checkpoints, decision tables, rollout configuration, and an alert-packet example through the full article.
+- [x] Replace the bottom related-guide dump with contextual links inside relevant explanations; retain a 3,626-word long-form article with 17 internal links.
+- [x] Add an article-archetype repertoire to the mandatory authoring workflow for future agents.
+- [x] Pass content tests, focused lint, rendered HTTP/DOM checks, and the full 116-route production build; document repository-wide lint failures as unrelated pre-existing issues.

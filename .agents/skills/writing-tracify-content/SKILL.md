@@ -11,7 +11,7 @@ Create useful, accurate content and place it where Tracify actually consumes it.
 
 1. Read `references/content-map.md` and select the destination before drafting. Never create an orphan Markdown file for a public route.
 2. Inspect the product source, SDK, API, or nearby content that proves technical claims. Mark uncertain claims instead of inventing details.
-3. State the reader, their job, and the outcome in one sentence. Build an outline where every section advances that outcome.
+3. State the reader, their job, and the outcome in one sentence. Choose the closest article archetype from the repertoire in `content/blog/README.md`, then build an outline where every section advances that outcome. Do not force every topic into the same structure.
 4. For a new blog or internal document, copy the matching file from `assets/`. Preserve existing frontmatter and publication state when editing.
 5. Draft using the applicable criteria in `references/quality-bar.md`. Prefer concrete explanations, runnable examples, explicit prerequisites, and honest limitations.
 6. For a new or materially edited blog post, inspect published slugs and place at least two truthful links to distinct posts inside explanatory sentences. Use descriptive topic words as anchors; targets must exist and be published. Typo-only edits do not require retrofitting.
@@ -26,6 +26,7 @@ Every published Tracify blog post must use the Semrush-inspired editorial patter
 - Make a clear promise with title, excerpt, metadata, and hero image.
 - Orient the reader in the opening: situation, job, outcome, and scope boundary.
 - Use the automatic table of contents generated from H2/H3 headings.
+- Select and follow one primary article archetype: definitive guide, decision framework, practical library, implementation tutorial, or comparison/benchmark.
 - Name and teach a topic-specific operating model or decision framework.
 - Support the explanation with evidence such as a worked example, code, table, formula, trace, screenshot, or diagram.
 - Include one purposeful deterministic interaction using an approved Markdoc tag.

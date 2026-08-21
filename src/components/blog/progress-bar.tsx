@@ -18,9 +18,9 @@ export function ProgressBar() {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] h-[2px]">
+    <div className="fixed top-0 left-0 right-0 z-[100] h-[2px]" aria-hidden="true">
       <div
-        className="h-full bg-white transition-[width] duration-150 ease-out"
+        className="h-full bg-[#f4d44d] transition-[width] duration-150 ease-out motion-reduce:transition-none"
         style={{ width: `${progress}%` }}
       />
     </div>

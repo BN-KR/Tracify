@@ -899,3 +899,12 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 4. [completed] Validate that `NPM_TOKEN` belongs to intended npm owner `tracifytech`; enforce that owner through `EXPECTED_NPM_USER`.
 5. [completed] First-publish `tracify-sdk@0.2.0` to PyPI through CI and npm through the owner's interactive 2FA session, then clean-install and import both public artifacts.
 6. [follow-up] Configure npm and PyPI trusted publishers for tokenless future releases; npm staged publishing is now available because the package exists.
+
+# AI agent monitoring article polish — 2026-08-21
+
+1. [completed] Compare the supplied Semrush guide, ROI-framework, and prompt-library structures and extract reusable editorial patterns without copying their branding or wording.
+2. [completed] Add a reusable static `runthrough` Markdoc component and apply six checkpoints only to the monitoring article.
+3. [completed] Close the TOC by default, use the Tracify yellow progress bar, render `C:\` before monitoring H2 headings, and harden focus/overflow/reduced-motion styles.
+4. [completed] Rework the article's latter sections into layered H3/H4 hierarchy, add visual evidence throughout, distribute contextual links, and remove the standalone link list.
+5. [completed] Codify definitive-guide, decision-framework, practical-library, tutorial, and comparison archetypes in the required authoring workflow.
+6. [completed] Verify content contracts, changed-file lint, diff hygiene, the full 116-route production build, and a local 200 rendered response containing six runthroughs, five FAQ accordions, and a closed TOC.
