@@ -1,6 +1,7 @@
 import Markdoc from "@markdoc/markdoc";
 import React from "react";
 
+import { BlogCodeBlock } from "@/components/blog/blog-code-block";
 import type { BlogPost } from "@/lib/markdoc-blog";
 
 function TraceScenario({ title, prompt, outcome }: { title: string; prompt: string; outcome: string }) {
@@ -19,7 +20,7 @@ function TraceScenario({ title, prompt, outcome }: { title: string; prompt: stri
 export function MarkdocRichText({ content }: Pick<BlogPost, "content">) {
   return (
     <div className="markdoc-blog-richtext">
-      {Markdoc.renderers.react(content, React, { components: { "trace-scenario": TraceScenario } })}
+      {Markdoc.renderers.react(content, React, { components: { "trace-scenario": TraceScenario, pre: BlogCodeBlock } })}
     </div>
   );
 }

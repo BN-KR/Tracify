@@ -474,6 +474,12 @@
   .markdoc-blog-richtext img { width: 100%; border: 1px solid #000; }
   .markdoc-blog-richtext a { color: #000; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
   .markdoc-blog-richtext code { background: #000; color: #fff; font-family: var(--font-geist-mono), monospace; padding: 0.125rem 0.3rem; }
+  .markdoc-blog-richtext .blog-code-block { margin-block: 2rem; overflow: hidden; border: 1px solid #000; background: #050505; box-shadow: 10px 10px 0 rgb(0 0 0 / 12%); }
+  .markdoc-blog-richtext .blog-code-block__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid rgb(255 255 255 / 18%); padding: 0.7rem 1rem; color: #f4d44d; font-family: var(--font-geist-mono), monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .markdoc-blog-richtext .blog-code-block__toolbar button { display: inline-flex; align-items: center; gap: 0.45rem; border: 1px solid rgb(255 255 255 / 30%); padding: 0.4rem 0.65rem; color: #fff; font-family: var(--font-geist-mono), monospace; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .markdoc-blog-richtext .blog-code-block__toolbar button:hover, .markdoc-blog-richtext .blog-code-block__toolbar button:focus-visible { background: #f4d44d; color: #000; outline: none; }
+  .markdoc-blog-richtext .blog-code-block pre { margin: 0; overflow-x: auto; padding: 1.25rem; color: #f5f5f2; font-family: var(--font-geist-mono), monospace; font-size: 0.82rem; line-height: 1.75; white-space: pre; }
+  .markdoc-blog-richtext .blog-code-block pre code { background: transparent; color: inherit; padding: 0; }
   .docs-markdoc { max-width: 760px; font-size: 1rem; line-height: 1.8; }
   .docs-markdoc h1 { display: none; }
   .docs-markdoc h2, .docs-markdoc h3 { margin: 2.5rem 0 0.75rem; font-family: var(--font-geist-pixel), monospace; line-height: .95; letter-spacing: -.04em; }

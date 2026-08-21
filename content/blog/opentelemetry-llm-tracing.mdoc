@@ -8,12 +8,17 @@ draft: false
 categories: [engineering]
 tags: [OpenTelemetry, LLM tracing, observability]
 relatedPosts: [llm-tracing-explained, ai-agent-observability-complete-guide]
+heroImage:
+  src: /media/ai-agent-observability-hero.png
+  alt: Abstract OpenTelemetry-style trace joining model calls, retrieval, and tools
 seo:
   metaTitle: OpenTelemetry for LLM Tracing
   metaDescription: Learn how to structure OpenTelemetry traces for LLM calls, retrieval, tools, retries, cost, and task outcomes.
 ---
 
 OpenTelemetry gives teams a portable vocabulary for traces, spans, attributes, and context propagation. For LLM applications, the hard part is not emitting spans. It is preserving the task boundary and the decisions that connect those spans to a user-visible outcome.
+
+{% trace-scenario title="Where should the parent span live?" prompt="A model call runs inside a retrying agent loop. What should the trace hierarchy preserve?" outcome="Keep the user task as the parent, model attempts as children, and retries as distinct events so outcome and wasted work remain visible." /%}
 
 ## Start with one parent run
 
@@ -36,3 +41,175 @@ Useful fields let you compare a failed run with a healthy one: retry count, tool
 ## Check propagation
 
 Test that context survives async boundaries, queues, tool clients, and retries. A trace that stops at the API edge is not a trace of the agent. Verify parent-child relationships with a small fixture and inspect the rendered result, not only exporter logs.
+
+## Choose the parent span carefully
+
+The parent span should represent the work a person or upstream system cares about: a support answer, research task, browser journey, or evaluation case. Do not make the model call the parent if tools and retrieval are part of the task. Do not make the HTTP request the parent if the task continues through a queue. Use a stable run identifier and propagate it across the boundaries that make up the work.
+
+The parent needs a terminal status that reflects the task, not only the last child. A successful model call inside a failed workflow should remain a successful child span while the parent ends as failed or incomplete. This distinction prevents dashboards from reporting a healthy system because a provider returned 200.
+
+## Build a semantic span vocabulary
+
+Use a small set of names that operators can scan: `agent.run`, `model.call`, `retrieval.query`, `tool.call`, `policy.check`, `approval.wait`, `evaluation.run`, and `agent.finish`. Add stable attributes for workflow, environment, release, model, provider, prompt revision, tool, status, error class, token counts, cost, and retry. Avoid creating a new span name for every prompt template.
+
+Keep attributes useful for grouping. Raw prompts, completions, and tool payloads can be sensitive and high-cardinality. Redact before export and store secure references only when the product’s access model supports them. The [AI agent observability guide](/blog/ai-agent-observability-complete-guide) explains how these layers answer different operational questions.
+
+## Propagate context through async work
+
+The most common tracing gap appears when a task leaves the request process. Queues, background jobs, streaming callbacks, and tool clients need to receive the trace context or an explicit run ID. Test the actual production path, including retries and dead-letter handling. A trace that loses its parent at the queue can make the slowest part of a workflow look unrelated.
+
+Do not reuse a parent span after its lifecycle has ended. Create a linked continuation or child context with the same run identity and a clear asynchronous boundary. Record enqueue time, dequeue time, queue name, attempt, and worker environment so waiting is distinguishable from processing.
+
+## Instrument model calls without leaking content
+
+Record model and provider, request and response timing, token counts where available, finish reason, tool-call count, retry number, and outcome. Keep prompt revision and output schema version separate. If raw content is retained, apply the same redaction, retention, and access controls as customer data. Observability is not permission to copy every prompt into a broadly visible system.
+
+Capture errors as structured classes: timeout, rate limit, authentication, invalid request, provider error, context limit, validation, and policy. A single `model_error` label cannot guide an operator. Preserve an explanation or provider reference where useful without exposing secrets.
+
+## Trace retrieval and tools as first-class work
+
+A model span without retrieval or tool spans hides the most important decisions. Add query construction, source selection, tool name, argument class, approval, dependency, and result status. The goal is not to reimplement a vendor’s telemetry schema. It is to keep the execution story connected enough to compare one run with another.
+
+For tools, distinguish client time, network time, server time, and result processing when the dependency justifies the detail. For retrieval, preserve document IDs, rank, index revision, and filter class. Keep raw values behind appropriate boundaries. The trace should answer which evidence and action were available to the model.
+
+## Add evaluation and feedback spans
+
+Quality signals belong on the run that produced the answer. Record evaluator name, version, dataset case, score type, value, status, explanation, and review state. Feedback from a user should link to the same trace or task ID. Do not treat a thumbs-up as a complete quality definition; combine it with deterministic checks and sampled review.
+
+Attaching evaluation to the trace enables release comparisons. A prompt revision can change latency and tool behavior even when the final text looks similar. [Prompt versioning in production](/blog/prompt-versioning-production) and [AI agent regression testing](/blog/ai-agent-regression-testing) show how to make those changes visible before and after rollout.
+
+## Define retention and sampling
+
+Not every span needs the same retention. Keep compact run metadata longer than sensitive raw content. Sample low-risk successful traces while retaining failures, policy blocks, high-cost outliers, and evaluation disagreements. Make sampling deterministic enough that an investigator can understand why a run was kept or omitted.
+
+Redaction should happen before export and before a value enters an index or cache. Test redaction with realistic nested objects, streamed chunks, error messages, and tool arguments. A field named `input` is not automatically safe; classify content by source and sensitivity.
+
+## Verify the rendered trace
+
+Instrumentation tests should assert more than that a span was emitted. Assert parent-child relationships, terminal state, attributes, redaction, retry count, and propagation across the async boundary. Open the rendered trace in the product and ask whether a new operator can reconstruct the task without application tribal knowledge.
+
+Use a small fixture with a model decision, retrieval hit, tool error, retry, and final stop. It should produce a predictable timeline. Add a second fixture for a successful run and compare the two. The difference should be visible in the same fields an alert or release gate will use.
+
+## Operate the telemetry pipeline
+
+Telemetry can fail too. Decide whether ingestion is fail-open or fail-closed for each workflow, bound exporter retries, and monitor dropped spans. Do not block a critical user action indefinitely because a telemetry backend is unavailable unless the data is itself a required control. If the trace is incomplete, record that fact on the run.
+
+Keep the canonical source of each fact clear. OpenTelemetry can carry portable context, while Tracify can add task-level metadata, evaluation, and cost fields that give the trace operational meaning. Avoid two competing definitions of release, status, or duration.
+
+## OpenTelemetry rollout checklist
+
+- Is the parent span the user-visible task?
+- Does context survive queues, tools, retries, and workers?
+- Are model, retrieval, tool, policy, evaluation, and finish spans present?
+- Are raw values redacted before export?
+- Are terminal status and error classes task-aware?
+- Can an operator inspect a slow and healthy run side by side?
+- Are sampling, retention, dropped spans, and pipeline failure visible?
+
+OpenTelemetry is a foundation, not the finished observability product. The quality of the trace depends on the questions the application needs to answer and the decisions the team makes from the evidence.
+## Telemetry review: a field guide
+
+This extended guide applies the same production discipline to OpenTelemetry: span hierarchy, attributes, propagation, redaction, sampling, and verification.
+
+## Start with the failure you need to prevent
+
+A strong OpenTelemetry LLM tracing practice begins with a failure that matters to a user. Write the failure in observable terms: the task stopped, the wrong action happened, the answer lacked evidence, the reviewer could not decide, or the system consumed more resources than the outcome justified. This wording gives the team a testable target and prevents the article from drifting into a collection of attractive but disconnected recommendations.
+
+## Name the boundary
+
+Most production incidents happen at a boundary: model to application, application to tool, retrieved data to instruction, browser action to page state, or metric to operational decision. For OpenTelemetry LLM tracing, draw that boundary in plain language before choosing an implementation. Identify what is trusted, what is untrusted, what must be validated, and what evidence crosses the boundary. A boundary that cannot be named cannot be monitored consistently.
+
+## Preserve the decision context
+
+A final answer or status flag rarely explains a failure by itself. Preserve the inputs, versions, policies, selected evidence, attempted actions, retries, and resulting state that shaped the decision. For OpenTelemetry LLM tracing, use stable identifiers and redaction so an investigator can reconstruct the path without copying secrets into every log line. The goal is not maximal data collection; it is enough context to test a plausible explanation.
+
+## Measure the user-visible outcome
+
+Choose a primary outcome for OpenTelemetry LLM tracing and define it before choosing a dashboard. Completion, correctness, groundedness, safe refusal, review quality, time to useful result, and cost per successful task answer different questions. Pair the outcome with failure dimensions such as model version, prompt version, cohort, provider, tool, language, and task type. An aggregate score is useful only when a person can move from the score to representative traces.
+
+## Make the unhappy path explicit
+
+A mature OpenTelemetry LLM tracing workflow names what happens when evidence is missing, a dependency is slow, a schema changes, a permission is denied, a reviewer does not respond, or the system cannot establish confidence. These are product states, not merely exceptions. Give each state an owner, a user-facing explanation, a safe fallback, and a trace event. This is how a graceful degradation policy becomes something an operator can verify.
+
+## Use small, reviewable examples
+
+Examples teach the boundary faster than abstract claims. Keep a representative OpenTelemetry LLM tracing example small enough to inspect, but include the field that changes the decision. Show the expected result and one plausible failure. Explain which part is illustrative and which part should be adapted to the repository. Avoid examples that imply a guarantee the implementation cannot make; precision is more persuasive than spectacle.
+
+## Test variation deliberately
+
+The happy path is only one member of the OpenTelemetry LLM tracing distribution. Add cases for empty input, ambiguous intent, stale state, partial failure, duplicate work, adversarial content, long context, and a dependency that returns a valid-looking but wrong result. Test cohorts and release versions separately. When behavior is probabilistic, record the evidence and evaluator version so a changed score can be distinguished from a changed system.
+
+## Roll out in stages
+
+Use shadow mode, a narrow cohort, explicit comparison, and a rollback condition when changing OpenTelemetry LLM tracing. Shadow mode reveals what the system would have done without changing user behavior. A cohort exposes regressions hidden by averages. A rollback condition turns caution into an operational decision. Keep the release, prompt, model, data, and configuration identifiers together so the comparison remains meaningful after deployment.
+
+## Create a learning loop
+
+Production feedback should become a queue of explainable cases for OpenTelemetry LLM tracing, not a pile of screenshots or vague tickets. Attach the user report, trace, expected behavior, actual behavior, and disposition. Classify the mechanism, add a compact regression case when appropriate, and record whether the fix changed code, data, prompt, policy, or operations. This closes the loop between observability and engineering instead of treating incidents as isolated surprises.
+
+## Review the economics and ownership
+
+Every OpenTelemetry LLM tracing decision has an operating cost. Include reviewer time, evaluator calls, storage, retries, provider spend, and the cost of a wrong action when they matter. Assign an owner for quality, reliability, security, and budget signals. A workflow is not production-ready because it can run; it is ready when the organization can understand, afford, and improve it.
+
+## Build the runbook around evidence
+
+The runbook for OpenTelemetry LLM tracing should begin with the trace or artifact an operator opens, then provide a short decision tree. If the parent task is missing, investigate ingestion. If the task exists but the child span is missing, inspect propagation. If evidence is present but the outcome is wrong, compare versions and evaluator results. Keep the first response steps concrete and link to the source of truth rather than asking an operator to search the whole repository.
+
+## Know when not to automate
+
+Automation is not always the correct endpoint for OpenTelemetry LLM tracing. If the consequence is irreversible, the evidence is incomplete, or the policy cannot be expressed safely, stop and route to a person or a trusted system. A bounded refusal is often a better product result than a confident action. Document the boundary so future optimization does not quietly remove the control that made the workflow acceptable.
+
+## A practical review sequence
+
+Review OpenTelemetry LLM tracing in this order: define the task, identify boundaries, preserve evidence, measure the outcome, exercise failures, test variation, stage the rollout, and assign ownership. The sequence matters because a polished implementation with no observable outcome is difficult to validate, while a clear contract makes later instrumentation and testing much cheaper.
+
+## Final field checklist
+
+Before shipping OpenTelemetry LLM tracing, confirm that the happy path and degraded paths are documented, the rendered page or workflow is accessible, examples are safe to copy, identifiers are stable, sensitive values are redacted, links point to canonical content, and a real person can investigate one representative failure. Then run the repository checks and review the exact diff. Quality is the combination of useful behavior, explainable evidence, and a release process that can recover.
+## Questions to ask in review
+
+Ask whether the current OpenTelemetry design makes the next failure easier or harder to explain. Where is the source of truth? Which value is user-controlled? Which decision is irreversible? What happens when a dependency returns a partial result? Which version can be rolled back? These questions expose missing contracts faster than adding another dashboard or another prompt instruction.
+
+## The smallest useful implementation
+
+Start with the smallest implementation that creates evidence for OpenTelemetry. One parent run, a few stable fields, one representative fixture, and one clear outcome are often enough to reveal the largest gap. Expand only when a real investigation needs another dimension. This keeps instrumentation affordable and prevents the team from confusing volume of telemetry with quality of understanding.
+
+## Keep the page and system honest
+
+Documentation about OpenTelemetry should describe the behavior a reader can actually reproduce. Mark illustrative examples clearly, keep names consistent, and avoid claims that depend on an unmentioned environment. On the rendered page, make the important artifact easy to inspect: use a labelled code block, a readable trace scenario, or a compact decision table. The presentation is part of the teaching contract.
+
+## Accessibility is a reliability feature
+
+A OpenTelemetry workflow should remain understandable when a reader cannot hover, drag, or run the example. Provide a static explanation, meaningful labels, visible focus, keyboard access, and mobile-safe overflow. The same principle applies in production: a trace should expose text and structured fields, not require an operator to infer meaning from color or animation alone.
+
+## Signals that justify a change
+
+Change OpenTelemetry when evidence shows a repeated failure mechanism, a measurable user benefit, or an unacceptable operational cost. Record the baseline, candidate, cohort, and decision owner. If the change improves one dimension while harming another, state the trade-off instead of hiding it in an average. This creates a durable record future agents can use when the same decision returns.
+
+## Closing principle
+
+The best OpenTelemetry practice makes good behavior easier to produce and bad behavior easier to see. It gives the user a useful outcome, gives the operator an explainable trace, and gives the team a safe way to improve the system. That is the standard to apply when reviewing both the implementation and this article.
+## Turn principles into an operating artifact
+
+A principle becomes useful when someone can apply it during a real change. For this topic, create a compact artifact: a trace field list, a test fixture, a rollout table, a budget rule, a review form, or a runbook. Keep the artifact close to the decision it supports. If it lives in a separate document with no owner, it will become stale while the system continues to change.
+
+## Compare like with like
+
+When evaluating a change, compare the same task distribution, evidence policy, model or release metadata, and outcome definition. A baseline gathered from easy cases cannot prove an improvement on difficult cases. Preserve the sampling rule and the exclusions. When the data is sparse, say so; a small honest sample is more useful than a precise-looking number that hides its uncertainty.
+
+## Make failure visible to the right person
+
+Visibility is not the same as exposure. A user needs a clear explanation and safe next step. An operator needs a trace, timing, versions, and likely cause. An engineer needs a reproducible fixture. A security owner needs the trust boundary and containment event. Design the evidence for the person who must act, and avoid copying sensitive content into places where no action is possible.
+
+## Review changes as a system
+
+A prompt, model, schema, retrieval index, browser selector, evaluator, and dashboard threshold can each change behavior. Review the connected system rather than approving one file in isolation. Record what changed, which outcomes could move, which tests cover the risk, and how to revert. This practice keeps small changes from becoming untraceable production behavior.
+
+## The standard for completion
+
+Completion means more than a passing happy-path test. A reader should understand the contract, an operator should be able to investigate a failure, and the team should have a bounded path to improve or roll back the behavior. Apply that standard to the article too: the examples should render clearly, the interaction should teach something, the image should have a job, and the validation command should pass.
+
+
+## Continue with the related production guides
+
+The most useful next step depends on the failure you are trying to understand. For system boundaries and execution design, read [AI agent architecture](/blog/ai-agent-architecture), [AI agent cost calculator](/blog/ai-agent-cost-optimization), [AI agent evaluation](/blog/ai-agent-evaluation-practical-guide), [AI agent memory design](/blog/ai-agent-memory-design), [AI agent monitoring](/blog/ai-agent-monitoring), [AI agent observability](/blog/ai-agent-observability-complete-guide), [AI agent production checklist](/blog/ai-agent-production-checklist), [AI agent regression testing](/blog/ai-agent-regression-testing), [AI agent reliability](/blog/ai-agent-reliability-failures-retries-guardrails), [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals), [browser agent observability](/blog/browser-agent-observability), [production-ready AI agents](/blog/building-production-ready-ai-agents), [debugging AI agents](/blog/debug-ai-agents-in-production), [writing Tracify blog posts](/blog/how-to-write-tracify-blog-posts), [human-in-the-loop agents](/blog/human-in-the-loop-ai-agents), [LLM hallucination detection](/blog/llm-hallucination-detection), [LLM latency optimization](/blog/llm-latency-optimization), [LLM observability metrics](/blog/llm-observability-metrics-that-matter). Use the linked guides as a connected path: compare the trace contract, evaluation method, rollout advice, and operational ownership instead of treating any one article as a complete solution.
