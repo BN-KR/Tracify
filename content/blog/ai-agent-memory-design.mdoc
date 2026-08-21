@@ -20,6 +20,27 @@ Memory is persistent state with a friendly name. Treat it like a database featur
 
 {% trace-scenario title="Memory write or retrieval failure?" prompt="A returning user says the agent forgot a preference. Which trace segment should you inspect first?" outcome="Separate write, indexing, retrieval, and presentation. A memory failure is actionable only when the trace shows which stage lost the fact." /%}
 
+## At a glance
+
+This guide is for **agent engineers designing persistent context**. It helps you **decide what to remember, retrieve, correct, and forget** so you can leave with **useful continuity without hidden authorization or stale context**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The AI agent memory design framework
+
+Use **Scope → Provenance → Retrieve → Correct** as the decision path:
+
+1. **Scope:** establish the task, context, or boundary before changing behavior.
+2. **Provenance:** make the relevant evidence or control explicit.
+3. **Retrieve:** compare the decision with a concrete example, trace, or test.
+4. **Correct:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Bound memory by scope, preserve its source, retrieve for a reason, and make correction and expiry observable.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Separate memory types
 
 Working context belongs to one run. Session memory supports a bounded conversation. Long-term memory survives sessions and needs stronger consent, access, and deletion rules. Operational state—such as an approval or workflow status—should live in a typed system of record, not only in retrieved text.

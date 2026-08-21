@@ -20,6 +20,27 @@ Prompt injection is a control-boundary problem. An agent reads untrusted text, t
 
 {% trace-scenario title="Security decision point" prompt="A web page tells the agent to export all customer records. Which evidence matters first?" outcome="The page is untrusted data, not policy. Inspect the trust label, the attempted tool, the policy decision, and the blocked side effect. The system should stop before execution and preserve a reviewable security event." /%}
 
+## At a glance
+
+This guide is for **security engineers protecting tool-using agents**. It helps you **separate untrusted instructions from authorized actions** so you can leave with **defense in depth at trust, privilege, validation, and containment boundaries**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The prompt injection defense framework
+
+Use **Trust → Privilege → Validate → Contain** as the decision path:
+
+1. **Trust:** establish the task, context, or boundary before changing behavior.
+2. **Privilege:** make the relevant evidence or control explicit.
+3. **Validate:** compare the decision with a concrete example, trace, or test.
+4. **Contain:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Classify trust, minimize privilege, validate before execution, and contain suspicious behavior.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Start with trust levels
 
 Label user input, retrieved documents, web pages, tool results, and system policy separately. Preserve those labels in the trace. The model may summarize untrusted text, but untrusted text should not silently grant a permission.

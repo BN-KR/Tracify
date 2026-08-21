@@ -18,6 +18,27 @@ seo:
 
 Cost optimization is safest when it starts at the task level. A provider invoice tells you what was spent; a trace can show which user workflow, model call, tool loop, or retry caused the spend and whether the task succeeded.
 
+## At a glance
+
+This guide is for **engineering and finance partners managing agent spend**. It helps you **find the paths that consume money and reduce them without hiding quality loss** so you can leave with **a cost model tied to successful task outcomes rather than token totals**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The AI agent cost optimization framework
+
+Use **Measure → Attribute → Optimize → Gate** as the decision path:
+
+1. **Measure:** establish the task, context, or boundary before changing behavior.
+2. **Attribute:** make the relevant evidence or control explicit.
+3. **Optimize:** compare the decision with a concrete example, trace, or test.
+4. **Gate:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Measure cost per completed task, attribute spend to work, optimize the expensive path, and gate savings with quality evidence.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Attribute spend to a run
 
 Record input and output tokens, model, provider, price-card version, tool costs, and retry number on child spans. Roll them up to a run and group by workflow, release, and outcome. Read [how to reduce LLM costs](/blog/reduce-llm-costs-without-hurting-quality) for the quality side of the trade-off, and [LLM observability metrics](/blog/llm-observability-metrics-that-matter) for the operational context.

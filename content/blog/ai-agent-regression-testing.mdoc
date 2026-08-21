@@ -20,6 +20,27 @@ An agent regression suite should represent the ways the system actually fails: a
 
 {% trace-scenario title="What belongs in the regression set?" prompt="A production trace contains a wrong tool argument but a correct final answer. Should it become a test case?" outcome="Yes. Preserve the trace when the path is unsafe or fragile, even if the final answer happened to look correct." /%}
 
+## At a glance
+
+This guide is for **quality engineers and agent developers**. It helps you **turn production failures into durable coverage** so you can leave with **a regression suite that compares behavior rather than only scores**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The AI agent regression testing framework
+
+Use **Capture → Replay → Compare → Gate** as the decision path:
+
+1. **Capture:** establish the task, context, or boundary before changing behavior.
+2. **Replay:** make the relevant evidence or control explicit.
+3. **Compare:** compare the decision with a concrete example, trace, or test.
+4. **Gate:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Capture a meaningful trace, replay the task, compare baseline and candidate behavior, and gate the release on risk.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Store the decision context
 
 Each case needs an input class, expected outcome, allowed tools, relevant evidence, evaluator version, and failure label. Keep the original trace reference when possible so a test remains connected to the execution that inspired it.

@@ -20,6 +20,27 @@ A browser agent can fail even when every click was syntactically valid. The page
 
 {% trace-scenario title="Where did the browser journey fail?" prompt="A click was issued, but the checkout did not complete. Which evidence should you inspect first?" outcome="Compare the intended target, page assertion, network response, and resulting state. A click alone is not proof of progress." /%}
 
+## At a glance
+
+This guide is for **teams operating browser automation**. It helps you **explain why a browser journey did not reach its intended state** so you can leave with **journey evidence that connects intent, page state, network activity, and outcome**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The browser agent observability framework
+
+Use **Intent → State → Evidence → Outcome** as the decision path:
+
+1. **Intent:** establish the task, context, or boundary before changing behavior.
+2. **State:** make the relevant evidence or control explicit.
+3. **Evidence:** compare the decision with a concrete example, trace, or test.
+4. **Outcome:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Define the journey, assert state, preserve useful evidence, and judge success by the user-visible outcome.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Build the journey
 
 Use one parent run for the task and child spans for model decisions, browser actions, network requests, console errors, screenshots or trace artifacts, assertions, and evaluation. Add URL, page, selector or semantic target, release, and environment context while redacting credentials and personal data.

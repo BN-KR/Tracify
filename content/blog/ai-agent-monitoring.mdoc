@@ -20,6 +20,27 @@ AI agent monitoring should answer “what changed, who is affected, and what do 
 
 {% trace-scenario title="What should this alert open?" prompt="An agent's success rate falls two points. Which additional signal tells you whether to page the owner?" outcome="Correlate outcome quality with error class, latency, cost, and affected workflow. A useful alert points to an action, not just a percentage." /%}
 
+## At a glance
+
+This guide is for **operators and workflow owners on call for agents**. It helps you **turn changing outcomes into alerts that lead to action** so you can leave with **monitoring that connects task quality, reliability, cost, latency, and ownership**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The AI agent monitoring framework
+
+Use **Outcome → Signal → Owner → Response** as the decision path:
+
+1. **Outcome:** establish the task, context, or boundary before changing behavior.
+2. **Signal:** make the relevant evidence or control explicit.
+3. **Owner:** compare the decision with a concrete example, trace, or test.
+4. **Response:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Start with user outcomes, choose signals that explain movement, assign an owner, and define the bounded response.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Alert on the task
 
 Start with a parent run and group signals by workflow, release, environment, and input class. Useful signals include completion rate, terminal failure class, evaluator outcomes, p95 latency, cost per successful task, retry rate, and approval backlog. [LLM observability metrics](/blog/llm-observability-metrics-that-matter) explains the measurement choices; [production debugging](/blog/debug-ai-agents-in-production) shows how an alert becomes an investigation.

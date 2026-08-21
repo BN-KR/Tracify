@@ -20,6 +20,27 @@ Free-form model text is a poor interface for a program that must choose a tool. 
 
 {% trace-scenario title="Schema-valid or task-correct?" prompt="The model returns valid JSON, but the selected action lacks required evidence. Is the output acceptable?" outcome="No. Validate syntax, semantic fields, authorization, and evidence separately. Valid structure is only the first gate." /%}
 
+## At a glance
+
+This guide is for **engineers building safe tool-calling boundaries**. It helps you **turn model output into a validated, observable decision** so you can leave with **schemas that constrain execution without pretending to guarantee correctness**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The structured outputs for AI agents framework
+
+Use **Model → Validate → Repair → Execute** as the decision path:
+
+1. **Model:** establish the task, context, or boundary before changing behavior.
+2. **Validate:** make the relevant evidence or control explicit.
+3. **Repair:** compare the decision with a concrete example, trace, or test.
+4. **Execute:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Model the decision, validate syntax and semantics, repair only within bounds, and execute through a trusted policy boundary.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Model a decision, not a response
 
 ```ts
