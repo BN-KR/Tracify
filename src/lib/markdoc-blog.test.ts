@@ -35,6 +35,7 @@ seo:
   metaTitle: First SEO title
 ---
 # First heading
+## Section heading
 
 First paragraph.
 `;
@@ -101,9 +102,10 @@ test("a post exposes validated metadata and a transformed Markdoc tree", () => {
     assert.ok(post);
     assert.equal(post.heroImage?.src, "/media/first.jpg");
     assert.equal(post.seo.metaTitle, "First SEO title");
+    assert.deepEqual(post.headings, [{ level: 2, text: "Section heading", id: "section-heading" }]);
     assert.equal(post.content.name, "article");
     assert.equal((post.content.children[0] as { name: string }).name, "h1");
-    assert.equal(post.plainText, "First heading First paragraph.");
+    assert.equal(post.plainText, "First heading Section heading First paragraph.");
   });
 });
 
