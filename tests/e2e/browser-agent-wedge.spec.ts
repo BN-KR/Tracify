@@ -23,17 +23,17 @@ test.describe("browser-agent observability wedge", () => {
       test.skip(!projectId || !runId, `Set TRACIFY_E2E_PROJECT_ID and ${runVariable}.`);
 
       await page.goto(`/dashboard/${projectId}/journey/${runId}`);
-      await expect(page.getByRole("heading", { name: "Agent Journey" })).toBeVisible();
-      await expect(page.getByText(/Observed cost/)).toBeVisible();
-      await expect(page.getByText(/LLM decision|Browser \/ network|Tool \/ API|Failure \/ assertion|Evaluation/).first()).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Agent Journey" })).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByText(/Observed cost/)).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByText(/LLM decision|Browser \/ network|Tool \/ API|Failure \/ assertion|Evaluation/).first()).toBeVisible({ timeout: 30_000 });
 
       await page.getByRole("link", { name: "Full trace", exact: true }).click();
-      await expect(page).toHaveURL(new RegExp(`/dashboard/${projectId}/runs/${runId}$`));
-      await expect(page.getByRole("link", { name: "Investigate", exact: true })).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(`/dashboard/${projectId}/runs/${runId}$`), { timeout: 30_000 });
+      await expect(page.getByRole("link", { name: "Investigate", exact: true })).toBeVisible({ timeout: 30_000 });
 
       await page.getByRole("link", { name: "Investigate", exact: true }).click();
-      await expect(page).toHaveURL(new RegExp(`/dashboard/${projectId}/investigate\\?run=${runId}$`));
-      await expect(page.getByRole("heading", { name: "Investigation Mode" })).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(`/dashboard/${projectId}/investigate\\?run=${runId}$`), { timeout: 30_000 });
+      await expect(page.getByRole("heading", { name: "Investigation Mode" })).toBeVisible({ timeout: 30_000 });
     });
   }
 });

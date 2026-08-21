@@ -22,29 +22,29 @@ export function WaitingStep() {
   const [probeState, setProbeState] = useState<"idle" | "sending" | "accepted" | "failed">("idle");
   const [probeMessage, setProbeMessage] = useState("");
   const capturedFirstTrace = useRef(false);
-  const [projectId] = useState(() => {
-    if (typeof window === "undefined") return "";
-    return window.sessionStorage.getItem(PROJECT_ID_STORAGE_KEY) ?? "";
-  });
-  const [fallbackProjectName] = useState(() => {
-    if (typeof window === "undefined") return FALLBACK_PROJECT_NAME;
-    return (
-      window.sessionStorage.getItem(PROJECT_NAME_STORAGE_KEY) ??
-      FALLBACK_PROJECT_NAME
-    );
-  });
-  const [apiKeyDisplay] = useState(() => {
-    if (typeof window === "undefined") return "tracify_sk_live_...";
-    const apiKey = getOneTimeApiKey();
-    return apiKey ? `tracify_sk_live_...${apiKey.slice(-4)}` : "tracify_sk_live_...";
-  });
-  const apiKey = getOneTimeApiKey();
+  const [projectId, setProjectId] = useState("");
+  const [fallbackProjectName, setFallbackProjectName] = useState(FALLBACK_PROJECT_NAME);
+  const [apiKeyDisplay, setApiKeyDisplay] = useState("tracify_sk_live_...");
+  const [apiKey, setApiKey] = useState("");
   const region = getTracifyRegion(getDeploymentRegion());
   const wrongRegion = useMemo(() => getWrongRegion(apiKey, region.id), [apiKey, region.id]);
   const onboardingState = useQuery(
     api.agentRuns.getProjectOnboardingState,
     projectId ? { projectId: projectId as Id<"projects"> } : "skip",
   );
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      const storedProjectId = window.sessionStorage.getItem(PROJECT_ID_STORAGE_KEY) ?? "";
+      const storedProjectName = window.sessionStorage.getItem(PROJECT_NAME_STORAGE_KEY) ?? FALLBACK_PROJECT_NAME;
+      const storedApiKey = getOneTimeApiKey();
+      setProjectId(storedProjectId);
+      setFallbackProjectName(storedProjectName);
+      setApiKey(storedApiKey);
+      if (storedApiKey) setApiKeyDisplay(`tracify_sk_live_...${storedApiKey.slice(-4)}`);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     const id = window.setInterval(() => setElapsed((value) => value + 1), 1000);

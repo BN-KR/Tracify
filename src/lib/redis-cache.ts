@@ -32,6 +32,7 @@ function getRedisClient() {
         // Fail fast instead of burning the whole serverless function budget on a
         // connect that will never complete.
         connectTimeout: 5_000,
+        reconnectStrategy: (retries) => (retries >= 1 ? false : 100),
       },
     });
     client.on("error", (error) => {
