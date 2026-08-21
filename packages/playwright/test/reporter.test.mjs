@@ -33,3 +33,22 @@ test("reporter flushes manual events and the final run event", async () => {
   assert.equal(spans[2].spanType, "run_end");
   assert.equal(spans[2].spanId, "run-2:run_end");
 });
+
+test("preserves the uploaded Playwright trace artifact URL", async () => {
+  const spans = [];
+  const reporter = new PlaywrightReporter({
+    runId: "run-3",
+    traceArtifactUrl: "https://artifacts.example.test/run-3/trace.zip",
+    transport: (span) => spans.push(span),
+  });
+
+  reporter.recordTraceArtifact({ name: "trace.zip", contentType: "application/zip" });
+  await reporter.onEnd({ status: "passed" });
+
+  assert.equal(spans[0].spanType, "trace_artifact");
+  assert.deepEqual(spans[0].attachments, [{
+    name: "trace.zip",
+    contentType: "application/zip",
+    url: "https://artifacts.example.test/run-3/trace.zip",
+  }]);
+});

@@ -298,7 +298,10 @@ export class PlaywrightReporter implements Reporter {
   }
 
   recordTraceArtifact(artifact: PlaywrightArtifact): void {
-    this.record({ ...this.manualEvent("trace_artifact", artifact.name), artifacts: [artifact] });
+    this.record({
+      ...this.manualEvent("trace_artifact", artifact.name),
+      artifacts: [{ ...artifact, url: artifact.url ?? this.options.traceArtifactUrl }],
+    });
   }
 
   private manualEvent(eventType: PlaywrightEventType, name: string, metadata?: Record<string, unknown>): PlaywrightEvent {

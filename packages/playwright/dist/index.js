@@ -193,7 +193,10 @@ export class PlaywrightReporter {
         this.record({ ...this.manualEvent("screenshot", name), artifacts: [artifact] });
     }
     recordTraceArtifact(artifact) {
-        this.record({ ...this.manualEvent("trace_artifact", artifact.name), artifacts: [artifact] });
+        this.record({
+            ...this.manualEvent("trace_artifact", artifact.name),
+            artifacts: [{ ...artifact, url: artifact.url ?? this.options.traceArtifactUrl }],
+        });
     }
     manualEvent(eventType, name, metadata) {
         return { eventType, name, status: "info", startedAt: new Date().toISOString(), durationMs: 0, metadata };
