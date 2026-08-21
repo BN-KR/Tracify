@@ -152,6 +152,14 @@ When a signal moves, open representative traces before changing the threshold. C
 Content should have an owner after publication. Revisit examples when routes, SDKs, product capabilities, or external standards change. Review search intent when the article attracts readers who are asking a different question. Check links and rendered interactions periodically. Update the source article when the underlying workflow changes; do not leave a stale post competing with a newer explanation.
 
 For a new article, the final review should read like a small product launch. Confirm the title and description match the body, the hero image loads with meaningful alt text, code blocks are labelled and copyable, interactions have a static path and keyboard behavior, links resolve to published pages, and the article is included only when its publication state says it should be.
+
+## Build a monitoring review packet
+
+When an alert fires, collect more than the metric that crossed the threshold. A useful review packet includes the affected workflow and cohort, the first and last timestamps, the current and previous release, representative trace IDs, the terminal failure class, latency and cost changes, evaluator versions, and the owner’s first recommended action. This packet gives a responder enough context to form a hypothesis without opening every dashboard in sequence.
+
+Keep the packet bounded. Include identifiers and summaries by default, then provide a controlled path to the underlying content when it is safe and necessary. Redaction belongs before export, not only in the dashboard. The monitoring system should help an operator decide what to inspect next while minimizing the number of places where sensitive prompts, retrieved documents, or user data are copied.
+
+Review packets are also useful after recovery. Record whether the alert described the customer impact correctly, whether the linked traces represented the failure, whether the threshold paged too early or too late, and whether the runbook led to the right owner. Feed that result back into the alert definition. Over time, this produces monitoring that is calibrated to decisions rather than to whatever signal was easiest to count.
 ## Keep the decision reversible
 
 When the evidence is uncertain, prefer a change that can be measured and undone. Record the baseline, define the stop condition, and make the owner explicit. This is especially important for monitoring because a locally attractive improvement can shift risk into quality, safety, cost, or trust. Reversibility is not hesitation; it is how a team learns without making every experiment a permanent incident.
