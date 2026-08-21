@@ -32,6 +32,8 @@ seo:
     og: /media/organic-series/llm-tracing-explained.jpg
 ---
 
+{% trace-scenario title="What belongs in one trace?" prompt="An agent retries a model call and then invokes a tool. How should the trace preserve the story?" outcome="Keep the user task as the parent, model attempts as distinct children, and the tool call linked to the decision that caused it." /%}
+
 ## Introduction: why LLM tracing needs an operating model
 
 LLM Tracing Explained is a guide for engineers implementing instrumentation for LLM and agent workflows. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?

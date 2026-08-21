@@ -32,6 +32,8 @@ seo:
     og: /media/organic-series/debug-ai-agents-in-production.jpg
 ---
 
+{% trace-scenario title="Where should an incident investigation begin?" prompt="The final answer is wrong, but the model call returned HTTP 200. What is the first useful boundary?" outcome="Open the parent run and follow the decision path through retrieval, tools, validation, retries, and the user-visible outcome." /%}
+
 ## Introduction: why debug AI agents in production needs an operating model
 
 How to Debug AI Agents in Production is a guide for on-call engineers, workflow owners, and technical leaders handling production AI incidents. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?

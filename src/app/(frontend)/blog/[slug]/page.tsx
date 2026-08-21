@@ -1,5 +1,6 @@
 import { AuthorBio } from "@/components/blog/author-bio";
 import { MarkdocRichText } from "@/components/blog/markdoc-rich-text";
+import { BlogTableOfContents } from "@/components/blog/blog-table-of-contents";
 import { ProgressBar } from "@/components/blog/progress-bar";
 import { RelatedPosts } from "@/components/blog/related-posts";
 import { ShareButtons } from "@/components/blog/share-buttons";
@@ -164,6 +165,7 @@ export default async function BlogPostPage({
           ) : null}
 
           <div className="mx-auto max-w-[820px] px-6 py-12 md:px-10 md:py-16">
+            <BlogTableOfContents headings={post.headings} />
             <MarkdocRichText content={post.content} />
 
             <div className="mt-12 flex flex-col gap-6 border-t border-black/20 pt-8">

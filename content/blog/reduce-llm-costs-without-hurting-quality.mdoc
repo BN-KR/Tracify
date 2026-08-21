@@ -32,6 +32,8 @@ seo:
     og: /media/organic-series/reduce-llm-costs-without-hurting-quality.jpg
 ---
 
+{% trace-scenario title="Is this cost saving safe?" prompt="A cheaper model reduces spend but lowers groundedness on research tasks. How should the change be evaluated?" outcome="Measure savings per successful task alongside quality and failure rates, then roll out only where the trade-off is acceptable." /%}
+
 ## Introduction: why reduce LLM costs needs an operating model
 
 How to Reduce LLM Costs Without Hurting Quality is a guide for engineering teams and leaders responsible for language-model spend and service quality. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?

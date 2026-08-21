@@ -32,6 +32,8 @@ seo:
     og: /media/organic-series/prompt-versioning-and-prompt-management.jpg
 ---
 
+{% trace-scenario title="Can this prompt change ship?" prompt="The new prompt improves the blended score but changes refusal behavior for a high-risk cohort. What is the next step?" outcome="Compare the same cases by cohort, record the trade-off, and require an explicit release decision with a rollback path." /%}
+
 ## Introduction: why prompt versioning needs an operating model
 
 Prompt Versioning and Prompt Management is a guide for teams maintaining prompts and policies that influence production LLM behavior. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?

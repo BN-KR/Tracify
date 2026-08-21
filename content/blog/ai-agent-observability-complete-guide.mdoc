@@ -32,6 +32,8 @@ seo:
     og: /media/organic-series/ai-agent-observability-complete-guide.jpg
 ---
 
+{% trace-scenario title="What should the trace explain?" prompt="A user reports a wrong answer. Which evidence turns the report into an investigation?" outcome="Preserve the task outcome, model and prompt versions, retrieved context, tool calls, retries, and the decision that shaped the final response." /%}
+
 ## Introduction: why AI agent observability needs an operating model
 
 AI Agent Observability: The Complete Guide is a guide for AI engineers, platform operators, and engineering leaders responsible for customer-facing agent workflows. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?

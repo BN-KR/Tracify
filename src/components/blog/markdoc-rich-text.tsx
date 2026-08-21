@@ -2,7 +2,24 @@ import Markdoc from "@markdoc/markdoc";
 import React from "react";
 
 import { BlogCodeBlock } from "@/components/blog/blog-code-block";
-import type { BlogPost } from "@/lib/markdoc-blog";
+import { slugifyBlogHeading, type BlogPost } from "@/lib/markdoc-blog";
+
+function textFromChildren(value: React.ReactNode): string {
+  if (typeof value === "string" || typeof value === "number") return String(value);
+  if (Array.isArray(value)) return value.map(textFromChildren).join("");
+  if (React.isValidElement(value)) {
+    return textFromChildren((value as React.ReactElement<{ children?: React.ReactNode }>).props.children);
+  }
+  return "";
+}
+
+function BlogH2({ children }: { children?: React.ReactNode }) {
+  return <h2 id={slugifyBlogHeading(textFromChildren(children))}>{children}</h2>;
+}
+
+function BlogH3({ children }: { children?: React.ReactNode }) {
+  return <h3 id={slugifyBlogHeading(textFromChildren(children))}>{children}</h3>;
+}
 
 function TraceScenario({ title, prompt, outcome }: { title: string; prompt: string; outcome: string }) {
   return (
@@ -20,7 +37,9 @@ function TraceScenario({ title, prompt, outcome }: { title: string; prompt: stri
 export function MarkdocRichText({ content }: Pick<BlogPost, "content">) {
   return (
     <div className="markdoc-blog-richtext">
-      {Markdoc.renderers.react(content, React, { components: { "trace-scenario": TraceScenario, pre: BlogCodeBlock } })}
+      {Markdoc.renderers.react(content, React, {
+        components: { "trace-scenario": TraceScenario, h2: BlogH2, h3: BlogH3, pre: BlogCodeBlock },
+      })}
     </div>
   );
 }
