@@ -18,6 +18,27 @@ seo:
 
 RAG failures are often misdiagnosed. A wrong answer may come from missing evidence, irrelevant evidence, a synthesis error, or a correct answer that does not solve the user’s task. Evaluate those stages separately before tuning the model.
 
+## At a glance
+
+This guide is for **retrieval engineers and teams shipping grounded answers**. It helps you **separate retrieval quality, groundedness, and task usefulness** so you can leave with **evaluation that explains whether the failure came from evidence or generation**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The RAG evaluation framework
+
+Use **Retrieve → Ground → Score → Improve** as the decision path:
+
+1. **Retrieve:** establish the task, context, or boundary before changing behavior.
+2. **Ground:** make the relevant evidence or control explicit.
+3. **Score:** compare the decision with a concrete example, trace, or test.
+4. **Improve:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Measure what was retrieved, whether claims are supported, whether the task succeeded, and what to change next.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Define the evaluation record
 
 For each example, keep the question, expected evidence, retrieved chunks, answer, citations, evaluator version, and final label. Link them to the same trace or request ID. This lets you inspect the execution path instead of debating a score without context.

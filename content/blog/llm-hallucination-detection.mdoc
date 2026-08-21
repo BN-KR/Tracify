@@ -20,6 +20,27 @@ Hallucination detection starts with a definition. An answer is unsupported when 
 
 {% trace-scenario title="Unsupported or merely incomplete?" prompt="An answer contains a correct conclusion but one claim has no retrieved evidence. How should it be classified?" outcome="Evaluate claims individually, preserve the evidence chain, and distinguish unsupported content from a useful answer that needs an explicit caveat." /%}
 
+## At a glance
+
+This guide is for **ML engineers and reliability teams**. It helps you **detect unsupported claims and choose when the system should abstain** so you can leave with **groundedness evidence that separates missing support from imperfect wording**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The LLM hallucination detection framework
+
+Use **Define → Ground → Judge → Abstain** as the decision path:
+
+1. **Define:** establish the task, context, or boundary before changing behavior.
+2. **Ground:** make the relevant evidence or control explicit.
+3. **Judge:** compare the decision with a concrete example, trace, or test.
+4. **Abstain:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Define the claim failure, preserve evidence, calibrate judgment, and abstain when support is insufficient.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Preserve evidence with the answer
 
 Store the retrieved passages, source identifiers, prompt or policy version, answer, and evaluator result together. Without that context, a reviewer can label a response but cannot tell whether retrieval failed or generation drifted.
