@@ -34,11 +34,33 @@ function TraceScenario({ title, prompt, outcome }: { title: string; prompt: stri
   );
 }
 
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  return (
+    <details className="blog-faq-item">
+      <summary>
+        <span>{question}</span>
+        <span className="blog-faq-item__icon" aria-hidden="true">+</span>
+      </summary>
+      <div className="blog-faq-item__answer">
+        <p>{answer}</p>
+      </div>
+    </details>
+  );
+}
+
 export function MarkdocRichText({ content }: Pick<BlogPost, "content">) {
   return (
     <div className="markdoc-blog-richtext">
       {Markdoc.renderers.react(content, React, {
-        components: { "trace-scenario": TraceScenario, h2: BlogH2, h3: BlogH3, pre: BlogCodeBlock },
+        components: {
+          "trace-scenario": TraceScenario,
+          "faq-item": FaqItem,
+          h2: BlogH2,
+          h3: BlogH3,
+          pre: BlogCodeBlock,
+        },
+        resolveTagName: (name, components) =>
+          typeof components === "function" ? components(name) : components[name] ?? name,
       })}
     </div>
   );

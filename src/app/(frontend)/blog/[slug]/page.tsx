@@ -114,6 +114,7 @@ export default async function BlogPostPage({
   const categories = post.categories;
   const tags = post.tags;
   const heroUrl = post.heroImage?.hero || post.heroImage?.src;
+  const articleClassName = post.slug === "ai-agent-monitoring" ? "blog-post--monitoring" : undefined;
 
   return (
     <div className="min-h-screen bg-[#eceae3] pt-[54px] text-black">
@@ -130,7 +131,7 @@ export default async function BlogPostPage({
           ← Back to blog
         </Link>
 
-        <article>
+        <article className={articleClassName}>
           <header className="border-b border-black px-6 py-10 md:px-10 md:py-12">
             <div className="mb-4 flex items-center gap-3 font-mono text-[12px] text-black/55">
               <time dateTime={getPostDate(post)}>{formatDate(getPostDate(post))}</time>
@@ -164,7 +165,7 @@ export default async function BlogPostPage({
             </div>
           ) : null}
 
-          <div className="mx-auto max-w-[820px] px-6 py-12 md:px-10 md:py-16">
+          <div className="blog-post__body mx-auto max-w-[820px] px-6 py-12 md:px-10 md:py-16">
             <BlogTableOfContents headings={post.headings} />
             <MarkdocRichText content={post.content} />
 
