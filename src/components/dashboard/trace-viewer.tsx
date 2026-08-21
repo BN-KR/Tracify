@@ -202,6 +202,12 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             >
               Compare
             </Link>
+            <Link
+              href={`/dashboard/${projectId}/journey/${encodeURIComponent(run.runId)}`}
+              className="flex h-8 items-center border border-black/15 bg-white px-3 font-mono text-[11px] uppercase text-black/60 hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+            >
+              Journey
+            </Link>
             <button
               type="button"
               onClick={() => void copyShareLink()}
