@@ -16,7 +16,7 @@ function textFromChildren(value: React.ReactNode): string {
 function BlogH2({ children }: { children?: React.ReactNode }) {
   return (
     <h2 id={slugifyBlogHeading(textFromChildren(children))}>
-      <span className="blog-heading-prompt" aria-hidden="true">{"C:\\"}</span>
+      <span className="blog-heading-prompt" aria-hidden="true">/</span>
       {children}
     </h2>
   );
@@ -53,23 +53,11 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   );
 }
 
-function Runthrough({ step, title, decision }: { step: number; title: string; decision: string }) {
-  const safeStep = Math.max(1, Math.min(step, 6));
-
+function BlogTable({ children, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
   return (
-    <aside className="blog-runthrough" aria-label={`Operator runthrough ${safeStep}: ${title}`}>
-      <div className="blog-runthrough__header">
-        <span>C:\MONITOR\{String(safeStep).padStart(2, "0")}</span>
-        <span>{String(safeStep).padStart(2, "0")} / 06</span>
-      </div>
-      <div className="blog-runthrough__track" aria-hidden="true">
-        {Array.from({ length: 6 }, (_, index) => (
-          <span key={index} data-active={index < safeStep ? "true" : "false"} />
-        ))}
-      </div>
-      <p className="blog-runthrough__title">{title}</p>
-      <p className="blog-runthrough__decision">{decision}</p>
-    </aside>
+    <div className="blog-table-scroll" tabIndex={0} role="region" aria-label="Scrollable data table">
+      <table {...props}>{children}</table>
+    </div>
   );
 }
 
@@ -80,10 +68,10 @@ export function MarkdocRichText({ content }: Pick<BlogPost, "content">) {
         components: {
           "trace-scenario": TraceScenario,
           "faq-item": FaqItem,
-          runthrough: Runthrough,
           h2: BlogH2,
           h3: BlogH3,
           pre: BlogCodeBlock,
+          table: BlogTable,
         },
         resolveTagName: (name, components) =>
           typeof components === "function" ? components(name) : components[name] ?? name,

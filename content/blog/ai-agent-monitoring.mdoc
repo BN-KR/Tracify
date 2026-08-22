@@ -7,7 +7,7 @@ author: Tracify Team
 draft: false
 categories: [operations]
 tags: [AI agent monitoring, observability, incident response]
-relatedPosts: [llm-observability-metrics-that-matter, debug-ai-agents-in-production]
+relatedPosts: [llm-observability-metrics-that-matter, debug-ai-agents-in-production, ai-agent-reliability-failures-retries-guardrails]
 heroImage:
   src: /media/ai-agent-operations-hero.png
   alt: AI agent monitoring illustration with alert signals converging on an operational decision
@@ -43,18 +43,11 @@ The framework is deliberately narrower than the entire subject. It gives the rea
 
 ## 1. Define the outcome before the alert
 
-{% runthrough step=1 title="Name the customer consequence" decision="Do not begin with a metric. Begin with the task that became slower, less accurate, unsafe, or unexpectedly expensive; then decide what evidence would change the response." /%}
-
 ### Alert on the task
 
 Start with a parent run and group signals by workflow, release, environment, and input class. Useful signals include completion rate, terminal failure class, evaluator outcomes, p95 latency, cost per successful task, retry rate, and approval backlog. [LLM observability metrics](/blog/llm-observability-metrics-that-matter) explains the measurement choices; [production debugging](/blog/debug-ai-agents-in-production) shows how an alert becomes an investigation.
 
-```text
-signal: failed_runs{workflow="support"} > baseline + 3σ
-owner: support-agent team
-action: compare current release with prior release
-stop condition: pause promotion if policy failures increase
-```
+> **Paging rule:** Page only when the changed outcome is material, the evidence is credible, and the owner has a safe first action. Route uncertain drift to review instead of interrupting someone with a metric they cannot use.
 
 ### Make alerts actionable
 
@@ -67,8 +60,6 @@ Review alert precision and missed incidents. Group correlated failures so one de
 Good monitoring closes the loop: the alert opens a trace, the trace produces a classification, the classification creates a test or operating change, and the next release proves whether the change worked.
 
 ## 2. Design signals that explain movement
-
-{% runthrough step=2 title="Make the signal explain the movement" decision="Pair one primary outcome with the smallest dimensions that can separate a provider failure, release regression, bad cohort, evaluator change, or expected variation." /%}
 
 ### Monitoring review: a field guide
 
@@ -97,9 +88,9 @@ Choose a primary outcome for AI agent monitoring and define it before choosing a
 | Cost rose | Cost per successful task and retry count | High-cost successful runs plus repeated failed attempts |
 | Latency rose | Provider, tool, and p95 child-span duration | Critical-path spans rather than the fastest representative run |
 
-## 3. Route every alert to a decision
+> **Diagnostic shortcut:** Pair one primary outcome with the fewest dimensions that can separate a provider failure, release regression, bad cohort, or evaluator change. If a dimension cannot change the investigation, leave it off the first dashboard.
 
-{% runthrough step=3 title="Route the evidence, not just the notification" decision="The destination should match the response: page for urgent containment, queue for reviewable drift, and annotate expected change so the next investigator sees the context." /%}
+## 3. Route every alert to a decision
 
 ### Make the unhappy path explicit
 
@@ -120,13 +111,15 @@ The happy path is only one member of the monitoring distribution. Add cases for 
 | Release annotation | The movement is expected after a controlled change | Compare against the declared baseline and stop condition |
 | Suppress with expiry | Maintenance or a known dependency issue explains the signal | Record the reason, owner, and automatic expiry time |
 
-## 4. Roll out with a reversible response
+> **Routing rule:** The destination should match the response: page for urgent containment, queue reviewable drift, and annotate expected movement so the next investigator sees the release context.
 
-{% runthrough step=4 title="Declare the rollback before promotion" decision="A rollout is observable only when the baseline, cohort, stop condition, and owner are recorded before the candidate receives meaningful traffic." /%}
+## 4. Roll out with a reversible response
 
 ### Roll out in stages
 
 Use shadow mode, a narrow cohort, explicit comparison, and a rollback condition when changing monitoring or agent behavior. Shadow mode reveals what the system would have done without changing user behavior. A cohort exposes regressions hidden by averages. A rollback condition turns caution into an operational decision. Keep the release, prompt, model, data, and configuration identifiers together; the [prompt versioning workflow](/blog/prompt-versioning-production) shows why prompt identity belongs beside code and model identity.
+
+The following is an **illustrative rollout policy**, not vendor-specific executable configuration. Copy its fields into the release system your team actually operates.
 
 ```yaml
 release: support-agent-2026-08-20.3
@@ -136,6 +129,8 @@ promote_when: completion_rate >= 0.94 and policy_failures == 0
 rollback_when: p95_latency_ms > 8500 or cost_per_success_usd > 0.18
 owner: support-agent-oncall
 ```
+
+> **Rollout rule:** Record the baseline, cohort, promotion condition, rollback condition, and owner before meaningful traffic reaches the candidate. A rollback invented after an alert is already an incident response.
 
 ### Create a learning loop
 
@@ -147,11 +142,11 @@ Every monitoring decision has an operating cost. Include reviewer time, evaluato
 
 ## 5. Review the monitoring system as a product
 
-{% runthrough step=5 title="Make the first five minutes obvious" decision="The runbook should open the affected task, representative traces, relevant versions, likely failure class, and safest first action without requiring dashboard archaeology." /%}
-
 ### Build the runbook around evidence
 
 The runbook for AI agent monitoring should begin with the trace or artifact an operator opens, then provide a short decision tree. If the parent task is missing, investigate ingestion. If the task exists but the child span is missing, inspect propagation. If evidence is present but the outcome is wrong, compare versions and evaluator results. Keep the first response steps concrete and link to the source of truth rather than asking an operator to search the whole repository.
+
+> **Runbook rule:** The first screen should show the affected task, representative traces, relevant versions, likely failure class, and safest first action. If responders must reconstruct those fields manually, the alert is incomplete.
 
 ### Know when not to automate
 
@@ -163,11 +158,10 @@ Review monitoring in this order: define the task, identify boundaries, preserve 
 
 ## 6. Establish an operating rhythm
 
-{% runthrough step=6 title="Review decisions, then tune signals" decision="Daily, weekly, and monthly reviews should each end with an owner and one recorded decision. A dashboard nobody uses is storage, not monitoring." /%}
-
 ### Final field checklist
 
 Before shipping AI agent monitoring, confirm that the happy path and degraded paths are documented, the rendered page or workflow is accessible, examples are safe to copy, identifiers are stable, sensitive values are redacted, links point to canonical content, and a real person can investigate one representative failure. Then run the repository checks and review the exact diff. Quality is the combination of useful behavior, explainable evidence, and a release process that can recover.
+
 ### Establish the monitoring contract
 
 The contract should make the task, source of truth, decision boundary, evidence, and owner explicit. Review it through the questions below before expanding the telemetry surface.
@@ -231,6 +225,8 @@ When a signal moves, open representative traces before changing the threshold. C
 
 When an alert fires, collect more than the metric that crossed the threshold. A useful review packet includes the affected workflow and cohort, the first and last timestamps, the current and previous release, representative trace IDs, the terminal failure class, latency and cost changes, evaluator versions, and the owner’s first recommended action. This packet gives a responder enough context to form a hypothesis without opening every dashboard in sequence.
 
+This **illustrative alert packet** shows the minimum handoff shape. Adapt the field names to your telemetry schema and keep sensitive prompt or retrieved content behind controlled access.
+
 ```json
 {
   "workflow": "support-agent",
@@ -243,6 +239,8 @@ When an alert fires, collect more than the metric that crossed the threshold. A 
   "owner": "support-agent-oncall"
 }
 ```
+
+> **Calibration rule:** Review the decisions produced by alerts before tuning their thresholds. A dashboard nobody acts on is storage, not monitoring.
 
 Keep the packet bounded. Include identifiers and summaries by default, then provide a controlled path to the underlying content when it is safe and necessary. Redaction belongs before export, not only in the dashboard. The monitoring system should help an operator decide what to inspect next while minimizing the number of places where sensitive prompts, retrieved documents, or user data are copied.
 

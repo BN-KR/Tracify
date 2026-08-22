@@ -112,7 +112,6 @@ test("a post exposes validated metadata and a transformed Markdoc tree", () => {
 test("interactive blog tags declare their renderer targets", () => {
   assert.equal(blogMarkdocConfig.tags["trace-scenario"].render, "trace-scenario");
   assert.equal(blogMarkdocConfig.tags["faq-item"].render, "faq-item");
-  assert.equal(blogMarkdocConfig.tags.runthrough.render, "runthrough");
 });
 
 test("invalid frontmatter fails with the source filename", () => {

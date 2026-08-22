@@ -1150,3 +1150,13 @@ Follow-ups still open:
 - [x] Replace the bottom related-guide dump with contextual links inside relevant explanations; retain a 3,626-word long-form article with 17 internal links.
 - [x] Add an article-archetype repertoire to the mandatory authoring workflow for future agents.
 - [x] Pass content tests, focused lint, rendered HTTP/DOM checks, and the full 116-route production build; document repository-wide lint failures as unrelated pre-existing issues.
+
+# AI agent monitoring usability correction — 2026-08-22
+
+- [x] Remove the decorative `C:\\MONITOR` runthrough treatment and use a simple `/` marker on article H2 headings.
+- [x] Replace decorative checkpoints with concise decision-rule notes distributed through the article.
+- [x] Remove the non-actionable pseudo-alert block; retain only clearly labeled illustrative YAML and JSON artifacts in neutral dark-gray code panels.
+- [x] Render all four article comparisons as semantic tables inside mobile-safe horizontal scroll regions without mid-word breaks.
+- [x] Fix article top clearance and Back to blog hover contrast, then place exactly three recommended posts at the bottom.
+- [x] Keep 17 contextual internal links across the roughly 3,838-word article (about 4.43 links per 1,000 words).
+- [x] Pass 19 content tests, focused ESLint, diff hygiene, desktop/mobile browser checks, and the full 116-route production build.

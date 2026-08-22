@@ -908,3 +908,12 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 4. [completed] Rework the article's latter sections into layered H3/H4 hierarchy, add visual evidence throughout, distribute contextual links, and remove the standalone link list.
 5. [completed] Codify definitive-guide, decision-framework, practical-library, tutorial, and comparison archetypes in the required authoring workflow.
 6. [completed] Verify content contracts, changed-file lint, diff hygiene, the full 116-route production build, and a local 200 rendered response containing six runthroughs, five FAQ accordions, and a closed TOC.
+
+# AI agent monitoring usability correction — 2026-08-22
+
+1. [completed] Remove the `C:\\MONITOR` runthrough cards and restore a restrained `/` H2 marker.
+2. [completed] Turn the strongest operational guidance into inline decision notes and remove the useless pseudo-alert sample.
+3. [completed] Preserve only adaptable YAML/JSON examples, identify their languages correctly, and render them in neutral dark-gray scroll containers.
+4. [completed] Wrap native tables in accessible, focusable overflow regions and prevent page-level mobile overflow or mid-word splitting.
+5. [completed] Fix article top spacing and Back to blog contrast, then render three recommended article cards at the bottom.
+6. [completed] Verify link density, content contracts, focused lint, diff hygiene, responsive browser behavior, and the full production build.
