@@ -2,14 +2,20 @@ import { getPublishedPosts } from "@/lib/markdoc-blog";
 import Image from "next/image";
 import Link from "next/link";
 
-export function RelatedPosts({ posts }: { posts?: string[] | null }) {
+export function RelatedPosts({
+  posts,
+  heading = "Related posts",
+}: {
+  posts?: string[] | null;
+  heading?: string;
+}) {
   const slugs = new Set(posts ?? []);
   const related = getPublishedPosts().filter((post) => slugs.has(post.slug)).slice(0, 3);
   if (!related.length) return null;
 
   return (
     <div className="mt-12 border-t border-black/20 pt-8">
-      <h3 className="mb-6 font-mono text-[16px] font-bold text-black">Related posts</h3>
+      <h3 className="mb-6 font-mono text-[16px] font-bold text-black">{heading}</h3>
       <div className="grid gap-4 md:grid-cols-3">
         {related.map((post) => {
           const image = post.heroImage?.card || post.heroImage?.src;
@@ -17,7 +23,7 @@ export function RelatedPosts({ posts }: { posts?: string[] | null }) {
             <Link
               key={post.id}
               href={`/blog/${post.slug}`}
-              className="flex flex-col gap-3 border border-black bg-white/35 p-4 transition-colors hover:bg-[#f4d44d]"
+              className="flex flex-col gap-3 border border-black bg-white/35 p-4 transition-colors hover:bg-[#f4d44d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
             >
               {image ? (
                 <div className="relative aspect-video overflow-hidden border border-black">

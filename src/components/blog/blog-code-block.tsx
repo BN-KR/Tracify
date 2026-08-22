@@ -12,11 +12,17 @@ function textFromChildren(value: React.ReactNode): string {
   return "";
 }
 
-export function BlogCodeBlock({ children }: { children?: React.ReactNode }) {
+export function BlogCodeBlock({
+  children,
+  "data-language": dataLanguage,
+}: {
+  children?: React.ReactNode;
+  "data-language"?: string;
+}) {
   const [copied, setCopied] = useState(false);
   const code = useMemo(() => textFromChildren(children).replace(/\n$/, ""), [children]);
   const child = React.Children.toArray(children).find(React.isValidElement) as React.ReactElement<{ className?: string }> | undefined;
-  const language = child?.props.className?.replace(/^language-/, "") || "code";
+  const language = dataLanguage || child?.props.className?.replace(/^language-/, "") || "code";
 
   async function copyCode() {
     try {
