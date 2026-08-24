@@ -1278,3 +1278,8 @@
 - The article now clears the fixed navigation, the Back to blog control has readable hover/focus contrast, and exactly three recommended-post cards appear after the tags at the bottom.
 - The article is roughly 3,838 words with 17 contextual links (about 4.43 per 1,000 words). The in-app browser verified desktop and 390px layouts, semantic tables, contained overflow, two labeled code panels, simple heading markers, no runthroughs, and three recommendations.
 - Final verification passes: 19 content tests, focused ESLint, `git diff --check`, and the 116-route production build with non-secret placeholder Convex URLs. The only browser console error was the expected missing local PostHog token.
+
+## 2026-08-25 LLM observability metrics refinement
+- On clean branch `codex/blog-llm-observability-metrics` from `origin/main`, replaced the duplicated/generated body of `content/blog/llm-observability-metrics-that-matter.mdoc` with an Outcome → Dimension → Threshold → Action decision guide.
+- Preserved the published metadata, `draft: false`, tracked hero asset, and article intent. Added one deterministic alert scenario, one FAQ section, decision notes, metric hierarchy tables, cost/latency trade-offs, contextual links, and a practical checklist.
+- `npm run test:content` passes all 19 tests, the production build passes with non-secret placeholder Convex URLs, `git diff --check` passes, the tracked image returns HTTP 200, and the final body has one FAQ heading with no recommendation prose dump. Full lint still reports 18 unrelated pre-existing errors.

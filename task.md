@@ -1189,6 +1189,13 @@ Follow-ups still open:
 2. [completed] Rewrite `llm-tracing-explained.mdoc` on a clean branch with a focused operating model, evidence tables, one deterministic interaction, one FAQ section, contextual links, and a practical checklist.
 3. [completed] Pass all 19 content tests, `git diff --check`, tracked-media verification, and HTTP 200 image verification.
 4. [blocked] Complete the production build/rendered HTML check after supplying the required non-secret `CONVEX_SITE_URL` environment value in the isolated worktree.
+
+# LLM observability metrics refinement — 2026-08-25
+
+1. [completed] Read the mandatory content workflow and inspect the canonical article, renderer, CSS, media inventory, published slugs, and metrics article.
+2. [completed] Rewrite `llm-observability-metrics-that-matter.mdoc` with a focused operational framework, evidence tables, one deterministic interaction, one FAQ section, contextual links, and a checklist.
+3. [completed] Pass 19 content tests, production build, diff hygiene, asset inventory, HTTP 200 image check, FAQ count, and recommendation-dump audit.
+4. [pending] Open the focused PR, verify rendered preview HTML and hosted checks, then merge only after all required checks pass.
 # Future content quality gate — 2026-08-24
 
 - [x] Make completed launch-plan strikethrough decoration more opaque without changing completed text contrast.
