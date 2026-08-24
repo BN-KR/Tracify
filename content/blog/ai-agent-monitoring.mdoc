@@ -63,6 +63,10 @@ Good monitoring closes the loop: the alert opens a trace, the trace produces a c
 
 ### Monitoring review: a field guide
 
+![Monitoring signals converging into one operational decision](/media/llm-observability-metrics-that-matter-800x450.jpg)
+
+*A useful monitoring view connects outcome, failure class, latency, cost, and ownership instead of presenting isolated metrics.*
+
 This extended guide applies the same production discipline to monitoring: task outcomes, drift, alert ownership, latency, cost, and incident response.
 
 ### Start with the failure you need to prevent
@@ -143,6 +147,10 @@ Every monitoring decision has an operating cost. Include reviewer time, evaluato
 ## 5. Review the monitoring system as a product
 
 ### Build the runbook around evidence
+
+![An operator reviewing an AI agent incident with trace evidence](/media/debug-ai-agents-in-production-800x450.jpg)
+
+*The review packet should shorten the path from an alert to an owned decision.*
 
 The runbook for AI agent monitoring should begin with the trace or artifact an operator opens, then provide a short decision tree. If the parent task is missing, investigate ingestion. If the task exists but the child span is missing, inspect propagation. If evidence is present but the outcome is wrong, compare versions and evaluator results. Keep the first response steps concrete and link to the source of truth rather than asking an operator to search the whole repository.
 
@@ -302,15 +310,3 @@ Start with one consequential workflow. Define its outcome, connect it to represe
 - Assign one owner for the next bounded action and write the stop condition before changing production behavior.
 
 > **Decision rule:** Prefer the smallest change that produces inspectable evidence. If the example cannot be tested, label it illustrative and verify the surrounding assumptions before adapting it.
-
-## Frequently asked questions
-
-{% faq-item question="What should I do first?" answer="Start with one real workflow and one user-visible outcome. Write down the boundary, collect the evidence that explains the outcome, and choose a reversible next step before expanding the system." /%}
-
-{% faq-item question="How do I know whether this is working?" answer="Compare the same task distribution before and after the change. Review quality, latency, cost, failure behavior, and user impact together, and preserve the release or prompt version that produced each result." /%}
-
-{% faq-item question="What is the most common mistake?" answer="Treating a metric, model response, or successful tool call as the outcome. Keep the user task, trace evidence, owner, and bounded response connected so the team can explain and improve the complete workflow." /%}
-
-## Recommended next reads
-
-Continue with [llm observability metrics that matter](/blog/llm-observability-metrics-that-matter), [debugging AI agents in production](/blog/debug-ai-agents-in-production), [ai agent reliability failures retries guardrails](/blog/ai-agent-reliability-failures-retries-guardrails). Choose the one that matches the next decision in your workflow rather than opening every guide at once.
