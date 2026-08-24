@@ -1196,6 +1196,13 @@ Follow-ups still open:
 2. [completed] Rewrite `llm-observability-metrics-that-matter.mdoc` with a focused operational framework, evidence tables, one deterministic interaction, one FAQ section, contextual links, and a checklist.
 3. [completed] Pass 19 content tests, production build, diff hygiene, asset inventory, HTTP 200 image check, FAQ count, and recommendation-dump audit.
 4. [pending] Open the focused PR, verify rendered preview HTML and hosted checks, then merge only after all required checks pass.
+
+# LLM latency article refinement — 2026-08-25
+
+1. [completed] Read the mandatory content workflow and inspect the canonical article, renderer, CSS, media inventory, published slugs, and latency article.
+2. [completed] Rewrite `llm-latency-optimization.mdoc` with a focused latency framework, waterfall evidence, trade-off tables, one deterministic interaction, one FAQ section, contextual links, and a checklist.
+3. [completed] Pass 19 content tests, production build, diff hygiene, tracked-image inventory, HTTP 200 image check, FAQ count, and recommendation-dump audit.
+4. [pending] Open the focused PR, verify rendered preview HTML and hosted checks, then merge only after all required checks pass.
 # Future content quality gate — 2026-08-24
 
 - [x] Make completed launch-plan strikethrough decoration more opaque without changing completed text contrast.

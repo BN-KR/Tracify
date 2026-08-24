@@ -3,6 +3,7 @@ title: "LLM Latency Optimization: Find the Slowest Step First"
 slug: llm-latency-optimization
 excerpt: Reduce AI application latency by tracing model, retrieval, tool, queue, and retry time instead of guessing from one request duration.
 publishedAt: 2026-08-20T09:20:00.000Z
+updatedAt: 2026-08-25T14:00:00.000Z
 author: Tracify Team
 draft: false
 categories: [performance]
@@ -16,246 +17,132 @@ seo:
   metaDescription: Diagnose and reduce LLM latency by measuring model time, retrieval, tools, queues, retries, and time to first token.
 ---
 
-“The model is slow” is usually an incomplete diagnosis. End-to-end latency may include queueing, retrieval, prompt construction, provider time, tool calls, retries, and rendering. Optimize the slowest meaningful segment, not the most visible one.
+“The model is slow” is usually an incomplete diagnosis. End-to-end latency can include queueing, retrieval, prompt construction, provider time, tool calls, retries, validation, and rendering. This guide is for performance engineers and product owners who need to reduce the wait users actually feel. It teaches a trace-first optimization sequence; it does not promise one universal target or prescribe a provider-specific tuning recipe.
 
-{% trace-scenario title="Which latency should you optimize?" prompt="Time to first token improved, but users still wait before they can act. Which measurement should lead?" outcome="Measure time to useful result and the critical path, not only the first streamed token." /%}
+{% trace-scenario title="Which latency should you optimize?" prompt="Time to first token improved, but users still wait before they can act. Which measurement should lead?" outcome="Measure time to useful result and the critical path, not only the first streamed token. A fast first byte is not a successful optimization if the required tool or validation work still blocks the task." /%}
 
 ## At a glance
 
-This guide is for **performance engineers and product owners**. It helps you **reduce the wait users actually feel** so you can leave with **a latency plan based on critical paths, tail behavior, and useful results**.
-
-| Before you start | What to inspect | What good looks like |
+| Before you start | What to define | What good looks like |
 | --- | --- | --- |
-| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+| One workflow and a user-visible wait problem | The primary milestone, critical path, baseline, and stop condition | A bounded latency change that improves the right wait without hiding quality or safety work |
 
-### The LLM latency optimization framework
+### The latency framework
 
-Use **Measure → Waterfall → Optimize → Tail** as the decision path:
+Use **Measure → Waterfall → Optimize → Tail** as the operating path:
 
-1. **Measure:** establish the task, context, or boundary before changing behavior.
-2. **Waterfall:** make the relevant evidence or control explicit.
-3. **Optimize:** compare the decision with a concrete example, trace, or test.
-4. **Tail:** finish with an owner, rollback, escalation, or next action.
+1. **Measure:** choose the event the user needs and record the full parent run.
+2. **Waterfall:** locate serial work, queue gaps, retries, and the first meaningful divergence.
+3. **Optimize:** change the lowest-risk bottleneck and compare matched tasks.
+4. **Tail:** protect p95/p99 behavior, deadlines, quality, and safe fallback paths.
 
-> **Decision rule:** Measure the meaningful wait, inspect the waterfall, remove avoidable serial work, and protect the tail.
+> **Decision rule:** Optimize the slowest meaningful segment on the user’s critical path, then recheck the complete task and its tail. Never declare success from one provider duration alone.
 
-The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+## Define the wait users actually feel
+
+Latency is a service promise, not just an infrastructure number. An interactive assistant may care about time to first useful content. A browser agent may care about time to first safe action. A batch enrichment workflow may care about completed-task throughput. Choose one primary milestone per workflow and keep the other clocks as diagnostics.
+
+### Name the primary milestone
+
+| Milestone | Useful when | Limitation |
+| --- | --- | --- |
+| Time to first token | Early streaming reassures the user or provides useful draft text | It says nothing about a slow tool or late validation step |
+| Time to first useful result | The user can act on an answer, status, or safe partial result | Requires a workflow-specific definition of “useful” |
+| Time to first safe action | An agent’s progress is visible through an approved tool action | Must include authorization and policy checks |
+| Time to completed task | The result is not trustworthy until all required work finishes | Can hide useful intermediate progress in interactive flows |
+
+An answer can stream quickly and then wait forty seconds for a tool. A batch task can take longer than an interactive request and still meet its promise. Record the selected milestone as an event on the parent trace, then connect it to model, retrieval, queue, and tool spans. [LLM observability metrics](/blog/llm-observability-metrics-that-matter) explains why this outcome definition should sit above raw token and request counts.
 
 ## Build a latency waterfall
 
-Record a parent run and child spans for each stage. Keep start and finish timestamps in one clock domain, and include model, provider, release, input class, and retry number. [LLM tracing](/blog/llm-tracing-explained) provides the basic vocabulary; [metrics that matter](/blog/llm-observability-metrics-that-matter) explains why averages are insufficient.
+Record a parent run and child spans for each stage. Use one clock domain, capture start and finish timestamps, and preserve workflow, release, model, provider, input cohort, and retry metadata. A useful waterfall makes serial time and waiting time visible together.
 
 ```text
-request       0ms ───────────────────────────── 1850ms
-queue         0ms ───── 120ms
+support-answer  0ms ─────────────────────────────────── 1850ms
+queue           0ms ─── 120ms
 retrieval     120ms ─────── 360ms
 model         360ms ───────────────── 1440ms
-tool          1440ms ───── 1760ms
-render        1760ms ─ 1850ms
+tool         1440ms ───── 1760ms
+validation   1760ms ─── 1810ms
+render       1810ms ─ 1850ms
 ```
 
-## Optimize in order
+This is an illustrative trace shape, not a measured Tracify benchmark. Its job is to show the questions an investigator should ask: where did the run wait, which spans were serial, and which stage controlled the selected user milestone? [LLM tracing explained](/blog/llm-tracing-explained) provides the parent-and-child vocabulary for preserving that story.
 
-First remove unnecessary serial work. Then reduce oversized context, cache stable retrieval, stream when the user benefits from partial output, and choose a faster model for bounded subtasks. Avoid trading away correctness without an evaluation set. A faster wrong answer is a regression.
+### Read the first meaningful divergence
 
-Track p50, p95, and tail behavior by workflow. A single p95 can hide that only one tool or tenant is slow. Annotate retries and timeouts so a “successful” response does not erase the cost of recovery.
+Compare a slow run with a representative healthy run from the same workflow, release, and input class. Look for a queue delay, an unexpectedly large retrieval result, repeated model attempts, a tool that moved onto the critical path, or a validation stage that was not present in the baseline. The largest span is a clue, not automatically the cause. Ask which changed segment can be modified without breaking the task contract.
 
-## Define the product target
+## Remove low-risk serial work first
 
-Latency is a service promise, not just an infrastructure metric. Decide whether the target is time to first token, time to first useful action, or time to completed task. Then measure the user-visible event and the internal spans that control it.
+The safest improvements usually come from sequencing. Fetch independent context in parallel, avoid constructing the same prompt twice, move non-critical analytics off the response path, and do not wait for an evaluator that is not required before the user can safely proceed. Confirm that parallel work respects rate limits, tenant isolation, ordering, and dependency budgets.
 
-## Pick the event the user actually feels
+### Measure the full task after each change
 
-Interactive assistants often have three meaningful clocks. Time to first token measures when streaming begins, time to first useful content measures when the user receives something actionable, and time to completed task measures when the workflow is safe to rely on. A browser agent may need time to first browser action rather than time to first model token. Choose one primary promise per workflow and keep the other clocks as diagnostic signals.
+Parallel retrieval can reduce wall-clock time while increasing provider load. Background evaluation can improve perceived latency while delaying the signal an operator needs. Record both the user-visible milestone and total system-complete time so the trade-off remains legible. A change that moves work out of the request is not free; it changes where and when the work is observed.
 
-An average request duration cannot tell you which promise is failing. A response can stream quickly and then spend forty seconds waiting for a tool. A completed task can be slow but acceptable for a batch workflow. Capture the user-visible milestone as an event in the parent trace, then connect it to model, retrieval, queue, and tool spans.
+> **Sequencing rule:** Parallelize only independent work with a clear failure policy. If the operations share authorization, mutable state, or an ordering contract, keep the dependency explicit and optimize the work inside it first.
 
-## Read a waterfall like an investigator
+## Control context and retries deliberately
 
-Start at the parent run and move left to right. Look for large serial gaps, repeated spans, queue waits, and a child span whose end time extends beyond the user-visible response. Compare a slow run with a healthy run from the same workflow and input class. The question is not “which span is largest?” but “which span changed and can be changed without breaking the task contract?”
+Long prompts increase input processing time and cost, but truncating context can remove the one exception that makes an answer correct. Set a context budget by workflow, summarize stable history, retrieve relevant fields, preserve document boundaries, and test the change against representative quality cases before promotion. Inspect token distributions by cohort; a p95 problem may be a small set of conversations with runaway memory or tool output.
 
-```ts
-type Timing = { name: string; startMs: number; endMs: number; parent?: string };
+Retries are a latency multiplier. Record why each retry happened, what changed, and how much time remained in the task budget. Retry transient dependency failures when a new attempt can plausibly work. Do not retry malformed arguments, policy blocks, or deterministic validation failures.
 
-function criticalPath(spans: Timing[]) {
-  return spans
-    .filter((span) => !span.parent)
-    .sort((a, b) => b.endMs - a.endMs)
-    .map((span) => ({ name: span.name, durationMs: span.endMs - span.startMs }));
-}
-```
+### Use one deadline for the parent task
 
-The code is a simplified analysis shape, not a replacement for a real trace backend. Preserve timestamps, parent IDs, release, model, provider, and retry metadata so the same analysis can be segmented by cause.
-
-## Remove avoidable serial work
-
-The lowest-risk latency improvements usually come from changing sequencing. Fetch independent context in parallel, avoid constructing the same prompt twice, do not wait for an evaluator that is not needed for the user response, and move non-critical analytics to an asynchronous path. Confirm that parallel calls do not violate rate limits, tenant isolation, or ordering requirements.
-
-Measure the change on the full task, not just the modified function. Parallel retrieval can reduce wall-clock time while increasing provider load. A background evaluator can reduce perceived latency while delaying the signal an operator needs. Record both user-visible and system-complete times so the trade-off remains visible.
-
-## Control context size deliberately
-
-Long prompts increase input processing time and cost, but truncating context can remove the one exception that makes an answer correct. Use a context budget by workflow. Summarize stable history, retrieve only relevant fields, preserve document boundaries, and make the model aware when context has been omitted. Test the change against a quality suite before promoting it.
-
-Inspect token distribution by cohort. A p95 latency problem may actually be a small set of conversations with runaway memory or tool output. Record input and output token counts, cache hits, and context source classes. The [LLM observability metrics guide](/blog/llm-observability-metrics-that-matter) explains why distributions and cohorts matter more than one global average.
+A sequence of three individually reasonable child timeouts can still violate the user’s service promise. Set a total deadline across the run and pass the remaining budget to child operations. Near the deadline, choose a safe stop, a bounded fallback, or a human handoff instead of starting work that cannot finish.
 
 ## Stream with a useful contract
 
-Streaming is valuable when partial output can help the user and can be safely interrupted. It is not a cure for a slow tool or an unbounded planner. Define whether the first streamed text is a draft, a status update, or a committed answer. Do not stream a confident answer before required evidence or approval has arrived.
+Streaming helps when partial output gives the user safe progress. It is not a cure for a slow tool, an unbounded planner, or a required approval step. Define whether the first streamed text is a draft, a status update, or a committed answer. Do not stream a confident conclusion before required evidence or authorization has arrived.
 
-For tool-using agents, a visible status such as “checking account policy” may be more useful than a partial explanation. Trace the transition from model decision to tool result and update the user interface at meaningful milestones. The latency target should reward useful progress, not merely early bytes.
+For tool-using agents, “checking the account policy” may be more useful than partial prose. Trace the transition from model decision to tool result and expose meaningful milestones in the interface. Reward useful progress, not merely early bytes.
 
-## Bound retries and fallbacks
+> **Streaming boundary:** If a partial result can be mistaken for a final decision, label it or delay it. Perceived latency is not an excuse to weaken the control that makes the workflow safe.
 
-Retries are a latency multiplier. Record why each retry happened, what changed, and how much time remained in the task budget. Retry a transient dependency failure when a new attempt can plausibly work. Do not retry malformed arguments, policy blocks, or deterministic validation failures. A fallback model may reduce provider wait but can increase output tokens or quality review.
+## Compare providers and caches like-for-like
 
-Set a total deadline across the run, not only a timeout per child span. A sequence of three individually reasonable timeouts can still violate the user’s service promise. When the deadline is near, choose a safe stop or human handoff instead of starting another action that cannot finish.
+Model routing can reduce provider time, but it also changes quality, context limits, tool support, cost, and regional behavior. Compare providers on the same task set and record the selected route in the trace. Keep provider time, queue time, and application time separate so the routing decision can be evaluated later.
 
-## Optimize providers without hiding trade-offs
+Warm connections and reuse clients where the current SDK supports it. Cache stable retrieval or embeddings with a correct tenant, source, and release key. Never cache a user-specific answer without a clear invalidation and access policy. A cache hit that serves stale or unauthorized content is a reliability and security regression, regardless of its speed.
 
-Model routing can reduce latency, but provider changes affect quality, context limits, tool support, cost, and regional behavior. Compare providers on the same task set and record the selected route in the trace. Keep provider time, queue time, and application time separate so a routing decision can be evaluated later.
+## Protect the tail
 
-Warm connections, reuse clients, and avoid repeated authentication setup where the SDK supports it. Cache stable embeddings or retrieval results with a correct tenant and release key. Never cache a user-specific answer without a clear invalidation and access policy.
+Users experience the slow tail, not your median. Track p50, p95, and p99 by workflow and meaningful cohort. A single global p95 can hide that one tool, tenant, region, or input class is responsible for the worst waits. Annotate retries, timeouts, provider changes, and release boundaries so a successful response does not erase the recovery cost.
 
-## Monitor the tail
+### Set a stop condition
 
-P50 tells you about the ordinary run. P95 and P99 tell you whether a user may be waiting through a dependency timeout, an oversized context, or a retry loop. Alert on tail latency by workflow and input class. Include completion rate and quality signals so a team does not optimize the tail by returning incomplete answers.
+Before shipping a latency change, record the baseline, cohort, milestone, observation window, quality checks, and rollback condition. For example: improve time to useful result for a defined support cohort while keeping groundedness and policy failures within their existing limits. Do not invent a numeric threshold without the product or service context that gives it meaning.
 
-Review slow traces weekly. Classify each as model, retrieval, tool, queue, application, retry, or unknown. If “unknown” grows, add the smallest missing span or timestamp. This creates a practical feedback loop instead of another dashboard that no one trusts.
+> **Tail rule:** A faster median with a worse p95 is not an optimization for users in the affected tail. Review both the typical path and the slowest consequential cohort.
 
-## A safe optimization sequence
+## Turn the finding into a safe change
 
-1. Define the user-visible latency event and target.
-2. Capture a parent run and complete child-span waterfall.
-3. Compare healthy and slow examples from the same cohort.
-4. Remove serial work and duplicate calls.
-5. Bound context, retries, deadlines, and tool output.
-6. Test routing or model changes against quality and cost.
-7. Roll out gradually and review the tail.
+When the waterfall identifies a bottleneck, capture the slow case as a representative fixture. State the expected milestone, unacceptable behavior, relevant release and model versions, and the quality or safety checks that must remain stable. Test the change against the same task distribution, including cases that were already healthy.
 
-Latency work is finished when the system is faster for the intended task without making the answer less useful, less safe, or harder to explain. Keep the trace as proof of that trade-off.
-## Performance review: a field guide
+### A practical optimization checklist
 
-This extended guide applies the same production discipline to latency optimization: critical paths, waterfalls, context size, streaming, retries, and tail latency.
+- Name the user-visible milestone and task denominator.
+- Capture parent and child spans in one clock domain.
+- Separate queue, retrieval, model, tool, validation, retry, and rendering time.
+- Compare a slow run with a matched healthy run.
+- Remove avoidable serial work before changing models.
+- Budget context and retries against the parent deadline.
+- Treat streaming and caching as contracts with explicit boundaries.
+- Track p50, p95, and p99 by workflow and cohort.
+- Record quality, safety, cost, owner, baseline, and rollback condition.
 
-## Start with the failure you need to prevent
-
-A strong LLM latency optimization practice begins with a failure that matters to a user. Write the failure in observable terms: the task stopped, the wrong action happened, the answer lacked evidence, the reviewer could not decide, or the system consumed more resources than the outcome justified. This wording gives the team a testable target and prevents the article from drifting into a collection of attractive but disconnected recommendations.
-
-## Name the boundary
-
-Most production incidents happen at a boundary: model to application, application to tool, retrieved data to instruction, browser action to page state, or metric to operational decision. For LLM latency optimization, draw that boundary in plain language before choosing an implementation. Identify what is trusted, what is untrusted, what must be validated, and what evidence crosses the boundary. A boundary that cannot be named cannot be monitored consistently.
-
-## Preserve the decision context
-
-A final answer or status flag rarely explains a failure by itself. Preserve the inputs, versions, policies, selected evidence, attempted actions, retries, and resulting state that shaped the decision. For LLM latency optimization, use stable identifiers and redaction so an investigator can reconstruct the path without copying secrets into every log line. The goal is not maximal data collection; it is enough context to test a plausible explanation.
-
-## Measure the user-visible outcome
-
-Choose a primary outcome for LLM latency optimization and define it before choosing a dashboard. Completion, correctness, groundedness, safe refusal, review quality, time to useful result, and cost per successful task answer different questions. Pair the outcome with failure dimensions such as model version, prompt version, cohort, provider, tool, language, and task type. An aggregate score is useful only when a person can move from the score to representative traces.
-
-## Make the unhappy path explicit
-
-A mature LLM latency optimization workflow names what happens when evidence is missing, a dependency is slow, a schema changes, a permission is denied, a reviewer does not respond, or the system cannot establish confidence. These are product states, not merely exceptions. Give each state an owner, a user-facing explanation, a safe fallback, and a trace event. This is how a graceful degradation policy becomes something an operator can verify.
-
-## Use small, reviewable examples
-
-Examples teach the boundary faster than abstract claims. Keep a representative LLM latency optimization example small enough to inspect, but include the field that changes the decision. Show the expected result and one plausible failure. Explain which part is illustrative and which part should be adapted to the repository. Avoid examples that imply a guarantee the implementation cannot make; precision is more persuasive than spectacle.
-
-## Test variation deliberately
-
-The happy path is only one member of the LLM latency optimization distribution. Add cases for empty input, ambiguous intent, stale state, partial failure, duplicate work, adversarial content, long context, and a dependency that returns a valid-looking but wrong result. Test cohorts and release versions separately. When behavior is probabilistic, record the evidence and evaluator version so a changed score can be distinguished from a changed system.
-
-## Roll out in stages
-
-Use shadow mode, a narrow cohort, explicit comparison, and a rollback condition when changing LLM latency optimization. Shadow mode reveals what the system would have done without changing user behavior. A cohort exposes regressions hidden by averages. A rollback condition turns caution into an operational decision. Keep the release, prompt, model, data, and configuration identifiers together so the comparison remains meaningful after deployment.
-
-## Create a learning loop
-
-Production feedback should become a queue of explainable cases for LLM latency optimization, not a pile of screenshots or vague tickets. Attach the user report, trace, expected behavior, actual behavior, and disposition. Classify the mechanism, add a compact regression case when appropriate, and record whether the fix changed code, data, prompt, policy, or operations. This closes the loop between observability and engineering instead of treating incidents as isolated surprises.
-
-## Review the economics and ownership
-
-Every LLM latency optimization decision has an operating cost. Include reviewer time, evaluator calls, storage, retries, provider spend, and the cost of a wrong action when they matter. Assign an owner for quality, reliability, security, and budget signals. A workflow is not production-ready because it can run; it is ready when the organization can understand, afford, and improve it.
-
-## Build the runbook around evidence
-
-The runbook for LLM latency optimization should begin with the trace or artifact an operator opens, then provide a short decision tree. If the parent task is missing, investigate ingestion. If the task exists but the child span is missing, inspect propagation. If evidence is present but the outcome is wrong, compare versions and evaluator results. Keep the first response steps concrete and link to the source of truth rather than asking an operator to search the whole repository.
-
-## Know when not to automate
-
-Automation is not always the correct endpoint for LLM latency optimization. If the consequence is irreversible, the evidence is incomplete, or the policy cannot be expressed safely, stop and route to a person or a trusted system. A bounded refusal is often a better product result than a confident action. Document the boundary so future optimization does not quietly remove the control that made the workflow acceptable.
-
-## A practical review sequence
-
-Review LLM latency optimization in this order: define the task, identify boundaries, preserve evidence, measure the outcome, exercise failures, test variation, stage the rollout, and assign ownership. The sequence matters because a polished implementation with no observable outcome is difficult to validate, while a clear contract makes later instrumentation and testing much cheaper.
-
-## Final field checklist
-
-Before shipping LLM latency optimization, confirm that the happy path and degraded paths are documented, the rendered page or workflow is accessible, examples are safe to copy, identifiers are stable, sensitive values are redacted, links point to canonical content, and a real person can investigate one representative failure. Then run the repository checks and review the exact diff. Quality is the combination of useful behavior, explainable evidence, and a release process that can recover.
-## Questions to ask in review
-
-Ask whether the current latency optimization design makes the next failure easier or harder to explain. Where is the source of truth? Which value is user-controlled? Which decision is irreversible? What happens when a dependency returns a partial result? Which version can be rolled back? These questions expose missing contracts faster than adding another dashboard or another prompt instruction.
-
-## The smallest useful implementation
-
-Start with the smallest implementation that creates evidence for latency optimization. One parent run, a few stable fields, one representative fixture, and one clear outcome are often enough to reveal the largest gap. Expand only when a real investigation needs another dimension. This keeps instrumentation affordable and prevents the team from confusing volume of telemetry with quality of understanding.
-
-## Keep the page and system honest
-
-Documentation about latency optimization should describe the behavior a reader can actually reproduce. Mark illustrative examples clearly, keep names consistent, and avoid claims that depend on an unmentioned environment. On the rendered page, make the important artifact easy to inspect: use a labelled code block, a readable trace scenario, or a compact decision table. The presentation is part of the teaching contract.
-
-## Accessibility is a reliability feature
-
-A latency optimization workflow should remain understandable when a reader cannot hover, drag, or run the example. Provide a static explanation, meaningful labels, visible focus, keyboard access, and mobile-safe overflow. The same principle applies in production: a trace should expose text and structured fields, not require an operator to infer meaning from color or animation alone.
-
-## Signals that justify a change
-
-Change latency optimization when evidence shows a repeated failure mechanism, a measurable user benefit, or an unacceptable operational cost. Record the baseline, candidate, cohort, and decision owner. If the change improves one dimension while harming another, state the trade-off instead of hiding it in an average. This creates a durable record future agents can use when the same decision returns.
-
-## Closing principle
-
-The best latency optimization practice makes good behavior easier to produce and bad behavior easier to see. It gives the user a useful outcome, gives the operator an explainable trace, and gives the team a safe way to improve the system. That is the standard to apply when reviewing both the implementation and this article.
-## Turn principles into an operating artifact
-
-A principle becomes useful when someone can apply it during a real change. For this topic, create a compact artifact: a trace field list, a test fixture, a rollout table, a budget rule, a review form, or a runbook. Keep the artifact close to the decision it supports. If it lives in a separate document with no owner, it will become stale while the system continues to change.
-
-## Compare like with like
-
-When evaluating a change, compare the same task distribution, evidence policy, model or release metadata, and outcome definition. A baseline gathered from easy cases cannot prove an improvement on difficult cases. Preserve the sampling rule and the exclusions. When the data is sparse, say so; a small honest sample is more useful than a precise-looking number that hides its uncertainty.
-
-## Make failure visible to the right person
-
-Visibility is not the same as exposure. A user needs a clear explanation and safe next step. An operator needs a trace, timing, versions, and likely cause. An engineer needs a reproducible fixture. A security owner needs the trust boundary and containment event. Design the evidence for the person who must act, and avoid copying sensitive content into places where no action is possible.
-
-## Review changes as a system
-
-A prompt, model, schema, retrieval index, browser selector, evaluator, and dashboard threshold can each change behavior. Review the connected system rather than approving one file in isolation. Record what changed, which outcomes could move, which tests cover the risk, and how to revert. This practice keeps small changes from becoming untraceable production behavior.
-
-## The standard for completion
-
-Completion means more than a passing happy-path test. A reader should understand the contract, an operator should be able to investigate a failure, and the team should have a bounded path to improve or roll back the behavior. Apply that standard to the article too: the examples should render clearly, the interaction should teach something, the image should have a job, and the validation command should pass.
-
-
-
-## Put this guidanceFind the Slowest Step First into practice
-
-### A small release checklist
-
-- Define the user-visible outcome and the boundary this article does not cover.
-- Capture the evidence needed to explain movement, including the relevant version, cohort, and failure class.
-- Assign one owner for the next bounded action and write the stop condition before changing production behavior.
-
-> **Decision rule:** Prefer the smallest change that produces inspectable evidence. If the example cannot be tested, label it illustrative and verify the surrounding assumptions before adapting it.
+> **Decision rule:** Start with one workflow, one milestone, one representative slow trace, and one reversible change. Expand the instrumentation only when the next investigation proves a missing segment.
 
 ## Frequently asked questions
 
-{% faq-item question="What should I do first?" answer="Start with one real workflow and one user-visible outcome. Write down the boundary, collect the evidence that explains the outcome, and choose a reversible next step before expanding the system." /%}
+{% faq-item question="Which latency should I optimize first?" answer="Start with the user-visible milestone that defines the workflow’s service promise, then inspect the critical path that controls it. Time to first token is not the right primary metric when users must wait for a tool, validation, or approval before acting." /%}
 
-{% faq-item question="How do I know whether this is working?" answer="Compare the same task distribution before and after the change. Review quality, latency, cost, failure behavior, and user impact together, and preserve the release or prompt version that produced each result." /%}
+{% faq-item question="Is streaming always a latency improvement?" answer="No. Streaming can improve perceived progress, but it does not reduce slow retrieval, tools, or validation. Define what the streamed content means and make sure a partial result cannot be mistaken for a committed answer." /%}
 
-{% faq-item question="What is the most common mistake?" answer="Treating a metric, model response, or successful tool call as the outcome. Keep the user task, trace evidence, owner, and bounded response connected so the team can explain and improve the complete workflow." /%}
+{% faq-item question="Should I retry a slow model call?" answer="Only when the cause is plausibly transient and the remaining parent-task budget supports another attempt. Record each attempt, avoid retrying deterministic validation or policy failures, and choose a safe fallback when the deadline is near." /%}
 
-## Recommended next reads
+## Next step: inspect one slow trace
 
-Continue with [llm observability metrics that matter](/blog/llm-observability-metrics-that-matter), [llm tracing explained](/blog/llm-tracing-explained), [AI agent observability](/blog/ai-agent-observability-complete-guide). Choose the one that matches the next decision in your workflow rather than opening every guide at once.
+Choose one workflow and one user-visible milestone. Compare its slowest representative run with a healthy run from the same cohort, identify the first meaningful divergence, and write down the smallest reversible change. Recheck the full task, quality, cost, and tail behavior before optimizing another segment.
