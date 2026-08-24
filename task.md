@@ -1197,6 +1197,13 @@ Follow-ups still open:
 3. [completed] Pass 19 content tests, production build, diff hygiene, asset inventory, HTTP 200 image check, FAQ count, and recommendation-dump audit.
 4. [pending] Open the focused PR, verify rendered preview HTML and hosted checks, then merge only after all required checks pass.
 
+# Production-ready AI agents article refinement — 2026-08-25
+
+1. [completed] Read the mandatory content workflow and inspect the canonical article, renderer, CSS, media inventory, published slugs, and production-readiness article.
+2. [completed] Rewrite `building-production-ready-ai-agents.mdoc` with a focused launch framework, goal/ownership/evidence/stage tables, one deterministic interaction, one FAQ section, contextual links, and a checklist.
+3. [completed] Pass 19 content tests, production build, diff hygiene, tracked-image inventory, HTTP 200 image check, FAQ count, and recommendation-dump audit.
+4. [pending] Open the focused PR, verify rendered preview HTML and hosted checks, then merge only after all required checks pass.
+
 # AI agent architecture article refinement — 2026-08-25
 
 1. [completed] Read the mandatory content workflow and inspect the canonical article, renderer, CSS, media inventory, published slugs, and architecture article.
