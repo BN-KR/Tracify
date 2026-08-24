@@ -47,5 +47,16 @@ Choose one primary archetype before outlining. The mandatory framework still app
 Use a small repertoire of recurring editorial modules rather than a single page recipe: fast answer, named model, numbered decision sequence, note or warning, code artifact, decision table, screenshot or diagram, worked example, FAQ accordion, and final action. Distribute these modules across the full article. Do not place every visual or interactive element in the opening section, and do not add a second widget when a static table or callout teaches the point better.
 
 For a practical library, lead with a small high-value set before the long collection, teach readers how to adapt the artifacts, group entries under descriptive H2/H3 headings, and make each entry independently useful. For a long definitive guide, alternate explanation with proof—screenshots, code, tables, or field notes—so no long stretch becomes undifferentiated prose. For a decision framework, carry one example through the stages so the reader sees the framework produce a decision.
+## Future-agent quality gate
+
+Agents editing blog content must follow this sequence and leave evidence for each stage:
+
+1. **Understand:** read `AGENTS.md`, the writing skill and its three references; inspect the current post, product source, published slugs, and media; state the reader job, outcome, boundary, archetype, and interaction.
+2. **Build:** preserve frontmatter and draft state; write Markdoc with layered H2/H3/H4 headings, useful evidence, tested or honestly labeled code, meaningful images, semantic tables, accessible accordion FAQs, decision notes, and one deterministic interaction.
+3. **Connect:** add 4–7 descriptive contextual links per 1,000 words for long-form posts, link only to existing published posts, finish with a checklist or next action, and include three eligible recommended posts.
+4. **Inspect:** render the entire page on desktop and mobile. Check the ToC, heading anchors, interactions, tables, code, images, links, recommendation cards, focus states, word wrapping, and page-level overflow.
+5. **Release:** run `npm run test:content`, `npm run lint`, `npm run build`, and `git diff --check`; review the exact diff for scope, drafts, fabricated claims, dead links, and untested examples before creating or merging the PR.
+
+If an item cannot be verified, the post is not finished. Explain the blocker or fix it before shipping.
 
 New posts must consider one purposeful interactive learning element at the point where it helps most: a trace/evaluation demo, an editable code sandbox, or a focused calculator, checklist, explorer, or scenario widget. Static prose is correct when reader-controlled state adds no value. Do not use MDX or raw JSX. Reuse an approved Markdoc tag, or add a validated tag in the centralized Markdoc configuration and map it to an accessible component in `src/components/blog/markdoc-rich-text.tsx`. Interactive examples must be deterministic and local; never execute arbitrary code on the server or access secrets or production data.
