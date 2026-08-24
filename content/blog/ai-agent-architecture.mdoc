@@ -3,6 +3,7 @@ title: "AI Agent Architecture: The Production Building Blocks"
 slug: ai-agent-architecture
 excerpt: A practical map of the model, tools, state, policy, and telemetry layers that make an AI agent understandable in production.
 publishedAt: 2026-08-20T09:00:00.000Z
+updatedAt: 2026-08-25T16:00:00.000Z
 author: Tracify Team
 draft: false
 categories: [engineering]
@@ -16,88 +17,55 @@ seo:
   metaDescription: Design an AI agent architecture with clear boundaries for state, tools, policy, evaluation, and observability.
 ---
 
-An AI agent is not just a prompt wrapped around a model. In production it is a control loop: receive a task, choose a next action, call a tool, inspect the result, and decide whether to continue or stop. The architecture should make each transition visible and testable.
+An AI agent is not just a prompt wrapped around a model. In production it is a control loop: receive a task, choose a next action, call a tool, inspect the result, and decide whether to continue or stop. This guide is for platform engineers designing tool-using workflows. It helps you choose boundaries that make decisions, side effects, state, and failures explainable. It does not prescribe one framework or claim that a diagram can replace policy and testing.
 
-{% trace-scenario title="Architecture decision point" prompt="A tool returns a valid response, but the user-visible task is still incomplete. What should the trace make obvious?" outcome="The trace should show the parent task, the model decision, the tool result, the state update, and the next terminal decision. A successful tool span is not the same thing as a successful task." /%}
+{% trace-scenario title="Architecture decision point" prompt="A tool returns a valid response, but the user-visible task is still incomplete. What should the trace make obvious?" outcome="The trace should show the parent task, model decision, tool result, state update, and next terminal decision. A successful tool span is not the same thing as a successful task." /%}
 
 ## At a glance
 
-This guide is for **platform engineers designing tool-using workflows**. It helps you **choose safe boundaries for tasks, tools, state, and evidence** so you can leave with **a reviewable architecture that makes decisions and failures explainable**.
-
-| Before you start | What to inspect | What good looks like |
+| Before you start | What to define | What good looks like |
 | --- | --- | --- |
-| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+| One real workflow and a consequential failure or release question | The task contract, allowed actions, state transitions, and evidence | A bounded control loop that can be tested, paused, and explained |
 
-### The AI agent architecture framework
+### The architecture framework
 
-Use **Contract → Boundary → State → Evidence** as the decision path:
+Use **Contract → Boundary → State → Evidence** as the design path:
 
-1. **Contract:** establish the task, context, or boundary before changing behavior.
-2. **Boundary:** make the relevant evidence or control explicit.
-3. **State:** compare the decision with a concrete example, trace, or test.
-4. **Evidence:** finish with an owner, rollback, escalation, or next action.
+1. **Contract:** define the task, allowed outcomes, side effects, and terminal states.
+2. **Boundary:** isolate model recommendations, policy decisions, tools, and untrusted data.
+3. **State:** carry only the facts needed for the next decision, with explicit transitions.
+4. **Evidence:** connect decisions, versions, side effects, and outcomes in one trace.
 
-> **Decision rule:** Define the task contract, isolate trust boundaries, make state explicit, and attach evidence to every consequential decision.
+> **Decision rule:** Define the task contract first, isolate trust boundaries, make state explicit, and attach evidence to every consequential transition.
 
-The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+## Map the six production layers
 
-## The six layers
+The exact implementation can vary, but each layer should have a clear responsibility:
 
-1. **Task boundary** defines the input, intended outcome, and terminal states.
-2. **Policy layer** decides what the agent may do and when approval is required.
-3. **Model layer** produces a structured next action, not an invisible side effect.
-4. **Tool layer** validates arguments, performs work, and returns typed results.
-5. **State layer** stores only the context needed for the next decision.
-6. **Evidence layer** records the run, spans, versions, costs, and outcome.
+| Layer | Responsibility | Boundary to protect |
+| --- | --- | --- |
+| Task | Defines input, intended outcome, and terminal states | User request versus internal assumptions |
+| Policy | Decides what is allowed and when approval is required | Model suggestion versus authorization |
+| Model | Produces a structured next-step recommendation | Generated output versus application control |
+| Tool | Validates arguments, performs work, and returns typed results | Untrusted arguments versus side effects |
+| State | Stores facts needed for the next decision | Current task state versus stale or unrelated memory |
+| Evidence | Records runs, spans, versions, costs, and outcomes | Telemetry versus sensitive or unauthorized data |
 
-This separation makes [AI agent observability](/blog/ai-agent-observability-complete-guide) a design property rather than a dashboard added after launch. It also gives [production-ready AI agents](/blog/building-production-ready-ai-agents) a concrete review surface.
-
-## A small control loop
-
-```ts
-type Decision = { tool?: string; input?: unknown; done?: boolean };
-
-async function runAgent(task: string) {
-  const trace = startTrace({ task, release: process.env.RELEASE ?? "local" });
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    const decision: Decision = await model.next({ task, state: trace.state });
-    if (decision.done) return trace.finish("success");
-    if (!decision.tool || !allowedTools.has(decision.tool)) return trace.finish("blocked");
-    const result = await tools[decision.tool](decision.input);
-    trace.span("tool", { name: decision.tool, result });
-    trace.state = reduceState(trace.state, result);
-  }
-  return trace.finish("limit_reached");
-}
-```
-
-The important detail is not the loop count. It is that every decision has a bounded path, a validated tool boundary, and a terminal status. Capture the same identifiers across model and tool spans so an investigator can reconstruct the run.
-
-## Where teams get stuck
-
-Shared mutable state makes retries hard to reason about. Unstructured tool outputs make the next model decision ambiguous. A single “success” flag hides partial failures. Fix those problems at the boundary: use typed results, explicit status values, immutable release identifiers, and an event schema that preserves parent-child relationships.
-
-Start with one workflow and one failure class. When a run is surprising, compare the trace with a healthy run before changing the prompt. That is the fastest way to learn whether the problem is policy, state, tool behavior, or model selection.
-
-## Architecture review checklist
-
-- Can you name the allowed tools and terminal states?
-- Does every side effect have an owner and an approval rule?
-- Can you compare two runs by release and input class?
-- Are retries bounded and visible?
-- Can a reviewer understand the result without reading application logs?
+This separation makes [AI agent observability](/blog/ai-agent-observability-complete-guide) an architectural property rather than a dashboard added after launch. It also gives [production-ready AI agents](/blog/building-production-ready-ai-agents) a concrete review surface. A layer may share code with another layer, but its contract should remain inspectable.
 
 ## Begin with a task contract
 
-The task boundary is the first architectural decision. Write down what enters the system, what the system is expected to produce, what side effects are allowed, and what counts as a terminal result. “Answer the user” is not enough for a support agent that may search an account, create a case, or hand work to a human. The contract should distinguish a completed answer, a clarification request, a policy refusal, a dependency failure, and an operator handoff.
+Write down what enters the system, what it should produce, what side effects are allowed, and what counts as a terminal result. “Answer the user” is not enough for a support agent that may search an account, create a case, or hand work to a person. Distinguish a completed answer, clarification request, policy refusal, dependency failure, and operator handoff.
 
-This contract gives every downstream component a stable reason to exist. The model chooses among allowed next steps. Tools implement those steps. State carries facts forward. Telemetry proves which path occurred. When a team skips the contract, each layer invents its own definition of success and the system becomes difficult to test. A tool can return HTTP 200 while the task is still wrong; a model can produce fluent text while the policy layer should have stopped it.
+### Use explicit terminal states
 
-Use a small state machine even if the implementation is ordinary application code. Name states such as `received`, `planning`, `awaiting_tool`, `awaiting_approval`, `completed`, `blocked`, and `failed`. Transitions should have an owner and a reason. This is more useful than a giant diagram because it can be reflected in code, metrics, evaluations, and an incident timeline.
+Even ordinary application code benefits from a small state machine. Name states such as `received`, `planning`, `awaiting_tool`, `awaiting_approval`, `completed`, `blocked`, and `failed`. Each transition should have a reason and an owner. This is more useful than a large diagram that no code, test, or runbook reflects.
+
+The contract gives every downstream component a stable reason to exist. The model chooses among allowed next steps. Tools implement those steps. State carries facts forward. Evidence proves which path occurred. Without the contract, each layer invents its own definition of success: a tool can return HTTP 200 while the task is wrong, and a fluent model response can still violate policy.
 
 ## Keep the model inside a decision boundary
 
-The model should recommend a next action, not directly perform an irreversible one. Return a typed decision with an explicit action kind, tool name, validated arguments, and a reason or confidence signal where that signal is meaningful. The application decides whether that recommendation is allowed. This separation makes it possible to change models without changing the permission model and to replay a decision against a new policy.
+The model should recommend a next action, not directly perform an irreversible one. Return a typed decision with an explicit action kind, tool name, validated arguments, and a reason where that reason is meaningful. The application decides whether the recommendation is allowed. This separation makes it possible to change models without silently changing the permission model.
 
 ```ts
 type AgentStep =
@@ -106,184 +74,118 @@ type AgentStep =
   | { kind: "answer"; text: string; citations: string[] }
   | { kind: "stop"; status: "blocked" | "failed"; reason: string };
 
-function decideNext(step: AgentStep, policy: Policy) {
-  if (step.kind === "search") return policy.allowsRead(step.query) ? step : { kind: "stop", status: "blocked", reason: "read-policy" };
-  if (step.kind === "request_approval") return policy.requiresApproval(step.action) ? step : { kind: "stop", status: "blocked", reason: "approval-policy" };
-  return step;
+function allowed(step: AgentStep, policy: Policy): AgentStep {
+  if (step.kind === "search" && policy.allowsRead(step.query)) return step;
+  if (step.kind === "request_approval") return step;
+  if (step.kind === "answer" && step.citations.length > 0) return step;
+  return { kind: "stop", status: "blocked", reason: "policy-or-evidence" };
 }
 ```
 
-The example is intentionally small. In a real system, schema validation must happen before the policy check, and the tool must validate its own arguments again. The important architectural property is the order: parse, validate, authorize, execute, record.
+This is an illustrative TypeScript shape, not a drop-in implementation: `Policy` must be supplied by the application and each tool needs its own argument and authorization validation. The important contract is that a model-produced value is still untrusted until the application checks it.
+
+> **Boundary note:** A policy check should happen at the side-effect boundary, immediately before execution. Earlier model confidence or a previous approval does not authorize a changed argument or stale state.
 
 ## Design tools as product boundaries
 
-A tool is not merely a function the model can call. It is a product surface with a name, description, schema, timeout, retry policy, authorization rule, audit requirement, and owner. The tool should return a typed result that says whether the operation succeeded, partially succeeded, or was rejected. Avoid returning an unbounded blob and asking the model to infer what happened. A narrow result is easier to summarize and much easier to evaluate.
+A tool is more than a function the model can call. It is a product boundary with an input contract, permission model, timeout, idempotency behavior, typed result, and failure class. Return enough structured information for the next decision without copying unrestricted payloads into every model context or trace.
 
-Separate read tools from mutation tools. A search tool may be safe to call automatically, while updating a customer record may require a confirmation or a human approval. Give destructive tools different credentials and a different trace classification. If every tool shares the same client and permission, the architecture has no meaningful safety boundary even if the prompt says “be careful.”
+### Make side effects reviewable
 
-Tool ownership also matters operationally. When an agent slows down, the owner needs to know whether the cause is model latency, tool queueing, a third-party dependency, or a retry rule. Record tool name, version, argument shape, dependency, duration, status, and retry number. Do not record secrets merely because they appear in arguments; redact them at the instrumentation boundary.
+For read operations, record the resource class, authorization result, and freshness signal. For writes, record the proposed action, validation result, approval or policy decision, idempotency key, and terminal outcome. A tool success should not automatically finish the parent task; the workflow still needs to evaluate whether the intended outcome was reached.
+
+| Tool event | What to preserve | Why it matters |
+| --- | --- | --- |
+| Requested | tool name, argument schema, parent run | Shows what the model proposed |
+| Authorized | policy version, actor, approval state | Shows why execution was allowed |
+| Executed | duration, dependency status, idempotency key | Separates work from recommendation |
+| Returned | typed result class, freshness, validation | Shows what the next decision actually saw |
+| Applied | state change and user-visible effect | Connects side effect to task outcome |
 
 ## Treat state as an explicit interface
 
-State is where many agent architectures become opaque. A growing conversation transcript is not a state model. Define which facts are required for the next decision, which facts are derived, and which facts must be read again from a source of truth. Keep transient reasoning separate from durable business state. A workflow status or approval record should not exist only in a prompt string.
+State should contain the facts needed for the next decision, not an unbounded transcript that every component interprets differently. Separate current task state from durable user or domain state. Mark source, freshness, version, and authority when a stale or user-controlled value could change the action.
 
-Use reducers or explicit transitions to update state. Each update should say what changed and why. This makes retries safer: the retry can see the same stable state instead of accidentally applying a side effect twice. Include an idempotency key for mutations and make the terminal state durable before acknowledging completion to the caller.
+### Make retries safe
 
-Context windows are an architectural budget. More context can improve recall, but it can also increase latency, token cost, and instruction confusion. Measure which retrieved or remembered fields affect the final decision. Remove fields that are never used, expire facts that become stale, and preserve source identifiers so an investigator can see what the model was given.
+Shared mutable state makes retries hard to reason about. Use explicit transition events, bounded attempts, and idempotency keys for side effects. A retry should say what failed, what changed, and whether repeating the action is safe. Do not allow a model to infer completion from a partial state update.
+
+The state model should also describe degraded paths: missing evidence, dependency timeout, invalid tool result, approval expiry, and budget exhaustion. A named fallback is easier to test and explain than an implicit “try again” branch.
 
 ## Make evidence part of the architecture
 
-Observability should be present at the same boundary where decisions happen. Start one parent run for the user task and create child spans for model calls, retrieval, tools, validation, approvals, retries, and final evaluation. Carry the run ID through asynchronous queues and external tool clients. A collection of independent logs cannot answer the question “why did this task end this way?”
+Telemetry is not a decorative afterthought. Record the parent task, child model and tool spans, state transitions, policy and prompt revisions, release identifier, retry history, cost, latency, and final outcome. Redact sensitive values and restrict access according to the consequences of the data being stored.
 
-At minimum, record environment, release, prompt revision, model, provider, input class, start and end time, token usage, cost, status, and error class. Add raw inputs only under an explicit retention and redaction policy. The value of a trace is not the amount of data it contains. It is the short path from a surprising outcome to a defensible next action.
+### Connect evidence to a decision
 
-The [AI agent observability guide](/blog/ai-agent-observability-complete-guide) gives the wider operating model, and [debugging AI agents in production](/blog/debug-ai-agents-in-production) shows how to use a run during an incident. Keep those concepts connected in the architecture: a release marker recorded in telemetry should also identify the prompt, tool schema, and policy version used by the run.
+An investigator should be able to answer: what task was attempted, which decision changed the path, what evidence supported it, which boundary was applied, and who owns the next action? If a field cannot help answer one of those questions, defer it until a real investigation requires it. The trace shape in [LLM tracing explained](/blog/llm-tracing-explained) provides the parent-child model; [prompt injection defense](/blog/prompt-injection-defense) covers the trust boundary for untrusted instructions and tool inputs.
 
 ## Choose a control-loop shape
 
-Most systems fit one of three shapes. A linear workflow uses a model for bounded decisions between fixed application steps. A planner-executor loop lets the model choose several actions but needs strict step limits and validation. A delegated graph assigns different sub-tasks to specialized nodes and needs clear ownership for shared state. Choose the smallest shape that expresses the real task. A free-form loop is not a sign of sophistication if a deterministic workflow would be easier to inspect.
+There is no single correct orchestration shape. Choose based on the task contract and failure cost:
 
-The control-loop shape determines your test strategy. Linear workflows can use scenario tests around each branch. Planner-executor systems need traces that assert tool order, stop conditions, and budget limits. Graphs need tests for handoff, duplicate work, and partial failure. In all cases, include a run-level outcome assertion; a test that only checks the final model text can miss an unsafe path that happened before the answer was produced.
+| Shape | Useful when | Risk to control |
+| --- | --- | --- |
+| Single decision | One model call can produce a bounded answer | Hidden validation or missing evidence |
+| Tool loop | The task requires lookup or action across several steps | Unbounded retries and state drift |
+| Planner/executor | The work benefits from a separable plan and execution phase | Stale plans and overly broad authority |
+| Human handoff | Ambiguity or consequence exceeds the automation boundary | Reviewer overload or unclear resume behavior |
+
+Keep the loop bounded by attempts, time, cost, and allowed transitions. A more elaborate architecture is not automatically safer; it may add more state and more failure surfaces.
+
+### A small control loop
+
+```text
+receive task
+  ↓
+validate contract and policy
+  ↓
+model recommends next step ──→ blocked / approval required
+  ↓
+validate tool arguments
+  ↓
+execute bounded tool action
+  ↓
+record result and update state
+  ├─ task complete → final outcome
+  └─ more work     → next bounded iteration
+```
+
+The diagram is intentionally simple. Every arrow should correspond to a testable transition and a trace event. If the team cannot name the stop condition, the loop is not ready for production traffic.
 
 ## Plan for degraded dependencies
 
-Production architecture assumes that models, tools, queues, and storage will fail independently. Define what the agent does when retrieval is unavailable, a tool times out, a provider returns a rate limit, or an evaluator cannot run. A fallback may be a cached answer, a clarification request, a human handoff, or a safe stop. Do not let a generic exception handler turn every error into another model call.
+Design the unhappy path before the happy path is polished. A dependency can be slow, return a valid-looking but wrong result, change its schema, or become unavailable after the agent has already made a decision. For each case, define the user explanation, safe fallback, owner, retry policy, and evidence to preserve.
 
-Bound retries by attempt count, elapsed time, and cost. Change something meaningful between attempts—such as provider, timeout, or input—not just the number attached to the log line. Record the retry decision as a span so cost and latency reports can explain why a task became expensive. The reliability patterns in [failures, retries, and guardrails](/blog/ai-agent-reliability-failures-retries-guardrails) are useful here, but the architecture must make those controls executable.
+Do not hide a policy refusal as a provider error. Do not retry a deterministic schema failure as if it were a network timeout. Do not continue after a missing approval because the model sounds confident. These distinctions are what make an architecture controllable under pressure.
 
-## A staged architecture review
+> **Failure rule:** Every degraded path must end in a named state. If the system can only “keep trying,” it has no reliable boundary.
 
-Review the system in four passes. First, ask whether the task contract and terminal states are unambiguous. Second, inspect each tool for schema, authorization, idempotency, and ownership. Third, replay a failed trace and confirm that the state and decision transitions are visible. Fourth, run a representative evaluation suite with the same release, prompt, model, and tool versions that production will use.
+## Review the architecture before launch
 
-Do not approve an architecture because the happy path is impressive. Ask what evidence would prove a failure was caused by the model rather than the tool, whether a human can stop a consequential action, and how a release would be rolled back. If the answer requires reading five unrelated logs or asking the original author, the architecture is missing an interface.
+Start with one workflow and one failure class. Review a successful, degraded, and failed run using only the recorded evidence. Then ask whether the architecture can explain the difference without tribal knowledge.
 
-## What good looks like after launch
+### Production checklist
 
-After launch, an engineer should be able to open one run and answer: what task arrived, what policy applied, what the model proposed, which tools ran, what state changed, where the run slowed down, what it cost, and why it stopped. A product owner should be able to compare task outcomes across releases. An operator should know which bounded action to take when a signal moves.
+- Can you name the task contract and terminal states?
+- Does every model recommendation pass through policy and argument validation?
+- Does every side effect have an owner, authorization rule, and idempotency behavior?
+- Is state explicit, bounded, versioned, and safe to retry?
+- Can you compare runs by release, workflow, input class, and outcome?
+- Are queue, model, tool, validation, and approval events connected?
+- Does every degraded path end in a safe, observable state?
+- Can an operator pause, resume, or roll back the workflow?
 
-That is the test of an AI agent architecture. It is not whether the system contains a model, a vector database, or a planner. It is whether the boundaries make behavior legible enough to improve without guessing.
-## Architecture review: a field guide
-
-This extended guide applies the same production discipline to architecture: task contracts, trust boundaries, state ownership, and degraded execution.
-
-## Start with the failure you need to prevent
-
-A strong agent architecture practice begins with a failure that matters to a user. Write the failure in observable terms: the task stopped, the wrong action happened, the answer lacked evidence, the reviewer could not decide, or the system consumed more resources than the outcome justified. This wording gives the team a testable target and prevents the article from drifting into a collection of attractive but disconnected recommendations.
-
-## Name the boundary
-
-Most production incidents happen at a boundary: model to application, application to tool, retrieved data to instruction, browser action to page state, or metric to operational decision. For agent architecture, draw that boundary in plain language before choosing an implementation. Identify what is trusted, what is untrusted, what must be validated, and what evidence crosses the boundary. A boundary that cannot be named cannot be monitored consistently.
-
-## Preserve the decision context
-
-A final answer or status flag rarely explains a failure by itself. Preserve the inputs, versions, policies, selected evidence, attempted actions, retries, and resulting state that shaped the decision. For agent architecture, use stable identifiers and redaction so an investigator can reconstruct the path without copying secrets into every log line. The goal is not maximal data collection; it is enough context to test a plausible explanation.
-
-## Measure the user-visible outcome
-
-Choose a primary outcome for agent architecture and define it before choosing a dashboard. Completion, correctness, groundedness, safe refusal, review quality, time to useful result, and cost per successful task answer different questions. Pair the outcome with failure dimensions such as model version, prompt version, cohort, provider, tool, language, and task type. An aggregate score is useful only when a person can move from the score to representative traces.
-
-## Make the unhappy path explicit
-
-A mature agent architecture workflow names what happens when evidence is missing, a dependency is slow, a schema changes, a permission is denied, a reviewer does not respond, or the system cannot establish confidence. These are product states, not merely exceptions. Give each state an owner, a user-facing explanation, a safe fallback, and a trace event. This is how a graceful degradation policy becomes something an operator can verify.
-
-## Use small, reviewable examples
-
-Examples teach the boundary faster than abstract claims. Keep a representative agent architecture example small enough to inspect, but include the field that changes the decision. Show the expected result and one plausible failure. Explain which part is illustrative and which part should be adapted to the repository. Avoid examples that imply a guarantee the implementation cannot make; precision is more persuasive than spectacle.
-
-## Test variation deliberately
-
-The happy path is only one member of the agent architecture distribution. Add cases for empty input, ambiguous intent, stale state, partial failure, duplicate work, adversarial content, long context, and a dependency that returns a valid-looking but wrong result. Test cohorts and release versions separately. When behavior is probabilistic, record the evidence and evaluator version so a changed score can be distinguished from a changed system.
-
-## Roll out in stages
-
-Use shadow mode, a narrow cohort, explicit comparison, and a rollback condition when changing agent architecture. Shadow mode reveals what the system would have done without changing user behavior. A cohort exposes regressions hidden by averages. A rollback condition turns caution into an operational decision. Keep the release, prompt, model, data, and configuration identifiers together so the comparison remains meaningful after deployment.
-
-## Create a learning loop
-
-Production feedback should become a queue of explainable cases for agent architecture, not a pile of screenshots or vague tickets. Attach the user report, trace, expected behavior, actual behavior, and disposition. Classify the mechanism, add a compact regression case when appropriate, and record whether the fix changed code, data, prompt, policy, or operations. This closes the loop between observability and engineering instead of treating incidents as isolated surprises.
-
-## Review the economics and ownership
-
-Every agent architecture decision has an operating cost. Include reviewer time, evaluator calls, storage, retries, provider spend, and the cost of a wrong action when they matter. Assign an owner for quality, reliability, security, and budget signals. A workflow is not production-ready because it can run; it is ready when the organization can understand, afford, and improve it.
-
-## Build the runbook around evidence
-
-The runbook for agent architecture should begin with the trace or artifact an operator opens, then provide a short decision tree. If the parent task is missing, investigate ingestion. If the task exists but the child span is missing, inspect propagation. If evidence is present but the outcome is wrong, compare versions and evaluator results. Keep the first response steps concrete and link to the source of truth rather than asking an operator to search the whole repository.
-
-## Know when not to automate
-
-Automation is not always the correct endpoint for agent architecture. If the consequence is irreversible, the evidence is incomplete, or the policy cannot be expressed safely, stop and route to a person or a trusted system. A bounded refusal is often a better product result than a confident action. Document the boundary so future optimization does not quietly remove the control that made the workflow acceptable.
-
-## A practical review sequence
-
-Review agent architecture in this order: define the task, identify boundaries, preserve evidence, measure the outcome, exercise failures, test variation, stage the rollout, and assign ownership. The sequence matters because a polished implementation with no observable outcome is difficult to validate, while a clear contract makes later instrumentation and testing much cheaper.
-
-## Final field checklist
-
-Before shipping agent architecture, confirm that the happy path and degraded paths are documented, the rendered page or workflow is accessible, examples are safe to copy, identifiers are stable, sensitive values are redacted, links point to canonical content, and a real person can investigate one representative failure. Then run the repository checks and review the exact diff. Quality is the combination of useful behavior, explainable evidence, and a release process that can recover.
-## Questions to ask in review
-
-Ask whether the current architecture design makes the next failure easier or harder to explain. Where is the source of truth? Which value is user-controlled? Which decision is irreversible? What happens when a dependency returns a partial result? Which version can be rolled back? These questions expose missing contracts faster than adding another dashboard or another prompt instruction.
-
-## The smallest useful implementation
-
-Start with the smallest implementation that creates evidence for architecture. One parent run, a few stable fields, one representative fixture, and one clear outcome are often enough to reveal the largest gap. Expand only when a real investigation needs another dimension. This keeps instrumentation affordable and prevents the team from confusing volume of telemetry with quality of understanding.
-
-## Keep the page and system honest
-
-Documentation about architecture should describe the behavior a reader can actually reproduce. Mark illustrative examples clearly, keep names consistent, and avoid claims that depend on an unmentioned environment. On the rendered page, make the important artifact easy to inspect: use a labelled code block, a readable trace scenario, or a compact decision table. The presentation is part of the teaching contract.
-
-## Accessibility is a reliability feature
-
-A architecture workflow should remain understandable when a reader cannot hover, drag, or run the example. Provide a static explanation, meaningful labels, visible focus, keyboard access, and mobile-safe overflow. The same principle applies in production: a trace should expose text and structured fields, not require an operator to infer meaning from color or animation alone.
-
-## Signals that justify a change
-
-Change architecture when evidence shows a repeated failure mechanism, a measurable user benefit, or an unacceptable operational cost. Record the baseline, candidate, cohort, and decision owner. If the change improves one dimension while harming another, state the trade-off instead of hiding it in an average. This creates a durable record future agents can use when the same decision returns.
-
-## Closing principle
-
-The best architecture practice makes good behavior easier to produce and bad behavior easier to see. It gives the user a useful outcome, gives the operator an explainable trace, and gives the team a safe way to improve the system. That is the standard to apply when reviewing both the implementation and this article.
-## Turn principles into an operating artifact
-
-A principle becomes useful when someone can apply it during a real change. For this topic, create a compact artifact: a trace field list, a test fixture, a rollout table, a budget rule, a review form, or a runbook. Keep the artifact close to the decision it supports. If it lives in a separate document with no owner, it will become stale while the system continues to change.
-
-## Compare like with like
-
-When evaluating a change, compare the same task distribution, evidence policy, model or release metadata, and outcome definition. A baseline gathered from easy cases cannot prove an improvement on difficult cases. Preserve the sampling rule and the exclusions. When the data is sparse, say so; a small honest sample is more useful than a precise-looking number that hides its uncertainty.
-
-## Make failure visible to the right person
-
-Visibility is not the same as exposure. A user needs a clear explanation and safe next step. An operator needs a trace, timing, versions, and likely cause. An engineer needs a reproducible fixture. A security owner needs the trust boundary and containment event. Design the evidence for the person who must act, and avoid copying sensitive content into places where no action is possible.
-
-## Review changes as a system
-
-A prompt, model, schema, retrieval index, browser selector, evaluator, and dashboard threshold can each change behavior. Review the connected system rather than approving one file in isolation. Record what changed, which outcomes could move, which tests cover the risk, and how to revert. This practice keeps small changes from becoming untraceable production behavior.
-
-## The standard for completion
-
-Completion means more than a passing happy-path test. A reader should understand the contract, an operator should be able to investigate a failure, and the team should have a bounded path to improve or roll back the behavior. Apply that standard to the article too: the examples should render clearly, the interaction should teach something, the image should have a job, and the validation command should pass.
-
-
-
-## Put this guidanceThe Production Building Blocks into practice
-
-### A small release checklist
-
-- Define the user-visible outcome and the boundary this article does not cover.
-- Capture the evidence needed to explain movement, including the relevant version, cohort, and failure class.
-- Assign one owner for the next bounded action and write the stop condition before changing production behavior.
-
-> **Decision rule:** Prefer the smallest change that produces inspectable evidence. If the example cannot be tested, label it illustrative and verify the surrounding assumptions before adapting it.
+> **Decision rule:** Start with the smallest architecture that makes one real failure explainable. Add a layer only when it owns a distinct contract or removes a demonstrated risk.
 
 ## Frequently asked questions
 
-{% faq-item question="What should I do first?" answer="Start with one real workflow and one user-visible outcome. Write down the boundary, collect the evidence that explains the outcome, and choose a reversible next step before expanding the system." /%}
+{% faq-item question="Does every AI agent need a planner and executor?" answer="No. Choose the simplest control-loop shape that satisfies the task contract and consequence boundary. A planner adds coordination and state, so use it only when the work benefits from that separation." /%}
 
-{% faq-item question="How do I know whether this is working?" answer="Compare the same task distribution before and after the change. Review quality, latency, cost, failure behavior, and user impact together, and preserve the release or prompt version that produced each result." /%}
+{% faq-item question="Where should authorization happen?" answer="At the side-effect boundary, immediately before execution, after validating the current arguments and state. Model output, earlier confidence, and stale approval should not authorize a changed action." /%}
 
-{% faq-item question="What is the most common mistake?" answer="Treating a metric, model response, or successful tool call as the outcome. Keep the user task, trace evidence, owner, and bounded response connected so the team can explain and improve the complete workflow." /%}
+{% faq-item question="What should the trace root represent?" answer="Usually the user-visible task or calling-system objective. Model, retrieval, tool, validation, approval, and state-transition events should appear as connected children when they shape the outcome." /%}
 
-## Recommended next reads
+## Next step: review one control loop
 
-Continue with [building production ready ai agents](/blog/building-production-ready-ai-agents), [AI agent observability](/blog/ai-agent-observability-complete-guide), [AI agent observability](/blog/ai-agent-observability-complete-guide). Choose the one that matches the next decision in your workflow rather than opening every guide at once.
+Choose one tool-using workflow and write its task contract, allowed actions, state transitions, terminal states, and evidence fields on one page. Then compare one successful and one failed run. The missing boundary will usually be more valuable than another model instruction or another dashboard panel.
