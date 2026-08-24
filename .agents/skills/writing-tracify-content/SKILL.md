@@ -65,3 +65,30 @@ npm run build
 ```
 
 For internal Markdown, run relevant commands/examples and `git diff --check`. For public docs, also inspect the actual `/docs` route and affected slug in a browser. Report any pre-existing verification failure separately.
+
+## Mandatory future-agent quality gate
+
+Every future content agent must complete this gate before calling a blog post finished. Treat each item as a release requirement, not a suggestion.
+
+### Before writing
+
+- Read `AGENTS.md`, this skill, `references/content-map.md`, `references/quality-bar.md`, and `references/interactive-content.md`.
+- Inspect the current article, published slugs, product implementation, and available media before making claims or choosing examples.
+- Write down the reader, their job, the promised outcome, the article boundary, the chosen article archetype, and the one interaction that earns its place.
+
+### While writing
+
+- Preserve frontmatter and publication state. Use CommonMark/Markdoc only; never raw JSX, MDX, fake capabilities, or unverified runnable code.
+- Build visible hierarchy: H2 sections, H3 subsections, and H4 detail only when the layer helps the reader navigate. Keep the generated table of contents readable and structured.
+- Use concrete evidence throughout the article: useful code, semantic tables, formulas, trace examples, screenshots, diagrams, or decision notes. A code block must be tested or clearly labeled illustrative and must teach an adaptable action.
+- Add one deterministic, accessible interaction at the point of need. It must work without secrets, production data, arbitrary code execution, or a network dependency.
+- Add meaningful images with descriptive alt text. Keep FAQ content in the shared accordion pattern. Use notes for rules, limits, trade-offs, and next actions instead of decorative callouts.
+- For long-form posts, target 4–7 contextual internal links per 1,000 words, using descriptive anchors to existing published posts. Never use a link dump, self-link, bare URL, “click here,” or “read more.”
+- End with a practical checklist or next action and three useful recommended posts when eligible targets exist.
+
+### Before shipping
+
+- Render the complete article and inspect it at desktop and mobile widths. Confirm no page-level horizontal overflow, no mid-word breaking, readable tables and code, visible focus states, a usable ToC, working accordions/interactions, images, links, and recommendation cards.
+- Run `npm run test:content`, `npm run lint`, `npm run build`, and `git diff --check`. Re-run after any review fix.
+- Audit the final diff for accidental drafts, missing assets, fabricated claims, dead links, duplicated sections, decorative modules that do not teach, and changes outside the requested scope.
+- Do not open or merge a PR until the rendered behavior and all required checks are evidenced. Record any pre-existing failure separately instead of hiding it.
