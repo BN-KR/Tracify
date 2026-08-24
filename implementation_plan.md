@@ -948,3 +948,10 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 2. [completed] Replace duplicated article sections with a concise reader/job/outcome/boundary structure and truthful tracing examples.
 3. [completed] Verify content contracts, internal links, FAQ count, image inventory, image HTTP status, and diff scope.
 4. [pending] Run the full build and rendered desktop/mobile route checks with the required Convex environment configured, then open a focused PR.
+
+# LLM observability metrics refinement — 2026-08-25
+
+1. [completed] Establish a clean branch from the merged LLM tracing baseline.
+2. [completed] Replace duplicated article sections with an outcome-led metric selection and response framework.
+3. [completed] Verify Markdoc contracts, links, interaction, image, build, and diff evidence.
+4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
