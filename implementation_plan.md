@@ -956,6 +956,13 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 3. [completed] Verify Markdoc contracts, links, interaction, image, build, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
+# Production-ready AI agents article refinement — 2026-08-25
+
+1. [completed] Establish a clean branch from the merged architecture baseline.
+2. [completed] Replace duplicated article sections with a measurable production-readiness and stewardship guide.
+3. [completed] Verify Markdoc contracts, links, interaction, image, build, lint result, and diff evidence.
+4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
+
 # AI agent architecture article refinement — 2026-08-25
 
 1. [completed] Establish a clean branch from the merged latency baseline.
