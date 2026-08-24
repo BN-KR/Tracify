@@ -2,6 +2,7 @@
 
 let apiKey = "";
 const listeners = new Set<() => void>();
+const ONE_TIME_API_KEY_STORAGE_KEY = "tracify.onboarding.apiKey";
 
 function emit() {
   for (const listener of listeners) {
@@ -11,10 +12,17 @@ function emit() {
 
 export function setOneTimeApiKey(value: string) {
   apiKey = value;
+  if (typeof window !== "undefined") {
+    window.sessionStorage.setItem(ONE_TIME_API_KEY_STORAGE_KEY, value);
+  }
   emit();
 }
 
 export function getOneTimeApiKey() {
+  if (apiKey) return apiKey;
+  if (typeof window !== "undefined") {
+    apiKey = window.sessionStorage.getItem(ONE_TIME_API_KEY_STORAGE_KEY) ?? "";
+  }
   return apiKey;
 }
 
@@ -24,6 +32,9 @@ export function hasOneTimeApiKey() {
 
 export function clearOneTimeApiKey() {
   apiKey = "";
+  if (typeof window !== "undefined") {
+    window.sessionStorage.removeItem(ONE_TIME_API_KEY_STORAGE_KEY);
+  }
   emit();
 }
 

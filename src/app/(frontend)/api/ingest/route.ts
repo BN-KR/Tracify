@@ -181,8 +181,16 @@ export async function POST(request: NextRequest) {
   let quota;
   try {
     quota = await consumeRateLimit(`ingest:${project._id}`, 1, INGEST_LIMIT_PER_MINUTE, 60);
-  } catch {
-    return Response.json({ error: "Ingestion quota service unavailable" }, { status: 503 });
+  } catch (error) {
+    if (process.env.NODE_ENV === "production") {
+      return Response.json({ error: "Ingestion quota service unavailable" }, { status: 503 });
+    }
+    console.warn("Ingestion quota service unavailable in development; accepting with a local fallback:", error);
+    quota = {
+      allowed: true,
+      remaining: Math.max(0, INGEST_LIMIT_PER_MINUTE - 1),
+      retryAfterSeconds: 60,
+    };
   }
   if (!quota.allowed) {
     return Response.json(
@@ -257,6 +265,60 @@ export async function POST(request: NextRequest) {
     }
   } catch (err) {
     console.error("Inngest send failed (span accepted but not queued):", err);
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        await convex.mutation(api.agentRuns.upsertRunFromSpan, {
+          runId: payload.runId,
+          projectId: projectDocId,
+          costUsd: payload.costUsd ?? 0,
+          spanType: payload.spanType,
+          createdAt: payload.createdAt,
+          modelId: payload.modelId,
+          sessionId: payload.sessionId,
+          environment: payload.environment,
+          release: payload.release,
+        });
+        await convex.mutation(api.analyticsCache.upsertRunSpanCache, {
+          projectId: projectDocId,
+          runId: payload.runId,
+          runStatus: payload.spanType === "error" ? "failed" : payload.spanType === "run_end" ? "completed" : "running",
+          spans: [{
+            spanId: payload.spanId,
+            runId: payload.runId,
+            projectId: String(projectDocId),
+            spanType: payload.spanType,
+            input: jsonString(payload.input),
+            output: jsonString(payload.output),
+            attachments: JSON.stringify(payload.attachments ?? []),
+            latencyMs: payload.latencyMs,
+            costUsd: payload.costUsd ?? 0,
+            modelId: payload.modelId ?? "",
+            toolName: payload.toolName ?? "",
+            parentSpanId: payload.parentSpanId ?? "",
+            metadata: payload.metadata ?? {},
+            inputTokens: payload.inputTokens ?? 0,
+            outputTokens: payload.outputTokens ?? 0,
+            ttftMs: payload.ttftMs ?? 0,
+            retryCount: payload.retryCount ?? 0,
+            errorType: payload.errorType ?? "",
+            errorMessage: payload.errorMessage ?? "",
+            isStreamChunk: payload.isStreamChunk ?? false,
+            streamSequence: payload.streamSequence ?? 0,
+            streamFinal: payload.streamFinal ?? true,
+            payloadFormat: payload.payloadFormat ?? "json",
+            stackTrace: payload.stackTrace ?? "",
+            timedOut: payload.timedOut ?? false,
+            timeoutMs: payload.timeoutMs ?? 0,
+            createdAt: payload.createdAt,
+          }],
+          refresh: "normal",
+          apiKeyHash: hashApiKey(apiKey),
+        });
+        console.warn("Development ingest fallback persisted the run summary directly to Convex.");
+      } catch (fallbackError) {
+        console.error("Development ingest fallback could not persist the run summary:", fallbackError);
+      }
+    }
   }
 
   return Response.json(

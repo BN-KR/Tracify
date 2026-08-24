@@ -64,21 +64,18 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 `/sign-in`, `/sign-up` — Clerk auth pages
 `/onboarding`, `/onboarding/project`, `/onboarding/api-key`, `/onboarding/install`, `/onboarding/waiting`, `/onboarding/success`
 
-## Useful Pages This Project is Missing
-- **`/integrations`** — Document existing integrations (Slack, Tinybird, Redis, Convex) and planned ones (Email, PagerDuty, Discord). The product has a real Slack integration but no discoverable listing page.
-- **`/contact` or `/sales`** — Enterprise plan exists (Pricing page shows "Contact us") but there is no contact form, email, or calendly link. Essential for converting Enterprise inquiries.
-- **`/security`** — SaaS platform with enterprise plans needs a security page covering data handling, encryption, SOC2 roadmap (mentioned in honest disclaimer), retention, and compliance posture.
-- **`/status`** — An observability product should eat its own dog food with a public status page for API/ingest uptime.
+## Public product pages
+`/integrations`, `/contact`, `/security`, and `/status` are implemented public surfaces. Keep their claims grounded in the actual integrations, support path, security posture, and regional health checks; do not reintroduce them as missing-page work.
 
 ## Gotchas
 - **Next.js 16 breaking changes.** Read `node_modules/next/dist/docs/` before writing Next.js code.
 - **Convex `_generated/` bindings are committed to git.** Run `npx convex codegen` after schema changes.
-- **No test framework** configured. `npm run smoke:beta` is the only verification script.
+- **Verification is layered.** Node contract/content tests, Playwright E2E tests, `npm run smoke:beta`, and `scripts/platform-smoke.mjs` are available; provider-backed checks still require their documented credentials.
 - **Convex + Clerk auth mismatch** is the most common production issue. See `docs/troubleshooting-convex-clerk-auth.md`.
 - **`scripts/`** and **`scratch/`** excluded from TypeScript compilation.
 - **`convex/auth.config.ts`** must point to the correct Clerk issuer per environment.
 - **Turbopack may OOM** on Windows during `npm run build` (Rust panic in `globals.css`). This is a system memory issue, not a code problem — use `npm run dev` to verify compilation.
-- **Marketing product feature pages** (`/product/[feature]`) are placeholders — they show "under construction" copy. Don't expect real content there.
+- **Marketing product feature pages** (`/product/[feature]`) have feature-specific content; update the relevant page and its metadata when changing a product surface.
 - **SDKs** (`packages/ts-sdk/`, `packages/python-sdk/`) are built but not yet published to npm/PyPI.
 
 ## Git workflow

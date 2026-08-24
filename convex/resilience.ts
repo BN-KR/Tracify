@@ -185,13 +185,28 @@ export const getRun = query({
   },
 });
 
-const failureMixValidator = v.object({
-  success: v.number(),
-  timeout: v.number(),
-  "429": v.number(),
-  "500": v.number(),
-  cost_overrun: v.number(),
-});
+const failureMixValidator = v.record(
+  v.string(),
+  v.number(),
+);
+
+function normalizeFailureMix(value: Record<string, number>): FailureMix {
+  const modes: FailureMode[] = ["success", "timeout", "429", "500", "cost_overrun"];
+  const keys = Object.keys(value);
+  if (keys.length !== modes.length || keys.some((key) => !modes.includes(key as FailureMode))) {
+    throw new Error("failureMix must contain exactly success, timeout, 429, 500, and cost_overrun");
+  }
+  for (const mode of modes) {
+    if (!Number.isFinite(value[mode])) throw new Error(`failureMix.${mode} must be a finite number`);
+  }
+  return {
+    success: value.success,
+    timeout: value.timeout,
+    "429": value["429"],
+    "500": value["500"],
+    cost_overrun: value.cost_overrun,
+  };
+}
 
 const policySnapshotValidator = v.object({
   enforcementMode: v.union(v.literal("observe"), v.literal("enforce")),
@@ -215,12 +230,13 @@ export const createRun = mutation({
     const project = await ctx.db.get(args.projectId);
     if (!project || !canAccess(project, identity)) throw new Error("Project not found or access denied");
     if (!Number.isInteger(args.iterations) || args.iterations < 1 || args.iterations > 200) throw new Error("Iterations must be between 1 and 200");
+    const failureMix = normalizeFailureMix(args.failureMix);
     const now = Date.now();
     return ctx.db.insert("resilienceRuns", {
       projectId: args.projectId,
       status: "running",
       iterations: args.iterations,
-      failureMix: args.failureMix,
+      failureMix,
       policySnapshot: args.policySnapshot,
       successCount: 0,
       failOpenCount: 0,
@@ -291,7 +307,7 @@ export const runResilienceTest = action({
     if (!project) throw new Error("Project not found or access denied");
 
     const iterations = Math.max(1, Math.min(200, Math.floor(args.iterations)));
-    const failureMix = args.failureMix ?? DEFAULT_FAILURE_MIX;
+    const failureMix = normalizeFailureMix(args.failureMix ?? DEFAULT_FAILURE_MIX);
     const runtimePolicy = project.runtimePolicy;
     const policySnapshot: PolicySnapshot = {
       enforcementMode: runtimePolicy?.enforcementMode ?? "observe",

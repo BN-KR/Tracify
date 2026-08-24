@@ -17,18 +17,18 @@ npm install tracify-sdk
 ```
 
 ```ts
-import { Tracify } from "tracify-sdk";
+import { traceAgent } from "tracify-sdk";
 
-const tracify = new Tracify({ apiKey: process.env.TRACIFY_API_KEY });
+const runAgent = traceAgent(
+  async (question: string) => callModel(question),
+  { apiKey: process.env.TRACIFY_API_KEY },
+);
 ```
 
 ## Trace model and tool work
 
 ```ts
-await tracify.trace("research-agent", async (trace) => {
-  const context = await trace.span("retrieval", () => searchDocs(question));
-  return trace.span("llm.call", () => callModel({ question, context }));
-});
+await runAgent(question);
 ```
 
 Use session and release fields to compare runs across customers and deployments. Never expose a project API key in browser code.

@@ -26,30 +26,20 @@ pip install tracify-sdk
 npm install tracify-sdk
 \`\`\`
 
-## 2. Initialize the Client
-
-Initialize the SDK with your Project API Key. You can find your API key in the [Settings](/dashboard/settings) page.
-
-\`\`\`python
-from tracify import TracifyClient
-
-client = TracifyClient(api_key="tracify_sk_live_...")
-\`\`\`
-
-## 3. Instrument your Agent
+## 2. Instrument your Agent
 
 Wrap your agent's main execution loop with the \`@trace_agent\` decorator.
 
 \`\`\`python
 from tracify import trace_agent
 
-@trace_agent(client=client)
+@trace_agent()
 def run_agent(task):
     # Your agent logic here
     pass
 \`\`\`
 
-## 4. View your Traces
+## 3. View your Traces
 
 Once your agent runs, traces will appear in the [Runs](/dashboard/runs) list in real-time.
     `,
@@ -79,12 +69,7 @@ Traces a tool or function execution by the agent.
 
 ## Advanced Usage
 
-### Manual Span Control
-\`\`\`python
-with client.span(name="Thinking Process"):
-    # manual logic
-    pass
-\`\`\`
+Use \`llm_call\` and \`tool_call\` helpers when you need explicit spans for model and tool work.
     `,
   },
   sdk_ts: {
@@ -101,16 +86,15 @@ npm install tracify-sdk
 
 ## Usage
 \`\`\`typescript
-import { TracifyClient } from "tracify-sdk";
+import { traceAgent } from "tracify-sdk";
 
-const client = new TracifyClient({
-  apiKey: process.env.TRACIFY_API_KEY
-});
+const runAgent = traceAgent(
+  async (task: string) => runTask(task),
+  { apiKey: process.env.TRACIFY_API_KEY },
+);
 
 async function main() {
-  await client.trace("My Agent", async (span) => {
-    // instrumented code
-  });
+  await runAgent("support request");
 }
 \`\`\`
     `,

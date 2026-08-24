@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
+import { useQuery } from "convex/react";
+import { api } from "convex/_generated/api";
+import type { Id } from "convex/_generated/dataModel";
 import { buttonVariants } from "@/components/ui/button";
 
 import {
@@ -11,6 +14,7 @@ import {
 
 const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
 const API_KEY_COPIED_STORAGE_KEY = "tracify.onboarding.apiKeyCopied";
+const INSTALL_READY_STORAGE_KEY = "tracify.onboarding.installReady";
 
 function getOnboardingSessionSnapshot() {
   const projectId = window.sessionStorage.getItem(PROJECT_ID_STORAGE_KEY) ?? "";
@@ -40,7 +44,7 @@ async def research_agent(query):
   },
   typescript: {
     label: "TypeScript",
-    code: `import { traceAgent } from "tracify"
+    code: `import { traceAgent } from "tracify-sdk"
 
 const researchAgent = traceAgent(async (query: string) => {
   return await run(query)
@@ -65,11 +69,17 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
   const active = quickstarts[tab];
   const effectiveProjectId = projectId ?? onboardingSession.projectId;
   const hasProject = Boolean(effectiveProjectId);
+  const onboardingState = useQuery(
+    api.agentRuns.getProjectOnboardingState,
+    effectiveProjectId ? { projectId: effectiveProjectId as Id<"projects"> } : "skip",
+  );
+  const installReady = typeof window !== "undefined" && window.sessionStorage.getItem(INSTALL_READY_STORAGE_KEY) === "true";
+  const hasFirstTrace = onboardingState?.hasReceivedFirstSpan === true;
   const checklist = [
     { label: "Create project", status: hasProject ? "completed" : "current" },
-    { label: "Copy API key", status: hasProject ? "pending" : "pending" },
-    { label: "Install SDK", status: "pending" },
-    { label: "Run your agent", status: "pending" },
+    { label: "Copy API key", status: onboardingSession.hasCopiedKey ? "completed" : hasProject ? "current" : "pending" },
+    { label: "Install SDK", status: installReady ? "completed" : onboardingSession.hasCopiedKey ? "current" : "pending" },
+    { label: "Run your agent", status: hasFirstTrace ? "completed" : installReady ? "current" : "pending" },
     { label: "Open first trace", status: "pending" },
   ] satisfies Array<{ label: string; status: ChecklistStatus }>;
 

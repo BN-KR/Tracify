@@ -25,11 +25,14 @@ TRACIFY_API_KEY=tracify_sk_live_...
 ## Wrap one run
 
 ```ts
-import { Tracify } from "tracify-sdk";
+import { traceAgent } from "tracify-sdk";
 
-const tracify = new Tracify({ apiKey: process.env.TRACIFY_API_KEY });
+const runAgent = traceAgent(
+  async (question: string) => callModel(question),
+  { apiKey: process.env.TRACIFY_API_KEY },
+);
 
-await tracify.trace("support-agent", async (trace) => trace.span("llm.call", () => callModel(question)));
+await runAgent(question);
 ```
 
 ## Verify the result

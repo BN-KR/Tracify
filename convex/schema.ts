@@ -499,13 +499,7 @@ export default defineSchema({
     projectId: v.id("projects"),
     status: v.union(v.literal("running"), v.literal("completed"), v.literal("failed")),
     iterations: v.number(),
-    failureMix: v.object({
-      success: v.number(),
-      timeout: v.number(),
-      "429": v.number(),
-      "500": v.number(),
-      cost_overrun: v.number(),
-    }),
+    failureMix: v.record(v.string(), v.number()),
     policySnapshot: v.object({
       enforcementMode: v.union(v.literal("observe"), v.literal("enforce")),
       fallbackChain: v.array(v.string()),

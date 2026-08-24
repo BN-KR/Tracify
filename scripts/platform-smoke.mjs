@@ -5,6 +5,7 @@ const routes = [
   ["/docs", 200],
   ["/docs/python", 200],
   ["/docs/typescript", 200],
+  ["/docs/playwright", 200],
   ["/docs/api", 200],
   ["/docs/prompts", 200],
   ["/docs/evaluation", 200],
@@ -16,10 +17,15 @@ const routes = [
   ["/product/lifecycle", 200],
   ["/roadmap", 200],
   ["/api/otel", 200],
+  ["/this-route-should-not-exist", 404],
   ["/dashboard/not-a-project/prompts", [200, 302, 307, 308]],
   ["/dashboard/not-a-project/evaluation", [200, 302, 307, 308]],
   ["/dashboard/not-a-project/datasets", [200, 302, 307, 308]],
   ["/dashboard/not-a-project/experiments", [200, 302, 307, 308]],
+  ["/dashboard/not-a-project/compare", [200, 302, 307, 308]],
+  ["/dashboard/not-a-project/investigate", [200, 302, 307, 308]],
+  ["/dashboard/not-a-project/journey/not-a-run", [200, 302, 307, 308]],
+  ["/dashboard/not-a-project/resilience", [200, 302, 307, 308]],
   ["/dashboard/not-a-project/playground", [200, 302, 307, 308]],
 ];
 

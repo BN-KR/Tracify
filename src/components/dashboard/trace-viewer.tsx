@@ -190,6 +190,24 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
+            <Link
+              href={`/dashboard/${projectId}/investigate?run=${encodeURIComponent(run.runId)}`}
+              className="flex h-8 items-center border border-black/15 bg-white px-3 font-mono text-[11px] uppercase text-black/60 hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+            >
+              Investigate
+            </Link>
+            <Link
+              href={`/dashboard/${projectId}/compare?left=${encodeURIComponent(run.runId)}`}
+              className="flex h-8 items-center border border-black/15 bg-white px-3 font-mono text-[11px] uppercase text-black/60 hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+            >
+              Compare
+            </Link>
+            <Link
+              href={`/dashboard/${projectId}/journey/${encodeURIComponent(run.runId)}`}
+              className="flex h-8 items-center border border-black/15 bg-white px-3 font-mono text-[11px] uppercase text-black/60 hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+            >
+              Journey
+            </Link>
             <button
               type="button"
               onClick={() => void copyShareLink()}

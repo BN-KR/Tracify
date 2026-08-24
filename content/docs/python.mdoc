@@ -15,15 +15,11 @@ pip install tracify-sdk
 ```
 
 ```python
-from tracify import Tracify
+from tracify import trace_agent
 
-tracify = Tracify(api_key="tracify_sk_live_...")
-
-@tracify.trace(name="support-agent")
+@trace_agent()
 def answer(question: str):
-    with tracify.span("retrieval"):
-        context = search_docs(question)
-    return llm.complete(question, context=context)
+    return llm.complete(question, context=search_docs(question))
 ```
 
 Set `TRACIFY_API_KEY` in production and attach session, user, environment, and release metadata when those dimensions matter to debugging.

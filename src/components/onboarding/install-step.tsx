@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 
 import { CodeCopyBlock } from "@/components/onboarding/code-copy-block";
@@ -12,11 +11,12 @@ const isPostHogConfigured = Boolean(
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
     process.env.NEXT_PUBLIC_POSTHOG_HOST,
 );
+const INSTALL_READY_STORAGE_KEY = "tracify.onboarding.installReady";
 
 const snippets = {
   python: {
     label: "Python",
-    install: "pip install tracify",
+    install: "pip install tracify-sdk",
     code: `from tracify import trace_agent
 
 @trace_agent()
@@ -25,8 +25,8 @@ async def research_agent(query):
   },
   typescript: {
     label: "TypeScript",
-    install: "npm install tracify",
-    code: `import { traceAgent } from "tracify"
+    install: "npm install tracify-sdk",
+    code: `import { traceAgent } from "tracify-sdk"
 
 const researchAgent = traceAgent(async (query: string) => {
   return await run(query)
@@ -50,12 +50,12 @@ Rules:
 Steps:
 1. Detect whether this project is Python or TypeScript.
 2. Install the Tracify SDK with the correct command:
-   - Python: pip install tracify
-   - TypeScript / Node.js: npm install tracify
+   - Python: pip install tracify-sdk
+   - TypeScript / Node.js: npm install tracify-sdk
 3. Add TRACIFY_API_KEY to .env.example.
 4. Find the main agent function.
 5. If Python, import trace_agent from tracify and add @trace_agent().
-6. If TypeScript, import traceAgent from tracify and wrap the async agent function.
+6. If TypeScript, import traceAgent from tracify-sdk and wrap the async agent function.
 7. Run the agent once.
 8. Confirm that a span was sent to Tracify.
 
@@ -65,7 +65,6 @@ TRACIFY_API_KEY=your_key_here`,
 };
 
 export function InstallStep() {
-  const router = useRouter();
   const [tab, setTab] = useState<keyof typeof snippets>("python");
   const active = snippets[tab];
   const region = getTracifyRegion(getDeploymentRegion());
@@ -121,7 +120,8 @@ export function InstallStep() {
           if (isPostHogConfigured) {
             posthog.capture("onboarding_install_ready", { runtime: tab });
           }
-          router.push("/onboarding/waiting");
+          window.sessionStorage.setItem(INSTALL_READY_STORAGE_KEY, "true");
+          window.location.assign("/onboarding/waiting");
         }}
         className="mt-6 h-10 border border-black bg-black px-4 text-[13px] text-white transition-colors hover:bg-[#CCCCCC]"
       >

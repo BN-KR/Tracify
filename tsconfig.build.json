@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": [
+    "node_modules",
+    "scratch",
+    "sanity",
+    "studio-tracify",
+    "scripts",
+    "packages/playwright",
+    ".next/dev",
+    ".next-cloud/dev",
+    ".next-clean/dev"
+  ]
+}

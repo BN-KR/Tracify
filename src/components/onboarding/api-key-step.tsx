@@ -1,14 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
-import {
-  clearOneTimeApiKey,
-  getOneTimeApiKey,
-} from "@/lib/onboarding-client-state";
+import { getOneTimeApiKey } from "@/lib/onboarding-client-state";
 import { getDeploymentRegion, getTracifyRegion } from "@/lib/regions";
 
 const API_KEY_COPIED_STORAGE_KEY = "tracify.onboarding.apiKeyCopied";
@@ -20,8 +17,16 @@ const isPostHogConfigured = Boolean(
 export function ApiKeyStep() {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
-  const [apiKey] = useState(getOneTimeApiKey);
+  const [apiKey, setApiKey] = useState("");
+  const [initialized, setInitialized] = useState(false);
   const region = getTracifyRegion(getDeploymentRegion());
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setApiKey(getOneTimeApiKey());
+      setInitialized(true);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, []);
   const envContent = useMemo(
     () => (apiKey ? `TRACIFY_API_KEY=${apiKey}\nTRACIFY_REGION=${region.id}\n` : ""),
     [apiKey, region.id],
@@ -34,7 +39,6 @@ export function ApiKeyStep() {
       posthog.capture("api_key_copied", { issuance_flow: "onboarding" });
     }
     window.sessionStorage.setItem(API_KEY_COPIED_STORAGE_KEY, "true");
-    clearOneTimeApiKey();
     setCopied(true);
   }
 
@@ -55,7 +59,11 @@ export function ApiKeyStep() {
         title="Your API key."
         description={`This key is shown once and belongs to Tracify ${region.shortName}. Copy it now and store it securely.`}
       />
-      {apiKey ? (
+      {!initialized ? (
+        <div className="border border-black/15 bg-[#f3f2ed] p-4 text-sm text-black/60">
+          Loading your one-time API key...
+        </div>
+      ) : apiKey ? (
         <>
           <div className="border border-black/15 bg-[#e4e1d8] p-4 font-mono text-sm text-black">
             <code className="break-all">{apiKey}</code>
@@ -78,7 +86,7 @@ export function ApiKeyStep() {
             <button
               type="button"
               disabled={!copied}
-              onClick={() => router.push("/onboarding/install")}
+              onClick={() => window.location.assign("/onboarding/install")}
               className="h-10 border border-black/15 bg-white px-4 text-[13px] text-black/70 transition-colors hover:bg-[#f3f2ed] hover:text-black disabled:cursor-not-allowed disabled:text-black/55"
             >
               Continue

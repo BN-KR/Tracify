@@ -390,9 +390,18 @@ export const upsertRunSpanCache = mutation({
     runStatus: runStatusValidator,
     spans: v.array(spanValidator),
     refresh: v.union(v.literal("normal"), v.literal("manual")),
+    apiKeyHash: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireProjectAccess(ctx, args.projectId);
+    if (args.apiKeyHash) {
+      const project = await ctx.db
+        .query("projects")
+        .withIndex("by_apiKeyHash", (q) => q.eq("apiKeyHash", args.apiKeyHash!))
+        .unique();
+      if (!project || project._id !== args.projectId) throw new Error("Invalid API key");
+    } else {
+      await requireProjectAccess(ctx, args.projectId);
+    }
 
     const now = Date.now();
     const existing = await ctx.db
