@@ -1,3 +1,15 @@
+# Cursor removal and fit verification — 2026-08-24
+
+- [completed] Remove the shared cursor component, scene cursor paths, click timing, and cursor CSS.
+- [completed] Render and visually inspect each scene at its densest content state.
+- [completed] Render the replacement MP4 and inspect representative frames extracted from the encoded file for clipping or overflow.
+
+# Product film pacing and SaaS cursor — 2026-08-24
+
+- [completed] Re-time each scene around the core interaction and shorten transitions to 15 frames.
+- [completed] Animate a cursor path and click ring through the homepage, run list, trace inspector, replay, and release gate.
+- [completed] Run lint/build, inspect representative stills, render the final MP4, probe its streams, and inspect extracted encoded frames.
+
 # Product film rebuild — 2026-08-22
 
 # Blog corpus cleanup — 2026-08-26
@@ -949,6 +961,14 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 1. [completed] Increase completed-item strikethrough decoration opacity in the dashboard launch plan.
 2. [completed] Make the future-agent content workflow explicit and mandatory in both the writing skill and blog publishing README.
 3. [completed] Run content, focused lint, full lint, build, diff, and rendered-style verification; content/focused checks pass, while full lint and build report unrelated pre-existing repository issues.
+
+# Google Search Console indexing triage — 2026-08-24
+
+1. [completed] Audit robots, sitemap, redirects, and canonical metadata against the reported categories.
+2. [completed] Add explicit canonicals for intentionally noindex utility/preview routes.
+3. [completed] Run the content validation suite and live sitemap/status checks.
+4. [completed] Exclude archived video source from TypeScript and complete the production build.
+5. [pending] Deploy the change, then validate the exact affected URLs and request reindexing in Search Console.
 # AI agent monitoring blog refinement — 2026-08-21
 
 1. [completed] Inspect the single article, Markdoc contract, shared TOC, code renderer, and page styles.

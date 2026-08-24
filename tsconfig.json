@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -20,8 +24,12 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "convex/*": ["./convex/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "convex/*": [
+        "./convex/*"
+      ]
     }
   },
   "include": [
@@ -30,7 +38,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    ".next-cloud/types/**/*.ts",
+    ".next-cloud/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules", "scratch", "sanity", "studio-tracify", "scripts", "packages/playwright", "video/archive", "playwright.config.ts"]
 }

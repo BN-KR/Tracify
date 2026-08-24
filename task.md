@@ -1,3 +1,16 @@
+# 2026-08-24 — Cursor removal and fit verification
+
+- [x] Remove the mouse cursor and click feedback from all four scenes.
+- [x] Verify every dense-state layout for text and panel overflow.
+- [x] Pass lint/build, render the replacement MP4, and inspect four frames from the encoded output.
+
+# 2026-08-24 — Product film pacing and SaaS cursor
+
+- [x] Compress the four-scene timeline and transitions for a faster, less tedious rhythm.
+- [x] Add a SaaS cursor and visible click feedback at each important product interaction.
+- [x] Pass lint and bundle checks, render the replacement MP4, and inspect cursor moments from the encoded video.
+- [x] Replace `video/tracify-demo.mp4` with the verified 1920×1080, 30fps, 26.56-second H.264 render.
+
 # 2026-08-22 — Product film rebuilt from scratch
 
 # 2026-08-26 — Blog corpus cleanup
