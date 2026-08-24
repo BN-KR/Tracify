@@ -32,6 +32,29 @@ seo:
     og: /media/organic-series/ai-agent-observability-complete-guide.jpg
 ---
 
+{% trace-scenario title="What should the trace explain?" prompt="A user reports a wrong answer. Which evidence turns the report into an investigation?" outcome="Preserve the task outcome, model and prompt versions, retrieved context, tool calls, retries, and the decision that shaped the final response." /%}
+
+## At a glance
+
+This guide is for **platform operators and engineering leaders**. It helps you **make agent behavior understandable in production** so you can leave with **connected evidence from the parent task to the final user-visible result**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The AI agent observability framework
+
+Use **Instrument → Correlate → Inspect → Improve** as the decision path:
+
+1. **Instrument:** establish the task, context, or boundary before changing behavior.
+2. **Correlate:** make the relevant evidence or control explicit.
+3. **Inspect:** compare the decision with a concrete example, trace, or test.
+4. **Improve:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Instrument meaningful boundaries, correlate the run, inspect decisions in context, and feed failures back into the system.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Introduction: why AI agent observability needs an operating model
 
 AI Agent Observability: The Complete Guide is a guide for AI engineers, platform operators, and engineering leaders responsible for customer-facing agent workflows. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?
@@ -228,3 +251,11 @@ The workflow owner owns outcome definitions; platform teams own the shared instr
 ## Next step: make AI agent observability actionable
 
 Start with one workflow this week. Instrument the evidence needed to explain a single completed run, review it against the intended outcome, and turn the finding into a named test or operating decision. Then use the relevant Tracify resource above to inspect the connected execution path. The final CTA is deliberately practical: choose one bounded improvement, measure its effect, and keep the rollback path clear.
+
+
+## Continue with the related production guides
+
+The most useful next step depends on the failure you are trying to understand. For system boundaries and execution design, read [AI agent architecture](/blog/ai-agent-architecture), [AI agent cost calculator](/blog/ai-agent-cost-optimization), [AI agent evaluation](/blog/ai-agent-evaluation-practical-guide), [AI agent memory design](/blog/ai-agent-memory-design), [AI agent monitoring](/blog/ai-agent-monitoring), [AI agent production checklist](/blog/ai-agent-production-checklist), [AI agent regression testing](/blog/ai-agent-regression-testing), [AI agent reliability](/blog/ai-agent-reliability-failures-retries-guardrails), [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals), [browser agent observability](/blog/browser-agent-observability), [production-ready AI agents](/blog/building-production-ready-ai-agents), [debugging AI agents](/blog/debug-ai-agents-in-production), [writing Tracify blog posts](/blog/how-to-write-tracify-blog-posts), [human-in-the-loop agents](/blog/human-in-the-loop-ai-agents), [LLM hallucination detection](/blog/llm-hallucination-detection), [LLM latency optimization](/blog/llm-latency-optimization), [LLM observability metrics](/blog/llm-observability-metrics-that-matter), [LLM tracing](/blog/llm-tracing-explained). Use the linked guides as a connected path: compare the trace contract, evaluation method, rollout advice, and operational ownership instead of treating any one article as a complete solution.
+
+
+For a deeper operational comparison, connect this guide to [LLM observability metrics](/blog/llm-observability-metrics-that-matter) and [MCP observability](/blog/mcp-observability-guide) when you are moving from explanation to implementation.

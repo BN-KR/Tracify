@@ -19,11 +19,34 @@ seo:
   metaDescription: Trace repeated agent tool calls, isolate retry conditions, and verify bounded fixes before production release.
 ---
 
-## Why retry loops are difficult to diagnose
+{% trace-scenario title="What should you inspect first?" prompt="A tool call repeats three times and the user receives no useful result. Which evidence narrows the failure fastest?" outcome="Follow the parent task through the first failure, retry decision, changed state, and terminal outcome before changing the retry policy." /%}
+
+## Introduction: the production situation
+
+State who this article helps, the job they need to complete, the outcome they should leave with, and what the article deliberately does not cover.
+
+## The decision framework
+
+Name a small framework that gives the reader a repeatable way to reason about the problem. Explain each part before moving into implementation.
+
+## Work through one concrete example
+
+Show the trace, code, table, formula, or other evidence that makes the framework usable. Explain the expected result and one plausible failure.
+
+## Trade-offs and boundaries
+
+Explain where the recommendation stops working, what it costs, and which security or operational boundary must remain explicit.
+
+## Operational checklist
+
+- [ ] The reader can identify the first decision boundary.
+- [ ] The example is safe to adapt and matches the current repository.
+- [ ] The failure path and rollback condition are observable.
+- [ ] The next action is clear.
 
 A retry is useful only when the next attempt has a meaningful chance of producing a different result. In production agent workflows, repeated attempts can otherwise hide the original failure while increasing latency and cost.
 
-Start with [LLM tracing](/blog/llm-tracing-explained) to preserve the attempt sequence, then use an [AI agent reliability strategy](/blog/ai-agent-reliability-failures-retries-guardrails) to define bounded recovery behavior.
+Continue with [LLM tracing](/blog/llm-tracing-explained) and an [AI agent reliability strategy](/blog/ai-agent-reliability-failures-retries-guardrails) for the next implementation decision.
 
 ## Reconstruct the decision path
 

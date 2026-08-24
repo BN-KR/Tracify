@@ -7,10 +7,18 @@ import { parse as parseYaml } from "yaml";
 export const blogMarkdocConfig = {
   tags: {
     "trace-scenario": {
+      render: "trace-scenario",
       attributes: {
         title: { type: String, required: true },
         prompt: { type: String, required: true },
         outcome: { type: String, required: true },
+      },
+    },
+    "faq-item": {
+      render: "faq-item",
+      attributes: {
+        question: { type: String, required: true },
+        answer: { type: String, required: true },
       },
     },
   },
@@ -23,6 +31,12 @@ export type BlogImage = {
   card?: string;
   hero?: string;
   og?: string;
+};
+
+export type BlogHeading = {
+  level: 2 | 3;
+  text: string;
+  id: string;
 };
 
 export type BlogPost = {
@@ -46,6 +60,7 @@ export type BlogPost = {
   };
   body: string;
   plainText: string;
+  headings: BlogHeading[];
   content: Tag;
 };
 
@@ -115,6 +130,47 @@ function extractPlainText(ast: ReturnType<typeof Markdoc.parse>) {
   return text.join(" ").replace(/\s+/g, " ").trim();
 }
 
+export function slugifyBlogHeading(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+export function extractBlogHeadings(body: string): BlogHeading[] {
+  const headings: BlogHeading[] = [];
+  const seen = new Map<string, number>();
+  const fence = String.fromCharCode(96).repeat(3);
+  let inFence = false;
+
+  for (const line of body.split(/\r?\n/)) {
+    if (line.trimStart().startsWith(fence)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+
+    const match = line.match(/^(#{2,3})\s+(.+?)\s*#*\s*$/);
+    if (!match) continue;
+    const text = match[2].trim();
+    if (!text || /^contents?$/i.test(text)) continue;
+
+    const baseId = slugifyBlogHeading(text) || "section";
+    const count = seen.get(baseId) ?? 0;
+    seen.set(baseId, count + 1);
+    headings.push({
+      level: match[1].length as 2 | 3,
+      text,
+      id: count ? `${baseId}-${count + 1}` : baseId,
+    });
+  }
+
+  return headings;
+}
+
 function parsePost(source: string, filename: string): BlogPost {
   const { frontmatter, body } = splitFrontmatter(source, filename);
   const data = requireRecord(frontmatter, filename);
@@ -164,6 +220,7 @@ function parsePost(source: string, filename: string): BlogPost {
     },
     body,
     plainText: extractPlainText(ast),
+    headings: extractBlogHeadings(body),
     content,
   };
 }

@@ -1,5 +1,6 @@
 import { AuthorBio } from "@/components/blog/author-bio";
 import { MarkdocRichText } from "@/components/blog/markdoc-rich-text";
+import { BlogTableOfContents } from "@/components/blog/blog-table-of-contents";
 import { ProgressBar } from "@/components/blog/progress-bar";
 import { RelatedPosts } from "@/components/blog/related-posts";
 import { ShareButtons } from "@/components/blog/share-buttons";
@@ -113,9 +114,11 @@ export default async function BlogPostPage({
   const categories = post.categories;
   const tags = post.tags;
   const heroUrl = post.heroImage?.hero || post.heroImage?.src;
+  const isMonitoringPost = post.slug === "ai-agent-monitoring";
+  const articleClassName = isMonitoringPost ? "blog-post--monitoring" : undefined;
 
   return (
-    <div className="min-h-screen bg-[#eceae3] pt-[54px] text-black">
+    <div className={`min-h-screen bg-[#eceae3] text-black ${isMonitoringPost ? "pt-[72px] md:pt-[76px]" : "pt-[54px]"}`}>
       <ProgressBar />
       <script
         type="application/ld+json"
@@ -124,12 +127,12 @@ export default async function BlogPostPage({
       <div className="mx-auto max-w-[1240px] border-x border-black">
         <Link
           href="/blog"
-          className="inline-block border-b border-r border-black bg-[#f4d44d] px-6 py-4 font-mono text-[9px] uppercase tracking-[0.13em] hover:bg-black hover:text-black"
+          className="inline-block border-b border-r border-black bg-[#f4d44d] px-6 py-4 font-mono text-[9px] uppercase tracking-[0.13em] transition-colors hover:bg-black hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-black"
         >
           ← Back to blog
         </Link>
 
-        <article>
+        <article className={articleClassName}>
           <header className="border-b border-black px-6 py-10 md:px-10 md:py-12">
             <div className="mb-4 flex items-center gap-3 font-mono text-[12px] text-black/55">
               <time dateTime={getPostDate(post)}>{formatDate(getPostDate(post))}</time>
@@ -163,7 +166,8 @@ export default async function BlogPostPage({
             </div>
           ) : null}
 
-          <div className="mx-auto max-w-[820px] px-6 py-12 md:px-10 md:py-16">
+          <div className="blog-post__body mx-auto max-w-[820px] px-6 py-12 md:px-10 md:py-16">
+            <BlogTableOfContents headings={post.headings} />
             <MarkdocRichText content={post.content} />
 
             <div className="mt-12 flex flex-col gap-6 border-t border-black/20 pt-8">
@@ -171,7 +175,7 @@ export default async function BlogPostPage({
               <AuthorBio author={post.author} />
             </div>
 
-            <RelatedPosts posts={post.relatedPosts} />
+            {!isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} /> : null}
 
             {tags.length ? (
               <div className="mt-12 border-t border-black/20 pt-8">
@@ -182,6 +186,8 @@ export default async function BlogPostPage({
                 </div>
               </div>
             ) : null}
+
+            {isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} heading="Recommended posts" /> : null}
           </div>
         </article>
       </div>

@@ -1,27 +1,31 @@
 # Project Memory
 
+## 2026-08-24 future content quality gate
+- Completed launch-plan labels in `src/components/dashboard/dashboard-overview.tsx` keep their muted text but now use `decoration-black/75`, making the strikethrough readable without overpowering the label.
+- The authoritative content workflow now has a mandatory future-agent quality gate in `.agents/skills/writing-tracify-content/SKILL.md` and `content/blog/README.md`: inspect evidence first, define reader/job/boundary, use layered structure and purposeful interactions, keep examples truthful, target 4–7 contextual links per 1,000 long-form words, render-test desktop/mobile behavior, and run all required checks before PR/merge.
+- Verification on 2026-08-24: 19 content tests, focused dashboard ESLint, and diff hygiene pass. Full lint still has unrelated existing errors; the full build reaches TypeScript but fails on the untracked archived Motion Canvas file `video/archive/tracify-demo-motion-canvas/src/scenes/demo.tsx`.
+
+## 2026-08-22 Tracify product film rebuilt from scratch in Remotion
+- Replaced the active Motion Canvas project with a new Remotion 4 composition under `video/tracify-demo`; the previous project is recoverably archived at `video/archive/tracify-demo-motion-canvas`.
+- The new film takes its visual system directly from the public homepage and demo page: warm paper `#eceae3`, white panels, one-pixel black rules, hard 18px black shadows, zero radius, black proof surfaces, acid yellow `#f4d44d`, and the exact Geist Pixel/Sans/Mono fonts copied from the site dependency.
+- The 38.25-second film covers the real Tracify loop: homepage release proof, demo workspace and failed run selection, span/root-cause inspection with replay evidence, and release-candidate promotion.
+- `npm run lint` and `npm run build` pass. Four Remotion still checkpoints and four frames extracted from the final MP4 were visually inspected with no clipping or panel overflow. Final `video/tracify-demo.mp4` is H.264, 1920×1080, 30fps, 38.25 seconds.
+
+## 2026-08-21 AI agent monitoring blog refinement
+- Refined only `/blog/ai-agent-monitoring`: added six H2 phases with nested H3 decision points, a five-item native FAQ accordion, a scoped paper/grid article background, and colored readable code-block treatment.
+- The shared blog renderer now nests H2/H3 headings into a structured TOC and adds mobile-safe wrapping/overflow rules. The `faq-item` Markdoc tag is centralized in `src/lib/markdoc-blog.ts` and rendered in `src/components/blog/markdoc-rich-text.tsx`.
+- `npm run test:content` passes all 18 tests. Focused ESLint passes for the changed TypeScript files. The local browser runtime could not initialize; the local Next response returned 200 after its first slow compile.
+
+## 2026-08-21 Tracify Motion Canvas product demo
+- Reworked the initial card-based draft after visual review: the final scene keeps a persistent execution graph and uses camera/object transitions into the selected span, code patch, evaluation bars, and release gate.
+- The film uses real Tracify concepts from the repository: support-agent trace spans, model/tool/decision telemetry, empty retrieval debugging, code patching, offline evaluation candidates, quality/latency/cost metrics, and a release gate.
+- Rendered the final `video/tracify-demo.mp4` with the Motion Canvas FFmpeg exporter at 1920×1080, 60fps, H.264, 45.87 seconds. Explicit left-anchored text helpers keep labels inside their panels; the selected-span evidence panel was tightened after inspection so its red failure marker stays inside the frame; the opening graph was reframed so its evaluation label stays inside the hook. Added a staged signal pulse through the graph and kinetic title-rule entry based on the supplied AI video-engineer/Remotion guidance, while retaining Tracify’s monochrome and acid-yellow brand. `ffprobe` confirms the stream and the hook, trace, code, and release frames were visually inspected from the replacement MP4.
+
 ## 2026-08-20 17-post blog visibility content set
 - Added 17 published Markdoc articles under `content/blog` targeting distinct, durable AI engineering searches: architecture, RAG evaluation, prompt injection, structured outputs, latency, hallucinations, cost, memory, MCP, OpenTelemetry, human review, regression testing, production readiness, browser agents, prompt versioning, monitoring, and the Tracify writing workflow.
 - Added `how-to-write-tracify-blog-posts.mdoc` so future agents have a public, reader-facing version of the required writing process. The repository-level must-follow process remains in `AGENTS.md`, `.agents/skills/writing-tracify-content/SKILL.md`, and `content/blog/README.md`.
 - Added the centralized `trace-scenario` Markdoc tag in `src/lib/markdoc-blog.ts` and its accessible disclosure renderer in `src/components/blog/markdoc-rich-text.tsx`; it is deterministic, local, and used by the RAG and cost articles.
 - `npm run test:content` passes all 16 tests. The first Turbopack build hit a Windows `spawn UNKNOWN` TypeScript-worker error; the full Webpack build then passed after temporarily enabling Node worker threads for verification. The temporary setting was removed, so `next.config.ts` remains unchanged.
-
-## 2026-08-20 gstack Investigation Mode
-- Added `/dashboard/[projectId]/investigate` as a guided incident workflow over existing run summaries and cached spans; no new backend or causal claims were introduced.
-- The page selects a run through the `run` URL parameter, surfaces confirmed status/error/latency/model-tool signals, and stores a per-project/run evidence board locally with separate `confirmed` and `inference` labels.
-- “Copy evidence summary” includes the selected run URL and board contents for handoff. It is intentionally clipboard-based until shared server-backed incident records are designed.
-- Trace Viewer run controls now link directly to Investigation Mode and Trace Compare, closing the path from a surprising run to evidence capture or baseline comparison.
-- Dashboard navigation and `npm run smoke:platform` cover the protected route. Focused ESLint, activation, content, smoke, and diff checks pass.
-
-## 2026-08-20 gstack activation implementation
-- Started `codex/gstack-activation` from `origin/main`; preserved unrelated untracked `graphify-out/`.
-- Onboarding now checks project access, regional cloud health, API-key region alignment, and last request state immediately. It can send a real, bounded onboarding probe to `/api/ingest` using the in-memory one-time key and reports the response without exposing the key.
-- The one-time key remains in memory through the waiting step so the probe can work, then is cleared when the waiting step unmounts. It is never persisted to browser storage.
-- Added activation events for project creation, API-key copy, install readiness, probe success/failure, and first trace receipt. Dashboard Launch plan uses client and Convex evidence for its first four steps.
-- Corrected public and dashboard examples to the published `tracify-sdk` package and actual `traceAgent` / `trace_agent` APIs. `npm run test:activation` protects the contract.
-- Focused ESLint, activation contract, content tests, and diff hygiene pass. The optimized production build now completes successfully after the active local Next process released its malformed generated `.next/dev/types/validator.ts`; do not edit generated output as the fix.
-- Added `/dashboard/[projectId]/compare` as the first keyboard-native investigation building block: two URL-persisted runs, metadata comparison, cached span evidence, and explicit distinction between observed differences and diagnosis. Platform smoke covers its protected route.
-- Added `.github/workflows/activation-contract.yml` to run activation and public-content contracts on pushes and pull requests.
 
 ## 2026-08-16 Mandatory reply format: every reply starts with "TRACIFY"
 - Every reply in this repo, from any agent, must begin with the literal line `TRACIFY` on its own, a blank line, then the reply. See CLAUDE.md "Reply format" section — that's the enforced instruction; this entry is just the pointer so it isn't missed.
@@ -1254,25 +1258,18 @@
 - GitHub workflow run `32365691091` published PyPI successfully. npm rejected the CI token with `EOTP`, so the identical verified npm package was published locally through the owner's interactive npm 2FA session.
 - Registry verification and clean consumer smoke tests pass: npm exposes `TracifyClient`, `traceAgent`, `llmCall`, `toolCall`, `decision`, and region constants; Python imports `TracifyClient`, `trace_agent`, `llm_call`, and `tool_call` from `tracify`.
 - Follow-up: configure trusted publishers for both registries. npm staged publishing can now be enabled because the npm package exists; it was unavailable for the first release.
-# 2026-08-20 Ponytail and browser-agent observability direction
-- Installed the Ponytail Codex plugin globally from `DietrichGebert/ponytail` using the official marketplace flow; it is installed outside the repository and does not modify the Tracify worktree.
-- Board direction: use Playwright as an instrumentation source, not as a competing browser-testing product. The proposed wedge is a `@tracify/playwright` reporter plus an Agent Journey view joining LLM decisions, browser actions, network/tool calls, failures, evaluations, cost, releases, and Playwright trace artifacts.
-- gstack/Ponytail are internal workflow aids for plan/build/QA/review discipline, not customer-facing Tracify branding. Do not build a competing Codegen recorder, Playwright runner, or Trace Viewer.
-- Validate with three real browser-agent workflows before expanding into release gates and production journey monitoring.
 
-## 2026-08-20 Playwright internal QA foundation
-- Added `@playwright/test` and Chromium to the workspace, with `test:e2e` and `test:e2e:ui` scripts.
-- Added `playwright.config.ts` with failure-retained trace, screenshot, and video capture.
-- Added `tests/e2e/public-smoke.spec.ts`; both tests pass. Authenticated dashboard journeys remain the next step.
+## 2026-08-21 blog article repertoire and monitoring polish
+- The supplied Semrush references establish three especially useful pacing models: a sequential definitive guide, a numbered decision framework, and a browsable practical library with a short starter set plus an adaptation method. Tracify's workflow now expands these into five selectable archetypes rather than forcing one template on every post.
+- The repertoire is mandatory in `.agents/skills/writing-tracify-content/SKILL.md`, its quality bar, and `content/blog/README.md`. Future authors must choose an archetype and distribute proof modules throughout the article instead of concentrating visuals in the opening.
+- `ai-agent-monitoring` is the only post using the new monitoring treatment: six static operator runthroughs, `C:\` H2 prompts, highlighted key phrases, operational tables, colored code artifacts, a closed nested TOC, FAQ accordions, and a yellow reading-progress bar.
+- The refined article is 3,626 words and has 17 contextual internal links (about 4.7 per 1,000 words). The former bottom link dump and irrelevant publishing-process tangent were removed.
+- Verification: 19 content tests pass; focused ESLint and `git diff --check` pass; the full 116-route Next production build passes when supplied non-secret placeholder Convex URLs for page collection. Repository-wide lint still fails on unrelated pre-existing files. Local SSR returned HTTP 200 and confirmed one closed TOC, six runthroughs, and five FAQ accordions. The in-app browser kernel still cannot initialize (`failed to write kernel assets`), so viewport verification is limited to CSS/DOM safeguards rather than a screenshot sweep.
 
-## 2026-08-20 Playwright adapter first slice
-- Added `packages/playwright` as a standalone `@tracify/playwright` package with a lockfile, TypeScript declarations, and Node tests.
-- The typed event contract covers run, test step, browser action, network request, console error, assertion, screenshot, trace artifact, and CI metadata. The reporter maps Playwright lifecycle events to existing ingest-compatible spans and emits a terminal `run_end` span.
-- Manual helpers cover browser/network/assertion/error/artifact events. The default transport sends to `/api/ingest`; tests can inject a transport without network access. Artifact URLs are references only, so Playwright remains the artifact viewer.
-- Public docs live at `/docs/playwright` and state that the package is workspace-installed until its first registry release. Package tests, public content tests, and the existing Playwright public smoke suite pass.
-# 2026-08-20 Authenticated Playwright QA journey
-- Added `tests/e2e/authenticated-journey.spec.ts` using the existing Better Auth sign-up flow, onboarding project/key/install flow, real “Send test span” ingestion probe, dashboard runs table, Trace Viewer, and Investigation Mode.
-- The test generates a per-run `example.test` identity and never persists or commits credentials, tokens, cookies, or storage state. `playwright.config.ts` already retains traces, screenshots, and video on failure.
-- Verification remains pending; the first-trace assertion depends on the local Better Auth/Convex/Inngest/Tinybird/Redis environment being healthy.
-- The marketing Playwright host redirects protected paths through the region directory, so `playwright.config.ts` now supports `PLAYWRIGHT_DEPLOYMENT=cloud` and starts the existing `npm run dev:cloud` host on port 4000. The spec retains the existing explicit `TRACIFY_E2E_AUTH=1` live-run gate.
-- The live cloud run reached sign-up but the Windows runtime then failed with `VirtualAlloc failed`; `npm run test` was also absent and now aliases `test:e2e`. Scoped ESLint and `git diff --check` pass; TypeScript is blocked by malformed generated `.next/dev/types/routes.d.ts`.
+## 2026-08-22 monitoring article usability correction
+- The owner rejected decorative terminal framing when it does not help a reader decide or act. `ai-agent-monitoring` now uses a simple `/` H2 marker, no numbered runthrough cards, and concise blockquote notes for paging, diagnosis, routing, rollout, runbook, and calibration rules.
+- Code belongs only when readers can adapt it. The throwaway pseudo-alert was removed; the remaining rollout-policy YAML and alert-packet JSON are explicitly described as illustrative, retain copy controls, identify their actual language, and use neutral dark-gray panels.
+- Markdown tables render through an accessible native-table wrapper with contained horizontal scrolling. Cells keep normal word boundaries, while the page itself has no horizontal overflow at 390px.
+- The article now clears the fixed navigation, the Back to blog control has readable hover/focus contrast, and exactly three recommended-post cards appear after the tags at the bottom.
+- The article is roughly 3,838 words with 17 contextual links (about 4.43 per 1,000 words). The in-app browser verified desktop and 390px layouts, semantic tables, contained overflow, two labeled code panels, simple heading markers, no runthroughs, and three recommendations.
+- Final verification passes: 19 content tests, focused ESLint, `git diff --check`, and the 116-route production build with non-secret placeholder Convex URLs. The only browser console error was the expected missing local PostHog token.

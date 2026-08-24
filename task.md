@@ -1,10 +1,19 @@
-# Authenticated Playwright QA journey — 2026-08-20
+# 2026-08-22 — Product film rebuilt from scratch
 
-- [x] Inspect the existing Better Auth, onboarding, ingest, dashboard, Trace Viewer, and Investigation Mode flows.
-- [x] Add one minimal authenticated Playwright journey using a generated per-run account and the real onboarding probe; no credentials, tokens, cookies, or fake product behavior are committed.
-- [ ] Run the focused journey and repository verification. The journey reaches the local cloud auth host when explicitly enabled with `PLAYWRIGHT_DEPLOYMENT=cloud TRACIFY_E2E_AUTH=1`; the latest attempt was stopped by a Windows `VirtualAlloc failed` browser/dev-runtime memory error before ingestion. `npm run test` was missing and now aliases the existing Playwright suite.
+- [x] Remove the active Motion Canvas composition and preserve it in a recoverable archive.
+- [x] Rebuild the film in Remotion using the live homepage/demo design language and exact Geist fonts.
+- [x] Animate the homepage proof, demo workspace, failed-run drilldown, trace inspector, replay score, and release proof.
+- [x] Pass lint and bundle checks; inspect four still checkpoints and four frames extracted from the final MP4.
+- [x] Render `video/tracify-demo.mp4` at 1920×1080, 30fps, H.264, 38.25 seconds.
 
 # 2026-08-20 — 17-post visibility content set
+
+## 2026-08-21 — AI agent monitoring article refinement
+
+- [x] Restructure only `content/blog/ai-agent-monitoring.mdoc` into six H2 phases with nested H3 decision points.
+- [x] Add the centralized `faq-item` Markdoc tag as an accessible native accordion.
+- [x] Add scoped article background/code colors and a nested, mobile-safe shared blog TOC.
+- [x] Run `npm run test:content`, focused ESLint, and `git diff --check`; local browser initialization remains unavailable.
 
 - [x] Add 17 keyword-led, non-overlapping Markdoc posts covering AI agent architecture, evaluation, security, performance, cost, operations, browser agents, MCP, and prompt management.
 - [x] Add the future-agent workflow article at `/blog/how-to-write-tracify-blog-posts` and retain the required workflow in `AGENTS.md`, the writing skill, and `content/blog/README.md`.
@@ -12,13 +21,12 @@
 - [x] Run `npm run test:content` successfully (16 tests passed).
 - [x] Verify the production build end-to-end with the Webpack path and temporary Node worker-thread workaround; compilation, TypeScript, static generation, and route finalization all passed. The workaround was removed afterward, leaving `next.config.ts` unchanged.
 
-# 2026-08-20 — gstack investigation workflow
+# 2026-08-21 — Motion Canvas product demo
 
-- [x] Add Investigation Mode at `/dashboard/[projectId]/investigate` with a URL-selected run, confirmed telemetry signals, and an evidence board that separates observations from hypotheses.
-- [x] Add a clipboard-ready, run-linked investigation summary for handoff without claiming team-synced notes.
-- [x] Add Investigation Mode to dashboard navigation and protected-route smoke coverage.
-- [x] Link every trace header directly into Investigation Mode and Trace Compare so a surprising run has an immediate next action.
-- [x] Re-run the production build after the active dev process released malformed `.next/dev/types/validator.ts`; the optimized build now completes successfully.
+- [x] Implement the standalone Motion Canvas source project under `video/tracify-demo`.
+- [x] Replace the initial PowerPoint-like card sequence with a persistent graph-led animation inspired by the Bufferhead reference.
+- [x] Build and render `video/tracify-demo.mp4` at 1920×1080, 60fps, H.264, 45.63 seconds.
+- [x] Visually inspect trace, code, release, and outro frames from the MP4; correct panel-safe text anchors, the selected-span right-edge marker, opening graph framing, and add a staged signal pulse.
 
 # ⚠ PENDING — needs BN-KR on their own machine (updated 2026-08-16)
 
@@ -357,20 +365,6 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
       now that localhost auth/dashboard routing and real codegen both work.
 
 ---
-
-# 2026-08-20 — gstack activation slice
-
-- [x] Move implementation onto `codex/gstack-activation` from current `origin/main` without touching the unrelated `graphify-out/` directory.
-- [x] Replace onboarding's timer-led waiting experience with project, cloud, API-key-region, and last-request diagnostics.
-- [x] Add a real onboarding test-span action against `/api/ingest` with accepted/failed feedback.
-- [x] Instrument first-trace receipt and onboarding probe outcomes through PostHog.
-- [x] Make the dashboard Launch plan reflect project creation, API-key copy, SDK install, and first-trace backend evidence.
-- [x] Canonicalize public onboarding/docs examples on the published `tracify-sdk` package and `traceAgent`/`trace_agent` APIs.
-- [x] Add `npm run test:activation` to reject stale package and API examples.
-- [x] Add Trace Compare with URL-persisted run selection and evidence-backed metadata/span differences.
-- [x] Add Trace Compare to the dashboard navigation and platform smoke coverage.
-- [x] Add CI coverage for the activation contract and public content tests.
-- [ ] Re-run production build after the active local Next dev process releases its malformed `.next/dev/types/validator.ts` output.
 
 # Robots standards cleanup — 2026-08-13
 
@@ -1171,22 +1165,24 @@ Follow-ups still open:
 - [x] Publish `tracify-sdk@0.2.0` to PyPI through the verified workflow and to npm through the owner's interactive 2FA session.
 - [x] Verify both public registry records and clean-install/import the published npm and PyPI artifacts.
 
-# Playwright internal QA foundation — 2026-08-20
+# AI agent monitoring article polish — 2026-08-21
 
-- [x] Add `@playwright/test` as a development dependency and install Chromium.
-- [x] Add Playwright scripts for standard and UI-mode runs.
-- [x] Add failure-retained trace, screenshot, and video configuration.
-- [x] Add and pass the first public-surface smoke suite.
-- [ ] Add authenticated dashboard journey coverage after the local auth test fixture is selected.
-# Browser-agent observability wedge — 2026-08-20
+- [x] Refine only `ai-agent-monitoring` with a closed structured TOC, yellow reading progress, command-prompt H2 treatment, and mobile-safe code/artifact styling.
+- [x] Distribute six operator runthrough checkpoints, decision tables, rollout configuration, and an alert-packet example through the full article.
+- [x] Replace the bottom related-guide dump with contextual links inside relevant explanations; retain a 3,626-word long-form article with 17 internal links.
+- [x] Add an article-archetype repertoire to the mandatory authoring workflow for future agents.
+- [x] Pass content tests, focused lint, rendered HTTP/DOM checks, and the full 116-route production build; document repository-wide lint failures as unrelated pre-existing issues.
 
-Decision: use Playwright as an instrumentation source, not as a product category. Tracify should help teams test, release, and monitor AI agents that act through browsers and APIs. Ponytail/gstack remain internal agent-development workflow tools; they are not customer-facing product brands.
+# AI agent monitoring usability correction — 2026-08-22
 
-- [x] Install the Ponytail Codex plugin globally from `DietrichGebert/ponytail`.
-- [x] Define the first supported Playwright event contract: run, test step, browser action, network request, console error, assertion, screenshot, trace artifact, CI metadata.
-- [x] Build a small `@tracify/playwright` reporter/adapter that sends Playwright execution into the existing run/span ingestion model. Package tests pass and the terminal event maps to `run_end`.
-- [ ] Add an Agent Journey view joining LLM decisions, browser actions, tool/API calls, failures, evaluation results, and cost.
-- [ ] Link the original Playwright `trace.zip` from the Tracify run for deep artifact inspection.
-- [ ] Add release-gate checks for task success, failure rate, retries, latency, and cost regression.
-- [ ] Validate the wedge with three real browser-agent workflows before expanding into production journey monitoring.
-- [ ] Do not build a competing Codegen recorder, Playwright runner, or Trace Viewer.
+- [x] Remove the decorative `C:\\MONITOR` runthrough treatment and use a simple `/` marker on article H2 headings.
+- [x] Replace decorative checkpoints with concise decision-rule notes distributed through the article.
+- [x] Remove the non-actionable pseudo-alert block; retain only clearly labeled illustrative YAML and JSON artifacts in neutral dark-gray code panels.
+- [x] Render all four article comparisons as semantic tables inside mobile-safe horizontal scroll regions without mid-word breaks.
+- [x] Fix article top clearance and Back to blog hover contrast, then place exactly three recommended posts at the bottom.
+- [x] Keep 17 contextual internal links across the roughly 3,838-word article (about 4.43 links per 1,000 words).
+- [x] Pass 19 content tests, focused ESLint, diff hygiene, desktop/mobile browser checks, and the full 116-route production build.
+# Future content quality gate — 2026-08-24
+
+- [x] Make completed launch-plan strikethrough decoration more opaque without changing completed text contrast.
+- [x] Add a mandatory future-agent quality gate to the writing skill and blog publishing README covering evidence, hierarchy, interactions, links, rendering, and release checks.

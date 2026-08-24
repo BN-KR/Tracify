@@ -1,7 +1,30 @@
 import Markdoc from "@markdoc/markdoc";
 import React from "react";
 
-import type { BlogPost } from "@/lib/markdoc-blog";
+import { BlogCodeBlock } from "@/components/blog/blog-code-block";
+import { slugifyBlogHeading, type BlogPost } from "@/lib/markdoc-blog";
+
+function textFromChildren(value: React.ReactNode): string {
+  if (typeof value === "string" || typeof value === "number") return String(value);
+  if (Array.isArray(value)) return value.map(textFromChildren).join("");
+  if (React.isValidElement(value)) {
+    return textFromChildren((value as React.ReactElement<{ children?: React.ReactNode }>).props.children);
+  }
+  return "";
+}
+
+function BlogH2({ children }: { children?: React.ReactNode }) {
+  return (
+    <h2 id={slugifyBlogHeading(textFromChildren(children))}>
+      <span className="blog-heading-prompt" aria-hidden="true">/</span>
+      {children}
+    </h2>
+  );
+}
+
+function BlogH3({ children }: { children?: React.ReactNode }) {
+  return <h3 id={slugifyBlogHeading(textFromChildren(children))}>{children}</h3>;
+}
 
 function TraceScenario({ title, prompt, outcome }: { title: string; prompt: string; outcome: string }) {
   return (
@@ -16,10 +39,43 @@ function TraceScenario({ title, prompt, outcome }: { title: string; prompt: stri
   );
 }
 
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  return (
+    <details className="blog-faq-item">
+      <summary>
+        <span>{question}</span>
+        <span className="blog-faq-item__icon" aria-hidden="true">+</span>
+      </summary>
+      <div className="blog-faq-item__answer">
+        <p>{answer}</p>
+      </div>
+    </details>
+  );
+}
+
+function BlogTable({ children, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
+  return (
+    <div className="blog-table-scroll" tabIndex={0} role="region" aria-label="Scrollable data table">
+      <table {...props}>{children}</table>
+    </div>
+  );
+}
+
 export function MarkdocRichText({ content }: Pick<BlogPost, "content">) {
   return (
     <div className="markdoc-blog-richtext">
-      {Markdoc.renderers.react(content, React, { components: { "trace-scenario": TraceScenario } })}
+      {Markdoc.renderers.react(content, React, {
+        components: {
+          "trace-scenario": TraceScenario,
+          "faq-item": FaqItem,
+          h2: BlogH2,
+          h3: BlogH3,
+          pre: BlogCodeBlock,
+          table: BlogTable,
+        },
+        resolveTagName: (name, components) =>
+          typeof components === "function" ? components(name) : components[name] ?? name,
+      })}
     </div>
   );
 }

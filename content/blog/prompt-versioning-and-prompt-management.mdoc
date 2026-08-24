@@ -32,6 +32,29 @@ seo:
     og: /media/organic-series/prompt-versioning-and-prompt-management.jpg
 ---
 
+{% trace-scenario title="Can this prompt change ship?" prompt="The new prompt improves the blended score but changes refusal behavior for a high-risk cohort. What is the next step?" outcome="Compare the same cases by cohort, record the trade-off, and require an explicit release decision with a rollback path." /%}
+
+## At a glance
+
+This guide is for **teams maintaining production prompts and policies**. It helps you **review prompt changes as behavior changes** so you can leave with **prompt operations with provenance, comparison, approval, and rollback**.
+
+| Before you start | What to inspect | What good looks like |
+| --- | --- | --- |
+| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+
+### The prompt versioning and management framework
+
+Use **Version → Compare → Approve → Rollback** as the decision path:
+
+1. **Version:** establish the task, context, or boundary before changing behavior.
+2. **Compare:** make the relevant evidence or control explicit.
+3. **Approve:** compare the decision with a concrete example, trace, or test.
+4. **Rollback:** finish with an owner, rollback, escalation, or next action.
+
+> **Decision rule:** Version the real interface, compare equivalent evidence, approve an explicit change, and make rollback boring.
+
+The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+
 ## Introduction: why prompt versioning needs an operating model
 
 Prompt Versioning and Prompt Management is a guide for teams maintaining prompts and policies that influence production LLM behavior. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?
@@ -228,3 +251,11 @@ A predeclared unacceptable behavior or a material regression in reviewed outcome
 ## Next step: make prompt versioning actionable
 
 Start with one workflow this week. Instrument the evidence needed to explain a single completed run, review it against the intended outcome, and turn the finding into a named test or operating decision. Then use the relevant Tracify resource above to inspect the connected execution path. The final CTA is deliberately practical: choose one bounded improvement, measure its effect, and keep the rollback path clear.
+
+
+## Continue with the related production guides
+
+The most useful next step depends on the failure you are trying to understand. For system boundaries and execution design, read [AI agent architecture](/blog/ai-agent-architecture), [AI agent cost calculator](/blog/ai-agent-cost-optimization), [AI agent evaluation](/blog/ai-agent-evaluation-practical-guide), [AI agent memory design](/blog/ai-agent-memory-design), [AI agent monitoring](/blog/ai-agent-monitoring), [AI agent observability](/blog/ai-agent-observability-complete-guide), [AI agent production checklist](/blog/ai-agent-production-checklist), [AI agent regression testing](/blog/ai-agent-regression-testing), [AI agent reliability](/blog/ai-agent-reliability-failures-retries-guardrails), [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals), [browser agent observability](/blog/browser-agent-observability), [production-ready AI agents](/blog/building-production-ready-ai-agents), [debugging AI agents](/blog/debug-ai-agents-in-production), [writing Tracify blog posts](/blog/how-to-write-tracify-blog-posts), [human-in-the-loop agents](/blog/human-in-the-loop-ai-agents), [LLM hallucination detection](/blog/llm-hallucination-detection), [LLM latency optimization](/blog/llm-latency-optimization), [LLM observability metrics](/blog/llm-observability-metrics-that-matter). Use the linked guides as a connected path: compare the trace contract, evaluation method, rollout advice, and operational ownership instead of treating any one article as a complete solution.
+
+
+For a deeper operational comparison, connect this guide to [production prompt versioning](/blog/prompt-versioning-production) and [structured outputs](/blog/structured-outputs-ai-agents) when you are moving from explanation to implementation.
