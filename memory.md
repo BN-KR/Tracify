@@ -1,5 +1,10 @@
 # Project Memory
 
+## 2026-08-25 LLM tracing article refinement
+- On clean branch `codex/blog-llm-tracing-format` from `origin/main`, replaced the duplicated/generated body of `content/blog/llm-tracing-explained.mdoc` with a focused Boundary → Propagate → Annotate → Inspect guide.
+- Preserved the published slug, `draft: false`, tracked hero asset, and frontmatter intent. Added one deterministic trace-scenario interaction, one FAQ section with three shared accordion items, decision notes, semantic trace/span tables, an illustrative trace shape, a checklist, and three contextual links to published posts.
+- `npm run test:content` passes all 19 tests, `git diff --check` passes, and the tracked image URL returns HTTP 200. `npm run build` compiles and passes TypeScript but page-data collection requires the missing clean-worktree `CONVEX_SITE_URL` environment variable.
+
 ## 2026-08-24 future content quality gate
 - Completed launch-plan labels in `src/components/dashboard/dashboard-overview.tsx` keep their muted text but now use `decoration-black/75`, making the strikethrough readable without overpowering the label.
 - The authoritative content workflow now has a mandatory future-agent quality gate in `.agents/skills/writing-tracify-content/SKILL.md` and `content/blog/README.md`: inspect evidence first, define reader/job/boundary, use layered structure and purposeful interactions, keep examples truthful, target 4–7 contextual links per 1,000 long-form words, render-test desktop/mobile behavior, and run all required checks before PR/merge.

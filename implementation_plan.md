@@ -941,3 +941,10 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 1. [completed] Inspect the single article, Markdoc contract, shared TOC, code renderer, and page styles.
 2. [completed] Add full-article structure, FAQ accordion, scoped background/code treatment, and mobile-safe TOC/overflow rules.
 3. [completed] Validate Markdoc/content tests, focused ESLint, local response status, and diff hygiene; browser runtime initialization remains unavailable.
+
+# LLM tracing article refinement — 2026-08-25
+
+1. [completed] Establish a clean `codex/blog-llm-tracing-format` worktree from `origin/main`.
+2. [completed] Replace duplicated article sections with a concise reader/job/outcome/boundary structure and truthful tracing examples.
+3. [completed] Verify content contracts, internal links, FAQ count, image inventory, image HTTP status, and diff scope.
+4. [pending] Run the full build and rendered desktop/mobile route checks with the required Convex environment configured, then open a focused PR.
