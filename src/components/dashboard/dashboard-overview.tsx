@@ -273,7 +273,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
                   <span className={item.complete ? "flex size-5 shrink-0 items-center justify-center bg-emerald-600 text-white" : "flex size-5 shrink-0 items-center justify-center border border-black/30 text-black/55"}>
                     {item.complete ? <CircleCheck className="size-3" aria-hidden="true" /> : index + 1}
                   </span>
-                  <span className={item.complete ? "line-through text-black/55" : "flex-1"}>{item.label}</span>
+                  <span className={item.complete ? "line-through decoration-black/75 text-black/55" : "flex-1"}>{item.label}</span>
                   <ArrowUpRight className="size-3 shrink-0" aria-hidden="true" />
                 </Link>
               </li>

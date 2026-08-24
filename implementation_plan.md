@@ -1,3 +1,10 @@
+# Product film rebuild — 2026-08-22
+
+- [completed] Extract the public homepage and demo-page design tokens, typography, panel geometry, and interaction language.
+- [completed] Archive the old Motion Canvas project and scaffold a clean Remotion composition.
+- [completed] Build four connected scenes using the actual Tracify visual system and product workflow.
+- [completed] Render and inspect representative frames, then produce and probe the final MP4.
+
 # 17-post visibility content set — 2026-08-20
 
 1. [completed] Read the project memory, content map, quality bar, interactive-content rules, and blog README.
@@ -6,6 +13,13 @@
 4. [completed] Add and centrally register a deterministic `<trace-scenario>` interaction for articles where reader-controlled state improves the lesson.
 5. [completed] Run the complete content test suite.
 6. [completed] Complete the production build with the Webpack path and a temporary Node worker-thread verification setting, then remove the temporary setting.
+
+# Motion Canvas product demo — 2026-08-21
+
+- [completed] Study the Bufferhead Motion Canvas reference and current Tracify trace/evaluation surfaces.
+- [completed] Replace the card-based draft with a graph-led animation that keeps the execution system alive across scene changes.
+- [completed] Build the Motion Canvas project and render the H.264 MP4 with the FFmpeg exporter.
+- [completed] Visually inspect representative MP4 frames and correct graph leakage, multiline text, panel-safe anchors, the selected-span right-edge marker, opening graph framing, signal timing, and final timing.
 
 # Robots standards cleanup — 2026-08-13
 
@@ -899,3 +913,14 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 4. [completed] Validate that `NPM_TOKEN` belongs to intended npm owner `tracifytech`; enforce that owner through `EXPECTED_NPM_USER`.
 5. [completed] First-publish `tracify-sdk@0.2.0` to PyPI through CI and npm through the owner's interactive 2FA session, then clean-install and import both public artifacts.
 6. [follow-up] Configure npm and PyPI trusted publishers for tokenless future releases; npm staged publishing is now available because the package exists.
+
+# Future content quality gate — 2026-08-24
+
+1. [completed] Increase completed-item strikethrough decoration opacity in the dashboard launch plan.
+2. [completed] Make the future-agent content workflow explicit and mandatory in both the writing skill and blog publishing README.
+3. [completed] Run content, focused lint, full lint, build, diff, and rendered-style verification; content/focused checks pass, while full lint and build report unrelated pre-existing repository issues.
+# AI agent monitoring blog refinement — 2026-08-21
+
+1. [completed] Inspect the single article, Markdoc contract, shared TOC, code renderer, and page styles.
+2. [completed] Add full-article structure, FAQ accordion, scoped background/code treatment, and mobile-safe TOC/overflow rules.
+3. [completed] Validate Markdoc/content tests, focused ESLint, local response status, and diff hygiene; browser runtime initialization remains unavailable.

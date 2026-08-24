@@ -1,5 +1,26 @@
 # Project Memory
 
+## 2026-08-24 future content quality gate
+- Completed launch-plan labels in `src/components/dashboard/dashboard-overview.tsx` keep their muted text but now use `decoration-black/75`, making the strikethrough readable without overpowering the label.
+- The authoritative content workflow now has a mandatory future-agent quality gate in `.agents/skills/writing-tracify-content/SKILL.md` and `content/blog/README.md`: inspect evidence first, define reader/job/boundary, use layered structure and purposeful interactions, keep examples truthful, target 4–7 contextual links per 1,000 long-form words, render-test desktop/mobile behavior, and run all required checks before PR/merge.
+- Verification on 2026-08-24: 19 content tests, focused dashboard ESLint, and diff hygiene pass. Full lint still has unrelated existing errors; the full build reaches TypeScript but fails on the untracked archived Motion Canvas file `video/archive/tracify-demo-motion-canvas/src/scenes/demo.tsx`.
+
+## 2026-08-22 Tracify product film rebuilt from scratch in Remotion
+- Replaced the active Motion Canvas project with a new Remotion 4 composition under `video/tracify-demo`; the previous project is recoverably archived at `video/archive/tracify-demo-motion-canvas`.
+- The new film takes its visual system directly from the public homepage and demo page: warm paper `#eceae3`, white panels, one-pixel black rules, hard 18px black shadows, zero radius, black proof surfaces, acid yellow `#f4d44d`, and the exact Geist Pixel/Sans/Mono fonts copied from the site dependency.
+- The 38.25-second film covers the real Tracify loop: homepage release proof, demo workspace and failed run selection, span/root-cause inspection with replay evidence, and release-candidate promotion.
+- `npm run lint` and `npm run build` pass. Four Remotion still checkpoints and four frames extracted from the final MP4 were visually inspected with no clipping or panel overflow. Final `video/tracify-demo.mp4` is H.264, 1920×1080, 30fps, 38.25 seconds.
+
+## 2026-08-21 AI agent monitoring blog refinement
+- Refined only `/blog/ai-agent-monitoring`: added six H2 phases with nested H3 decision points, a five-item native FAQ accordion, a scoped paper/grid article background, and colored readable code-block treatment.
+- The shared blog renderer now nests H2/H3 headings into a structured TOC and adds mobile-safe wrapping/overflow rules. The `faq-item` Markdoc tag is centralized in `src/lib/markdoc-blog.ts` and rendered in `src/components/blog/markdoc-rich-text.tsx`.
+- `npm run test:content` passes all 18 tests. Focused ESLint passes for the changed TypeScript files. The local browser runtime could not initialize; the local Next response returned 200 after its first slow compile.
+
+## 2026-08-21 Tracify Motion Canvas product demo
+- Reworked the initial card-based draft after visual review: the final scene keeps a persistent execution graph and uses camera/object transitions into the selected span, code patch, evaluation bars, and release gate.
+- The film uses real Tracify concepts from the repository: support-agent trace spans, model/tool/decision telemetry, empty retrieval debugging, code patching, offline evaluation candidates, quality/latency/cost metrics, and a release gate.
+- Rendered the final `video/tracify-demo.mp4` with the Motion Canvas FFmpeg exporter at 1920×1080, 60fps, H.264, 45.87 seconds. Explicit left-anchored text helpers keep labels inside their panels; the selected-span evidence panel was tightened after inspection so its red failure marker stays inside the frame; the opening graph was reframed so its evaluation label stays inside the hook. Added a staged signal pulse through the graph and kinetic title-rule entry based on the supplied AI video-engineer/Remotion guidance, while retaining Tracify’s monochrome and acid-yellow brand. `ffprobe` confirms the stream and the hook, trace, code, and release frames were visually inspected from the replacement MP4.
+
 ## 2026-08-20 17-post blog visibility content set
 - Added 17 published Markdoc articles under `content/blog` targeting distinct, durable AI engineering searches: architecture, RAG evaluation, prompt injection, structured outputs, latency, hallucinations, cost, memory, MCP, OpenTelemetry, human review, regression testing, production readiness, browser agents, prompt versioning, monitoring, and the Tracify writing workflow.
 - Added `how-to-write-tracify-blog-posts.mdoc` so future agents have a public, reader-facing version of the required writing process. The repository-level must-follow process remains in `AGENTS.md`, `.agents/skills/writing-tracify-content/SKILL.md`, and `content/blog/README.md`.

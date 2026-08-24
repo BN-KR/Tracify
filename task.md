@@ -1,10 +1,32 @@
+# 2026-08-22 — Product film rebuilt from scratch
+
+- [x] Remove the active Motion Canvas composition and preserve it in a recoverable archive.
+- [x] Rebuild the film in Remotion using the live homepage/demo design language and exact Geist fonts.
+- [x] Animate the homepage proof, demo workspace, failed-run drilldown, trace inspector, replay score, and release proof.
+- [x] Pass lint and bundle checks; inspect four still checkpoints and four frames extracted from the final MP4.
+- [x] Render `video/tracify-demo.mp4` at 1920×1080, 30fps, H.264, 38.25 seconds.
+
 # 2026-08-20 — 17-post visibility content set
+
+## 2026-08-21 — AI agent monitoring article refinement
+
+- [x] Restructure only `content/blog/ai-agent-monitoring.mdoc` into six H2 phases with nested H3 decision points.
+- [x] Add the centralized `faq-item` Markdoc tag as an accessible native accordion.
+- [x] Add scoped article background/code colors and a nested, mobile-safe shared blog TOC.
+- [x] Run `npm run test:content`, focused ESLint, and `git diff --check`; local browser initialization remains unavailable.
 
 - [x] Add 17 keyword-led, non-overlapping Markdoc posts covering AI agent architecture, evaluation, security, performance, cost, operations, browser agents, MCP, and prompt management.
 - [x] Add the future-agent workflow article at `/blog/how-to-write-tracify-blog-posts` and retain the required workflow in `AGENTS.md`, the writing skill, and `content/blog/README.md`.
 - [x] Add a centralized, deterministic `<trace-scenario>` Markdoc interaction with accessible disclosure behavior and use it in the RAG and cost articles.
 - [x] Run `npm run test:content` successfully (16 tests passed).
 - [x] Verify the production build end-to-end with the Webpack path and temporary Node worker-thread workaround; compilation, TypeScript, static generation, and route finalization all passed. The workaround was removed afterward, leaving `next.config.ts` unchanged.
+
+# 2026-08-21 — Motion Canvas product demo
+
+- [x] Implement the standalone Motion Canvas source project under `video/tracify-demo`.
+- [x] Replace the initial PowerPoint-like card sequence with a persistent graph-led animation inspired by the Bufferhead reference.
+- [x] Build and render `video/tracify-demo.mp4` at 1920×1080, 60fps, H.264, 45.63 seconds.
+- [x] Visually inspect trace, code, release, and outro frames from the MP4; correct panel-safe text anchors, the selected-span right-edge marker, opening graph framing, and add a staged signal pulse.
 
 # ⚠ PENDING — needs BN-KR on their own machine (updated 2026-08-16)
 
@@ -1142,3 +1164,8 @@ Follow-ups still open:
 - [x] Merge the scoped workflow fix that runs `npm ci` from `packages/ts-sdk`, rerun the dry run, and confirm `NPM_TOKEN` belongs to npm user `tracifytech`.
 - [x] Publish `tracify-sdk@0.2.0` to PyPI through the verified workflow and to npm through the owner's interactive 2FA session.
 - [x] Verify both public registry records and clean-install/import the published npm and PyPI artifacts.
+
+# Future content quality gate — 2026-08-24
+
+- [x] Make completed launch-plan strikethrough decoration more opaque without changing completed text contrast.
+- [x] Add a mandatory future-agent quality gate to the writing skill and blog publishing README covering evidence, hierarchy, interactions, links, rendering, and release checks.
