@@ -404,13 +404,13 @@
    utilities cannot override it. */
 ::selection,
 *::selection {
-  background-color: rgba(250, 204, 21, 0.38) !important;
+  background-color: rgba(250, 204, 21, 0.18) !important;
   color: inherit !important;
 }
 
 ::-moz-selection,
 *::-moz-selection {
-  background-color: rgba(250, 204, 21, 0.38) !important;
+  background-color: rgba(250, 204, 21, 0.18) !important;
   color: inherit !important;
 }
 
