@@ -13,6 +13,7 @@
     "sanity",
     "studio-tracify",
     "scripts",
+    "packages/playwright",
     ".next/dev",
     ".next-cloud/dev",
     ".next-clean/dev"
