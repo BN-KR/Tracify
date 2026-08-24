@@ -1,5 +1,10 @@
 # Project Memory
 
+## 2026-08-25 LLM latency article refinement
+- On clean branch `codex/blog-llm-latency-optimization` from `origin/main`, replaced the duplicated/generated body of `content/blog/llm-latency-optimization.mdoc` with a Measure → Waterfall → Optimize → Tail guide.
+- Preserved published metadata, `draft: false`, the existing tracked operations hero, related posts, and article intent. Added one deterministic latency scenario, one FAQ section, waterfall evidence, milestone and trade-off tables, bounded retry/streaming/cache guidance, contextual links, and a checklist.
+- `npm run test:content` passes all 19 tests, the production build passes with non-secret placeholder Convex URLs, `git diff --check` passes, the tracked hero returns HTTP 200, and the final body has one FAQ heading with no recommendation prose dump. Full lint still reports 18 unrelated pre-existing errors.
+
 ## 2026-08-25 LLM tracing article refinement
 - On clean branch `codex/blog-llm-tracing-format` from `origin/main`, replaced the duplicated/generated body of `content/blog/llm-tracing-explained.mdoc` with a focused Boundary → Propagate → Annotate → Inspect guide.
 - Preserved the published slug, `draft: false`, tracked hero asset, and frontmatter intent. Added one deterministic trace-scenario interaction, one FAQ section with three shared accordion items, decision notes, semantic trace/span tables, an illustrative trace shape, a checklist, and three contextual links to published posts.

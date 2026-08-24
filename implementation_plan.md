@@ -955,3 +955,10 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 2. [completed] Replace duplicated article sections with an outcome-led metric selection and response framework.
 3. [completed] Verify Markdoc contracts, links, interaction, image, build, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
+
+# LLM latency article refinement — 2026-08-25
+
+1. [completed] Establish a clean branch from the merged metrics baseline.
+2. [completed] Replace duplicated article sections with an outcome-led latency measurement and optimization sequence.
+3. [completed] Verify Markdoc contracts, links, interaction, image, build, lint result, and diff evidence.
+4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
