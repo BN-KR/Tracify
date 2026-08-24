@@ -968,7 +968,8 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 2. [completed] Add explicit canonicals for intentionally noindex utility/preview routes.
 3. [completed] Run the content validation suite and live sitemap/status checks.
 4. [completed] Exclude archived video source from TypeScript and complete the production build.
-5. [pending] Deploy the change, then validate the exact affected URLs and request reindexing in Search Console.
+5. [completed] Deploy the exact commit to a clean Vercel Preview and verify the changed route metadata.
+6. [pending] Merge/deploy through the production `origin/main` workflow, then validate the exact affected URLs and request reindexing in Search Console.
 # AI agent monitoring blog refinement — 2026-08-21
 
 1. [completed] Inspect the single article, Markdoc contract, shared TOC, code renderer, and page styles.
