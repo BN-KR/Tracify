@@ -1182,6 +1182,13 @@ Follow-ups still open:
 - [x] Fix article top clearance and Back to blog hover contrast, then place exactly three recommended posts at the bottom.
 - [x] Keep 17 contextual internal links across the roughly 3,838-word article (about 4.43 links per 1,000 words).
 - [x] Pass 19 content tests, focused ESLint, diff hygiene, desktop/mobile browser checks, and the full 116-route production build.
+
+# LLM tracing article refinement — 2026-08-25
+
+1. [completed] Read the mandatory content instructions and inspect the canonical article, renderer, media inventory, published corpus, and target article.
+2. [completed] Rewrite `llm-tracing-explained.mdoc` on a clean branch with a focused operating model, evidence tables, one deterministic interaction, one FAQ section, contextual links, and a practical checklist.
+3. [completed] Pass all 19 content tests, `git diff --check`, tracked-media verification, and HTTP 200 image verification.
+4. [blocked] Complete the production build/rendered HTML check after supplying the required non-secret `CONVEX_SITE_URL` environment value in the isolated worktree.
 # Future content quality gate — 2026-08-24
 
 - [x] Make completed launch-plan strikethrough decoration more opaque without changing completed text contrast.
