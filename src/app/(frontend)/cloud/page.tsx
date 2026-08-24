@@ -7,6 +7,7 @@ import { getAvailableRegions } from "@/lib/regions";
 export const metadata: Metadata = {
   title: "Select your Tracify Cloud region",
   description: "Choose the Tracify Cloud region where your account and telemetry will be stored.",
+  alternates: { canonical: "/cloud" },
   robots: { index: false, follow: false },
 };
 

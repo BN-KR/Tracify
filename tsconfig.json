@@ -32,5 +32,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "scratch", "sanity", "studio-tracify", "scripts", "packages/playwright"]
+  "exclude": ["node_modules", "scratch", "sanity", "studio-tracify", "scripts", "packages/playwright", "video/archive", "playwright.config.ts"]
 }

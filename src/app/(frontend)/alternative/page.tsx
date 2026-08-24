@@ -4,6 +4,7 @@ export const metadata = {
   title: "Tracify — Future 19 homepage preview",
   description:
     "A complete Tracify homepage composed from the Future 19 visual system.",
+  alternates: { canonical: "/" },
   robots: { index: false, follow: false },
 };
 

@@ -1,3 +1,5 @@
+// This file is loaded by the standalone Playwright test runner, not by the Next.js app build.
+// @ts-nocheck
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
