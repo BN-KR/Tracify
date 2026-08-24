@@ -1,5 +1,10 @@
 # Project Memory
 
+## 2026-08-25 AI agent architecture article refinement
+- On clean branch `codex/blog-ai-agent-architecture` from `origin/main`, replaced the duplicated/generated body of `content/blog/ai-agent-architecture.mdoc` with a Contract → Boundary → State → Evidence guide.
+- Preserved published metadata, `draft: false`, related posts, and the tracked observability hero. Added one deterministic architecture scenario, one FAQ section, six-layer and tool-boundary tables, a typed decision example, a control-loop diagram, degraded-path guidance, contextual links, and a checklist.
+- `npm run test:content` passes all 19 tests, the production build passes with non-secret placeholder Convex URLs, `git diff --check` passes, the tracked hero returns HTTP 200, and the final body has one FAQ heading with no recommendation prose dump. Full lint still reports 18 unrelated pre-existing errors.
+
 ## 2026-08-25 LLM latency article refinement
 - On clean branch `codex/blog-llm-latency-optimization` from `origin/main`, replaced the duplicated/generated body of `content/blog/llm-latency-optimization.mdoc` with a Measure → Waterfall → Optimize → Tail guide.
 - Preserved published metadata, `draft: false`, the existing tracked operations hero, related posts, and article intent. Added one deterministic latency scenario, one FAQ section, waterfall evidence, milestone and trade-off tables, bounded retry/streaming/cache guidance, contextual links, and a checklist.
