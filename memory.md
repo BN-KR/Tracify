@@ -1299,6 +1299,11 @@
 - Preserved published metadata, `draft: false`, related-post state, and the existing tracked hero image. Added one deterministic release-gate scenario, representative-set and rubric tables, an illustrative rubric artifact, one FAQ section, contextual links, and an operational checklist.
 - `npm run test:content` passes all 19 tests, the production build passes with non-secret placeholder Convex URLs, `git diff --check` passes, and the final body has one FAQ heading with no recommendation prose dump. Full lint remains a separate check with the same unrelated pre-existing errors.
 
+## 2026-08-25 RAG evaluation guide refinement
+- On clean branch `codex/blog-rag-evaluation` from `origin/main`, replaced the appended/generated sections of `content/blog/rag-evaluation-guide.mdoc` with a Retrieve → Ground → Score → Gate evaluation loop.
+- Preserved published metadata, `draft: false`, related posts, and the tracked evaluation hero asset. Added one deterministic citation-mismatch scenario, an illustrative evaluation record, retrieval/claim/release tables, an in-article visual, one FAQ section, contextual links, and an operational checklist.
+- `npm run test:content` passes all 19 tests, the production build passes with non-secret placeholder Convex URLs, `git diff --check` passes, and the final body has one FAQ heading with no recommendation prose dump. Full lint remains a separate check with the same unrelated pre-existing errors.
+
 ## 2026-08-25 AI agent testing guide refinement
 - On clean branch `codex/blog-agent-testing` from `origin/main`, replaced the duplicated/generated body of `content/blog/ai-agent-testing-unit-tests-production-evals.mdoc` with an Isolate → Simulate → Evaluate → Observe → Improve testing loop.
 - Preserved published metadata, `draft: false`, related-post state, and the existing tracked hero image. Added one deterministic layer-selection scenario, a failure/layer matrix, illustrative test pseudocode, an in-article visual, one FAQ section, contextual links, and an operational checklist.
