@@ -32,246 +32,119 @@ seo:
     og: /media/organic-series/debug-ai-agents-in-production.jpg
 ---
 
-{% trace-scenario title="Where should an incident investigation begin?" prompt="The final answer is wrong, but the model call returned HTTP 200. What is the first useful boundary?" outcome="Open the parent run and follow the decision path through retrieval, tools, validation, retries, and the user-visible outcome." /%}
+Production debugging starts when the user-visible result is wrong, incomplete, unsafe, or too slow—not when a model request returns an error. The job is to protect users first, reconstruct the path, identify the mechanism, and verify that the fix changes the outcome without creating a new failure.
+
+{% trace-scenario title="Where should an incident investigation begin?" prompt="The final answer is wrong, but the model call returned HTTP 200. What is the first useful boundary?" outcome="Open the parent run and follow the decision path through retrieval, tools, validation, retries, and the user-visible outcome. HTTP success is only one event in the task." /%}
 
 ## At a glance
 
-This guide is for **on-call engineers and incident responders**. It helps you **reconstruct a failed run and verify a safe fix** so you can leave with **an incident workflow that moves from symptom to mechanism to proof**.
+This guide is for on-call engineers and incident responders. It helps you **move from symptom to mechanism to proof** so you can leave with a contained incident, a reproducible hypothesis, and a fix that has a verification plan.
 
-| Before you start | What to inspect | What good looks like |
+| Before you start | What to define | What good looks like |
 | --- | --- | --- |
-| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+| A user report, alert, or representative failed run | Impact, trace boundary, comparison case, owner, and stop condition | Users are protected while the team explains the failure and proves the change |
 
-### The debugging AI agents in production framework
+### The debugging loop
 
-Use **Reconstruct → Classify → Fix → Verify** as the decision path:
+Use **Stabilize → Reconstruct → Compare → Correct → Verify**:
 
-1. **Reconstruct:** establish the task, context, or boundary before changing behavior.
-2. **Classify:** make the relevant evidence or control explicit.
-3. **Fix:** compare the decision with a concrete example, trace, or test.
-4. **Verify:** finish with an owner, rollback, escalation, or next action.
+1. **Stabilize:** protect users with pause, fallback, rollback, or a narrower cohort.
+2. **Reconstruct:** follow the parent task through evidence, decisions, tools, retries, and state.
+3. **Compare:** contrast the failing path with a healthy run from the same workflow and release.
+4. **Correct:** address the mechanism in code, data, prompt, policy, dependency, or operations.
+5. **Verify:** replay the case, test neighbors, and watch the production signal that exposed it.
 
-> **Decision rule:** Reconstruct the run, classify the first meaningful failure, fix the mechanism, and verify the result against the original case.
+> **Decision rule:** Do not change the prompt while the failure boundary is still unknown. First preserve the path that proves what happened.
 
-The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+## 1. Stabilize users before diagnosis
 
-## Introduction: why debug AI agents in production needs an operating model
+Choose the smallest reversible action that limits harm. Pause a high-consequence action, roll back a release, narrow the affected cohort, route to human review, or activate a known-safe fallback. Record the start time, impact, owner, affected workflow, and decision so diagnosis does not erase incident control.
 
-How to Debug AI Agents in Production is a guide for on-call engineers, workflow owners, and technical leaders handling production AI incidents. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?
+| Situation | First containment | Avoid |
+| --- | --- | --- |
+| Active harmful action | Pause the action boundary and require approval | Repeating the same call to gather more logs |
+| Release regression | Roll back or narrow exposure | Editing production prompts without a baseline |
+| Dependency outage | Use bounded fallback or degraded state | Infinite retries that multiply load |
+| Unclear impact | Sample and classify representative runs | Treating one vivid transcript as the distribution |
 
-Incident response improves when investigators reconstruct one connected run before proposing a fix. This guide treats those questions as an engineering and leadership responsibility. The goal is not to manufacture certainty from a probabilistic component. It is to give people enough timely, connected evidence to set boundaries, investigate deviations, compare alternatives, and learn from real operation. That distinction matters because teams can otherwise accumulate impressive telemetry while remaining unable to explain a user-visible result or decide whether a change helped.
+The [AI agent reliability guide](/blog/ai-agent-reliability-failures-retries-guardrails) covers bounded retries and terminal states. Containment is part of debugging because an uncontained investigation changes the evidence while the incident is still active.
 
-> A useful AI operating practice turns an observed run into a decision, an owner, and a reversible next action.
+## 2. Reconstruct the execution timeline
 
-![A black computer keyboard beside a developer workspace](/media/organic-series/debug-ai-agents-in-production.jpg)
+Open the parent task, not just the last model response. Preserve the user request or input class, expected outcome, release and prompt versions, retrieved evidence, model calls, tool requests and responses, validation, retries, approvals, timing, final state, and user effect. Redact secrets and use protected references for sensitive content.
 
-## Contents
+| Timeline question | Evidence to open |
+| --- | --- |
+| What task was the system attempting? | Parent run, input class, expected outcome |
+| Which transition changed the path? | Child spans, retrieval, tool, validator, policy, or retry events |
+| What context was available? | Source IDs, versions, tool results, permissions, prompt/model markers |
+| What did the user receive or experience? | Terminal status, response, fallback, action result, correction |
 
-- Stabilize users before diagnosis
-- Reconstruct the execution timeline
-- Compare a failing run with a healthy run
-- Classify the failure mechanism
-- Verify the fix in production
-- A grounded production example
-- Operational checklist and FAQ
+The [AI agent observability guide](/blog/ai-agent-observability-complete-guide) describes the evidence model. A trace is useful when it shortens the path from user effect to an owned hypothesis; collecting more unstructured logs is not the same as reconstructing a run.
 
-## A working definition of debug AI agents in production
+![A developer workspace used to reconstruct an AI agent incident timeline](/media/organic-series/debug-ai-agents-in-production.jpg)
 
-A reproducible diagnosis starts with [LLM tracing](/blog/llm-tracing-explained) and ends by feeding the confirmed failure into an [AI agent reliability strategy](/blog/ai-agent-reliability-failures-retries-guardrails).
+*The first useful debugging artifact is a timeline that connects the user effect to the transition that changed the path.*
 
-debug AI agents in production is the discipline of recording and interpreting enough execution evidence to understand how an AI-enabled workflow behaved, whether it met its intended outcome, and what should happen next. It includes technical telemetry, but it is broader than logging model requests. The unit that people care about is usually an end-to-end task: a user request, a retrieval step, one or more model calls, a tool action, a retry or approval, and a final result. The evidence must keep those events connected without pretending that one metric can stand in for the whole task.
+## 3. Compare failing and healthy runs
 
-This definition makes room for different roles. An engineer needs causally useful context when investigating a failure. A product owner needs a stable way to see whether the workflow is helping users. A security or risk reviewer needs proof that boundaries and approvals were honored. An engineering leader needs a release decision that is based on representative behavior rather than a single memorable transcript. All of them use the same underlying story of a run, but they ask different questions of it.
+Find a known-good case from the same workflow, task class, and release whenever possible. Compare like with like: input conditions, retrieved sources, model and prompt versions, tool state, retry path, timing, policy result, and final outcome. If the healthy comparison is from an easier cohort or different release, say so and limit the claim.
 
-### Start with outcomes, not dashboards
+| Difference | Candidate mechanism | Next check |
+| --- | --- | --- |
+| Required source absent | Retrieval, indexing, filter, or freshness issue | Inspect corpus version and source selection |
+| Tool response differs | Dependency state or contract change | Replay with recorded request and validate schema |
+| Same evidence, different decision | Prompt, model, policy, or context interpretation | Compare versions and criterion-level outcomes |
+| Same path, slower result | Retry, provider, queue, or critical-path latency | Inspect child-span timing and deadlines |
+| Action changed external state | Missing authority or idempotency boundary | Review precondition, approval, and postcondition |
 
-Before choosing fields or tools, write the outcome the workflow is supposed to produce and the harm it must avoid. a safe restoration of the affected workflow and a verified prevention step is a better anchor than a generic request to improve accuracy. It gives teams a way to distinguish a healthy unusual case from a concerning ordinary case. It also exposes where a human decision is required. A measurement program cannot remove that judgment, but it can make the judgment repeatable, reviewable, and easier to improve.
+Avoid the attractive explanation that is easiest to edit. The [RAG evaluation guide](/blog/rag-evaluation-guide) shows why missing or irrelevant evidence should be separated from a synthesis failure before changing generation behavior.
 
-## The Stabilize, Reconstruct, Compare, Correct, Verify framework
+## 4. Classify the mechanism and choose the correction
 
-Use Stabilize, Reconstruct, Compare, Correct, Verify as a compact way to organize the work. First, define the task boundary and success condition. Second, preserve the execution path as connected evidence. Third, classify the result using a mix of automated checks and sampled human review. Fourth, choose a response that is proportionate to impact: continue, retry within a bound, ask for approval, repair, or stop. Finally, feed the confirmed result into a change decision. The framework is deliberately cyclical. Production behavior should improve the next test set, runbook, prompt review, and release gate.
+Write the hypothesis as a mechanism: “the freshness check was absent,” “the tool contract accepted a partial result,” or “the retry classified a deterministic validation error as transient.” Then identify the smallest correction that changes that mechanism and the evidence that will show recurrence.
 
-1. Frame the user-facing task, its allowed actions, and its measurable success condition.
-2. Follow the execution path across models, tools, retries, dependencies, and handoffs.
-3. Assess outcome quality and operational cost with context, not a single proxy.
-4. Respond through a named owner, a bounded policy, and a documented escalation path.
-5. Learn by turning reviewed evidence into tests, evaluations, controls, or a rollback decision.
+```text
+incident: renewal_guidance_wrong_commitment
+mechanism: stale_account_state_passed_as_current
+correction: require_freshness_check_before_drafting
+regression_case: renewal_state_older_than_request
+watch: blocked_action_rate_and_user_correction_rate
+owner: account-workflow
+```
 
-### Why the loop is more important than any individual tool
+This is an illustrative incident packet, not executable configuration. Keep observations separate from interpretation, name the owner, and record what would falsify the hypothesis. A correction may belong in code, data, retrieval, prompt, policy, dependency handling, or operations.
 
-A tracing tool, an evaluation dataset, or a cost report is useful only when it closes part of this loop. The failure mode is collecting data because collection feels prudent, then discovering during an incident that no one knows which run is representative, which version changed, or who may make a corrective decision. A smaller system with explicit task boundaries and owners generally teaches more than a larger system filled with unactionable events. Add detail where it changes an investigation or release decision; resist detail that only increases storage and review burden.
+> **Correction rule:** Prefer the change that makes the failure impossible or visible at its boundary. A prompt edit is insufficient when the system lacks a state or authority control.
 
-## Signals, context, and ownership
+## 5. Verify the fix before closing
 
-Instrumentation should describe the actual workflow rather than the architecture diagram people wish they had. Record a stable run identifier, relevant session or request identifier, environment and release marker, start and finish times, model and provider configuration where permitted, prompt or policy revision, tool names and outcomes, retry decisions, and a final task status. Then connect quality, latency, and cost signals to that same run. The point is to make comparison possible: this run against a baseline, this release against the prior release, and this failure pattern against an owned response.
+Replay the original case with the corrected version, then test neighboring cases that could regress: empty input, ambiguous intent, stale state, partial tool result, duplicate action, long context, and a dependency timeout. Compare user outcome, failure class, latency, cost, safety, and escalation—not just whether the final response looks better.
 
-### Use a layered evidence model
+After release, watch the signal that exposed the incident for a defined observation window. Preserve the candidate and baseline versions, cohort, sample rule, and rollback condition. If the result improves one dimension while harming another, record the trade-off and decide whether the exposure remains appropriate.
 
-Layer one is task evidence: input class, intended outcome, final status, and user-visible effect. Layer two is execution evidence: spans for model calls, retrieval, tools, validation, retries, and approvals. Layer three is governance evidence: version identifiers, access boundaries, review labels, and the decision that authorized a consequential action. Each layer answers a different question. Keeping them distinct prevents teams from confusing a fast response with a good outcome or a successful API call with a safe business action.
-
-Ownership completes the model. Every signal should have a consumer, a cadence, and an action. A latency distribution might be reviewed weekly by the platform team, while a safety-boundary violation demands immediate triage by the workflow owner. A cost increase may trigger an experiment rather than an incident. Put these rules in a short runbook. People should not have to negotiate the meaning of an alert while a customer is waiting for a response.
-
-The operating detail should be proportionate to the decision. For a low-consequence drafting workflow, the team may need a sampled outcome label and a clear correction path. For an agent that changes records, communicates commitments, or triggers downstream work, the team may also need pre-action validation, approval evidence, and a reliable terminal state. In either case, make the evidence legible to someone who was not in the original design meeting. A future investigator should be able to identify the input class, the intended outcome, the applicable version, the important transition, and the owner of the next response without reverse-engineering the entire codebase.
-
-This is also why teams should rehearse the review flow before an incident. Pick a recently completed run, ask a new operator to explain the path using only the recorded evidence, and note where they need tribal knowledge. Missing context is not a reason to collect everything indiscriminately. It is a design prompt: add the smallest identifier, classification, or boundary that would make the next decision clearer. Repeat this exercise after a release, a dependency change, or a newly observed input class. The practice builds operational fluency while keeping the system focused on real decisions instead of dashboard decoration.
-
-A useful review ends with a visible change in the operating system: a clearer contract, a new representative case, a narrower approval rule, a corrected threshold, or an explicit choice to accept a bounded risk. If no decision changes, reduce the reporting burden and return attention to the task that needs evidence. This keeps debug AI agents in production practical for both the engineers producing telemetry and the leaders accountable for the result.
-
-## Stabilize users before diagnosis
-
-Stabilize users before diagnosis deserves an explicit operating decision, not a vague expectation. Teams often see it only after an incident channel fills with theories before anyone has reconstructed the affected run, when the pressure to restore service makes every signal look equally important. Start by naming the decision that Stabilize users before diagnosis must support: whether a run may continue, whether an operator should intervene, whether a release should advance, or whether a customer outcome needs repair. That decision determines the unit of analysis, the useful time window, and who owns the response. How to Debug AI Agents in Production is more useful when it turns a technical trace into that concrete decision.
-
-The most useful evidence combines user impact and fallback activation with the surrounding execution context. A number without an input, tool result, model setting, prompt revision, retry history, and final outcome can suggest a correlation without establishing a cause. Capture the smallest stable identifiers that connect those pieces, then preserve the raw values needed for authorized investigation. This is not a request to retain every possible datum forever. It is a request to make the path from observed behavior to an accountable explanation short enough for the people operating the system.
-
-A practical review asks three questions. What normal behavior looks like for Stabilize users before diagnosis; what deviation changes risk or user impact; and what action follows the deviation. The answer should be written before a dashboard or alert is created. For example, a slower run may be acceptable when it completes a high-value task, while the same delay can be unacceptable in an interactive flow. The threshold therefore belongs to a service promise and a workflow, not to a generic chart. This keeps debug AI agents in production connected to the outcome A safe restoration of the affected workflow and a verified prevention step.
-
-Treat the first version as a learning instrument. Review a small sample of successful, degraded, and failed runs, and compare the classification against what an experienced operator concludes from the full context. If the signal creates noise, refine the event boundary or add missing context instead of silently lowering attention. If it misses meaningful cases, inspect the false negatives for a shared pattern. That feedback loop makes the measurement defensible and prevents the team from turning an early proxy into a permanent definition of quality.
-
-## Reconstruct the execution timeline
-
-Reconstruct the execution timeline deserves an explicit operating decision, not a vague expectation. Teams often see it only after an incident channel fills with theories before anyone has reconstructed the affected run, when the pressure to restore service makes every signal look equally important. Start by naming the decision that Reconstruct the execution timeline must support: whether a run may continue, whether an operator should intervene, whether a release should advance, or whether a customer outcome needs repair. That decision determines the unit of analysis, the useful time window, and who owns the response. How to Debug AI Agents in Production is more useful when it turns a technical trace into that concrete decision.
-
-The most useful evidence combines span chronology and correlated identifiers with the surrounding execution context. A number without an input, tool result, model setting, prompt revision, retry history, and final outcome can suggest a correlation without establishing a cause. Capture the smallest stable identifiers that connect those pieces, then preserve the raw values needed for authorized investigation. This is not a request to retain every possible datum forever. It is a request to make the path from observed behavior to an accountable explanation short enough for the people operating the system.
-
-A practical review asks three questions. What normal behavior looks like for Reconstruct the execution timeline; what deviation changes risk or user impact; and what action follows the deviation. The answer should be written before a dashboard or alert is created. For example, a slower run may be acceptable when it completes a high-value task, while the same delay can be unacceptable in an interactive flow. The threshold therefore belongs to a service promise and a workflow, not to a generic chart. This keeps debug AI agents in production connected to the outcome A safe restoration of the affected workflow and a verified prevention step.
-
-Treat the first version as a learning instrument. Review a small sample of successful, degraded, and failed runs, and compare the classification against what an experienced operator concludes from the full context. If the signal creates noise, refine the event boundary or add missing context instead of silently lowering attention. If it misses meaningful cases, inspect the false negatives for a shared pattern. That feedback loop makes the measurement defensible and prevents the team from turning an early proxy into a permanent definition of quality.
-
-## Compare a failing run with a healthy run
-
-Compare a failing run with a healthy run deserves an explicit operating decision, not a vague expectation. Teams often see it only after an incident channel fills with theories before anyone has reconstructed the affected run, when the pressure to restore service makes every signal look equally important. Start by naming the decision that Compare a failing run with a healthy run must support: whether a run may continue, whether an operator should intervene, whether a release should advance, or whether a customer outcome needs repair. That decision determines the unit of analysis, the useful time window, and who owns the response. How to Debug AI Agents in Production is more useful when it turns a technical trace into that concrete decision.
-
-The most useful evidence combines version and input-class differences with the surrounding execution context. A number without an input, tool result, model setting, prompt revision, retry history, and final outcome can suggest a correlation without establishing a cause. Capture the smallest stable identifiers that connect those pieces, then preserve the raw values needed for authorized investigation. This is not a request to retain every possible datum forever. It is a request to make the path from observed behavior to an accountable explanation short enough for the people operating the system.
-
-A practical review asks three questions. What normal behavior looks like for Compare a failing run with a healthy run; what deviation changes risk or user impact; and what action follows the deviation. The answer should be written before a dashboard or alert is created. For example, a slower run may be acceptable when it completes a high-value task, while the same delay can be unacceptable in an interactive flow. The threshold therefore belongs to a service promise and a workflow, not to a generic chart. This keeps debug AI agents in production connected to the outcome A safe restoration of the affected workflow and a verified prevention step.
-
-Treat the first version as a learning instrument. Review a small sample of successful, degraded, and failed runs, and compare the classification against what an experienced operator concludes from the full context. If the signal creates noise, refine the event boundary or add missing context instead of silently lowering attention. If it misses meaningful cases, inspect the false negatives for a shared pattern. That feedback loop makes the measurement defensible and prevents the team from turning an early proxy into a permanent definition of quality.
-
-## Classify the failure mechanism
-
-Classify the failure mechanism deserves an explicit operating decision, not a vague expectation. Teams often see it only after an incident channel fills with theories before anyone has reconstructed the affected run, when the pressure to restore service makes every signal look equally important. Start by naming the decision that Classify the failure mechanism must support: whether a run may continue, whether an operator should intervene, whether a release should advance, or whether a customer outcome needs repair. That decision determines the unit of analysis, the useful time window, and who owns the response. How to Debug AI Agents in Production is more useful when it turns a technical trace into that concrete decision.
-
-The most useful evidence combines tool, retrieval, model, and policy outcomes with the surrounding execution context. A number without an input, tool result, model setting, prompt revision, retry history, and final outcome can suggest a correlation without establishing a cause. Capture the smallest stable identifiers that connect those pieces, then preserve the raw values needed for authorized investigation. This is not a request to retain every possible datum forever. It is a request to make the path from observed behavior to an accountable explanation short enough for the people operating the system.
-
-A practical review asks three questions. What normal behavior looks like for Classify the failure mechanism; what deviation changes risk or user impact; and what action follows the deviation. The answer should be written before a dashboard or alert is created. For example, a slower run may be acceptable when it completes a high-value task, while the same delay can be unacceptable in an interactive flow. The threshold therefore belongs to a service promise and a workflow, not to a generic chart. This keeps debug AI agents in production connected to the outcome A safe restoration of the affected workflow and a verified prevention step.
-
-Treat the first version as a learning instrument. Review a small sample of successful, degraded, and failed runs, and compare the classification against what an experienced operator concludes from the full context. If the signal creates noise, refine the event boundary or add missing context instead of silently lowering attention. If it misses meaningful cases, inspect the false negatives for a shared pattern. That feedback loop makes the measurement defensible and prevents the team from turning an early proxy into a permanent definition of quality.
-
-## Verify the fix in production
-
-Verify the fix in production deserves an explicit operating decision, not a vague expectation. Teams often see it only after an incident channel fills with theories before anyone has reconstructed the affected run, when the pressure to restore service makes every signal look equally important. Start by naming the decision that Verify the fix in production must support: whether a run may continue, whether an operator should intervene, whether a release should advance, or whether a customer outcome needs repair. That decision determines the unit of analysis, the useful time window, and who owns the response. How to Debug AI Agents in Production is more useful when it turns a technical trace into that concrete decision.
-
-The most useful evidence combines recurrence rate and post-release samples with the surrounding execution context. A number without an input, tool result, model setting, prompt revision, retry history, and final outcome can suggest a correlation without establishing a cause. Capture the smallest stable identifiers that connect those pieces, then preserve the raw values needed for authorized investigation. This is not a request to retain every possible datum forever. It is a request to make the path from observed behavior to an accountable explanation short enough for the people operating the system.
-
-A practical review asks three questions. What normal behavior looks like for Verify the fix in production; what deviation changes risk or user impact; and what action follows the deviation. The answer should be written before a dashboard or alert is created. For example, a slower run may be acceptable when it completes a high-value task, while the same delay can be unacceptable in an interactive flow. The threshold therefore belongs to a service promise and a workflow, not to a generic chart. This keeps debug AI agents in production connected to the outcome A safe restoration of the affected workflow and a verified prevention step.
-
-Treat the first version as a learning instrument. Review a small sample of successful, degraded, and failed runs, and compare the classification against what an experienced operator concludes from the full context. If the signal creates noise, refine the event boundary or add missing context instead of silently lowering attention. If it misses meaningful cases, inspect the false negatives for a shared pattern. That feedback loop makes the measurement defensible and prevents the team from turning an early proxy into a permanent definition of quality.
-
-## Decision records that survive handoffs
-
-A durable operating practice leaves behind a short decision record whenever the team changes a material boundary. The record should name the task class, the observed evidence, the hypothesis, the proposed change, the expected benefit, the risks being watched, the accountable owner, and the date for review. It does not need to be a long narrative. Its purpose is to prevent a familiar failure: a reasonable change is made during a fast-moving moment, then the original context disappears and later reviewers cannot distinguish a measured improvement from an accidental drift. In How to Debug AI Agents in Production, a decision record makes whether to pause, repair, roll back, or continue the workflow under a temporary boundary visible to the next engineer and the next release reviewer.
-
-Good records separate observations from interpretations. “Thirty percent of reviewed runs needed a clarification after a tool timeout” is an observation when the sample and classification are stated. “The model is confused” is an interpretation that may be useful but requires supporting evidence. The distinction is not bureaucratic. It lets a team revise a theory without losing the facts that led to it. When the interpretation turns out to be wrong, the record still points to the next question: were inputs incomplete, did a dependency fail, did a policy constraint apply, or did the expected outcome need better definition?
-
-This discipline is especially important for AI-enabled workflows because several components can be individually healthy while the task outcome is poor. A provider request can succeed, a tool can return data, and an output can look fluent, yet the result may be irrelevant, unsupported, too late, or inappropriate for the requested action. Review the task as a chain of commitments. What did the system infer? What action did it choose? What evidence supported that action? What constraint should have stopped it? A decision record keeps those commitments inspectable instead of letting them collapse into a generic error label.
-
-### Use comparison cohorts carefully
-
-Most production questions are comparative. Did the new revision improve behavior? Is one input class disproportionately slow? Does a routing policy save money without reducing completion? Comparisons work only when cohorts are meaningful. Hold the task definition stable, identify the relevant release or policy version, account for material changes in traffic and dependency conditions, and report sample limitations. Avoid comparing a high-complexity cohort with a simple baseline just because the aggregate number is convenient. When uncertainty remains, state it plainly and collect the next sample deliberately.
-
-A small cohort can still be valuable when it represents a consequential edge case. The team should not wait for a large volume of customer harm before addressing a well-understood failure mechanism. In that situation, combine the targeted example with a wider baseline and explain the scope of the claim. The practical question is not whether every metric is statistically definitive; it is whether the current evidence is sufficient for the decision at hand and whether the chosen response is reversible if uncertainty proves important.
-
-### Avoid proxy traps
-
-Every operating metric is a proxy for a more important outcome. Completion rate may hide a poor result that users silently correct. A low latency number may come from skipping valuable validation. Reduced token usage may reflect lost context. Human approval rate may rise because the agent is wisely cautious, or because it cannot complete ordinary work. Pair each proxy with a review path that checks the outcome it is meant to represent. The point is not to make measurement impossible; it is to keep the team from optimizing a number after it has lost contact with the user and the workflow.
-
-Proxy traps become visible through disagreement. If an automated score says a task passed but reviewers repeatedly identify unsupported claims, inspect the rubric, the sample, and the evidence available to the scorer. If users report poor experiences while the run status is successful, study what “success” means in the implementation. These disagreements are often the most valuable learning material because they reveal a mismatch between system telemetry and the real service promise. Record them, classify them, and use them to revise the measurement rather than smoothing them away.
-
-### Make escalation humane and specific
-
-Human review is not a failure of automation. It is a controlled response to ambiguity, missing authority, high consequence, or low confidence. An effective escalation packet contains the minimum context a reviewer needs: the task request, relevant evidence, the action proposed or blocked, the policy or uncertainty that triggered escalation, and the time sensitivity. It should not dump an entire unstructured transcript on a person who is already handling exceptions. The reviewer needs a question they can answer and a clear record of their decision.
-
-Define what happens after that decision as well. If the reviewer approves, can the workflow proceed once or must it revalidate stale data? If the reviewer rejects, does the agent provide a safe explanation, retry a different path, or close the task? If no reviewer responds, what is the bounded fallback? These details turn a nominal approval step into an actual reliability control. They also produce evidence that can reveal whether the system is improving: a falling escalation rate may be good only if sampled quality and safety remain sound.
-
-### Build for learning without overclaiming
-
-The right conclusion from a review is often modest. A team may know that a change improved one task class under observed conditions without knowing that it generalizes to every future input. Say what the evidence supports, what it does not support, and what will be watched next. This protects users and makes collaboration easier. Engineering leaders can make a staged investment decision; operators can add an explicit watchpoint; product partners can choose whether the remaining uncertainty is acceptable for the intended audience.
-
-Over time, the records, traces, examples, and review decisions become a practical memory for the service. They show not just what broke but how the organization recognized the issue, who acted, and what evidence justified the fix. That memory is one of the most valuable outputs of debug AI agents in production. It allows a team to improve deliberately even as models, prompts, tools, and user expectations change, while keeping claims proportional to the evidence actually collected.
-
-## A grounded production example
-
-Consider a procurement agent that submits an incomplete vendor request after a downstream lookup returns an unexpected shape. The first report may say only that the agent produced an unhelpful answer. A good investigation does not jump directly to a prompt rewrite. It reconstructs the task boundary: the request class, the expected action, the policy that applied, the retrieved or supplied context, the selected model configuration, tool outcomes, retry path, final response, and user effect. The team then compares this path with a known-good sample from the same workflow and release. The comparison narrows the question from “why are agents unreliable?” to a testable difference in evidence.
-
-Suppose the evidence shows a valid tool response arrived after an earlier model step inferred that the tool had failed. The correction may be a clearer tool-state contract, a bounded wait, or a validation step before a final answer. Suppose instead that the tool response was correct but stale for the user’s request. The correction might be retrieval freshness controls or an explicit date check. In both cases, the visible symptom is similar, but the remedy differs. That is why a run-level narrative is more useful than a dashboard total.
-
-### Turn the finding into a safe change
-
-Capture the failing case in a scenario suite, state the expected outcome and unacceptable behavior, and choose a leading signal that will reveal recurrence. Test the proposed change against representative cases, including cases that previously worked. Release behind an appropriate boundary when the impact justifies it. After release, review the same evidence for a defined observation period. If the outcome improves without creating a material regression in quality, latency, cost, or risk, keep the change. If not, use the version identifier and rollback path rather than debating from memory.
-
-## Operating cadence and decision hygiene
-
-The work becomes sustainable when it has a rhythm. During ordinary operation, sample completed runs and look for drift across input classes, outcomes, latency, and cost. Before a change, review the scenarios most likely to reveal a meaningful regression. During an incident, assign one person to reconstruct the timeline and another to protect users through the existing fallback or pause policy. After the incident, decide which evidence was missing and whether a new test, label, trace field, or boundary would have made the response faster and safer. Avoid a ritual that produces reports with no changed decision.
-
-Leaders should ask for decision-quality artifacts rather than a larger dashboard. A concise weekly review can include the top outcome risk, the affected task class, the evidence behind the classification, the named owner, and the next reversible action. This connects technical uncertainty to accountable delivery. It also makes it easier to say no to a rollout when the team lacks representative evidence, which is a sign of maturity rather than a lack of ambition.
-
-## Visual guide
-
-- An incident timeline with decision points.
-- A failing-versus-healthy trace comparison.
-- A pause, repair, rollback decision tree.
+The [AI agent testing guide](/blog/ai-agent-testing-unit-tests-production-evals) explains how to turn the confirmed mechanism into the lowest useful durable test. The best incident review ends with a new test, contract, alert, runbook step, or explicit risk decision.
 
 ## Operational checklist
 
-- Protect affected users with a pause or fallback first.
-- Select a concrete failing run rather than debating symptoms.
-- Reconstruct the timeline from request to final action.
-- Compare it with a healthy run in the same task class.
-- Write a regression case before shipping the repair.
-- Review post-release runs for recurrence.
-
-## Explore in Tracify
-
-[Explore the relevant Tracify workflow](/docs/typescript)
-
-## Frequently asked questions
-
-### What should an on-call engineer do first?
-
-Stabilize user impact, preserve the evidence, and appoint a timeline owner.
-
-### Is a prompt change always the fix?
-
-No. Tool contracts, stale context, policy checks, and retries often explain the symptom.
-
-### When should a workflow be paused?
-
-Pause when continuing could create material user harm and no bounded fallback exists.
-
-## Next step: make debug AI agents in production actionable
-
-Start with one workflow this week. Instrument the evidence needed to explain a single completed run, review it against the intended outcome, and turn the finding into a named test or operating decision. Then use the relevant Tracify resource above to inspect the connected execution path. The final CTA is deliberately practical: choose one bounded improvement, measure its effect, and keep the rollback path clear.
-
-
-
-## Put How to Debug AI Agents in Production into practice
-
-### A small release checklist
-
-- Define the user-visible outcome and the boundary this article does not cover.
-- Capture the evidence needed to explain movement, including the relevant version, cohort, and failure class.
-- Assign one owner for the next bounded action and write the stop condition before changing production behavior.
-
-> **Decision rule:** Prefer the smallest change that produces inspectable evidence. If the example cannot be tested, label it illustrative and verify the surrounding assumptions before adapting it.
+- Record impact, owner, start time, and first containment action.
+- Open the parent run and reconstruct the complete timeline.
+- Preserve versions, evidence references, tool outcomes, retries, and user effect.
+- Compare with a like-for-like healthy run before changing behavior.
+- State the failure as a mechanism and identify what would falsify it.
+- Choose a bounded correction at the responsible boundary.
+- Replay the incident and test neighboring failure paths.
+- Watch the exposing signal with a defined rollback condition.
+- Turn the confirmed mechanism into a durable test or operating control.
 
 ## Frequently asked questions
 
-{% faq-item question="What should I do first?" answer="Start with one real workflow and one user-visible outcome. Write down the boundary, collect the evidence that explains the outcome, and choose a reversible next step before expanding the system." /%}
+{% faq-item question="What should an on-call engineer do first?" answer="Protect users and external state with the smallest reversible action: pause, roll back, narrow exposure, or route to a safe fallback. Record the impact and owner, then open the parent run so diagnosis starts from the task rather than the last model response." /%}
 
-{% faq-item question="How do I know whether this is working?" answer="Compare the same task distribution before and after the change. Review quality, latency, cost, failure behavior, and user impact together, and preserve the release or prompt version that produced each result." /%}
+{% faq-item question="Is a prompt change always the fix?" answer="No. A wrong result can originate in retrieval, stale state, tool contracts, permissions, retries, validation, dependencies, or the release boundary. Identify the mechanism first; change the prompt only when the evidence shows that instruction or context interpretation is the responsible boundary." /%}
 
-{% faq-item question="What is the most common mistake?" answer="Treating a metric, model response, or successful tool call as the outcome. Keep the user task, trace evidence, owner, and bounded response connected so the team can explain and improve the complete workflow." /%}
+{% faq-item question="When should a workflow be paused?" answer="Pause when customer harm is active, an irreversible action lacks trustworthy evidence or authority, a policy boundary is violated, or the team cannot establish a safe fallback. Resume only after a named owner records the condition and verification that supports renewed exposure." /%}
 
-## Recommended next reads
+## Next step: make debugging repeatable
 
-Continue with [AI agent observability](/blog/ai-agent-observability-complete-guide), [the AI agent production checklist](/blog/ai-agent-production-checklist). Choose the one that matches the next decision in your workflow rather than opening every guide at once.
+Choose one recent failed run and write its timeline, comparison case, mechanism, correction, and verification signal. Keep the packet short enough for the next responder to use, and turn the confirmed mechanism into one durable test or control before closing the incident.
