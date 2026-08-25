@@ -1299,6 +1299,11 @@
 - Preserved published metadata, `draft: false`, related-post state, and the existing tracked hero image. Added one deterministic release-gate scenario, representative-set and rubric tables, an illustrative rubric artifact, one FAQ section, contextual links, and an operational checklist.
 - `npm run test:content` passes all 19 tests, the production build passes with non-secret placeholder Convex URLs, `git diff --check` passes, and the final body has one FAQ heading with no recommendation prose dump. Full lint remains a separate check with the same unrelated pre-existing errors.
 
+## 2026-08-25 AI agent observability guide refinement
+- On clean branch `codex/blog-agent-observability` from `origin/main`, replaced the duplicated/generated body of `content/blog/ai-agent-observability-complete-guide.mdoc` with a Frame → Follow → Assess → Respond → Learn observability loop.
+- Preserved published metadata, `draft: false`, related-post state, and the existing tracked hero image. Added one deterministic trace scenario, signal-layer and outcome tables, an illustrative trace event shape, one FAQ section, contextual links, and an operational checklist.
+- `npm run test:content` passes all 19 tests, the production build passes with non-secret placeholder Convex URLs, `git diff --check` passes, and the final body has one FAQ heading with no recommendation prose dump. Full lint remains a separate check with the same unrelated pre-existing errors.
+
 ## 2026-08-25 AI agent reliability guide refinement
 - On clean branch `codex/blog-agent-reliability` from `origin/main`, replaced the duplicated/generated body of `content/blog/ai-agent-reliability-failures-retries-guardrails.mdoc` with a Classify → Contain → Recover → Escalate → Learn operational loop.
 - Preserved published metadata, `draft: false`, related-post state, and the existing tracked hero image. Added one deterministic retry scenario, failure/action and boundary tables, an illustrative retry policy, one FAQ section, contextual links, and an operational checklist.
