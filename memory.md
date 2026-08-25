@@ -1294,6 +1294,11 @@
 - The article is roughly 3,838 words with 17 contextual links (about 4.43 per 1,000 words). The in-app browser verified desktop and 390px layouts, semantic tables, contained overflow, two labeled code panels, simple heading markers, no runthroughs, and three recommendations.
 - Final verification passes: 19 content tests, focused ESLint, `git diff --check`, and the 116-route production build with non-secret placeholder Convex URLs. The only browser console error was the expected missing local PostHog token.
 
+## 2026-08-25 AI agent evaluation guide refinement
+- On clean branch `codex/blog-ai-agent-evaluation` from `origin/main`, replaced the duplicated/generated body of `content/blog/ai-agent-evaluation-practical-guide.mdoc` with a Represent → Specify → Score → Review → Gate evaluation loop.
+- Preserved published metadata, `draft: false`, related-post state, and the existing tracked hero image. Added one deterministic release-gate scenario, representative-set and rubric tables, an illustrative rubric artifact, one FAQ section, contextual links, and an operational checklist.
+- `npm run test:content` passes all 19 tests, the production build passes with non-secret placeholder Convex URLs, `git diff --check` passes, and the final body has one FAQ heading with no recommendation prose dump. Full lint remains a separate check with the same unrelated pre-existing errors.
+
 ## 2026-08-25 LLM observability metrics refinement
 - On clean branch `codex/blog-llm-observability-metrics` from `origin/main`, replaced the duplicated/generated body of `content/blog/llm-observability-metrics-that-matter.mdoc` with an Outcome → Dimension → Threshold → Action decision guide.
 - Preserved the published metadata, `draft: false`, tracked hero asset, and article intent. Added one deterministic alert scenario, one FAQ section, decision notes, metric hierarchy tables, cost/latency trade-offs, contextual links, and a practical checklist.
