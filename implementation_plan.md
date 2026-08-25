@@ -956,6 +956,13 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 3. [completed] Verify Markdoc contracts, links, interaction, image, build, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
+# RAG evaluation guide refinement — 2026-08-25
+
+1. [completed] Establish a clean branch from the merged testing-guide baseline.
+2. [completed] Replace appended legacy sections with a retrieval, groundedness, usefulness, and release-gate guide.
+3. [completed] Verify Markdoc contracts, links, interaction, image inventory, build, and diff evidence.
+4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
+
 # AI agent testing guide refinement — 2026-08-25
 
 1. [completed] Establish a clean branch from the merged observability-guide baseline.
