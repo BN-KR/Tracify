@@ -1,5 +1,9 @@
 # Project Memory
 
+## 2026-08-26 canonical blog refinement prompt
+- Added a copy-paste content-manager prompt to `docs/blog-canonical-format-playbook.md` for bringing the remaining 26 published posts up to the `ai-agent-monitoring` standard.
+- The prompt requires preserved frontmatter/publication state, reader/job/boundary definition, numbered H2/H3 decision structure, evidence, one purposeful deterministic interaction, one FAQ accordion, contextual links, mobile/rendered QA, and all release checks.
+
 ## 2026-08-25 Production-ready AI agents article refinement
 - On clean branch `codex/blog-production-ready-agents` from `origin/main`, replaced the duplicated/generated body of `content/blog/building-production-ready-ai-agents.mdoc` with a Goal → Boundary → Evidence → Readiness → Stewardship launch guide.
 - Preserved published metadata, `draft: false`, related-post intent, and the tracked hero asset. Added one deterministic launch scenario, one FAQ section, goal/ownership/evidence/staged-gate tables, boundary and stewardship rules, contextual links, and a checklist.

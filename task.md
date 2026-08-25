@@ -1270,3 +1270,7 @@ Follow-ups still open:
 
 - [x] Make completed launch-plan strikethrough decoration more opaque without changing completed text contrast.
 - [x] Add a mandatory future-agent quality gate to the writing skill and blog publishing README covering evidence, hierarchy, interactions, links, rendering, and release checks.
+
+## 2026-08-26 canonical blog refinement prompt
+
+- [x] Add a reusable content-manager prompt to `docs/blog-canonical-format-playbook.md`, based on the refined AI Agent Monitoring article, for the remaining 26 published posts.
