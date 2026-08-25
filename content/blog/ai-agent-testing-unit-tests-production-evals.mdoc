@@ -32,246 +32,134 @@ seo:
     og: /media/organic-series/ai-agent-testing-unit-tests-production-evals.jpg
 ---
 
+AI agent testing is not one test suite. A tool schema can be deterministic while the final task depends on retrieval, model behavior, timing, and user context. The right strategy places each check at the layer that can detect its failure without making every release slow and expensive.
+
 {% trace-scenario title="What belongs at this test layer?" prompt="A tool schema is deterministic, but the final answer depends on retrieval and model behavior. How should it be tested?" outcome="Unit-test the schema boundary, then cover the end-to-end behavior with scenario evaluation and production feedback." /%}
 
 ## At a glance
 
-This guide is for **quality-minded engineers building release practices**. It helps you **choose the right test layer for deterministic and probabilistic behavior** so you can leave with **coverage that moves from code boundaries to realistic tasks and production feedback**.
+This guide is for engineers building release practices for AI workflows. It helps you **match failure modes to test layers** so you can leave with fast boundary checks, realistic task coverage, and a feedback loop that catches behavior changing in production.
 
-| Before you start | What to inspect | What good looks like |
+| Before you start | What to define | What good looks like |
 | --- | --- | --- |
-| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+| A workflow, release, or repeated failure | Expected outcome, failure mechanism, test layer, and owner | The cheapest reliable check catches the failure before exposure grows |
 
-### The AI agent testing framework
+### The testing loop
 
-Use **Isolate → Simulate → Evaluate → Observe** as the decision path:
+Use **Isolate → Simulate → Evaluate → Observe → Improve**:
 
-1. **Isolate:** establish the task, context, or boundary before changing behavior.
-2. **Simulate:** make the relevant evidence or control explicit.
-3. **Evaluate:** compare the decision with a concrete example, trace, or test.
-4. **Observe:** finish with an owner, rollback, escalation, or next action.
+1. **Isolate:** test deterministic contracts, transformations, permissions, and state transitions.
+2. **Simulate:** control tools, dependencies, time, and failure responses.
+3. **Evaluate:** run representative tasks against explicit quality criteria.
+4. **Observe:** sample real behavior and connect failures to traces and outcomes.
+5. **Improve:** turn confirmed mechanisms into the lowest useful durable test.
 
-> **Decision rule:** Isolate deterministic contracts, simulate dependencies, evaluate task behavior, and observe what real users expose.
+> **Decision rule:** Test a failure at the lowest layer that can see it, then add a higher-layer case when integration or model behavior changes the outcome.
 
-The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+![An engineer working beside a monitor while choosing the right test boundary](/media/organic-series/ai-agent-testing-unit-tests-production-evals.jpg)
 
-## Introduction: why AI agent testing needs an operating model
+*A layered testing strategy keeps fast deterministic checks close to code while reserving realistic evaluation for behavior that depends on the full workflow.*
 
-AI Agent Testing: From Unit Tests to Production Evals is a guide for AI engineers and quality-minded leaders building repeatable release practices. The central idea is simple: a capable-looking agent is not necessarily an understandable or controllable system. Language-model behavior is conditional on instructions, retrieved context, tool responses, runtime conditions, and the choices made after each intermediate result. A team can watch a polished demo and still be unable to answer the questions that matter when a user reports a bad outcome. What happened in this run? Which decision changed the path? Was the result wrong, slow, expensive, unsafe, or merely surprising? And what evidence would justify changing the system?
+## 1. Start with the failure and the outcome
 
-A layered test strategy makes probabilistic behavior safer by putting the right evidence at each boundary from code to production. This guide treats those questions as an engineering and leadership responsibility. The goal is not to manufacture certainty from a probabilistic component. It is to give people enough timely, connected evidence to set boundaries, investigate deviations, compare alternatives, and learn from real operation. That distinction matters because teams can otherwise accumulate impressive telemetry while remaining unable to explain a user-visible result or decide whether a change helped.
+Write what must be true and what must never happen before choosing a testing tool. “The agent should be reliable” is too broad. “The renewal assistant must cite current account state and must not create a customer commitment without approval” gives each layer something observable to check.
 
-> A useful AI operating practice turns an observed run into a decision, an owner, and a reversible next action.
+| Failure or requirement | Best first layer | Higher-layer evidence |
+| --- | --- | --- |
+| Tool input violates a schema | Unit or contract test | Trace shows validation and terminal response |
+| Dependency times out | Simulated integration test | Production timing and retry path |
+| Retrieval returns stale evidence | Scenario evaluation | User outcome and freshness failure trace |
+| Model gives unsupported guidance | Rubric-based evaluation | Sampled human review and correction rate |
+| Workflow crosses an authority boundary | Policy or state-machine test | Approval evidence and blocked action |
 
-![An engineer working beside a computer monitor](/media/organic-series/ai-agent-testing-unit-tests-production-evals.jpg)
+The [AI agent evaluation guide](/blog/ai-agent-evaluation-practical-guide) explains how representative cases become release evidence. This article focuses on the testing layers that produce that evidence, not on one test framework or provider.
 
-## Contents
+## 2. Isolate deterministic boundaries
 
-- Unit test deterministic boundaries
-- Simulate tools and dependencies
-- Evaluate realistic task behavior
-- Observe production feedback
-- Turn incidents into tests
-- A grounded production example
-- Operational checklist and FAQ
+Unit tests are valuable wherever the expected result is stable: schema parsing, redaction, routing, retry classification, permission checks, idempotency keys, state transitions, and cost or timeout calculations. Keep these tests fast and specific so a developer can run them after every change.
 
-## A working definition of AI agent testing
+```ts
+// Illustrative pseudocode: adapt the assertion style to your test runner.
+test("validation errors are terminal, not retryable", () => {
+  const result = classifyFailure({ kind: "tool", code: "INVALID_ARGUMENT" });
 
-Deterministic tests cover code boundaries, while [AI agent evaluation](/blog/ai-agent-evaluation-practical-guide) measures end-to-end behavior and [prompt versioning](/blog/prompt-versioning-and-prompt-management) keeps each result attributable to a specific change.
+  expect(result).toEqual({
+    retryable: false,
+    terminalState: "needs_correction",
+    owner: "workflow",
+  });
+});
+```
 
-AI agent testing is the discipline of recording and interpreting enough execution evidence to understand how an AI-enabled workflow behaved, whether it met its intended outcome, and what should happen next. It includes technical telemetry, but it is broader than logging model requests. The unit that people care about is usually an end-to-end task: a user request, a retrieval step, one or more model calls, a tool action, a retry or approval, and a final result. The evidence must keep those events connected without pretending that one metric can stand in for the whole task.
+This is intentionally illustrative pseudocode, not a drop-in library example. The contract matters: deterministic invalid input should not silently enter a retry loop. Keep assertions focused on the behavior your system owns.
 
-This definition makes room for different roles. An engineer needs causally useful context when investigating a failure. A product owner needs a stable way to see whether the workflow is helping users. A security or risk reviewer needs proof that boundaries and approvals were honored. An engineering leader needs a release decision that is based on representative behavior rather than a single memorable transcript. All of them use the same underlying story of a run, but they ask different questions of it.
+## 3. Simulate dependencies and unhappy paths
 
-### Start with outcomes, not dashboards
+Integration tests should make external behavior controllable. Simulate a timeout, rate limit, malformed response, stale record, duplicate event, partial result, and permission denial. Assert not only that the agent returns a result, but that it stops, retries within budget, escalates, or compensates as designed.
 
-Before choosing fields or tools, write the outcome the workflow is supposed to produce and the harm it must avoid. a safer release process that catches deterministic defects and behavior regressions is a better anchor than a generic request to improve accuracy. It gives teams a way to distinguish a healthy unusual case from a concerning ordinary case. It also exposes where a human decision is required. A measurement program cannot remove that judgment, but it can make the judgment repeatable, reviewable, and easier to improve.
+| Simulation | What to assert |
+| --- | --- |
+| Timeout after a valid request | Deadline, bounded retry, and user-safe terminal state |
+| Valid-looking stale response | Freshness check blocks the consequential action |
+| Duplicate tool delivery | Idempotency prevents duplicate side effects |
+| Reviewer does not respond | Expiry and fallback are visible |
+| Dependency returns malformed data | Validation contains the result and preserves evidence |
 
-## The Isolate, Simulate, Evaluate, Observe, Improve framework
+The [AI agent reliability guide](/blog/ai-agent-reliability-failures-retries-guardrails) shows how failure classes map to bounded recovery. Simulation is where teams can exercise those paths cheaply and repeatedly before production supplies the case for them.
 
-Use Isolate, Simulate, Evaluate, Observe, Improve as a compact way to organize the work. First, define the task boundary and success condition. Second, preserve the execution path as connected evidence. Third, classify the result using a mix of automated checks and sampled human review. Fourth, choose a response that is proportionate to impact: continue, retry within a bound, ask for approval, repair, or stop. Finally, feed the confirmed result into a change decision. The framework is deliberately cyclical. Production behavior should improve the next test set, runbook, prompt review, and release gate.
+## 4. Evaluate realistic tasks
 
-1. Frame the user-facing task, its allowed actions, and its measurable success condition.
-2. Follow the execution path across models, tools, retries, dependencies, and handoffs.
-3. Assess outcome quality and operational cost with context, not a single proxy.
-4. Respond through a named owner, a bounded policy, and a documented escalation path.
-5. Learn by turning reviewed evidence into tests, evaluations, controls, or a rollback decision.
+Scenario evaluation covers behavior that unit assertions cannot fully see: retrieved context, model choices, multi-step plans, tool sequencing, ambiguity, and user-visible quality. Build a representative set with ordinary cases, difficult cases, and high-consequence edge cases. Record expected behavior, unacceptable behavior, input class, versions, and consequence.
 
-### Why the loop is more important than any individual tool
+Use deterministic checks for facts such as required fields, citations, schema validity, and policy results. Use rubric-based or human review for groundedness, usefulness, ambiguity, and judgment. Review disagreements rather than hiding them in an average. A candidate that improves overall score while regressing a high-risk slice needs a hold or explicit disposition.
 
-A tracing tool, an evaluation dataset, or a cost report is useful only when it closes part of this loop. The failure mode is collecting data because collection feels prudent, then discovering during an incident that no one knows which run is representative, which version changed, or who may make a corrective decision. A smaller system with explicit task boundaries and owners generally teaches more than a larger system filled with unactionable events. Add detail where it changes an investigation or release decision; resist detail that only increases storage and review burden.
+> **Evaluation rule:** A high average cannot compensate for an unbounded failure in a workflow where the consequence is material.
 
-## Signals, context, and ownership
+## 5. Observe production as a test surface
 
-Instrumentation should describe the actual workflow rather than the architecture diagram people wish they had. Record a stable run identifier, relevant session or request identifier, environment and release marker, start and finish times, model and provider configuration where permitted, prompt or policy revision, tool names and outcomes, retry decisions, and a final task status. Then connect quality, latency, and cost signals to that same run. The point is to make comparison possible: this run against a baseline, this release against the prior release, and this failure pattern against an owned response.
+Production reveals distributions and interactions that fixtures miss. Sample successful, degraded, and failed runs. Connect the task outcome to release, prompt, model, retrieval, tool, retry, latency, cost, and policy evidence. Treat user reports and operator classifications as test inputs, not merely tickets.
 
-### Use a layered evidence model
+The [AI agent observability guide](/blog/ai-agent-observability-complete-guide) describes the evidence path. Keep production feedback safe and privacy-aware: redact secrets, restrict raw content access, and preserve the smallest trace context needed to reproduce the mechanism.
 
-Layer one is task evidence: input class, intended outcome, final status, and user-visible effect. Layer two is execution evidence: spans for model calls, retrieval, tools, validation, retries, and approvals. Layer three is governance evidence: version identifiers, access boundaries, review labels, and the decision that authorized a consequential action. Each layer answers a different question. Keeping them distinct prevents teams from confusing a fast response with a good outcome or a successful API call with a safe business action.
+### Turn incidents into durable cases
 
-Ownership completes the model. Every signal should have a consumer, a cadence, and an action. A latency distribution might be reviewed weekly by the platform team, while a safety-boundary violation demands immediate triage by the workflow owner. A cost increase may trigger an experiment rather than an incident. Put these rules in a short runbook. People should not have to negotiate the meaning of an alert while a customer is waiting for a response.
+When a failure is confirmed, capture the smallest fixture that would have exposed it earlier. State the mechanism, expected outcome, unacceptable behavior, and the layer that can detect recurrence. Add a higher-layer scenario when the failure depends on interactions that isolation cannot model.
 
-The operating detail should be proportionate to the decision. For a low-consequence drafting workflow, the team may need a sampled outcome label and a clear correction path. For an agent that changes records, communicates commitments, or triggers downstream work, the team may also need pre-action validation, approval evidence, and a reliable terminal state. In either case, make the evidence legible to someone who was not in the original design meeting. A future investigator should be able to identify the input class, the intended outcome, the applicable version, the important transition, and the owner of the next response without reverse-engineering the entire codebase.
+For a renewal assistant, stale account data may require a retrieval freshness case, while a malformed tool argument belongs in a contract test. If both appear only as “bad answer,” the suite will grow without improving detection.
 
-This is also why teams should rehearse the review flow before an incident. Pick a recently completed run, ask a new operator to explain the path using only the recorded evidence, and note where they need tribal knowledge. Missing context is not a reason to collect everything indiscriminately. It is a design prompt: add the smallest identifier, classification, or boundary that would make the next decision clearer. Repeat this exercise after a release, a dependency change, or a newly observed input class. The practice builds operational fluency while keeping the system focused on real decisions instead of dashboard decoration.
+## 6. Gate releases with layered evidence
 
-A useful review ends with a visible change in the operating system: a clearer contract, a new representative case, a narrower approval rule, a corrected threshold, or an explicit choice to accept a bounded risk. If no decision changes, reduce the reporting burden and return attention to the task that needs evidence. This keeps AI agent testing practical for both the engineers producing telemetry and the leaders accountable for the result.
+A release gate should combine fast checks with representative evidence and a reversible exposure plan. Write the stop condition before the candidate runs. Keep a record of test versions, dataset or fixture versions, baseline, candidate, evaluator, sampled production window, and owner.
 
-## Unit test deterministic boundaries
+| Gate result | Meaning | Action |
+| --- | --- | --- |
+| Boundary tests fail | The owned contract is broken | Stop before integration or exposure |
+| Simulated path fails | Recovery or containment is unsafe | Fix or narrow the workflow boundary |
+| High-risk scenario regresses | Aggregate score hides material harm | Hold, investigate, or roll back |
+| Evidence is incomplete | The decision is under-supported | Extend sampling or reduce exposure |
+| Checks and slices pass | Evidence supports bounded change | Promote the declared cohort and watch |
 
-Unit test deterministic boundaries deserves an explicit operating decision, not a vague expectation. Teams often see it only after a workflow passes its unit tests but fails when a realistic tool response is incomplete or delayed, when the pressure to restore service makes every signal look equally important. Start by naming the decision that Unit test deterministic boundaries must support: whether a run may continue, whether an operator should intervene, whether a release should advance, or whether a customer outcome needs repair. That decision determines the unit of analysis, the useful time window, and who owns the response. AI Agent Testing: From Unit Tests to Production Evals is more useful when it turns a technical trace into that concrete decision.
-
-The most useful evidence combines unit pass rate and contract coverage with the surrounding execution context. A number without an input, tool result, model setting, prompt revision, retry history, and final outcome can suggest a correlation without establishing a cause. Capture the smallest stable identifiers that connect those pieces, then preserve the raw values needed for authorized investigation. This is not a request to retain every possible datum forever. It is a request to make the path from observed behavior to an accountable explanation short enough for the people operating the system.
-
-A practical review asks three questions. What normal behavior looks like for Unit test deterministic boundaries; what deviation changes risk or user impact; and what action follows the deviation. The answer should be written before a dashboard or alert is created. For example, a slower run may be acceptable when it completes a high-value task, while the same delay can be unacceptable in an interactive flow. The threshold therefore belongs to a service promise and a workflow, not to a generic chart. This keeps AI agent testing connected to the outcome A safer release process that catches deterministic defects and behavior regressions.
-
-Treat the first version as a learning instrument. Review a small sample of successful, degraded, and failed runs, and compare the classification against what an experienced operator concludes from the full context. If the signal creates noise, refine the event boundary or add missing context instead of silently lowering attention. If it misses meaningful cases, inspect the false negatives for a shared pattern. That feedback loop makes the measurement defensible and prevents the team from turning an early proxy into a permanent definition of quality.
-
-## Simulate tools and dependencies
-
-Simulate tools and dependencies deserves an explicit operating decision, not a vague expectation. Teams often see it only after a workflow passes its unit tests but fails when a realistic tool response is incomplete or delayed, when the pressure to restore service makes every signal look equally important. Start by naming the decision that Simulate tools and dependencies must support: whether a run may continue, whether an operator should intervene, whether a release should advance, or whether a customer outcome needs repair. That decision determines the unit of analysis, the useful time window, and who owns the response. AI Agent Testing: From Unit Tests to Production Evals is more useful when it turns a technical trace into that concrete decision.
-
-The most useful evidence combines simulated tool error handling with the surrounding execution context. A number without an input, tool result, model setting, prompt revision, retry history, and final outcome can suggest a correlation without establishing a cause. Capture the smallest stable identifiers that connect those pieces, then preserve the raw values needed for authorized investigation. This is not a request to retain every possible datum forever. It is a request to make the path from observed behavior to an accountable explanation short enough for the people operating the system.
-
-A practical review asks three questions. What normal behavior looks like for Simulate tools and dependencies; what deviation changes risk or user impact; and what action follows the deviation. The answer should be written before a dashboard or alert is created. For example, a slower run may be acceptable when it completes a high-value task, while the same delay can be unacceptable in an interactive flow. The threshold therefore belongs to a service promise and a workflow, not to a generic chart. This keeps AI agent testing connected to the outcome A safer release process that catches deterministic defects and behavior regressions.
-
-Treat the first version as a learning instrument. Review a small sample of successful, degraded, and failed runs, and compare the classification against what an experienced operator concludes from the full context. If the signal creates noise, refine the event boundary or add missing context instead of silently lowering attention. If it misses meaningful cases, inspect the false negatives for a shared pattern. That feedback loop makes the measurement defensible and prevents the team from turning an early proxy into a permanent definition of quality.
-
-## Evaluate realistic task behavior
-
-Evaluate realistic task behavior deserves an explicit operating decision, not a vague expectation. Teams often see it only after a workflow passes its unit tests but fails when a realistic tool response is incomplete or delayed, when the pressure to restore service makes every signal look equally important. Start by naming the decision that Evaluate realistic task behavior must support: whether a run may continue, whether an operator should intervene, whether a release should advance, or whether a customer outcome needs repair. That decision determines the unit of analysis, the useful time window, and who owns the response. AI Agent Testing: From Unit Tests to Production Evals is more useful when it turns a technical trace into that concrete decision.
-
-The most useful evidence combines scenario quality and criterion outcomes with the surrounding execution context. A number without an input, tool result, model setting, prompt revision, retry history, and final outcome can suggest a correlation without establishing a cause. Capture the smallest stable identifiers that connect those pieces, then preserve the raw values needed for authorized investigation. This is not a request to retain every possible datum forever. It is a request to make the path from observed behavior to an accountable explanation short enough for the people operating the system.
-
-A practical review asks three questions. What normal behavior looks like for Evaluate realistic task behavior; what deviation changes risk or user impact; and what action follows the deviation. The answer should be written before a dashboard or alert is created. For example, a slower run may be acceptable when it completes a high-value task, while the same delay can be unacceptable in an interactive flow. The threshold therefore belongs to a service promise and a workflow, not to a generic chart. This keeps AI agent testing connected to the outcome A safer release process that catches deterministic defects and behavior regressions.
-
-Treat the first version as a learning instrument. Review a small sample of successful, degraded, and failed runs, and compare the classification against what an experienced operator concludes from the full context. If the signal creates noise, refine the event boundary or add missing context instead of silently lowering attention. If it misses meaningful cases, inspect the false negatives for a shared pattern. That feedback loop makes the measurement defensible and prevents the team from turning an early proxy into a permanent definition of quality.
-
-## Observe production feedback
-
-Observe production feedback deserves an explicit operating decision, not a vague expectation. Teams often see it only after a workflow passes its unit tests but fails when a realistic tool response is incomplete or delayed, when the pressure to restore service makes every signal look equally important. Start by naming the decision that Observe production feedback must support: whether a run may continue, whether an operator should intervene, whether a release should advance, or whether a customer outcome needs repair. That decision determines the unit of analysis, the useful time window, and who owns the response. AI Agent Testing: From Unit Tests to Production Evals is more useful when it turns a technical trace into that concrete decision.
-
-The most useful evidence combines production correction and escalation patterns with the surrounding execution context. A number without an input, tool result, model setting, prompt revision, retry history, and final outcome can suggest a correlation without establishing a cause. Capture the smallest stable identifiers that connect those pieces, then preserve the raw values needed for authorized investigation. This is not a request to retain every possible datum forever. It is a request to make the path from observed behavior to an accountable explanation short enough for the people operating the system.
-
-A practical review asks three questions. What normal behavior looks like for Observe production feedback; what deviation changes risk or user impact; and what action follows the deviation. The answer should be written before a dashboard or alert is created. For example, a slower run may be acceptable when it completes a high-value task, while the same delay can be unacceptable in an interactive flow. The threshold therefore belongs to a service promise and a workflow, not to a generic chart. This keeps AI agent testing connected to the outcome A safer release process that catches deterministic defects and behavior regressions.
-
-Treat the first version as a learning instrument. Review a small sample of successful, degraded, and failed runs, and compare the classification against what an experienced operator concludes from the full context. If the signal creates noise, refine the event boundary or add missing context instead of silently lowering attention. If it misses meaningful cases, inspect the false negatives for a shared pattern. That feedback loop makes the measurement defensible and prevents the team from turning an early proxy into a permanent definition of quality.
-
-## Turn incidents into tests
-
-Turn incidents into tests deserves an explicit operating decision, not a vague expectation. Teams often see it only after a workflow passes its unit tests but fails when a realistic tool response is incomplete or delayed, when the pressure to restore service makes every signal look equally important. Start by naming the decision that Turn incidents into tests must support: whether a run may continue, whether an operator should intervene, whether a release should advance, or whether a customer outcome needs repair. That decision determines the unit of analysis, the useful time window, and who owns the response. AI Agent Testing: From Unit Tests to Production Evals is more useful when it turns a technical trace into that concrete decision.
-
-The most useful evidence combines regression recurrence after a fix with the surrounding execution context. A number without an input, tool result, model setting, prompt revision, retry history, and final outcome can suggest a correlation without establishing a cause. Capture the smallest stable identifiers that connect those pieces, then preserve the raw values needed for authorized investigation. This is not a request to retain every possible datum forever. It is a request to make the path from observed behavior to an accountable explanation short enough for the people operating the system.
-
-A practical review asks three questions. What normal behavior looks like for Turn incidents into tests; what deviation changes risk or user impact; and what action follows the deviation. The answer should be written before a dashboard or alert is created. For example, a slower run may be acceptable when it completes a high-value task, while the same delay can be unacceptable in an interactive flow. The threshold therefore belongs to a service promise and a workflow, not to a generic chart. This keeps AI agent testing connected to the outcome A safer release process that catches deterministic defects and behavior regressions.
-
-Treat the first version as a learning instrument. Review a small sample of successful, degraded, and failed runs, and compare the classification against what an experienced operator concludes from the full context. If the signal creates noise, refine the event boundary or add missing context instead of silently lowering attention. If it misses meaningful cases, inspect the false negatives for a shared pattern. That feedback loop makes the measurement defensible and prevents the team from turning an early proxy into a permanent definition of quality.
-
-## Decision records that survive handoffs
-
-A durable operating practice leaves behind a short decision record whenever the team changes a material boundary. The record should name the task class, the observed evidence, the hypothesis, the proposed change, the expected benefit, the risks being watched, the accountable owner, and the date for review. It does not need to be a long narrative. Its purpose is to prevent a familiar failure: a reasonable change is made during a fast-moving moment, then the original context disappears and later reviewers cannot distinguish a measured improvement from an accidental drift. In AI Agent Testing: From Unit Tests to Production Evals, a decision record makes which evidence is sufficient to release a workflow change at the intended level of exposure visible to the next engineer and the next release reviewer.
-
-Good records separate observations from interpretations. “Thirty percent of reviewed runs needed a clarification after a tool timeout” is an observation when the sample and classification are stated. “The model is confused” is an interpretation that may be useful but requires supporting evidence. The distinction is not bureaucratic. It lets a team revise a theory without losing the facts that led to it. When the interpretation turns out to be wrong, the record still points to the next question: were inputs incomplete, did a dependency fail, did a policy constraint apply, or did the expected outcome need better definition?
-
-This discipline is especially important for AI-enabled workflows because several components can be individually healthy while the task outcome is poor. A provider request can succeed, a tool can return data, and an output can look fluent, yet the result may be irrelevant, unsupported, too late, or inappropriate for the requested action. Review the task as a chain of commitments. What did the system infer? What action did it choose? What evidence supported that action? What constraint should have stopped it? A decision record keeps those commitments inspectable instead of letting them collapse into a generic error label.
-
-### Use comparison cohorts carefully
-
-Most production questions are comparative. Did the new revision improve behavior? Is one input class disproportionately slow? Does a routing policy save money without reducing completion? Comparisons work only when cohorts are meaningful. Hold the task definition stable, identify the relevant release or policy version, account for material changes in traffic and dependency conditions, and report sample limitations. Avoid comparing a high-complexity cohort with a simple baseline just because the aggregate number is convenient. When uncertainty remains, state it plainly and collect the next sample deliberately.
-
-A small cohort can still be valuable when it represents a consequential edge case. The team should not wait for a large volume of customer harm before addressing a well-understood failure mechanism. In that situation, combine the targeted example with a wider baseline and explain the scope of the claim. The practical question is not whether every metric is statistically definitive; it is whether the current evidence is sufficient for the decision at hand and whether the chosen response is reversible if uncertainty proves important.
-
-### Avoid proxy traps
-
-Every operating metric is a proxy for a more important outcome. Completion rate may hide a poor result that users silently correct. A low latency number may come from skipping valuable validation. Reduced token usage may reflect lost context. Human approval rate may rise because the agent is wisely cautious, or because it cannot complete ordinary work. Pair each proxy with a review path that checks the outcome it is meant to represent. The point is not to make measurement impossible; it is to keep the team from optimizing a number after it has lost contact with the user and the workflow.
-
-Proxy traps become visible through disagreement. If an automated score says a task passed but reviewers repeatedly identify unsupported claims, inspect the rubric, the sample, and the evidence available to the scorer. If users report poor experiences while the run status is successful, study what “success” means in the implementation. These disagreements are often the most valuable learning material because they reveal a mismatch between system telemetry and the real service promise. Record them, classify them, and use them to revise the measurement rather than smoothing them away.
-
-### Make escalation humane and specific
-
-Human review is not a failure of automation. It is a controlled response to ambiguity, missing authority, high consequence, or low confidence. An effective escalation packet contains the minimum context a reviewer needs: the task request, relevant evidence, the action proposed or blocked, the policy or uncertainty that triggered escalation, and the time sensitivity. It should not dump an entire unstructured transcript on a person who is already handling exceptions. The reviewer needs a question they can answer and a clear record of their decision.
-
-Define what happens after that decision as well. If the reviewer approves, can the workflow proceed once or must it revalidate stale data? If the reviewer rejects, does the agent provide a safe explanation, retry a different path, or close the task? If no reviewer responds, what is the bounded fallback? These details turn a nominal approval step into an actual reliability control. They also produce evidence that can reveal whether the system is improving: a falling escalation rate may be good only if sampled quality and safety remain sound.
-
-### Build for learning without overclaiming
-
-The right conclusion from a review is often modest. A team may know that a change improved one task class under observed conditions without knowing that it generalizes to every future input. Say what the evidence supports, what it does not support, and what will be watched next. This protects users and makes collaboration easier. Engineering leaders can make a staged investment decision; operators can add an explicit watchpoint; product partners can choose whether the remaining uncertainty is acceptable for the intended audience.
-
-Over time, the records, traces, examples, and review decisions become a practical memory for the service. They show not just what broke but how the organization recognized the issue, who acted, and what evidence justified the fix. That memory is one of the most valuable outputs of AI agent testing. It allows a team to improve deliberately even as models, prompts, tools, and user expectations change, while keeping claims proportional to the evidence actually collected.
-
-## A grounded production example
-
-Consider a compliance assistant that classifies requests, retrieves policy sections, and prepares a review packet for a human approver. The first report may say only that the agent produced an unhelpful answer. A good investigation does not jump directly to a prompt rewrite. It reconstructs the task boundary: the request class, the expected action, the policy that applied, the retrieved or supplied context, the selected model configuration, tool outcomes, retry path, final response, and user effect. The team then compares this path with a known-good sample from the same workflow and release. The comparison narrows the question from “why are agents unreliable?” to a testable difference in evidence.
-
-Suppose the evidence shows a valid tool response arrived after an earlier model step inferred that the tool had failed. The correction may be a clearer tool-state contract, a bounded wait, or a validation step before a final answer. Suppose instead that the tool response was correct but stale for the user’s request. The correction might be retrieval freshness controls or an explicit date check. In both cases, the visible symptom is similar, but the remedy differs. That is why a run-level narrative is more useful than a dashboard total.
-
-### Turn the finding into a safe change
-
-Capture the failing case in a scenario suite, state the expected outcome and unacceptable behavior, and choose a leading signal that will reveal recurrence. Test the proposed change against representative cases, including cases that previously worked. Release behind an appropriate boundary when the impact justifies it. After release, review the same evidence for a defined observation period. If the outcome improves without creating a material regression in quality, latency, cost, or risk, keep the change. If not, use the version identifier and rollback path rather than debating from memory.
-
-## Operating cadence and decision hygiene
-
-The work becomes sustainable when it has a rhythm. During ordinary operation, sample completed runs and look for drift across input classes, outcomes, latency, and cost. Before a change, review the scenarios most likely to reveal a meaningful regression. During an incident, assign one person to reconstruct the timeline and another to protect users through the existing fallback or pause policy. After the incident, decide which evidence was missing and whether a new test, label, trace field, or boundary would have made the response faster and safer. Avoid a ritual that produces reports with no changed decision.
-
-Leaders should ask for decision-quality artifacts rather than a larger dashboard. A concise weekly review can include the top outcome risk, the affected task class, the evidence behind the classification, the named owner, and the next reversible action. This connects technical uncertainty to accountable delivery. It also makes it easier to say no to a rollout when the team lacks representative evidence, which is a sign of maturity rather than a lack of ambition.
-
-## Visual guide
-
-- A layered testing pyramid for agents.
-- A test-to-evaluation-to-production feedback loop.
-- A tool simulation failure matrix.
+Do not make every test blocking. A check should block when its failure matters to the intended exposure and the team has a clear response. Otherwise, route it to review with an owner and expiry rather than teaching people to ignore the gate.
 
 ## Operational checklist
 
-- Unit test deterministic transforms and policy boundaries.
-- Simulate delayed, malformed, and denied tool responses.
-- Use scenario suites for end-to-end behavior.
-- Run evaluations before expanding exposure.
-- Classify production corrections and escalations.
-- Promote incident examples into permanent regressions.
-
-## Explore in Tracify
-
-[Explore the relevant Tracify workflow](/product/tool-calls)
+- Write the expected outcome and unacceptable failure first.
+- Match each failure mechanism to its lowest useful test layer.
+- Keep deterministic boundary tests fast and specific.
+- Simulate timeouts, malformed data, duplicates, stale state, and no-response paths.
+- Stratify evaluation cases by task, consequence, and input class.
+- Preserve versions, traces, evaluator results, and reviewer disagreement.
+- Turn confirmed production mechanisms into durable fixtures or contracts.
+- Define release stop conditions, exposure, owner, and rollback path.
 
 ## Frequently asked questions
 
-### Why are unit tests not enough?
+{% faq-item question="Why are unit tests not enough?" answer="Unit tests can prove deterministic boundaries, but they cannot fully model retrieval quality, model choices, multi-step plans, dependency timing, or user-visible outcomes. Keep them as the fast foundation and add simulation, scenario evaluation, and production feedback where interactions change behavior." /%}
 
-They cannot capture the interaction of model choices, realistic context, and dependency behavior.
+{% faq-item question="What should be mocked?" answer="Mock dependencies whose timing, failure modes, or data would make a test slow or nondeterministic, while keeping their contracts explicit. Simulate timeouts, malformed responses, stale state, duplicates, and permission outcomes; reserve realistic end-to-end cases for behavior that depends on the interaction." /%}
 
-### What should be mocked?
+{% faq-item question="When does production become a test surface?" answer="As soon as real inputs, user corrections, operator classifications, or traces reveal behavior your fixtures do not cover. Sample safely, protect sensitive context, and convert confirmed mechanisms into a small regression case or contract at the layer that can detect them." /%}
 
-Dependencies whose contract needs deterministic failure and edge-case coverage; retain integration tests for real boundaries.
+## Next step: make testing actionable
 
-### When does production become a test surface?
-
-After release gates exist, production feedback reveals drift and new representative cases.
-
-## Next step: make AI agent testing actionable
-
-Start with one workflow this week. Instrument the evidence needed to explain a single completed run, review it against the intended outcome, and turn the finding into a named test or operating decision. Then use the relevant Tracify resource above to inspect the connected execution path. The final CTA is deliberately practical: choose one bounded improvement, measure its effect, and keep the rollback path clear.
-
-
-
-## Put this guidanceFrom Unit Tests to Production Evals into practice
-
-### A small release checklist
-
-- Define the user-visible outcome and the boundary this article does not cover.
-- Capture the evidence needed to explain movement, including the relevant version, cohort, and failure class.
-- Assign one owner for the next bounded action and write the stop condition before changing production behavior.
-
-> **Decision rule:** Prefer the smallest change that produces inspectable evidence. If the example cannot be tested, label it illustrative and verify the surrounding assumptions before adapting it.
-
-## Frequently asked questions
-
-{% faq-item question="What should I do first?" answer="Start with one real workflow and one user-visible outcome. Write down the boundary, collect the evidence that explains the outcome, and choose a reversible next step before expanding the system." /%}
-
-{% faq-item question="How do I know whether this is working?" answer="Compare the same task distribution before and after the change. Review quality, latency, cost, failure behavior, and user impact together, and preserve the release or prompt version that produced each result." /%}
-
-{% faq-item question="What is the most common mistake?" answer="Treating a metric, model response, or successful tool call as the outcome. Keep the user task, trace evidence, owner, and bounded response connected so the team can explain and improve the complete workflow." /%}
-
-## Recommended next reads
-
-Continue with [AI agent observability](/blog/ai-agent-observability-complete-guide), [debugging AI agents in production](/blog/debug-ai-agents-in-production), [the AI agent production checklist](/blog/ai-agent-production-checklist). Choose the one that matches the next decision in your workflow rather than opening every guide at once.
+Choose one repeated failure and write its expected outcome. Add the cheapest test that can detect it, then add a realistic scenario if the failure depends on retrieval, model behavior, timing, or user context. Run the case through the release gate and keep the production trace that proves whether the fix worked.
