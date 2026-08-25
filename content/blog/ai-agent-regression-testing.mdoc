@@ -18,267 +18,126 @@ seo:
 
 An agent regression suite should represent the ways the system actually fails: a wrong tool, a missing citation, an unsafe action, a retry loop, a timeout, or a result that is technically valid but useless. Start with reviewed production traces, redact sensitive values, and preserve the reason each case matters.
 
-{% trace-scenario title="What belongs in the regression set?" prompt="A production trace contains a wrong tool argument but a correct final answer. Should it become a test case?" outcome="Yes. Preserve the trace when the path is unsafe or fragile, even if the final answer happened to look correct." /%}
+{% trace-scenario title="What belongs in the regression set?" prompt="A production trace contains a wrong tool argument but a correct final answer. Should it become a test case?" outcome="Yes. Preserve the trace when the path is unsafe or fragile, even if the final answer happened to look correct. A safe final string does not erase an unsafe intermediate action." /%}
 
 ## At a glance
 
-This guide is for **quality engineers and agent developers**. It helps you **turn production failures into durable coverage** so you can leave with **a regression suite that compares behavior rather than only scores**.
+This guide is for quality engineers and agent developers. It helps you **turn production failures into durable, comparable coverage** so you can leave with a regression suite that protects behavior across prompt, model, tool, policy, and data changes.
 
-| Before you start | What to inspect | What good looks like |
+| Before you start | What to define | What good looks like |
 | --- | --- | --- |
-| A real workflow, failure, or release decision | The trace, evidence, policy, and user-visible outcome | A bounded decision backed by evidence rather than a confident guess |
+| A reviewed failure or fragile success | Mechanism, expected outcome, risk, versions, and owner | A compact case detects recurrence and explains the release decision |
 
-### The AI agent regression testing framework
+### The regression loop
 
-Use **Capture → Replay → Compare → Gate** as the decision path:
+Use **Capture → Replay → Compare → Gate**:
 
-1. **Capture:** establish the task, context, or boundary before changing behavior.
-2. **Replay:** make the relevant evidence or control explicit.
-3. **Compare:** compare the decision with a concrete example, trace, or test.
-4. **Gate:** finish with an owner, rollback, escalation, or next action.
+1. **Capture:** preserve the task, failure mechanism, relevant evidence, and user effect.
+2. **Replay:** make the case safe, deterministic enough, and runnable against a declared version.
+3. **Compare:** inspect baseline and candidate behavior by outcome and criterion, not only one score.
+4. **Gate:** promote, hold, narrow, or roll back according to consequence and exposure.
 
-> **Decision rule:** Capture a meaningful trace, replay the task, compare baseline and candidate behavior, and gate the release on risk.
+> **Decision rule:** Keep a case when it exposes a failure mechanism or dangerous path, even if the final answer was accidentally acceptable.
 
-The framework is deliberately narrower than the entire subject. It gives the reader a repeatable route through this article; it does not claim that one metric, model, or control solves every production case.
+![Evaluation matrix comparing regression cases across AI agent releases](/media/ai-agent-evaluation-hero.png)
 
-## Store the decision context
+*A regression suite makes change visible by comparing the same meaningful case across versions and preserving why the case matters.*
 
-Each case needs an input class, expected outcome, allowed tools, relevant evidence, evaluator version, and failure label. Keep the original trace reference when possible so a test remains connected to the execution that inspired it.
+## 1. Choose cases by failure mechanism
 
-The [testing path from unit tests to production evals](/blog/ai-agent-testing-unit-tests-production-evals) explains the layers; the [evaluation guide](/blog/ai-agent-evaluation-practical-guide) covers scoring and review. Regression testing is the bridge that makes those layers learn from operation.
+Do not build the suite from only the most recent incident or the most dramatic transcript. Sample across task class, consequence, release, model, prompt, tool, retrieval path, and input cohort. Include fragile successes when an unsafe intermediate action, near miss, or recovery path could recur.
 
-```yaml
-id: support-refund-ambiguous-date
-expectedStatus: ask_user
-forbiddenTools: [issue_refund]
-checks:
-  - no_irreversible_action
-  - asks_for_missing_date
-```
+| Case type | Why it belongs | What to assert |
+| --- | --- | --- |
+| Wrong final outcome | Direct user-visible regression | Expected result and criterion-level failure |
+| Unsafe intermediate action | Harm can occur before the final text | Tool arguments, permission, approval, and state change |
+| Missing or stale evidence | Generation may appear fluent while grounding fails | Source selection, freshness, citation, and refusal |
+| Recovery failure | Retries or fallbacks can multiply impact | Attempt budget, terminal state, and escalation |
+| Fragile success | A lucky result can hide a path regression | Intermediate trace and invariant, not just final answer |
 
-## Compare behavior, not only scores
+The [AI agent testing guide](/blog/ai-agent-testing-unit-tests-production-evals) explains how to place a case at the lowest useful test layer. A regression suite should be the durable memory of mechanisms, not an archive of every transcript.
 
-Run the baseline and candidate on the same cases. Compare terminal status, tool sequence, policy decisions, latency, cost, and evaluator explanations. A candidate that keeps the final answer but changes a risky intermediate action deserves review.
+## 2. Preserve a compact trace fixture
 
-## Keep the suite alive
-
-Add a case after every confirmed incident, remove duplicates, and periodically sample successful runs for coverage gaps. Tag cases by workflow, model, release, and failure mechanism. A smaller suite with clear ownership is more useful than a large folder no one trusts.
-
-## Choose cases by failure mechanism
-
-Do not organize a regression suite only by feature or prompt name. Tag cases by the mechanism that failed: wrong tool, missing evidence, unsafe action, schema rejection, retry loop, timeout, stale memory, browser synchronization, cost budget, or human-review boundary. This lets a release owner see whether a change improves one class while regressing another.
-
-Keep the user job in the case title. `support-refund-ambiguous-date` tells a reviewer more than `case-184`. Store the expected terminal state, permitted tools, forbidden tools, evidence requirements, and evaluator rationale. A regression case should explain why it belongs in the suite six months after the incident.
-
-## Preserve a compact trace fixture
-
-A production trace may contain too much sensitive or incidental data to copy directly into a test. Reduce it to the smallest input, context, tool response, version metadata, and expected outcome that reproduces the behavior. Preserve a secure reference to the original run when authorized. Record what was removed so the fixture’s limitations are clear.
+Keep the minimum input and structured context needed to reproduce the behavior. Redact secrets and personal data; replace protected content with stable references or approved fixtures. Record the expected outcome, unacceptable behavior, versions, evaluator, and why the case matters.
 
 ```yaml
-id: browser-login-fails-after-redirect
-workflow: browser-support
-inputClass: expired-session
-expectedStatus: stop_and_request_login
-allowedTools: [navigate, read_page]
-forbiddenTools: [submit_form]
-checks:
-  - no_sensitive_submission
-  - explains_next_step
-  - preserves_artifact_reference
+case_id: wrong_tool_argument_014
+task_class: account_update
+mechanism: missing_field_validation
+expected: request_clarification_before_tool_call
+forbidden: submit_partial_update
+baseline: release-2026-08-18
+owner: account-workflow
 ```
 
-The expected status is more important than an exact sentence. It gives the evaluator a stable contract while allowing harmless wording changes.
+This is an illustrative fixture, not executable configuration. Keep the trace evidence that explains the case, but avoid making the suite depend on unredacted production payloads or an undocumented live service.
 
-## Test the whole path
+## 3. Replay the whole path that matters
 
-Unit tests should cover validators and individual tools. Workflow tests should cover ordering, retry, state, and terminal behavior. Evaluation cases should cover outcome quality and user usefulness. Production regression tests should run the same representative cases against the deployed version or captured interfaces. No single layer can replace the others.
+A final-answer snapshot is insufficient when the failure depends on retrieval, tool sequencing, state, timing, or policy. Replay the relevant path with controlled dependencies where possible. Preserve the same task definition, evidence policy, and case classification while changing only the candidate version under test.
 
-The [AI agent testing guide](/blog/ai-agent-testing-unit-tests-production-evals) describes the layers. The [AI agent evaluation guide](/blog/ai-agent-evaluation-practical-guide) explains datasets and evaluators. Regression testing is the maintenance loop that keeps real failures in those systems instead of letting them disappear into an incident document.
+| Replay choice | Use when | Watch for |
+| --- | --- | --- |
+| Deterministic fixture | Boundary or contract behavior is stable | The fixture still represents production conditions |
+| Simulated dependency | Timeout, malformed response, stale state, or duplicate must be exercised | The simulation matches the real failure contract |
+| Recorded trace context | Retrieval or multi-step evidence shaped the failure | Sensitive content is protected and versions are explicit |
+| Live canary | Interaction or distribution cannot be modeled safely | Exposure, rollback, and data access are bounded |
 
-## Compare baseline and candidate traces
+The [production debugging guide](/blog/debug-ai-agents-in-production) shows how to reconstruct the mechanism before turning it into a case. If replay cannot isolate what changed, the test may be measuring a moving environment rather than the agent.
 
-Run baseline and candidate on the same case revision. Compare final status, tool sequence, policy result, evidence used, latency, tokens, cost, evaluator values, and explanation. A candidate that preserves the final answer but adds an unsafe intermediate call deserves review. A candidate that changes wording but preserves the intended task can pass.
+## 4. Compare behavior, not only scores
 
-Make differences easy to inspect. Group by case tag, workflow, model, prompt, tool schema, and release. Show examples behind aggregate scores. A ten-point average improvement is not enough evidence when one critical case changes from `blocked` to `executed`.
+Compare baseline and candidate on the expected outcome, unacceptable behavior, criterion-level results, tool and policy path, latency, cost, and recovery. Segment by meaningful slices so an average cannot hide a high-consequence regression.
 
-## Keep evaluators honest
+| Comparison result | Interpretation | Gate action |
+| --- | --- | --- |
+| Candidate passes the case and invariants | Mechanism appears corrected | Keep the case and continue bounded rollout |
+| Final answer improves, forbidden action remains | User text masks an unsafe path | Hold and fix the action boundary |
+| Average score rises, high-risk slice regresses | Aggregate hides material harm | Hold, investigate, or roll back |
+| Case is nondeterministic without explanation | Harness or system variation is unclear | Stabilize the test or define an explicit band |
+| Candidate changes a declared trade-off | Improvement has an operational cost | Record owner, threshold, and acceptance decision |
 
-Version evaluator prompts, deterministic rules, and judge models. Maintain a calibration set and sample disagreements. Do not rewrite the expected label because the new implementation made the old behavior inconvenient. If the product contract changed, create a new case revision with a documented decision.
+The [AI agent evaluation guide](/blog/ai-agent-evaluation-practical-guide) covers representative datasets and release gates. Regression tests contribute evidence; they do not remove the need for review of distribution, uncertainty, and user impact.
 
-Separate the evaluator’s confidence from the case outcome. A judge can be uncertain about a nuanced answer while a deterministic safety rule clearly fails. Keep each signal so a release owner can decide which one has priority.
+> **Comparison rule:** Preserve the baseline and the candidate artifact. A passing candidate without a comparable baseline cannot explain whether the change helped.
 
-## Use production traces as a learning queue
+## 5. Keep the suite alive
 
-Sample successful, degraded, and failed traces. Route candidates to review based on uncertainty, cost, policy, and novelty. When an operator confirms a new failure, create a case with its mechanism and expected behavior. When a case becomes redundant, archive it with a reason rather than deleting history.
+Review cases after incidents, releases, prompt changes, model changes, tool-contract changes, corpus updates, and policy changes. Retire a case only when the mechanism no longer exists or the workflow boundary changed deliberately; record that reason rather than silently deleting history.
 
-Review the suite for coverage gaps. Are there cases for empty retrieval, provider timeout, duplicate delivery, stale prompt, permission change, and user correction? Are common workflows represented as well as dramatic incidents? A suite that only remembers the last outage will not protect ordinary quality.
+Track suite health: case coverage by failure class, stale fixtures, flaky cases, time to diagnose a failure, false positives, and production failures that escaped. A large suite that nobody trusts is slower than a smaller suite with clear ownership and useful failure output.
 
-## Run fast checks at the right frequency
+### Turn production feedback into a case
 
-Every pull request should run cheap schema, policy, and deterministic outcome checks. Release candidates should run representative model and tool cases. Scheduled jobs can run broader datasets and human review. The exact cadence depends on cost and risk, but the decision should be explicit.
+When a user report or trace reveals a new mechanism, capture the expected behavior and the smallest evidence that distinguishes it. Reproduce safely, add the case at the lowest useful layer, then add a higher-layer scenario if interactions matter. Keep the original production reference in the incident record even after the sanitized fixture becomes the durable test.
 
-Cache only safe, immutable inputs and evaluator artifacts. Never reuse a result across a prompt, model, tool, or policy revision without recording that the case was not re-executed. A green result from the wrong revision is worse than a slow test because it creates false confidence.
+## 6. Gate changes with risk and exposure
 
-## Test non-determinism deliberately
+Write the stop condition before running the candidate. Define which cases are blocking, which are review-only, the intended exposure, the observation window, the owner, and the rollback path. A deterministic policy violation should block a release differently from a small uncertain shift in a low-consequence quality score.
 
-Some model outputs vary while the correct action remains stable. Assert invariants: allowed tools, required citations, terminal state, budget, approval, and user-visible fields. Use multiple runs for high-risk cases when the provider supports it, and track variance. Do not lower the expected behavior simply because a flaky implementation is difficult to test.
+Do not make every case equally blocking. Severity, likelihood, reversibility, and affected users should determine the response. If the suite is incomplete for the target exposure, narrow the exposure or extend the evidence rather than treating missing coverage as a pass.
 
-For deterministic tools, keep exact assertions. For free-form answers, use rubrics and claim checks. A test should state what may vary and what may not. This makes failures actionable instead of producing a binary score no one can interpret.
+## Operational checklist
 
-## Release gates and rollback
-
-Define which cases block a release. Critical safety or data-loss regressions should block even if aggregate quality improves. A minor wording change may route to review rather than block. Attach the gate decision to the release record and keep the prior version available.
-
-When a live signal regresses, roll back the prompt, model route, tool catalog, or policy pointer that changed. Then retain the trace and case. A rollback without a regression artifact only postpones the same failure.
-
-## Regression review checklist
-
-- Does each case name the user job and failure mechanism?
-- Is the expected terminal behavior explicit?
-- Are trace fixtures minimal, redacted, and versioned?
-- Are baseline and candidate compared on the same inputs?
-- Do evaluators distinguish safety, quality, latency, and cost?
-- Are successful traces sampled for missing coverage?
-- Are block conditions and rollback owners documented?
-
-Regression testing makes production behavior part of engineering memory. It turns a surprising trace into a case, a case into a release decision, and a release decision into evidence for the next change.
-## Regression review: a field guide
-
-This extended guide applies the same production discipline to regression testing: trace fixtures, evaluators, nondeterminism, release gates, and rollback.
-
-## Start with the failure you need to prevent
-
-A strong AI agent regression testing practice begins with a failure that matters to a user. Write the failure in observable terms: the task stopped, the wrong action happened, the answer lacked evidence, the reviewer could not decide, or the system consumed more resources than the outcome justified. This wording gives the team a testable target and prevents the article from drifting into a collection of attractive but disconnected recommendations.
-
-## Name the boundary
-
-Most production incidents happen at a boundary: model to application, application to tool, retrieved data to instruction, browser action to page state, or metric to operational decision. For AI agent regression testing, draw that boundary in plain language before choosing an implementation. Identify what is trusted, what is untrusted, what must be validated, and what evidence crosses the boundary. A boundary that cannot be named cannot be monitored consistently.
-
-## Preserve the decision context
-
-A final answer or status flag rarely explains a failure by itself. Preserve the inputs, versions, policies, selected evidence, attempted actions, retries, and resulting state that shaped the decision. For AI agent regression testing, use stable identifiers and redaction so an investigator can reconstruct the path without copying secrets into every log line. The goal is not maximal data collection; it is enough context to test a plausible explanation.
-
-## Measure the user-visible outcome
-
-Choose a primary outcome for AI agent regression testing and define it before choosing a dashboard. Completion, correctness, groundedness, safe refusal, review quality, time to useful result, and cost per successful task answer different questions. Pair the outcome with failure dimensions such as model version, prompt version, cohort, provider, tool, language, and task type. An aggregate score is useful only when a person can move from the score to representative traces.
-
-## Make the unhappy path explicit
-
-A mature AI agent regression testing workflow names what happens when evidence is missing, a dependency is slow, a schema changes, a permission is denied, a reviewer does not respond, or the system cannot establish confidence. These are product states, not merely exceptions. Give each state an owner, a user-facing explanation, a safe fallback, and a trace event. This is how a graceful degradation policy becomes something an operator can verify.
-
-## Use small, reviewable examples
-
-Examples teach the boundary faster than abstract claims. Keep a representative AI agent regression testing example small enough to inspect, but include the field that changes the decision. Show the expected result and one plausible failure. Explain which part is illustrative and which part should be adapted to the repository. Avoid examples that imply a guarantee the implementation cannot make; precision is more persuasive than spectacle.
-
-## Test variation deliberately
-
-The happy path is only one member of the AI agent regression testing distribution. Add cases for empty input, ambiguous intent, stale state, partial failure, duplicate work, adversarial content, long context, and a dependency that returns a valid-looking but wrong result. Test cohorts and release versions separately. When behavior is probabilistic, record the evidence and evaluator version so a changed score can be distinguished from a changed system.
-
-## Roll out in stages
-
-Use shadow mode, a narrow cohort, explicit comparison, and a rollback condition when changing AI agent regression testing. Shadow mode reveals what the system would have done without changing user behavior. A cohort exposes regressions hidden by averages. A rollback condition turns caution into an operational decision. Keep the release, prompt, model, data, and configuration identifiers together so the comparison remains meaningful after deployment.
-
-## Create a learning loop
-
-Production feedback should become a queue of explainable cases for AI agent regression testing, not a pile of screenshots or vague tickets. Attach the user report, trace, expected behavior, actual behavior, and disposition. Classify the mechanism, add a compact regression case when appropriate, and record whether the fix changed code, data, prompt, policy, or operations. This closes the loop between observability and engineering instead of treating incidents as isolated surprises.
-
-## Review the economics and ownership
-
-Every AI agent regression testing decision has an operating cost. Include reviewer time, evaluator calls, storage, retries, provider spend, and the cost of a wrong action when they matter. Assign an owner for quality, reliability, security, and budget signals. A workflow is not production-ready because it can run; it is ready when the organization can understand, afford, and improve it.
-
-## Build the runbook around evidence
-
-The runbook for AI agent regression testing should begin with the trace or artifact an operator opens, then provide a short decision tree. If the parent task is missing, investigate ingestion. If the task exists but the child span is missing, inspect propagation. If evidence is present but the outcome is wrong, compare versions and evaluator results. Keep the first response steps concrete and link to the source of truth rather than asking an operator to search the whole repository.
-
-## Know when not to automate
-
-Automation is not always the correct endpoint for AI agent regression testing. If the consequence is irreversible, the evidence is incomplete, or the policy cannot be expressed safely, stop and route to a person or a trusted system. A bounded refusal is often a better product result than a confident action. Document the boundary so future optimization does not quietly remove the control that made the workflow acceptable.
-
-## A practical review sequence
-
-Review AI agent regression testing in this order: define the task, identify boundaries, preserve evidence, measure the outcome, exercise failures, test variation, stage the rollout, and assign ownership. The sequence matters because a polished implementation with no observable outcome is difficult to validate, while a clear contract makes later instrumentation and testing much cheaper.
-
-## Final field checklist
-
-Before shipping AI agent regression testing, confirm that the happy path and degraded paths are documented, the rendered page or workflow is accessible, examples are safe to copy, identifiers are stable, sensitive values are redacted, links point to canonical content, and a real person can investigate one representative failure. Then run the repository checks and review the exact diff. Quality is the combination of useful behavior, explainable evidence, and a release process that can recover.
-## Questions to ask in review
-
-Ask whether the current AI agent regression testing design makes the next failure easier or harder to explain. Where is the source of truth? Which value is user-controlled? Which decision is irreversible? What happens when a dependency returns a partial result? Which version can be rolled back? These questions expose missing contracts faster than adding another dashboard or another prompt instruction.
-
-## The smallest useful implementation
-
-Start with the smallest implementation that creates evidence for AI agent regression testing. One parent run, a few stable fields, one representative fixture, and one clear outcome are often enough to reveal the largest gap. Expand only when a real investigation needs another dimension. This keeps instrumentation affordable and prevents the team from confusing volume of telemetry with quality of understanding.
-
-## Keep the page and system honest
-
-Documentation about AI agent regression testing should describe the behavior a reader can actually reproduce. Mark illustrative examples clearly, keep names consistent, and avoid claims that depend on an unmentioned environment. On the rendered page, make the important artifact easy to inspect: use a labelled code block, a readable trace scenario, or a compact decision table. The presentation is part of the teaching contract.
-
-## Accessibility is a reliability feature
-
-A AI agent regression testing workflow should remain understandable when a reader cannot hover, drag, or run the example. Provide a static explanation, meaningful labels, visible focus, keyboard access, and mobile-safe overflow. The same principle applies in production: a trace should expose text and structured fields, not require an operator to infer meaning from color or animation alone.
-
-## Signals that justify a change
-
-Change AI agent regression testing when evidence shows a repeated failure mechanism, a measurable user benefit, or an unacceptable operational cost. Record the baseline, candidate, cohort, and decision owner. If the change improves one dimension while harming another, state the trade-off instead of hiding it in an average. This creates a durable record future agents can use when the same decision returns.
-
-## Closing principle
-
-The best AI agent regression testing practice makes good behavior easier to produce and bad behavior easier to see. It gives the user a useful outcome, gives the operator an explainable trace, and gives the team a safe way to improve the system. That is the standard to apply when reviewing both the implementation and this article.
-## Turn principles into an operating artifact
-
-A principle becomes useful when someone can apply it during a real change. For this topic, create a compact artifact: a trace field list, a test fixture, a rollout table, a budget rule, a review form, or a runbook. Keep the artifact close to the decision it supports. If it lives in a separate document with no owner, it will become stale while the system continues to change.
-
-## Compare like with like
-
-When evaluating a change, compare the same task distribution, evidence policy, model or release metadata, and outcome definition. A baseline gathered from easy cases cannot prove an improvement on difficult cases. Preserve the sampling rule and the exclusions. When the data is sparse, say so; a small honest sample is more useful than a precise-looking number that hides its uncertainty.
-
-## Make failure visible to the right person
-
-Visibility is not the same as exposure. A user needs a clear explanation and safe next step. An operator needs a trace, timing, versions, and likely cause. An engineer needs a reproducible fixture. A security owner needs the trust boundary and containment event. Design the evidence for the person who must act, and avoid copying sensitive content into places where no action is possible.
-
-## Review changes as a system
-
-A prompt, model, schema, retrieval index, browser selector, evaluator, and dashboard threshold can each change behavior. Review the connected system rather than approving one file in isolation. Record what changed, which outcomes could move, which tests cover the risk, and how to revert. This practice keeps small changes from becoming untraceable production behavior.
-
-## The standard for completion
-
-Completion means more than a passing happy-path test. A reader should understand the contract, an operator should be able to investigate a failure, and the team should have a bounded path to improve or roll back the behavior. Apply that standard to the article too: the examples should render clearly, the interaction should teach something, the image should have a job, and the validation command should pass.
-## Keep the decision reversible
-
-When the evidence is uncertain, prefer a change that can be measured and undone. Record the baseline, define the stop condition, and make the owner explicit. This is especially important for regression testing because a locally attractive improvement can shift risk into quality, safety, cost, or trust. Reversibility is not hesitation; it is how a team learns without making every experiment a permanent incident.
-
-## Share the result clearly
-
-A good handoff states what changed, what did not change, which traces or examples support the conclusion, and what remains unknown. Use the same vocabulary in the article, dashboard, runbook, and release note. Consistent language reduces translation work and makes future investigations faster.
-
-## Keep the workflow maintainable
-
-A workflow that works only because one person remembers its hidden assumptions is not ready to scale. Put the contract, owner, evidence fields, and rollback path next to the implementation. Revisit them after incidents and material dependency changes. This keeps the system understandable when the original author is not available.
-
-## Review the edges
-
-The most revealing cases are often at the edges of the distribution: the longest task, the oldest record, the least common cohort, the first retry, the empty result, or the most consequential action. Include those cases in review deliberately. They are where a simple average most often lies.
-
-
-
-## Put this guidanceTurn Production Failures Into Coverage into practice
-
-### A small release checklist
-
-- Define the user-visible outcome and the boundary this article does not cover.
-- Capture the evidence needed to explain movement, including the relevant version, cohort, and failure class.
-- Assign one owner for the next bounded action and write the stop condition before changing production behavior.
-
-> **Decision rule:** Prefer the smallest change that produces inspectable evidence. If the example cannot be tested, label it illustrative and verify the surrounding assumptions before adapting it.
+- Capture reviewed failures and fragile successes by mechanism.
+- Redact production data and preserve only approved fixture context.
+- Record expected outcomes, forbidden behavior, versions, and ownership.
+- Replay the path that caused the failure, not only the final answer.
+- Compare baseline and candidate behavior by slices and criteria.
+- Keep unsafe intermediate actions visible even when the final result passes.
+- Track flaky, stale, missing, and escaped cases.
+- Define blocking severity, exposure, observation window, and rollback.
+- Retain the case as durable memory until its boundary changes deliberately.
 
 ## Frequently asked questions
 
-{% faq-item question="What should I do first?" answer="Start with one real workflow and one user-visible outcome. Write down the boundary, collect the evidence that explains the outcome, and choose a reversible next step before expanding the system." /%}
+{% faq-item question="Should a correct final answer hide a wrong tool call?" answer="No. Keep the case when the intermediate action was unsafe, unauthorized, or fragile. The final string can be correct by chance, while the path still exposes users or state to harm. Assert the action boundary as well as the final outcome." /%}
 
-{% faq-item question="How do I know whether this is working?" answer="Compare the same task distribution before and after the change. Review quality, latency, cost, failure behavior, and user impact together, and preserve the release or prompt version that produced each result." /%}
+{% faq-item question="How many regression cases should a suite contain?" answer="Enough to represent the failure mechanisms and risk slices relevant to the intended release. Prefer a compact, owned set with clear expected and forbidden behavior over a large archive of unlabelled transcripts. Add cases when production reveals a new mechanism and retire them only with a recorded reason." /%}
 
-{% faq-item question="What is the most common mistake?" answer="Treating a metric, model response, or successful tool call as the outcome. Keep the user task, trace evidence, owner, and bounded response connected so the team can explain and improve the complete workflow." /%}
+{% faq-item question="What should block a release?" answer="Predeclared unacceptable behavior, a material regression in a consequential slice, or insufficient coverage for the intended exposure. Review-only variation can remain non-blocking when its owner, threshold, and next action are explicit." /%}
 
-## Recommended next reads
+## Next step: turn one failure into coverage
 
-Continue with [ai agent testing unit tests production evals](/blog/ai-agent-testing-unit-tests-production-evals), [ai agent evaluation practical guide](/blog/ai-agent-evaluation-practical-guide), [AI agent observability](/blog/ai-agent-observability-complete-guide). Choose the one that matches the next decision in your workflow rather than opening every guide at once.
+Choose one recent production trace. Redact it, name the mechanism, define the expected and forbidden behavior, replay the relevant path, and compare it with the baseline. Keep the resulting case in the release gate so the next prompt, model, tool, or policy change has to earn its way past the failure that already happened.
