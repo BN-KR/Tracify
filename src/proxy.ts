@@ -9,6 +9,7 @@ const CLOUD_APP_PREFIXES = [
   "/reset-password",
   "/accept-invitation",
   "/auth/error",
+  "/auth/callback",
 ];
 
 function isCloudAppPath(pathname: string) {
