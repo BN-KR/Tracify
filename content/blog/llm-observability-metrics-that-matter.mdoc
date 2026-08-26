@@ -314,3 +314,29 @@ const shouldPage =
 {% faq-item question="Are token counts quality metrics?" answer="No. Token counts describe input and output volume. They can explain cost or context changes, but they cannot show whether the workflow helped the user without an outcome measure or review signal." /%}
 
 {% faq-item question="Should every anomaly alert?" answer="No. Alert when the movement is material and credible, the consequence is time-sensitive, and a named owner has a safe first action. Route uncertain drift to review instead." /%}
+
+## Build a metric chain, not a metric wall
+
+An observability metric earns its place by changing a decision. Start with the user-visible outcome, then choose the smallest set of signals that explains movement toward or away from that outcome. For an agent, that may connect task completion to validation failures, tool latency, retry count, cost, evaluator outcome, and approval backlog. A dashboard full of disconnected counters is difficult to operate because no one knows which number should trigger action.
+
+### Define the denominator
+
+Rates become misleading when the population changes. State whether completion is measured per request, workflow, customer, or eligible task. Exclude cancelled work explicitly and report unknown states instead of silently dropping them. Cost per call is not cost per successful task; latency for a model span is not time to a useful result. Put the denominator and sampling rule beside the metric so a later dashboard reader does not have to reverse-engineer them.
+
+### Pair leading and outcome signals
+
+A rising retry rate can warn of a provider problem before completion falls. A stable completion rate can hide worsening correction work. Pair leading signals with the outcome they are meant to protect: latency with time to useful result, token usage with cost per successful task, evaluator score with reviewed correctness, and approval rate with policy exceptions. Review disagreement whenever a proxy improves while the user outcome does not.
+
+### Set thresholds around actions
+
+A threshold should specify the affected cohort, evidence window, owner, and bounded response. Page for active material harm, route uncertain drift to review, and annotate expected movement during a controlled rollout. Use percentiles for tail behavior and minimum sample sizes for noisy metrics. Revisit thresholds after incidents; a number that never changes behavior is not an alert, it is decoration.
+
+### Preserve metric context
+
+Record workflow, prompt, model, tool, evaluator, release, cohort, and environment dimensions with the run. Redact sensitive values but preserve stable identifiers that connect aggregate movement to representative traces. When a metric changes, the investigator should be able to compare a healthy and affected task without searching multiple systems for the versions that shaped it.
+
+### Retire metrics deliberately
+
+Remove a metric when it no longer changes a decision, duplicates a stronger signal, or creates alert fatigue. Document what replaced it and keep the historical meaning clear. A smaller scorecard with known trade-offs is more trustworthy than an ever-growing catalog that encourages teams to optimize whichever number is easiest to improve.
+
+> **Metric rule:** Every production metric must name the decision it supports, the owner who acts on it, and the evidence that confirms the response.

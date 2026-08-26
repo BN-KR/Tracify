@@ -290,3 +290,29 @@ Review one success, one corrected result, and one failure after every material r
 {% faq-item question="Can an LLM judge replace reviewers?" answer="It can scale a rubric, but calibrate it against blinded human samples and retain human review for ambiguous or high-consequence cases. Treat disagreement as evidence that the rubric or context needs work." /%}
 
 {% faq-item question="What blocks a release?" answer="A predeclared unacceptable failure, a material regression in a high-risk slice, or insufficient representative evidence for the intended exposure. Name the owner and next reversible action instead of hiding uncertainty in the average." /%}
+
+## Turn evaluation into a release decision
+
+Agent evaluation is useful when it answers a specific question: should this change ship, should exposure expand, or should the workflow remain behind review? Begin with the task distribution and the unacceptable failure, then choose checks that reveal whether the candidate meets the intended boundary. Do not start with a universal score and search backward for a meaning.
+
+### Build the case set
+
+Combine curated edge cases, anonymized production examples, recent traffic, and known incidents. Label answerable and unanswerable tasks, policy-sensitive cases, tool failures, stale evidence, and cases where a human must intervene. Record the expected outcome and the evidence that would justify it. A dataset that contains only easy successes cannot establish readiness for production.
+
+### Use layered evaluators
+
+Deterministic checks are appropriate for schema, required fields, citations, tool arguments, latency, cost, and state transitions. Model-assisted evaluators can help judge tone, relevance, or semantic similarity, but calibrate them against human review and preserve examples of disagreement. Human review is essential for high-consequence behavior and for understanding why an automated score is wrong. No single evaluator should silently become the definition of quality.
+
+### Interpret disagreement
+
+When evaluators disagree, inspect the task, rubric, evidence available to the evaluator, and actual user outcome. A model judge may reward fluent unsupported text; a strict parser may reject a useful answer with harmless formatting variation. Classify disagreement as data ambiguity, rubric weakness, evaluator error, or system failure. Add a targeted case or revise the evaluator only after naming the mechanism.
+
+### Gate and roll out
+
+Define pass criteria, severe-failure criteria, sample size, cohort, observation window, owner, and rollback action before running the candidate. A candidate can pass average quality while failing a critical security or authorization case; severe failures need their own gate. Use shadow mode or a narrow cohort when production behavior is uncertain, and compare candidate and baseline on the same task classes.
+
+### Keep evaluation reproducible
+
+Store dataset version, task input reference, prompt and model versions, tool and policy versions, evaluator version, score, evidence, and disposition. When a result changes, you should be able to tell whether the system changed or the evaluation changed. Keep failed cases after a fix so the release process remembers what the team already learned.
+
+> **Evaluation rule:** A score is not a release decision until it is tied to a task distribution, severe-failure policy, evidence packet, owner, and reversible next action.

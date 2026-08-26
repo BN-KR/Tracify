@@ -266,3 +266,25 @@ After launch, inspect the result from the user’s point of view. Did the workfl
 {% faq-item question="Is there one perfect prompt?" answer="No. Prompt quality depends on the task distribution, model, tools, context, and outcome definition. Treat prompts as versioned system components and evaluate them with representative cases." /%}
 {% faq-item question="Should prompts include chain-of-thought instructions?" answer="Focus on the output contract and evidence your application needs. Do not depend on hidden reasoning text as an audit record; capture structured decisions and tool actions instead." /%}
 {% faq-item question="How often should prompts be reviewed?" answer="Review them whenever the task, model, tools, data, policy, or observed failure distribution changes. Re-run the regression set and inspect representative production traces." /%}
+
+## Make prompts behave like versioned interfaces
+
+A production prompt is an interface between a workflow and a model, so its quality depends on more than wording. Define the task contract, allowed output, evidence requirements, tool boundary, and failure state outside the prose prompt. The prompt should tell the model how to use those boundaries; the application must still validate them. A short prompt with a clear contract is safer than a long prompt that tries to encode every policy in natural language.
+
+### Use examples to expose decisions
+
+A useful few-shot example shows the input, the relevant context, the expected structured output, and the reason a tempting alternative is wrong. Include an abstention case and a case where the model must request clarification. Examples should represent the distribution that matters to the workflow, not only the cases that make the prompt look successful. Remove an example when it teaches a shortcut that conflicts with current policy.
+
+### Debug one behavior at a time
+
+When a prompt fails, classify the failure before editing it. Missing information points to retrieval or context construction. Wrong format points to schema or parser handling. Unsupported claims point to evidence and abstention. Wrong tool choice points to the action boundary. Vague output instructions rarely fix a failure whose cause is outside the prompt. Capture the failing trace and compare it with a healthy trace from the same task class.
+
+### Protect prompt boundaries
+
+Treat retrieved text, user content, tool results, and memory as data, not as trusted instructions. Delimit sources, state which fields are authoritative, and validate tool arguments in code. A prompt can reduce ambiguity but cannot grant permission. Keep secrets, tenant rules, and irreversible business logic out of model-controlled text. Use the controls in the prompt-injection guide when external content can influence execution.
+
+### Evaluate changes honestly
+
+Compare candidate prompt versions on a fixed regression set and a recent production sample. Inspect severe failures, abstention, correction work, latency, and cost—not only a model-graded average. Roll out gradually and keep the previous version available. Record the prompt, model, tool schema, policy, and evaluator versions together so a later regression can be reproduced rather than debated from memory.
+
+> **Prompt rule:** Change wording only after the failing behavior has a named mechanism and a test that can distinguish improvement from accidental drift.
