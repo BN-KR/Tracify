@@ -9,8 +9,8 @@ categories: [evaluation]
 tags: [AI evaluation metrics, LLM evaluation, model quality]
 relatedPosts: [ai-agent-evaluation-practical-guide, ai-agent-testing-unit-tests-production-evals]
 heroImage:
-  src: /media/ai-agent-evaluation-hero.png
-  alt: AI evaluation scorecard comparing quality, latency, cost, and safety outcomes
+  src: /media/ai-evaluation-metrics-hero.png
+  alt: A black mechanical measurement machine evaluating acid-yellow test objects across several physical instruments
 seo:
   metaTitle: "AI Evaluation Metrics for Production Systems"
   metaDescription: Choose practical AI evaluation metrics for quality, groundedness, tool use, latency, cost, safety, and user-visible outcomes.
@@ -42,28 +42,17 @@ Define what successful completion means and how failure affects the user. For a 
 | Economics | What did the run cost and how long did it take? |
 | Safety | Did the workflow stay inside policy? |
 
-## Pair aggregate scores with traces
+## Build the measurement system
+
+### Pair aggregate scores with traces
 
 An average can hide a severe regression in a small cohort. Store evaluator version, candidate version, task distribution, sampled examples, and failure class. Inspect traces for the mechanism behind the score. [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals) shows how unit tests, regression cases, and production evaluations fit together.
 
-## Set decision thresholds before looking
+### Set decision thresholds before looking
 
 Write the baseline, acceptable regression, required improvement, and stop condition before comparing candidates. If the sample is small or the evaluator is noisy, state that uncertainty. A precise number without a stable sampling rule is not strong evidence.
 
-## Release checklist
-
-- Define the user-visible outcome.
-- Choose metrics that explain quality, reliability, cost, latency, and safety.
-- Version the candidate, evaluator, prompt, and dataset.
-- Review representative failures, not only aggregate scores.
-- Write promotion and rollback thresholds in advance.
-
-> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
-## Recommended next reads
-
-Continue with [AI agent evaluation](/blog/ai-agent-evaluation-practical-guide), [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals), and [AI agent regression testing](/blog/ai-agent-regression-testing).
-
-## Calibrate metrics before using them as gates
+### Calibrate metrics before using them as gates
 
 Run the evaluator on examples whose expected interpretation is already understood. Compare automated labels with a small human-reviewed sample and record disagreement reasons. Calibration does not prove that an evaluator is correct everywhere; it reveals where the metric is dependable, where it is noisy, and where a human must remain in the loop.
 
@@ -71,11 +60,11 @@ Run the evaluator on examples whose expected interpretation is already understoo
 
 A score can improve because the traffic became easier. Compare cohorts, task mix, language, release, and input length. Preserve the sampling rule and report excluded cases. If the distribution changes materially, describe the result as a new baseline rather than presenting it as a clean before-and-after improvement.
 
-## Connect metrics to actions
+### Connect metrics to actions
 
 For each metric, name the owner and response. A groundedness regression may trigger retrieval investigation; a latency regression may trigger trace inspection; a safety disagreement may pause a rollout. If a metric never changes a decision, remove it or move it to a lower-cost review. More metrics do not create more control.
 
-## Review metric health
+### Review metric health
 
 Revisit evaluator drift, missing labels, stale references, and reviewer fatigue. The measurement system is part of the product and can fail independently of the agent. Keep a small set of known cases that should remain stable and inspect them whenever the evaluator, prompt, model, or data changes.
 
@@ -139,6 +128,8 @@ Organize metrics by the layer they describe. Task metrics describe the user-visi
 | Operations | p95 latency, spend, queue delay, failure rate | Platform owner |
 | Governance | Approval compliance, policy blocks, redaction | Security or risk owner |
 
+{% editorial-panel eyebrow="Operating principle" title="A metric earns its place by changing a decision." body="Attach every signal to an owner, a threshold, and a response. If nobody acts when it moves, remove it from the release board." tone="yellow" /%}
+
 ### Keep the denominator visible
 
 Every percentage needs a population. State whether the denominator is all runs, completed runs, eligible examples, reviewed samples, or a particular cohort. Exclude cancelled or unsupported cases only with a documented reason. A success rate can rise when difficult cases disappear from the denominator. Preserve counts next to rates so a reviewer can judge whether a change is meaningful.
@@ -167,6 +158,8 @@ Route novel, high-impact, evaluator-disagreement, and threshold-adjacent cases t
 
 An aggregate score tells you that something moved; a trace helps explain why. Attach evaluator version, candidate version, task cohort, sample rule, and failure class to the run. Link the score to retrieval evidence, prompt version, tool calls, retries, approvals, latency, and cost. Preserve baseline and candidate outputs together so the release decision remains reproducible.
 
+{% editorial-panel eyebrow="Diagnostic shortcut" title="Find the first divergence, not the loudest symptom." body="Read the request, evidence, decision, execution, and outcome in order. The earliest meaningful change usually points to the smallest useful fix." tone="dark" /%}
+
 ## Design layered release gates
 
 Start with deterministic checks such as schema validity, tool permissions, and known security fixtures. Add offline quality and regression evaluation. Then use shadow or canary traffic with monitoring and a rollback condition. A fluent answer cannot excuse a forbidden action, and a lower cost cannot excuse a task failure. Write the gate before viewing results so the standard does not move to fit an attractive candidate.
@@ -181,7 +174,7 @@ Review candidates before promotion, representative samples during normal operati
 
 ## Read disagreement as evidence
 
-The most useful evaluation examples are often the ones where two systems, two evaluators, or an evaluator and a person disagree. Preserve the complete comparison: same task, relevant context, candidate and baseline outputs, tool calls, citations, evaluator versions, and reviewer disposition. Then classify the disagreement as a genuine quality change, interpretation change, missing reference answer, tool or retrieval difference, evaluator noise, or a task that should not have been scored by the current rubric.
+The most useful evaluation examples are often the ones where {% highlight %}systems or reviewers disagree{% /highlight %}. Preserve the complete comparison: same task, relevant context, candidate and baseline outputs, tool calls, citations, evaluator versions, and reviewer disposition. Then classify the disagreement as a genuine quality change, interpretation change, missing reference answer, tool or retrieval difference, evaluator noise, or a task that should not have been scored by the current rubric.
 
 ### Separate the first divergence
 
@@ -201,7 +194,7 @@ A stable set protects comparability. Keep it unchanged long enough to detect mea
 
 ### Treat missing examples as a signal
 
-If a task class cannot be evaluated because the expected outcome is unclear, mark it as unscored and record why. Decide whether to clarify the contract, collect human labels, or route the workflow to review. An honest unknown is more useful than a false pass.
+If a task class cannot be evaluated because the expected outcome is unclear, mark it as unscored and record why. Decide whether to clarify the contract, collect human labels, or route the workflow to review. {% highlight %}An honest unknown is more useful than a false pass{% /highlight %}.
 
 ## Measure reliability around the task
 
@@ -225,7 +218,7 @@ Maintain a small panel of cases with human-reviewed dispositions. Run every eval
 
 ## Make safety and policy non-negotiable
 
-Some evaluation dimensions are not ordinary trade-offs. A system may tolerate a small latency increase to preserve a required approval, but it should not accept an unauthorized action because answer quality improved. Define hard gates for forbidden tools, cross-tenant access, secret exposure, disallowed content, and missing approvals. Test them deterministically where possible and review borderline cases manually.
+Some evaluation dimensions are not ordinary trade-offs. A system may tolerate a small latency increase to preserve a required approval, but it should not accept an unauthorized action because answer quality improved. Define {% highlight %}hard gates for non-negotiable boundaries{% /highlight %}: forbidden tools, cross-tenant access, secret exposure, disallowed content, and missing approvals. Test them deterministically where possible and review borderline cases manually.
 
 ### Evaluate refusal quality
 
@@ -233,7 +226,7 @@ A refusal is not automatically a success. It may be a correct boundary, an unnec
 
 ## Design canary evaluation
 
-Offline evaluation cannot capture every integration effect. During a canary, compare candidate and baseline by task class, not only by global average. Route the candidate to a narrow cohort, retain a clear baseline, and watch outcome quality, failure classes, cost, latency, policy events, and user repair behavior. Decide how long the canary must run or how many representative cases it needs before promotion. A canary without a stop condition is only an observation period.
+Offline evaluation cannot capture every integration effect. During a canary, compare candidate and baseline by task class, not only by global average. Route the candidate to a narrow cohort, retain a clear baseline, and watch outcome quality, failure classes, cost, latency, policy events, and user repair behavior. Decide how long the canary must run or how many representative cases it needs before promotion. {% highlight %}A canary without a stop condition is only an observation period{% /highlight %}.
 
 ### Monitor after promotion
 
@@ -245,7 +238,7 @@ A release record should state candidate and baseline, task distribution, dataset
 
 ## Choose the next action from the metric
 
-If task quality is low and retrieval recall is low, investigate ingestion or search before rewriting the answer prompt. If retrieval is strong but citations are wrong, inspect context assembly and output validation. If tool selection is correct but arguments are invalid, strengthen the schema or policy boundary. If scores are stable but users repair outputs, revisit the task definition and evaluator. The purpose of metrics is to narrow the next decision, not to create another dashboard surface.
+If task quality is low and retrieval recall is low, investigate ingestion or search before rewriting the answer prompt. If retrieval is strong but citations are wrong, inspect context assembly and output validation. If tool selection is correct but arguments are invalid, strengthen the schema or policy boundary. If scores are stable but users repair outputs, revisit the task definition and evaluator. The purpose of metrics is to {% highlight %}narrow the next decision{% /highlight %}, not to create another dashboard surface.
 
 ### Keep the operating loop small
 
@@ -265,7 +258,7 @@ The person who owns a metric should know what evidence to open and what action i
 
 ### Record unresolved uncertainty
 
-Some results will be inconclusive because the sample is small, labels disagree, or the task boundary is changing. Record the uncertainty and choose a bounded next measurement. Do not turn an inconclusive result into a confident promotion merely because the schedule is tight. A clear hold with an owner and evidence plan is a valid engineering decision.
+Some results will be inconclusive because the sample is small, labels disagree, or the task boundary is changing. Record the uncertainty and choose a bounded next measurement. Do not turn an inconclusive result into a confident promotion merely because the schedule is tight. {% highlight %}A clear hold with an owner and evidence plan{% /highlight %} is a valid engineering decision.
 
 ## Evaluate the evaluator’s cost
 
@@ -289,7 +282,7 @@ Schedule a review after incidents, evaluator changes, and material workflow shif
 
 After a release, check whether the team used the metric as intended. Did it lead to a prompt change, a retrieval repair, a tool policy, a canary pause, or a decision to accept the risk? If no action followed repeated movement, the metric may be poorly owned or too detached from the workflow. Refine the signal, change its cadence, or remove it so the evaluation system remains useful rather than decorative.
 
-The final standard is practical: evaluation should make a user-visible decision safer, clearer, or more reversible. If a score cannot help someone decide what to inspect or change next, it does not yet earn a place in the production scorecard.
+The final standard is practical: evaluation should make a user-visible decision {% highlight %}safer, clearer, or more reversible{% /highlight %}. If a score cannot help someone decide what to inspect or change next, it does not yet earn a place in the production scorecard.
 
 ## Turn the scorecard into a release room
 
@@ -313,7 +306,11 @@ This small test also exposes duplicate metrics. If task completion, answer quali
 
 ## Read one evaluation like a story
 
-A production evaluation should be readable from left to right. Start with the request, then follow the evidence, the model decision, the tool path, and the user-visible result. The first divergence is usually more valuable than the final score.
+A production evaluation should be readable from left to right. Start with the request, then follow the evidence, the model decision, the tool path, and the user-visible result. {% highlight %}The first divergence is usually more valuable than the final score{% /highlight %}.
+
+![A five-stage AI evaluation trace moving from request through evidence, decision, execution, and outcome, with the first divergence marked between evidence and decision.](/media/ai-evaluation-trace-story.png)
+
+*Read the run from left to right. Stop at the first meaningful change before diagnosing the final symptom.*
 
 | Moment | What to inspect | What it can explain |
 | --- | --- | --- |
@@ -354,11 +351,15 @@ Disagreement is not automatically noise. It can indicate an ambiguous rubric, a 
 
 A release gate should make bad trade-offs visible. Separate the checks into three layers:
 
+![An AI candidate moving through hard controls, quality evidence, and operating limits before reaching a controlled canary.](/media/ai-evaluation-release-gates.png)
+
+*The candidate advances only when each layer passes on its own; a strong average cannot open a failed gate.*
+
 1. **Hard controls:** schema validity, authorization, policy blocks, required citations, and safe argument validation.
 2. **Quality evidence:** task success, groundedness, tool correctness, refusal quality, and human review on difficult cases.
 3. **Operating limits:** latency, cost, retry volume, queue delay, and unknown provider outcomes.
 
-A candidate must pass the hard controls even when its quality score improves. It must show useful quality evidence without crossing operating limits. If a candidate fails one layer, record the reason and the owner instead of averaging the failure away.
+A candidate must pass the hard controls even when its quality score improves. It must show useful quality evidence without crossing operating limits. If a candidate fails one layer, {% highlight %}record the reason and owner instead of averaging the failure away{% /highlight %}.
 
 | Candidate result | Correct response |
 | --- | --- |
@@ -369,6 +370,8 @@ A candidate must pass the hard controls even when its quality score improves. It
 | Evaluator passes rise without outcome movement | Audit evaluator drift |
 
 ## A worked release decision
+
+{% editorial-panel eyebrow="Release room" title="The candidate wins on quality and still does not ship." body="A better average cannot hide a tool regression or an unsafe tail. Read the complete scorecard before choosing the rollout." tone="paper" /%}
 
 Suppose the baseline handles 1,000 support tasks. A candidate is tested on the same cases:
 
@@ -381,7 +384,7 @@ Suppose the baseline handles 1,000 support tasks. A candidate is tested on the s
 | p95 latency | 8.9s | 10.7s | Regression |
 | Cost per completed task | $0.018 | $0.021 | Trade-off |
 
-The candidate is not ready for broad promotion. The task outcome improved, but the tool and tail-latency regressions can create expensive or unsafe customer experiences. A sensible next step is a canary limited to read-only cases while the team investigates whether the model is proposing more complex actions or whether argument validation changed.
+The candidate is {% highlight %}not ready for broad promotion{% /highlight %}. The task outcome improved, but the tool and tail-latency regressions can create expensive or unsafe customer experiences. A sensible next step is a canary limited to read-only cases while the team investigates whether the model is proposing more complex actions or whether argument validation changed.
 
 Keep the decision record compact:
 
@@ -433,3 +436,5 @@ The best evaluation system is not the one with the most metrics. It is the one t
 {% faq-item question="What is the best AI evaluation metric?" answer="The best primary metric is the one that represents the user task. Add quality, reliability, cost, latency, and safety dimensions when they can change the release decision." /%}
 {% faq-item question="Can an LLM judge evaluate another LLM?" answer="It can provide useful evidence, but validate its agreement with human or task-specific checks, monitor evaluator drift, and keep the evaluator version attached to every result." /%}
 {% faq-item question="How many examples are needed?" answer="Enough to represent important cohorts and failure modes, with uncertainty reported honestly. A smaller, curated set is more useful than a larger set that excludes difficult cases." /%}
+{% faq-item question="How often should production evaluations run?" answer="Run deterministic and critical safety checks on every relevant release. Sample production outcomes continuously or on a regular operating cadence, and re-run stable calibration cases whenever the model, prompt, evaluator, tool set, or reference data changes." /%}
+{% faq-item question="How should quality be balanced against cost and latency?" answer="Keep quality, cost, and latency as separate dimensions with explicit limits. Promote only when the user outcome improves without crossing the agreed operating boundary; do not average a serious regression into a single composite score." /%}

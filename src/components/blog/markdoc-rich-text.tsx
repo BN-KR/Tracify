@@ -30,6 +30,26 @@ function BlogHighlight({ children }: { children?: React.ReactNode }) {
   return <mark className="blog-highlight">{children}</mark>;
 }
 
+function EditorialPanel({
+  eyebrow,
+  title,
+  body,
+  tone = "yellow",
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  tone?: "yellow" | "dark" | "paper";
+}) {
+  return (
+    <aside className={`blog-editorial-panel blog-editorial-panel--${tone}`} aria-label={`${eyebrow}: ${title}`}>
+      <p className="blog-editorial-panel__eyebrow">{eyebrow}</p>
+      <p className="blog-editorial-panel__title">{title}</p>
+      <p className="blog-editorial-panel__body">{body}</p>
+    </aside>
+  );
+}
+
 function TraceScenario({ title, prompt, outcome }: { title: string; prompt: string; outcome: string }) {
   return (
     <aside className="my-8 border border-black bg-[#f4d44d] p-5 text-black" aria-label={title}>
@@ -73,6 +93,7 @@ export function MarkdocRichText({ content }: Pick<BlogPost, "content">) {
           "trace-scenario": TraceScenario,
           "faq-item": FaqItem,
           highlight: BlogHighlight,
+          "editorial-panel": EditorialPanel,
           h2: BlogH2,
           h3: BlogH3,
           pre: BlogCodeBlock,

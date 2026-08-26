@@ -24,6 +24,15 @@ export const blogMarkdocConfig = {
     highlight: {
       render: "highlight",
     },
+    "editorial-panel": {
+      render: "editorial-panel",
+      attributes: {
+        eyebrow: { type: String, required: true },
+        title: { type: String, required: true },
+        body: { type: String, required: true },
+        tone: { type: String, default: "yellow", matches: ["yellow", "dark", "paper"] },
+      },
+    },
   },
 };
 

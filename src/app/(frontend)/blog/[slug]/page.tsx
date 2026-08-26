@@ -161,7 +161,7 @@ export default async function BlogPostPage({
                 alt={post.heroImage?.alt || post.title}
                 fill
                 sizes="(min-width: 1240px) 1240px, 100vw"
-                className="object-cover grayscale"
+                className="object-cover"
               />
             </div>
           ) : null}
@@ -175,7 +175,7 @@ export default async function BlogPostPage({
               <AuthorBio author={post.author} />
             </div>
 
-            {!isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} /> : null}
+            {!isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} currentSlug={post.slug} categories={post.categories} /> : null}
 
             {tags.length ? (
               <div className="mt-12 border-t border-black/20 pt-8">
@@ -187,7 +187,7 @@ export default async function BlogPostPage({
               </div>
             ) : null}
 
-            {isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} heading="Recommended posts" /> : null}
+            {isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} currentSlug={post.slug} categories={post.categories} heading="Recommended posts" /> : null}
           </div>
         </article>
       </div>

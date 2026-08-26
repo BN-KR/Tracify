@@ -414,6 +414,31 @@
   color: inherit !important;
 }
 
+/* Editorial panels keep their backgrounds; only selected text changes contrast. */
+.blog-editorial-panel--yellow::selection,
+.blog-editorial-panel--yellow *::selection {
+  background-color: #050505 !important;
+  color: #fff !important;
+}
+
+.blog-editorial-panel--yellow::-moz-selection,
+.blog-editorial-panel--yellow *::-moz-selection {
+  background-color: #050505 !important;
+  color: #fff !important;
+}
+
+.blog-editorial-panel--dark::selection,
+.blog-editorial-panel--dark *::selection {
+  background-color: #efece4 !important;
+  color: #050505 !important;
+}
+
+.blog-editorial-panel--dark::-moz-selection,
+.blog-editorial-panel--dark *::-moz-selection {
+  background-color: #efece4 !important;
+  color: #050505 !important;
+}
+
 @keyframes exploration-spin {
   from {
     transform: translate(-50%, -50%) rotate(0deg);
@@ -499,13 +524,19 @@
   .markdoc-blog-richtext blockquote { border-left: 4px solid #f4d44d; background: rgb(244 212 77 / 18%); padding: 0.9rem 1rem 0.9rem 1.15rem; }
   .markdoc-blog-richtext img { width: 100%; border: 1px solid #000; box-shadow: 10px 10px 0 rgb(0 0 0 / 10%); }
   .markdoc-blog-richtext a { color: #000; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
-  .markdoc-blog-richtext strong { position: relative; isolation: isolate; color: #000; font-weight: 700; background: transparent; padding-inline: 0.08em; }
-  .markdoc-blog-richtext strong::before,
-  .blog-highlight::before { position: absolute; z-index: -1; content: ""; inset-inline: -0.16em; bottom: 0.02em; height: 68%; transform: rotate(-1deg) skewX(-7deg); background: rgb(244 212 77 / 80%); }
-  .blog-highlight { position: relative; isolation: isolate; display: inline; color: #000; background: transparent; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding-inline: 0.16em; }
+  .markdoc-blog-richtext strong { color: #000; font-weight: 700; background: linear-gradient(transparent 48%, rgb(244 212 77 / 40%) 48%); box-decoration-break: clone; -webkit-box-decoration-break: clone; padding-inline: 0.08em; }
+  .blog-highlight { display: inline; color: #000; background: linear-gradient(transparent 48%, rgb(244 212 77 / 40%) 48%); box-decoration-break: clone; -webkit-box-decoration-break: clone; padding-inline: 0.12em; }
+  .blog-editorial-panel { margin-block: 3rem; border: 1px solid #000; padding: 1.25rem; box-shadow: 10px 10px 0 rgb(0 0 0 / 12%); }
+  .blog-editorial-panel p { margin: 0; }
+  .blog-editorial-panel__eyebrow { font-family: var(--font-geist-mono), monospace; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+  .blog-editorial-panel__title { margin-top: 2.5rem !important; max-width: 18ch; color: #000; font-family: var(--font-pixel), monospace; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 0.92; letter-spacing: -0.045em; text-wrap: balance; }
+  .blog-editorial-panel__body { margin-top: 1.25rem !important; max-width: 54ch; font-size: 0.92rem; line-height: 1.65; }
+  .blog-editorial-panel--yellow { background: #f4d44d; color: #000; }
+  .blog-editorial-panel--dark { background: #050505; color: rgb(255 255 255 / 72%); }
+  .blog-editorial-panel--dark .blog-editorial-panel__title { color: #f4d44d; }
+  .blog-editorial-panel--paper { background: rgb(255 255 255 / 62%); color: #000; }
   .blog-post__title { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.28em; row-gap: 0.08em; text-wrap: balance; }
   .blog-post__title { text-decoration: none; }
-  .blog-post__body > .blog-table-of-contents + .markdoc-blog-richtext > article > h3:first-of-type { text-decoration: line-through; text-decoration-color: #f4d44d; text-decoration-thickness: 0.18em; text-decoration-skip-ink: none; }
   .markdoc-blog-richtext code { background: #000; color: #fff; font-family: var(--font-geist-mono), monospace; padding: 0.125rem 0.3rem; }
   .markdoc-blog-richtext p, .markdoc-blog-richtext li { overflow-wrap: break-word; }
   .blog-table-scroll { width: 100%; max-width: 100%; margin-block: 2rem; overflow-x: auto; border: 1px solid #000; background: rgb(255 255 255 / 55%); }
