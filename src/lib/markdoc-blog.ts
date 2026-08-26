@@ -21,6 +21,9 @@ export const blogMarkdocConfig = {
         answer: { type: String, required: true },
       },
     },
+    highlight: {
+      render: "highlight",
+    },
   },
 };
 

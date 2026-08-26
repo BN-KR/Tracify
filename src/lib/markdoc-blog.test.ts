@@ -112,6 +112,17 @@ test("a post exposes validated metadata and a transformed Markdoc tree", () => {
 test("interactive blog tags declare their renderer targets", () => {
   assert.equal(blogMarkdocConfig.tags["trace-scenario"].render, "trace-scenario");
   assert.equal(blogMarkdocConfig.tags["faq-item"].render, "faq-item");
+  assert.equal(blogMarkdocConfig.tags.highlight.render, "highlight");
+});
+
+test("decorative title punctuation does not change heading anchors", () => {
+  withContentDirectory(
+    { "slash.mdoc": firstPost.replace("## Section heading", "## Section: Evidence / action") },
+    (directory) => {
+      const post = createBlogRepository(directory).getPublishedPost("first-post");
+      assert.equal(post?.headings[0]?.id, "section-evidence-action");
+    },
+  );
 });
 
 test("invalid frontmatter fails with the source filename", () => {

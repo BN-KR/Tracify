@@ -26,6 +26,10 @@ function BlogH3({ children }: { children?: React.ReactNode }) {
   return <h3 id={slugifyBlogHeading(textFromChildren(children))}>{children}</h3>;
 }
 
+function BlogHighlight({ children }: { children?: React.ReactNode }) {
+  return <mark className="blog-highlight">{children}</mark>;
+}
+
 function TraceScenario({ title, prompt, outcome }: { title: string; prompt: string; outcome: string }) {
   return (
     <aside className="my-8 border border-black bg-[#f4d44d] p-5 text-black" aria-label={title}>
@@ -68,6 +72,7 @@ export function MarkdocRichText({ content }: Pick<BlogPost, "content">) {
         components: {
           "trace-scenario": TraceScenario,
           "faq-item": FaqItem,
+          highlight: BlogHighlight,
           h2: BlogH2,
           h3: BlogH3,
           pre: BlogCodeBlock,

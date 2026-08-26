@@ -443,7 +443,8 @@
     color: rgb(0 0 0 / 72%);
     font-family: var(--font-geist-sans), sans-serif;
     font-size: 1rem;
-    line-height: 1.8;
+    line-height: 1.82;
+    max-width: 68ch;
   }
 
   .markdoc-blog-richtext p,
@@ -461,14 +462,14 @@
     font-family: var(--font-geist-mono), monospace;
     font-weight: 700;
     line-height: 1.25;
-    margin-bottom: 0.75rem;
-    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    margin-top: 3.5rem;
     scroll-margin-top: 5rem;
     text-wrap: balance;
   }
 
-  .markdoc-blog-richtext h2 { font-size: 1.75rem; }
-  .markdoc-blog-richtext h3 { font-size: 1.25rem; }
+  .markdoc-blog-richtext h2 { border-top: 1px solid rgb(0 0 0 / 20%); font-size: clamp(1.6rem, 3vw, 2.15rem); padding-top: 1.25rem; }
+  .markdoc-blog-richtext h3 { border-left: 3px solid #f4d44d; font-size: 1.25rem; padding-left: 0.8rem; }
   .markdoc-blog-richtext h4 { font-size: 1rem; }
   .blog-table-of-contents { margin-bottom: 3rem; border: 1px solid rgb(0 0 0 / 22%); background: rgb(255 255 255 / 42%); }
   .blog-table-of-contents { width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden; }
@@ -494,9 +495,13 @@
   .blog-table-of-contents__subitem a { display: block; padding-block: 0.16rem; color: rgb(0 0 0 / 58%); }
   .markdoc-blog-richtext ul { list-style: disc; padding-left: 1.5rem; }
   .markdoc-blog-richtext ol { list-style: decimal; padding-left: 1.5rem; }
-  .markdoc-blog-richtext blockquote { border-left: 4px solid #f4d44d; padding-left: 1rem; }
-  .markdoc-blog-richtext img { width: 100%; border: 1px solid #000; }
+  .markdoc-blog-richtext blockquote { border-left: 4px solid #f4d44d; background: rgb(244 212 77 / 18%); padding: 0.9rem 1rem 0.9rem 1.15rem; }
+  .markdoc-blog-richtext img { width: 100%; border: 1px solid #000; box-shadow: 10px 10px 0 rgb(0 0 0 / 10%); }
   .markdoc-blog-richtext a { color: #000; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .markdoc-blog-richtext strong { color: #000; font-weight: 700; background: linear-gradient(transparent 58%, rgb(244 212 77 / 68%) 58%); }
+  .blog-highlight { color: #000; background: #f4d44d; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding: 0.04em 0.18em; }
+  .blog-post__title { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.28em; row-gap: 0.08em; text-wrap: balance; }
+  .blog-title-slash { color: #f4d44d; text-shadow: 2px 2px 0 #000; font-family: var(--font-geist-mono), monospace; font-size: 0.72em; font-weight: 700; }
   .markdoc-blog-richtext code { background: #000; color: #fff; font-family: var(--font-geist-mono), monospace; padding: 0.125rem 0.3rem; }
   .markdoc-blog-richtext p, .markdoc-blog-richtext li { overflow-wrap: break-word; }
   .blog-table-scroll { width: 100%; max-width: 100%; margin-block: 2rem; overflow-x: auto; border: 1px solid #000; background: rgb(255 255 255 / 55%); }
@@ -530,7 +535,7 @@
   .blog-post--monitoring .markdoc-blog-richtext h2 { border-top: 1px solid rgb(0 0 0 / 24%); padding-top: 1.75rem; }
   .blog-post--monitoring .blog-heading-prompt { display: inline; margin-right: 0.55rem; color: #f4d44d; text-shadow: 1px 1px 0 #000; }
   .blog-post--monitoring .markdoc-blog-richtext h3 { border-left: 3px solid #f4d44d; padding-left: 0.8rem; }
-  .blog-post--monitoring .markdoc-blog-richtext strong { color: rgb(0 0 0 / 50%); font-weight: 600; }
+  .blog-post--monitoring .markdoc-blog-richtext strong { color: #000; font-weight: 700; }
   .blog-post--monitoring .markdoc-blog-richtext p strong,
   .blog-post--monitoring .markdoc-blog-richtext li strong { background: linear-gradient(transparent 56%, rgb(244 212 77 / 72%) 56%); color: #000; }
   .blog-post--monitoring .markdoc-blog-richtext blockquote { margin-block: 1.75rem; border: 1px solid rgb(0 0 0 / 18%); border-left: 4px solid #f4d44d; background: rgb(255 255 255 / 58%); padding: 0.95rem 1rem; color: rgb(0 0 0 / 78%); }

@@ -73,6 +73,18 @@ function absoluteUrl(value: string) {
   return value.startsWith("http") ? value : `https://www.tracify.tech${value}`;
 }
 
+function BlogDisplayTitle({ title }: { title: string }) {
+  const segments = title.split(/\s+(?:—|:)\s+/);
+  if (segments.length < 2) return <>{title}</>;
+  return (
+    <>
+      <span>{segments[0]}</span>
+      <span className="blog-title-slash" aria-hidden="true">/</span>
+      <span>{segments.slice(1).join(" / ")}</span>
+    </>
+  );
+}
+
 function jsonLd(post: BlogPost) {
   const canonical = post.seo?.canonicalUrl || `https://www.tracify.tech/blog/${post.slug}`;
   const image = post.heroImage?.og || post.heroImage?.src;
@@ -142,7 +154,7 @@ export default async function BlogPostPage({
               <span>{getReadingTime(post.plainText)} min read</span>
             </div>
 
-            <h1 className="mt-6 max-w-4xl font-pixel text-5xl leading-[0.9] tracking-[-0.045em] md:text-7xl">{post.title}</h1>
+            <h1 className="blog-post__title mt-6 max-w-4xl font-pixel text-5xl leading-[0.9] tracking-[-0.045em] md:text-7xl"><BlogDisplayTitle title={post.title} /></h1>
             <p className="mt-7 max-w-2xl text-base leading-7 text-black/58">{post.excerpt}</p>
 
             {categories.length ? (
