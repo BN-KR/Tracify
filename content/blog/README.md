@@ -4,10 +4,10 @@ Blog posts are Markdoc files (`.mdoc`) in this directory. The filename is for au
 
 To publish a post:
 
-1. Add or edit its `.mdoc` file.
-2. Put referenced images in `public/media` and use paths such as `/media/example.jpg`.
+1. Copy `.agents/skills/tracify-blog-tool/assets/blog-post.mdoc`, replace every placeholder, and keep the post a draft until publication is explicitly requested.
+2. Put referenced images in `public/media` and use paths such as `/media/example.jpg`. Use a unique, article-specific hero and article-specific teaching visuals; never reuse another post's image as a shortcut.
 3. Set `draft: false` and provide an ISO `publishedAt` timestamp.
-4. Run `npm run test:content`, `npm run lint`, and `npm run build` before merging.
+4. Run `npm run validate:blog -- <slug>`, `npm run test:content`, `npm run lint`, and `npm run build` before merging.
 
 Required frontmatter fields are `title`, `slug`, `excerpt`, `publishedAt`, and `author`. `categories`, `tags`, and `relatedPosts` are string arrays. Related posts use slugs. `heroImage` accepts `src`, `alt`, and optional `card`, `hero`, `og`, and `caption` variants. SEO overrides live under `seo`.
 
@@ -15,20 +15,22 @@ Markdoc supports CommonMark plus Markdoc tags and annotations. The application v
 
 ### Non-negotiable length requirement
 
-Every new or materially rewritten published post must be **3,000–10,000 body words**, excluding frontmatter. This is a hard content-contract gate. Posts around 300 or 1,000 words are incomplete and must not be published. Reach the minimum with original, topic-specific teaching: a clear operating model, evidence, worked examples, failure modes, trade-offs, security boundaries, rollout guidance, FAQs, and a practical next action. Never reach the count through repeated paragraphs, keyword stuffing, or generic filler. Run the content validator and confirm the exact count before opening a PR.
+Every new or materially rewritten published post must be **3,000–10,000 body words**, excluding frontmatter. This is a hard content-contract gate. Posts around 300 or 1,000 words are incomplete and must not be published. Reach the minimum with original, topic-specific teaching: a clear operating model, evidence, worked examples, failure modes, trade-offs, security boundaries, rollout guidance, FAQs, and a practical next action. Never reach the count through repeated paragraphs, keyword stuffing, or generic filler. Run `npm run validate:blog -- <slug>` and confirm the exact count before opening a PR.
 
 ## Mandatory Tracify editorial framework
 
 Every published post follows the same editorial shape. This is a product requirement for the blog, not an optional style preference:
 
-1. **Promise:** a specific title, useful excerpt, author/date metadata, and a meaningful hero image.
+1. **Promise:** a specific title, useful excerpt, author/date metadata, and a meaningful hero image created for that article. Do not share hero assets between posts or pass off a recolor as a new composition; card, hero, and OG crops may derive from the same article-specific source.
 2. **Orientation:** open with the reader’s production situation, the decision they need to make, and the boundary of the article.
 3. **Navigation:** the page automatically renders a collapsible table of contents from the article’s H2/H3 headings.
 4. **Operating model:** name the article’s framework or decision model and explain its parts before diving into implementation.
 5. **Evidence:** include at least one concrete example, code block, table, formula, trace, screenshot, or diagram where it improves understanding.
-6. **Interaction:** include one deterministic, accessible Markdoc interaction—normally a trace scenario, evaluation explorer, calculator, checklist, or focused decision widget.
-7. **Trade-offs:** state limitations, failure modes, security boundaries, and what the recommendation does not solve.
-8. **Action:** close with a practical checklist, next step, or release decision and contextual links to the next Tracify guides.
+6. **Composition:** use natural two-part title structures for the shared slash treatment and reserve the centralized `highlight` tag for important decisions, risks, and outcomes. Keep highlights sparse and readable.
+7. **Interaction:** include one deterministic, accessible Markdoc interaction—normally a trace scenario, evaluation explorer, calculator, checklist, or focused decision widget.
+8. **Trade-offs:** state limitations, failure modes, security boundaries, and what the recommendation does not solve.
+9. **Action:** close with a practical checklist, next step, or release decision and contextual links to the next Tracify guides.
+10. **FAQ and recommendations:** finish with exactly one late FAQ containing exactly five article-specific questions. Never add an in-body “Recommended next reads” block; the shared related-post component resolves curated, category, and recency fallbacks dynamically.
 
 Use this article rhythm for each major section:
 
@@ -55,12 +57,12 @@ For a practical library, lead with a small high-value set before the long collec
 
 Agents editing blog content must follow this sequence and leave evidence for each stage:
 
-1. **Understand:** read `AGENTS.md`, the writing skill and its three references; inspect the current post, product source, published slugs, and media; state the reader job, outcome, boundary, archetype, and interaction.
-2. **Build:** preserve frontmatter and draft state; write Markdoc with layered H2/H3/H4 headings, useful evidence, tested or honestly labeled code, meaningful in-article images, semantic tables, accessible accordion FAQs placed after the main teaching, decision notes, restrained emphasis, and one deterministic interaction.
-3. **Connect:** add 4–7 descriptive contextual links per 1,000 words for long-form posts, link only to existing published posts, finish with a checklist or next action, and include three eligible recommended posts.
+1. **Understand:** read `AGENTS.md`, the writing skill and its four references; inspect the current post, product source, published slugs, and media; state the reader job, outcome, boundary, archetype, and interaction.
+2. **Build:** preserve frontmatter and draft state; write Markdoc with layered H2/H3/H4 headings, useful evidence, tested or honestly labeled code, a unique article-specific hero, at least two unique instructional visuals distributed across both halves, semantic tables, five accessible late FAQ items, two labeled notes, restrained highlights, at least two instructional panels with different tones, and one deterministic interaction. Audit published image references before selecting filenames or generating art.
+3. **Connect:** add at least two descriptive contextual links to distinct existing published posts and finish with a checklist or next action. Keep recommendations in frontmatter; never write an in-body recommendation dump.
 4. **Inspect:** render the entire page on desktop and mobile. Check the ToC, heading anchors, interactions, tables, code, images, links, recommendation cards, focus states, word wrapping, and page-level overflow.
-5. **Release:** run `npm run test:content`, `npm run lint`, `npm run build`, and `git diff --check`; review the exact diff for scope, drafts, fabricated claims, dead links, and untested examples before creating or merging the PR.
+5. **Release:** run `npm run validate:blog -- <slug>`, `npm run test:content`, `npm run lint`, `npm run build`, and `git diff --check`; review the exact diff for scope, drafts, fabricated claims, dead links, and untested examples before creating or merging the PR.
 
 If an item cannot be verified, the post is not finished. Explain the blocker or fix it before shipping.
 
-New posts must consider one purposeful interactive learning element at the point where it helps most: a trace/evaluation demo, an editable code sandbox, or a focused calculator, checklist, explorer, or scenario widget. Static prose is correct when reader-controlled state adds no value. Do not use MDX or raw JSX. Reuse an approved Markdoc tag, or add a validated tag in the centralized Markdoc configuration and map it to an accessible component in `src/components/blog/markdoc-rich-text.tsx`. Interactive examples must be deterministic and local; never execute arbitrary code on the server or access secrets or production data.
+New posts must include exactly one purposeful interactive learning element at the point where it helps most. Use the approved trace scenario now; add a new centralized interaction type only when the topic genuinely requires it and its renderer, accessibility, and validation are implemented first. Do not use MDX or raw JSX. Interactive examples must be deterministic and local; never execute arbitrary code on the server or access secrets or production data.

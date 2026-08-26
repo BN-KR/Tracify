@@ -14,16 +14,35 @@ function textFromChildren(value: React.ReactNode): string {
 }
 
 function BlogH2({ children }: { children?: React.ReactNode }) {
-  return (
-    <h2 id={slugifyBlogHeading(textFromChildren(children))}>
-      <span className="blog-heading-prompt" aria-hidden="true">/</span>
-      {children}
-    </h2>
-  );
+  return <h2 id={slugifyBlogHeading(textFromChildren(children))}>{children}</h2>;
 }
 
 function BlogH3({ children }: { children?: React.ReactNode }) {
   return <h3 id={slugifyBlogHeading(textFromChildren(children))}>{children}</h3>;
+}
+
+function BlogHighlight({ children }: { children?: React.ReactNode }) {
+  return <mark className="blog-highlight">{children}</mark>;
+}
+
+function EditorialPanel({
+  eyebrow,
+  title,
+  body,
+  tone = "yellow",
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  tone?: "yellow" | "dark" | "paper";
+}) {
+  return (
+    <aside className={`blog-editorial-panel blog-editorial-panel--${tone}`} aria-label={`${eyebrow}: ${title}`}>
+      <p className="blog-editorial-panel__eyebrow">{eyebrow}</p>
+      <p className="blog-editorial-panel__title">{title}</p>
+      <p className="blog-editorial-panel__body">{body}</p>
+    </aside>
+  );
 }
 
 function TraceScenario({ title, prompt, outcome }: { title: string; prompt: string; outcome: string }) {
@@ -68,6 +87,8 @@ export function MarkdocRichText({ content }: Pick<BlogPost, "content">) {
         components: {
           "trace-scenario": TraceScenario,
           "faq-item": FaqItem,
+          highlight: BlogHighlight,
+          "editorial-panel": EditorialPanel,
           h2: BlogH2,
           h3: BlogH3,
           pre: BlogCodeBlock,

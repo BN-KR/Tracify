@@ -18,13 +18,14 @@ Use this prompt when refining any of the other 26 published posts:
 >
 > Hard length requirement: the final body must be 3,000–10,000 words, excluding frontmatter. Do not submit a shorter draft or call a partial expansion complete. Verify the count with the repository content test.
 >
-> Before editing, read `AGENTS.md`, `.agents/skills/writing-tracify-content/SKILL.md`, its required references, `docs/blog-canonical-format-playbook.md`, the complete target article, the complete AI Agent Monitoring reference article, the shared Markdoc renderer and blog styles, the published-slug list, and the relevant Tracify product source. State the reader, job, promised outcome, article boundary, archetype, evidence, and one interaction before you write.
+> Before editing, read `AGENTS.md`, `.agents/skills/tracify-blog-tool/SKILL.md`, its required references, `docs/blog-canonical-format-playbook.md`, the complete target article, the complete AI Agent Monitoring reference article, the shared Markdoc renderer and blog styles, the published-slug list, and the relevant Tracify product source. State the reader, job, promised outcome, article boundary, archetype, evidence, and one interaction before you write.
 >
 > Preserve the target article’s frontmatter and draft/publication state. Keep the article in CommonMark/Markdoc. Do not add raw JSX, MDX, invented benchmarks, invented integrations, speculative roadmap claims, or unverified runnable code.
 >
 > Rebuild the article around a clear operating model, using the monitoring article’s rhythm: orient the reader in the opening; provide an “At a glance” section; name a topic-specific framework or decision path; organize the body into numbered H2 phases with nested H3 decision points; and make every major section move from point to evidence, example, trade-off, and reader action. Keep the framework narrower than the whole topic and state what it does not solve.
 >
 > Add concrete evidence where it teaches the subject: a small tested or clearly illustrative code block, semantic table, formula, trace example, diagram, decision rule, or checklist. Examples must expose the field or condition that changes the decision. Explain failure modes, security boundaries, ownership, cost, latency, rollout, and reversible next actions when relevant to the topic.
+> For titles with a natural two-part structure, the shared renderer supplies a decorative slash separator. Keep the source title semantic and unchanged. Use the centralized `highlight` Markdoc tag sparingly for a decision, risk, or outcome that deserves visual priority; do not use raw HTML or style individual posts with one-off classes.
 >
 > Add exactly one purposeful, deterministic, accessible interaction at the point of need. Prefer an existing centralized Markdoc tag such as `trace-scenario` or `faq-item`; do not create one-off parsing, arbitrary code execution, network-dependent behavior, secrets, or production data access. If interaction would not improve learning, keep the article static and explain that choice in the review notes.
 >
@@ -70,7 +71,7 @@ The manager should apply this prompt to the remaining posts in small batches, st
 
 ## Mandatory workflow for every blog or documentation change
 
-1. Read `AGENTS.md`, `.agents/skills/writing-tracify-content/SKILL.md`, this playbook, and all required references before touching content or documentation.
+1. Read `AGENTS.md`, `.agents/skills/tracify-blog-tool/SKILL.md`, this playbook, and all required references before touching content or documentation.
 2. Inspect the canonical monitoring article, shared blog renderer/CSS, current media inventory, published slugs, and the target article.
 3. Write down the reader, job, outcome, boundary, article archetype, evidence, and interaction before editing.
 4. Work from a clean `codex/...` branch based on `origin/main`.

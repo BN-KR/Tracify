@@ -2,6 +2,12 @@
 
 # Blog corpus cleanup — 2026-08-26
 
+# AI evaluation metrics editorial rebuild — 2026-08-26
+
+- [completed] Replace repetitive H3/paragraph cadence with visual decision-led modules.
+- [completed] Add worked release comparison, three-layer gates, and reader checklist.
+- [completed] Verify localhost response, Markdoc output, tests, build, and diff hygiene.
+
 - [completed] Audit every published post for visuals, code, callouts, emphasis, FAQ placement, and word count.
 - [completed] Remove repeated generated prose from the remaining articles.
 - [completed] Run content tests, diff hygiene, and production build.
@@ -1039,3 +1045,28 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 2. [completed] Expand every published article below 4,000 body words with operational, evidence-led sections while preserving frontmatter and links.
 3. [completed] Verify the full 35-post count audit, framework/link/Markdoc tests, build, and diff hygiene.
 4. [in_progress] Create branch/commit, open PR, inspect hosted checks, and merge after release verification.
+
+# AI evaluation metrics editorial and UX rebuild — 2026-08-26
+
+1. [completed] Rebuild the article hierarchy, teaching sequence, callouts, FAQ, and ending while preserving route, metadata, anchors, publication state, and the 3,000–10,000 contract.
+2. [completed] Centralize the editorial panel renderer and dynamic related-post selector, with tests for curated order, category/recency fallback, self/draft/missing exclusion, and deduplication.
+3. [completed] Add two project-bound lower-half visuals plus a unique article-specific hero, card-specific selection contrast, and deliberate highlight pacing; verify desktop and 390px rendering with no page overflow.
+4. [completed] Pass 20 content tests, 3 related-post tests, focused ESLint, media/route HTTP checks, and `git diff --check`; record the unrelated dashboard TypeScript blocker encountered after successful production compilation.
+5. [completed] Update the future-agent contract so hero and teaching visuals must be compositionally unique to each article, with no cross-post reuse or recolor-only variants.
+6. [pending] Keep the pass local and uncommitted until visual approval, then force-add the ignored media assets and create the requested focused PR.
+
+# Reusable Tracify blog-quality skill — 2026-08-26
+
+1. [completed] Keep one canonical automatically triggered skill and define `ai-evaluation-metrics` as a quality benchmark rather than a copyable article template.
+2. [completed] Add a reusable editorial blueprint and new-post scaffold with visual pacing requirements spanning the opening, midpoint, lower half, action ending, and five-item FAQ.
+3. [completed] Implement a targeted validator with clear issue codes and a regression test proving that the benchmark passes while an intentionally poor post fails.
+4. [completed] Wire the gate into package scripts, `AGENTS.md`, the writing skill, skill UI metadata, and the publishing README.
+5. [completed] Run the strict article gate, 22 content tests, focused lint, skill validation, build compilation/typecheck, and diff checks; preserve unrelated known blockers as separate evidence.
+6. [pending] Force-add ignored `.agents` additions and media assets, then include them in the focused article/renderer/skill PR after approval.
+
+# Rename project blog skill — 2026-08-26
+
+1. [completed] Rename the folder, skill frontmatter ID, heading, UI display name, and default `$skill` prompt to `tracify-blog-tool`.
+2. [completed] Redirect all active repository instructions and validation commands to `.agents/skills/tracify-blog-tool/`.
+3. [completed] Validate the renamed skill package, parse its UI metadata, and rerun its strict article gate and 22-test content suite.
+4. [pending] Force-add the renamed skill directory when preparing the focused PR because the local repository exclude rule hides new `.agents` paths.

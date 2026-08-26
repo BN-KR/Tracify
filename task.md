@@ -2,6 +2,12 @@
 
 # 2026-08-26 — Blog corpus cleanup
 
+# 2026-08-26 — AI evaluation metrics editorial rebuild
+
+- [completed] Rebuild the stale second half of the evaluation metrics article with varied editorial modules.
+- [completed] Verify slash title and highlight rendering on localhost.
+- [completed] Run focused tests, build, and diff hygiene.
+
 - [completed] Remove generated context-template language from the published corpus.
 - [completed] Verify word-count and canonical presentation requirements across all posts.
 - [completed] Run focused content suites and production build.
@@ -1022,7 +1028,7 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 # Tracify content-authoring skill — 2026-08-13
 
 - [x] Baseline-test existing guidance against content quality and storage-routing scenarios.
-- [x] Create the project-local `writing-tracify-content` skill and UI metadata.
+- [x] Create the project-local skill now named `tracify-blog-tool` and its UI metadata.
 - [x] Document blog, internal-doc, public-doc, dashboard-doc, and media storage boundaries.
 - [x] Add evidence-led blog/docs quality criteria and reusable source templates.
 - [x] Validate skill structure, placeholder hygiene, length, and the Markdoc template contract.
@@ -1282,3 +1288,26 @@ Follow-ups still open:
 ## 2026-08-26 canonical blog refinement prompt
 
 - [x] Add a reusable content-manager prompt to `docs/blog-canonical-format-playbook.md`, based on the refined AI Agent Monitoring article, for the remaining 26 published posts.
+
+# AI evaluation metrics editorial and UX rebuild — 2026-08-26
+
+1. [completed] Recompose the full article, remove the mid-body recommendation block, keep one late FAQ with five questions, and distribute instructional modules through the lower half.
+2. [completed] Fix panel text-selection contrast without changing either panel, add stable 40% marker highlights, and keep the decorative slash beside H2 headings only.
+3. [completed] Add and verify two lower-half editorial visuals, a unique full-color article hero, dynamic curated/category/recency related posts, desktop/mobile layout, media responses, content contracts, focused lint, and diff hygiene.
+4. [completed] Make unique article-specific heroes and teaching visuals mandatory for future agents in the writing skill and publishing README; forbid cross-post reuse and superficial recolors.
+5. [pending] After localhost approval, force-add the ignored PNGs, create the focused commit and PR, and merge only after hosted checks pass; report the unrelated dashboard build type error separately.
+
+# Reusable Tracify blog-quality skill — 2026-08-26
+
+1. [completed] Codify the approved `ai-evaluation-metrics` composition as a reusable quality blueprint inside the existing mandatory writing skill.
+2. [completed] Replace the minimal new-post asset with a full editorial scaffold and update `AGENTS.md`, the skill metadata, package scripts, and publishing documentation.
+3. [completed] Add a per-post validator and negative fixture covering length, unique media, lower-half visual pacing, highlights, panels, tables, code, notes, interaction, links, practical ending, five-item FAQ, and recommendation-block exclusion.
+4. [completed] Pass the targeted article gate, two validator tests, 22 content tests, focused blog lint, the skill-package validator, and diff hygiene; record unrelated full-lint and dashboard build blockers.
+5. [pending] Force-add the locally ignored skill files and article PNGs when preparing the already-planned focused PR.
+
+# Rename project blog skill — 2026-08-26
+
+1. [completed] Rename the project-local skill and folder to `tracify-blog-tool` while leaving the global `writing-tracify-content` skill untouched.
+2. [completed] Update the UI label to “Tracify Blog Tool” and the explicit invocation to `$tracify-blog-tool`.
+3. [completed] Update `AGENTS.md`, package scripts, publishing documentation, the canonical playbook, and maintained path references.
+4. [completed] Pass skill validation, UI-YAML parsing, targeted blog validation, two validator tests, all 22 content tests, and diff hygiene after the rename.

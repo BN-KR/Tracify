@@ -1,16 +1,25 @@
 import { getPublishedPosts } from "@/lib/markdoc-blog";
+import { selectRelatedPosts } from "@/lib/related-posts";
 import Image from "next/image";
 import Link from "next/link";
 
 export function RelatedPosts({
   posts,
+  currentSlug,
+  categories,
   heading = "Related posts",
 }: {
   posts?: string[] | null;
+  currentSlug: string;
+  categories: string[];
   heading?: string;
 }) {
-  const slugs = new Set(posts ?? []);
-  const related = getPublishedPosts().filter((post) => slugs.has(post.slug)).slice(0, 3);
+  const related = selectRelatedPosts({
+    posts: getPublishedPosts(),
+    preferredSlugs: posts,
+    currentSlug,
+    categories,
+  });
   if (!related.length) return null;
 
   return (
