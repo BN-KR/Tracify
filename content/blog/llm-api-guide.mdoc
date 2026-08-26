@@ -64,6 +64,36 @@ Capture queue time, provider time, retry count, input and output token usage, mo
 - Test provider errors, timeouts, empty output, and malformed output.
 
 > **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+
+## Make the API boundary observable
+
+An LLM request should be treated as a bounded dependency call, not as an opaque function that returns text. Record the parent task, provider, model, request class, prompt version, timeout budget, retry attempt, input and output token counts, validation result, and terminal outcome. Keep sensitive content redacted or referenced, but preserve enough structure to answer whether a slow run waited in your queue, waited at the provider, streamed partial output, or spent time validating the response.
+
+### Separate transport success from task success
+
+An HTTP success only tells you that the provider accepted and returned a request. It does not prove that the output is complete, grounded, policy-compliant, or useful to the calling workflow. Give each request at least three decisions: did transport succeed, did the response satisfy the output contract, and did the parent task reach its intended outcome? These states should be visible independently in traces and metrics.
+
+For streaming responses, record the time to first token separately from total completion time. A fast first token can still hide a long tail or a truncated stream. Treat disconnects, empty final buffers, invalid tool arguments, and provider-side refusals as distinct outcomes. The application should not mark a task complete merely because some tokens arrived.
+
+### Choose retry behavior by failure class
+
+Retry a rate limit or transient provider failure only when the request remains within its total time and spend budget. Do not retry an invalid request, a policy refusal, a permanently unsupported model, or a response that failed semantic validation without changing the input or routing decision. A retry budget belongs to the parent task, not just to an individual function call, otherwise several layers can each retry and multiply the load.
+
+When a request may have caused a side effect through a tool call, reconcile before retrying. Preserve an attempt identifier and an idempotency key where the provider or downstream system supports one. If the outcome is unknown, expose an unknown or awaiting-reconciliation state rather than guessing. An honest unknown state is safer than a duplicated email, payment, or record update.
+
+### Design fallbacks as separate products
+
+A fallback model or provider changes more than availability. It may change context limits, tool support, latency, refusal behavior, cost, and answer quality. Define which workflows may use it, which permissions remain valid, what evidence must be retained, and when the fallback should stop and route to a person. Evaluate the fallback on the same representative cases as the primary path, including empty, ambiguous, adversarial, and high-consequence inputs.
+
+Do not hide fallback traffic inside one success-rate number. Tag the provider and route in every run, compare quality and correction work by route, and set a rollback condition for the fallback itself. A provider outage may justify a degraded answer for a low-risk question while requiring a visible hold for a financial or security-sensitive task.
+
+### Operate the incident path
+
+When LLM API behavior changes, begin with the affected workflow and release rather than changing prompts immediately. Compare a failed trace with a healthy trace from the same task class. Check provider status, queue time, model identifier, request size, validation result, retry count, and whether a fallback was selected. Then choose the smallest safe response: reduce concurrency, pause a cohort, route read-only work elsewhere, increase a bounded timeout, or restore the previous configuration.
+
+The runbook should state how to identify requests still in flight, how to reconcile unknown side effects, how to stop retries, and how to communicate degraded behavior to users. After recovery, preserve one representative failure, classify the mechanism, and add a regression case or operational control. An incident is not closed when the provider is healthy; it is closed when the application can detect and handle the same failure more safely next time.
+
+> **Runbook rule:** Never describe an LLM API incident as “the model was bad” without identifying the request boundary, failure class, affected cohort, safe containment action, and evidence that confirms recovery.
 ## Recommended next reads
 
 Continue with [LLM latency optimization](/blog/llm-latency-optimization), [reducing LLM costs](/blog/reduce-llm-costs-without-hurting-quality), and [LLM observability metrics](/blog/llm-observability-metrics-that-matter).

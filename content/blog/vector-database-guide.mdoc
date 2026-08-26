@@ -59,6 +59,28 @@ Include newly added documents, deleted documents, conflicting versions, empty re
 - Compare retrieval changes on the same evaluation set.
 
 > **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+
+## Treat the vector index as a serving system
+
+A vector database is not a magic memory layer. It is a serving system with an ingestion contract, an indexing strategy, a query path, access rules, freshness expectations, and a recovery plan. Choose it because semantic similarity is useful for the task, then measure whether the returned evidence improves the user-visible result. Exact identifiers, filters, joins, and strict relationships may be better handled by SQL, keyword search, or a hybrid path.
+
+### Preserve the fields similarity cannot know
+
+An embedding can place related text near each other, but it does not understand tenant ownership, document validity, effective date, deletion, or authorization unless the application supplies those constraints. Store stable document identifiers, chunk position, source path, version, timestamps, and access scope as metadata. Apply filters deliberately and test the combination of semantic ranking and metadata filtering; a relevant but unauthorized result is still wrong.
+
+### Evaluate index quality with queries that matter
+
+Build a query set from real task types rather than generic similarity examples. Include paraphrases, short queries, long queries, entity names, dates, negative questions, multilingual cases if relevant, and questions whose answer is absent. Measure recall at the chosen candidate depth, supported-answer rate after generation, citation correctness, empty-result precision, latency percentiles, and index cost. Inspect failures by mechanism: poor chunk boundaries, stale ingestion, vocabulary mismatch, filter error, reranker drift, or missing source data.
+
+### Plan ingestion and freshness
+
+Ingestion should be idempotent and version-aware. A document update must replace or supersede the correct chunks, while deletion must remove them from every serving path and cache. Record when source data was observed, transformed, embedded, indexed, and made queryable. Expose stale or partially indexed states to the calling workflow. A chatbot that answers from yesterday’s policy should say so or refuse, depending on the consequence of the decision.
+
+### Make migrations reversible
+
+Build a candidate index alongside the current index and compare both on the same labeled queries. Do not promote because nearest-neighbor scores increased; inspect user outcomes, citations, access controls, cost, and tail latency. Keep index schema and embedding-model versions visible in traces. If the candidate is rolled back, preserve the mapping from returned chunks to source versions so an operator can explain which evidence the user saw during the transition.
+
+> **Index rule:** Similarity ranks candidates; application policy decides which candidates are eligible, current, and safe to show.
 ## Recommended next reads
 
 Continue with [RAG evaluation](/blog/rag-evaluation-guide), [how to build a RAG chatbot](/blog/rag-chatbot), and [LLM tracing](/blog/llm-tracing-explained).
