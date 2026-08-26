@@ -281,3 +281,25 @@ The release reviewer should sign off on the boundary, not merely the implementat
 {% faq-item question="Can a system prompt secure an AI agent?" answer="No. Treat the prompt as one layer of guidance. Enforce permissions, argument validation, data boundaries, approvals, and audit evidence in code and infrastructure." /%}
 {% faq-item question="Should every tool call require approval?" answer="No. Use risk-based controls. Low-risk reads can be automated; external communication and irreversible writes usually need stronger validation or human approval." /%}
 {% faq-item question="What should a security trace contain?" answer="Record the workflow, actor, policy version, proposed action, validated arguments, approval decision, execution result, and redacted evidence needed to investigate the decision." /%}
+
+## Build the threat model around actions
+
+AI agent security starts with what the system can cause, not with a generic list of model risks. Inventory data, identities, tools, external systems, durable memory, and irreversible actions. For each asset, identify who may request access, what the model can propose, what the application must authorize, and how an operator can contain misuse. This produces controls tied to consequences instead of a checklist detached from the workflow.
+
+### Separate instruction from authority
+
+User input, retrieved documents, tool responses, browser content, and memory can all contain instructions. Treat them as untrusted data. The model may summarize or propose, but application policy decides which resources and actions are allowed. Validate tenant, actor, resource, arguments, and current state at the tool boundary. A prompt that says “ignore previous instructions” must not change the authorization path.
+
+### Control the confused deputy
+
+An agent often has more access than the user who initiated a task. Propagate identity and tenant context to every retrieval and tool call. Use least-privilege credentials, narrow resource scopes, allowlists for destinations, and explicit approval for high-impact actions. Test a user who asks for another tenant’s record, a document that contains malicious instructions, a revoked session, and a tool argument that changes the target after approval.
+
+### Protect memory and browser paths
+
+Memory should have a purpose, owner, retention rule, deletion path, and access policy. Do not write untrusted claims into durable memory without validation. Browser agents need visible origin checks, destination restrictions, confirmation for submissions, and protection against page content impersonating system instructions. Capture enough evidence to investigate without storing secrets or unnecessary personal data.
+
+### Prepare containment and evidence
+
+Security controls are incomplete without a response path. Log policy decisions, denied actions, credential scope, tool arguments after redaction, approval state, and resulting changes. Define how to revoke a token, pause a workflow, quarantine an input source, invalidate memory, and identify affected runs. Rehearse the path before launch and keep one representative adversarial case in the regression set.
+
+> **Security rule:** The model can recommend an action, but only the application can authorize it at the current side-effect boundary.
