@@ -562,13 +562,11 @@
   .blog-faq-item[open] .blog-faq-item__icon { background: #f4d44d; }
   .blog-faq-item__answer { border-top: 1px solid rgb(0 0 0 / 14%); padding: 0.1rem 1.1rem 1rem; color: rgb(0 0 0 / 68%); font-size: 0.92rem; }
   .blog-faq-item__answer p { margin-bottom: 0; }
-  .blog-heading-prompt { display: none; }
   .blog-post--monitoring { background: #e7e3d8; }
   .blog-post--monitoring > header { background: #f8f5ed; }
   .blog-post--monitoring .blog-post__body { background-color: #f8f5ed; background-image: linear-gradient(rgb(0 0 0 / 2%) 1px, transparent 1px), linear-gradient(90deg, rgb(0 0 0 / 2%) 1px, transparent 1px); background-size: 32px 32px; }
   .blog-post--monitoring .markdoc-blog-richtext { padding: 0.5rem 0 1rem; }
   .blog-post--monitoring .markdoc-blog-richtext h2 { border-top: 1px solid rgb(0 0 0 / 24%); padding-top: 1.75rem; }
-  .blog-post--monitoring .blog-heading-prompt { display: inline; margin-right: 0.55rem; color: #f4d44d; text-shadow: 1px 1px 0 #000; }
   .blog-post--monitoring .markdoc-blog-richtext h3 { border-left: 3px solid #f4d44d; padding-left: 0.8rem; }
   .blog-post--monitoring .markdoc-blog-richtext strong { color: #000; font-weight: 700; }
   .blog-post--monitoring .markdoc-blog-richtext p strong,

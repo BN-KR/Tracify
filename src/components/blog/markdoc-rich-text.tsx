@@ -14,12 +14,7 @@ function textFromChildren(value: React.ReactNode): string {
 }
 
 function BlogH2({ children }: { children?: React.ReactNode }) {
-  return (
-    <h2 id={slugifyBlogHeading(textFromChildren(children))}>
-      <span className="blog-heading-prompt" aria-hidden="true">/</span>
-      {children}
-    </h2>
-  );
+  return <h2 id={slugifyBlogHeading(textFromChildren(children))}>{children}</h2>;
 }
 
 function BlogH3({ children }: { children?: React.ReactNode }) {
