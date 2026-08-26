@@ -1,0 +1,59 @@
+<svg viewBox="0 0 1600 1000" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="tcrLifecycleTitle">
+  <title id="tcrLifecycleTitle">A vertical lifecycle diagram of one tool call: model proposes a call, the application validates arguments against a schema, the tool executes under a timeout, the result is classified, and the loop either returns, retries with backoff, or escalates, with a failure label attached to each transition</title>
+  <rect width="1600" height="1000" fill="#ffffff"/>
+  <rect x="0" y="0" width="1600" height="1000" fill="none" stroke="#000000" stroke-width="4"/>
+
+  <text x="90" y="100" font-family="monospace" font-size="26" letter-spacing="4" fill="#000000">TOOL-CALL LIFECYCLE / FAILURE INJECTION POINTS</text>
+
+  <!-- Column layout: stage boxes on the left, failure notes on the right -->
+  <g font-family="monospace" font-size="20">
+    <!-- 1 -->
+    <rect x="120" y="150" width="520" height="90" fill="#000000"/>
+    <text x="150" y="203" fill="#ffffff">1. MODEL PROPOSES A CALL</text>
+    <rect x="700" y="150" width="780" height="90" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+    <text x="730" y="190" fill="#000000" font-size="17">Fails as: hallucinated tool name, wrong</text>
+    <text x="730" y="215" fill="#000000" font-size="17">argument types, or invented parameters.</text>
+
+    <line x1="380" y1="240" x2="380" y2="290" stroke="#000000" stroke-width="3"/>
+
+    <!-- 2 -->
+    <rect x="120" y="290" width="520" height="90" fill="#4b4b4b"/>
+    <text x="150" y="343" fill="#ffffff">2. VALIDATE AGAINST SCHEMA</text>
+    <rect x="700" y="290" width="780" height="90" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+    <text x="730" y="330" fill="#000000" font-size="17">Fails as: malformed JSON, missing required</text>
+    <text x="730" y="355" fill="#000000" font-size="17">fields, or values outside allowed ranges.</text>
+
+    <line x1="380" y1="380" x2="380" y2="430" stroke="#000000" stroke-width="3"/>
+
+    <!-- 3 -->
+    <rect x="120" y="430" width="520" height="90" fill="#8a8a8a"/>
+    <text x="150" y="483" fill="#000000">3. EXECUTE UNDER A TIMEOUT</text>
+    <rect x="700" y="430" width="780" height="90" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+    <text x="730" y="470" fill="#000000" font-size="17">Fails as: slow dependency, transient 5xx,</text>
+    <text x="730" y="495" fill="#000000" font-size="17">permanent 4xx, or a hung connection.</text>
+
+    <line x1="380" y1="520" x2="380" y2="570" stroke="#000000" stroke-width="3"/>
+
+    <!-- 4 -->
+    <rect x="120" y="570" width="520" height="90" fill="#000000"/>
+    <text x="150" y="613" fill="#ffffff">4. CLASSIFY THE RESULT</text>
+    <text x="150" y="638" fill="#ffffff" font-size="15">(success / retryable / terminal)</text>
+    <rect x="700" y="570" width="780" height="90" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+    <text x="730" y="610" fill="#000000" font-size="17">Fails as: partial data, empty result treated</text>
+    <text x="730" y="635" fill="#000000" font-size="17">as success, or an ambiguous status field.</text>
+
+    <line x1="380" y1="660" x2="380" y2="710" stroke="#000000" stroke-width="3"/>
+
+    <!-- 5 -->
+    <rect x="120" y="710" width="520" height="120" fill="#f4d44d" stroke="#000000" stroke-width="2"/>
+    <text x="150" y="753" fill="#000000">5. RETRY, FALL BACK,</text>
+    <text x="150" y="778" fill="#000000">OR ESCALATE</text>
+    <text x="150" y="803" fill="#000000" font-size="15">bounded attempts, idempotency-aware</text>
+    <rect x="700" y="710" width="780" height="120" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+    <text x="730" y="750" fill="#000000" font-size="17">Fails as: unbounded retry loops, duplicate</text>
+    <text x="730" y="775" fill="#000000" font-size="17">side effects on a non-idempotent tool, or a</text>
+    <text x="730" y="800" fill="#000000" font-size="17">circuit that never opens for a flaky tool.</text>
+  </g>
+
+  <text x="90" y="920" font-family="monospace" font-size="19" fill="#000000">Each arrow is a place to log a decision: what failed, why, and what the system did next.</text>
+</svg>

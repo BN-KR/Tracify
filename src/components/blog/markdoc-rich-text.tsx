@@ -2,6 +2,10 @@ import Markdoc from "@markdoc/markdoc";
 import React from "react";
 
 import { BlogCodeBlock } from "@/components/blog/blog-code-block";
+import { ContextBudgetCalculator } from "@/components/blog/context-budget-calculator";
+import { FailureModeExplorer, FailureModeOption } from "@/components/blog/failure-mode-explorer";
+import { RolloutStrategyPicker } from "@/components/blog/rollout-strategy-picker";
+import { TopologyPicker } from "@/components/blog/topology-picker";
 import { slugifyBlogHeading, type BlogPost } from "@/lib/markdoc-blog";
 
 function textFromChildren(value: React.ReactNode): string {
@@ -89,6 +93,11 @@ export function MarkdocRichText({ content }: Pick<BlogPost, "content">) {
           "faq-item": FaqItem,
           highlight: BlogHighlight,
           "editorial-panel": EditorialPanel,
+          "context-budget-calculator": ContextBudgetCalculator,
+          "rollout-strategy-picker": RolloutStrategyPicker,
+          "failure-mode-explorer": FailureModeExplorer,
+          "failure-mode-option": FailureModeOption,
+          "topology-picker": TopologyPicker,
           h2: BlogH2,
           h3: BlogH3,
           pre: BlogCodeBlock,

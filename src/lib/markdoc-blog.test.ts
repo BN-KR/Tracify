@@ -114,6 +114,10 @@ test("interactive blog tags declare their renderer targets", () => {
   assert.equal(blogMarkdocConfig.tags["faq-item"].render, "faq-item");
   assert.equal(blogMarkdocConfig.tags.highlight.render, "highlight");
   assert.equal(blogMarkdocConfig.tags["editorial-panel"].render, "editorial-panel");
+  assert.equal(blogMarkdocConfig.tags["context-budget-calculator"].render, "context-budget-calculator");
+  assert.equal(blogMarkdocConfig.tags["rollout-strategy-picker"].render, "rollout-strategy-picker");
+  assert.equal(blogMarkdocConfig.tags["failure-mode-explorer"].render, "failure-mode-explorer");
+  assert.equal(blogMarkdocConfig.tags["topology-picker"].render, "topology-picker");
 });
 
 test("decorative title punctuation does not change heading anchors", () => {

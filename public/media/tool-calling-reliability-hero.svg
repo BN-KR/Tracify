@@ -1,0 +1,65 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="tcrHeroTitle">
+  <title id="tcrHeroTitle">A tool call moving left to right through model decision, argument parsing, execution, and result stages, with five lightning-bolt failure points marked where the call can break</title>
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <rect x="0" y="0" width="1600" height="900" fill="none" stroke="#000000" stroke-width="4"/>
+
+  <g stroke="#000000" stroke-opacity="0.05" stroke-width="1">
+    <line x1="0" y1="180" x2="1600" y2="180"/>
+    <line x1="0" y1="360" x2="1600" y2="360"/>
+    <line x1="0" y1="540" x2="1600" y2="540"/>
+    <line x1="0" y1="720" x2="1600" y2="720"/>
+  </g>
+
+  <text x="90" y="110" font-family="monospace" font-size="26" letter-spacing="4" fill="#000000">TOOL CALL / FAILURE SURFACE</text>
+
+  <!-- Pipeline baseline -->
+  <line x1="120" y1="470" x2="1480" y2="470" stroke="#000000" stroke-width="4"/>
+
+  <!-- Stage nodes -->
+  <g font-family="monospace" font-size="19" fill="#000000">
+    <rect x="120" y="420" width="240" height="100" fill="#000000"/>
+    <text x="150" y="460" fill="#ffffff">MODEL</text>
+    <text x="150" y="486" fill="#ffffff">DECISION</text>
+
+    <rect x="460" y="420" width="240" height="100" fill="#4b4b4b"/>
+    <text x="490" y="460" fill="#ffffff">PARSE / VALIDATE</text>
+    <text x="490" y="486" fill="#ffffff">ARGUMENTS</text>
+
+    <rect x="800" y="420" width="240" height="100" fill="#8a8a8a"/>
+    <text x="830" y="460" fill="#000000">EXECUTE</text>
+    <text x="830" y="486" fill="#000000">TOOL</text>
+
+    <rect x="1140" y="420" width="240" height="100" fill="#000000"/>
+    <text x="1170" y="460" fill="#ffffff">RETURN</text>
+    <text x="1170" y="486" fill="#ffffff">RESULT</text>
+  </g>
+
+  <!-- Connectors -->
+  <g stroke="#000000" stroke-width="3">
+    <line x1="360" y1="470" x2="460" y2="470"/>
+    <line x1="700" y1="470" x2="800" y2="470"/>
+    <line x1="1040" y1="470" x2="1140" y2="470"/>
+  </g>
+
+  <!-- Failure injection markers (lightning bolts) at each seam -->
+  <g fill="#f4d44d" stroke="#000000" stroke-width="2">
+    <polygon points="220,340 260,340 235,410 275,410 205,500 220,420 190,420" />
+    <polygon points="560,340 600,340 575,410 615,410 545,500 560,420 530,420" />
+    <polygon points="900,340 940,340 915,410 955,410 885,500 900,420 870,420" />
+    <polygon points="1240,340 1280,340 1255,410 1295,410 1225,500 1240,420 1210,420" />
+  </g>
+
+  <g font-family="monospace" font-size="15" fill="#000000">
+    <text x="150" y="330">HALLUCINATED TOOL,</text>
+    <text x="150" y="350">MALFORMED JSON</text>
+    <text x="490" y="330">SCHEMA-INVALID</text>
+    <text x="490" y="350">ARGUMENTS</text>
+    <text x="830" y="330">TIMEOUT, RATE LIMIT,</text>
+    <text x="830" y="350">PERMANENT ERROR</text>
+    <text x="1170" y="330">PARTIAL OR</text>
+    <text x="1170" y="350">AMBIGUOUS RESULT</text>
+  </g>
+
+  <text x="90" y="620" font-family="monospace" font-size="20" fill="#000000">Every seam between model output and tool execution is a place a confident-looking call can quietly fail.</text>
+  <text x="90" y="650" font-family="monospace" font-size="20" fill="#000000">Reliability comes from validating, bounding, and logging each seam instead of trusting the happy path.</text>
+</svg>
