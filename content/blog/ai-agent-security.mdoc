@@ -20,6 +20,10 @@ seo:
 
 ## At a glance
 
+![Ai Agent Security decision flow showing context, evidence, and action](/media/blog-diagrams/ai-agent-security.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 This guide is for **engineers shipping tool-using AI agents**. It helps you **turn vague security concerns into enforceable boundaries**. It covers runtime controls and evidence, not a complete compliance program or a substitute for threat modeling.
 
 ### The security framework
@@ -69,12 +73,7 @@ Redact secrets before telemetry leaves the process. Limit retention for prompts,
 - Redact secrets and define retention before enabling production traces.
 - Give every high-consequence alert an owner and rollback path.
 
-## Frequently asked questions
-
-{% faq-item question="Can a system prompt secure an AI agent?" answer="No. Treat the prompt as one layer of guidance. Enforce permissions, argument validation, data boundaries, approvals, and audit evidence in code and infrastructure." /%}
-{% faq-item question="Should every tool call require approval?" answer="No. Use risk-based controls. Low-risk reads can be automated; external communication and irreversible writes usually need stronger validation or human approval." /%}
-{% faq-item question="What should a security trace contain?" answer="Record the workflow, actor, policy version, proposed action, validated arguments, approval decision, execution result, and redacted evidence needed to investigate the decision." /%}
-
+The release reviewer should sign off on the boundary, not merely the implementation. Record the reviewed workflow, tools, data classes, fixtures, observed results, unresolved risks, and rollback owner. That record is the durable proof that the team considered security before increasing autonomy, and it gives the next reviewer a concrete baseline instead of another informal promise. Keep the decision attached to the release and revisit it after real usage. Compare the evidence with the baseline before widening permissions and after incidents.
 ## Recommended next reads
 
 Continue with [prompt injection defense](/blog/prompt-injection-defense), [structured outputs for AI agents](/blog/structured-outputs-ai-agents), and [AI agent reliability](/blog/ai-agent-reliability-failures-retries-guardrails).
@@ -275,3 +274,10 @@ Do not reserve security review for incidents. Sample ordinary runs and confirm t
 For a new tool, begin with a dry-run response that shows the normalized action without executing it. For a new provider, route only synthetic or approved low-sensitivity cases. For a new memory source, keep it read-only and attach provenance. Define the evidence that allows each boundary to widen and the evidence that causes an immediate rollback. Reversibility gives the team room to learn while keeping an unsafe assumption from becoming a permanent permission.
 
 The release reviewer should sign off on the boundary, not merely the implementation. Record the reviewed workflow, tools, data classes, fixtures, observed results, unresolved risks, and rollback owner. That record is the durable proof that the team considered security before increasing autonomy, and it gives the next reviewer a concrete baseline instead of another informal promise. Keep the decision attached to the release and revisit it after real usage. Compare the evidence with the baseline before widening permissions and after incidents.
+> **Decision rule:** Treat every model output, retrieved document, tool argument, and browser result as untrusted until the application validates its scope and authority.
+
+## Frequently asked questions
+
+{% faq-item question="Can a system prompt secure an AI agent?" answer="No. Treat the prompt as one layer of guidance. Enforce permissions, argument validation, data boundaries, approvals, and audit evidence in code and infrastructure." /%}
+{% faq-item question="Should every tool call require approval?" answer="No. Use risk-based controls. Low-risk reads can be automated; external communication and irreversible writes usually need stronger validation or human approval." /%}
+{% faq-item question="What should a security trace contain?" answer="Record the workflow, actor, policy version, proposed action, validated arguments, approval decision, execution result, and redacted evidence needed to investigate the decision." /%}

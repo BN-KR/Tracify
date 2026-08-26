@@ -20,6 +20,10 @@ seo:
 
 ## At a glance
 
+![Vector Database Guide decision flow showing context, evidence, and action](/media/blog-diagrams/vector-database-guide.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 This guide is for **engineers choosing or operating vector search for AI applications**. It helps you **make retrieval behavior measurable before choosing a vendor**. It does not rank providers or claim one database fits every workload.
 
 ### The retrieval decision model
@@ -54,12 +58,7 @@ Include newly added documents, deleted documents, conflicting versions, empty re
 - Trace query and result identifiers without leaking source content.
 - Compare retrieval changes on the same evaluation set.
 
-## Frequently asked questions
-
-{% faq-item question="Is a vector database required for RAG?" answer="No. It is one retrieval option. Keyword, metadata, graph, or hybrid search may be better for some corpora and queries." /%}
-{% faq-item question="What embedding model should I choose?" answer="Choose from measured performance on your own representative queries, including multilingual, short, long, ambiguous, and adversarial cases. Public rankings are not a substitute for task evidence." /%}
-{% faq-item question="Why are vector search results wrong?" answer="Possible causes include poor chunking, embedding mismatch, stale indexes, incorrect filters, low top-k, or a generator that ignores valid context. Trace each stage before changing the model." /%}
-
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
 ## Recommended next reads
 
 Continue with [RAG evaluation](/blog/rag-evaluation-guide), [how to build a RAG chatbot](/blog/rag-chatbot), and [LLM tracing](/blog/llm-tracing-explained).
@@ -253,3 +252,23 @@ Use the same standard for maintenance: preserve a representative trace, name the
 Keep the review record with the release. Note the baseline, the changed dependency, the measured result, the remaining uncertainty, and the person responsible for follow-up. This makes the guide actionable when retrieval behaves differently under real traffic.
 
 Include the rollback trigger and the exact configuration that restores the previous behavior. Recheck recall, citation quality, latency, cost, and access-control behavior after rollback, because a fallback can solve availability while introducing a different retrieval regression.
+
+## A practical implementation example
+
+This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
+
+```ts
+const results = await index.search(embedding, {
+  filter: { tenantId, documentVersion },
+  limit: 8,
+});
+
+return rerank(results).filter((item) => item.accessible);
+```
+
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+## Frequently asked questions
+
+{% faq-item question="Is a vector database required for RAG?" answer="No. It is one retrieval option. Keyword, metadata, graph, or hybrid search may be better for some corpora and queries." /%}
+{% faq-item question="What embedding model should I choose?" answer="Choose from measured performance on your own representative queries, including multilingual, short, long, ambiguous, and adversarial cases. Public rankings are not a substitute for task evidence." /%}
+{% faq-item question="Why are vector search results wrong?" answer="Possible causes include poor chunking, embedding mismatch, stale indexes, incorrect filters, low top-k, or a generator that ignores valid context. Trace each stage before changing the model." /%}

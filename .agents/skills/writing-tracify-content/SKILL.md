@@ -86,7 +86,7 @@ Every future content agent must complete this gate before calling a blog post fi
 - Build visible hierarchy: H2 sections, H3 subsections, and H4 detail only when the layer helps the reader navigate. Keep the generated table of contents readable and structured.
 - Use concrete evidence throughout the article: useful code, semantic tables, formulas, trace examples, screenshots, diagrams, or decision notes. A code block must be tested or clearly labeled illustrative and must teach an adaptable action.
 - Add one deterministic, accessible interaction at the point of need. It must work without secrets, production data, arbitrary code execution, or a network dependency.
-- Add meaningful images with descriptive alt text. Keep FAQ content in the shared accordion pattern. Use notes for rules, limits, trade-offs, and next actions instead of decorative callouts.
+- Add meaningful in-article images with descriptive alt text. Include one practical or clearly labeled illustrative code example, mid-article notes, and restrained emphasis. Keep exactly one FAQ section in the shared accordion pattern after the main teaching; an opening FAQ followed by appended prose is not acceptable.
 - For long-form posts, target 4–7 contextual internal links per 1,000 words, using descriptive anchors to existing published posts. Never use a link dump, self-link, bare URL, “click here,” or “read more.”
 - End with a practical checklist or next action and three useful recommended posts when eligible targets exist.
 

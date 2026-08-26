@@ -20,6 +20,10 @@ seo:
 
 ## At a glance
 
+![Llm Api Guide decision flow showing context, evidence, and action](/media/blog-diagrams/llm-api-guide.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 This guide is for **developers integrating LLM APIs into user-facing systems**. It helps you **design the call boundary so failures remain explainable and bounded**. It does not promise provider uptime or prescribe a specific SDK.
 
 ### The API call contract
@@ -59,12 +63,7 @@ Capture queue time, provider time, retry count, input and output token usage, mo
 - Record every attempt with a stable parent run.
 - Test provider errors, timeouts, empty output, and malformed output.
 
-## Frequently asked questions
-
-{% faq-item question="Should every LLM API failure retry?" answer="No. Retry only transient, bounded failures with backoff and an attempt budget. Do not blindly retry invalid requests, policy refusals, or non-idempotent actions." /%}
-{% faq-item question="What is the most important LLM API metric?" answer="Start with the user-visible outcome and connect latency, cost, validation, and failure class to it. A provider metric alone cannot tell you whether the task succeeded." /%}
-{% faq-item question="How do fallbacks affect quality?" answer="A fallback can improve availability while changing quality, latency, cost, or safety. Version and evaluate the fallback path separately rather than hiding it behind one success metric." /%}
-
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
 ## Recommended next reads
 
 Continue with [LLM latency optimization](/blog/llm-latency-optimization), [reducing LLM costs](/blog/reduce-llm-costs-without-hurting-quality), and [LLM observability metrics](/blog/llm-observability-metrics-that-matter).
@@ -258,3 +257,26 @@ Use the same standard for maintenance: preserve a representative trace, name the
 Keep the review record with the release. Note the baseline, the changed dependency, the measured result, the remaining uncertainty, and the person responsible for follow-up. This makes the guide actionable when the API behaves differently under real traffic.
 
 Include the rollback trigger and the exact configuration that restores the previous behavior. Recheck quality, latency, cost, and error categories after rollback, because a fallback can solve availability while introducing a different product regression.
+
+## A practical implementation example
+
+This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
+
+```ts
+const response = await client.responses.create({
+  model,
+  input,
+  timeout: 8_000,
+});
+
+if (!response.output_text.trim()) {
+  throw new Error("empty model response");
+}
+```
+
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+## Frequently asked questions
+
+{% faq-item question="Should every LLM API failure retry?" answer="No. Retry only transient, bounded failures with backoff and an attempt budget. Do not blindly retry invalid requests, policy refusals, or non-idempotent actions." /%}
+{% faq-item question="What is the most important LLM API metric?" answer="Start with the user-visible outcome and connect latency, cost, validation, and failure class to it. A provider metric alone cannot tell you whether the task succeeded." /%}
+{% faq-item question="How do fallbacks affect quality?" answer="A fallback can improve availability while changing quality, latency, cost, or safety. Version and evaluate the fallback path separately rather than hiding it behind one success metric." /%}

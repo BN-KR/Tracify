@@ -130,14 +130,6 @@ Do not make every case equally blocking. Severity, likelihood, reversibility, an
 - Define blocking severity, exposure, observation window, and rollback.
 - Retain the case as durable memory until its boundary changes deliberately.
 
-## Frequently asked questions
-
-{% faq-item question="Should a correct final answer hide a wrong tool call?" answer="No. Keep the case when the intermediate action was unsafe, unauthorized, or fragile. The final string can be correct by chance, while the path still exposes users or state to harm. Assert the action boundary as well as the final outcome." /%}
-
-{% faq-item question="How many regression cases should a suite contain?" answer="Enough to represent the failure mechanisms and risk slices relevant to the intended release. Prefer a compact, owned set with clear expected and forbidden behavior over a large archive of unlabelled transcripts. Add cases when production reveals a new mechanism and retire them only with a recorded reason." /%}
-
-{% faq-item question="What should block a release?" answer="Predeclared unacceptable behavior, a material regression in a consequential slice, or insufficient coverage for the intended exposure. Review-only variation can remain non-blocking when its owner, threshold, and next action are explicit." /%}
-
 ## Next step: turn one failure into coverage
 
 Choose one recent production trace. Redact it, name the mechanism, define the expected and forbidden behavior, replay the relevant path, and compare it with the baseline. Keep the resulting case in the release gate so the next prompt, model, tool, or policy change has to earn its way past the failure that already happened.
@@ -267,3 +259,10 @@ Finally, define completion precisely. A workflow is not complete because the dem
 Use a representative input and a deliberately difficult input. Confirm that the system identifies the workflow and version, applies the right scope and permissions, records the evidence used, and returns a state a user can understand. If it calls a tool, verify the arguments after normalization and confirm that the tool result is associated with the same run. If it retries, verify that the retry is bounded and cannot duplicate a consequential side effect.
 
 Review one success, one corrected result, and one failure after every material release. Compare the first meaningful divergence, not only the final text. Update the regression case, runbook, policy, or state transition that would have prevented the failure or made it safe. Then record the owner and date for the next review. This small discipline keeps the implementation connected to production reality and gives the team evidence for deciding whether to expand, simplify, or pause the workflow.
+## Frequently asked questions
+
+{% faq-item question="Should a correct final answer hide a wrong tool call?" answer="No. Keep the case when the intermediate action was unsafe, unauthorized, or fragile. The final string can be correct by chance, while the path still exposes users or state to harm. Assert the action boundary as well as the final outcome." /%}
+
+{% faq-item question="How many regression cases should a suite contain?" answer="Enough to represent the failure mechanisms and risk slices relevant to the intended release. Prefer a compact, owned set with clear expected and forbidden behavior over a large archive of unlabelled transcripts. Add cases when production reveals a new mechanism and retire them only with a recorded reason." /%}
+
+{% faq-item question="What should block a release?" answer="Predeclared unacceptable behavior, a material regression in a consequential slice, or insufficient coverage for the intended exposure. Review-only variation can remain non-blocking when its owner, threshold, and next action are explicit." /%}

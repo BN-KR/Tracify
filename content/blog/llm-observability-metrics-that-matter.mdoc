@@ -38,6 +38,10 @@ LLM observability metrics are useful when they help someone decide whether to co
 
 ## At a glance
 
+![Llm Observability Metrics That Matter decision flow showing context, evidence, and action](/media/blog-diagrams/llm-observability-metrics-that-matter.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 | Before you start | What to define | What good looks like |
 | --- | --- | --- |
 | One real workflow and a release or incident question | The outcome, comparison cohort, owner, and response | A small metric set that changes an operational decision |
@@ -166,14 +170,6 @@ Start with one workflow and a small review packet. Include the task outcome, com
 
 > **Decision rule:** The smallest useful metric system is the one that helps a named owner explain one real change and choose one safe next action. Expand it only when the next investigation proves a missing signal.
 
-## Frequently asked questions
-
-{% faq-item question="Which metric comes first?" answer="Start with the user-visible outcome and its denominator. Add latency, cost, reliability, and quality measures that explain movement or protect a decision boundary." /%}
-
-{% faq-item question="Are token counts quality metrics?" answer="No. Token counts describe input and output volume. They can explain cost or context changes, but they cannot show whether the workflow helped the user without an outcome measure or review signal." /%}
-
-{% faq-item question="Should every anomaly alert?" answer="No. Alert when the movement is material and credible, the consequence is time-sensitive, and a named owner has a safe first action. Route uncertain drift to review instead." /%}
-
 ## Next step: remove one useless metric
 
 Choose one dashboard this week. Identify the metric that does not change a decision, replace it with the outcome or diagnostic signal that would, and write down the owner and stop condition. Then review one representative trace before adding anything else. A smaller, explainable metric set is easier to operate than a complete-looking dashboard no one trusts.
@@ -297,3 +293,24 @@ Plan ownership beyond launch. Someone should own the workflow contract, dependen
 Include the maintenance loop in the implementation. Sample production results, inspect correction work, refresh the regression set, review costs and latency, and remove metrics that do not guide action. Feed confirmed incidents into tests, policies, or state transitions. A fix that changes only wording may hide a symptom; a durable fix changes the mechanism that allowed the failure or makes the failure safe and visible.
 
 Finally, define completion precisely. A workflow is not complete because the demo passed or because the model produced a plausible answer. It is complete when its inputs and outputs are bounded, its authority is explicit, its evidence is traceable, its side effects are safe to retry or reconcile, its degraded states are honest, and its owner can prove the result with representative cases. Use that standard to decide what to build next and what to leave out.
+
+## A practical implementation example
+
+This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
+
+```ts
+const costPerSuccess = totalCost / Math.max(successfulTasks, 1);
+const shouldPage =
+  successRate < baseline - 0.03 &&
+  costPerSuccess < budget &&
+  owner !== undefined;
+```
+
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+## Frequently asked questions
+
+{% faq-item question="Which metric comes first?" answer="Start with the user-visible outcome and its denominator. Add latency, cost, reliability, and quality measures that explain movement or protect a decision boundary." /%}
+
+{% faq-item question="Are token counts quality metrics?" answer="No. Token counts describe input and output volume. They can explain cost or context changes, but they cannot show whether the workflow helped the user without an outcome measure or review signal." /%}
+
+{% faq-item question="Should every anomaly alert?" answer="No. Alert when the movement is material and credible, the consequence is time-sensitive, and a named owner has a safe first action. Route uncertain drift to review instead." /%}

@@ -38,6 +38,10 @@ AI agent evaluation should answer a release question, not merely produce a score
 
 ## At a glance
 
+![Ai Agent Evaluation Practical Guide decision flow showing context, evidence, and action](/media/blog-diagrams/ai-agent-evaluation-practical-guide.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 This guide is for engineers, evaluation leads, and product owners deciding whether an agent change is ready for more exposure. It helps you **turn representative cases into a bounded release decision** with evidence that another person can inspect.
 
 | Before you start | What to define | What good looks like |
@@ -149,14 +153,6 @@ Before asking another person to approve a release, provide the task class, expec
 - Gate high-risk slices separately from the average.
 - Turn confirmed failures into durable cases or controls.
 - Set an owner, observation window, and rollback path.
-
-## Frequently asked questions
-
-{% faq-item question="How large should an evaluation set be?" answer="Large enough to cover the release decision and its important edge cases. A small consequential cohort can justify a hold when its mechanism is clear, while a large easy sample cannot prove safety for an unrepresented workflow." /%}
-
-{% faq-item question="Can an LLM judge replace reviewers?" answer="It can scale a rubric, but calibrate it against blinded human samples and retain human review for ambiguous or high-consequence cases. Treat disagreement as evidence that the rubric or context needs work." /%}
-
-{% faq-item question="What blocks a release?" answer="A predeclared unacceptable failure, a material regression in a high-risk slice, or insufficient representative evidence for the intended exposure. Name the owner and next reversible action instead of hiding uncertainty in the average." /%}
 
 ## Next step: make the evaluation actionable
 
@@ -287,3 +283,10 @@ Finally, define completion precisely. A workflow is not complete because the dem
 Use a representative input and a deliberately difficult input. Confirm that the system identifies the workflow and version, applies the right scope and permissions, records the evidence used, and returns a state a user can understand. If it calls a tool, verify the arguments after normalization and confirm that the tool result is associated with the same run. If it retries, verify that the retry is bounded and cannot duplicate a consequential side effect.
 
 Review one success, one corrected result, and one failure after every material release. Compare the first meaningful divergence, not only the final text. Update the regression case, runbook, policy, or state transition that would have prevented the failure or made it safe. Then record the owner and date for the next review. This small discipline keeps the implementation connected to production reality and gives the team evidence for deciding whether to expand, simplify, or pause the workflow.
+## Frequently asked questions
+
+{% faq-item question="How large should an evaluation set be?" answer="Large enough to cover the release decision and its important edge cases. A small consequential cohort can justify a hold when its mechanism is clear, while a large easy sample cannot prove safety for an unrepresented workflow." /%}
+
+{% faq-item question="Can an LLM judge replace reviewers?" answer="It can scale a rubric, but calibrate it against blinded human samples and retain human review for ambiguous or high-consequence cases. Treat disagreement as evidence that the rubric or context needs work." /%}
+
+{% faq-item question="What blocks a release?" answer="A predeclared unacceptable failure, a material regression in a high-risk slice, or insufficient representative evidence for the intended exposure. Name the owner and next reversible action instead of hiding uncertainty in the average." /%}

@@ -236,17 +236,11 @@ Leaders should ask for decision-quality artifacts rather than a larger dashboard
 
 ## Frequently asked questions
 
-### What is the safest first cost change?
+{% faq-item question="What is the safest first cost change?" answer="Remove unnecessary repeated context only after confirming it is not needed for the task outcome." /%}
 
-Remove unnecessary repeated context only after confirming it is not needed for the task outcome.
+{% faq-item question="Should teams always route to cheaper models?" answer="Only where representative evaluation shows the lower-cost path meets the same service boundary." /%}
 
-### Should teams always route to cheaper models?
-
-Only where representative evaluation shows the lower-cost path meets the same service boundary.
-
-### How long should savings be observed?
-
-Long enough to include normal task variation and any delayed correction or escalation signals.
+{% faq-item question="How long should savings be observed?" answer="Long enough to include normal task variation and any delayed correction or escalation signals." /%}
 
 ## Next step: make reduce LLM costs actionable
 
@@ -264,14 +258,20 @@ Start with one workflow this week. Instrument the evidence needed to explain a s
 
 > **Decision rule:** Prefer the smallest change that produces inspectable evidence. If the example cannot be tested, label it illustrative and verify the surrounding assumptions before adapting it.
 
-## Frequently asked questions
-
-{% faq-item question="What should I do first?" answer="Start with one real workflow and one user-visible outcome. Write down the boundary, collect the evidence that explains the outcome, and choose a reversible next step before expanding the system." /%}
-
-{% faq-item question="How do I know whether this is working?" answer="Compare the same task distribution before and after the change. Review quality, latency, cost, failure behavior, and user impact together, and preserve the release or prompt version that produced each result." /%}
-
-{% faq-item question="What is the most common mistake?" answer="Treating a metric, model response, or successful tool call as the outcome. Keep the user task, trace evidence, owner, and bounded response connected so the team can explain and improve the complete workflow." /%}
-
 ## Recommended next reads
 
 Continue with [AI agent observability](/blog/ai-agent-observability-complete-guide), [debugging AI agents in production](/blog/debug-ai-agents-in-production), [the AI agent production checklist](/blog/ai-agent-production-checklist). Choose the one that matches the next decision in your workflow rather than opening every guide at once.
+
+## A practical implementation example
+
+This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
+
+```ts
+const candidate = await run(candidateConfig, cases);
+if (candidate.quality >= baseline.quality && candidate.cost < baseline.cost) {
+  return promote(candidate);
+}
+return keepBaseline();
+```
+
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.

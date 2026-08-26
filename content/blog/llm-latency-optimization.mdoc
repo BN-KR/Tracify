@@ -23,6 +23,10 @@ seo:
 
 ## At a glance
 
+![Llm Latency Optimization decision flow showing context, evidence, and action](/media/blog-diagrams/llm-latency-optimization.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 | Before you start | What to define | What good looks like |
 | --- | --- | --- |
 | One workflow and a user-visible wait problem | The primary milestone, critical path, baseline, and stop condition | A bounded latency change that improves the right wait without hiding quality or safety work |
@@ -134,14 +138,6 @@ When the waterfall identifies a bottleneck, capture the slow case as a represent
 - Record quality, safety, cost, owner, baseline, and rollback condition.
 
 > **Decision rule:** Start with one workflow, one milestone, one representative slow trace, and one reversible change. Expand the instrumentation only when the next investigation proves a missing segment.
-
-## Frequently asked questions
-
-{% faq-item question="Which latency should I optimize first?" answer="Start with the user-visible milestone that defines the workflow’s service promise, then inspect the critical path that controls it. Time to first token is not the right primary metric when users must wait for a tool, validation, or approval before acting." /%}
-
-{% faq-item question="Is streaming always a latency improvement?" answer="No. Streaming can improve perceived progress, but it does not reduce slow retrieval, tools, or validation. Define what the streamed content means and make sure a partial result cannot be mistaken for a committed answer." /%}
-
-{% faq-item question="Should I retry a slow model call?" answer="Only when the cause is plausibly transient and the remaining parent-task budget supports another attempt. Record each attempt, avoid retrying deterministic validation or policy failures, and choose a safe fallback when the deadline is near." /%}
 
 ## Next step: inspect one slow trace
 
@@ -266,3 +262,10 @@ Plan ownership beyond launch. Someone should own the workflow contract, dependen
 Include the maintenance loop in the implementation. Sample production results, inspect correction work, refresh the regression set, review costs and latency, and remove metrics that do not guide action. Feed confirmed incidents into tests, policies, or state transitions. A fix that changes only wording may hide a symptom; a durable fix changes the mechanism that allowed the failure or makes the failure safe and visible.
 
 Finally, define completion precisely. A workflow is not complete because the demo passed or because the model produced a plausible answer. It is complete when its inputs and outputs are bounded, its authority is explicit, its evidence is traceable, its side effects are safe to retry or reconcile, its degraded states are honest, and its owner can prove the result with representative cases. Use that standard to decide what to build next and what to leave out.
+## Frequently asked questions
+
+{% faq-item question="Which latency should I optimize first?" answer="Start with the user-visible milestone that defines the workflow’s service promise, then inspect the critical path that controls it. Time to first token is not the right primary metric when users must wait for a tool, validation, or approval before acting." /%}
+
+{% faq-item question="Is streaming always a latency improvement?" answer="No. Streaming can improve perceived progress, but it does not reduce slow retrieval, tools, or validation. Define what the streamed content means and make sure a partial result cannot be mistaken for a committed answer." /%}
+
+{% faq-item question="Should I retry a slow model call?" answer="Only when the cause is plausibly transient and the remaining parent-task budget supports another attempt. Record each attempt, avoid retrying deterministic validation or policy failures, and choose a safe fallback when the deadline is near." /%}

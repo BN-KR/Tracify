@@ -20,6 +20,10 @@ seo:
 
 ## At a glance
 
+![Ai Workflow Automation decision flow showing context, evidence, and action](/media/blog-diagrams/ai-workflow-automation.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 This guide is for **teams automating multi-step business workflows with AI**. It helps you **choose safe automation boundaries**. It does not cover general robotic process automation or vendor procurement.
 
 ### The automation ladder
@@ -54,12 +58,7 @@ Capture the parent task, state transitions, model calls, tools, approvals, retri
 - Validate permissions and tool arguments.
 - Alert on stalled, rejected, and failed workflows.
 
-## Frequently asked questions
-
-{% faq-item question="Should AI automate the whole workflow?" answer="Usually not initially. Start with observation or preparation, measure outcomes, and expand the boundary only when the failure modes and recovery path are understood." /%}
-{% faq-item question="What makes an AI workflow reliable?" answer="Explicit state, narrow tools, validated inputs and outputs, bounded retries, idempotent side effects, observable evidence, and an owner for failures." /%}
-{% faq-item question="When is human approval necessary?" answer="Use approval when an action is irreversible, externally visible, high consequence, ambiguous, or outside a policy that can be enforced safely in code." /%}
-
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
 ## Recommended next reads
 
 Continue with [human-in-the-loop AI agents](/blog/human-in-the-loop-ai-agents), [AI agent reliability](/blog/ai-agent-reliability-failures-retries-guardrails), and [AI agent monitoring](/blog/ai-agent-monitoring).
@@ -281,3 +280,22 @@ Treat the result as a living contract. When a model, prompt, tool, policy, provi
 The best implementation is usually the smallest one that makes the decision explicit. Prefer a narrow workflow with clear permissions, predictable recovery, and honest uncertainty over a broad agent that can do more but cannot explain what it did. Measure the correction work created for people, not just the work removed from the queue. If the new path saves time while increasing hidden review or incident cost, it has not improved the user outcome.
 
 Use this guide to produce a concrete next action. Pick one workflow, name its owner, write the contract, collect representative traces, choose one quality and one safety signal, and set a rollback condition. Review the result with engineering, security, and the people who handle exceptions. Their questions are part of the system design. A dependable production workflow is not defined by a long prompt or a high demo score; it is defined by a user-visible outcome that remains explainable, bounded, and recoverable as conditions change.
+
+## A practical implementation example
+
+This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
+
+```yaml
+state: awaiting_approval
+owner: workflow-reviewer
+expires_after_minutes: 30
+on_expiry: route_to_manual_queue
+side_effects: []
+```
+
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+## Frequently asked questions
+
+{% faq-item question="Should AI automate the whole workflow?" answer="Usually not initially. Start with observation or preparation, measure outcomes, and expand the boundary only when the failure modes and recovery path are understood." /%}
+{% faq-item question="What makes an AI workflow reliable?" answer="Explicit state, narrow tools, validated inputs and outputs, bounded retries, idempotent side effects, observable evidence, and an owner for failures." /%}
+{% faq-item question="When is human approval necessary?" answer="Use approval when an action is irreversible, externally visible, high consequence, ambiguous, or outside a policy that can be enforced safely in code." /%}

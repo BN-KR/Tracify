@@ -20,6 +20,10 @@ seo:
 
 ## At a glance
 
+![Prompt Engineering Guide decision flow showing context, evidence, and action](/media/blog-diagrams/prompt-engineering-guide.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 This guide is for **engineers and product teams changing prompts in production**. It helps you **turn prompt edits into reviewable experiments**. It does not replace application validation, permissions, or model-specific testing.
 
 ### The prompt contract
@@ -59,12 +63,7 @@ Use a fixed regression set plus fresh production examples. Compare quality, refu
 - Test adversarial, ambiguous, empty, and long inputs.
 - Define the rollback threshold before the rollout.
 
-## Frequently asked questions
-
-{% faq-item question="Is there one perfect prompt?" answer="No. Prompt quality depends on the task distribution, model, tools, context, and outcome definition. Treat prompts as versioned system components and evaluate them with representative cases." /%}
-{% faq-item question="Should prompts include chain-of-thought instructions?" answer="Focus on the output contract and evidence your application needs. Do not depend on hidden reasoning text as an audit record; capture structured decisions and tool actions instead." /%}
-{% faq-item question="How often should prompts be reviewed?" answer="Review them whenever the task, model, tools, data, policy, or observed failure distribution changes. Re-run the regression set and inspect representative production traces." /%}
-
+After launch, inspect the result from the user’s point of view. Did the workflow produce the promised outcome? Did it create correction work? Was the latency and cost acceptable? Could an operator reconstruct the decision without guessing? If the answer is no, classify the gap and improve the contract, test, policy, trace, or recovery path that owns it. A production guide is successful when it changes what the team can safely explain and operate, not when it merely adds another page of plausible advice.
 ## Recommended next reads
 
 Continue with [prompt versioning in production](/blog/prompt-versioning-production), [AI agent regression testing](/blog/ai-agent-regression-testing), and [structured outputs](/blog/structured-outputs-ai-agents).
@@ -260,3 +259,10 @@ Review one success, one corrected result, and one failure after every material r
 Take the next real implementation decision and write it down before changing the system. State the user outcome, the acceptable and unacceptable failure, the evidence required, the authority boundary, the owner, and the rollback condition. Run the decision through a small representative set that includes missing data, conflicting evidence, stale context, and a dependency failure. Keep the traces and compare them with the baseline.
 
 After launch, inspect the result from the user’s point of view. Did the workflow produce the promised outcome? Did it create correction work? Was the latency and cost acceptable? Could an operator reconstruct the decision without guessing? If the answer is no, classify the gap and improve the contract, test, policy, trace, or recovery path that owns it. A production guide is successful when it changes what the team can safely explain and operate, not when it merely adds another page of plausible advice.
+## Frequently asked questions
+
+> **Decision rule:** Change a prompt only when a representative failure explains the needed behavior and the resulting test can distinguish improvement from accidental drift.
+
+{% faq-item question="Is there one perfect prompt?" answer="No. Prompt quality depends on the task distribution, model, tools, context, and outcome definition. Treat prompts as versioned system components and evaluate them with representative cases." /%}
+{% faq-item question="Should prompts include chain-of-thought instructions?" answer="Focus on the output contract and evidence your application needs. Do not depend on hidden reasoning text as an audit record; capture structured decisions and tool actions instead." /%}
+{% faq-item question="How often should prompts be reviewed?" answer="Review them whenever the task, model, tools, data, policy, or observed failure distribution changes. Re-run the regression set and inspect representative production traces." /%}

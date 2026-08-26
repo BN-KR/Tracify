@@ -45,6 +45,8 @@ The manager should apply this prompt to the remaining posts in small batches, st
 - Use useful tables, tested code, trace examples, formulas, screenshots, or diagrams.
 - Include exactly one purposeful deterministic interaction where it materially improves learning.
 - Use one FAQ section rendered with the shared accordion pattern. Never add a second generic FAQ section.
+- Place the FAQ after the article’s main teaching, examples, and trade-offs; it must not appear in the opening third of the body.
+- Include at least one practical code artifact, one meaningful in-article visual, and mid-article decision notes; the hero image alone does not satisfy the visual requirement.
 - Use descriptive contextual internal links in natural prose.
 - End the article without a prose recommendation dump. The existing related-post cards are the recommendation UI.
 - Keep the complete article readable on mobile: no page-level horizontal overflow, mid-word breaking, or unusable tables/code blocks.

@@ -152,14 +152,6 @@ Do not make every test blocking. A check should block when its failure matters t
 - Turn confirmed production mechanisms into durable fixtures or contracts.
 - Define release stop conditions, exposure, owner, and rollback path.
 
-## Frequently asked questions
-
-{% faq-item question="Why are unit tests not enough?" answer="Unit tests can prove deterministic boundaries, but they cannot fully model retrieval quality, model choices, multi-step plans, dependency timing, or user-visible outcomes. Keep them as the fast foundation and add simulation, scenario evaluation, and production feedback where interactions change behavior." /%}
-
-{% faq-item question="What should be mocked?" answer="Mock dependencies whose timing, failure modes, or data would make a test slow or nondeterministic, while keeping their contracts explicit. Simulate timeouts, malformed responses, stale state, duplicates, and permission outcomes; reserve realistic end-to-end cases for behavior that depends on the interaction." /%}
-
-{% faq-item question="When does production become a test surface?" answer="As soon as real inputs, user corrections, operator classifications, or traces reveal behavior your fixtures do not cover. Sample safely, protect sensitive context, and convert confirmed mechanisms into a small regression case or contract at the layer that can detect them." /%}
-
 ## Next step: make testing actionable
 
 Choose one repeated failure and write its expected outcome. Add the cheapest test that can detect it, then add a realistic scenario if the failure depends on retrieval, model behavior, timing, or user context. Run the case through the release gate and keep the production trace that proves whether the fix worked.
@@ -289,3 +281,10 @@ Finally, define completion precisely. A workflow is not complete because the dem
 Use a representative input and a deliberately difficult input. Confirm that the system identifies the workflow and version, applies the right scope and permissions, records the evidence used, and returns a state a user can understand. If it calls a tool, verify the arguments after normalization and confirm that the tool result is associated with the same run. If it retries, verify that the retry is bounded and cannot duplicate a consequential side effect.
 
 Review one success, one corrected result, and one failure after every material release. Compare the first meaningful divergence, not only the final text. Update the regression case, runbook, policy, or state transition that would have prevented the failure or made it safe. Then record the owner and date for the next review. This small discipline keeps the implementation connected to production reality and gives the team evidence for deciding whether to expand, simplify, or pause the workflow.
+## Frequently asked questions
+
+{% faq-item question="Why are unit tests not enough?" answer="Unit tests can prove deterministic boundaries, but they cannot fully model retrieval quality, model choices, multi-step plans, dependency timing, or user-visible outcomes. Keep them as the fast foundation and add simulation, scenario evaluation, and production feedback where interactions change behavior." /%}
+
+{% faq-item question="What should be mocked?" answer="Mock dependencies whose timing, failure modes, or data would make a test slow or nondeterministic, while keeping their contracts explicit. Simulate timeouts, malformed responses, stale state, duplicates, and permission outcomes; reserve realistic end-to-end cases for behavior that depends on the interaction." /%}
+
+{% faq-item question="When does production become a test surface?" answer="As soon as real inputs, user corrections, operator classifications, or traces reveal behavior your fixtures do not cover. Sample safely, protect sensitive context, and convert confirmed mechanisms into a small regression case or contract at the layer that can detect them." /%}

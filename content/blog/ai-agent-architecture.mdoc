@@ -23,6 +23,10 @@ An AI agent is not just a prompt wrapped around a model. In production it is a c
 
 ## At a glance
 
+![Ai Agent Architecture decision flow showing context, evidence, and action](/media/blog-diagrams/ai-agent-architecture.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 | Before you start | What to define | What good looks like |
 | --- | --- | --- |
 | One real workflow and a consequential failure or release question | The task contract, allowed actions, state transitions, and evidence | A bounded control loop that can be tested, paused, and explained |
@@ -178,14 +182,6 @@ Start with one workflow and one failure class. Review a successful, degraded, an
 
 > **Decision rule:** Start with the smallest architecture that makes one real failure explainable. Add a layer only when it owns a distinct contract or removes a demonstrated risk.
 
-## Frequently asked questions
-
-{% faq-item question="Does every AI agent need a planner and executor?" answer="No. Choose the simplest control-loop shape that satisfies the task contract and consequence boundary. A planner adds coordination and state, so use it only when the work benefits from that separation." /%}
-
-{% faq-item question="Where should authorization happen?" answer="At the side-effect boundary, immediately before execution, after validating the current arguments and state. Model output, earlier confidence, and stale approval should not authorize a changed action." /%}
-
-{% faq-item question="What should the trace root represent?" answer="Usually the user-visible task or calling-system objective. Model, retrieval, tool, validation, approval, and state-transition events should appear as connected children when they shape the outcome." /%}
-
 ## Next step: review one control loop
 
 Choose one tool-using workflow and write its task contract, allowed actions, state transitions, terminal states, and evidence fields on one page. Then compare one successful and one failed run. The missing boundary will usually be more valuable than another model instruction or another dashboard panel.
@@ -309,3 +305,11 @@ Plan ownership beyond launch. Someone should own the workflow contract, dependen
 Include the maintenance loop in the implementation. Sample production results, inspect correction work, refresh the regression set, review costs and latency, and remove metrics that do not guide action. Feed confirmed incidents into tests, policies, or state transitions. A fix that changes only wording may hide a symptom; a durable fix changes the mechanism that allowed the failure or makes the failure safe and visible.
 
 Finally, define completion precisely. A workflow is not complete because the demo passed or because the model produced a plausible answer. It is complete when its inputs and outputs are bounded, its authority is explicit, its evidence is traceable, its side effects are safe to retry or reconcile, its degraded states are honest, and its owner can prove the result with representative cases. Use that standard to decide what to build next and what to leave out.
+
+## Frequently asked questions
+
+{% faq-item question="Does every AI agent need a planner and executor?" answer="No. Choose the simplest control-loop shape that satisfies the task contract and consequence boundary. A planner adds coordination and state, so use it only when the work benefits from that separation." /%}
+
+{% faq-item question="Where should authorization happen?" answer="At the side-effect boundary, immediately before execution, after validating the current arguments and state. Model output, earlier confidence, and stale approval should not authorize a changed action." /%}
+
+{% faq-item question="What should the trace root represent?" answer="Usually the user-visible task or calling-system objective. Model, retrieval, tool, validation, approval, and state-transition events should appear as connected children when they shape the outcome." /%}

@@ -158,14 +158,6 @@ For a renewal assistant, a wrong answer might result from stale account state or
 - Rehearse one success, degraded path, and failure with a new operator.
 - Turn confirmed mechanisms into tests, controls, alerts, or release decisions.
 
-## Frequently asked questions
-
-{% faq-item question="Where should observability begin?" answer="Begin with one user-visible workflow and its expected outcome. Define the parent task, terminal states, and trust boundaries, then add the smallest connected evidence that lets another person explain a representative run." /%}
-
-{% faq-item question="What is the smallest useful trace?" answer="A stable task identifier, outcome and terminal status, relevant release and model context, the important child operations, timing and failure classifications, and the decision or fallback that ended the path. Add raw content only when an authorized investigation requires it." /%}
-
-{% faq-item question="Who owns the evidence?" answer="The owner is the person or team who can act when the signal changes. Assign ownership by workflow and consequence, then document the first response, escalation route, review cadence, and access boundaries. Shared dashboards without accountable consumers decay into noise." /%}
-
 ## Next step: make observability actionable
 
 Choose one workflow and reconstruct three runs: a success, a degraded path, and a failure. Mark the missing evidence, add only what changes the investigation, and assign the next bounded action to an owner. The result should be a trace that helps the next person decide—not merely a longer log.
@@ -289,3 +281,10 @@ Plan ownership beyond launch. Someone should own the workflow contract, dependen
 Include the maintenance loop in the implementation. Sample production results, inspect correction work, refresh the regression set, review costs and latency, and remove metrics that do not guide action. Feed confirmed incidents into tests, policies, or state transitions. A fix that changes only wording may hide a symptom; a durable fix changes the mechanism that allowed the failure or makes the failure safe and visible.
 
 Finally, define completion precisely. A workflow is not complete because the demo passed or because the model produced a plausible answer. It is complete when its inputs and outputs are bounded, its authority is explicit, its evidence is traceable, its side effects are safe to retry or reconcile, its degraded states are honest, and its owner can prove the result with representative cases. Use that standard to decide what to build next and what to leave out.
+## Frequently asked questions
+
+{% faq-item question="Where should observability begin?" answer="Begin with one user-visible workflow and its expected outcome. Define the parent task, terminal states, and trust boundaries, then add the smallest connected evidence that lets another person explain a representative run." /%}
+
+{% faq-item question="What is the smallest useful trace?" answer="A stable task identifier, outcome and terminal status, relevant release and model context, the important child operations, timing and failure classifications, and the decision or fallback that ended the path. Add raw content only when an authorized investigation requires it." /%}
+
+{% faq-item question="Who owns the evidence?" answer="The owner is the person or team who can act when the signal changes. Assign ownership by workflow and consequence, then document the first response, escalation route, review cadence, and access boundaries. Shared dashboards without accountable consumers decay into noise." /%}

@@ -2,7 +2,7 @@ import type { BlogPost } from "./markdoc-blog";
 
 export type BlogFrameworkIssue = {
   slug: string;
-  code: "missing-hero" | "missing-interaction" | "too-few-sections" | "missing-action" | "too-short" | "too-long";
+  code: "missing-hero" | "missing-interaction" | "too-few-sections" | "missing-action" | "too-short" | "too-long" | "missing-visual" | "missing-code" | "missing-note" | "missing-emphasis" | "missing-faq" | "faq-too-early" | "multiple-faq-sections";
   message: string;
 };
 
@@ -26,6 +26,31 @@ export function validateBlogFramework(posts: Pick<BlogPost, "slug" | "draft" | "
     }
     if (!post.heroImage) {
       issues.push({ slug: post.slug, code: "missing-hero", message: "Published posts need a hero image." });
+    }
+    if (!/!\[[^\]]+\]\(\/media\/[^)]+\)/.test(post.body)) {
+      issues.push({ slug: post.slug, code: "missing-visual", message: "Published posts need at least one meaningful in-article visual." });
+    }
+    const fence = String.fromCharCode(96).repeat(3);
+    if (!new RegExp(`${fence}[\\s\\S]*?${fence}`).test(post.body)) {
+      issues.push({ slug: post.slug, code: "missing-code", message: "Published posts need one practical or clearly illustrative code example." });
+    }
+    if (!/^>\s+\*\*(?:Note|Decision rule|Warning|Trade-off|Rollout rule|Runbook rule|Diagnostic shortcut):/im.test(post.body)) {
+      issues.push({ slug: post.slug, code: "missing-note", message: "Published posts need a mid-article decision note, warning, or trade-off callout." });
+    }
+    if (!/\*\*[^*]+\*\*/.test(post.body)) {
+      issues.push({ slug: post.slug, code: "missing-emphasis", message: "Published posts need restrained emphasis for a high-impact idea." });
+    }
+    const faqHeadings = post.headings.filter((heading) => /\b(?:FAQ|frequently asked questions)\b/i.test(heading.text));
+    const faqItems = (post.body.match(/\{%\s*faq-item\b/g) ?? []).length;
+    if (faqItems < 2 || faqHeadings.length === 0) {
+      issues.push({ slug: post.slug, code: "missing-faq", message: "Published posts need one FAQ section with at least two shared accordion items." });
+    } else if (faqHeadings.length > 1) {
+      issues.push({ slug: post.slug, code: "multiple-faq-sections", message: "Published posts must have exactly one FAQ section." });
+    } else {
+      const faqIndex = post.body.search(/^##+\s+.*\b(?:FAQ|frequently asked questions)\b/im);
+      if (faqIndex >= 0 && faqIndex < post.body.length * 0.65) {
+        issues.push({ slug: post.slug, code: "faq-too-early", message: "The FAQ belongs after the main teaching content, not in the opening third." });
+      }
     }
     if (!/\{%\s*trace-scenario\b/.test(post.body)) {
       issues.push({ slug: post.slug, code: "missing-interaction", message: "Published posts need one purposeful interactive scenario." });

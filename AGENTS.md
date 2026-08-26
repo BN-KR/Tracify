@@ -98,6 +98,7 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 ## Markdoc Blog Rules
 - **Required skill:** Read `.agents/skills/writing-tracify-content/SKILL.md` before writing, editing, reviewing, storing, or publishing any blog post or documentation.
 - **Hard length gate:** Every new or materially rewritten published post must contain 3,000–10,000 body words, excluding frontmatter. A post below 3,000 words is unfinished; do not publish or merge it. Use `npm run test:content` to verify the count.
+- **Canonical presentation gate:** Word count alone is never completion. Every published post also needs a meaningful in-article visual, one practical or clearly labeled illustrative code example, mid-article decision notes, restrained emphasis, exactly one FAQ section after the main teaching, and one purposeful deterministic interaction.
 - **Canonical agent instructions:** Follow `docs/blog-canonical-format-playbook.md` as the authoritative content-manager and agent workflow. It overrides informal shortcuts and requires evidence-led expansion rather than keyword stuffing or repeated filler.
 - Blog content lives exclusively in `content/blog/*.mdoc`; do not add a database or CMS fallback.
 - Start new articles by copying an existing `.mdoc` file. Required frontmatter: `title`, `slug`, `excerpt`, `publishedAt` (ISO timestamp), and `author`. Keep `categories`, `tags`, and `relatedPosts` as string arrays; related posts reference slugs.

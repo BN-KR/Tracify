@@ -20,6 +20,10 @@ seo:
 
 ## At a glance
 
+![Ai Evaluation Metrics decision flow showing context, evidence, and action](/media/blog-diagrams/ai-evaluation-metrics.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 This guide is for **engineers evaluating LLM and AI agent changes**. It helps you **choose metrics that support a release decision**. It does not claim that one score can represent every user, risk, or workflow.
 
 ### The evaluation scorecard
@@ -54,12 +58,7 @@ Write the baseline, acceptable regression, required improvement, and stop condit
 - Review representative failures, not only aggregate scores.
 - Write promotion and rollback thresholds in advance.
 
-## Frequently asked questions
-
-{% faq-item question="What is the best AI evaluation metric?" answer="The best primary metric is the one that represents the user task. Add quality, reliability, cost, latency, and safety dimensions when they can change the release decision." /%}
-{% faq-item question="Can an LLM judge evaluate another LLM?" answer="It can provide useful evidence, but validate its agreement with human or task-specific checks, monitor evaluator drift, and keep the evaluator version attached to every result." /%}
-{% faq-item question="How many examples are needed?" answer="Enough to represent important cohorts and failure modes, with uncertainty reported honestly. A smaller, curated set is more useful than a larger set that excludes difficult cases." /%}
-
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
 ## Recommended next reads
 
 Continue with [AI agent evaluation](/blog/ai-agent-evaluation-practical-guide), [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals), and [AI agent regression testing](/blog/ai-agent-regression-testing).
@@ -349,3 +348,24 @@ For a meaningful release, write a short record with the goal, affected workflow,
 ### Practical checklist
 
 Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. In the context of ai evaluation metrics, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+
+## A practical implementation example
+
+This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
+
+```ts
+type Evaluation = { outcome: "pass" | "fail" | "review"; evidence: string[] };
+
+function gate(result: Evaluation) {
+  if (result.outcome === "fail") return "hold";
+  if (result.outcome === "review") return "sample";
+  return "promote";
+}
+```
+
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+## Frequently asked questions
+
+{% faq-item question="What is the best AI evaluation metric?" answer="The best primary metric is the one that represents the user task. Add quality, reliability, cost, latency, and safety dimensions when they can change the release decision." /%}
+{% faq-item question="Can an LLM judge evaluate another LLM?" answer="It can provide useful evidence, but validate its agreement with human or task-specific checks, monitor evaluator drift, and keep the evaluator version attached to every result." /%}
+{% faq-item question="How many examples are needed?" answer="Enough to represent important cohorts and failure modes, with uncertainty reported honestly. A smaller, curated set is more useful than a larger set that excludes difficult cases." /%}

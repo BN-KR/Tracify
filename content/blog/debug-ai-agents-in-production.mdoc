@@ -137,14 +137,6 @@ The [AI agent testing guide](/blog/ai-agent-testing-unit-tests-production-evals)
 - Watch the exposing signal with a defined rollback condition.
 - Turn the confirmed mechanism into a durable test or operating control.
 
-## Frequently asked questions
-
-{% faq-item question="What should an on-call engineer do first?" answer="Protect users and external state with the smallest reversible action: pause, roll back, narrow exposure, or route to a safe fallback. Record the impact and owner, then open the parent run so diagnosis starts from the task rather than the last model response." /%}
-
-{% faq-item question="Is a prompt change always the fix?" answer="No. A wrong result can originate in retrieval, stale state, tool contracts, permissions, retries, validation, dependencies, or the release boundary. Identify the mechanism first; change the prompt only when the evidence shows that instruction or context interpretation is the responsible boundary." /%}
-
-{% faq-item question="When should a workflow be paused?" answer="Pause when customer harm is active, an irreversible action lacks trustworthy evidence or authority, a policy boundary is violated, or the team cannot establish a safe fallback. Resume only after a named owner records the condition and verification that supports renewed exposure." /%}
-
 ## Next step: make debugging repeatable
 
 Choose one recent failed run and write its timeline, comparison case, mechanism, correction, and verification signal. Keep the packet short enough for the next responder to use, and turn the confirmed mechanism into one durable test or control before closing the incident.
@@ -280,3 +272,10 @@ Review one success, one corrected result, and one failure after every material r
 Take the next real implementation decision and write it down before changing the system. State the user outcome, the acceptable and unacceptable failure, the evidence required, the authority boundary, the owner, and the rollback condition. Run the decision through a small representative set that includes missing data, conflicting evidence, stale context, and a dependency failure. Keep the traces and compare them with the baseline.
 
 After launch, inspect the result from the user’s point of view. Did the workflow produce the promised outcome? Did it create correction work? Was the latency and cost acceptable? Could an operator reconstruct the decision without guessing? If the answer is no, classify the gap and improve the contract, test, policy, trace, or recovery path that owns it. A production guide is successful when it changes what the team can safely explain and operate, not when it merely adds another page of plausible advice.
+## Frequently asked questions
+
+{% faq-item question="What should an on-call engineer do first?" answer="Protect users and external state with the smallest reversible action: pause, roll back, narrow exposure, or route to a safe fallback. Record the impact and owner, then open the parent run so diagnosis starts from the task rather than the last model response." /%}
+
+{% faq-item question="Is a prompt change always the fix?" answer="No. A wrong result can originate in retrieval, stale state, tool contracts, permissions, retries, validation, dependencies, or the release boundary. Identify the mechanism first; change the prompt only when the evidence shows that instruction or context interpretation is the responsible boundary." /%}
+
+{% faq-item question="When should a workflow be paused?" answer="Pause when customer harm is active, an irreversible action lacks trustworthy evidence or authority, a policy boundary is violated, or the team cannot establish a safe fallback. Resume only after a named owner records the condition and verification that supports renewed exposure." /%}

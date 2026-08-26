@@ -38,6 +38,10 @@ A successful demo does not prove that an AI agent is ready for production. Produ
 
 ## At a glance
 
+![Building Production Ready Ai Agents decision flow showing context, evidence, and action](/media/blog-diagrams/building-production-ready-ai-agents.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 | Before you start | What to define | What good looks like |
 | --- | --- | --- |
 | One workflow, a real user, and a proposed launch boundary | The outcome, authority, evidence, recovery path, and owner | A staged capability that can be measured, paused, and improved after release |
@@ -148,14 +152,6 @@ Start with one workflow and review one successful, degraded, and failed run usin
 - Schedule post-launch sampling and a mechanism-to-regression learning loop.
 
 > **Decision rule:** The smallest useful readiness review is one real workflow, one representative failure, one explicit owner, and one reversible launch decision. Expand the process when evidence shows a missing control.
-
-## Frequently asked questions
-
-{% faq-item question="What separates a prototype from production?" answer="A production capability has an owned outcome, explicit authority and data boundaries, representative evidence, failure and recovery paths, and a post-launch operating cadence. A successful demo proves only that one path can work." /%}
-
-{% faq-item question="Who should approve readiness?" answer="The accountable workflow owner should make the decision with engineering, risk, security, and operations input proportional to the consequence. The approval should name the evidence, scope, stop condition, and rollback path." /%}
-
-{% faq-item question="Can a launch be staged?" answer="Yes. Constrain the audience, task class, action authority, or review boundary while evidence accumulates. Each stage should have an exit criterion and a clear pause or rollback action." /%}
 
 ## Next step: run one readiness review
 
@@ -280,3 +276,24 @@ Plan ownership beyond launch. Someone should own the workflow contract, dependen
 Include the maintenance loop in the implementation. Sample production results, inspect correction work, refresh the regression set, review costs and latency, and remove metrics that do not guide action. Feed confirmed incidents into tests, policies, or state transitions. A fix that changes only wording may hide a symptom; a durable fix changes the mechanism that allowed the failure or makes the failure safe and visible.
 
 Finally, define completion precisely. A workflow is not complete because the demo passed or because the model produced a plausible answer. It is complete when its inputs and outputs are bounded, its authority is explicit, its evidence is traceable, its side effects are safe to retry or reconcile, its degraded states are honest, and its owner can prove the result with representative cases. Use that standard to decide what to build next and what to leave out.
+
+## A practical implementation example
+
+This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
+
+```ts
+type RunResult = { status: "completed" | "blocked" | "failed"; evidence: string[] };
+
+function terminal(result: RunResult) {
+  return result.status !== "completed" || result.evidence.length > 0;
+}
+```
+
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+## Frequently asked questions
+
+{% faq-item question="What separates a prototype from production?" answer="A production capability has an owned outcome, explicit authority and data boundaries, representative evidence, failure and recovery paths, and a post-launch operating cadence. A successful demo proves only that one path can work." /%}
+
+{% faq-item question="Who should approve readiness?" answer="The accountable workflow owner should make the decision with engineering, risk, security, and operations input proportional to the consequence. The approval should name the evidence, scope, stop condition, and rollback path." /%}
+
+{% faq-item question="Can a launch be staged?" answer="Yes. Constrain the audience, task class, action authority, or review boundary while evidence accumulates. Each stage should have an exit criterion and a clear pause or rollback action." /%}

@@ -20,6 +20,10 @@ seo:
 
 ## At a glance
 
+![Ai Agent Frameworks decision flow showing context, evidence, and action](/media/blog-diagrams/ai-agent-frameworks.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 This guide is for **teams choosing an AI agent framework**. It helps you **evaluate operational fit beyond a quick demo**. It does not provide a universal framework ranking or replace a proof of concept on your workload.
 
 ### The framework scorecard
@@ -54,12 +58,7 @@ Framework defaults are not your reliability policy. Set budgets, permissions, re
 - Test degraded paths and cancellation.
 - Document framework behavior your team still owns.
 
-## Frequently asked questions
-
-{% faq-item question="Is an AI agent framework required?" answer="No. A focused workflow can be clearer with direct model and tool calls. Use a framework when its control, testing, or orchestration benefits justify the added abstraction." /%}
-{% faq-item question="How should frameworks be compared?" answer="Compare them on your representative task and failure set, including observability, tool control, latency, cost, portability, and the amount of custom operational code required." /%}
-{% faq-item question="Can a framework guarantee reliable agents?" answer="No. Reliability depends on the complete system: model, tools, data, policies, runtime, tests, and operations. A framework can expose or hide those concerns but cannot remove them." /%}
-
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
 ## Recommended next reads
 
 Continue with [AI agent architecture](/blog/ai-agent-architecture), [building production-ready AI agents](/blog/building-production-ready-ai-agents), and [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals).
@@ -333,3 +332,22 @@ For a meaningful release, write a short record with the goal, affected workflow,
 ### Practical checklist
 
 Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. In the context of ai agent frameworks, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+
+## A practical implementation example
+
+This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
+
+```ts
+type Decision = { kind: "tool" | "answer" | "handoff"; confidence: number; reason: string };
+
+function canRun(decision: Decision, policy: Policy) {
+  return decision.kind !== "tool" || policy.allowsTools === true;
+}
+```
+
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+## Frequently asked questions
+
+{% faq-item question="Is an AI agent framework required?" answer="No. A focused workflow can be clearer with direct model and tool calls. Use a framework when its control, testing, or orchestration benefits justify the added abstraction." /%}
+{% faq-item question="How should frameworks be compared?" answer="Compare them on your representative task and failure set, including observability, tool control, latency, cost, portability, and the amount of custom operational code required." /%}
+{% faq-item question="Can a framework guarantee reliable agents?" answer="No. Reliability depends on the complete system: model, tools, data, policies, runtime, tests, and operations. A framework can expose or hide those concerns but cannot remove them." /%}

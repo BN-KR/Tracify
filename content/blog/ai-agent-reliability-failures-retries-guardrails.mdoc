@@ -168,14 +168,6 @@ Capture the case in a scenario suite, state the expected terminal state, and tes
 - Preserve versions, traces, retry paths, and terminal outcomes.
 - Turn confirmed mechanisms into tests, contracts, alerts, or runbook changes.
 
-## Frequently asked questions
-
-{% faq-item question="When is a retry safe?" answer="When the failure is plausibly transient, the operation is idempotent or protected by a compensating control, the input or dependency state may change, and the remaining deadline can absorb another attempt. Do not retry deterministic validation, permission, or policy failures." /%}
-
-{% faq-item question="What makes a guardrail useful?" answer="It sits at a real action boundary, has observable inputs and a testable result, names the owner of exceptions, and defines what happens when the check fails. A vague instruction without a terminal response is not enough." /%}
-
-{% faq-item question="Do guardrails eliminate failures?" answer="No. They reduce harm, make failure states predictable, and give the system a safe way to stop or recover. Reliability still requires representative tests, trace evidence, and review of the paths that succeeded only after recovery." /%}
-
 ## Next step: make reliability actionable
 
 Choose one workflow with a repeated failure. Name its failure classes, set a retry and deadline budget, add one action-boundary guardrail, and define the terminal state a person will see. Then inspect the next representative trace to confirm that the control changed behavior rather than merely hiding the error.
@@ -299,3 +291,10 @@ Plan ownership beyond launch. Someone should own the workflow contract, dependen
 Include the maintenance loop in the implementation. Sample production results, inspect correction work, refresh the regression set, review costs and latency, and remove metrics that do not guide action. Feed confirmed incidents into tests, policies, or state transitions. A fix that changes only wording may hide a symptom; a durable fix changes the mechanism that allowed the failure or makes the failure safe and visible.
 
 Finally, define completion precisely. A workflow is not complete because the demo passed or because the model produced a plausible answer. It is complete when its inputs and outputs are bounded, its authority is explicit, its evidence is traceable, its side effects are safe to retry or reconcile, its degraded states are honest, and its owner can prove the result with representative cases. Use that standard to decide what to build next and what to leave out.
+## Frequently asked questions
+
+{% faq-item question="When is a retry safe?" answer="When the failure is plausibly transient, the operation is idempotent or protected by a compensating control, the input or dependency state may change, and the remaining deadline can absorb another attempt. Do not retry deterministic validation, permission, or policy failures." /%}
+
+{% faq-item question="What makes a guardrail useful?" answer="It sits at a real action boundary, has observable inputs and a testable result, names the owner of exceptions, and defines what happens when the check fails. A vague instruction without a terminal response is not enough." /%}
+
+{% faq-item question="Do guardrails eliminate failures?" answer="No. They reduce harm, make failure states predictable, and give the system a safe way to stop or recover. Reliability still requires representative tests, trace evidence, and review of the paths that succeeded only after recovery." /%}

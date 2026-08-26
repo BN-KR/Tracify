@@ -34,6 +34,10 @@ LLM tracing is for the moment when a model request succeeded but the workflow st
 
 ## At a glance
 
+![Llm Tracing Explained decision flow showing context, evidence, and action](/media/blog-diagrams/llm-tracing-explained.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 | Before you start | What to define | What good looks like |
 | --- | --- | --- |
 | One real workflow and a failure or release question | The task boundary, outcome, evidence, and owner | A connected execution narrative that supports a bounded next action |
@@ -144,14 +148,6 @@ Choose one workflow and collect a small sample of traces before expanding covera
 - Turn confirmed findings into a test, control, or reversible release decision.
 
 > **Decision rule:** Start with the smallest trace that can explain one real failure. Expand the schema only when an investigation or release decision demonstrates the missing evidence.
-
-## Frequently asked questions
-
-{% faq-item question="What is the root of an LLM trace?" answer="Usually the end-to-end task a user or calling system experiences, not an individual provider request. Model, retrieval, tool, validation, retry, and approval work should appear as connected children when they shape the result." /%}
-
-{% faq-item question="How many spans are enough?" answer="Enough to distinguish consequential decisions, dependencies, validations, retries, and terminal outcomes. Start with a small representative workflow and add detail when a real investigation cannot explain a difference." /%}
-
-{% faq-item question="Are logs and traces interchangeable?" answer="No. Logs record events; traces preserve causal relationships among operations. A production investigation often needs both, plus evaluations or human review to judge the final outcome." /%}
 
 ## Next step: trace one real workflow
 
@@ -276,3 +272,10 @@ Plan ownership beyond launch. Someone should own the workflow contract, dependen
 Include the maintenance loop in the implementation. Sample production results, inspect correction work, refresh the regression set, review costs and latency, and remove metrics that do not guide action. Feed confirmed incidents into tests, policies, or state transitions. A fix that changes only wording may hide a symptom; a durable fix changes the mechanism that allowed the failure or makes the failure safe and visible.
 
 Finally, define completion precisely. A workflow is not complete because the demo passed or because the model produced a plausible answer. It is complete when its inputs and outputs are bounded, its authority is explicit, its evidence is traceable, its side effects are safe to retry or reconcile, its degraded states are honest, and its owner can prove the result with representative cases. Use that standard to decide what to build next and what to leave out.
+## Frequently asked questions
+
+{% faq-item question="What is the root of an LLM trace?" answer="Usually the end-to-end task a user or calling system experiences, not an individual provider request. Model, retrieval, tool, validation, retry, and approval work should appear as connected children when they shape the result." /%}
+
+{% faq-item question="How many spans are enough?" answer="Enough to distinguish consequential decisions, dependencies, validations, retries, and terminal outcomes. Start with a small representative workflow and add detail when a real investigation cannot explain a difference." /%}
+
+{% faq-item question="Are logs and traces interchangeable?" answer="No. Logs record events; traces preserve causal relationships among operations. A production investigation often needs both, plus evaluations or human review to judge the final outcome." /%}

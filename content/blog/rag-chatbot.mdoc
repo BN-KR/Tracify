@@ -20,6 +20,10 @@ seo:
 
 ## At a glance
 
+![Rag Chatbot decision flow showing context, evidence, and action](/media/blog-diagrams/rag-chatbot.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 This guide is for **developers building production RAG chatbots**. It helps you **separate retrieval failures from generation failures**. It does not prescribe a specific vector database or embedding provider.
 
 ### The RAG debugging loop
@@ -57,12 +61,7 @@ Build a fixture set containing answerable questions, ambiguous questions, stale 
 - Validate citations against retrieved sources.
 - Inspect representative traces before changing the prompt or index.
 
-## Frequently asked questions
-
-{% faq-item question="Does RAG eliminate hallucinations?" answer="No. Retrieval gives the model additional evidence but does not guarantee that the answer follows it. Validate grounding, citations, and refusal behavior." /%}
-{% faq-item question="How many chunks should a RAG chatbot retrieve?" answer="There is no universal value. Tune top-k against a representative evaluation set and inspect latency, context quality, duplication, and answer correctness together." /%}
-{% faq-item question="What is the most useful RAG trace field?" answer="The document identifier and retrieval score are a strong starting point because they let you distinguish missing evidence from an answer that ignored available evidence." /%}
-
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
 ## Recommended next reads
 
 Continue with [RAG evaluation](/blog/rag-evaluation-guide), [LLM hallucination detection](/blog/llm-hallucination-detection), and [LLM tracing explained](/blog/llm-tracing-explained).
@@ -250,3 +249,23 @@ Review one success, one corrected result, and one failure after every material r
 Take the next real implementation decision and write it down before changing the system. State the user outcome, the acceptable and unacceptable failure, the evidence required, the authority boundary, the owner, and the rollback condition. Run the decision through a small representative set that includes missing data, conflicting evidence, stale context, and a dependency failure. Keep the traces and compare them with the baseline.
 
 After launch, inspect the result from the user’s point of view. Did the workflow produce the promised outcome? Did it create correction work? Was the latency and cost acceptable? Could an operator reconstruct the decision without guessing? If the answer is no, classify the gap and improve the contract, test, policy, trace, or recovery path that owns it. A production guide is successful when it changes what the team can safely explain and operate, not when it merely adds another page of plausible advice.
+
+## A practical implementation example
+
+This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
+
+```ts
+const context = await retriever.search(query, {
+  tenantId,
+  topK: 8,
+});
+
+if (context.length === 0) return { status: "needs-review" };
+```
+
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+## Frequently asked questions
+
+{% faq-item question="Does RAG eliminate hallucinations?" answer="No. Retrieval gives the model additional evidence but does not guarantee that the answer follows it. Validate grounding, citations, and refusal behavior." /%}
+{% faq-item question="How many chunks should a RAG chatbot retrieve?" answer="There is no universal value. Tune top-k against a representative evaluation set and inspect latency, context quality, duplication, and answer correctness together." /%}
+{% faq-item question="What is the most useful RAG trace field?" answer="The document identifier and retrieval score are a strong starting point because they let you distinguish missing evidence from an answer that ignored available evidence." /%}

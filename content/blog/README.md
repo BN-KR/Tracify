@@ -56,7 +56,7 @@ For a practical library, lead with a small high-value set before the long collec
 Agents editing blog content must follow this sequence and leave evidence for each stage:
 
 1. **Understand:** read `AGENTS.md`, the writing skill and its three references; inspect the current post, product source, published slugs, and media; state the reader job, outcome, boundary, archetype, and interaction.
-2. **Build:** preserve frontmatter and draft state; write Markdoc with layered H2/H3/H4 headings, useful evidence, tested or honestly labeled code, meaningful images, semantic tables, accessible accordion FAQs, decision notes, and one deterministic interaction.
+2. **Build:** preserve frontmatter and draft state; write Markdoc with layered H2/H3/H4 headings, useful evidence, tested or honestly labeled code, meaningful in-article images, semantic tables, accessible accordion FAQs placed after the main teaching, decision notes, restrained emphasis, and one deterministic interaction.
 3. **Connect:** add 4–7 descriptive contextual links per 1,000 words for long-form posts, link only to existing published posts, finish with a checklist or next action, and include three eligible recommended posts.
 4. **Inspect:** render the entire page on desktop and mobile. Check the ToC, heading anchors, interactions, tables, code, images, links, recommendation cards, focus states, word wrapping, and page-level overflow.
 5. **Release:** run `npm run test:content`, `npm run lint`, `npm run build`, and `git diff --check`; review the exact diff for scope, drafts, fabricated claims, dead links, and untested examples before creating or merging the PR.

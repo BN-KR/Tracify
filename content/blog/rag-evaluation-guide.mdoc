@@ -124,14 +124,6 @@ Do not treat a better retrieval score as permission to ship automatically. The g
 - Compare matched baseline and candidate slices with evaluator versions recorded.
 - Set a release owner, stop condition, exposure boundary, and rollback path.
 
-## Frequently asked questions
-
-{% faq-item question="What should I evaluate first in a RAG system?" answer="Start with one important workflow and determine whether the required evidence is retrieved at all. Then check claim support and task usefulness separately. This sequence prevents a retrieval miss from being mislabelled as a prompt or model problem." /%}
-
-{% faq-item question="Is citation presence enough to measure groundedness?" answer="No. Check whether the cited passage supports the specific claim, whether the answer adds unsupported certainty, and whether important claims are missing citations. Citation presence without claim alignment can create false confidence." /%}
-
-{% faq-item question="How should a RAG release be gated?" answer="Compare matched task and corpus conditions, inspect high-risk slices, preserve evaluator and retrieval versions, and predeclare hold or rollback conditions. Promote only to the exposure boundary the evidence supports; an improved average cannot erase a material regression." /%}
-
 ## Next step: make RAG evaluation actionable
 
 Choose one workflow and label a small set of answerable, unanswerable, stale, and conflicting cases. Record what was retrieved, which claims were supported, and whether the task was useful. Use the first failure mechanism to decide whether the next change belongs in the corpus, retriever, generator, rubric, or release boundary.
@@ -267,3 +259,10 @@ Review one success, one corrected result, and one failure after every material r
 Take the next real implementation decision and write it down before changing the system. State the user outcome, the acceptable and unacceptable failure, the evidence required, the authority boundary, the owner, and the rollback condition. Run the decision through a small representative set that includes missing data, conflicting evidence, stale context, and a dependency failure. Keep the traces and compare them with the baseline.
 
 After launch, inspect the result from the user’s point of view. Did the workflow produce the promised outcome? Did it create correction work? Was the latency and cost acceptable? Could an operator reconstruct the decision without guessing? If the answer is no, classify the gap and improve the contract, test, policy, trace, or recovery path that owns it. A production guide is successful when it changes what the team can safely explain and operate, not when it merely adds another page of plausible advice.
+## Frequently asked questions
+
+{% faq-item question="What should I evaluate first in a RAG system?" answer="Start with one important workflow and determine whether the required evidence is retrieved at all. Then check claim support and task usefulness separately. This sequence prevents a retrieval miss from being mislabelled as a prompt or model problem." /%}
+
+{% faq-item question="Is citation presence enough to measure groundedness?" answer="No. Check whether the cited passage supports the specific claim, whether the answer adds unsupported certainty, and whether important claims are missing citations. Citation presence without claim alignment can create false confidence." /%}
+
+{% faq-item question="How should a RAG release be gated?" answer="Compare matched task and corpus conditions, inspect high-risk slices, preserve evaluator and retrieval versions, and predeclare hold or rollback conditions. Promote only to the exposure boundary the evidence supports; an improved average cannot erase a material regression." /%}
