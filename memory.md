@@ -1,5 +1,9 @@
 # Project Memory
 
+## 2026-08-26 blog corpus completion audit
+- Removed the remaining generated `In the context of ...` prose pattern across 29 published posts while preserving article-specific headings and required presentation modules.
+- Verified all 35 posts are 4,000–8,000 words and pass the strict framework, internal-link, Markdoc, and reading-time suites; production build generated 125 pages successfully.
+
 ## 2026-08-26 canonical blog refinement prompt
 - Added a copy-paste content-manager prompt to `docs/blog-canonical-format-playbook.md` for bringing the remaining 26 published posts up to the `ai-agent-monitoring` standard.
 - The prompt requires preserved frontmatter/publication state, reader/job/boundary definition, numbered H2/H3 decision structure, evidence, one purposeful deterministic interaction, one FAQ accordion, contextual links, mobile/rendered QA, and all release checks.

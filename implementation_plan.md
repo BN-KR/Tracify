@@ -1,5 +1,12 @@
 # Product film rebuild — 2026-08-22
 
+# Blog corpus cleanup — 2026-08-26
+
+- [completed] Audit every published post for visuals, code, callouts, emphasis, FAQ placement, and word count.
+- [completed] Remove repeated generated prose from the remaining articles.
+- [completed] Run content tests, diff hygiene, and production build.
+- [pending] Publish through the PR workflow after repository review permissions are available.
+
 - [completed] Extract the public homepage and demo-page design tokens, typography, panel geometry, and interaction language.
 - [completed] Archive the old Motion Canvas project and scaffold a clean Remotion composition.
 - [completed] Build four connected scenes using the actual Tracify visual system and product workflow.
