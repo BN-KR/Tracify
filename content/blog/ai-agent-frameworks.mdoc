@@ -1,0 +1,65 @@
+---
+title: "AI Agent Frameworks: How to Choose for Production"
+slug: ai-agent-frameworks
+excerpt: Compare AI agent frameworks by control, observability, testing, tool boundaries, portability, and the operational work they leave to your team.
+publishedAt: 2026-08-26T12:25:00.000Z
+author: Tracify Team
+draft: false
+categories: [engineering]
+tags: [AI agent frameworks, agent architecture, orchestration]
+relatedPosts: [ai-agent-architecture, building-production-ready-ai-agents]
+heroImage:
+  src: /media/ai-agent-observability-hero.png
+  alt: AI agent framework components connected into an observable execution graph
+seo:
+  metaTitle: "AI Agent Frameworks: Production Selection Guide"
+  metaDescription: Choose an AI agent framework by comparing control, tool use, observability, testing, portability, and production operations.
+---
+
+{% trace-scenario title="What should the framework expose?" prompt="Two frameworks complete the same task, but one hides retries and tool decisions. Which is safer to operate?" outcome="Prefer the framework that exposes the execution boundary and lets your team inspect, test, and control consequential steps." /%}
+
+## At a glance
+
+This guide is for **teams choosing an AI agent framework**. It helps you **evaluate operational fit beyond a quick demo**. It does not provide a universal framework ranking or replace a proof of concept on your workload.
+
+### The framework scorecard
+
+Use **Control → Evidence → Tests → Operations**. A framework is useful when it reduces implementation work without making failures opaque.
+
+## Start with the workflow, not the library
+
+Write the task, tools, state, approval boundaries, latency target, deployment model, and failure responses first. [AI agent architecture](/blog/ai-agent-architecture) explains why the parent task and decision boundaries matter more than the number of abstractions in a framework.
+
+| Question | Evidence to request |
+| --- | --- |
+| Can we control tools? | Typed arguments, permissions, approvals |
+| Can we inspect runs? | Parent/child spans and attempt history |
+| Can we test behavior? | Fixtures, replay, evaluator hooks |
+| Can we recover? | Timeouts, cancellation, retries, rollback |
+| Can we change providers? | Clear model and adapter boundary |
+
+## Run a failure-focused proof of concept
+
+Do not test only a successful conversation. Include a timeout, malformed tool argument, empty retrieval, duplicate event, partial state, user correction, and approval rejection. Record what the framework handles, what your code must implement, and what remains invisible.
+
+## Keep ownership explicit
+
+Framework defaults are not your reliability policy. Set budgets, permissions, retention, redaction, and alerting in your application. [Building production-ready AI agents](/blog/building-production-ready-ai-agents) provides a broader readiness checklist.
+
+## Release checklist
+
+- Define the workflow and boundaries before selecting abstractions.
+- Verify tool permissions and output validation.
+- Trace parent tasks, model attempts, tools, and decisions.
+- Test degraded paths and cancellation.
+- Document framework behavior your team still owns.
+
+## Frequently asked questions
+
+{% faq-item question="Is an AI agent framework required?" answer="No. A focused workflow can be clearer with direct model and tool calls. Use a framework when its control, testing, or orchestration benefits justify the added abstraction." /%}
+{% faq-item question="How should frameworks be compared?" answer="Compare them on your representative task and failure set, including observability, tool control, latency, cost, portability, and the amount of custom operational code required." /%}
+{% faq-item question="Can a framework guarantee reliable agents?" answer="No. Reliability depends on the complete system: model, tools, data, policies, runtime, tests, and operations. A framework can expose or hide those concerns but cannot remove them." /%}
+
+## Recommended next reads
+
+Continue with [AI agent architecture](/blog/ai-agent-architecture), [building production-ready AI agents](/blog/building-production-ready-ai-agents), and [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals).

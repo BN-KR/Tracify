@@ -1,0 +1,80 @@
+---
+title: "AI Agent Security: A Practical Production Checklist"
+slug: ai-agent-security
+excerpt: Secure AI agents by defining tool boundaries, protecting data, validating outputs, and tracing every consequential action.
+publishedAt: 2026-08-26T12:00:00.000Z
+author: Tracify Team
+draft: false
+categories: [security]
+tags: [AI agent security, prompt injection, tool security]
+relatedPosts: [prompt-injection-defense, human-in-the-loop-ai-agents]
+heroImage:
+  src: /media/ai-agent-security-hero.png
+  alt: Black and yellow security boundary diagram for an AI agent
+seo:
+  metaTitle: "AI Agent Security: Production Checklist"
+  metaDescription: Learn how to secure AI agents with tool permissions, prompt injection defenses, data boundaries, and traceable approvals.
+---
+
+{% trace-scenario title="Where should the security boundary sit?" prompt="An agent receives untrusted text and can call a refund tool. What must happen before the tool runs?" outcome="Treat retrieved and user-provided text as data, validate the proposed action against policy, and require approval when the consequence is material." /%}
+
+## At a glance
+
+This guide is for **engineers shipping tool-using AI agents**. It helps you **turn vague security concerns into enforceable boundaries**. It covers runtime controls and evidence, not a complete compliance program or a substitute for threat modeling.
+
+### The security framework
+
+Use **Input → Policy → Tool → Evidence**:
+
+1. **Input:** classify user, retrieved, and tool-returned content as untrusted by default.
+2. **Policy:** decide what the agent may propose, read, or execute.
+3. **Tool:** validate arguments and scope credentials to the smallest useful permission.
+4. **Evidence:** record the decision, tool call, result, and approval path.
+
+## Start with the consequence
+
+Security controls should be strongest where an incorrect action is hardest to reverse. Reading a public document, sending an email, changing an account, and issuing a refund should not share one permission level. The [prompt injection defense guide](/blog/prompt-injection-defense) explains why instructions found inside data cannot be trusted merely because a model saw them.
+
+| Action | Default control | Evidence to retain |
+| --- | --- | --- |
+| Read public data | Allow with filtering | Source and scope |
+| Write internal data | Validate and log | Arguments and actor |
+| Contact an external party | Preview or approve | Message and recipient |
+| Irreversible change | Human approval | Policy decision and approver |
+
+## Make tools narrow and explicit
+
+Prefer several small tools with typed arguments over one general-purpose executor. Validate identifiers, ranges, destinations, and authorization in application code. The model can suggest an action; it should not be the final authority that grants itself access.
+
+```ts
+type RefundRequest = { orderId: string; amountCents: number };
+
+function authorizeRefund(request: RefundRequest, actorId: string) {
+  if (request.amountCents <= 0 || request.amountCents > 5000) throw new Error("approval required");
+  return { actorId, request };
+}
+```
+
+The example is illustrative: adapt the policy to your authorization system and test boundary cases. Trace the proposed call separately from the executed call so an investigator can tell what the model wanted from what the system allowed.
+
+## Protect data across the run
+
+Redact secrets before telemetry leaves the process. Limit retention for prompts, retrieved documents, and tool payloads. Keep tenant, user, and authorization context attached to the parent run so a later review can detect cross-boundary access. [Human-in-the-loop design](/blog/human-in-the-loop-ai-agents) helps define where a person must become part of the decision.
+
+## Release checklist
+
+- List every tool, credential, data source, and irreversible action.
+- Test prompt injection, confused-deputy, replay, and excessive-permission cases.
+- Log proposed, approved, rejected, and executed actions separately.
+- Redact secrets and define retention before enabling production traces.
+- Give every high-consequence alert an owner and rollback path.
+
+## Frequently asked questions
+
+{% faq-item question="Can a system prompt secure an AI agent?" answer="No. Treat the prompt as one layer of guidance. Enforce permissions, argument validation, data boundaries, approvals, and audit evidence in code and infrastructure." /%}
+{% faq-item question="Should every tool call require approval?" answer="No. Use risk-based controls. Low-risk reads can be automated; external communication and irreversible writes usually need stronger validation or human approval." /%}
+{% faq-item question="What should a security trace contain?" answer="Record the workflow, actor, policy version, proposed action, validated arguments, approval decision, execution result, and redacted evidence needed to investigate the decision." /%}
+
+## Recommended next reads
+
+Continue with [prompt injection defense](/blog/prompt-injection-defense), [structured outputs for AI agents](/blog/structured-outputs-ai-agents), and [AI agent reliability](/blog/ai-agent-reliability-failures-retries-guardrails).
