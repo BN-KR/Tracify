@@ -40,11 +40,14 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   async function continueWith(provider: "google" | "github") {
     setPending(true);
     setError("");
+    // Give the Better Auth/Convex clients a chance to observe the OAuth
+    // session before protected destinations such as billing are rendered.
+    const authCallbackPath = `/auth/callback?redirect_url=${encodeURIComponent(callbackPath)}`;
     const result = await authClient.signIn.social({
       provider,
-      callbackURL: absolute(callbackPath),
+      callbackURL: absolute(authCallbackPath),
       errorCallbackURL: absolute("/auth/error"),
-      newUserCallbackURL: absolute(callbackPath),
+      newUserCallbackURL: absolute(authCallbackPath),
     });
     if (result.error) {
       setPending(false);
