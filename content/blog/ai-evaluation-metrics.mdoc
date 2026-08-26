@@ -291,9 +291,9 @@ After a release, check whether the team used the metric as intended. Did it lead
 
 The final standard is practical: evaluation should make a user-visible decision safer, clearer, or more reversible. If a score cannot help someone decide what to inspect or change next, it does not yet earn a place in the production scorecard.
 
-## ai evaluation metrics: a production field guide
+## The ai evaluation metrics operating model
 
-## Implementation notes
+## Put ai evaluation metrics into practice
 
 A useful article should help a reader move from an idea to a safe production decision. Start by stating the user-visible outcome, then identify the inputs, the owner, the evidence, and the terminal states. Do not begin with a tool or framework. Begin with the decision the system must support and the cost of getting that decision wrong. In the context of ai evaluation metrics, apply this principle to the concrete workflow rather than treating it as a generic best practice.
 
@@ -349,7 +349,7 @@ For a meaningful release, write a short record with the goal, affected workflow,
 
 Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. In the context of ai evaluation metrics, apply this principle to the concrete workflow rather than treating it as a generic best practice.
 
-## A practical implementation example
+## A practical ai evaluation metrics implementation example
 
 This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
 

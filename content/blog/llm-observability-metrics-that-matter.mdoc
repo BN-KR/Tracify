@@ -174,9 +174,9 @@ Start with one workflow and a small review packet. Include the task outcome, com
 
 Choose one dashboard this week. Identify the metric that does not change a decision, replace it with the outcome or diagnostic signal that would, and write down the owner and stop condition. Then review one representative trace before adding anything else. A smaller, explainable metric set is easier to operate than a complete-looking dashboard no one trusts.
 
-## llm observability metrics that matter: a production field guide
+## The llm observability metrics that matter operating model
 
-## Implementation notes
+## Put llm observability metrics that matter into practice
 
 A useful article should help a reader move from an idea to a safe production decision. Start by stating the user-visible outcome, then identify the inputs, the owner, the evidence, and the terminal states. Do not begin with a tool or framework. Begin with the decision the system must support and the cost of getting that decision wrong. In the context of llm observability metrics that matter, apply this principle to the concrete workflow rather than treating it as a generic best practice.
 
@@ -232,7 +232,7 @@ For a meaningful release, write a short record with the goal, affected workflow,
 
 Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. In the context of llm observability metrics that matter, apply this principle to the concrete workflow rather than treating it as a generic best practice.
 
-## Failure scenarios to rehearse
+## Failure scenarios in llm observability metrics that matter
 
 The happy path is the least informative path. Rehearse empty input, malformed output, stale context, unavailable dependencies, rate limits, duplicate callbacks, and a provider timeout after an external system may already have accepted the request. For each case, state the expected user-visible result, the durable record that proves what happened, and the person or process responsible for recovery.
 
@@ -280,7 +280,7 @@ The best implementation is usually the smallest one that makes the decision expl
 
 Use this guide to produce a concrete next action. Pick one workflow, name its owner, write the contract, collect representative traces, choose one quality and one safety signal, and set a rollback condition. Review the result with engineering, security, and the people who handle exceptions. Their questions are part of the system design. A dependable production workflow is not defined by a long prompt or a high demo score; it is defined by a user-visible outcome that remains explainable, bounded, and recoverable as conditions change.
 
-## From draft to durable practice
+## From llm observability metrics that matter draft to durable practice
 
 A production article should leave the reader with a sequence they can execute and inspect. Start with a baseline: one representative input, one expected outcome, one failure case, and one trace or record that makes the result visible. Change one meaningful variable at a time. If the result improves, record why; if it regresses, preserve the case so the regression becomes a durable test instead of a forgotten anecdote.
 
@@ -294,7 +294,7 @@ Include the maintenance loop in the implementation. Sample production results, i
 
 Finally, define completion precisely. A workflow is not complete because the demo passed or because the model produced a plausible answer. It is complete when its inputs and outputs are bounded, its authority is explicit, its evidence is traceable, its side effects are safe to retry or reconcile, its degraded states are honest, and its owner can prove the result with representative cases. Use that standard to decide what to build next and what to leave out.
 
-## A practical implementation example
+## A practical llm observability metrics that matter implementation example
 
 This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
 

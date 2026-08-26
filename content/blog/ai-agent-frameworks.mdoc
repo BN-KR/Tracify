@@ -275,9 +275,9 @@ The selection is successful when the team can explain why the framework is prese
 
 Keep that explanation current. Update it when a model provider changes, a tool gains a side effect, a state store moves, or the framework changes its serialization. Attach the update to the release review and rerun the failure fixtures. A framework is part of the operating system of the agent, so its documentation, traces, tests, and ownership need the same maintenance discipline as the workflow code itself. This final record should make the next choice easier, whether that choice is adoption, expansion, simplification, or replacement. Review it with the people who build, operate, secure, and support the workflow. Their different questions expose hidden assumptions before those assumptions become production behavior or an expensive migration problem. The review should end with a named owner, a measured follow-up, and a date for reassessing whether the framework still earns its complexity.
 
-## ai agent frameworks: a production field guide
+## The ai agent frameworks operating model
 
-## Implementation notes
+## Put ai agent frameworks into practice
 
 A useful article should help a reader move from an idea to a safe production decision. Start by stating the user-visible outcome, then identify the inputs, the owner, the evidence, and the terminal states. Do not begin with a tool or framework. Begin with the decision the system must support and the cost of getting that decision wrong. In the context of ai agent frameworks, apply this principle to the concrete workflow rather than treating it as a generic best practice.
 
@@ -333,7 +333,7 @@ For a meaningful release, write a short record with the goal, affected workflow,
 
 Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. In the context of ai agent frameworks, apply this principle to the concrete workflow rather than treating it as a generic best practice.
 
-## A practical implementation example
+## A practical ai agent frameworks implementation example
 
 This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
 
