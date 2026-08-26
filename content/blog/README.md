@@ -26,9 +26,10 @@ Every published post follows the same editorial shape. This is a product require
 3. **Navigation:** the page automatically renders a collapsible table of contents from the article’s H2/H3 headings.
 4. **Operating model:** name the article’s framework or decision model and explain its parts before diving into implementation.
 5. **Evidence:** include at least one concrete example, code block, table, formula, trace, screenshot, or diagram where it improves understanding.
-6. **Interaction:** include one deterministic, accessible Markdoc interaction—normally a trace scenario, evaluation explorer, calculator, checklist, or focused decision widget.
-7. **Trade-offs:** state limitations, failure modes, security boundaries, and what the recommendation does not solve.
-8. **Action:** close with a practical checklist, next step, or release decision and contextual links to the next Tracify guides.
+6. **Composition:** use natural two-part title structures for the shared slash treatment and reserve the centralized `highlight` tag for important decisions, risks, and outcomes. Keep highlights sparse and readable.
+7. **Interaction:** include one deterministic, accessible Markdoc interaction—normally a trace scenario, evaluation explorer, calculator, checklist, or focused decision widget.
+8. **Trade-offs:** state limitations, failure modes, security boundaries, and what the recommendation does not solve.
+9. **Action:** close with a practical checklist, next step, or release decision and contextual links to the next Tracify guides.
 
 Use this article rhythm for each major section:
 
