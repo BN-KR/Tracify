@@ -1,0 +1,68 @@
+---
+title: "How to Build a RAG Chatbot That You Can Debug"
+slug: rag-chatbot
+excerpt: Build a retrieval-augmented chatbot with clear source boundaries, measurable retrieval quality, and traces that explain wrong answers.
+publishedAt: 2026-08-26T12:05:00.000Z
+author: Tracify Team
+draft: false
+categories: [engineering]
+tags: [RAG chatbot, retrieval augmented generation, AI search]
+relatedPosts: [rag-evaluation-guide, llm-hallucination-detection]
+heroImage:
+  src: /media/ai-agent-observability-hero.png
+  alt: Retrieval and answer path shown as connected stages in a RAG chatbot
+seo:
+  metaTitle: "How to Build a Debuggable RAG Chatbot"
+  metaDescription: Build a RAG chatbot with retrieval boundaries, citations, evaluation, and traces for diagnosing irrelevant or unsupported answers.
+---
+
+{% trace-scenario title="Why was this answer wrong?" prompt="A RAG chatbot gives a confident answer, but the source documents do not support it. Which span should you inspect first?" outcome="Compare the user question, retrieved passages, ranking scores, prompt context, and final answer as one causal chain." /%}
+
+## At a glance
+
+This guide is for **developers building production RAG chatbots**. It helps you **separate retrieval failures from generation failures**. It does not prescribe a specific vector database or embedding provider.
+
+### The RAG debugging loop
+
+Use **Question → Retrieve → Ground → Answer → Evaluate**. Keep each stage observable; otherwise a wrong answer collapses into one opaque model call.
+
+## Define what the chatbot is allowed to answer
+
+Write the source boundary before choosing a model. State which corpus is authoritative, how fresh it must be, and what the chatbot should say when evidence is missing. The [RAG evaluation guide](/blog/rag-evaluation-guide) gives a practical way to measure retrieval and answer quality instead of treating fluency as correctness.
+
+## Trace retrieval separately from generation
+
+Capture the query, filters, top-k setting, document identifiers, chunk boundaries, scores, prompt version, and answer. Do not store sensitive document text by default; retain identifiers and controlled previews where possible.
+
+| Failure symptom | Likely stage | First evidence |
+| --- | --- | --- |
+| Relevant source never appears | Retrieval | Query, filters, top-k, scores |
+| Source appears but answer ignores it | Grounding | Context and prompt version |
+| Answer contradicts source | Generation or policy | Citation and output validation |
+| Answer is stale | Ingestion | Document version and index timestamp |
+
+## Make unsupported answers visible
+
+Require citations or source identifiers when the task needs factual grounding. Validate that cited identifiers came from retrieved context. A refusal or “I do not have enough evidence” response is often safer than filling a gap with plausible language. Pair this with [LLM hallucination detection](/blog/llm-hallucination-detection) when you need a review queue for unsupported claims.
+
+## Test the whole path
+
+Build a fixture set containing answerable questions, ambiguous questions, stale documents, adversarial instructions, empty retrieval, and conflicting sources. Compare retrieval recall, groundedness, answer quality, latency, and cost together. A change that improves one number while damaging the user task is not an improvement.
+
+## Release checklist
+
+- Define the authoritative corpus and freshness boundary.
+- Record retrieval inputs and document identifiers.
+- Test empty, stale, conflicting, and adversarial context.
+- Validate citations against retrieved sources.
+- Inspect representative traces before changing the prompt or index.
+
+## Frequently asked questions
+
+{% faq-item question="Does RAG eliminate hallucinations?" answer="No. Retrieval gives the model additional evidence but does not guarantee that the answer follows it. Validate grounding, citations, and refusal behavior." /%}
+{% faq-item question="How many chunks should a RAG chatbot retrieve?" answer="There is no universal value. Tune top-k against a representative evaluation set and inspect latency, context quality, duplication, and answer correctness together." /%}
+{% faq-item question="What is the most useful RAG trace field?" answer="The document identifier and retrieval score are a strong starting point because they let you distinguish missing evidence from an answer that ignored available evidence." /%}
+
+## Recommended next reads
+
+Continue with [RAG evaluation](/blog/rag-evaluation-guide), [LLM hallucination detection](/blog/llm-hallucination-detection), and [LLM tracing explained](/blog/llm-tracing-explained).

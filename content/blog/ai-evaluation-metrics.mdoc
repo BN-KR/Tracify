@@ -1,0 +1,65 @@
+---
+title: "AI Evaluation Metrics: What to Measure in Production"
+slug: ai-evaluation-metrics
+excerpt: Choose AI evaluation metrics that connect model behavior to task outcomes, reliability, cost, latency, safety, and user impact.
+publishedAt: 2026-08-26T12:35:00.000Z
+author: Tracify Team
+draft: false
+categories: [evaluation]
+tags: [AI evaluation metrics, LLM evaluation, model quality]
+relatedPosts: [ai-agent-evaluation-practical-guide, ai-agent-testing-unit-tests-production-evals]
+heroImage:
+  src: /media/ai-agent-evaluation-hero.png
+  alt: AI evaluation scorecard comparing quality, latency, cost, and safety outcomes
+seo:
+  metaTitle: "AI Evaluation Metrics for Production Systems"
+  metaDescription: Choose practical AI evaluation metrics for quality, groundedness, tool use, latency, cost, safety, and user-visible outcomes.
+---
+
+{% trace-scenario title="Which metric should drive the release?" prompt="A candidate model improves answer similarity but increases failed tool calls. How should the team decide?" outcome="Compare the complete task scorecard and inspect representative traces; do not promote a candidate on one convenient metric." /%}
+
+## At a glance
+
+This guide is for **engineers evaluating LLM and AI agent changes**. It helps you **choose metrics that support a release decision**. It does not claim that one score can represent every user, risk, or workflow.
+
+### The evaluation scorecard
+
+Use **Outcome → Quality → Reliability → Economics → Safety**. Start with the user task, then add dimensions that explain whether a change is acceptable.
+
+## Measure the task first
+
+Define what successful completion means and how failure affects the user. For a RAG answer, that may include groundedness and citation correctness. For a tool-using agent, it may include correct tool selection, argument validity, and side-effect accuracy. [AI agent evaluation](/blog/ai-agent-evaluation-practical-guide) covers how to build that decision path.
+
+| Dimension | Example question |
+| --- | --- |
+| Outcome | Did the user task finish correctly? |
+| Quality | Was the answer relevant and supported? |
+| Reliability | Did tools and dependencies behave? |
+| Economics | What did the run cost and how long did it take? |
+| Safety | Did the workflow stay inside policy? |
+
+## Pair aggregate scores with traces
+
+An average can hide a severe regression in a small cohort. Store evaluator version, candidate version, task distribution, sampled examples, and failure class. Inspect traces for the mechanism behind the score. [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals) shows how unit tests, regression cases, and production evaluations fit together.
+
+## Set decision thresholds before looking
+
+Write the baseline, acceptable regression, required improvement, and stop condition before comparing candidates. If the sample is small or the evaluator is noisy, state that uncertainty. A precise number without a stable sampling rule is not strong evidence.
+
+## Release checklist
+
+- Define the user-visible outcome.
+- Choose metrics that explain quality, reliability, cost, latency, and safety.
+- Version the candidate, evaluator, prompt, and dataset.
+- Review representative failures, not only aggregate scores.
+- Write promotion and rollback thresholds in advance.
+
+## Frequently asked questions
+
+{% faq-item question="What is the best AI evaluation metric?" answer="The best primary metric is the one that represents the user task. Add quality, reliability, cost, latency, and safety dimensions when they can change the release decision." /%}
+{% faq-item question="Can an LLM judge evaluate another LLM?" answer="It can provide useful evidence, but validate its agreement with human or task-specific checks, monitor evaluator drift, and keep the evaluator version attached to every result." /%}
+{% faq-item question="How many examples are needed?" answer="Enough to represent important cohorts and failure modes, with uncertainty reported honestly. A smaller, curated set is more useful than a larger set that excludes difficult cases." /%}
+
+## Recommended next reads
+
+Continue with [AI agent evaluation](/blog/ai-agent-evaluation-practical-guide), [AI agent testing](/blog/ai-agent-testing-unit-tests-production-evals), and [AI agent regression testing](/blog/ai-agent-regression-testing).

@@ -1,0 +1,70 @@
+---
+title: "Prompt Engineering for Production AI Systems"
+slug: prompt-engineering-guide
+excerpt: Improve production prompts by defining the task contract, testing variation, versioning changes, and measuring user-visible outcomes.
+publishedAt: 2026-08-26T12:10:00.000Z
+author: Tracify Team
+draft: false
+categories: [engineering]
+tags: [prompt engineering, prompt design, LLM prompts]
+relatedPosts: [prompt-versioning-production, structured-outputs-ai-agents]
+heroImage:
+  src: /media/ai-agent-observability-hero.png
+  alt: Structured prompt contract connected to an evaluation and production trace
+seo:
+  metaTitle: "Prompt Engineering for Production AI Systems"
+  metaDescription: A practical prompt engineering guide for defining contracts, testing edge cases, versioning prompts, and debugging regressions.
+---
+
+{% trace-scenario title="Did the prompt fix the problem?" prompt="A revised prompt improves one demo but increases refusals in production. What should you compare?" outcome="Compare the same task distribution by prompt version, outcome, failure class, latency, and cost instead of trusting one example." /%}
+
+## At a glance
+
+This guide is for **engineers and product teams changing prompts in production**. It helps you **turn prompt edits into reviewable experiments**. It does not replace application validation, permissions, or model-specific testing.
+
+### The prompt contract
+
+Use **Task → Context → Constraints → Output → Evaluation**. Each part should be explicit enough that another person can identify a failure without guessing what the prompt intended.
+
+## Start with the task contract
+
+Name the user outcome, inputs, allowed actions, refusal conditions, and output shape. Remove instructions that do not affect a decision. When a prompt depends on retrieved content or tool results, label those inputs as data and keep the trust boundary clear.
+
+## Make outputs testable
+
+For downstream code, prefer a schema with validation rather than parsing prose. [Structured outputs for AI agents](/blog/structured-outputs-ai-agents) covers the boundary between model suggestions and application-controlled actions. Keep validation outside the model and return a safe error when the output is incomplete.
+
+```text
+Task: classify the support request
+Allowed labels: billing | access | technical | other
+Output: one JSON object with label and confidence
+If evidence is insufficient: label=other and explain why
+```
+
+This is an illustrative contract, not a guaranteed model behavior. Test malformed JSON, ambiguous inputs, long context, conflicting instructions, and empty fields.
+
+## Version every meaningful change
+
+Store prompt version, model, relevant configuration, evaluator version, and task cohort with each run. The [prompt versioning guide](/blog/prompt-versioning-production) explains why a prompt diff without outcome evidence is not a release record.
+
+## Evaluate before rollout
+
+Use a fixed regression set plus fresh production examples. Compare quality, refusal rate, tool-call correctness, latency, cost, and safety. Roll out to a narrow cohort with a stop condition and preserve the prior version for rollback.
+
+## Release checklist
+
+- Write the task, boundary, output, and refusal contract.
+- Validate outputs in application code.
+- Store prompt and model versions with every evaluation.
+- Test adversarial, ambiguous, empty, and long inputs.
+- Define the rollback threshold before the rollout.
+
+## Frequently asked questions
+
+{% faq-item question="Is there one perfect prompt?" answer="No. Prompt quality depends on the task distribution, model, tools, context, and outcome definition. Treat prompts as versioned system components and evaluate them with representative cases." /%}
+{% faq-item question="Should prompts include chain-of-thought instructions?" answer="Focus on the output contract and evidence your application needs. Do not depend on hidden reasoning text as an audit record; capture structured decisions and tool actions instead." /%}
+{% faq-item question="How often should prompts be reviewed?" answer="Review them whenever the task, model, tools, data, policy, or observed failure distribution changes. Re-run the regression set and inspect representative production traces." /%}
+
+## Recommended next reads
+
+Continue with [prompt versioning in production](/blog/prompt-versioning-production), [AI agent regression testing](/blog/ai-agent-regression-testing), and [structured outputs](/blog/structured-outputs-ai-agents).

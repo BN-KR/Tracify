@@ -1,0 +1,70 @@
+---
+title: "LLM APIs in Production: Reliability, Cost, and Observability"
+slug: llm-api-guide
+excerpt: Operate LLM APIs safely with timeouts, retries, fallbacks, structured evidence, and trace-linked cost and latency measurements.
+publishedAt: 2026-08-26T12:20:00.000Z
+author: Tracify Team
+draft: false
+categories: [engineering]
+tags: [LLM API, API reliability, model calls]
+relatedPosts: [llm-tracing-explained, llm-latency-optimization]
+heroImage:
+  src: /media/llm-tracing-explained-1200x630.jpg
+  alt: LLM API request path showing timing, retries, and response evidence
+seo:
+  metaTitle: "LLM APIs in Production: Reliability Guide"
+  metaDescription: Make LLM API integrations reliable with timeouts, retries, fallbacks, validation, cost controls, and trace-linked diagnostics.
+---
+
+{% trace-scenario title="Should this model call retry?" prompt="An LLM API request times out after the provider accepted it. What must the system know before retrying?" outcome="Use an idempotency strategy, bounded retry policy, timeout classification, and trace-linked attempt IDs to avoid duplicate work." /%}
+
+## At a glance
+
+This guide is for **developers integrating LLM APIs into user-facing systems**. It helps you **design the call boundary so failures remain explainable and bounded**. It does not promise provider uptime or prescribe a specific SDK.
+
+### The API call contract
+
+Use **Budget → Attempt → Validate → Record**:
+
+1. Set time, token, spend, and retry budgets.
+2. Give every attempt an explicit outcome.
+3. Validate the response before downstream use.
+4. Record model, version, latency, usage, and failure class.
+
+## Separate failure classes
+
+An invalid request, rate limit, provider outage, timeout, malformed output, and policy refusal need different responses. Retrying all failures increases cost and can amplify an outage. [AI agent reliability](/blog/ai-agent-reliability-failures-retries-guardrails) covers bounded retries and guardrails in the larger workflow.
+
+## Make the response safe to consume
+
+Treat model output as untrusted input. Validate schema, length, allowed values, citations, and tool arguments in application code. If validation fails, route to a bounded fallback or human review instead of passing malformed output downstream.
+
+## Measure the complete call
+
+Capture queue time, provider time, retry count, input and output token usage, model identifier, status, timeout, and redacted request metadata. [LLM tracing explained](/blog/llm-tracing-explained) shows how a call becomes useful when it remains connected to the parent user task.
+
+| Signal | Decision it supports |
+| --- | --- |
+| Time to first token | Streaming experience |
+| Total duration | End-to-end latency |
+| Retry count | Reliability and spend |
+| Usage and price | Budget control |
+| Validation result | Downstream safety |
+
+## Release checklist
+
+- Classify failures before adding retries.
+- Set explicit time, token, and spend budgets.
+- Validate output before tool or database use.
+- Record every attempt with a stable parent run.
+- Test provider errors, timeouts, empty output, and malformed output.
+
+## Frequently asked questions
+
+{% faq-item question="Should every LLM API failure retry?" answer="No. Retry only transient, bounded failures with backoff and an attempt budget. Do not blindly retry invalid requests, policy refusals, or non-idempotent actions." /%}
+{% faq-item question="What is the most important LLM API metric?" answer="Start with the user-visible outcome and connect latency, cost, validation, and failure class to it. A provider metric alone cannot tell you whether the task succeeded." /%}
+{% faq-item question="How do fallbacks affect quality?" answer="A fallback can improve availability while changing quality, latency, cost, or safety. Version and evaluate the fallback path separately rather than hiding it behind one success metric." /%}
+
+## Recommended next reads
+
+Continue with [LLM latency optimization](/blog/llm-latency-optimization), [reducing LLM costs](/blog/reduce-llm-costs-without-hurting-quality), and [LLM observability metrics](/blog/llm-observability-metrics-that-matter).
