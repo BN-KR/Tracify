@@ -468,7 +468,8 @@
     text-wrap: balance;
   }
 
-  .markdoc-blog-richtext h2 { border-top: 1px solid rgb(0 0 0 / 20%); font-size: clamp(1.6rem, 3vw, 2.15rem); padding-top: 1.25rem; }
+  .markdoc-blog-richtext h2 { position: relative; border-top: 1px solid rgb(0 0 0 / 20%); font-size: clamp(1.6rem, 3vw, 2.15rem); padding-top: 1.25rem; }
+  .markdoc-blog-richtext h2::before { content: "/"; position: absolute; top: 0.95rem; left: -2.1rem; color: #f4d44d; font-family: var(--font-geist-mono), monospace; font-size: 1.3rem; font-weight: 700; line-height: 1; text-shadow: 1px 1px 0 #000; }
   .markdoc-blog-richtext h3 { border-left: 3px solid #f4d44d; font-size: 1.25rem; padding-left: 0.8rem; }
   .markdoc-blog-richtext h4 { font-size: 1rem; }
   .blog-table-of-contents { margin-bottom: 3rem; border: 1px solid rgb(0 0 0 / 22%); background: rgb(255 255 255 / 42%); }
@@ -501,7 +502,8 @@
   .markdoc-blog-richtext strong { color: #000; font-weight: 700; background: linear-gradient(transparent 58%, rgb(244 212 77 / 68%) 58%); }
   .blog-highlight { color: #000; background: #f4d44d; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding: 0.04em 0.18em; }
   .blog-post__title { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.28em; row-gap: 0.08em; text-wrap: balance; }
-  .blog-title-slash { color: #f4d44d; text-shadow: 2px 2px 0 #000; font-family: var(--font-geist-mono), monospace; font-size: 0.72em; font-weight: 700; }
+  .blog-post__title { text-decoration: none; }
+  .blog-post__body > .blog-table-of-contents + .markdoc-blog-richtext > article > h3:first-of-type { text-decoration: line-through; text-decoration-color: #f4d44d; text-decoration-thickness: 0.18em; text-decoration-skip-ink: none; }
   .markdoc-blog-richtext code { background: #000; color: #fff; font-family: var(--font-geist-mono), monospace; padding: 0.125rem 0.3rem; }
   .markdoc-blog-richtext p, .markdoc-blog-richtext li { overflow-wrap: break-word; }
   .blog-table-scroll { width: 100%; max-width: 100%; margin-block: 2rem; overflow-x: auto; border: 1px solid #000; background: rgb(255 255 255 / 55%); }
