@@ -1,5 +1,12 @@
 # 2026-08-22 — Product film rebuilt from scratch
 
+# 2026-08-26 — Blog corpus cleanup
+
+- [completed] Remove generated context-template language from the published corpus.
+- [completed] Verify word-count and canonical presentation requirements across all posts.
+- [completed] Run focused content suites and production build.
+- [pending] Open and merge the PR; deployment requires the merged commit on `main`.
+
 - [x] Remove the active Motion Canvas composition and preserve it in a recoverable archive.
 - [x] Rebuild the film in Remotion using the live homepage/demo design language and exact Geist fonts.
 - [x] Animate the homepage proof, demo workspace, failed-run drilldown, trace inspector, replay score, and release proof.

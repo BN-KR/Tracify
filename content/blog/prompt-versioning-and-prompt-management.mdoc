@@ -236,17 +236,26 @@ Leaders should ask for decision-quality artifacts rather than a larger dashboard
 
 ## Frequently asked questions
 
-### What belongs in a prompt version?
+{% faq-item question="What belongs in a prompt version?" answer="The instruction, relevant policy text, model settings, and references required to reproduce behavior." /%}
 
-The instruction, relevant policy text, model settings, and references required to reproduce behavior.
+{% faq-item question="Can copy edits skip review?" answer="Not when they can alter task interpretation, tool use, or a policy boundary." /%}
 
-### Can copy edits skip review?
+{% faq-item question="What triggers rollback?" answer="A predeclared unacceptable behavior or a material regression in reviewed outcomes." /%}
 
-Not when they can alter task interpretation, tool use, or a policy boundary.
+## A practical version record
 
-### What triggers rollback?
+Keep the prompt and its operational dependencies together so a run can be reproduced and a release can be rolled back.
 
-A predeclared unacceptable behavior or a material regression in reviewed outcomes.
+```yaml
+prompt_id: support-triage
+version: 2026-08-26.4
+model: approved-model-id
+policy: support-policy-12
+evaluation_set: support-triage-regression
+rollback_when: unacceptable_policy_failure
+```
+
+> **Decision rule:** A prompt version is incomplete if an operator cannot identify the model, policy, evaluation set, and rollback condition that accompanied it.
 
 ## Next step: make prompt versioning actionable
 
@@ -263,14 +272,6 @@ Start with one workflow this week. Instrument the evidence needed to explain a s
 - Assign one owner for the next bounded action and write the stop condition before changing production behavior.
 
 > **Decision rule:** Prefer the smallest change that produces inspectable evidence. If the example cannot be tested, label it illustrative and verify the surrounding assumptions before adapting it.
-
-## Frequently asked questions
-
-{% faq-item question="What should I do first?" answer="Start with one real workflow and one user-visible outcome. Write down the boundary, collect the evidence that explains the outcome, and choose a reversible next step before expanding the system." /%}
-
-{% faq-item question="How do I know whether this is working?" answer="Compare the same task distribution before and after the change. Review quality, latency, cost, failure behavior, and user impact together, and preserve the release or prompt version that produced each result." /%}
-
-{% faq-item question="What is the most common mistake?" answer="Treating a metric, model response, or successful tool call as the outcome. Keep the user task, trace evidence, owner, and bounded response connected so the team can explain and improve the complete workflow." /%}
 
 ## Recommended next reads
 

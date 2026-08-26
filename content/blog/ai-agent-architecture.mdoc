@@ -23,6 +23,10 @@ An AI agent is not just a prompt wrapped around a model. In production it is a c
 
 ## At a glance
 
+![Ai Agent Architecture decision flow showing context, evidence, and action](/media/blog-diagrams/ai-agent-architecture.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 | Before you start | What to define | What good looks like |
 | --- | --- | --- |
 | One real workflow and a consequential failure or release question | The task contract, allowed actions, state transitions, and evidence | A bounded control loop that can be tested, paused, and explained |
@@ -178,77 +182,69 @@ Start with one workflow and one failure class. Review a successful, degraded, an
 
 > **Decision rule:** Start with the smallest architecture that makes one real failure explainable. Add a layer only when it owns a distinct contract or removes a demonstrated risk.
 
-## Frequently asked questions
-
-{% faq-item question="Does every AI agent need a planner and executor?" answer="No. Choose the simplest control-loop shape that satisfies the task contract and consequence boundary. A planner adds coordination and state, so use it only when the work benefits from that separation." /%}
-
-{% faq-item question="Where should authorization happen?" answer="At the side-effect boundary, immediately before execution, after validating the current arguments and state. Model output, earlier confidence, and stale approval should not authorize a changed action." /%}
-
-{% faq-item question="What should the trace root represent?" answer="Usually the user-visible task or calling-system objective. Model, retrieval, tool, validation, approval, and state-transition events should appear as connected children when they shape the outcome." /%}
-
 ## Next step: review one control loop
 
 Choose one tool-using workflow and write its task contract, allowed actions, state transitions, terminal states, and evidence fields on one page. Then compare one successful and one failed run. The missing boundary will usually be more valuable than another model instruction or another dashboard panel.
 
-## ai agent architecture: a production field guide
+## The ai agent architecture operating model
 
-## Implementation notes
+## Put ai agent architecture into practice
 
-A useful article should help a reader move from an idea to a safe production decision. Start by stating the user-visible outcome, then identify the inputs, the owner, the evidence, and the terminal states. Do not begin with a tool or framework. Begin with the decision the system must support and the cost of getting that decision wrong. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+A useful article should help a reader move from an idea to a safe production decision. Start by stating the user-visible outcome, then identify the inputs, the owner, the evidence, and the terminal states. Do not begin with a tool or framework. Begin with the decision the system must support and the cost of getting that decision wrong. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Define the contract
 
-Write the input and output contract before tuning the model. Name required fields, acceptable values, missing-data behavior, and the response a user receives when the system cannot proceed. A schema validates shape, but it does not prove meaning or authorization. Follow parsing with semantic checks, policy checks, and an explicit fallback. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Write the input and output contract before tuning the model. Name required fields, acceptable values, missing-data behavior, and the response a user receives when the system cannot proceed. A schema validates shape, but it does not prove meaning or authorization. Follow parsing with semantic checks, policy checks, and an explicit fallback. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Separate proposal from authority
 
-A model can classify, extract, summarize, rank, or propose an action. Deterministic code should own permissions, limits, accounting, retention, and irreversible side effects. This boundary makes the system easier to test and easier to explain after an incident. If a model suggestion is rejected, route it to a visible state instead of silently rewriting it. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+A model can classify, extract, summarize, rank, or propose an action. Deterministic code should own permissions, limits, accounting, retention, and irreversible side effects. This boundary makes the system easier to test and easier to explain after an incident. If a model suggestion is rejected, route it to a visible state instead of silently rewriting it. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Build representative cases
 
-Create a small case set before claiming that an implementation works. Include ordinary examples, empty inputs, ambiguous requests, stale data, conflicting evidence, malformed outputs, permission boundaries, and provider failures. Label the expected user outcome and the unacceptable failure. Keep the cases versioned so a later change can be compared against the same baseline. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Create a small case set before claiming that an implementation works. Include ordinary examples, empty inputs, ambiguous requests, stale data, conflicting evidence, malformed outputs, permission boundaries, and provider failures. Label the expected user outcome and the unacceptable failure. Keep the cases versioned so a later change can be compared against the same baseline. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Validate the full path
 
-Unit tests are valuable for parsers, transitions, policies, and retry rules, but they do not prove the workflow works end to end. Add scenario tests that exercise retrieval, model calls, tool calls, timeouts, duplicate events, approvals, and partial completion. Preserve the trace for each important scenario and check both the final result and the intermediate evidence. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Unit tests are valuable for parsers, transitions, policies, and retry rules, but they do not prove the workflow works end to end. Add scenario tests that exercise retrieval, model calls, tool calls, timeouts, duplicate events, approvals, and partial completion. Preserve the trace for each important scenario and check both the final result and the intermediate evidence. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Make retries safe
 
-Every external write needs a stable identity, a bounded retry policy, and a reconciliation path. A timeout is not proof that an action failed. Record unknown outcomes explicitly, query the provider when possible, and prevent duplicate work with idempotency keys. Never let a generic retry loop decide whether a financial, permission, or communication side effect is safe. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Every external write needs a stable identity, a bounded retry policy, and a reconciliation path. A timeout is not proof that an action failed. Record unknown outcomes explicitly, query the provider when possible, and prevent duplicate work with idempotency keys. Never let a generic retry loop decide whether a financial, permission, or communication side effect is safe. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Design human review
 
-Human review should be specific and actionable. Show the proposed action, normalized arguments, evidence, policy version, expected consequence, and expiration. Bind approval to that exact proposal. If a material field changes, invalidate the approval. Record the reviewer, decision, reason, and result so rejection patterns become improvements rather than repeated surprises. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Human review should be specific and actionable. Show the proposed action, normalized arguments, evidence, policy version, expected consequence, and expiration. Bind approval to that exact proposal. If a material field changes, invalidate the approval. Record the reviewer, decision, reason, and result so rejection patterns become improvements rather than repeated surprises. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Instrument useful evidence
 
-A trace should connect the original request to each meaningful stage and the final outcome. Capture versions, latency, cost, status, error category, tool arguments after redaction, and the evidence used for the decision. Avoid collecting sensitive payloads merely because they are available. Store references or structured summaries when raw content is not necessary for diagnosis. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+A trace should connect the original request to each meaningful stage and the final outcome. Capture versions, latency, cost, status, error category, tool arguments after redaction, and the evidence used for the decision. Avoid collecting sensitive payloads merely because they are available. Store references or structured summaries when raw content is not necessary for diagnosis. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Measure outcomes
 
-Completion rate is not enough. Measure correctness, user acceptance, review rate, repair rate, latency, cost, retries, and the frequency of unsafe or unauthorized proposals. Segment the results by version, model, customer cohort, input class, and failure mechanism. A higher automation rate can be a regression when it creates more corrections or delays discovery of mistakes. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Completion rate is not enough. Measure correctness, user acceptance, review rate, repair rate, latency, cost, retries, and the frequency of unsafe or unauthorized proposals. Segment the results by version, model, customer cohort, input class, and failure mechanism. A higher automation rate can be a regression when it creates more corrections or delays discovery of mistakes. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Roll out in stages
 
-Use observation, shadow mode, suggestions, prepared drafts, approved execution, and only then broader automation. Give each stage an owner, cohort, success threshold, and rollback condition. Preserve the manual path until the automated path has demonstrated normal and degraded behavior. Keep in-flight work recoverable when a release is paused. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Use observation, shadow mode, suggestions, prepared drafts, approved execution, and only then broader automation. Give each stage an owner, cohort, success threshold, and rollback condition. Preserve the manual path until the automated path has demonstrated normal and degraded behavior. Keep in-flight work recoverable when a release is paused. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Operate failure states
 
-Make waiting, degraded, unknown, failed, cancelled, and completed distinct states. Tell the user whether the system is waiting for data, approval, a provider, a retry window, or manual repair. Give every waiting state an expiration or escalation path. Silent queues and ambiguous success messages are operational defects, not cosmetic issues. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Make waiting, degraded, unknown, failed, cancelled, and completed distinct states. Tell the user whether the system is waiting for data, approval, a provider, a retry window, or manual repair. Give every waiting state an expiration or escalation path. Silent queues and ambiguous success messages are operational defects, not cosmetic issues. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Review changes
 
-Prompts, models, schemas, retrieval indexes, tools, providers, and policies are all dependencies. Version them and record their versions with each run. When behavior changes, compare a representative cohort with the previous baseline. Review quality, safety, latency, cost, and correction work together; optimizing one dimension can damage another. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Prompts, models, schemas, retrieval indexes, tools, providers, and policies are all dependencies. Version them and record their versions with each run. When behavior changes, compare a representative cohort with the previous baseline. Review quality, safety, latency, cost, and correction work together; optimizing one dimension can damage another. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Example decision record
 
-For a meaningful release, write a short record with the goal, affected workflow, expected improvement, known risks, evidence set, rollout stage, owner, rollback command, and review date. Link it to representative traces and the test cases that protect the most important boundary. This record turns a vague confidence claim into something another engineer can inspect. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+For a meaningful release, write a short record with the goal, affected workflow, expected improvement, known risks, evidence set, rollout stage, owner, rollback command, and review date. Link it to representative traces and the test cases that protect the most important boundary. This record turns a vague confidence claim into something another engineer can inspect. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
 ### Practical checklist
 
-Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. In the context of ai agent architecture, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. For an agent architecture, this means making the boundary observable in the run trace and testable without the model.
 
-## Failure scenarios to rehearse
+## Failure scenarios in ai agent architecture
 
 The happy path is the least informative path. Rehearse empty input, malformed output, stale context, unavailable dependencies, rate limits, duplicate callbacks, and a provider timeout after an external system may already have accepted the request. For each case, state the expected user-visible result, the durable record that proves what happened, and the person or process responsible for recovery.
 
@@ -296,7 +292,7 @@ The best implementation is usually the smallest one that makes the decision expl
 
 Use this guide to produce a concrete next action. Pick one workflow, name its owner, write the contract, collect representative traces, choose one quality and one safety signal, and set a rollback condition. Review the result with engineering, security, and the people who handle exceptions. Their questions are part of the system design. A dependable production workflow is not defined by a long prompt or a high demo score; it is defined by a user-visible outcome that remains explainable, bounded, and recoverable as conditions change.
 
-## From draft to durable practice
+## From ai agent architecture draft to durable practice
 
 A production article should leave the reader with a sequence they can execute and inspect. Start with a baseline: one representative input, one expected outcome, one failure case, and one trace or record that makes the result visible. Change one meaningful variable at a time. If the result improves, record why; if it regresses, preserve the case so the regression becomes a durable test instead of a forgotten anecdote.
 
@@ -309,3 +305,33 @@ Plan ownership beyond launch. Someone should own the workflow contract, dependen
 Include the maintenance loop in the implementation. Sample production results, inspect correction work, refresh the regression set, review costs and latency, and remove metrics that do not guide action. Feed confirmed incidents into tests, policies, or state transitions. A fix that changes only wording may hide a symptom; a durable fix changes the mechanism that allowed the failure or makes the failure safe and visible.
 
 Finally, define completion precisely. A workflow is not complete because the demo passed or because the model produced a plausible answer. It is complete when its inputs and outputs are bounded, its authority is explicit, its evidence is traceable, its side effects are safe to retry or reconcile, its degraded states are honest, and its owner can prove the result with representative cases. Use that standard to decide what to build next and what to leave out.
+
+## Frequently asked questions
+
+{% faq-item question="Does every AI agent need a planner and executor?" answer="No. Choose the simplest control-loop shape that satisfies the task contract and consequence boundary. A planner adds coordination and state, so use it only when the work benefits from that separation." /%}
+
+{% faq-item question="Where should authorization happen?" answer="At the side-effect boundary, immediately before execution, after validating the current arguments and state. Model output, earlier confidence, and stale approval should not authorize a changed action." /%}
+
+{% faq-item question="What should the trace root represent?" answer="Usually the user-visible task or calling-system objective. Model, retrieval, tool, validation, approval, and state-transition events should appear as connected children when they shape the outcome." /%}
+
+## Turn the architecture into an executable boundary
+
+An agent architecture becomes useful when each box in the diagram owns a decision that can be tested. The task contract defines what the user is asking and what completion means. The policy layer defines what the system may do. The model proposes a next step. The tool validates and performs bounded work. State records facts needed for the next transition. Evidence connects the entire path. If two layers both own the same decision, an incident will produce competing explanations.
+
+### Draw the side-effect line
+
+Place the side-effect boundary as close as possible to the system that owns authorization and current state. Before execution, validate tenant, actor, resource, arguments, freshness, policy version, and idempotency key. Do not rely on a model’s earlier reasoning or a reviewer’s approval if the action changed after approval. For high-consequence actions, make the proposed command visible and require a terminal confirmation.
+
+### Choose state deliberately
+
+Keep transient reasoning separate from durable domain state. Transient state can include the current plan, tool result, and iteration budget. Durable state should have a source, owner, version, freshness, and retention rule. Never let an unbounded transcript become an accidental database. When state is missing or contradictory, use a named blocked or review state instead of allowing the model to silently choose a convenient interpretation.
+
+### Bound the control loop
+
+Set maximum iterations, wall-clock time, token spend, tool calls, and side-effect count. Define what happens when each budget is exhausted. A loop that stops only when the model says it is finished has no dependable terminal condition. Record every transition with its reason and parent run so an operator can distinguish a legitimate multi-step task from an accidental retry storm.
+
+### Validate the architecture with traces
+
+Review one successful, one degraded, and one failed run. Can the team identify the task contract, model recommendation, policy decision, tool result, state transition, and final user outcome? If not, add the smallest missing evidence field or boundary test. Architecture quality is demonstrated by explainable behavior under failure, not by the number of boxes in a diagram.
+
+> **Architecture rule:** Add a component only when it owns a distinct contract, removes a demonstrated risk, or creates evidence the operator can use.

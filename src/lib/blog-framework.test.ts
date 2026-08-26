@@ -33,5 +33,5 @@ test("the framework reports missing shared article elements", () => {
     },
   ]);
 
-  assert.deepEqual(issues.map((issue) => issue.code), ["too-short", "missing-hero", "missing-interaction", "missing-action"]);
+  assert.deepEqual(issues.map((issue) => issue.code), ["too-short", "missing-hero", "missing-visual", "missing-code", "missing-note", "missing-emphasis", "missing-faq", "missing-interaction", "missing-action"]);
 });

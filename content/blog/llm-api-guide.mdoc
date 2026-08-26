@@ -20,6 +20,10 @@ seo:
 
 ## At a glance
 
+![Llm Api Guide decision flow showing context, evidence, and action](/media/blog-diagrams/llm-api-guide.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 This guide is for **developers integrating LLM APIs into user-facing systems**. It helps you **design the call boundary so failures remain explainable and bounded**. It does not promise provider uptime or prescribe a specific SDK.
 
 ### The API call contract
@@ -59,12 +63,37 @@ Capture queue time, provider time, retry count, input and output token usage, mo
 - Record every attempt with a stable parent run.
 - Test provider errors, timeouts, empty output, and malformed output.
 
-## Frequently asked questions
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
 
-{% faq-item question="Should every LLM API failure retry?" answer="No. Retry only transient, bounded failures with backoff and an attempt budget. Do not blindly retry invalid requests, policy refusals, or non-idempotent actions." /%}
-{% faq-item question="What is the most important LLM API metric?" answer="Start with the user-visible outcome and connect latency, cost, validation, and failure class to it. A provider metric alone cannot tell you whether the task succeeded." /%}
-{% faq-item question="How do fallbacks affect quality?" answer="A fallback can improve availability while changing quality, latency, cost, or safety. Version and evaluate the fallback path separately rather than hiding it behind one success metric." /%}
+## Make the API boundary observable
 
+An LLM request should be treated as a bounded dependency call, not as an opaque function that returns text. Record the parent task, provider, model, request class, prompt version, timeout budget, retry attempt, input and output token counts, validation result, and terminal outcome. Keep sensitive content redacted or referenced, but preserve enough structure to answer whether a slow run waited in your queue, waited at the provider, streamed partial output, or spent time validating the response.
+
+### Separate transport success from task success
+
+An HTTP success only tells you that the provider accepted and returned a request. It does not prove that the output is complete, grounded, policy-compliant, or useful to the calling workflow. Give each request at least three decisions: did transport succeed, did the response satisfy the output contract, and did the parent task reach its intended outcome? These states should be visible independently in traces and metrics.
+
+For streaming responses, record the time to first token separately from total completion time. A fast first token can still hide a long tail or a truncated stream. Treat disconnects, empty final buffers, invalid tool arguments, and provider-side refusals as distinct outcomes. The application should not mark a task complete merely because some tokens arrived.
+
+### Choose retry behavior by failure class
+
+Retry a rate limit or transient provider failure only when the request remains within its total time and spend budget. Do not retry an invalid request, a policy refusal, a permanently unsupported model, or a response that failed semantic validation without changing the input or routing decision. A retry budget belongs to the parent task, not just to an individual function call, otherwise several layers can each retry and multiply the load.
+
+When a request may have caused a side effect through a tool call, reconcile before retrying. Preserve an attempt identifier and an idempotency key where the provider or downstream system supports one. If the outcome is unknown, expose an unknown or awaiting-reconciliation state rather than guessing. An honest unknown state is safer than a duplicated email, payment, or record update.
+
+### Design fallbacks as separate products
+
+A fallback model or provider changes more than availability. It may change context limits, tool support, latency, refusal behavior, cost, and answer quality. Define which workflows may use it, which permissions remain valid, what evidence must be retained, and when the fallback should stop and route to a person. Evaluate the fallback on the same representative cases as the primary path, including empty, ambiguous, adversarial, and high-consequence inputs.
+
+Do not hide fallback traffic inside one success-rate number. Tag the provider and route in every run, compare quality and correction work by route, and set a rollback condition for the fallback itself. A provider outage may justify a degraded answer for a low-risk question while requiring a visible hold for a financial or security-sensitive task.
+
+### Operate the incident path
+
+When LLM API behavior changes, begin with the affected workflow and release rather than changing prompts immediately. Compare a failed trace with a healthy trace from the same task class. Check provider status, queue time, model identifier, request size, validation result, retry count, and whether a fallback was selected. Then choose the smallest safe response: reduce concurrency, pause a cohort, route read-only work elsewhere, increase a bounded timeout, or restore the previous configuration.
+
+The runbook should state how to identify requests still in flight, how to reconcile unknown side effects, how to stop retries, and how to communicate degraded behavior to users. After recovery, preserve one representative failure, classify the mechanism, and add a regression case or operational control. An incident is not closed when the provider is healthy; it is closed when the application can detect and handle the same failure more safely next time.
+
+> **Runbook rule:** Never describe an LLM API incident as “the model was bad” without identifying the request boundary, failure class, affected cohort, safe containment action, and evidence that confirms recovery.
 ## Recommended next reads
 
 Continue with [LLM latency optimization](/blog/llm-latency-optimization), [reducing LLM costs](/blog/reduce-llm-costs-without-hurting-quality), and [LLM observability metrics](/blog/llm-observability-metrics-that-matter).
@@ -121,65 +150,65 @@ Token usage is an input to cost, not the whole cost story. Include retries, fall
 
 The runbook should tell an operator how to identify the affected provider and model, distinguish global outage from one workflow regression, pause or reroute traffic, reconcile unknown side effects, and communicate degraded behavior. Link the runbook to representative traces and preserve the previous configuration. A fallback is only useful if its permissions, quality, cost, and rollback path are known.
 
-## llm api guide: a production field guide
+## The llm api guide operating model
 
-## Implementation notes
+## Put llm api guide into practice
 
-A useful article should help a reader move from an idea to a safe production decision. Start by stating the user-visible outcome, then identify the inputs, the owner, the evidence, and the terminal states. Do not begin with a tool or framework. Begin with the decision the system must support and the cost of getting that decision wrong. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+A useful article should help a reader move from an idea to a safe production decision. Start by stating the user-visible outcome, then identify the inputs, the owner, the evidence, and the terminal states. Do not begin with a tool or framework. Begin with the decision the system must support and the cost of getting that decision wrong. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Define the contract
 
-Write the input and output contract before tuning the model. Name required fields, acceptable values, missing-data behavior, and the response a user receives when the system cannot proceed. A schema validates shape, but it does not prove meaning or authorization. Follow parsing with semantic checks, policy checks, and an explicit fallback. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Write the input and output contract before tuning the model. Name required fields, acceptable values, missing-data behavior, and the response a user receives when the system cannot proceed. A schema validates shape, but it does not prove meaning or authorization. Follow parsing with semantic checks, policy checks, and an explicit fallback. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Separate proposal from authority
 
-A model can classify, extract, summarize, rank, or propose an action. Deterministic code should own permissions, limits, accounting, retention, and irreversible side effects. This boundary makes the system easier to test and easier to explain after an incident. If a model suggestion is rejected, route it to a visible state instead of silently rewriting it. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+A model can classify, extract, summarize, rank, or propose an action. Deterministic code should own permissions, limits, accounting, retention, and irreversible side effects. This boundary makes the system easier to test and easier to explain after an incident. If a model suggestion is rejected, route it to a visible state instead of silently rewriting it. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Build representative cases
 
-Create a small case set before claiming that an implementation works. Include ordinary examples, empty inputs, ambiguous requests, stale data, conflicting evidence, malformed outputs, permission boundaries, and provider failures. Label the expected user outcome and the unacceptable failure. Keep the cases versioned so a later change can be compared against the same baseline. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Create a small case set before claiming that an implementation works. Include ordinary examples, empty inputs, ambiguous requests, stale data, conflicting evidence, malformed outputs, permission boundaries, and provider failures. Label the expected user outcome and the unacceptable failure. Keep the cases versioned so a later change can be compared against the same baseline. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Validate the full path
 
-Unit tests are valuable for parsers, transitions, policies, and retry rules, but they do not prove the workflow works end to end. Add scenario tests that exercise retrieval, model calls, tool calls, timeouts, duplicate events, approvals, and partial completion. Preserve the trace for each important scenario and check both the final result and the intermediate evidence. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Unit tests are valuable for parsers, transitions, policies, and retry rules, but they do not prove the workflow works end to end. Add scenario tests that exercise retrieval, model calls, tool calls, timeouts, duplicate events, approvals, and partial completion. Preserve the trace for each important scenario and check both the final result and the intermediate evidence. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Make retries safe
 
-Every external write needs a stable identity, a bounded retry policy, and a reconciliation path. A timeout is not proof that an action failed. Record unknown outcomes explicitly, query the provider when possible, and prevent duplicate work with idempotency keys. Never let a generic retry loop decide whether a financial, permission, or communication side effect is safe. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Every external write needs a stable identity, a bounded retry policy, and a reconciliation path. A timeout is not proof that an action failed. Record unknown outcomes explicitly, query the provider when possible, and prevent duplicate work with idempotency keys. Never let a generic retry loop decide whether a financial, permission, or communication side effect is safe. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Design human review
 
-Human review should be specific and actionable. Show the proposed action, normalized arguments, evidence, policy version, expected consequence, and expiration. Bind approval to that exact proposal. If a material field changes, invalidate the approval. Record the reviewer, decision, reason, and result so rejection patterns become improvements rather than repeated surprises. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Human review should be specific and actionable. Show the proposed action, normalized arguments, evidence, policy version, expected consequence, and expiration. Bind approval to that exact proposal. If a material field changes, invalidate the approval. Record the reviewer, decision, reason, and result so rejection patterns become improvements rather than repeated surprises. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Instrument useful evidence
 
-A trace should connect the original request to each meaningful stage and the final outcome. Capture versions, latency, cost, status, error category, tool arguments after redaction, and the evidence used for the decision. Avoid collecting sensitive payloads merely because they are available. Store references or structured summaries when raw content is not necessary for diagnosis. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+A trace should connect the original request to each meaningful stage and the final outcome. Capture versions, latency, cost, status, error category, tool arguments after redaction, and the evidence used for the decision. Avoid collecting sensitive payloads merely because they are available. Store references or structured summaries when raw content is not necessary for diagnosis. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Measure outcomes
 
-Completion rate is not enough. Measure correctness, user acceptance, review rate, repair rate, latency, cost, retries, and the frequency of unsafe or unauthorized proposals. Segment the results by version, model, customer cohort, input class, and failure mechanism. A higher automation rate can be a regression when it creates more corrections or delays discovery of mistakes. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Completion rate is not enough. Measure correctness, user acceptance, review rate, repair rate, latency, cost, retries, and the frequency of unsafe or unauthorized proposals. Segment the results by version, model, customer cohort, input class, and failure mechanism. A higher automation rate can be a regression when it creates more corrections or delays discovery of mistakes. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Roll out in stages
 
-Use observation, shadow mode, suggestions, prepared drafts, approved execution, and only then broader automation. Give each stage an owner, cohort, success threshold, and rollback condition. Preserve the manual path until the automated path has demonstrated normal and degraded behavior. Keep in-flight work recoverable when a release is paused. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Use observation, shadow mode, suggestions, prepared drafts, approved execution, and only then broader automation. Give each stage an owner, cohort, success threshold, and rollback condition. Preserve the manual path until the automated path has demonstrated normal and degraded behavior. Keep in-flight work recoverable when a release is paused. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Operate failure states
 
-Make waiting, degraded, unknown, failed, cancelled, and completed distinct states. Tell the user whether the system is waiting for data, approval, a provider, a retry window, or manual repair. Give every waiting state an expiration or escalation path. Silent queues and ambiguous success messages are operational defects, not cosmetic issues. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Make waiting, degraded, unknown, failed, cancelled, and completed distinct states. Tell the user whether the system is waiting for data, approval, a provider, a retry window, or manual repair. Give every waiting state an expiration or escalation path. Silent queues and ambiguous success messages are operational defects, not cosmetic issues. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Review changes
 
-Prompts, models, schemas, retrieval indexes, tools, providers, and policies are all dependencies. Version them and record their versions with each run. When behavior changes, compare a representative cohort with the previous baseline. Review quality, safety, latency, cost, and correction work together; optimizing one dimension can damage another. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Prompts, models, schemas, retrieval indexes, tools, providers, and policies are all dependencies. Version them and record their versions with each run. When behavior changes, compare a representative cohort with the previous baseline. Review quality, safety, latency, cost, and correction work together; optimizing one dimension can damage another. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Example decision record
 
-For a meaningful release, write a short record with the goal, affected workflow, expected improvement, known risks, evidence set, rollout stage, owner, rollback command, and review date. Link it to representative traces and the test cases that protect the most important boundary. This record turns a vague confidence claim into something another engineer can inspect. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+For a meaningful release, write a short record with the goal, affected workflow, expected improvement, known risks, evidence set, rollout stage, owner, rollback command, and review date. Link it to representative traces and the test cases that protect the most important boundary. This record turns a vague confidence claim into something another engineer can inspect. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Practical checklist
 
-Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. In the context of llm api guide, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. For llm api guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
-## Failure scenarios to rehearse
+## Failure scenarios in llm api guide
 
 The happy path is the least informative path. Rehearse empty input, malformed output, stale context, unavailable dependencies, rate limits, duplicate callbacks, and a provider timeout after an external system may already have accepted the request. For each case, state the expected user-visible result, the durable record that proves what happened, and the person or process responsible for recovery.
 
@@ -227,7 +256,7 @@ The best implementation is usually the smallest one that makes the decision expl
 
 Use this guide to produce a concrete next action. Pick one workflow, name its owner, write the contract, collect representative traces, choose one quality and one safety signal, and set a rollback condition. Review the result with engineering, security, and the people who handle exceptions. Their questions are part of the system design. A dependable production workflow is not defined by a long prompt or a high demo score; it is defined by a user-visible outcome that remains explainable, bounded, and recoverable as conditions change.
 
-## From draft to durable practice
+## From llm api guide draft to durable practice
 
 A production article should leave the reader with a sequence they can execute and inspect. Start with a baseline: one representative input, one expected outcome, one failure case, and one trace or record that makes the result visible. Change one meaningful variable at a time. If the result improves, record why; if it regresses, preserve the case so the regression becomes a durable test instead of a forgotten anecdote.
 
@@ -241,13 +270,13 @@ Include the maintenance loop in the implementation. Sample production results, i
 
 Finally, define completion precisely. A workflow is not complete because the demo passed or because the model produced a plausible answer. It is complete when its inputs and outputs are bounded, its authority is explicit, its evidence is traceable, its side effects are safe to retry or reconcile, its degraded states are honest, and its owner can prove the result with representative cases. Use that standard to decide what to build next and what to leave out.
 
-## A compact operating checklist
+## Operating checklist for llm api guide
 
 Use a representative input and a deliberately difficult input. Confirm that the system identifies the workflow and version, applies the right scope and permissions, records the evidence used, and returns a state a user can understand. If it calls a tool, verify the arguments after normalization and confirm that the tool result is associated with the same run. If it retries, verify that the retry is bounded and cannot duplicate a consequential side effect.
 
 Review one success, one corrected result, and one failure after every material release. Compare the first meaningful divergence, not only the final text. Update the regression case, runbook, policy, or state transition that would have prevented the failure or made it safe. Then record the owner and date for the next review. This small discipline keeps the implementation connected to production reality and gives the team evidence for deciding whether to expand, simplify, or pause the workflow.
 
-## Final operator exercise
+## Final operator exercise for llm api guide
 
 Take the next real implementation decision and write it down before changing the system. State the user outcome, the acceptable and unacceptable failure, the evidence required, the authority boundary, the owner, and the rollback condition. Run the decision through a small representative set that includes missing data, conflicting evidence, stale context, and a dependency failure. Keep the traces and compare them with the baseline.
 
@@ -258,3 +287,26 @@ Use the same standard for maintenance: preserve a representative trace, name the
 Keep the review record with the release. Note the baseline, the changed dependency, the measured result, the remaining uncertainty, and the person responsible for follow-up. This makes the guide actionable when the API behaves differently under real traffic.
 
 Include the rollback trigger and the exact configuration that restores the previous behavior. Recheck quality, latency, cost, and error categories after rollback, because a fallback can solve availability while introducing a different product regression.
+
+## A practical llm api guide implementation example
+
+This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
+
+```ts
+const response = await client.responses.create({
+  model,
+  input,
+  timeout: 8_000,
+});
+
+if (!response.output_text.trim()) {
+  throw new Error("empty model response");
+}
+```
+
+> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+## Frequently asked questions
+
+{% faq-item question="Should every LLM API failure retry?" answer="No. Retry only transient, bounded failures with backoff and an attempt budget. Do not blindly retry invalid requests, policy refusals, or non-idempotent actions." /%}
+{% faq-item question="What is the most important LLM API metric?" answer="Start with the user-visible outcome and connect latency, cost, validation, and failure class to it. A provider metric alone cannot tell you whether the task succeeded." /%}
+{% faq-item question="How do fallbacks affect quality?" answer="A fallback can improve availability while changing quality, latency, cost, or safety. Version and evaluate the fallback path separately rather than hiding it behind one success metric." /%}

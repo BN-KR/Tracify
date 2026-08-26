@@ -22,6 +22,10 @@ A browser agent can fail even when every click was syntactically valid. The page
 
 ## At a glance
 
+![Browser Agent Observability decision flow showing context, evidence, and action](/media/blog-diagrams/browser-agent-observability.svg)
+
+*This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
+
 This guide is for **teams operating browser automation**. It helps you **explain why a browser journey did not reach its intended state** so you can leave with **journey evidence that connects intent, page state, network activity, and outcome**.
 
 | Before you start | What to inspect | What good looks like |
@@ -279,60 +283,60 @@ The most revealing cases are often at the edges of the distribution: the longest
 
 Continue with [AI agent observability](/blog/ai-agent-observability-complete-guide), [debugging AI agents in production](/blog/debug-ai-agents-in-production), [AI agent observability](/blog/ai-agent-observability-complete-guide). Choose the one that matches the next decision in your workflow rather than opening every guide at once.
 
-## browser agent observability: a production field guide
+## The browser agent observability operating model
 
-## Implementation notes
+## Put browser agent observability into practice
 
-A useful article should help a reader move from an idea to a safe production decision. Start by stating the user-visible outcome, then identify the inputs, the owner, the evidence, and the terminal states. Do not begin with a tool or framework. Begin with the decision the system must support and the cost of getting that decision wrong. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+A useful article should help a reader move from an idea to a safe production decision. Start by stating the user-visible outcome, then identify the inputs, the owner, the evidence, and the terminal states. Do not begin with a tool or framework. Begin with the decision the system must support and the cost of getting that decision wrong. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Define the contract
 
-Write the input and output contract before tuning the model. Name required fields, acceptable values, missing-data behavior, and the response a user receives when the system cannot proceed. A schema validates shape, but it does not prove meaning or authorization. Follow parsing with semantic checks, policy checks, and an explicit fallback. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Write the input and output contract before tuning the model. Name required fields, acceptable values, missing-data behavior, and the response a user receives when the system cannot proceed. A schema validates shape, but it does not prove meaning or authorization. Follow parsing with semantic checks, policy checks, and an explicit fallback. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Separate proposal from authority
 
-A model can classify, extract, summarize, rank, or propose an action. Deterministic code should own permissions, limits, accounting, retention, and irreversible side effects. This boundary makes the system easier to test and easier to explain after an incident. If a model suggestion is rejected, route it to a visible state instead of silently rewriting it. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+A model can classify, extract, summarize, rank, or propose an action. Deterministic code should own permissions, limits, accounting, retention, and irreversible side effects. This boundary makes the system easier to test and easier to explain after an incident. If a model suggestion is rejected, route it to a visible state instead of silently rewriting it. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Build representative cases
 
-Create a small case set before claiming that an implementation works. Include ordinary examples, empty inputs, ambiguous requests, stale data, conflicting evidence, malformed outputs, permission boundaries, and provider failures. Label the expected user outcome and the unacceptable failure. Keep the cases versioned so a later change can be compared against the same baseline. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Create a small case set before claiming that an implementation works. Include ordinary examples, empty inputs, ambiguous requests, stale data, conflicting evidence, malformed outputs, permission boundaries, and provider failures. Label the expected user outcome and the unacceptable failure. Keep the cases versioned so a later change can be compared against the same baseline. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Validate the full path
 
-Unit tests are valuable for parsers, transitions, policies, and retry rules, but they do not prove the workflow works end to end. Add scenario tests that exercise retrieval, model calls, tool calls, timeouts, duplicate events, approvals, and partial completion. Preserve the trace for each important scenario and check both the final result and the intermediate evidence. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Unit tests are valuable for parsers, transitions, policies, and retry rules, but they do not prove the workflow works end to end. Add scenario tests that exercise retrieval, model calls, tool calls, timeouts, duplicate events, approvals, and partial completion. Preserve the trace for each important scenario and check both the final result and the intermediate evidence. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Make retries safe
 
-Every external write needs a stable identity, a bounded retry policy, and a reconciliation path. A timeout is not proof that an action failed. Record unknown outcomes explicitly, query the provider when possible, and prevent duplicate work with idempotency keys. Never let a generic retry loop decide whether a financial, permission, or communication side effect is safe. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Every external write needs a stable identity, a bounded retry policy, and a reconciliation path. A timeout is not proof that an action failed. Record unknown outcomes explicitly, query the provider when possible, and prevent duplicate work with idempotency keys. Never let a generic retry loop decide whether a financial, permission, or communication side effect is safe. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Design human review
 
-Human review should be specific and actionable. Show the proposed action, normalized arguments, evidence, policy version, expected consequence, and expiration. Bind approval to that exact proposal. If a material field changes, invalidate the approval. Record the reviewer, decision, reason, and result so rejection patterns become improvements rather than repeated surprises. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Human review should be specific and actionable. Show the proposed action, normalized arguments, evidence, policy version, expected consequence, and expiration. Bind approval to that exact proposal. If a material field changes, invalidate the approval. Record the reviewer, decision, reason, and result so rejection patterns become improvements rather than repeated surprises. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Instrument useful evidence
 
-A trace should connect the original request to each meaningful stage and the final outcome. Capture versions, latency, cost, status, error category, tool arguments after redaction, and the evidence used for the decision. Avoid collecting sensitive payloads merely because they are available. Store references or structured summaries when raw content is not necessary for diagnosis. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+A trace should connect the original request to each meaningful stage and the final outcome. Capture versions, latency, cost, status, error category, tool arguments after redaction, and the evidence used for the decision. Avoid collecting sensitive payloads merely because they are available. Store references or structured summaries when raw content is not necessary for diagnosis. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Measure outcomes
 
-Completion rate is not enough. Measure correctness, user acceptance, review rate, repair rate, latency, cost, retries, and the frequency of unsafe or unauthorized proposals. Segment the results by version, model, customer cohort, input class, and failure mechanism. A higher automation rate can be a regression when it creates more corrections or delays discovery of mistakes. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Completion rate is not enough. Measure correctness, user acceptance, review rate, repair rate, latency, cost, retries, and the frequency of unsafe or unauthorized proposals. Segment the results by version, model, customer cohort, input class, and failure mechanism. A higher automation rate can be a regression when it creates more corrections or delays discovery of mistakes. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Roll out in stages
 
-Use observation, shadow mode, suggestions, prepared drafts, approved execution, and only then broader automation. Give each stage an owner, cohort, success threshold, and rollback condition. Preserve the manual path until the automated path has demonstrated normal and degraded behavior. Keep in-flight work recoverable when a release is paused. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Use observation, shadow mode, suggestions, prepared drafts, approved execution, and only then broader automation. Give each stage an owner, cohort, success threshold, and rollback condition. Preserve the manual path until the automated path has demonstrated normal and degraded behavior. Keep in-flight work recoverable when a release is paused. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Operate failure states
 
-Make waiting, degraded, unknown, failed, cancelled, and completed distinct states. Tell the user whether the system is waiting for data, approval, a provider, a retry window, or manual repair. Give every waiting state an expiration or escalation path. Silent queues and ambiguous success messages are operational defects, not cosmetic issues. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Make waiting, degraded, unknown, failed, cancelled, and completed distinct states. Tell the user whether the system is waiting for data, approval, a provider, a retry window, or manual repair. Give every waiting state an expiration or escalation path. Silent queues and ambiguous success messages are operational defects, not cosmetic issues. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Review changes
 
-Prompts, models, schemas, retrieval indexes, tools, providers, and policies are all dependencies. Version them and record their versions with each run. When behavior changes, compare a representative cohort with the previous baseline. Review quality, safety, latency, cost, and correction work together; optimizing one dimension can damage another. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Prompts, models, schemas, retrieval indexes, tools, providers, and policies are all dependencies. Version them and record their versions with each run. When behavior changes, compare a representative cohort with the previous baseline. Review quality, safety, latency, cost, and correction work together; optimizing one dimension can damage another. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Example decision record
 
-For a meaningful release, write a short record with the goal, affected workflow, expected improvement, known risks, evidence set, rollout stage, owner, rollback command, and review date. Link it to representative traces and the test cases that protect the most important boundary. This record turns a vague confidence claim into something another engineer can inspect. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+For a meaningful release, write a short record with the goal, affected workflow, expected improvement, known risks, evidence set, rollout stage, owner, rollback command, and review date. Link it to representative traces and the test cases that protect the most important boundary. This record turns a vague confidence claim into something another engineer can inspect. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
 
 ### Practical checklist
 
-Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. In the context of browser agent observability, apply this principle to the concrete workflow rather than treating it as a generic best practice.
+Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. For browser agent observability, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
