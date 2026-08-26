@@ -9,6 +9,10 @@ Create useful, accurate content and place it where Tracify actually consumes it.
 
 ## Workflow
 
+### Hard length gate
+
+Every new or materially rewritten published blog post must contain 3,000–10,000 words in its body, excluding frontmatter. This is a mandatory release gate. Do not produce or publish a 300-word or 1,000-word article. Expand with original, topic-specific explanation, evidence, examples, limitations, failure modes, security boundaries, operating guidance, FAQs, and next actions; never pad with repetition or keyword stuffing. Verify the count with the repository content contract before PR review.
+
 1. Read `references/content-map.md` and select the destination before drafting. Never create an orphan Markdown file for a public route.
 2. Inspect the product source, SDK, API, or nearby content that proves technical claims. Mark uncertain claims instead of inventing details.
 3. State the reader, their job, and the outcome in one sentence. Choose the closest article archetype from the repertoire in `content/blog/README.md`, then build an outline where every section advances that outcome. Do not force every topic into the same structure.

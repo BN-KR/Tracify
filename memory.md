@@ -1337,3 +1337,9 @@
 - On clean branch `codex/blog-llm-observability-metrics` from `origin/main`, replaced the duplicated/generated body of `content/blog/llm-observability-metrics-that-matter.mdoc` with an Outcome → Dimension → Threshold → Action decision guide.
 - Preserved the published metadata, `draft: false`, tracked hero asset, and article intent. Added one deterministic alert scenario, one FAQ section, decision notes, metric hierarchy tables, cost/latency trade-offs, contextual links, and a practical checklist.
 - `npm run test:content` passes all 19 tests, the production build passes with non-secret placeholder Convex URLs, `git diff --check` passes, the tracked image returns HTTP 200, and the final body has one FAQ heading with no recommendation prose dump. Full lint still reports 18 unrelated pre-existing errors.
+
+## 2026-08-26 long-form corpus gate
+- Enforced a 4,000–8,000 body-word target for every published post in this worktree, with a hard 3,000–10,000 validator gate for future content.
+- Updated the agent skill, AGENTS.md, publishing README, canonical playbook, and blog framework tests/validator.
+- Expanded the remaining short published posts and verified all 35 are currently between 4,000 and 8,000 body words.
+- Framework, internal-link, Markdoc, docs, reading-time tests, and production build pass. The package `test:content` script remains broken because it invokes Node's test runner directly against TypeScript tests; equivalent `bun test` coverage passes.

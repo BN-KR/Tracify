@@ -1025,3 +1025,10 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 2. [completed] Replace duplicated article sections with an outcome-led latency measurement and optimization sequence.
 3. [completed] Verify Markdoc contracts, links, interaction, image, build, lint result, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
+
+# Long-form blog corpus enforcement — 2026-08-26
+
+1. [completed] Add the 3,000–10,000 hard validator gate and document the 4,000–8,000 editorial target for every agent and future post.
+2. [completed] Expand every published article below 4,000 body words with operational, evidence-led sections while preserving frontmatter and links.
+3. [completed] Verify the full 35-post count audit, framework/link/Markdoc tests, build, and diff hygiene.
+4. [in_progress] Create branch/commit, open PR, inspect hosted checks, and merge after release verification.

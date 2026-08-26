@@ -13,6 +13,10 @@ Required frontmatter fields are `title`, `slug`, `excerpt`, `publishedAt`, and `
 
 Markdoc supports CommonMark plus Markdoc tags and annotations. The application validates every file before rendering, so malformed frontmatter or Markdoc fails the build instead of publishing a broken article.
 
+### Non-negotiable length requirement
+
+Every new or materially rewritten published post must be **3,000–10,000 body words**, excluding frontmatter. This is a hard content-contract gate. Posts around 300 or 1,000 words are incomplete and must not be published. Reach the minimum with original, topic-specific teaching: a clear operating model, evidence, worked examples, failure modes, trade-offs, security boundaries, rollout guidance, FAQs, and a practical next action. Never reach the count through repeated paragraphs, keyword stuffing, or generic filler. Run the content validator and confirm the exact count before opening a PR.
+
 ## Mandatory Tracify editorial framework
 
 Every published post follows the same editorial shape. This is a product requirement for the blog, not an optional style preference:

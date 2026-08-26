@@ -2,6 +2,10 @@
 
 This playbook is mandatory whenever an agent creates, edits, reviews, stores, or publishes a Tracify blog post or public documentation. It applies to every change, including a new article, rewrite, migration, typo-plus edit, metadata update, image change, internal-link change, or documentation update.
 
+## Hard length gate
+
+Every new or materially rewritten published blog post must contain **at least 3,000 and at most 10,000 body words**, excluding YAML frontmatter. This is a release requirement, not an estimate. A 300-word or 1,000-word post is incomplete and must not be published. Reach the minimum with original, topic-specific explanation, evidence, worked examples, trade-offs, failure modes, security boundaries, operational guidance, FAQs, and next actions. Never inflate an article with duplicated paragraphs, keyword stuffing, or generic filler. The repository content contract must reject a published post outside this range.
+
 The canonical visual and editorial reference is the AI Agent Monitoring article:
 
 `/blog/ai-agent-monitoring`
@@ -11,6 +15,8 @@ The canonical visual and editorial reference is the AI Agent Monitoring article:
 Use this prompt when refining any of the other 26 published posts:
 
 > Refine this Tracify blog post to the quality and usefulness of `/blog/ai-agent-monitoring` without changing its slug, publication state, author, published date, or making unsupported product claims.
+>
+> Hard length requirement: the final body must be 3,000–10,000 words, excluding frontmatter. Do not submit a shorter draft or call a partial expansion complete. Verify the count with the repository content test.
 >
 > Before editing, read `AGENTS.md`, `.agents/skills/writing-tracify-content/SKILL.md`, its required references, `docs/blog-canonical-format-playbook.md`, the complete target article, the complete AI Agent Monitoring reference article, the shared Markdoc renderer and blog styles, the published-slug list, and the relevant Tracify product source. State the reader, job, promised outcome, article boundary, archetype, evidence, and one interaction before you write.
 >

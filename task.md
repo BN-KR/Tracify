@@ -1195,7 +1195,8 @@ Follow-ups still open:
 1. [completed] Read the mandatory content workflow and inspect the canonical article, renderer, CSS, media inventory, published slugs, and metrics article.
 2. [completed] Rewrite `llm-observability-metrics-that-matter.mdoc` with a focused operational framework, evidence tables, one deterministic interaction, one FAQ section, contextual links, and a checklist.
 3. [completed] Pass 19 content tests, production build, diff hygiene, asset inventory, HTTP 200 image check, FAQ count, and recommendation-dump audit.
-4. [pending] Open the focused PR, verify rendered preview HTML and hosted checks, then merge only after all required checks pass.
+4. [completed] Enforce and apply the 4,000–8,000 long-form corpus target, update all agent-facing guidance, and pass local framework/content/build verification.
+5. [pending] Create the focused PR, verify hosted checks and rendered preview, then merge only after all required checks pass.
 
 # AI agent regression testing guide refinement — 2026-08-25
 
