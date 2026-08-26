@@ -1,0 +1,54 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="tcrDecisionTitle">
+  <title id="tcrDecisionTitle">A decision map for a failed tool call: transient and idempotent failures retry with backoff, transient and non-idempotent failures check an idempotency key before retrying, and permanent failures or an open circuit breaker route straight to a fallback or human escalation</title>
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <rect x="0" y="0" width="1600" height="900" fill="none" stroke="#000000" stroke-width="4"/>
+
+  <text x="90" y="100" font-family="monospace" font-size="26" letter-spacing="4" fill="#000000">RETRY, CIRCUIT, OR FALLBACK?</text>
+
+  <!-- Root -->
+  <rect x="650" y="140" width="300" height="80" fill="#000000"/>
+  <text x="680" y="188" font-family="monospace" font-size="19" fill="#ffffff">TOOL CALL FAILED</text>
+
+  <line x1="800" y1="220" x2="800" y2="270" stroke="#000000" stroke-width="3"/>
+  <line x1="330" y1="270" x2="1270" y2="270" stroke="#000000" stroke-width="3"/>
+  <line x1="330" y1="270" x2="330" y2="310" stroke="#000000" stroke-width="3"/>
+  <line x1="800" y1="270" x2="800" y2="310" stroke="#000000" stroke-width="3"/>
+  <line x1="1270" y1="270" x2="1270" y2="310" stroke="#000000" stroke-width="3"/>
+
+  <!-- Branch 1: transient + idempotent -->
+  <rect x="120" y="310" width="420" height="110" fill="#f4d44d" stroke="#000000" stroke-width="2"/>
+  <text x="150" y="350" font-family="monospace" font-size="17" fill="#000000">TRANSIENT + IDEMPOTENT</text>
+  <text x="150" y="375" font-family="monospace" font-size="17" fill="#000000">(read, lookup, dry-run)</text>
+  <text x="150" y="400" font-family="monospace" font-size="17" fill="#000000">RETRY with backoff + jitter</text>
+
+  <!-- Branch 2: transient + non-idempotent -->
+  <rect x="590" y="310" width="420" height="110" fill="#8a8a8a" stroke="#000000" stroke-width="2"/>
+  <text x="620" y="350" font-family="monospace" font-size="17" fill="#000000">TRANSIENT + NOT IDEMPOTENT</text>
+  <text x="620" y="375" font-family="monospace" font-size="17" fill="#000000">(charge, send, write)</text>
+  <text x="620" y="400" font-family="monospace" font-size="17" fill="#000000">RETRY only with an idempotency key</text>
+
+  <!-- Branch 3: permanent / circuit open -->
+  <rect x="1060" y="310" width="420" height="110" fill="#4b4b4b" stroke="#000000" stroke-width="2"/>
+  <text x="1090" y="350" font-family="monospace" font-size="17" fill="#ffffff">PERMANENT ERROR OR</text>
+  <text x="1090" y="375" font-family="monospace" font-size="17" fill="#ffffff">CIRCUIT OPEN</text>
+  <text x="1090" y="400" font-family="monospace" font-size="17" fill="#ffffff">STOP retrying immediately</text>
+
+  <!-- Down to shared outcomes -->
+  <line x1="330" y1="420" x2="330" y2="470" stroke="#000000" stroke-width="3"/>
+  <line x1="800" y1="420" x2="800" y2="470" stroke="#000000" stroke-width="3"/>
+  <line x1="1270" y1="420" x2="1270" y2="470" stroke="#000000" stroke-width="3"/>
+  <line x1="330" y1="470" x2="1270" y2="470" stroke="#000000" stroke-width="3"/>
+  <line x1="800" y1="470" x2="800" y2="520" stroke="#000000" stroke-width="3"/>
+
+  <rect x="560" y="520" width="480" height="140" fill="#000000"/>
+  <text x="590" y="560" font-family="monospace" font-size="18" fill="#ffffff">RECORD attempt, failure class,</text>
+  <text x="590" y="585" font-family="monospace" font-size="18" fill="#ffffff">and elapsed time on every branch</text>
+  <text x="590" y="620" font-family="monospace" font-size="18" fill="#f4d44d">Track failures per tool for the</text>
+  <text x="590" y="645" font-family="monospace" font-size="18" fill="#f4d44d">circuit breaker to open early</text>
+
+  <line x1="800" y1="660" x2="800" y2="710" stroke="#000000" stroke-width="3"/>
+  <rect x="600" y="710" width="400" height="110" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+  <text x="630" y="750" font-family="monospace" font-size="18" fill="#000000">STILL FAILING AFTER</text>
+  <text x="630" y="775" font-family="monospace" font-size="18" fill="#000000">THE RETRY BUDGET?</text>
+  <text x="630" y="800" font-family="monospace" font-size="16" fill="#000000">Fall back or escalate to a human.</text>
+</svg>

@@ -1,0 +1,54 @@
+<svg viewBox="0 0 1600 1000" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="a2aSeqTitle a2aSeqDesc">
+  <title id="a2aSeqTitle">Sequence diagram of a full agent-to-agent handshake</title>
+  <desc id="a2aSeqDesc">A lifeline diagram with two participants, Client Agent and Remote Agent, showing five ordered messages: capability discovery request, capability card response, task delegation with a correlation id, streamed or polled status updates, and a final result message, each labeled with its message type.</desc>
+  <rect width="1600" height="1000" fill="#f6f1e6"/>
+
+  <line x1="320" y1="90" x2="320" y2="940" stroke="#0a0a0a" stroke-width="2"/>
+  <line x1="1280" y1="90" x2="1280" y2="940" stroke="#0a0a0a" stroke-width="2"/>
+
+  <rect x="180" y="30" width="280" height="60" fill="#0a0a0a"/>
+  <text x="320" y="68" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="20" font-weight="700">CLIENT AGENT</text>
+
+  <rect x="1140" y="30" width="280" height="60" fill="#0a0a0a"/>
+  <text x="1280" y="68" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="20" font-weight="700">REMOTE AGENT</text>
+
+  <!-- message 1: discovery -->
+  <line x1="320" y1="180" x2="1270" y2="180" stroke="#0a0a0a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="330" y="165" fill="#0a0a0a" font-family="monospace" font-size="16">1. GET /.well-known/agent-card (discovery)</text>
+
+  <!-- message 2: capability card -->
+  <line x1="1280" y1="270" x2="330" y2="270" stroke="#0a0a0a" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#arrow)"/>
+  <text x="330" y="255" fill="#0a0a0a" font-family="monospace" font-size="16">2. 200 OK — capability card (skills, auth schemes, endpoints)</text>
+
+  <!-- message 3: negotiation -->
+  <line x1="320" y1="380" x2="1270" y2="380" stroke="#0a0a0a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="330" y="365" fill="#0a0a0a" font-family="monospace" font-size="16">3. negotiate: requested skill + accepted auth scheme</text>
+
+  <!-- highlight box: trust check -->
+  <rect x="900" y="410" width="500" height="70" fill="#f4d44d"/>
+  <text x="920" y="440" fill="#0a0a0a" font-family="monospace" font-size="14" font-weight="700">verify token issuer + audience</text>
+  <text x="920" y="462" fill="#0a0a0a" font-family="monospace" font-size="14">before accepting the task</text>
+
+  <!-- message 4: task delegation -->
+  <line x1="320" y1="560" x2="1270" y2="560" stroke="#0a0a0a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="330" y="545" fill="#0a0a0a" font-family="monospace" font-size="16">4. task.create — correlation_id: 7f2c9a…, input, callback</text>
+
+  <!-- message 5: status -->
+  <line x1="1280" y1="660" x2="330" y2="660" stroke="#0a0a0a" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+  <text x="330" y="645" fill="#0a0a0a" font-family="monospace" font-size="16">5. task.status — working (same correlation_id)</text>
+
+  <!-- message 6: result -->
+  <line x1="1280" y1="770" x2="330" y2="770" stroke="#0a0a0a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="330" y="755" fill="#0a0a0a" font-family="monospace" font-size="16">6. task.result — completed, output, same correlation_id</text>
+
+  <!-- timeout note -->
+  <rect x="320" y="830" width="960" height="80" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="340" y="860" fill="#0a0a0a" font-family="monospace" font-size="14">if no status or result arrives before the deadline,</text>
+  <text x="340" y="882" fill="#0a0a0a" font-family="monospace" font-size="14">the client agent marks the task timed_out and decides: retry, escalate, or fail closed</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0a0a0a"/>
+    </marker>
+  </defs>
+</svg>

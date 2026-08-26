@@ -1,0 +1,49 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="cwHeroTitle">
+  <title id="cwHeroTitle">A context window drawn as a bounded tank filling with system prompt, tool definitions, conversation history, and scratch memory blocks, approaching a hard token limit line</title>
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <rect x="0" y="0" width="1600" height="900" fill="none" stroke="#000000" stroke-width="4"/>
+
+  <!-- Grid texture -->
+  <g stroke="#000000" stroke-opacity="0.05" stroke-width="1">
+    <line x1="0" y1="150" x2="1600" y2="150"/>
+    <line x1="0" y1="300" x2="1600" y2="300"/>
+    <line x1="0" y1="450" x2="1600" y2="450"/>
+    <line x1="0" y1="600" x2="1600" y2="600"/>
+    <line x1="0" y1="750" x2="1600" y2="750"/>
+  </g>
+
+  <text x="90" y="120" font-family="monospace" font-size="26" letter-spacing="4" fill="#000000">CONTEXT WINDOW / TOKEN BUDGET</text>
+
+  <!-- Tank outline -->
+  <rect x="120" y="180" width="1360" height="560" fill="#ffffff" stroke="#000000" stroke-width="6"/>
+
+  <!-- Limit line -->
+  <line x1="120" y1="220" x2="1480" y2="220" stroke="#000000" stroke-width="3" stroke-dasharray="14 10"/>
+  <text x="1490" y="228" font-family="monospace" font-size="22" fill="#000000">HARD LIMIT</text>
+
+  <!-- Stacked budget blocks, bottom to top: system, tools, history, scratch -->
+  <!-- system prompt -->
+  <rect x="120" y="660" width="1360" height="80" fill="#000000"/>
+  <text x="150" y="708" font-family="monospace" font-size="24" fill="#ffffff">SYSTEM PROMPT</text>
+
+  <!-- tool definitions -->
+  <rect x="120" y="560" width="1360" height="100" fill="#4b4b4b"/>
+  <text x="150" y="618" font-family="monospace" font-size="24" fill="#ffffff">TOOL DEFINITIONS</text>
+
+  <!-- conversation history (largest, encroaching on limit) -->
+  <rect x="120" y="280" width="1360" height="280" fill="#8a8a8a"/>
+  <text x="150" y="330" font-family="monospace" font-size="24" fill="#000000">CONVERSATION HISTORY</text>
+  <text x="150" y="368" font-family="monospace" font-size="18" fill="#000000">growing every turn</text>
+
+  <!-- scratch memory pushing past the limit -->
+  <rect x="120" y="180" width="1360" height="100" fill="#f4d44d"/>
+  <text x="150" y="238" font-family="monospace" font-size="24" fill="#000000">SCRATCH / WORKING MEMORY</text>
+
+  <!-- Overflow marker -->
+  <g>
+    <rect x="1300" y="150" width="180" height="46" fill="#000000"/>
+    <text x="1318" y="180" font-family="monospace" font-size="20" fill="#f4d44d">OVER BUDGET</text>
+  </g>
+
+  <text x="90" y="830" font-family="monospace" font-size="20" fill="#000000">Four components share one finite window. When history and scratch grow unbounded, they push the whole run past the limit.</text>
+</svg>

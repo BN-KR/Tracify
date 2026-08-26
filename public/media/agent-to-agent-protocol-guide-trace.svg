@@ -1,0 +1,36 @@
+<svg viewBox="0 0 1600 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="a2aTraceTitle a2aTraceDesc">
+  <title id="a2aTraceTitle">One correlation id threaded through three agent hops and a distributed trace</title>
+  <desc id="a2aTraceDesc">Three stacked agent boxes labeled Orchestrator agent, Research agent, and Pricing agent, each producing a span that shares one correlation id and links to a parent trace id, illustrating how a multi-agent conversation stays reconstructable end to end.</desc>
+  <rect width="1600" height="800" fill="#0a0a0a"/>
+
+  <text x="60" y="60" fill="#f6f1e6" font-family="monospace" font-size="18" opacity="0.7">trace_id: 4b91…  /  correlation_id: 7f2c9a… (constant across hops)</text>
+
+  <rect x="60" y="120" width="420" height="140" fill="#f6f1e6"/>
+  <text x="80" y="160" fill="#0a0a0a" font-family="monospace" font-size="18" font-weight="700">ORCHESTRATOR AGENT</text>
+  <text x="80" y="190" fill="#0a0a0a" font-family="monospace" font-size="14">span: agent.delegate</text>
+  <text x="80" y="212" fill="#0a0a0a" font-family="monospace" font-size="14">parent_span: (root)</text>
+  <text x="80" y="234" fill="#0a0a0a" font-family="monospace" font-size="14">hop: 0</text>
+
+  <rect x="590" y="330" width="420" height="140" fill="#f6f1e6"/>
+  <text x="610" y="370" fill="#0a0a0a" font-family="monospace" font-size="18" font-weight="700">RESEARCH AGENT</text>
+  <text x="610" y="400" fill="#0a0a0a" font-family="monospace" font-size="14">span: agent.task.execute</text>
+  <text x="610" y="422" fill="#0a0a0a" font-family="monospace" font-size="14">parent_span: agent.delegate</text>
+  <text x="610" y="444" fill="#0a0a0a" font-family="monospace" font-size="14">hop: 1</text>
+
+  <rect x="1120" y="540" width="420" height="140" fill="#f4d44d"/>
+  <text x="1140" y="580" fill="#0a0a0a" font-family="monospace" font-size="18" font-weight="700">PRICING AGENT</text>
+  <text x="1140" y="610" fill="#0a0a0a" font-family="monospace" font-size="14">span: agent.task.execute</text>
+  <text x="1140" y="632" fill="#0a0a0a" font-family="monospace" font-size="14">parent_span: agent.task.execute</text>
+  <text x="1140" y="654" fill="#0a0a0a" font-family="monospace" font-size="14">hop: 2 — timeout at 4200ms</text>
+
+  <path d="M270 260 C 350 300, 450 300, 700 335" fill="none" stroke="#f6f1e6" stroke-width="2" marker-end="url(#arrow2)"/>
+  <path d="M800 470 C 900 500, 1000 500, 1230 545" fill="none" stroke="#f6f1e6" stroke-width="2" marker-end="url(#arrow2)"/>
+
+  <defs>
+    <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#f6f1e6"/>
+    </marker>
+  </defs>
+
+  <text x="60" y="760" fill="#f6f1e6" font-family="monospace" font-size="15" opacity="0.75">A single correlation id lets one dashboard reconstruct the full cross-agent conversation, including the hop that timed out.</text>
+</svg>

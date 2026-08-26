@@ -1,0 +1,35 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="a2aHeroTitle a2aHeroDesc">
+  <title id="a2aHeroTitle">Two agent nodes exchanging a signed message envelope across an organizational boundary</title>
+  <desc id="a2aHeroDesc">A black canvas shows two square agent nodes in cream, one labeled CLIENT AGENT and one labeled REMOTE AGENT, connected by a dashed trust-boundary line. An acid-yellow envelope with a correlation id travels between them along a directional path, with a small padlock mark indicating authentication.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <line x1="800" y1="80" x2="800" y2="820" stroke="#f4d44d" stroke-width="2" stroke-dasharray="10 10" opacity="0.55"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">TRUST BOUNDARY</text>
+
+  <rect x="150" y="360" width="260" height="180" fill="#f6f1e6" />
+  <text x="280" y="440" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="24" font-weight="700">CLIENT</text>
+  <text x="280" y="470" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="24" font-weight="700">AGENT</text>
+  <rect x="180" y="490" width="200" height="10" fill="#0a0a0a" opacity="0.15"/>
+
+  <rect x="1190" y="360" width="260" height="180" fill="#f6f1e6" />
+  <text x="1320" y="440" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="24" font-weight="700">REMOTE</text>
+  <text x="1320" y="470" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="24" font-weight="700">AGENT</text>
+  <rect x="1220" y="490" width="200" height="10" fill="#0a0a0a" opacity="0.15"/>
+
+  <path d="M410 420 C 600 340, 900 340, 1190 420" fill="none" stroke="#f6f1e6" stroke-width="2" opacity="0.5"/>
+  <path d="M1190 480 C 900 560, 600 560, 410 480" fill="none" stroke="#f6f1e6" stroke-width="2" opacity="0.5"/>
+
+  <g transform="translate(730,300)">
+    <rect x="0" y="0" width="140" height="90" fill="#f4d44d"/>
+    <text x="70" y="35" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="13" font-weight="700">ENVELOPE</text>
+    <text x="70" y="55" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="11">corr_id: 7f2c...</text>
+    <text x="70" y="72" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="11">task.delegate</text>
+  </g>
+
+  <g transform="translate(1010,590)">
+    <rect x="0" y="0" width="30" height="38" rx="3" fill="none" stroke="#f4d44d" stroke-width="4"/>
+    <path d="M6 0 V-14 a9 9 0 0 1 18 0 V0" fill="none" stroke="#f4d44d" stroke-width="4"/>
+  </g>
+  <text x="1025" y="660" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="13">SIGNED</text>
+
+  <text x="800" y="820" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="16" opacity="0.6">DISCOVERY  →  NEGOTIATION  →  DELEGATION  →  RESULT</text>
+</svg>

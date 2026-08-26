@@ -33,6 +33,45 @@ export const blogMarkdocConfig = {
         tone: { type: String, default: "yellow", matches: ["yellow", "dark", "paper"] },
       },
     },
+    "context-budget-calculator": {
+      render: "context-budget-calculator",
+      attributes: {
+        title: { type: String, required: true },
+        contextLimit: { type: Number, required: true },
+        systemPromptTokens: { type: Number, required: true },
+        toolDefinitionTokens: { type: Number, required: true },
+        historyTokens: { type: Number, required: true },
+        scratchTokens: { type: Number, required: true },
+      },
+    },
+    "rollout-strategy-picker": {
+      render: "rollout-strategy-picker",
+      attributes: {
+        title: { type: String, required: true },
+      },
+    },
+    "failure-mode-explorer": {
+      render: "failure-mode-explorer",
+      attributes: {
+        title: { type: String, required: true },
+        intro: { type: String, required: false },
+      },
+    },
+    "failure-mode-option": {
+      render: "failure-mode-option",
+      selfClosing: true,
+      attributes: {
+        label: { type: String, required: true },
+        symptom: { type: String, required: true },
+        strategy: { type: String, required: true },
+        code: { type: String, required: false },
+      },
+    },
+    "topology-picker": {
+      render: "topology-picker",
+      selfClosing: true,
+      attributes: {},
+    },
   },
 };
 
