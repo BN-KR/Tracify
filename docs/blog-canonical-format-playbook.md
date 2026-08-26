@@ -18,7 +18,7 @@ Use this prompt when refining any of the other 26 published posts:
 >
 > Hard length requirement: the final body must be 3,000–10,000 words, excluding frontmatter. Do not submit a shorter draft or call a partial expansion complete. Verify the count with the repository content test.
 >
-> Before editing, read `AGENTS.md`, `.agents/skills/writing-tracify-content/SKILL.md`, its required references, `docs/blog-canonical-format-playbook.md`, the complete target article, the complete AI Agent Monitoring reference article, the shared Markdoc renderer and blog styles, the published-slug list, and the relevant Tracify product source. State the reader, job, promised outcome, article boundary, archetype, evidence, and one interaction before you write.
+> Before editing, read `AGENTS.md`, `.agents/skills/tracify-blog-tool/SKILL.md`, its required references, `docs/blog-canonical-format-playbook.md`, the complete target article, the complete AI Agent Monitoring reference article, the shared Markdoc renderer and blog styles, the published-slug list, and the relevant Tracify product source. State the reader, job, promised outcome, article boundary, archetype, evidence, and one interaction before you write.
 >
 > Preserve the target article’s frontmatter and draft/publication state. Keep the article in CommonMark/Markdoc. Do not add raw JSX, MDX, invented benchmarks, invented integrations, speculative roadmap claims, or unverified runnable code.
 >
@@ -71,7 +71,7 @@ The manager should apply this prompt to the remaining posts in small batches, st
 
 ## Mandatory workflow for every blog or documentation change
 
-1. Read `AGENTS.md`, `.agents/skills/writing-tracify-content/SKILL.md`, this playbook, and all required references before touching content or documentation.
+1. Read `AGENTS.md`, `.agents/skills/tracify-blog-tool/SKILL.md`, this playbook, and all required references before touching content or documentation.
 2. Inspect the canonical monitoring article, shared blog renderer/CSS, current media inventory, published slugs, and the target article.
 3. Write down the reader, job, outcome, boundary, article archetype, evidence, and interaction before editing.
 4. Work from a clean `codex/...` branch based on `origin/main`.

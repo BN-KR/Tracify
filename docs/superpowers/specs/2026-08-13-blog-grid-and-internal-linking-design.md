@@ -34,7 +34,7 @@ Links should be distributed through the body rather than collected into an artif
 
 ## Future-agent rule
 
-Update `.agents/skills/writing-tracify-content/` so agents writing or materially editing a blog post must:
+Update `.agents/skills/tracify-blog-tool/` so agents writing or materially editing a blog post must:
 
 1. inspect the current published-post inventory;
 2. add at least two relevant, descriptive internal links when eligible targets exist;

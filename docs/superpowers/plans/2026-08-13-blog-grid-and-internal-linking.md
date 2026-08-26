@@ -143,9 +143,9 @@ git commit -m "Add contextual links to blog articles"
 ### Task 3: Enforce the rule for future content agents
 
 **Files:**
-- Modify: `.agents/skills/writing-tracify-content/SKILL.md`
-- Modify: `.agents/skills/writing-tracify-content/references/quality-bar.md`
-- Modify: `.agents/skills/writing-tracify-content/assets/blog-post.mdoc`
+- Modify: `.agents/skills/tracify-blog-tool/SKILL.md`
+- Modify: `.agents/skills/tracify-blog-tool/references/quality-bar.md`
+- Modify: `.agents/skills/tracify-blog-tool/assets/blog-post.mdoc`
 
 **Interfaces:**
 - Consumes: the validator contract and publication behavior established in Tasks 1–2.
@@ -174,7 +174,7 @@ Run the local skill validator, confirm `SKILL.md` remains below 500 words, parse
 - [ ] **Step 6: Commit the future-agent rule**
 
 ```powershell
-git add .agents/skills/writing-tracify-content
+git add .agents/skills/tracify-blog-tool
 git commit -m "Require contextual blog links"
 ```
 
