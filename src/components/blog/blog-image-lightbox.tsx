@@ -59,6 +59,8 @@ export function BlogImage({
   const handleClick = useCallback(() => setIsOpen(true), []);
   const handleClose = useCallback(() => setIsOpen(false), []);
 
+  const isStringUrl = typeof src === "string";
+
   return (
     <>
       <img
@@ -76,7 +78,7 @@ export function BlogImage({
           }
         }}
       />
-      {isOpen && src && alt !== undefined && (
+      {isOpen && isStringUrl && typeof alt === "string" && (
         <ImageLightbox src={src} alt={alt} onClose={handleClose} />
       )}
     </>
