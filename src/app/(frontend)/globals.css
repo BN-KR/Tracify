@@ -499,8 +499,10 @@
   .markdoc-blog-richtext blockquote { border-left: 4px solid #f4d44d; background: rgb(244 212 77 / 18%); padding: 0.9rem 1rem 0.9rem 1.15rem; }
   .markdoc-blog-richtext img { width: 100%; border: 1px solid #000; box-shadow: 10px 10px 0 rgb(0 0 0 / 10%); }
   .markdoc-blog-richtext a { color: #000; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
-  .markdoc-blog-richtext strong { color: #000; font-weight: 700; background: linear-gradient(transparent 58%, rgb(244 212 77 / 68%) 58%); }
-  .blog-highlight { color: #000; background: #f4d44d; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding: 0.04em 0.18em; }
+  .markdoc-blog-richtext strong { position: relative; isolation: isolate; color: #000; font-weight: 700; background: transparent; padding-inline: 0.08em; }
+  .markdoc-blog-richtext strong::before,
+  .blog-highlight::before { position: absolute; z-index: -1; content: ""; inset-inline: -0.16em; bottom: 0.02em; height: 68%; transform: rotate(-1deg) skewX(-7deg); background: rgb(244 212 77 / 80%); }
+  .blog-highlight { position: relative; isolation: isolate; display: inline; color: #000; background: transparent; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding-inline: 0.16em; }
   .blog-post__title { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.28em; row-gap: 0.08em; text-wrap: balance; }
   .blog-post__title { text-decoration: none; }
   .blog-post__body > .blog-table-of-contents + .markdoc-blog-richtext > article > h3:first-of-type { text-decoration: line-through; text-decoration-color: #f4d44d; text-decoration-thickness: 0.18em; text-decoration-skip-ink: none; }
