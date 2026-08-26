@@ -34,7 +34,7 @@
 
 ## 2026-08-24 future content quality gate
 - Completed launch-plan labels in `src/components/dashboard/dashboard-overview.tsx` keep their muted text but now use `decoration-black/75`, making the strikethrough readable without overpowering the label.
-- The authoritative content workflow now has a mandatory future-agent quality gate in `.agents/skills/writing-tracify-content/SKILL.md` and `content/blog/README.md`: inspect evidence first, define reader/job/boundary, use layered structure and purposeful interactions, keep examples truthful, target 4–7 contextual links per 1,000 long-form words, render-test desktop/mobile behavior, and run all required checks before PR/merge.
+- The authoritative content workflow now has a mandatory future-agent quality gate in `.agents/skills/tracify-blog-tool/SKILL.md` and `content/blog/README.md`: inspect evidence first, define reader/job/boundary, use layered structure and purposeful interactions, keep examples truthful, target contextual links only where useful, render-test desktop/mobile behavior, and run all required checks before PR/merge.
 - Verification on 2026-08-24: 19 content tests, focused dashboard ESLint, and diff hygiene pass. Full lint still has unrelated existing errors; the full build reaches TypeScript but fails on the untracked archived Motion Canvas file `video/archive/tracify-demo-motion-canvas/src/scenes/demo.tsx`.
 
 ## 2026-08-22 Tracify product film rebuilt from scratch in Remotion
@@ -55,7 +55,7 @@
 
 ## 2026-08-20 17-post blog visibility content set
 - Added 17 published Markdoc articles under `content/blog` targeting distinct, durable AI engineering searches: architecture, RAG evaluation, prompt injection, structured outputs, latency, hallucinations, cost, memory, MCP, OpenTelemetry, human review, regression testing, production readiness, browser agents, prompt versioning, monitoring, and the Tracify writing workflow.
-- Added `how-to-write-tracify-blog-posts.mdoc` so future agents have a public, reader-facing version of the required writing process. The repository-level must-follow process remains in `AGENTS.md`, `.agents/skills/writing-tracify-content/SKILL.md`, and `content/blog/README.md`.
+- Added `how-to-write-tracify-blog-posts.mdoc` so future agents have a public, reader-facing version of the required writing process. The repository-level must-follow process remains in `AGENTS.md`, `.agents/skills/tracify-blog-tool/SKILL.md`, and `content/blog/README.md`.
 - Added the centralized `trace-scenario` Markdoc tag in `src/lib/markdoc-blog.ts` and its accessible disclosure renderer in `src/components/blog/markdoc-rich-text.tsx`; it is deterministic, local, and used by the RAG and cost articles.
 - `npm run test:content` passes all 16 tests. The first Turbopack build hit a Windows `spawn UNKNOWN` TypeScript-worker error; the full Webpack build then passed after temporarily enabling Node worker threads for verification. The temporary setting was removed, so `next.config.ts` remains unchanged.
 
@@ -116,7 +116,7 @@
 - `llms.txt` is maintained for agent discovery only. Google states that it neither helps nor harms Google Search visibility; canonical crawlable pages, useful original content, page experience, sitemap coverage, and valid structured data remain the SEO priorities.
 
 ## 2026-08-13 Tracify content-authoring skill
-- Added the project-local `writing-tracify-content` skill for drafting, editing, reviewing, storing, and publishing Tracify blogs and documentation.
+- Added the project-local skill now named `tracify-blog-tool` for drafting, editing, reviewing, storing, and publishing Tracify blogs and documentation.
 - The skill distinguishes live storage surfaces: public blogs in `content/blog/*.mdoc`, blog media in `public/media`, internal engineering Markdown in `docs/`, public `/docs` content in its current TypeScript registry, and dashboard reference content in `docs-viewer.tsx`.
 - Added an evidence-led writing quality bar, explicit draft/privacy and no-fabrication rules, a complete Markdoc blog example, and an internal-document example.
 - Registered the skill as required in `AGENTS.md`. Skill validation passes, the skill body is 405 words, its template parses through the real Markdoc repository, remains a draft, and contains no placeholders.
@@ -1206,7 +1206,7 @@
 
 ## Markdoc Blog and Authoring Workflow (2026-08-13)
 - Replaced Payload CMS with validated repository-backed Markdoc content under `content/blog`; Payload routes and runtime packages are removed.
-- Future blog and documentation work must use `.agents/skills/writing-tracify-content/SKILL.md` for writing quality and storage routing.
+- Future blog and documentation work must use `.agents/skills/tracify-blog-tool/SKILL.md` for writing quality and storage routing.
 - The first published post is `ai-agent-observability-complete-guide`; the other migrated posts remain drafts.
 - Blog posts do not render a post-level newsletter CTA. The site-wide footer newsletter remains.
 - The article author signature uses a responsive light editorial treatment instead of the former dark card.
@@ -1293,7 +1293,7 @@
 
 ## 2026-08-21 blog article repertoire and monitoring polish
 - The supplied Semrush references establish three especially useful pacing models: a sequential definitive guide, a numbered decision framework, and a browsable practical library with a short starter set plus an adaptation method. Tracify's workflow now expands these into five selectable archetypes rather than forcing one template on every post.
-- The repertoire is mandatory in `.agents/skills/writing-tracify-content/SKILL.md`, its quality bar, and `content/blog/README.md`. Future authors must choose an archetype and distribute proof modules throughout the article instead of concentrating visuals in the opening.
+- The repertoire is mandatory in `.agents/skills/tracify-blog-tool/SKILL.md`, its quality bar, and `content/blog/README.md`. Future authors must choose an archetype and distribute proof modules throughout the article instead of concentrating visuals in the opening.
 - `ai-agent-monitoring` is the only post using the new monitoring treatment: six static operator runthroughs, `C:\` H2 prompts, highlighted key phrases, operational tables, colored code artifacts, a closed nested TOC, FAQ accordions, and a yellow reading-progress bar.
 - The refined article is 3,626 words and has 17 contextual internal links (about 4.7 per 1,000 words). The former bottom link dump and irrelevant publishing-process tangent were removed.
 - Verification: 19 content tests pass; focused ESLint and `git diff --check` pass; the full 116-route Next production build passes when supplied non-secret placeholder Convex URLs for page collection. Repository-wide lint still fails on unrelated pre-existing files. Local SSR returned HTTP 200 and confirmed one closed TOC, six runthroughs, and five FAQ accordions. The in-app browser kernel still cannot initialize (`failed to write kernel assets`), so viewport verification is limited to CSS/DOM safeguards rather than a screenshot sweep.
@@ -1351,3 +1351,27 @@
 - Updated the agent skill, AGENTS.md, publishing README, canonical playbook, and blog framework tests/validator.
 - Expanded the remaining short published posts and verified all 35 are currently between 4,000 and 8,000 body words.
 - Framework, internal-link, Markdoc, docs, reading-time tests, and production build pass. The package `test:content` script remains broken because it invokes Node's test runner directly against TypeScript tests; equivalent `bun test` coverage passes.
+
+## 2026-08-26 AI evaluation metrics editorial and UX rebuild
+- Reworked `ai-evaluation-metrics` into a 5,533-word editorial article with a late five-item FAQ, no in-body recommendation dump, three instructional editorial panels, dynamic three-card related-post selection, and eleven restrained explicit highlights.
+- Kept the yellow and dark panel colors unchanged while giving selected text card-specific contrast: black/white on yellow and cream/black on dark. Browser-computed selection styles confirm the overrides.
+- Added two generated, article-specific 1672×941 visuals under `public/media`: a request-to-outcome first-divergence trace and a layered release-gate/canary diagram. Both return HTTP 200 and scale without page overflow at 1460px and 390px.
+- Replaced the reused evaluation scorecard hero with the article-specific 1672×941 `ai-evaluation-metrics-hero.png`, a photographed mechanical measurement machine. The asset is referenced by this article only, and the shared article hero no longer forces grayscale so unique color direction remains visible; related-card thumbnails stay grayscale.
+- Updated the mandatory writing skill and publishing README: future posts need their own compositionally distinct hero and teaching visuals, may not borrow another post's asset or submit a simple recolor, and may derive card/hero/OG crops only from that post's unique source.
+- Verification passes: 20 content tests, 3 related-post tests, focused ESLint, `git diff --check`, route/media HTTP checks, and desktop/mobile in-app browser inspection. The production bundle compiles, then stops on the unrelated pre-existing `src/components/dashboard/cost-dashboard.tsx:256` `ReactNode`/`Date` type error.
+- The localhost review pass remains uncommitted. `public/media` is ignored, so all three new PNGs must be force-added when the approved PR commit is prepared.
+
+## 2026-08-26 reusable blog-quality skill gate
+- Upgraded and renamed the existing mandatory project skill to `tracify-blog-tool`, so it is visually distinct from the global `writing-tracify-content` skill while `AGENTS.md` continues to trigger one canonical workflow for every Tracify blog request.
+
+## 2026-08-26 project blog skill rename
+- Renamed the repository-local skill folder, frontmatter name, UI display name, and `$skill` invocation from `writing-tracify-content` to `tracify-blog-tool`.
+- Updated active repository rules, package commands, publishing instructions, canonical playbook links, and historical design references to the new path.
+- The global `C:\Users\krist\.codex\skills\writing-tracify-content` skill remains unchanged. The project-local skill is now unambiguous in the skill list as “Tracify Blog Tool.”
+- The renamed skill passes the skill-package validator, its YAML UI metadata parses correctly, the strict benchmark gate passes, both validator tests pass, all 22 content tests pass, and `git diff --check` passes.
+- Added `references/blog-quality-blueprint.md`, using the rendered `ai-evaluation-metrics` article as the composition benchmark without allowing agents to copy its topic, structure, examples, or artwork.
+- Replaced the thin blog asset with a full editorial scaffold covering a unique hero, two teaching images, lower-half visual pacing, code, tables, notes, varied panels, restrained highlights, a practical ending, and exactly five FAQ items.
+- Added `npm run validate:blog -- <slug>` and a deterministic validator that enforces 3,000–10,000 words, unique hero and body media paths, article depth, lower-half modules, code, tables, notes, highlights, panels, one interaction, contextual links, a late five-item FAQ, and no in-body recommendation dump.
+- The approved article passes with 5,533 words, 3 body visuals, 11 highlights, 3 panel tones, 8 tables, 2 notes, 1 interaction, 3 internal links, and 5 FAQs. A deliberately bad fixture fails the expected gates. The complete content suite passes 22 tests, the focused blog lint passes, the skill package validator passes, and `git diff --check` passes.
+- Full lint still reports the same unrelated 18 errors across existing share buttons, ToC, marketing, UI, and hook files. The production bundle compiles and then reaches the same unrelated `cost-dashboard.tsx:256` `ReactNode`/`Date` type error.
+- The new skill reference and validator scripts are hidden by the repository’s local `.git/info/exclude` rule for `.agents/`; force-add them with the three ignored article PNGs when preparing the PR.
