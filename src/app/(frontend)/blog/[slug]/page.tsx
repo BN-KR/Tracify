@@ -74,7 +74,7 @@ function absoluteUrl(value: string) {
 }
 
 function BlogDisplayTitle({ title }: { title: string }) {
-  const segments = title.split(/\s+(?:—|:)\s+/);
+  const segments = title.split(/\s*(?:—|:)\s*/);
   if (segments.length < 2) return <>{title}</>;
   return (
     <>

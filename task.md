@@ -2,6 +2,12 @@
 
 # 2026-08-26 — Blog corpus cleanup
 
+# 2026-08-26 — AI evaluation metrics editorial rebuild
+
+- [completed] Rebuild the stale second half of the evaluation metrics article with varied editorial modules.
+- [completed] Verify slash title and highlight rendering on localhost.
+- [completed] Run focused tests, build, and diff hygiene.
+
 - [completed] Remove generated context-template language from the published corpus.
 - [completed] Verify word-count and canonical presentation requirements across all posts.
 - [completed] Run focused content suites and production build.

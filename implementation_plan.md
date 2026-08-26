@@ -2,6 +2,12 @@
 
 # Blog corpus cleanup — 2026-08-26
 
+# AI evaluation metrics editorial rebuild — 2026-08-26
+
+- [completed] Replace repetitive H3/paragraph cadence with visual decision-led modules.
+- [completed] Add worked release comparison, three-layer gates, and reader checklist.
+- [completed] Verify localhost response, Markdoc output, tests, build, and diff hygiene.
+
 - [completed] Audit every published post for visuals, code, callouts, emphasis, FAQ placement, and word count.
 - [completed] Remove repeated generated prose from the remaining articles.
 - [completed] Run content tests, diff hygiene, and production build.

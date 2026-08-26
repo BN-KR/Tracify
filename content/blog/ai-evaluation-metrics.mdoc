@@ -24,7 +24,7 @@ seo:
 
 *This diagram is a topic-specific decision aid: connect the article’s context to evidence before taking the next action.*
 
-This guide is for **engineers evaluating LLM and AI agent changes**. It helps you **choose metrics that support a release decision**. It does not claim that one score can represent every user, risk, or workflow.
+This guide is for **engineers evaluating LLM and AI agent changes**. It helps you {% highlight %}choose metrics that support a release decision{% /highlight %}. It does not claim that one score can represent every user, risk, or workflow.
 
 ### The evaluation scorecard
 
@@ -291,79 +291,143 @@ After a release, check whether the team used the metric as intended. Did it lead
 
 The final standard is practical: evaluation should make a user-visible decision safer, clearer, or more reversible. If a score cannot help someone decide what to inspect or change next, it does not yet earn a place in the production scorecard.
 
-## The ai evaluation metrics operating model
+## Turn the scorecard into a release room
 
-## Put ai evaluation metrics into practice
+Metrics become useful when a real team can use them under time pressure. Imagine two candidate models for a support workflow. Candidate B improves answer relevance by four points, but tool-call failures double for refund requests. The right question is not “which model scored higher?” It is “which change produces the better customer outcome inside the allowed risk and operating budget?”
 
-A useful article should help a reader move from an idea to a safe production decision. Start by stating the user-visible outcome, then identify the inputs, the owner, the evidence, and the terminal states. Do not begin with a tool or framework. Begin with the decision the system must support and the cost of getting that decision wrong. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+| Release question | Evidence to put on the table | Decision owner |
+| --- | --- | --- |
+| Did the task get completed? | Expected outcome versus terminal state | Workflow owner |
+| Was the result correct? | Rubric score plus reviewed examples | Product or domain owner |
+| Did the system stay dependable? | Timeouts, retries, tool failures, unknown outcomes | Platform owner |
+| Did the improvement pay for itself? | Cost and latency by cohort | Engineering owner |
+| Did it stay inside policy? | Blocks, approvals, unsafe proposals, refusal quality | Risk owner |
 
-### Define the contract
+> **Field note:** Never let a single averaged score speak for a workflow with side effects. Put the score beside the traces that explain its movement.
 
-Write the input and output contract before tuning the model. Name required fields, acceptable values, missing-data behavior, and the response a user receives when the system cannot proceed. A schema validates shape, but it does not prove meaning or authorization. Follow parsing with semantic checks, policy checks, and an explicit fallback. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+### A metric has a job
 
-### Separate proposal from authority
+Give every metric one sentence: “This changes our decision when…” If the sentence cannot be finished, the metric is decoration. A groundedness score might decide whether retrieval needs investigation. A p95 latency measure might decide whether streaming or caching needs work. A refusal-quality measure might decide whether a workflow stays behind human approval.
 
-A model can classify, extract, summarize, rank, or propose an action. Deterministic code should own permissions, limits, accounting, retention, and irreversible side effects. This boundary makes the system easier to test and easier to explain after an incident. If a model suggestion is rejected, route it to a visible state instead of silently rewriting it. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+This small test also exposes duplicate metrics. If task completion, answer quality, and user acceptance all move together on the same sample, keep the one that best represents the decision and use the others as diagnostics. A smaller board is easier to explain, cheaper to run, and harder to game.
 
-### Build representative cases
+## Read one evaluation like a story
 
-Create a small case set before claiming that an implementation works. Include ordinary examples, empty inputs, ambiguous requests, stale data, conflicting evidence, malformed outputs, permission boundaries, and provider failures. Label the expected user outcome and the unacceptable failure. Keep the cases versioned so a later change can be compared against the same baseline. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+A production evaluation should be readable from left to right. Start with the request, then follow the evidence, the model decision, the tool path, and the user-visible result. The first divergence is usually more valuable than the final score.
 
-### Validate the full path
+| Moment | What to inspect | What it can explain |
+| --- | --- | --- |
+| Request | Task class, language, input length, expected outcome | Cohort drift or a bad contract |
+| Evidence | Retrieved sources, freshness, permissions | Unsupported or stale answers |
+| Decision | Prompt/model version and structured output | Changed reasoning or schema behavior |
+| Execution | Tool arguments, retries, approvals, provider status | Side-effect and reliability failures |
+| Outcome | Final state, correction, review, complaint | Whether the task actually worked |
 
-Unit tests are valuable for parsers, transitions, policies, and retry rules, but they do not prove the workflow works end to end. Add scenario tests that exercise retrieval, model calls, tool calls, timeouts, duplicate events, approvals, and partial completion. Preserve the trace for each important scenario and check both the final result and the intermediate evidence. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+For example, a candidate may have the same answer-quality score as baseline while producing more clarification requests. That can be good if ambiguous cases are being handled safely. It can be bad if the candidate lost access to a required field. The trace tells you which story is true.
 
-### Make retries safe
+### The denominator is part of the plot
 
-Every external write needs a stable identity, a bounded retry policy, and a reconciliation path. A timeout is not proof that an action failed. Record unknown outcomes explicitly, query the provider when possible, and prevent duplicate work with idempotency keys. Never let a generic retry loop decide whether a financial, permission, or communication side effect is safe. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+“92% success” is unfinished information. Name the population, the count, and the exclusions. Say “92 of 100 eligible refund cases” rather than “92%.” If cancelled runs, unsupported languages, or missing labels were excluded, show them beside the result. A rising percentage can simply mean that difficult work stopped entering the sample.
 
-### Design human review
+> **Decision rule:** A metric without its denominator, cohort, evaluator version, and owner is a signal, not a release gate.
 
-Human review should be specific and actionable. Show the proposed action, normalized arguments, evidence, policy version, expected consequence, and expiration. Bind approval to that exact proposal. If a material field changes, invalidate the approval. Record the reviewer, decision, reason, and result so rejection patterns become improvements rather than repeated surprises. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+## Build a small but difficult case set
 
-### Instrument useful evidence
+A useful evaluation set is not a museum of perfect demos. Start with the common path, then add cases that force the system to reveal its boundaries:
 
-A trace should connect the original request to each meaningful stage and the final outcome. Capture versions, latency, cost, status, error category, tool arguments after redaction, and the evidence used for the decision. Avoid collecting sensitive payloads merely because they are available. Store references or structured summaries when raw content is not necessary for diagnosis. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+- an empty retrieval result;
+- two sources that disagree;
+- a request missing the field needed for authorization;
+- a malformed tool response;
+- a repeated event after a timeout;
+- a long input that exceeds the normal context shape;
+- a high-consequence action that should wait for approval;
+- an evaluator disagreement with a clear human disposition.
 
-### Measure outcomes
+Give each case a purpose, expected outcome, unacceptable outcome, and owner. Keep the fixture redacted and versioned. When a production incident becomes a case, record the mechanism, not just the transcript.
 
-Completion rate is not enough. Measure correctness, user acceptance, review rate, repair rate, latency, cost, retries, and the frequency of unsafe or unauthorized proposals. Segment the results by version, model, customer cohort, input class, and failure mechanism. A higher automation rate can be a regression when it creates more corrections or delays discovery of mistakes. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+### Make evaluators disagree usefully
 
-### Roll out in stages
+Disagreement is not automatically noise. It can indicate an ambiguous rubric, a missing reference answer, a judge that lacks context, or a genuine product regression. Store the candidate output, baseline output, evidence, evaluator version, and reviewer reason together. The next action should follow the mechanism: improve the rubric, improve retrieval, repair the tool contract, or route the case to review.
 
-Use observation, shadow mode, suggestions, prepared drafts, approved execution, and only then broader automation. Give each stage an owner, cohort, success threshold, and rollback condition. Preserve the manual path until the automated path has demonstrated normal and degraded behavior. Keep in-flight work recoverable when a release is paused. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+## Use three gates, not one score
 
-### Operate failure states
+A release gate should make bad trade-offs visible. Separate the checks into three layers:
 
-Make waiting, degraded, unknown, failed, cancelled, and completed distinct states. Tell the user whether the system is waiting for data, approval, a provider, a retry window, or manual repair. Give every waiting state an expiration or escalation path. Silent queues and ambiguous success messages are operational defects, not cosmetic issues. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+1. **Hard controls:** schema validity, authorization, policy blocks, required citations, and safe argument validation.
+2. **Quality evidence:** task success, groundedness, tool correctness, refusal quality, and human review on difficult cases.
+3. **Operating limits:** latency, cost, retry volume, queue delay, and unknown provider outcomes.
 
-### Review changes
+A candidate must pass the hard controls even when its quality score improves. It must show useful quality evidence without crossing operating limits. If a candidate fails one layer, record the reason and the owner instead of averaging the failure away.
 
-Prompts, models, schemas, retrieval indexes, tools, providers, and policies are all dependencies. Version them and record their versions with each run. When behavior changes, compare a representative cohort with the previous baseline. Review quality, safety, latency, cost, and correction work together; optimizing one dimension can damage another. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+| Candidate result | Correct response |
+| --- | --- |
+| Quality up, safety stable, cost stable | Proceed to a controlled canary |
+| Quality up, tool failures up | Hold and inspect the first divergent trace |
+| Cost down, task completion down | Reject the optimization |
+| Scores stable, complaints up | Revisit the rubric and sample selection |
+| Evaluator passes rise without outcome movement | Audit evaluator drift |
 
-### Example decision record
+## A worked release decision
 
-For a meaningful release, write a short record with the goal, affected workflow, expected improvement, known risks, evidence set, rollout stage, owner, rollback command, and review date. Link it to representative traces and the test cases that protect the most important boundary. This record turns a vague confidence claim into something another engineer can inspect. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+Suppose the baseline handles 1,000 support tasks. A candidate is tested on the same cases:
 
-### Practical checklist
+| Signal | Baseline | Candidate | Read |
+| --- | ---: | ---: | --- |
+| Correct task outcome | 884 | 901 | Improvement |
+| Unsupported claim | 31 | 28 | Improvement |
+| Tool argument failure | 7 | 19 | Regression |
+| Median latency | 2.4s | 2.1s | Improvement |
+| p95 latency | 8.9s | 10.7s | Regression |
+| Cost per completed task | $0.018 | $0.021 | Trade-off |
 
-Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. For ai evaluation metrics, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
+The candidate is not ready for broad promotion. The task outcome improved, but the tool and tail-latency regressions can create expensive or unsafe customer experiences. A sensible next step is a canary limited to read-only cases while the team investigates whether the model is proposing more complex actions or whether argument validation changed.
 
-## A practical ai evaluation metrics implementation example
+Keep the decision record compact:
 
-This example is illustrative at the integration boundary; adapt the client names to the repository’s actual dependency. The important behavior is the explicit contract, bounded failure state, and evidence that a reviewer can inspect.
+- **Candidate:** model, prompt, evaluator, and dataset versions.
+- **Observed win:** +17 correct task outcomes on the fixed panel.
+- **Observed risk:** tool argument failures and p95 latency increased.
+- **Scope:** read-only canary, 10% of eligible traffic.
+- **Stop condition:** any unsafe proposal or tool-failure rate above baseline plus agreed tolerance.
+- **Owner:** the workflow team.
+- **Next review:** after the first 200 canary tasks.
+
+## Instrument the evaluator itself
+
+The evaluator is a production dependency. Track missing scores, parser failures, score distributions, judge-model version, rubric version, reference-data version, and evaluation cost. Alert when the evaluator suddenly marks nearly everything as a pass or when its output schema changes.
+
+Here is a small illustrative gate. It is intentionally simple: the application still needs its own policy, cohort, and trace storage.
 
 ```ts
-type Evaluation = { outcome: "pass" | "fail" | "review"; evidence: string[] };
+type Gate = "promote" | "hold" | "review";
 
-function gate(result: Evaluation) {
-  if (result.outcome === "fail") return "hold";
-  if (result.outcome === "review") return "sample";
-  return "promote";
+function decide(input: {
+  hardControlsPass: boolean;
+  qualityImproved: boolean;
+  operatingLimitsPass: boolean;
+}): Gate {
+  if (!input.hardControlsPass) return "hold";
+  if (!input.operatingLimitsPass) return "review";
+  return input.qualityImproved ? "promote" : "hold";
 }
 ```
 
-> **Decision rule:** Validate the example’s inputs, output, permissions, and failure behavior before connecting it to a consequential side effect.
+The code does not replace judgment. It makes the ordering explicit: safety and operating limits are checked before a quality improvement can earn promotion.
+
+## Leave the reader with the next move
+
+Use the scorecard at the next candidate review:
+
+1. Write the task outcome and denominator.
+2. Select the smallest case set that covers common and costly failures.
+3. Version the candidate, evaluator, rubric, and evidence.
+4. Inspect the first divergence in representative traces.
+5. Apply hard-control, quality, and operating-limit gates separately.
+6. Choose a bounded rollout, named owner, and stop condition.
+
+The best evaluation system is not the one with the most metrics. It is the one that helps a team make a **clearer decision**, find the **first failure mechanism**, and improve the workflow without hiding trade-offs.
+
 ## Frequently asked questions
 
 {% faq-item question="What is the best AI evaluation metric?" answer="The best primary metric is the one that represents the user task. Add quality, reliability, cost, latency, and safety dimensions when they can change the release decision." /%}

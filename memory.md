@@ -1,5 +1,9 @@
 # Project Memory
 
+## 2026-08-26 AI evaluation metrics editorial rebuild
+- Replaced the stale H3/paragraph tail of `content/blog/ai-evaluation-metrics.mdoc` with varied release-room tables, trace storytelling, difficult-case guidance, layered gates, a worked release decision, and a visual checklist.
+- Added shared slash-separated display titles and centralized yellow `highlight` Markdoc rendering in the blog system; local route verified at `/blog/ai-evaluation-metrics` with the required Convex placeholder environment.
+
 ## 2026-08-26 blog corpus completion audit
 - Removed the remaining generated `In the context of ...` prose pattern across 29 published posts while preserving article-specific headings and required presentation modules.
 - Verified all 35 posts are 4,000–8,000 words and pass the strict framework, internal-link, Markdoc, and reading-time suites; production build generated 125 pages successfully.
