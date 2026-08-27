@@ -6,7 +6,8 @@ import { getStripe, stripePriceIds } from "@/lib/stripe";
 import { getDeploymentRegion } from "@/lib/regions";
 
 export async function POST(request: Request) {
-  if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: "Stripe is not configured" }, { status: 503 });
+  try {
+    if (!process.env.STRIPE_SECRET_KEY) return NextResponse.json({ error: "Stripe is not configured" }, { status: 503 });
   const stripe = getStripe();
   const region = getDeploymentRegion();
   const body = await request.json() as { projectId?: string; plan?: "pro" | "team"; interval?: "monthly" | "annual" };
@@ -43,5 +44,10 @@ export async function POST(request: Request) {
     },
     { apiVersion: "2026-02-25.preview" },
   );
-  return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: session.url });
+  } catch (error) {
+    console.error("Stripe checkout session creation failed", error);
+    const message = error instanceof Error ? error.message : "Checkout is unavailable right now.";
+    return NextResponse.json({ error: message }, { status: 502 });
+  }
 }

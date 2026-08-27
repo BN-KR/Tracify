@@ -36,7 +36,15 @@ export default function PricingCheckoutPage() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ projectId: targetProjectId, plan, interval }),
     });
-    const data = await response.json() as { url?: string; error?: string };
+    const responseText = await response.text();
+    let data: { url?: string; error?: string } = {};
+    if (responseText.trim()) {
+      try {
+        data = JSON.parse(responseText) as { url?: string; error?: string };
+      } catch {
+        throw new Error(`Checkout failed (${response.status}). The billing service returned an invalid response.`);
+      }
+    }
     if (!response.ok || !data.url) throw new Error(data.error ?? "Checkout is unavailable right now.");
     window.location.assign(data.url);
   }
