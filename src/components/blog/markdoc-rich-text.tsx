@@ -2,6 +2,7 @@ import Markdoc from "@markdoc/markdoc";
 import React from "react";
 
 import { BlogCodeBlock } from "@/components/blog/blog-code-block";
+import { BlogImage } from "@/components/blog/blog-image-lightbox";
 import { ContextBudgetCalculator } from "@/components/blog/context-budget-calculator";
 import { FailureModeExplorer, FailureModeOption } from "@/components/blog/failure-mode-explorer";
 import { RolloutStrategyPicker } from "@/components/blog/rollout-strategy-picker";
@@ -98,6 +99,7 @@ export function MarkdocRichText({ content }: Pick<BlogPost, "content">) {
           "failure-mode-explorer": FailureModeExplorer,
           "failure-mode-option": FailureModeOption,
           "topology-picker": TopologyPicker,
+          img: BlogImage,
           h2: BlogH2,
           h3: BlogH3,
           pre: BlogCodeBlock,
