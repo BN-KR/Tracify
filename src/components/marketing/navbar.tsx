@@ -144,12 +144,20 @@ export function Navbar() {
                 </Link>
               </>
             ) : (
-              <Link
-                href="/cloud?next=/sign-up"
-                className="bg-black px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black"
-              >
-                Start free
-              </Link>
+              <>
+                <Link
+                  href="/cloud?next=/sign-in"
+                  className="px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] hover:bg-black/5"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/cloud?next=/sign-up"
+                  className="bg-black px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black"
+                >
+                  Start free
+                </Link>
+              </>
             )}
           </div>
           <button
@@ -338,6 +346,15 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
             </Link>
           </>
         ) : (
+          <>
+          <Link
+            onClick={onClose}
+            href="/cloud?next=/sign-in"
+            className="flex min-h-16 w-full items-center justify-between border border-black bg-white px-1 font-mono text-xs uppercase tracking-[0.14em] text-black"
+          >
+            <span>Sign in</span>
+            <ArrowRight className="size-5" aria-hidden="true" />
+          </Link>
           <Link
             onClick={onClose}
             href="/cloud?next=/sign-up"
@@ -349,6 +366,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
             </span>
             <ArrowRight className="size-5" aria-hidden="true" />
           </Link>
+          </>
         )}
       </div>
     </div>
