@@ -109,7 +109,7 @@ export function Navbar() {
             <BrandLogo />
           </Link>
           <nav className="hidden h-full items-center gap-7 font-mono text-[9px] uppercase tracking-[0.12em] md:flex">
-            <Link href="/pricing" className="flex h-full items-center border-b-2 border-transparent hover:border-black/35">Pricing</Link>
+            <Link href="/pricing" className="flex h-full items-center border-b-2 border-transparent normal-case hover:border-black/35">Pricing</Link>
             {(Object.keys(menus) as MenuName[]).map((name) => (
               <button
                 key={name}
