@@ -1,169 +1,20 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, Minus, Plus } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { pricingCheckoutHref } from "@/lib/billing-links";
 
 const plans = [
-  { name: "Free", monthly: 0, spans: "50k", retention: "7 days", members: "1", projects: "1 project", signal: "Start", features: ["Trace viewer", "Cost visibility", "Community support"] },
-  { name: "Pro", monthly: 19, spans: "500k", retention: "30 days", members: "5", projects: "3 projects", signal: "Build", features: ["Evaluations + datasets", "Prompt versions", "Slack alerts"] },
-  { name: "Team", monthly: 39, spans: "2m", retention: "90 days", members: "20", projects: "Unlimited projects", signal: "Operate", features: ["Release gates", "Collaboration + reviews", "Priority support"] },
+  { name: "Free", monthly: 0, spans: "50k", retention: "7 days", members: "1", projects: "1", features: ["Trace viewer", "Cost visibility", "Community support"] },
+  { name: "Pro", monthly: 19, spans: "500k", retention: "30 days", members: "5", projects: "3", features: ["Evaluations + datasets", "Prompt versions", "Slack alerts"] },
+  { name: "Team", monthly: 39, spans: "2m", retention: "90 days", members: "20", projects: "Unlimited", features: ["Release gates", "Collaboration + reviews", "Priority support"] },
 ] as const;
 
-const teamSizes = ["1", "2–5", "6–20", "20+"] as const;
-const traceVolumes = ["<50k", "50k–500k", "500k–2m", "2m+"] as const;
-const comparison = [
-  ["Tracing + sessions", "Included", "Included", "Included"],
-  ["Cost analytics", "Basic", "Full", "Full"],
-  ["Evaluations", "—", "Included", "Included"],
-  ["Datasets + experiments", "—", "Included", "Included"],
-  ["Release gates", "—", "—", "Included"],
-  ["Members", "1", "5", "20"],
-  ["Retention", "7 days", "30 days", "90 days"],
-] as const;
+const rows = [["Spans / month", "50k", "500k", "2m"], ["Retention", "7 days", "30 days", "90 days"], ["Members", "1", "5", "20"], ["Projects", "1", "3", "Unlimited"], ["Tracing + sessions", "Included", "Included", "Included"], ["Cost analytics", "Basic", "Full", "Full"], ["Evaluations + datasets", "—", "Included", "Included"], ["Release gates", "—", "—", "Included"]] as const;
 
 export default function PricingPage() {
   const [annual, setAnnual] = useState(false);
-  const [teamIndex, setTeamIndex] = useState(1);
-  const [traceIndex, setTraceIndex] = useState(1);
-
-  const recommendedIndex = useMemo(() => {
-    if (teamIndex === 0 && traceIndex === 0) return 0;
-    if (teamIndex >= 2 || traceIndex >= 2) return 2;
-    return 1;
-  }, [teamIndex, traceIndex]);
-  const recommended = plans[recommendedIndex];
-  const price = annual ? recommended.monthly * 0.8 : recommended.monthly;
-
-  return (
-    <main className="min-h-screen overflow-hidden bg-[#eceae3] pt-[54px] text-black">
-      <section className="border-b border-black">
-        <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]">
-          <div className="border-black px-5 py-10 sm:px-8 md:px-10 md:py-14 lg:border-r">
-            <div className="flex items-center justify-between gap-4 font-mono text-[9px] uppercase tracking-[0.16em] text-black/55">
-              <span>Decision canvas</span>
-              <span>USD / self-serve</span>
-            </div>
-            <h1 className="mt-8 max-w-4xl font-pixel text-[clamp(3rem,6vw,6rem)] leading-[0.84] tracking-[-0.07em]">
-              Find your fit in 30 seconds.
-            </h1>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-black/62">
-              Set the size of the team and the operating record. We will point to the smallest plan that fits without hiding the tradeoffs.
-            </p>
-
-            <div className="mt-12 grid gap-8 sm:grid-cols-2">
-              <DecisionAxis
-                label="Team size"
-                suffix="people"
-                options={teamSizes}
-                selected={teamIndex}
-                onChange={setTeamIndex}
-              />
-              <DecisionAxis
-                label="Trace volume"
-                suffix="spans / month"
-                options={traceVolumes}
-                selected={traceIndex}
-                onChange={setTraceIndex}
-              />
-            </div>
-
-            <div className="mt-10 grid grid-cols-4 border-l border-t border-black" aria-label="Plan fit map">
-              {teamSizes.map((team, row) =>
-                traceVolumes.map((volume, column) => {
-                  const cellPlan = row === 0 && column === 0 ? 0 : row >= 2 || column >= 2 ? 2 : 1;
-                  const active = row === teamIndex && column === traceIndex;
-                  return (
-                    <button
-                      type="button"
-                      key={`${team}-${volume}`}
-                      onClick={() => { setTeamIndex(row); setTraceIndex(column); }}
-                      aria-label={`${team} people and ${volume} spans: ${plans[cellPlan].name}`}
-                      className={`aspect-[1.35] border-b border-r border-black p-2 text-left font-mono text-[8px] uppercase tracking-[0.1em] transition-colors sm:aspect-[1.75] ${active ? "bg-[#f4d44d] shadow-[inset_0_0_0_3px_#000]" : cellPlan === 2 ? "bg-black text-white" : "bg-white/30 hover:bg-white/70"}`}
-                    >
-                      <span className="block opacity-55">{team} / {volume}</span>
-                      <strong className="mt-2 block text-[10px]">{plans[cellPlan].name}</strong>
-                    </button>
-                  );
-                }),
-              )}
-            </div>
-          </div>
-
-          <aside className="flex flex-col bg-black text-white">
-            <div className="flex items-center justify-between border-b border-white/20 px-6 py-4 font-mono text-[9px] uppercase tracking-[0.15em]">
-              <span>Recommended plan</span>
-              <span className="bg-[#f4d44d] px-3 py-1.5 text-black">Best fit</span>
-            </div>
-            <div className="flex flex-1 flex-col p-6 md:p-8">
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-white/62">{recommended.signal}</p>
-                  <h2 className="mt-3 font-pixel text-7xl leading-none tracking-[-0.08em]">{recommended.name}</h2>
-                </div>
-                <div className="text-right">
-                  <span className="font-pixel text-5xl tracking-[-0.07em]">${price % 1 ? price.toFixed(2) : price}</span>
-                  <span className="block font-mono text-[8px] uppercase tracking-[0.12em] text-white/62">per month</span>
-                </div>
-              </div>
-
-              <div className="mt-8 flex border border-white/30 p-1">
-                <button type="button" onClick={() => setAnnual(false)} aria-pressed={!annual} className={`min-h-11 flex-1 font-mono text-[9px] uppercase tracking-[0.12em] ${!annual ? "bg-white text-black" : "text-white/62"}`}>Monthly</button>
-                <button type="button" onClick={() => setAnnual(true)} aria-pressed={annual} className={`min-h-11 flex-1 font-mono text-[9px] uppercase tracking-[0.12em] ${annual ? "bg-[#f4d44d] text-black" : "text-white/62"}`}>Annual −20%</button>
-              </div>
-
-              <dl className="mt-8 divide-y divide-white/20 border-y border-white/20 font-mono text-[10px] uppercase tracking-[0.1em]">
-                <PlanFact label="Spans / month" value={recommended.spans} />
-                <PlanFact label="Retention" value={recommended.retention} />
-                <PlanFact label="Members" value={recommended.members} />
-                <PlanFact label="Projects" value={recommended.projects} />
-              </dl>
-
-              <ul className="mt-8 grid gap-3 text-sm text-white/68 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                {recommended.features.map((feature) => <li key={feature} className="flex items-center gap-3"><Check className="size-4 text-[#f4d44d]" aria-hidden="true" />{feature}</li>)}
-              </ul>
-
-              <Link
-                href={recommended.name === "Free" ? "/sign-up" : pricingCheckoutHref(recommended.name.toLowerCase() as "pro" | "team", annual ? "annual" : "monthly")}
-                className="mt-auto flex min-h-14 items-center justify-between bg-[#f4d44d] px-5 font-mono text-[10px] uppercase tracking-[0.13em] text-black transition-colors hover:bg-white"
-              >
-                Start {recommended.name}
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      <section className="border-b border-black">
-        <div className="mx-auto max-w-[1440px]">
-          <div className="grid border-b border-black md:grid-cols-[260px_1fr]">
-            <div className="border-black bg-[#f4d44d] p-6 md:border-r md:p-8">
-              <p className="font-mono text-[9px] uppercase tracking-[0.16em]">Plan ledger</p>
-              <p className="mt-16 font-pixel text-4xl leading-[0.92] tracking-[-0.055em]">Compare the limits that change the work.</p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] border-collapse text-left">
-                <thead><tr className="font-mono text-[9px] uppercase tracking-[0.13em]"><th className="p-5">Capability</th>{plans.map((plan, index) => <th key={plan.name} className={`border-l border-black p-5 ${index === recommendedIndex ? "bg-[#f4d44d]" : ""}`}>{plan.name}<span className="mt-1 block text-[8px] opacity-50">${annual ? plan.monthly * 0.8 : plan.monthly}/mo</span></th>)}</tr></thead>
-                <tbody>{comparison.map((row, rowIndex) => <tr key={row[0]} className={rowIndex % 2 ? "bg-white/35" : ""}>{row.map((cell, cellIndex) => <td key={`${row[0]}-${cellIndex}`} className={`border-l border-t border-black p-4 text-sm first:border-l-0 ${cellIndex > 0 ? "font-mono text-[10px] uppercase tracking-[0.08em]" : "font-medium"} ${cellIndex - 1 === recommendedIndex ? "bg-[#f4d44d]/25" : ""}`}>{cell}</td>)}</tr>)}</tbody>
-              </table>
-            </div>
-          </div>
-          <div className="flex flex-col gap-6 bg-[#d9d5ca] px-5 py-10 sm:px-8 md:flex-row md:items-center md:justify-between md:px-10">
-            <div><p className="font-pixel text-4xl tracking-[-0.055em]">Need custom retention, residency, or rollout support?</p><p className="mt-2 text-sm text-black/60">Enterprise constraints deserve a real conversation.</p></div>
-            <Link href="/contact" className="inline-flex min-h-12 shrink-0 items-center justify-between gap-8 border border-black bg-black px-5 font-mono text-[9px] uppercase tracking-[0.13em] text-white hover:bg-[#f4d44d] hover:text-black">Contact us <ArrowRight className="size-4" /></Link>
-          </div>
-        </div>
-      </section>
-    </main>
-  );
-}
-
-function DecisionAxis({ label, suffix, options, selected, onChange }: { label: string; suffix: string; options: readonly string[]; selected: number; onChange: (index: number) => void }) {
-  return <div><div className="flex items-end justify-between gap-4"><div><p className="font-mono text-[9px] uppercase tracking-[0.14em]">{label}</p><p className="mt-1 text-sm text-black/55">{suffix}</p></div><div className="flex items-center border border-black"><button type="button" onClick={() => onChange(Math.max(0, selected - 1))} disabled={selected === 0} aria-label={`Decrease ${label}`} className="flex size-10 items-center justify-center border-r border-black disabled:opacity-25"><Minus className="size-3.5" /></button><span className="min-w-20 px-3 text-center font-mono text-xs">{options[selected]}</span><button type="button" onClick={() => onChange(Math.min(options.length - 1, selected + 1))} disabled={selected === options.length - 1} aria-label={`Increase ${label}`} className="flex size-10 items-center justify-center border-l border-black disabled:opacity-25"><Plus className="size-3.5" /></button></div></div><div className="mt-4 grid" style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>{options.map((option, index) => <button type="button" key={option} onClick={() => onChange(index)} aria-pressed={selected === index} className={`min-h-12 border border-r-0 border-black px-2 font-mono text-[8px] uppercase tracking-[0.08em] last:border-r ${selected === index ? "bg-black text-white" : "bg-white/25 hover:bg-white/65"}`}>{option}</button>)}</div></div>;
-}
-
-function PlanFact({ label, value }: { label: string; value: string }) {
-  return <div className="flex items-center justify-between gap-4 py-4"><dt className="text-white/62">{label}</dt><dd>{value}</dd></div>;
+  const interval = annual ? "annual" : "monthly";
+  return <main className="min-h-screen bg-[#eceae3] pt-[54px] text-black"><section className="border-b border-black px-5 py-14 sm:px-8 md:px-10 md:py-20"><div className="mx-auto max-w-[1180px]"><div className="flex flex-col gap-6 border-b border-black pb-10 md:flex-row md:items-end md:justify-between"><div><p className="font-mono text-[9px] uppercase tracking-[0.16em] text-black/55">Simple, transparent pricing</p><h1 className="mt-6 font-pixel text-[clamp(3.5rem,8vw,7.5rem)] leading-[0.82] tracking-[-0.075em]">Choose your plan.</h1><p className="mt-6 max-w-xl text-base leading-7 text-black/62">Start with the plan that fits your team and trace volume. Upgrade when the work grows.</p></div><div className="flex shrink-0 border border-black bg-white p-1 font-mono text-[9px] uppercase tracking-[0.12em]"><button type="button" onClick={() => setAnnual(false)} aria-pressed={!annual} className={`min-h-11 px-4 ${!annual ? "bg-black text-white" : "hover:bg-[#f4d44d]"}`}>Monthly</button><button type="button" onClick={() => setAnnual(true)} aria-pressed={annual} className={`min-h-11 px-4 ${annual ? "bg-[#f4d44d]" : "hover:bg-[#f4d44d]"}`}>Annual −20%</button></div></div><div className="mt-10 grid gap-5 lg:grid-cols-3">{plans.map((plan) => { const price = annual ? plan.monthly * 0.8 : plan.monthly; return <article key={plan.name} className={`flex flex-col border border-black p-6 shadow-[6px_6px_0_#000] ${plan.name === "Pro" ? "bg-[#f4d44d]" : "bg-white"}`}><div className="flex items-start justify-between gap-4"><div><p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/55">{plan.name === "Pro" ? "Most popular" : plan.name === "Free" ? "For getting started" : "For teams"}</p><h2 className="mt-3 font-pixel text-5xl leading-none tracking-[-0.065em]">{plan.name}</h2></div>{plan.name === "Pro" ? <span className="border border-black px-2 py-1 font-mono text-[8px] uppercase">Popular</span> : null}</div><div className="mt-8 border-y border-black py-5"><span className="font-pixel text-5xl tracking-[-0.07em]">${price % 1 ? price.toFixed(2) : price}</span><span className="ml-2 font-mono text-[9px] uppercase text-black/55">/ month</span>{annual ? <p className="mt-2 font-mono text-[8px] uppercase text-black/55">Billed annually</p> : null}</div><ul className="mt-6 grid gap-3 text-sm">{plan.features.map((feature) => <li key={feature} className="flex items-start gap-3"><Check className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{feature}</li>)}</ul><dl className="mt-8 grid gap-3 border-t border-black pt-5 font-mono text-[9px] uppercase tracking-[0.08em]"><div className="flex justify-between"><dt className="text-black/55">Usage</dt><dd>{plan.spans}</dd></div><div className="flex justify-between"><dt className="text-black/55">Retention</dt><dd>{plan.retention}</dd></div><div className="flex justify-between"><dt className="text-black/55">Members</dt><dd>{plan.members}</dd></div><div className="flex justify-between"><dt className="text-black/55">Projects</dt><dd>{plan.projects}</dd></div></dl><Link href={plan.name === "Free" ? "/sign-up" : pricingCheckoutHref(plan.name.toLowerCase() as "pro" | "team", interval)} className="mt-8 flex min-h-12 items-center justify-between border border-black bg-black px-4 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-white hover:text-black">Choose {plan.name}<ArrowRight className="size-4" aria-hidden="true" /></Link></article>; })}</div></div></section><section className="border-b border-black px-5 py-14 sm:px-8 md:px-10 md:py-20"><div className="mx-auto max-w-[1180px]"><div className="mb-8"><p className="font-mono text-[9px] uppercase tracking-[0.16em] text-black/55">Plan comparison</p><h2 className="mt-4 font-pixel text-5xl leading-none tracking-[-0.065em]">The full picture.</h2></div><div className="overflow-x-auto border border-black bg-white"><table className="w-full min-w-[700px] border-collapse text-left"><thead><tr className="bg-black font-mono text-[9px] uppercase tracking-[0.12em] text-white"><th className="p-4">Capability</th>{plans.map((plan) => <th key={plan.name} className="border-l border-white/30 p-4">{plan.name}<span className="mt-1 block text-white/55">${annual ? (plan.monthly * 0.8).toFixed(plan.monthly ? 2 : 0) : plan.monthly}/mo</span></th>)}</tr></thead><tbody>{rows.map((row, index) => <tr key={row[0]} className={index % 2 ? "bg-[#eceae3]" : ""}>{row.map((cell, cellIndex) => <td key={`${row[0]}-${cellIndex}`} className={`border-t border-black p-4 ${cellIndex ? "border-l font-mono text-[10px] uppercase" : "font-medium"}`}>{cell}</td>)}</tr>)}</tbody></table></div><div className="mt-10 flex flex-col gap-5 border-t border-black pt-8 md:flex-row md:items-center md:justify-between"><div><h3 className="font-pixel text-3xl tracking-[-0.055em]">Need something custom?</h3><p className="mt-2 text-sm text-black/60">Talk to us about enterprise retention, residency, or rollout support.</p></div><Link href="/contact" className="inline-flex min-h-12 items-center justify-between gap-8 border border-black bg-black px-5 font-mono text-[9px] uppercase tracking-[0.13em] text-white hover:bg-[#f4d44d] hover:text-black">Contact us<ArrowRight className="size-4" aria-hidden="true" /></Link></div></div></section></main>;
 }
