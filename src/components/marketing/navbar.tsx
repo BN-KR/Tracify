@@ -62,6 +62,37 @@ const menus = {
   ],
 } as const;
 
+const featured = {
+  Product: {
+    eyebrow: "Featured / product tour",
+    title: "See the full agent improvement loop.",
+    body: "Trace a run, evaluate the output, compare changes, and ship with evidence.",
+    href: "/demo",
+    label: "Open the demo",
+  },
+  Solutions: {
+    eyebrow: "Featured / support workflow",
+    title: "When an agent gives the wrong answer.",
+    body: "Follow a customer-facing failure back to the exact decision, tool call, and prompt version.",
+    href: "/use-cases/support",
+    label: "Explore support",
+  },
+  Developers: {
+    eyebrow: "Featured / quickstart",
+    title: "Your first trace, from zero to visible.",
+    body: "Install the SDK, send one run, and start inspecting your agent in minutes.",
+    href: "/docs",
+    label: "Open the quickstart",
+  },
+  Company: {
+    eyebrow: "Featured / field guide",
+    title: "AI agent observability, explained.",
+    body: "A practical guide to traces, evaluations, cost, prompts, and production decisions.",
+    href: "/blog/ai-agent-observability-complete-guide",
+    label: "Read the complete guide",
+  },
+} satisfies Record<MenuName, { eyebrow: string; title: string; body: string; href: string; label: string }>;
+
 const mobileMenuMeta = {
   Product: {
     summary: "Observe, improve, release, and operate with confidence.",
@@ -210,17 +241,20 @@ function DesktopPanel({
       </div>
       <div className="bg-black p-7 text-white">
         <p className="font-mono text-[8px] uppercase tracking-[0.12em] text-zinc-600">
-          Featured
+          {featured[name].eyebrow}
         </p>
         <p className="mt-10 font-pixel text-5xl leading-[0.88] tracking-[-0.06em]">
-          The complete agent lifecycle.
+          {featured[name].title}
+        </p>
+        <p className="mt-6 max-w-sm text-sm leading-6 text-zinc-400">
+          {featured[name].body}
         </p>
         <Link
           onClick={onClose}
-          href="/product/lifecycle"
+          href={featured[name].href}
           className="mt-10 inline-block border-b border-[#f4d44d] pb-1 font-mono text-[8px] uppercase tracking-[0.12em] text-[#f4d44d]"
         >
-          Explore workflow
+          {featured[name].label}
         </Link>
       </div>
     </div>
