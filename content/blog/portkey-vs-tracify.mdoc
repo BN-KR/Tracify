@@ -1,0 +1,90 @@
+﻿---
+title: "Portkey vs Tracify: LLM Proxy vs Integrated Observability"
+slug: portkey-vs-tracify
+excerpt: "Portkey is an LLM proxy that routes requests and provides tracing; Tracify is an integrated observability platform with evaluation and cost tracking. Learn when proxy routing matters and when end-to-end observability becomes the priority."
+publishedAt: 2026-08-28T12:00:00.000Z
+author: Tracify Team
+draft: true
+categories:
+  - engineering
+tags:
+  - llm proxy
+  - platform comparison
+  - routing
+relatedPosts:
+  - ai-agent-observability-complete-guide
+  - llm-tracing-explained
+heroImage:
+  src: /media/cost-quality-correlation.svg
+  alt: "Cost-quality efficiency frontier showing Portkey as LLM gateway specialist vs Tracify at efficiency frontier with integrated native observability"
+seo:
+  metaTitle: "Portkey vs Tracify: Proxy Routing vs Observability"
+  metaDescription: "Compare Portkey's LLM proxy platform with Tracify's observability stack. Learn when routing control matters and when integrated evaluation wins."
+---
+
+## At a glance
+
+| Dimension | Portkey | Tracify |
+| --- | --- | --- |
+| **Primary focus** | LLM request routing | Observability + evaluation |
+| **Routing/failover** | Native (main feature) | Not available |
+| **Tracing** | Basic | Comprehensive |
+| **Evaluation** | No | Integrated |
+| **Cost tracking** | Basic | Real-time per-call |
+| **Best for** | Teams needing proxy control | Teams needing observability |
+
+Portkey is a request router; Tracify is an observability platform.
+
+## Core difference
+
+**Portkey** routes LLM requests across providers for reliability and cost optimization. **Tracify** observes and evaluates agent behavior end-to-end.
+
+These solve different problems.
+
+## Scenario 1: multi-provider failover
+
+You want to route requests across Claude, GPT-4, and Llama automatically.
+
+**With Portkey:** Native routing, failover, load balancing. This is Portkey's core feature.
+
+**With Tracify:** No native routing. You handle failover yourself.
+
+**Result:** Portkey is required for sophisticated routing.
+
+## Scenario 2: production with observability
+
+You need traces, evaluation, cost tracking across all providers.
+
+**With Portkey:** Routing is solved. Observability requires integration.
+
+**With Tracify:** Full observability, integrated evaluation, cost tracking by provider.
+
+**Result:** Tracify wins on observability.
+
+## Can you use both?
+
+Yes. Portkey for request routing, Tracify for observability. Send Portkey logs to Tracify for analysis.
+
+## Cost
+
+**Portkey:** $0.01 per 1k tokens (on top of LLM costs)
+**Tracify:** $1,000-2,000/month all-in-one
+
+At high volume, Portkey's token-based pricing may outweigh Tracify's flat rate.
+
+## When to choose each
+
+**Choose Portkey:** If you need sophisticated multi-provider routing
+**Choose Tracify:** If you need comprehensive observability
+
+## FAQ
+
+{% faq-item question="Does Portkey provide observability?" answer="Basic tracing, but not integrated evaluation or cost analysis." /%}
+
+{% faq-item question="Can I use both?" answer="Yes. Portkey routes requests; Tracify observes them." /%}
+
+{% faq-item question="Is Portkey cheaper?" answer="Depends on token volume, but at scale Tracify's flat rate is typically cheaper." /%}
+
+{% faq-item question="Does Portkey replace Tracify?" answer="No, Portkey routes; Tracify observes. Complementary." /%}
+
+{% faq-item question="When should I choose Portkey?" answer="When multi-provider routing and failover are non-negotiable." /%}

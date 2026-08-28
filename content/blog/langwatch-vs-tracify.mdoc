@@ -1,0 +1,430 @@
+---
+title: LangWatch vs Tracify: Open-Source Cost Tracking vs Commercial All-In-One
+slug: langwatch-vs-tracify
+excerpt: LangWatch excels at cost transparency and self-hosted ownership. Tracify adds managed evaluation, experiments, and quality scoring. Learn when cost-tracking alone is enough and when managed eval justifies the switch.
+publishedAt: 2026-08-28T12:00:00.000Z
+author: Tracify Team
+categories:
+  - engineering
+  - observability
+tags:
+  - langwatch
+  - open-source
+  - cost-tracking
+  - evaluation
+  - experiments
+relatedPosts:
+  - llm-observability-metrics-that-matter
+  - rag-evaluation-guide
+  - reduce-llm-costs-without-hurting-quality
+heroImage:
+  src: /media/cost-quality-correlation.svg
+  alt: Cost-quality correlation showing LangWatch as open-source cost-tracking specialist vs Tracify at efficiency frontier with managed evaluation and experiments
+seo:
+  metaTitle: LangWatch vs Tracify - Open-Source vs Commercial LLM Observability
+  metaDescription: Compare LangWatch's open-source cost tracking with Tracify's managed evaluation platform. Understand when to choose each tool.
+draft: true
+---
+
+{% trace-scenario title="You need to track LLM costs—but are you also running experiments?" prompt="Your team runs multiple LLM models in production and wants cost visibility. But as you scale, you're wondering if you also need to measure output quality and run A/B tests. Should you invest in a cost-tracking platform, or do you need evaluation capabilities too?" outcome="This guide shows you when open-source cost-tracking is sufficient and when managed evaluation justifies moving to a commercial platform." /%}
+
+## At a glance
+
+![Comparison of cost dashboard on LangWatch side and experiment-tracking interface on Tracify side](/media/langwatch-vs-tracify-hero.png)
+
+Your team is evaluating LLM observability tools and wondering: Is an open-source cost-tracking solution like LangWatch enough, or should you adopt a commercial platform with built-in evaluation and experiment tracking?
+
+LangWatch gives you {% highlight %}cost transparency without vendor lock-in{% /highlight %}. It's self-hosted, built for teams that own their infrastructure and want granular cost attribution. Tracify adds a managed layer on top of cost tracking: {% highlight %}evaluation workflows, A/B experiment runners, and quality scoring{% /highlight %} built into the platform itself.
+
+The decision hinges on whether your primary need is cost visibility alone, or whether you also need structured evaluation and experimentation to improve model outputs.
+
+### The operating model
+
+This article uses a decision-routing framework:
+
+| Decision point | Question | Cost-tracking focus | Eval-driven focus |
+| --- | --- | --- | --- |
+| Primary need | Are you tracking costs or improving quality? | Sufficient | Insufficient |
+| Team size | How many engineers iterate on prompts? | Scales easily | Benefits from managed workflows |
+| Deployment | Do you require self-hosted infrastructure? | Possible | Limited |
+| Cadence | Are you running experiments weekly? | Not the primary use case | Core workflow |
+
+## LangWatch: The cost-tracking foundation
+
+LangWatch is an open-source observability platform purpose-built for cost tracking and audit. It gives you {% highlight %}real-time visibility into every LLM API call{% /highlight %}—model, provider, tokens used, cost per call, and cumulative spend by project.
+
+### What LangWatch does well
+
+**Cost attribution at scale.** LangWatch tracks costs down to the individual request. You can see cost breakdowns by model, by endpoint, by user, or by feature. This level of granularity is essential if you're running multiple models or providers (GPT-4, Claude, Llama, etc.) in the same system.
+
+**Self-hosted ownership.** You deploy LangWatch in your own infrastructure—Kubernetes, Docker, or VM. Your LLM telemetry stays inside your network. No API calls home. No SaaS dependency. For regulated industries or teams with strict data residency requirements, this is non-negotiable.
+
+**Integration simplicity.** LangWatch integrates with common LLM frameworks: LangChain, LiteLLM, OpenAI SDK, Anthropic SDK. You add a few lines to instrument your code, point it at your LangWatch instance, and start seeing costs. The SDK footprint is minimal.
+
+**No ongoing operational cost.** Once deployed, LangWatch runs as a background service. There's no per-token pricing, no usage-based billing. You pay infrastructure costs (compute, storage) but not per-call licensing fees.
+
+### The cost-tracking ceiling
+
+LangWatch excels at answering "How much did that request cost?" But it stops there. It doesn't tell you:
+
+- Did the output actually solve the user's problem?
+- Is model A better than model B for this use case?
+- Which prompt revision improved the score?
+- Should we enable this feature, or roll it back?
+
+These questions require {% highlight %}structured evaluation{% /highlight %}: running outputs through scoring functions, collecting user feedback, or comparing models side-by-side. LangWatch has no built-in eval framework. You'd need to wire up evaluation logic yourself—external scorers, human review pipelines, or custom metrics.
+
+For teams that only need cost visibility, this is fine. But if you're iterating rapidly on models or prompts, the lack of managed evaluation becomes friction.
+
+> **Field note:** Cost tracking is a prerequisite for production LLM systems, not a differentiator. The question is whether it's your only need.
+
+## Tracify: Cost tracking + managed evaluation
+
+Tracify bundles cost tracking with a {% highlight %}managed evaluation platform{% /highlight %}. You get all the cost visibility that LangWatch provides, plus:
+
+**Built-in evaluation workflows.** Define scorers (LLM-based, rule-based, or custom) once, then run them across your traces automatically. Track quality metrics over time. Tracify scores every trace in real time.
+
+**Experiment tracking and routing.** Run A/B tests natively. Split traffic between two prompts or models, measure quality and cost tradeoffs, and route production traffic to the winner. All managed through the platform UI.
+
+**Quality dashboards.** Track quality scores (accuracy, relevance, hallucination risk) alongside costs. See when a cost optimization accidentally degraded quality.
+
+**Managed infrastructure.** Tracify runs on Tinybird (for raw spans) and Convex (for app metadata and experiments). No self-hosting required. Data is encrypted in transit and at rest.
+
+### When does evaluation matter?
+
+Evaluation becomes critical when you move from "track costs" to "improve quality while managing costs." Common scenarios:
+
+**Prompt iteration.** You're A/B testing different prompt versions. LangWatch shows you the cost difference. Tracify shows you cost *and* quality difference, and automatically routes traffic to the best version.
+
+**Model selection.** You're deciding between GPT-4 and Claude. LangWatch shows cost. Tracify measures accuracy, latency, and hallucination risk for the same requests, then compares ROI (quality gained per dollar spent).
+
+**RAG pipeline optimization.** You're tuning retrieval depth, chunking strategy, or reranker. LangWatch tracks the cost. Tracify measures retrieval relevance and final answer quality, showing whether the tuning actually helped.
+
+**Feature rollout.** You've built a new LLM-powered feature. LangWatch tracks its cost impact. Tracify shows whether users find it useful (via structured evals) before you roll it out to 100%.
+
+These workflows are possible with LangWatch, but they require building evaluation logic yourself. Tracify makes them native.
+
+## Architecture and deployment model
+
+The deployment model shapes your operational overhead significantly.
+
+![Diagram showing LangWatch self-hosted stack on the left (LLM app → SDK → LangWatch server → Database) and Tracify managed stack on the right (LLM app → Tracify SDK → Tinybird + Convex)](/media/langwatch-vs-tracify-architecture.png)
+
+**LangWatch (self-hosted):**
+- You run the LangWatch server.
+- You manage the database (PostgreSQL or similar).
+- You handle backups, upgrades, and scaling.
+- Infrastructure cost: ~$200–500/month for a small deployment, scaling with usage.
+- Operational overhead: High. You own the SLA.
+
+**Tracify (managed):**
+- Tracify runs infrastructure.
+- Tinybird handles time-series telemetry (spans, metrics).
+- Convex handles app state (experiments, evals, runs).
+- Redis cache between Tinybird and dashboard.
+- Infrastructure cost: Included in subscription; transparent per-trace pricing.
+- Operational overhead: Low. Tracify owns the SLA.
+
+For a small team (1–5 engineers), self-hosting LangWatch is reasonable. For teams over 10 engineers or those running high-volume production systems, managed infrastructure often wins on total cost of ownership.
+
+{% editorial-panel eyebrow="Hidden costs of self-hosting" title="Factor in more than just compute." body="Self-hosting means on-call support, database maintenance, monitoring the monitoring system, and keeping dependencies patched. For small teams, this overhead easily exceeds a managed-platform subscription." tone="yellow" /%}
+
+## Cost model comparison
+
+Let's compare a realistic scenario: A startup with 3 engineers running 10,000 LLM requests per day (~300K/month).
+
+**LangWatch:**
+- Server infrastructure: $300/month (compute, storage, networking)
+- Engineer time for setup and maintenance: ~8 hours/month (~$1,600 at $200/hour)
+- Database backups and recovery: ~2 hours/month (~$400)
+- Total: ~$2,300/month
+
+**Tracify:**
+- Per-trace pricing: $0.001 × 300K = $300/month (transparent, no surprises)
+- Managed infrastructure included
+- No operational overhead
+- Total: $300/month base + usage
+
+At this scale, LangWatch's self-hosting overhead is 7× the platform cost. At smaller volumes (1K requests/day), self-hosting becomes more attractive. At larger volumes (100K+ requests/day), managed platforms gain more advantage because operational overhead is fixed while usage-based pricing scales with value.
+
+| Scale | LangWatch advantage | Neutral zone | Tracify advantage |
+| --- | --- | --- | --- |
+| < 5K requests/day | Self-hosting cost is lower; ops burden is manageable | Tradeoff: low overhead vs. low usage cost | — |
+| 5K–50K requests/day | — | Tradeoff: balanced; team capacity and evaluation needs matter most | Managed infrastructure becomes easier; eval features valuable |
+| > 50K requests/day | — | — | Operational overhead dominates; managed platform wins on cost of ownership |
+
+At small scales (< 1K requests/day), even free self-hosting of LangWatch becomes economical. At large scales (> 100K requests/day), Tracify's per-trace pricing stays linear while self-hosting costs spike with infrastructure needs.
+
+## Decision routing framework
+
+Use this interactive tool to determine which tool fits your situation. Answer the four questions, and we'll recommend the right choice.
+
+{% decision-explorer-langwatch title="Which tool fits your workflow?" /%}
+
+Or use this table as a quick reference:
+
+| Your situation | LangWatch fits | Tracify fits | Why |
+| --- | --- | --- | --- |
+| Cost tracking only; no evaluation | ✓ | — | LangWatch solves the stated need; Tracify adds unnecessary complexity |
+| Cost tracking + manual evaluation | ✓ | ✓ | Both work; LangWatch requires more custom code for eval workflows |
+| Cost tracking + weekly prompt experiments | — | ✓ | Tracify's experiment runner saves weeks of engineering |
+| Strict data residency (on-prem required) | ✓ | — | LangWatch is self-hosted; Tracify is SaaS only |
+| < 5K requests/day; small team | ✓ | — | Infrastructure cost favors self-hosting |
+| > 50K requests/day; growth team | — | ✓ | Operational overhead tips toward managed platform |
+| Quality scoring must be built-in | — | ✓ | Tracify integrates evaluation; LangWatch doesn't |
+
+## Evaluation at scale: When it becomes critical
+
+As your LLM deployment matures, several scenarios make structured evaluation non-negotiable.
+
+**Model consolidation.** You're running Claude, GPT-4, and Llama models for different tasks. Which performs best on your specific prompts? Cost tracking tells you spend per model. Evaluation tells you quality per model. Only together can you make ROI decisions. This is where evaluation-driven observability becomes essential, as explained in our guide to {% highlight %}measuring quality while controlling costs{% /highlight %}.
+
+**Prompt versioning.** Your team iterates on system prompts weekly. LangWatch shows cost impact. Tracify's built-in evaluation framework shows quality impact. You can measure whether a prompt change improved accuracy, reduced hallucinations, or improved latency—all in the same dashboard where you track cost.
+
+**Feature flag rollouts.** You've built an LLM-powered feature for customer support. Before rolling out to 100%, you want to verify it actually helps (via structured eval) and measure the cost impact. LangWatch alone requires you to wire this up yourself. Tracify has experiment workflows built in.
+
+**Compliance and auditing.** Regulated industries (healthcare, finance) need to prove that LLM outputs meet quality thresholds. A dashboard showing "we track costs" isn't enough. You need "we measure quality, and every deployment is scored against defined criteria." This moves beyond observability into operational governance, where managed eval platforms excel.
+
+## Practical comparison: A worked scenario
+
+Let's walk through a realistic scenario: a startup building an AI-powered research assistant that summarizes documents and answers questions about them.
+
+**Week 1: Launch with cost tracking only**
+
+The team deploys LangWatch to track costs as they test different Claude and GPT-4 models. Initial spend is $200/day. Cost tracking shows they're using Claude for reasoning and GPT-4 for quick summaries. Infrastructure for LangWatch: $150/month.
+
+LangWatch solves the question: "How much are we spending?"
+
+**Week 4: First user complaints**
+
+Early users report that summaries sometimes miss key details or include hallucinations. The team starts collecting user feedback manually. They want to know:
+- Which model produces fewer hallucinations?
+- Are longer documents handled worse than short ones?
+- Do specific prompt versions improve accuracy?
+
+LangWatch shows cost breakdown by model, but not quality breakdown. The team realizes they need evaluation.
+
+**Option A: Build evaluation on LangWatch**
+
+The team writes an eval script: feed a sample of traces through an LLM-based scorer that checks for hallucinations. They run it weekly, store results in a separate database, build charts in Grafana. This works, but costs 2 engineer-days per sprint just to maintain the eval pipeline. Cost of ownership: $1,000/week in engineering time.
+
+**Option B: Migrate to Tracify**
+
+Same week, they enable Tracify's managed evaluation. Define a scorer (LLM-based hallucination detector), enable it for all new runs. Within an hour, they see quality scores alongside costs. Run an experiment: Claude vs. GPT-4 on the same 100 documents. Results show Claude is 15% more accurate and 20% cheaper. This single finding justifies the platform subscription.
+
+The difference: Option A took weeks of custom engineering and ongoing maintenance. Option B took one hour to set up and gave immediate insights.
+
+## SDK integration and developer experience
+
+The practical switching cost depends on how easily each tool integrates with your stack.
+
+**LangWatch SDK:**
+```typescript
+// Minimal instrumentation
+import { LangWatch } from "langwatch/sdk";
+
+const client = new LangWatch({
+  apiKey: process.env.LANGWATCH_API_KEY,
+  endpoint: "https://your-langwatch-instance.internal"
+});
+
+// Log a single request
+await client.logRequest({
+  model: "claude-3-opus",
+  tokens: { input: 150, output: 200 },
+  cost: 0.03,
+  timestamp: Date.now(),
+});
+```
+
+**Tracify SDK:**
+```typescript
+// Similar signature, adds eval integration
+import { Tracify } from "tracify/sdk";
+
+const client = new Tracify({
+  apiKey: process.env.TRACIFY_API_KEY,
+  projectId: "my-project"
+});
+
+// Same logging, plus eval context
+await client.logTrace({
+  model: "claude-3-opus",
+  input: userQuery,
+  output: response,
+  metadata: { userId, conversationId },
+  eval: {
+    scorer: "hallucination_detector",
+    context: userDocs
+  }
+});
+```
+
+For teams already on LangWatch, the SDK migration is mechanical—swap the import, update config, done. For new projects, the decision is purely feature-based: Do you need evaluation now or later?
+
+{% editorial-panel eyebrow="Developer experience note" title="Both SDKs are low-friction; the difference is in post-logging workflows." body="LangWatch logs are immutable cost records. Tracify logs become input for evaluation and experiments. If your team runs experiments weekly or needs real-time quality scoring, Tracify's integration pays off fast. If cost tracking and occasional manual review is sufficient, LangWatch's simplicity is an advantage." tone="dark" /%}
+
+## Making the transition
+
+If you start with LangWatch and later decide you need evaluation capabilities, the migration path is straightforward:
+
+1. **Keep your cost data.** LangWatch stores historical costs. You can export or query this history for audit or reconciliation.
+2. **Instrument for Tracify.** Swap the LangWatch SDK for Tracify's SDK (same signature in most cases). This typically requires changing a single import and one or two configuration lines.
+3. **Run both in parallel.** For a week, send traces to both systems. Verify costs match between LangWatch and Tracify's billing. Then cut over production traffic.
+4. **Retire LangWatch.** Stop the self-hosted deployment once you've verified data consistency and Tracify is stable in production.
+
+The switchover typically takes a single engineering day. There's no lock-in risk with LangWatch—it's designed to be replaceable.
+
+Conversely, if you adopt Tracify for evaluation but later decide you want cost-tracking redundancy (for audit or compliance), you can run LangWatch alongside Tracify. Many teams do this for regulated industries where dual audit trails are required.
+
+> **Decision rule:** Start with LangWatch if cost tracking alone solves your immediate problem. Migrate to Tracify when you need evaluation workflows or when operational overhead becomes expensive.
+
+## Integrating with your observability stack
+
+Both tools fit into broader observability architecture, but they solve different layers.
+
+**LangWatch in a cost-focused stack:**
+- LLM SDK → LangWatch → Your alerting (Datadog, Prometheus)
+- Strengths: Simple, self-contained, easy to audit
+- Limitation: No built-in quality signal; external eval tools required
+
+**Tracify in an end-to-end stack:**
+- LLM SDK → Tracify → Quality dashboards, experiments, routing decisions
+- Strengths: Integrated eval, experiment platform, cost + quality in one system
+- Limitation: Managed service means less control over data residency
+
+For teams already running Datadog or New Relic, LangWatch integrates as a cost plugin. For teams building product around LLM quality (e.g., raising the bar on RAG relevance or reducing hallucinations), Tracify's integrated evaluation layer means fewer tools to maintain.
+
+This is similar to the broader observability discussion we covered in our piece on {% highlight %}LLM observability metrics that matter{% /highlight %}—cost tracking is table stakes, but quality measurement shapes product decisions.
+
+## Operational overhead in detail
+
+Let's be concrete about the ongoing burden of self-hosting versus managed platforms.
+
+**LangWatch self-hosting burden (monthly):**
+- Kubernetes or VM patches: 2–4 hours
+- Database maintenance, backups, recovery testing: 4–6 hours
+- Monitoring the monitoring system (alert noise, disk usage): 2–3 hours
+- Debugging slow queries or index bloat: ad-hoc, 2–8 hours when it happens
+- Scaling decisions (CPU, memory, storage): 1–2 hours as usage grows
+
+**Total:** 10–25 hours/month for a small deployment. At $200/hour fully-loaded, that's $2,000–$5,000/month in engineering time.
+
+**Tracify managed platform burden:**
+- Initial setup: 1–2 hours
+- Ongoing: monitoring usage, inviting team members, configuring experiment workflows: 1–2 hours/month
+
+**Total:** ~1 hour/month in steady state.
+
+At 10+ runs per second (highly typical for production LLM systems), LangWatch self-hosting often costs $3,000–$8,000/month when you include infrastructure and operational time. Tracify's per-trace pricing typically falls into the $500–$3,000/month range at the same scale. The intersection point where Tracify becomes cheaper than self-hosting is lower than most teams expect.
+
+{% highlight %}The hidden cost of self-hosting often exceeds the platform subscription cost at scale.{% /highlight %}
+
+## Failure modes and recovery
+
+Understanding what breaks is as important as understanding what works.
+
+**LangWatch failure mode: Disk fills up**
+- Symptom: Cost tracking stops working; new traces aren't logged
+- Root cause: Database grows without pruning; disk is full
+- Recovery: Restore from backup (assumes backups were working), prune old data, scale storage
+- Time to recovery: 30 minutes to several hours
+- Lesson: You own the SLA
+
+**Tracify failure mode: Eval scorer crashes**
+- Symptom: Quality scores stop flowing; cost tracking continues
+- Root cause: Eval server error or misconfigured scorer
+- Recovery: Tracify investigates and fixes; you get notified
+- Time to recovery: 5–30 minutes (SLA-backed)
+- Lesson: Tracify owns the SLA
+
+For {% highlight %}critical production systems where downtime is expensive{% /highlight %}, SLA ownership matters. LangWatch asks: "Can your team commit to owning observability availability?" Tracify asks: "Can we charge you for managed availability?"
+
+## Real-world assessment: Questions to ask your team
+
+Before making a decision, have these conversations with your team:
+
+1. **Cost control:** "Are cost alerts and monthly spend reports enough, or do we need real-time visibility by feature/user/model?" If the latter, both tools work; if cost is the only concern, LangWatch suffices.
+
+2. **Evaluation pace:** "How often do we run experiments? Monthly? Weekly? Daily?" Weekly+ makes Tracify's experiment runner valuable. Monthly or less, LangWatch + manual eval is fine.
+
+3. **Operational readiness:** "Do we have someone on-call for database outages and scaling decisions?" If yes, self-hosting is manageable. If no, managed platforms reduce risk.
+
+4. **Team growth trajectory:** "Will our team double in the next year?" High growth makes Tracify's simplicity increasingly valuable; static teams can handle LangWatch's operational load.
+
+5. **Data governance:** "Can our LLM traces go to a third-party SaaS, or must they stay on-premises?" If on-premises is required, LangWatch is the only option.
+
+Answer these five questions honestly. Your answers will likely point clearly toward one tool or the other.
+
+## When to stay with LangWatch long-term
+
+Not every team should migrate. LangWatch remains the right choice if:
+
+1. **Your evaluation is lightweight.** You measure quality via user satisfaction surveys, not automated scoring. A monthly report is sufficient.
+2. **You have DevOps expertise.** Your team runs Kubernetes, PostgreSQL, and monitoring stacks already. Operational overhead is natural.
+3. **Compliance requires on-prem.** Data residency is non-negotiable. You can't use a SaaS platform.
+4. **Cost optimization is extreme.** You're willing to trade operational effort for absolute minimum platform cost, and self-hosting saves you $5,000+/month at your current scale.
+5. **Vendor independence is critical.** You need a vendor-agnostic cost-tracking layer that could theoretically power anything.
+
+These are legitimate reasons. LangWatch serves them well.
+
+## When to move to Tracify
+
+Conversely, move to Tracify if:
+
+1. **You run experiments regularly.** Weekly A/B tests or more frequent prompt iterations. Managed experiment workflows save weeks of engineering.
+2. **Quality matters as much as cost.** Your business decision-making relies on measuring accuracy, latency, or user satisfaction alongside cost.
+3. **Operational simplicity is worth it.** You'd rather let Tracify handle infrastructure than own that burden.
+4. **Your team is growing fast.** Adding 5–10 engineers per quarter means operational overhead grows non-linearly. Managed platforms scale without hiring SREs.
+
+## Protect the security boundary
+
+Both tools handle sensitive data (LLM inputs/outputs, cost data, user behavior). Understand the boundaries:
+
+**LangWatch (self-hosted):**
+- Your infrastructure, your security model.
+- Ensure your LangWatch instance is behind authentication and VPN.
+- Backup encryption is your responsibility.
+- Audit logs depend on your database.
+- You control data retention and deletion.
+- Compliance evidence comes from your security posture, not the tool.
+
+**Tracify (managed):**
+- Data encrypted in transit (TLS) and at rest.
+- Role-based access control (RBAC) for team members.
+- Audit logs built in (who accessed what, when).
+- SOC 2 Type II compliance in roadmap.
+- Data retention policies managed by Tracify.
+- Compliance evidence includes Tracify's certifications and audits.
+
+For regulated environments (healthcare, finance), discuss compliance posture with both vendors. LangWatch's self-hosted model may provide stronger guarantees (all data stays within your compliance boundary). Tracify's managed model includes compliance features but requires trust in the vendor.
+
+The security trade-off is fundamental: LangWatch gives you control; Tracify gives you professional management. Neither is inherently more secure—it depends on your team's security expertise and your compliance requirements.
+
+## Making the operating decision
+
+{% editorial-panel eyebrow="Decision room" title="Choose based on your evaluation maturity and deployment constraints." body="If you need cost tracking only and can self-host, LangWatch wins on cost and control. If you're iterating on models or running experiments, or if operational overhead is a concern, Tracify's managed evaluation layer justifies the platform cost. Many teams run both: LangWatch for historical audit, Tracify for production workflows." tone="paper" /%}
+
+The choice isn't binary. Some teams use LangWatch for cost audit and Tracify for experiments. Others start with LangWatch and graduate to Tracify. The right answer depends on your team's size, your willingness to operate infrastructure, and whether evaluation is part of your roadmap now or later.
+
+## Leave the reader with the next move
+
+- [ ] Audit your current cost tracking gaps and operationalization burden.
+- [ ] Define what "good enough evaluation" means for your primary use case (prompt experiments, model selection, feature rollout, user satisfaction).
+- [ ] Estimate the operational cost of self-hosting LangWatch for your current scale and team size.
+- [ ] If evaluation is required now, trial Tracify for one sprint to understand the workflow.
+- [ ] If cost tracking alone is sufficient, deploy LangWatch and revisit this decision in Q2.
+
+The best time to add evaluation infrastructure is before you need it. The worst time is in the middle of a production incident. Plan ahead.
+
+## Frequently asked questions
+
+{% faq-item question="Can I run LangWatch and Tracify at the same time?" answer="Yes. Many teams send traces to both for cost audit and experimentation. The only trade-off is double instrumentation overhead (minimal) and duplicate storage. This is a valid hybrid strategy if you want cost redundancy and managed evaluation workflows." /%}
+
+{% faq-item question="If I start with LangWatch, can I migrate to Tracify later without rewriting my code?" answer="Yes. Both platforms use similar SDK patterns. The migration typically requires swapping one SDK import and reconfiguring endpoints. You can run both in parallel for a week to verify data consistency before cutting over." /%}
+
+{% faq-item question="Does LangWatch have any evaluation features at all?" answer="LangWatch focuses on observability and cost tracking. It doesn't have built-in eval workflows or experiment routing. You can integrate external evaluation tools, but this requires custom code. Tracify has evaluation built into the platform." /%}
+
+{% faq-item question="Is LangWatch truly free, or are there hidden costs?" answer="LangWatch is open-source and free to deploy. You pay for infrastructure (compute, storage, network). At small scales, this is cheaper than Tracify's per-trace pricing. At large scales, the operational overhead often exceeds platform costs." /%}
+
+{% faq-item question="What if I need both self-hosting and evaluation capabilities?" answer="This is a challenging requirement. LangWatch is open-source but lacks evaluation features. Tracify is managed-only. Your options are to build evaluation on top of LangWatch, or compromise on one requirement (accept managed infrastructure, or build evaluation elsewhere). Open-source evaluation frameworks like DeepEval exist but require custom integration work." /%}

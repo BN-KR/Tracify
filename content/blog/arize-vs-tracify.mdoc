@@ -1,0 +1,390 @@
+---
+title: "Arize vs Tracify: LLM Monitoring vs Agentic Observability"
+slug: arize-vs-tracify
+excerpt: "Compare Arize's enterprise LLM monitoring with Tracify's agent-focused observability. Learn when to choose model quality gates and when end-to-end agentic tracing with integrated evaluation matters more."
+publishedAt: 2026-08-28T12:00:00.000Z
+author: Tracify Team
+draft: true
+categories:
+  - engineering
+tags:
+  - arize
+  - llm-monitoring
+  - enterprise
+relatedPosts:
+  - ai-agent-observability-complete-guide
+  - llm-observability-metrics-that-matter
+  - ai-agent-evaluation-practical-guide
+heroImage:
+  src: /media/cost-quality-correlation.svg
+  alt: "Cost-quality correlation showing Arize as enterprise LLM monitoring specialist vs Tracify at efficiency frontier with integrated agent observability"
+seo:
+  metaTitle: "Arize vs Tracify: LLM Monitoring vs Agent Observability"
+  metaDescription: "Compare Arize and Tracify for production AI systems. Understand the differences between enterprise LLM monitoring and integrated agentic observability, cost trade-offs, and when each platform wins."
+---
+
+{% trace-scenario title="Monitor LLM quality or trace agent execution?" prompt="Your team is shipping a multi-agent system with Claude, GPT-4, and fine-tuned models to production. Arize excels at model quality gates and drift detection. Tracify gives you end-to-end traces, integrated evaluation, and cost breakdown. Which platform gives you production confidence fastest?" outcome="Choose based on your primary constraint: is preventing model quality regression your bottleneck, or is understanding why agents fail and controlling costs?" /%}
+
+## At a glance
+
+| Dimension | Arize | Tracify |
+| --- | --- | --- |
+| **Primary focus** | LLM model monitoring and quality degradation | End-to-end agent observability and outcomes |
+| **Tracing model** | Model calls + external metrics | Native traces with session context |
+| **Evaluation** | External: you bring evaluators | Integrated test cases and batch runner |
+| **Cost tracking** | Token counts only | Per-call cost by model, provider, route |
+| **Session/context** | Not native | First-class multi-turn interactions |
+| **Setup time** | 1-2 weeks (metric integration) | Minutes (API key + SDK) |
+| **Best for** | Teams optimizing model quality | Teams optimizing agent reliability and cost |
+
+### The operating model
+
+**Arize** emphasizes {% highlight %}model quality monitoring for production LLMs{% /highlight %}. You send model performance data, embeddings, predictions, and external metrics to Arize's platform. Arize detects data drift, performance drift, feature anomalies, and helps you manage model versions and retraining workflows. **Tracify** emphasizes {% highlight %}end-to-end agent observability with integrated evaluation{% /highlight %}. You instrument agent calls, get complete execution traces, run evaluations natively, and see per-call cost immediately. Choose Arize when your system's risk comes from model degradation; choose Tracify when your risk comes from agentic workflow failures and cost surprises.
+
+## Opening situation: teams with multi-model systems
+
+Your team is running production agents that route requests across Claude, GPT-4, and a custom fine-tuned model. You have three concerns:
+
+- **Model quality:** How do you detect if a model's outputs have degraded? How do you know when to retrain or roll back?
+- **Agent failures:** Why did an agent choose the wrong tool? Why did it fail to complete a user's request?
+- **Cost control:** Which model choice is most expensive? Which routes should be optimized?
+
+Arize and Tracify solve overlapping but distinct problems. This article helps you choose by examining what each platform actually measures, what you must build yourself, and the real total cost of ownership.
+
+Both platforms have grown from real production needs. Arize emerged from the data science and ML operations world, where teams needed visibility into model behavior across thousands of predictions and complex data distributions. Tracify emerged from the agent and LLM application world, where teams needed to understand not just whether a model worked, but why an entire orchestrated workflow succeeded or failed, and what it cost. The difference is fundamental: Arize looks inward at the model's statistical properties; Tracify looks across the entire agent execution path and business outcome.
+
+## Core difference: model monitoring vs. agent tracing
+
+Arize built its product around {% highlight %}monitoring the LLMs themselves{% /highlight %}. You instrument model calls, collect performance labels (from human review or downstream metrics), and Arize compares predictions to ground truth, detects drift, and alerts. Arize is designed for teams running LLM applications where the primary risk is model degradation.
+
+In Arize's model, your system's risk surface is the model's weights and predictions. If GPT-4 starts producing lower-quality summaries because of a silent API change, or if your fine-tuned model's training data distribution has shifted, Arize detects that. You send Arize your predictions, the right answers (ground truth), and features about each request. Arize looks for statistical patterns: Are predictions drifting? Is confidence falling? Are certain cohorts performing worse? This is the work of traditional ML observability.
+
+Tracify built its product around {% highlight %}understanding why agents fail{% /highlight %}. You instrument the entire agent workflow (tool calls, LLM calls, decisions, retries). Tracify preserves the full execution graph, runs evaluations to find failures, and shows cost per request. Tracify is designed for teams building agentic systems where the primary risk is orchestration failure, not just model degradation.
+
+In Tracify's model, your system's risk surface is the orchestration and decision-making logic. If an agent chooses the wrong tool, fails to retry on timeout, or gets stuck in an infinite loop, Tracify shows you the complete trace. If an evaluation detects that the agent's reasoning is flawed, Tracify correlates that with the exact LLM call, the tool it invoked, and the downstream outcome. This is the work of workflow observability.
+
+The choice is not primarily about cost. It is about {% highlight %}what your team's pace of reaching production confidence is bounded by: model quality assurance or end-to-end workflow visibility{% /highlight %}.
+
+## The architecture comparison
+
+### Arize: LLM-first quality monitoring
+
+Arize's strength is in production model observability. You:
+
+- **Instrument model calls** to log predictions, ground truth labels, and embeddings.
+- **Send external metrics** (user satisfaction, downstream task success, business KPIs).
+- **Detect model drift** (data distribution changes, performance degradation, feature importance shifts).
+- **Manage model versions** and retraining workflows from a central dashboard.
+- **Run statistical tests** to validate whether a model is safe to deploy.
+- **Monitor feature distributions** to catch upstream data problems before they affect model performance.
+
+Arize's architecture assumes you have a way to measure whether predictions were correct (ground truth). This might come from human reviewers, from downstream task completion, or from automated metrics (like A/B test results). Once Arize has ground truth, it becomes a statistical engine: it compares your recent predictions to historical distributions, alerts on anomalies, and helps you decide whether to revert to a previous model version or trigger retraining.
+
+The trade-off: you must bring your own metrics, define ground truth labels, and integrate agent observability separately. This is not a weakness; it is intentional specialization. Arize does not claim to trace your agent's workflow because that is not its job.
+
+### Tracify: agentic observability platform
+
+Tracify's strength is end-to-end agent execution understanding. You get:
+
+- **Native trace collection** for the entire agent workflow (LLM calls, tool invocations, retries, decisions).
+- **Integrated evaluation.** Define test cases, run them against traces, version your evaluators.
+- **Cost transparency.** Real-time per-call cost breakdown by model, provider, and route.
+- **Session tracking.** Multi-turn interactions preserved with full context chain.
+- **Integrated quality gates.** Evaluation failures trigger alerts without external orchestration.
+- **Automatic cost calculation** using real-time provider pricing (no manual integration needed).
+
+Tracify's architecture assumes you want to understand the full agent execution path. Instead of asking "Did the model's accuracy drop?", you ask "Did the agent complete the user's goal? If not, where did it fail?" Tracify preserves the complete trace: the exact LLM input and output, which tool was chosen and why, whether it succeeded, how many retries happened, and the final result. Evaluation happens on traces (not models), so you can ask Tracify to evaluate whether "the agent's reasoning about the user's intent was correct" or "the final answer matched the expected output". If evaluation finds a failure, you have the complete trace to debug it.
+
+The trade-off: SaaS-only, no self-hosting, LLM-specific platform (not suitable for non-LLM monitoring). You also cannot use Tracify to detect statistical model drift the way Arize does; Tracify evaluation is more direct ("Did this trace succeed?") rather than statistical ("Are this model's outputs drifting?").
+
+## Scenario 1: Multi-model agent with cost optimization
+
+Your team is shipping a customer-support agent that routes complex requests to Claude for reasoning, GPT-4 for structured output, and a fine-tuned model for quick classification. You need to understand cost per request, detect model regressions, and optimize routing. Your SLO is <2 seconds per request end-to-end.
+
+**With Arize:**
+- Instrument each model call with request features and the model name (1 week).
+- Set up ground truth labeling via human review or downstream metrics (manual, ongoing). This is critical for Arize to be useful; without ground truth, you cannot measure model quality.
+- Arize detects if the fine-tuned model's accuracy drops or if GPT-4's latency regresses (automated).
+- You build custom dashboards to correlate model choice with cost (you integrate token usage, external pricing from OpenAI and Anthropic's rate cards).
+- You would need to add Langfuse or custom logging to understand why a request timed out or chose the wrong model.
+- Result: Excellent model quality monitoring overall. Cost and routing decisions require external tooling. Agent-level understanding requires separate integration.
+
+**With Tracify:**
+- Add API key to configuration (15 minutes).
+- Instrument agent calls with span names for each model (same SDKs as Arize).
+- Tracify automatically calculates cost per call using real provider pricing. You see "This request cost $0.024 via Claude + $0.008 via GPT-4."
+- Create test cases for each model: "Does GPT-4 produce valid JSON?" "Does fine-tuned model classify correctly?" "Did the agent's routing decision make sense?"
+- Run batch evaluation across production traces; Tracify shows which model fails most often and which routes are most expensive.
+- See latency breakdown: which model took longest? Where did retries happen?
+- Result: Full observability and cost breakdown within hours. Routing optimization visible immediately. You see exact cost per model choice.
+
+{% editorial-panel eyebrow="Agent tracing changes the feedback loop" title="Arize gives you model quality signals; Tracify gives you agent execution signals." body="Arize tells you 'the fine-tuned model accuracy dropped 3%.' Tracify tells you 'the fine-tuned model failed classification in 5 of 2000 requests; those requests retried with Claude and succeeded.' This is the difference between model monitoring and workflow observability." tone="yellow" /%}
+
+## Scenario 2: Drift detection and model retraining workflow
+
+Your team maintains an LLM application that predicts customer churn. You have a retraining pipeline that runs monthly. You need early warning when predictions drift, model confidence falls, or feature distributions change. Your team has a mature data science org with statistical expertise.
+
+**With Arize:**
+- Instrument predictions with confidence scores and features (mature workflow).
+- Arize detects feature drift (customer behavior changes), prediction drift (model predicting different values), and performance drift (if you label outcomes).
+- Set up automated alerts: "Alert if prediction confidence < 0.7 for >10% of requests." "Alert if customer segment distribution changes by >15%."
+- Trigger retraining pipeline based on Arize metrics using webhooks.
+- Use Arize's cohort analysis to understand which customer segments the model is struggling with.
+- Result: Industry-leading drift detection. You understand model behavior deeply. Retraining is triggered proactively before quality degrades.
+
+**With Tracify:**
+- Instrument the prediction call as a span.
+- Tracify preserves the request, model choice, latency, and cost.
+- Tracify evaluation could flag when predictions seem wrong (via LLM-as-judge evaluation), but this is not the same as statistical drift detection.
+- You would need to add external drift detection (Arize, or custom statistical monitoring) to your pipeline for robust retraining triggers.
+- Result: Full request context for investigation. Drift detection must come from elsewhere. This scenario is not a good fit for Tracify alone.
+
+{% editorial-panel eyebrow="When to use Arize" title="Arize is the right choice for model quality as your primary observability need." body="If your system's risk comes from LLM model degradation—prediction accuracy, confidence collapse, feature drift—Arize has specialized tooling built for this. Your team does not have to build drift detection; it is part of the product." tone="dark" /%}
+
+## Deep comparison: feature by feature
+
+Before diving into specific capabilities, understand the philosophical difference: Arize assumes you have mature ML engineering practices (ground truth labeling, feature engineering, statistical testing). Tracify assumes you are iterating on agent behavior and need rapid feedback loops. This shapes every feature comparison that follows.
+
+### Instrumentation and SDKs
+
+**Arize:**
+- Python, Node.js, Java SDKs; also REST API.
+- Log model predictions, ground truth, embeddings, and metadata.
+- Decorator support and manual logging.
+- Framework integrations (Hugging Face, scikit-learn, LangChain).
+
+**Tracify:**
+- Python, Node.js, TypeScript SDKs.
+- Log spans for LLM calls, tool calls, decisions.
+- Decorator and context managers.
+- Framework integrations (LangChain, LlamaIndex, direct instrumentation).
+
+**Winner:** Tie. Both have solid SDKs. Arize's are more mature for ML workflows; Tracify's are optimized for agent orchestration. The practical difference is minimal for most teams; both require minimal changes to working code.
+
+### Model quality monitoring
+
+**Arize:**
+- Drift detection (data distribution, prediction drift, performance drift).
+- Anomaly detection on predictions and features.
+- Ground truth integration and performance tracking.
+- Model version management and AB testing.
+- Statistical testing for deployment safety.
+
+**Tracify:**
+- No native drift detection.
+- You must integrate external ML monitoring (Arize, custom).
+- Focus is on agent execution, not model statistics.
+
+**Winner:** Arize. Hands down. This is Arize's core strength.
+
+### Agent execution observability
+
+**Arize:**
+- Model calls logged; agent orchestration not natively traced.
+- You integrate tool calls and decisions separately.
+- No native session concept.
+
+**Tracify:**
+- Full end-to-end trace graph (LLM call → tool → next LLM call → decision).
+- Native session tracking for multi-turn interactions.
+- Failure modes preserved (retries, timeouts, errors).
+
+**Winner:** Tracify. Agent tracing is a first-class concept.
+
+### Evaluation and quality gates
+
+**Arize:**
+- Manual evaluation via UI and external metric integration.
+- No built-in test case runner.
+- You must build evaluation automation yourself.
+
+**Tracify:**
+- Native test case library (LLM-as-judge, exact match, custom validators).
+- Batch evaluation runner across traces.
+- Evaluation results tied to traces for debugging.
+
+**Winner:** Tracify. Integrated evaluation with no external orchestration.
+
+### Cost tracking and optimization
+
+**Arize:**
+- Token counts from model calls.
+- No automatic provider pricing.
+- You calculate cost separately.
+
+**Tracify:**
+- Automatic cost calculation using real-time provider pricing.
+- Cost breakdown by model, provider, route.
+- Cost trending and optimization recommendations.
+
+**Winner:** Tracify. Automatic and transparent.
+
+### Session and context preservation
+
+**Arize:**
+- Trace-level data; no native multi-turn concept.
+- Sessions are an external integration concern.
+
+**Tracify:**
+- Native session tracking for multi-turn agent interactions.
+- Context chain preserved.
+- Session-level metrics (cost, success, quality).
+
+**Winner:** Tracify. Multi-turn agents are native.
+
+## Integration complexity: the hidden cost
+
+Both platforms require integration work, but the work is different in kind.
+
+**Arize integration work:**
+- Instrument model calls (straightforward with SDKs).
+- Define and collect ground truth labels. This is the hard part. For many applications, ground truth requires human review, downstream task success metrics, or external data sources. If you cannot answer "Was this prediction correct?" reliably, Arize has limited value.
+- Integrate external metrics (user satisfaction scores, business outcomes, feature engineering).
+- Build custom dashboards to correlate findings.
+- Maintain the ground truth pipeline as your application evolves.
+
+**Tracify integration work:**
+- Instrument agent calls (SDKs provided, straightforward).
+- Define evaluation test cases (typically written as prompt templates with expected outcomes).
+- Set up alerts on evaluation failures.
+- Maintain evaluation test cases as agent behavior evolves.
+
+For teams without mature ground truth pipelines, Arize's integration cost is often underestimated during the decision phase. Many teams choose Arize expecting to get immediate drift detection, only to discover that building ground truth is the actual bottleneck. You cannot effectively use Arize without it.
+
+Tracify's integration is more lightweight because evaluation does not require ground truth in the statistical sense; it requires only expected behavior. You write test cases that say "If the user asks for a summary, the agent should produce a summary under 200 words." Tracify evaluates against that expectation. No human labeling required. This is a fundamental difference in how the platforms approach quality assurance.
+
+## Cost analysis: TCO over 12 months
+
+Assume a team running 500k LLM calls per month with 8 engineers and a mission-critical model quality requirement.
+
+### Arize
+
+| Item | Cost |
+| --- | --- |
+| Platform (500k events/month) | $3,000/month |
+| Data ingestion (predictions + ground truth) | Included |
+| Setup and metric integration (2 weeks) | $2,000 (one-time) |
+| Ongoing ground truth labeling (0.5 FTE) | $4,000/month |
+| External agent tracing (Langfuse or custom) | $500/month |
+| **Total monthly** | **$7,500** |
+| **Total annual** | **$90,000** |
+
+### Tracify
+
+| Item | Cost |
+| --- | --- |
+| Platform (500k events/month, tracing + evaluation) | $3,000/month |
+| Setup and first evaluations (1 week) | $400 (one-time) |
+| External drift detection (if required) | $500/month |
+| Ongoing evaluation maintenance (0.1 FTE) | $800/month |
+| **Total monthly** | **$4,300** |
+| **Total annual** | **$51,600** |
+
+{% highlight %}The cost gap widens when you account for Arize's ground truth labeling burden. Tracify's integrated evaluation eliminates the need for external evaluation orchestration.{% /highlight %}
+
+However, if model quality monitoring is your primary blocker, Arize's cost is justified because your alternative is building drift detection yourself (much more expensive). A team building custom drift detection in-house typically spends 2-3 FTE for 6+ months, which exceeds $200k. Arize's cost buys you a mature, battle-tested statistical engine that your team does not have to maintain.
+
+The hidden cost in the Tracify model is evaluation maintenance. As your agent evolves, your test cases need to evolve. This is light work (0.1 FTE) but ongoing. The hidden cost in the Arize model is ground truth. If your ground truth pipeline breaks (humans stop labeling, downstream metrics become unreliable), Arize becomes less useful immediately. Both platforms have maintenance burdens; they are just different in kind.
+
+## Trade-offs and boundaries
+
+### Choose Arize when:
+
+- **Model drift is your primary risk.** Your system's reliability depends on detecting prediction degradation, feature shifts, and performance regressions. You have experienced silent model failures in production and need statistical guardrails.
+- **You have mature ground truth pipelines.** You label outcomes regularly (from user feedback, downstream tasks, or human review). You have data science engineers who maintain this process.
+- **You need statistical rigor.** AB testing models and confidence-interval validation are part of your deployment process. You want to know not just that something changed, but whether it changed significantly.
+- **Your team is LLM-centric.** You are not building complex agent workflows; you are optimizing LLM choice and retraining. Your system is effectively a prediction API with supporting infrastructure.
+- **You already have agent tracing elsewhere.** Arize handles model quality; you use Langfuse, DataDog, or custom logging for agent execution. You want specialized tools for each job.
+- **You need compliance and audit trails.** Arize's detailed model versioning and performance history support compliance requirements in regulated industries.
+
+### Choose Tracify when:
+
+- **Agent workflow failures are your primary risk.** You need to understand why agents fail, which tools they choose, and which requests retry. Debugging is more important than statistical validation.
+- **Cost optimization is urgent.** You need per-request cost visibility to optimize model routing and deprecate expensive paths. You want automatic cost calculation without manual integration.
+- **Time-to-production-confidence is constrained.** You cannot afford a weeks-long setup for metric integration and ground truth labeling. You want to see failures and iterate within days.
+- **Multi-turn interactions are central.** Your agents have context-heavy conversations; sessions matter. You need context chains preserved across tool calls and retries.
+- **Evaluation velocity matters.** You are iterating on prompts and need rapid feedback. Test-case evaluation runs faster than manual labeling.
+- **You value simplicity.** You prefer one platform doing many things well over specialization across multiple tools. Operational overhead matters.
+
+### Hybrid approach: Arize for model quality, Tracify for agent tracing
+
+Some teams run both. Arize monitors model performance and drift; Tracify traces agent execution and evaluates outcomes. This adds operational complexity but lets you optimize both dimensions independently. The cost is running two instrumentation streams (low overhead if done right, 10-15% additional platform cost). The benefit is specialized tooling: Arize's statistical rigor plus Tracify's workflow visibility.
+
+## Real-world hybrid usage patterns
+
+Some teams have discovered that running both platforms makes sense for different reasons, and the operational overhead is often justified.
+
+**Pattern 1: Arize for model quality, Tracify for agent debugging.** A team uses Arize to monitor whether their LLM's outputs have degraded (model quality). They use Tracify to trace agent execution and understand why requests fail. Arize answers "Is our model still good?" Tracify answers "Why did this agent fail?" Both are important questions. When agent failures correlate with model quality regressions, you want both signals.
+
+**Pattern 2: Tracify during development, Arize at scale.** A small team starts with Tracify to build and iterate on agent logic rapidly. As the system grows and model quality becomes critical, they add Arize for production monitoring. Tracify gives them speed during development (days to confidence); Arize gives them peace of mind at scale (early detection of model degradation before customers notice).
+
+**Pattern 3: Arize for one model family, Tracify for the agent orchestration.** A team has a specialized model (e.g., a fine-tuned classifier) that needs deep monitoring with statistical rigor. They use Arize for that model alone. They use Tracify to trace the broader agent that uses the classifier plus other models and tools. This hybrid approach lets specialists own each piece: data scientists own the fine-tuned model via Arize; product engineers own the agent via Tracify.
+
+**Pattern 4: Migration path.** A team starts with Arize, realizes they need agent tracing for debugging, adds Tracify alongside. Over time, they may decide one is more critical than the other and can reduce infrastructure. This phased approach lets you learn what your system actually needs without committing to both upfront.
+
+The overhead of running both is typically 10-15% additional platform cost and engineering effort for instrumentation and alerting. The benefit is specialized tooling: Arize's statistical rigor for model quality; Tracify's workflow visibility and cost transparency for agent reliability. For teams with mission-critical systems, this is often money well spent.
+
+## Making the transition
+
+### From Arize to Tracify
+
+If you already use Arize for model quality and want to add agent tracing:
+
+1. Keep Arize running (model quality monitoring remains valuable).
+2. Add Tracify instrumentation to your agent code.
+3. Run both for 2-4 weeks to verify Tracify captures the production agent behavior.
+4. Use Tracify evaluation to find failure patterns; correlate with Arize model quality signals.
+5. Decide whether you need Arize's drift detection or whether Tracify's evaluation is sufficient.
+
+### From Tracify to Arize
+
+If you need deeper model quality monitoring:
+
+1. Keep Tracify for agent tracing and evaluation.
+2. Add Arize instrumentation to log predictions and features.
+3. Set up ground truth labeling (human review or downstream metric).
+4. Run Arize drift detection in parallel with Tracify evaluation.
+5. Over time, correlate agent failures with model quality signals.
+
+## Action checklist
+
+Use this decision-tree approach to commit to a platform:
+
+| Step | If this is true | Next action |
+| --- | --- | --- |
+| 1. Primary risk | Model quality degradation or feature drift matters most | Choose Arize; set up ground truth labeling pipeline |
+| 1. Primary risk | Agent orchestration failures or cost surprises matter most | Choose Tracify; start with tracing and evaluation |
+| 2. Timeline | You have 2+ weeks to integrate metrics and ground truth | Arize's full investment pays off |
+| 2. Timeline | You need production confidence within 3 days | Tracify's quick setup is critical |
+| 3. Team size | 3+ engineers can own metric integration and labeling | Arize's operational burden is manageable |
+| 3. Team size | Small team, few spare resources for platform ops | Tracify's low-overhead model is better |
+| 4. Integration | You already use Arize for another system | Keep Arize; add Tracify for agent tracing |
+| 4. Integration | You have no observability foundation yet | Start with Tracify; add Arize only if drift detection becomes critical |
+| **Decision** | Model drift is your bottleneck **and** you can staff ground truth labeling | **Arize** |
+| **Decision** | Agent failures or cost visibility are your bottlenecks | **Tracify** |
+| **Decision** | Both matter equally and you have operational bandwidth | **Hybrid: Arize + Tracify in parallel** |
+
+- [ ] Identify your primary observability constraint: model quality or agent execution?
+- [ ] Document your ground truth labeling process (if you have one).
+- [ ] Estimate your monthly LLM call volume and your team's operational bandwidth.
+- [ ] Prototype instrumentation with both platforms (4 hours each).
+- [ ] Run a 2-week pilot in a staging environment.
+- [ ] Measure setup time, integration effort, and feedback loop speed.
+- [ ] Decide: Arize alone, Tracify alone, or hybrid (both).
+- [ ] Plan your instrumentation and choose your primary platform.
+
+To understand end-to-end agentic observability, read [the complete agent observability guide](/blog/ai-agent-observability-complete-guide). If you're specifically concerned about LLM observability and what metrics matter most, [LLM observability: metrics that matter](/blog/llm-observability-metrics-that-matter) breaks down the key signals to watch. For teams building production agent systems with evaluation at the core, [AI agent evaluation: practical guide](/blog/ai-agent-evaluation-practical-guide) covers how to design and run effective evaluations that catch failures.
+
+For deeper context on monitoring practices, Arize's own documentation and research papers provide excellent context on drift detection and model performance strategies. The Tracify documentation in-app guides will help you set up evaluation test cases and cost tracking quickly.
+
+## Frequently asked questions
+
+{% faq-item question="Can I run Arize and Tracify together?" answer="Yes. Both platforms can consume the same instrumentation data. You can send model calls to Arize for quality monitoring and agent traces to Tracify for workflow observability. The operational overhead is minimal; you instrument once and fork the data to both systems. Many teams do this successfully to get the best of both worlds." /%}
+
+{% faq-item question="Does Tracify detect model drift like Arize?" answer="Tracify does not have native drift detection statistics. Tracify evaluation can flag when a model's outputs change quality (via test cases), but Arize's feature drift and prediction drift detection are specialized tools not built into Tracify. If drift detection is your primary need, Arize is the right choice." /%}
+
+{% faq-item question="Is Arize expensive for small teams?" answer="Arize's platform cost scales with event volume, but the hidden cost is ground truth labeling. Small teams often cannot afford continuous human labeling; this makes Arize most valuable for teams with large call volumes or automated ground truth (e.g., ranking systems where ranking accuracy can be measured automatically)." /%}
+
+{% faq-item question="Can I use Tracify if I only care about cost?" answer="Yes. Tracify's cost breakdown is automatic and useful even if you do not use evaluation. You will see per-call cost by model and route, which is often enough to optimize routing and deprecate expensive paths. If cost is your only concern, Tracify is overkill; simpler cost-tracking solutions exist." /%}
+
+{% faq-item question="When would I choose Arize over Tracify?" answer="Choose Arize when model quality and drift detection are your primary blocker. Arize has no equal for production LLM monitoring. Choose Tracify when you need to understand why agents fail and control costs. For most agent teams, Tracify moves faster; for teams optimizing LLM robustness, Arize is worth the operational overhead." /%}

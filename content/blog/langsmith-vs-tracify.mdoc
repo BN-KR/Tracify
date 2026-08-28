@@ -1,0 +1,444 @@
+﻿---
+title: "LangSmith vs Tracify: The TCO Trap & All-In-One Value"
+slug: langsmith-vs-tracify
+excerpt: "LangSmith's per-trace overage fees create hidden costs that scale exponentially. This guide breaks down when pricing stays competitive, when LangSmith costs 10x more, and how to calculate TCO before committing to a platform."
+publishedAt: 2026-08-28T12:00:00.000Z
+author: Tracify Team
+draft: true
+categories:
+  - cost-management
+  - platform-comparison
+tags:
+  - langsmith
+  - pricing
+  - tco
+  - cost-optimization
+relatedPosts:
+  - reduce-llm-costs-without-hurting-quality
+  - ai-agent-cost-calculator
+  - ai-agent-observability-complete-guide
+heroImage:
+  src: /media/langsmith-vs-tracify-cost-divergence.svg
+  alt: "Cost trajectory comparison showing LangSmith per-trace overage fees vs Tracify flat pricing, diverging at scale with 22-26x gap at 100M traces"
+seo:
+  metaTitle: "LangSmith vs Tracify: TCO Comparison & Cost Analysis"
+  metaDescription: "Compare LangSmith and Tracify pricing models. See real TCO calculations for moderate and high-volume trace ingestion, and learn when each platform makes financial sense."
+---
+
+{% trace-scenario title="Platform choice: feature fit or cost trap?" prompt="Your team is choosing between LangSmith and Tracify for agent observability. Both can capture traces, but LangSmith charges $2.50/1K traces after a monthly quota. At what volume does this become the deciding factor?" outcome="Calculate your true 12-month cost of ownership. Small volumes stay comparable; high-volume production flips the decision decisively toward flat-rate pricing." /%}
+
+## At a glance
+
+![Cost trajectory showing where LangSmith and Tracify pricing diverge: staying close at 10M monthly traces, then Tracify maintaining flat cost while LangSmith's overage fees accelerate exponentially to 10x baseline](/media/langsmith-vs-tracify-tco-hero.png)
+
+You are evaluating observability platforms for multi-agent production systems. Both LangSmith and Tracify capture traces, support evaluations, and integrate with your stack. The critical difference is not features—it is the pricing model and how costs scale with production volume.
+
+**LangSmith** charges per trace after an initial monthly quota. Overages cost $2.50 per 1,000 traces. **Tracify** offers all-in-one pricing with no per-trace overage fees. At moderate volumes (10–50M monthly traces), costs stay similar. At production scale (100M+ monthly traces), LangSmith costs 10x more than Tracify.
+
+This article helps you calculate your true total cost of ownership, understand where each model breaks down, and make a decision grounded in your expected volume and growth trajectory.
+
+### The operating model: quota-based vs. all-in-one pricing
+
+**LangSmith's model:** Free tier for evaluation, then per-seat billing with trace quotas (typically 50K–500K traces/month depending on plan). Overages: $2.50 per 1,000 traces. This model incentivizes teams to constrain trace volume, sample selectively, and architect around quota limits.
+
+**Tracify's model:** Unified pricing tier with no trace overages, no sampling penalties, and no quota-based escalation. Costs scale with features (evaluation runs, API usage, team seats) but not per-trace ingestion. This model incentivizes comprehensive observation and simplifies cost predictability.
+
+| Dimension | LangSmith | Tracify |
+| --- | --- | --- |
+| **Pricing basis** | Per-seat + per-trace overages | All-in-one monthly tier |
+| **Trace quota** | Depends on plan (50K–500K/mo) | Unlimited |
+| **Overage cost** | $2.50 / 1K traces | None |
+| **Cost predictability** | Variable (quota + usage) | Fixed (plan tier) |
+| **Architectural constraint** | Must sample traces to stay in quota | No quota-induced sampling |
+| **Setup time** | Hours | Minutes |
+| **Cost at 10M traces/mo** | $50–150 + seat costs | $200–400 all-in |
+| **Cost at 100M traces/mo** | $300–500 + seat costs | $200–400 all-in |
+| **Cost at 500M traces/mo** | $1,500–2,500 + seat costs | $200–400 all-in |
+
+## Understanding your trace volume
+
+Before evaluating platforms, you need to understand what drives trace volume and how to estimate it for your use case. Trace volume is not linear with requests—it depends on your system architecture, the depth of your instrumentation, and how many intermediate steps you log.
+
+**Trace volume drivers:**
+- **Request count:** Every customer request or API call that touches an LLM or agent.
+- **Instrumentation depth:** Each LLM call, tool call, memory access, and error produces separate spans. A single customer request might generate 5–20 traces depending on agent complexity.
+- **Multi-turn interactions:** Chat applications and session-based agents produce more traces because each turn is captured as a separate span.
+- **Debugging and testing:** During development, trace volume is higher because teams log more verbosely. Production often requires less instrumentation.
+- **Error handling:** Retries, fallbacks, and error paths produce additional traces even if the final outcome succeeds.
+
+**Calculate your expected volume:**
+Use this formula for a rough estimate:
+- (Requests/hour) × 24 hours × 30 days × (traces per request) = Monthly traces
+- Example: 100 requests/hour × 24 × 30 × 8 traces/request = 576,000 traces/month
+
+If you are currently using LangSmith, you can check your actual volume in the dashboard under Settings > Traces. This historical data is the most reliable input for choosing a new platform.
+
+{% editorial-panel eyebrow="Operational insight" title="Trace volume grows faster than request volume." body="As teams instrument more deeply and add more agents to production, trace volume can grow 2-3x faster than request volume. If you are currently at 10M traces/month but plan to ship 5 new agents, plan for 30–50M traces/month within 12 months. LangSmith's overage costs compound with this growth; Tracify's flat pricing absorbs it." tone="yellow" /%}
+
+## Scenario 1: Moderate-volume team (10–50M monthly traces)
+
+Your team is shipping an internal observability system for three multi-agent workflows. You expect stable volume around 30M traces per month. You need to understand per-call costs, detect regressions, and iterate on prompts.
+
+### With LangSmith
+
+**Setup:**
+- LangSmith Starter or Growth plan: assume $100/month base + 3 team seats at $30/seat = $190/month
+- Trace quota on Growth: typically 500K/month included
+- Expected overage: 30M traces – 500K included = 29.5M overage traces
+- Overage cost: 29.5M traces ÷ 1,000 × $2.50 = **$73,750/month**
+- **Total: ~$73,940/month ($887,680/year)**
+
+This is unsustainable at 30M traces on standard plans. Teams facing this reality typically architect around the quota:
+
+> **Field note:** LangSmith plans with higher trace quotas exist (typically through enterprise agreements), but they push base costs to $500–1,000/month. Check with sales to verify actual quota levels for your plan tier.
+
+**What you do instead:**
+- Enable sampling: capture 10% of traces (3M/month traces)
+- Route only failing or expensive traces to full ingestion
+- Accept that you miss 90% of production behavior
+- Result: costs drop to $100 + sampling overhead, but observability degrades
+
+### With Tracify
+
+**Setup:**
+- Tracify Pro tier: $300/month flat (includes up to 1B monthly API events, all features, 3 team seats)
+- No trace quotas, no overage penalties
+- Ingest full 30M traces/month
+- **Total: $300/month ($3,600/year)**
+
+**What you actually get:**
+- Every trace captured
+- Integrated evaluation (define test cases, run evaluations in the platform)
+- Cost breakdown by model, provider, route
+- Session tracking across multi-turn interactions
+- No sampling trade-offs
+
+### The trade-off at 30M traces/month
+
+| Metric | LangSmith | Tracify |
+| --- | --- | --- |
+| **Monthly cost** | $73,940 | $300 |
+| **Annual cost** | $887,680 | $3,600 |
+| **Cost per million traces** | $2.47 | $0.01 |
+| **Sampling required** | Yes (90% loss) | No |
+| **Observability fidelity** | 10% of production | 100% of production |
+
+At 30M traces/month, LangSmith's overage structure forces a choice: pay for comprehensive observation or sample aggressively and lose visibility. Tracify's flat pricing means you capture every trace without cost escalation.
+
+> **Decision rule:** If your monthly trace volume exceeds your plan's included quota by 3x or more, compare the overage cost to Tracify's flat tier. The break-even point is typically at 15–20M traces/month, depending on your LangSmith plan tier.
+
+### Why sampling degrades your observability
+
+The sample-to-stay-within-quota pattern is a productivity killer. When you enable sampling at LangSmith, you are not capturing a representative subset—you are capturing a random subset that loses context and makes debugging harder.
+
+Consider a real scenario: Your agent processes 30M requests/month with 8 traces per request. A 10% sample captures 24M traces instead of 240M. But the cost says you are paying for the full volume through overage fees, while getting only 10% of the visibility.
+
+The worst part is that the traces you lose are often the ones you need most:
+- **Failed requests:** If a request fails, the entire multi-step trace is valuable. Losing it to random sampling means you miss 90% of failures.
+- **Expensive requests:** The customer transaction that cost $50 in LLM spend is the one you want to debug, but random sampling might drop it.
+- **Edge cases:** Rare but important behaviors (very long conversations, unusual model responses) are naturally sparse in your data. Sampling removes them entirely.
+
+Real teams solve this by implementing sophisticated sampling strategies—only sample successful requests, always capture errors, always capture requests above a cost threshold. This adds engineering overhead, delays observability setup, and still results in incomplete visibility.
+
+With Tracify's flat pricing, you capture every trace without this compromise. The 30M monthly traces are all visible, all queryable, and all available for debugging. The platform's cost is fixed whether you ingest 1M or 300M traces.
+
+## Scenario 2: Production-scale system (100M+ monthly traces)
+
+Your team operates a customer-facing multi-agent platform. You are processing customer requests across 10 independent agents, each generating multiple traces per request. Your monthly trace volume stabilizes at 200M.
+
+### With LangSmith
+
+**Setup:**
+- Enterprise or custom plan to handle 200M traces/month
+- Assume negotiated base: $1,000/month + 10 team seats at $100/seat = $2,000/month
+- Trace quota: assume negotiated 10M/month (typical for enterprise)
+- Expected overage: 200M – 10M = 190M traces/month
+- Overage cost: 190M ÷ 1,000 × $2.50 = **$475,000/month**
+- **Total: ~$477,000/month ($5,724,000/year)**
+
+Even with aggressive negotiation on base pricing and quota, overage fees dominate the bill. This is where LangSmith's pricing model breaks down decisively.
+
+**What teams do:**
+- Negotiate volume discounts (LangSmith may offer 20–40% overage discount for committed volume)
+- Best-case: $475,000 × 0.7 = **$332,500/month**
+- Still **$3,990,000/year**
+
+**Or accept architectural constraints:**
+- Implement aggressive sampling (log only 20% of traces)
+- Route 80% of production traffic away from logging
+- Accept that debugging production issues relies on sparse, unreliable data
+- Cost: $2,000/month + sampling overhead
+- Risk: hidden failures and poor incident response
+
+### With Tracify
+
+**Setup:**
+- Tracify Enterprise tier: $1,500/month flat (covers 1B+ monthly API events, all features, unlimited seats)
+- No trace quotas, no per-trace overages
+- Ingest full 200M traces/month
+- **Total: $1,500/month ($18,000/year)**
+
+**What you get:**
+- Every trace captured from every agent
+- Integrated evaluation with automated quality gates
+- Deep cost analysis per agent, per model, per customer
+- Session continuity across multi-turn workflows
+- No sampling overhead, no observability blind spots
+
+### The cost comparison at 200M traces/month
+
+| Metric | LangSmith (negotiated) | Tracify |
+| --- | --- | --- |
+| **Monthly cost** | $332,500–477,000 | $1,500 |
+| **Annual cost** | $3,990,000–5,724,000 | $18,000 |
+| **Cost per million traces** | $1.66–2.39 | $0.09 |
+| **Cost multiple** | **22–26x** Tracify | **1x** |
+| **Observability fidelity** | 100% at premium cost | 100% at flat cost |
+
+At 200M traces/month, Tracify costs approximately **22–26x less** than LangSmith, even with aggressive enterprise negotiation. The cost of observability shifts from being a compliance cost (accepted but managed) to being a strategic advantage (affordable comprehensive visibility).
+
+![Cost breakdown showing monthly spend distribution: LangSmith dominated by overage fees, Tracify distributed across seats, evaluations, and API usage](/media/langsmith-vs-tracify-cost-breakdown.png)
+
+### Real-world impact of the 22x cost difference
+
+A 22x cost difference is not academic—it is the difference between treating observability as a utility cost and treating it as a strategic investment.
+
+**With LangSmith's $3.99M–5.7M annual bill:**
+- The team can afford a dedicated observability engineer who manages sampling, optimization, and integration.
+- But that engineer is solving a *pricing problem*, not an *observability problem*.
+- The team saves money by deleting old traces, archiving data, and optimizing queries.
+- When production breaks at 2 AM, the on-call engineer has to hope the traces they need were not sampled out.
+- The financial pressure to constrain trace collection is constant and influences architecture decisions.
+
+**With Tracify's $18K annual bill:**
+- The observability cost is negligible—it's a utility like email or Slack.
+- The team can afford comprehensive tracing without budget anxiety.
+- Engineers instrument deeply, capture context, and debug quickly.
+- When production breaks, the complete trace history is available instantly.
+- The financial incentive is to capture *more* traces, not fewer.
+
+This is the hidden cost of quota-based pricing: it forces teams to optimize for cost rather than observability. Over 12 months, that optimization compounds into blind spots, slower incident response, and architectural constraints that were never necessary.
+
+## Scenario 3: Growing team navigating rapid volume growth
+
+Your team has been running on LangSmith for 8 months at 5M traces/month. The product gained traction, and you just shipped 3 new agents to production. Your trace volume is projected to hit 50M/month within 30 days and double again within 6 months.
+
+### LangSmith trajectory
+
+**Today (5M traces/month):**
+- LangSmith Growth plan: $100/month + 3 seats = $190/month
+- Trace quota: 500K/month included, 4.5M overage at $2.50 per 1K = **$11,250/month**
+- Total: **$11,440/month**
+
+**30 days (50M traces/month):**
+- Upgrade to Enterprise plan: $1,000/month base + 5 seats = $1,500/month
+- Trace quota: 5M/month included, 45M overage = **$112,500/month**
+- Total: **$114,000/month**
+
+**6 months (100M traces/month):**
+- Enterprise plan: $1,500/month + 10 seats = $2,500/month
+- Trace quota: 5M/month included, 95M overage = **$237,500/month**
+- Total: **$240,000/month**
+
+**Annual cost trajectory:** $11K → $114K → $240K (ramping from $136K in first quarter to $2.88M annualized by month 6).
+
+### Tracify trajectory
+
+**Today (5M traces/month):**
+- Tracify Pro tier: $300/month (covers 1B+ events, all features, 3 seats)
+- Total: **$300/month**
+
+**30 days (50M traces/month):**
+- Tracify Pro tier: $300/month (no change, no new quotas hit)
+- Total: **$300/month**
+
+**6 months (100M traces/month):**
+- Tracify Pro tier: $300/month (still no change)
+- Total: **$300/month**
+
+**Annual cost trajectory:** $300 → $300 → $300 (fixed at $3,600 annually).
+
+### The growth impact
+
+By month 6, your LangSmith bill is $240K/month while Tracify remains at $300/month. The cumulative 6-month cost is:
+- **LangSmith:** $11K + $114K + (3 × $240K) = **$842K**
+- **Tracify:** 6 × $300 = **$1,800**
+
+The cost difference is **$840K in the first 6 months**—money that could fund 2–3 additional engineers who focus on product, not cost optimization.
+
+Many teams discover this problem too late. They commit to LangSmith for evaluation, the product gains traction, and suddenly observability is the #2 cost line after infrastructure. By then, switching platforms is disruptive: switching SDKs, migrating historical data, retraining the team, and updating documentation.
+
+> **Decision point:** If you anticipate rapid growth (2–3x trace volume in 12 months), choose a platform whose cost model scales linearly, not exponentially. This is not premature optimization—it is strategic financial planning for a predictable outcome.
+
+## Where LangSmith excels (and why it matters)
+
+Before concluding that Tracify is always better, acknowledge the areas where LangSmith leads:
+
+**Developer experience:** LangSmith's UI for browsing traces is polished and intuitive. The trace inspector shows request/response pairs clearly, integrates with prompt chaining, and lets teams debug quickly. This is a genuine strength.
+
+**Self-hosting optionality:** LangSmith Cloud is the standard, but enterprise deployments can negotiate on-premises instances. This matters for teams with strict data residency requirements or air-gapped environments. Tracify is SaaS-only.
+
+**Langchain ecosystem integration:** If your team is building on Langchain, LangSmith's SDK integration is seamless. The tracing is nearly automatic, requiring minimal instrumentation code.
+
+**Prompt versioning:** LangSmith's prompt management and versioning is mature and well-integrated with tracing. You can see which prompt version produced which trace, making iteration transparent.
+
+**Flexible sampling strategies:** LangSmith allows sampling at the SDK level—you choose which traces to send, when to send them, and to what detail. This architectural flexibility is valuable for teams building novel observability patterns.
+
+These strengths are real. The question is whether they justify the cost gap at your expected scale.
+
+> **Decision point:** If your team is primarily building with Langchain and your trace volume stays under 20M/month, LangSmith's UX and ecosystem fit may outweigh Tracify's cost advantage. Cost is not the only dimension; developer velocity matters too.
+
+## Why the pricing structure matters
+
+The choice between quota-based and all-in-one pricing is not just about the number on the invoice. It shapes your observability architecture, your operational practices, your team's ability to debug production incidents, and the quality of decisions you can make with your data.
+
+### The sampling trap
+
+When trace volume exceeds quota, teams instinctively enable sampling. The intention is reasonable: capture a representative subset to stay within budget. But sampling introduces blind spots:
+
+- **Rare failures:** A bug that affects 1% of requests is invisible in a 10% sample.
+- **Cost anomalies:** The customer with 10x higher costs might be invisible in the sample.
+- **Cascading errors:** A bug that only manifests after 50 sequential requests is unlikely to appear in sampled traces.
+- **Incident response:** When production fails, the traces you need to debug are often the ones you sampled out.
+- **Model drift:** If a model update degrades performance for a specific input type (e.g., requests with very long context), that degradation is invisible in a random sample.
+- **User experience issues:** A customer reports that responses became slow last week—but the slow traces are sampled out, so you cannot diagnose the problem.
+
+LangSmith's pricing incentivizes sampling as a cost control. Teams rationalize it as acceptable for development but necessary for production. This false choice—paying for comprehensive observation or sampling aggressively—creates a false binary that Tracify eliminates.
+
+Tracify's flat pricing removes the incentive to sample. You capture every trace by default, then choose what to sample *for optimization*, not for cost control. This is a fundamentally different model: you sample because you want faster queries or lower storage costs for historical data, not because you cannot afford comprehensive logging.
+
+### Cost predictability and financial planning
+
+LangSmith's bill is variable: it depends on actual trace volume, which fluctuates with production traffic, debugging sessions, and team activity. This makes budgeting difficult and creates budget surprises when traffic spikes.
+
+Imagine your product hits a viral moment and traffic spikes to 5x normal. Your trace volume also spikes 5x. On LangSmith, your bill spikes from $10K/month to $50K/month *in that single month*. Finance is caught off-guard. The team scrambles to disable tracing in production to avoid the overage spike. Observability is turned off exactly when you need it most—during the highest-volume period.
+
+Tracify's bill is fixed: the monthly cost does not change whether you ingest 10M or 500M traces in a single month. The cost is predictable, budgeted, and immune to traffic spikes. When your product goes viral, you have complete observability and no bill shock.
+
+For finance-conscious teams, this certainty has value beyond the headline number. Your CFO can forecast observability costs accurately. No one is surprised by a $200K spike in a single month.
+
+### Architectural freedom and engineering velocity
+
+When trace quotas are generous, teams can afford to be comprehensive: log every interaction, preserve context, and capture side effects. When quotas are tight, teams must architect around them: sample strategically, drop low-value traces, and instrument selectively. This constraint can actually degrade observability by making the system artificially sparse.
+
+Engineers spend time optimizing for quota compliance instead of shipping features. The observability system becomes a cost-control system rather than a debugging tool.
+
+Tracify's unlimited tracing removes this architectural constraint. Teams can instrument completely and let the platform handle scale. Engineers ask "What information would help me debug this?" instead of "How much quota do I have left?" This shift in mentality, from constraint to completeness, is subtle but powerful.
+
+The result is faster incident response, clearer debugging, and better observability decisions because the complete picture is available.
+
+## When to choose each platform
+
+**Choose LangSmith when:**
+- You are evaluating or prototyping (< 1M traces/month; cost is minimal, UX is valuable)
+- You are building primarily on Langchain and need tight SDK integration with automatic instrumentation
+- You need on-premises deployment or have strict data residency requirements that SaaS solutions cannot meet
+- Your team prioritizes trace UI polish and quick debugging over cost efficiency
+- Your volume stays under 20M traces/month and you have no plans to scale beyond that in 12 months
+- You need to integrate with existing LangSmith workflows and dashboards already deployed across teams
+
+**Choose Tracify when:**
+- Your production volume is 10M+ traces/month (cost advantage becomes visible; at 20M+ it is decisive)
+- You need integrated evaluation (test cases, quality gates, automated evals) alongside tracing
+- You want comprehensive cost visibility by model, provider, customer segment, or agent
+- You value cost predictability and fixed monthly budgeting (especially during growth)
+- You are optimizing for observability completeness without sampling penalties
+- You anticipate 2–3x trace volume growth in the next 12 months
+- You have multiple teams that need unified observability without cost negotiations per team
+
+| Decision factor | LangSmith advantage | Tracify advantage |
+| --- | --- | --- |
+| **Volume < 5M/mo** | Cost parity, excellent UI | Flat cost, integrated eval, unlimited scale potential |
+| **Volume 5–20M/mo** | Features mature, ecosystem integration | 5–50x cost savings, cost predictability |
+| **Volume 20–100M/mo** | Specialized enterprise support | 10–100x cost savings, cost certainty during growth |
+| **Volume > 100M/mo** | Negotiated enterprise terms possible | 20–26x cost savings, full observability at fixed cost |
+| **Langchain ecosystem** | Native integration, auto-instrumentation | Good support, requires explicit instrumentation |
+| **Data residency/on-prem** | On-prem options available | SaaS only |
+| **Integrated evaluation** | API-based, requires custom integration | Native, production-tested, in platform |
+| **Growth trajectory** | Costs escalate with volume | Costs flat regardless of growth |
+| **Team scaling** | Per-seat costs increase | Unlimited seats in tier |
+
+## Making the operating decision
+
+The choice between LangSmith and Tracify turns on five critical questions:
+
+### 1. What is your actual trace volume today and 12-month projection?
+
+If you cannot estimate this, calculate it: (average requests/hour) × 24 × 30 × (average traces/request). Use the "Understanding your trace volume" section above if you are uncertain about traces-per-request.
+
+If you are currently using LangSmith, export your usage data from Settings and calculate your average monthly volume. Do not guess—use actual numbers.
+
+Project 12-month growth realistically:
+- Mature products with stable customer base: 20–50% growth
+- Growing SaaS businesses: 50–200% growth
+- Products shipping new agents or expanding to new markets: 200%+ growth
+
+Plug this projection into the cost calculator. If your year-end volume puts LangSmith costs above $50K/month, Tracify is almost certainly the better choice.
+
+### 2. How are you currently handling observability costs?
+
+- Are you sampling traces to stay within quota? (If yes, you are already paying a hidden observability cost.)
+- Have you disabled tracing in production to save costs? (If yes, you lack visibility exactly when you need it most.)
+- Do you retain traces for only 30 days because longer retention would exceed budget? (If yes, you cannot debug historical issues.)
+- Do you have a dedicated engineer managing sampling strategies and quota optimization? (If yes, multiply their salary by the cost of not having them build product.)
+
+If any of these are true, LangSmith's cost structure is not just expensive—it is actively harming your observability practices.
+
+### 3. What observability capabilities matter most?
+
+Evaluate:
+- **Integrated evaluation:** Do you need to define test cases, run automated evaluations, and detect quality regressions in the same platform where you trace? (LangSmith requires external tools or custom integration; Tracify is built-in.)
+- **Cost breakdown by model/provider:** Do you need to understand which models/providers are expensive and where to optimize? (Tracify breaks this down by default; LangSmith requires manual calculation or integration with a cost platform.)
+- **Session tracking:** Do you need to preserve multi-turn conversations and see the full customer journey? (Both support this, but Tracify's integration is tighter.)
+- **Prompt versioning:** Do you need to see which prompt version produced which result? (LangSmith excels here; Tracify supports it through evaluation context.)
+
+### 4. Do you have data residency or compliance requirements?
+
+- If you need data to stay in a specific region or on-premises, LangSmith's self-hosting option may be necessary. Tracify is SaaS-only.
+- If HIPAA, SOC2, or other compliance frameworks are critical, both support these, but on-prem may be required. Verify with your compliance team.
+
+### 5. Are you building primarily on Langchain or adopting multiple frameworks?
+
+- If you are all-in on Langchain, LangSmith's native integration saves instrumentation work.
+- If you are using OpenAI API directly, calling Claude, using LlamaIndex, and integrating tools from different libraries, you will need to instrument each integration separately on LangSmith anyway. Tracify's unified SDK may be simpler.
+
+{% editorial-panel eyebrow="Decision room" title="Cost-transparent observability is a competitive advantage." body="At high volume, observability cost can swing from '$3.6K/year' to '$6M/year' based on pricing model alone. The team that makes this decision deliberately—not accidentally via quota overage fees—will have better incident response, clearer cost visibility, and faster debugging. This is not about being cheap; it is about being smart." tone="paper" /%}
+
+## Cost calculator: estimate your TCO
+
+Use this interactive calculator to input your expected monthly trace volume and see the annual cost for both platforms. Adjust seat count and plan tier to match your needs.
+
+{% cost-tco-calculator
+  platforms="langsmith,tracify"
+  defaultTraceVolume="30000000"
+  defaultSeats="3"
+  defaultLangsmithPlan="growth"
+  defaultTracifyPlan="pro"
+  scenarioNames="Moderate Volume|High Volume|Enterprise"
+/%}
+
+The calculator shows monthly and annual cost for both platforms. Pay attention to the cost-per-million-traces metric: this is where LangSmith's overage fees compound.
+
+## Make the operating decision
+
+- [ ] You have calculated your expected monthly trace volume (or identified the formula to calculate it).
+- [ ] You have compared the annual cost for both platforms at your expected volume.
+- [ ] You have evaluated the non-cost trade-offs: UX, ecosystem fit, evaluation capabilities, data residency.
+- [ ] You have accounted for 12-month growth (assume 50% YoY growth for established systems).
+- [ ] You have confirmed that the chosen platform's pricing scales predictably with that growth.
+- [ ] You have verified the platform's SLA, compliance posture, and incident response if it impacts your customers.
+- [ ] You have notified finance and procurement of the decision and locked in the contract terms.
+
+Once you have completed this decision, the next step is instrumentation. Both platforms require you to add traces to your LLM application. Start with the Tracify documentation or LangSmith tracing guide to begin capturing your first traces.
+
+## Frequently asked questions
+
+{% faq-item question="At what trace volume do overages become a real problem?" answer="Overages exceed the base plan cost at approximately 15–20M traces/month, depending on your LangSmith plan tier. Beyond that, overage fees dominate the bill. Run the cost calculator with your expected volume to find your break-even point." /%}
+
+{% faq-item question="Can we negotiate better overage rates with LangSmith?" answer="LangSmith offers volume discounts for enterprise customers, typically 20–40% off standard overage rates. However, even with aggressive negotiation, the cost curve still favors Tracify at high volumes. The per-trace cost gap narrows but remains significant." /%}
+
+{% faq-item question="Is sampling a viable alternative to control LangSmith costs?" answer="Sampling reduces cost but degrades observability. You may miss rare failures, cost anomalies, and context needed for incident response. If your volume exceeds quota, this is a trade-off worth quantifying: what observability would you lose if you sampled 50% of traces? That loss has cost too." /%}
+
+{% faq-item question="Does Tracify offer volume discounts or enterprise pricing?" answer="Tracify's pricing is transparent and does not have surprise overage fees, but enterprise commitments may include custom terms. Contact Tracify sales for large deployments (500M+ traces/month). Standard tiers scale predictably." /%}
+
+{% faq-item question="If we choose LangSmith for development and Tracify for production, how do we manage two platforms?" answer="This is operationally expensive. You maintain two separate integrations, train teams on two UIs, and lose the cost visibility benefit of a unified platform. If you are considering this approach, calculate the cost of maintaining two platforms against the cost savings of consolidating on one." /%}
