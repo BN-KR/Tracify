@@ -306,9 +306,21 @@ Your initial decision should not be permanent. Revisit your platform choice if:
 
 ## Decision checklist: Which platform fits your needs?
 
-Use this interactive tool to identify your evaluation and observability priorities. Each question has a weight; your total score guides the recommendation.
+Find the row closest to your situation for each criterion, and note which column it favors. If most of your answers land in one column, that's your platform; a mixed result means the hybrid approach below is worth considering.
 
-{% decision-checklist title="Evaluation Platform Decision Matrix" items=[{"label": "Evaluation complexity: How custom must your scoring logic be?", "options": [{"text": "Basic patterns (LLM-as-judge, ROUGE, regex)", "braintrust": 1, "tracify": 5}, {"text": "Domain-specific rules and custom evaluators", "braintrust": 5, "tracify": 2}, {"text": "Rapidly evolving scoring (weekly changes)", "braintrust": 5, "tracify": 2}], "default": 0}, {"label": "Observability scope: What signals matter most?", "options": [{"text": "Just evaluation quality", "braintrust": 5, "tracify": 2}, {"text": "Evaluation + tracing", "braintrust": 3, "tracify": 5}, {"text": "Evaluation + tracing + cost + experiments", "braintrust": 1, "tracify": 5}], "default": 0}, {"label": "Cost visibility: How critical is cost tracking?", "options": [{"text": "Not a priority for this quarter", "braintrust": 4, "tracify": 2}, {"text": "Important but handled externally", "braintrust": 3, "tracify": 3}, {"text": "Essential—automatic per-call breakdown needed", "braintrust": 1, "tracify": 5}], "default": 0}, {"label": "Experimentation velocity: How often do you A/B test?", "options": [{"text": "Rarely; evaluation is the main gate", "braintrust": 4, "tracify": 2}, {"text": "Monthly; we test new prompts and models", "braintrust": 2, "tracify": 4}, {"text": "Weekly; rapid iteration on routing and models", "braintrust": 1, "tracify": 5}], "default": 0}, {"label": "Team size and infrastructure expertise:", "options": [{"text": "Solo or pair; minimal DevOps resources", "braintrust": 2, "tracify": 5}, {"text": "Small team (3-5) with some platform experience", "braintrust": 3, "tracify": 4}, {"text": "Team with dedicated platform/infra engineers", "braintrust": 4, "tracify": 4}], "default": 0}] /%}
+| Criterion | Your situation | Favors |
+| --- | --- | --- |
+| Evaluation complexity | Basic patterns (LLM-as-judge, ROUGE, regex) | Tracify |
+| Evaluation complexity | Domain-specific rules or rapidly evolving scoring | Braintrust |
+| Observability scope | Just evaluation quality | Braintrust |
+| Observability scope | Evaluation + tracing | Tracify |
+| Observability scope | Evaluation + tracing + cost + experiments | Tracify |
+| Cost visibility | Not a priority this quarter | Braintrust |
+| Cost visibility | Essential — automatic per-call breakdown needed | Tracify |
+| Experimentation velocity | Rarely; evaluation is the main gate | Braintrust |
+| Experimentation velocity | Monthly or weekly iteration on prompts/models | Tracify |
+| Team size and expertise | Solo or pair; minimal DevOps resources | Tracify |
+| Team size and expertise | Team with dedicated platform/infra engineers | Either (parity) |
 
 ---
 

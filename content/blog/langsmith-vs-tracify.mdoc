@@ -404,20 +404,16 @@ Evaluate:
 
 {% editorial-panel eyebrow="Decision room" title="Cost-transparent observability is a competitive advantage." body="At high volume, observability cost can swing from '$3.6K/year' to '$6M/year' based on pricing model alone. The team that makes this decision deliberately—not accidentally via quota overage fees—will have better incident response, clearer cost visibility, and faster debugging. This is not about being cheap; it is about being smart." tone="paper" /%}
 
-## Cost calculator: estimate your TCO
+## Estimate your own TCO
 
-Use this interactive calculator to input your expected monthly trace volume and see the annual cost for both platforms. Adjust seat count and plan tier to match your needs.
+Use the two worked scenarios above as reference points for your own volume:
 
-{% cost-tco-calculator
-  platforms="langsmith,tracify"
-  defaultTraceVolume="30000000"
-  defaultSeats="3"
-  defaultLangsmithPlan="growth"
-  defaultTracifyPlan="pro"
-  scenarioNames="Moderate Volume|High Volume|Enterprise"
-/%}
+| Scenario | Monthly traces | LangSmith | Tracify | Gap |
+| --- | --- | --- | --- | --- |
+| Moderate volume | 30M | Comparable to Tracify at standard plan tiers | Comparable to LangSmith | ~1x |
+| Production scale | 200M | Enterprise-negotiated overage pricing | $1,500/month flat (Enterprise tier) | 22–26x |
 
-The calculator shows monthly and annual cost for both platforms. Pay attention to the cost-per-million-traces metric: this is where LangSmith's overage fees compound.
+Plot your own expected monthly trace volume against these two data points. If you're below ~20M traces/month, the platforms are within range of each other on cost alone — the decision should turn on UX and ecosystem fit. Above that, LangSmith's per-trace overage fees compound quickly; use the formula in Scenario 2 above (traces × 8 spans/interaction, minus your negotiated quota, × $2.50/1K) to project your own bill.
 
 ## Make the operating decision
 

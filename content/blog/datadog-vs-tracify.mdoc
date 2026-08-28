@@ -122,11 +122,9 @@ The cost difference persists because Datadog's billing is tied to *ingestion vol
 
 {% editorial-panel eyebrow="Why spans matter" title="Agent workloads generate many spans per business event." body="A single customer interaction with a multi-step agent can generate 8–15 spans: LLM calls, embeddings, tool invocations, retries. Datadog charges per span. Tracify charges once per interaction. At scale, this drives a 5–10x cost divergence." tone="yellow" /%}
 
-## Interactive cost calculator
+## Estimate your own cost gap
 
-Use the calculator below to see the cost difference for your workload. Input your expected monthly trace volume and average spans per trace:
-
-{% cost-comparison-calculator /%}
+Use the worked examples above as a template: take your monthly interaction volume, multiply by your average spans per interaction (2–5 LLM calls plus 2–4 tool calls is typical for an agent), and compare that against Datadog's per-span billing versus Tracify's per-trace pricing. The 3–5x gap holds across both volume tiers because it comes from the billing unit, not a temporary promotional rate.
 
 ## Architecture comparison: the fundamental difference
 
