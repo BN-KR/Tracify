@@ -3,15 +3,15 @@ import Link from "next/link";
 export function Pagination({
   hasOlder,
   hasNewer,
-  category,
+  categories,
 }: {
   hasOlder: boolean;
   hasNewer: boolean;
-  category?: string;
+  categories?: string[];
 }) {
   function buildUrl(direction: "older" | "newer") {
     const params = new URLSearchParams();
-    if (category) params.set("category", category);
+    for (const category of categories ?? []) params.append("category", category);
     if (direction === "older") params.set("before", "1");
     else params.set("after", "1");
     return `/blog${params.toString() ? `?${params.toString()}` : ""}`;

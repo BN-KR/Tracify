@@ -25,11 +25,12 @@ function formatDate(date: string) {
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string | string[] }>;
 }) {
   const { category } = await searchParams;
+  const selectedCategories = category === undefined ? [] : Array.isArray(category) ? category : [category];
   const [posts, categoryOptions] = await Promise.all([
-    getPublishedPosts(category),
+    getPublishedPosts(selectedCategories),
     getCategoryOptions(),
   ]);
   const allCategories = categoryOptions.map((option) => option.value);
@@ -66,7 +67,7 @@ export default async function BlogPage({
       <FutureBand label="Filter the record">
         <div className="border-x border-black px-5 py-5">
           {allCategories.length ? (
-            <CategoryPills categories={allCategories} active={category} />
+            <CategoryPills categories={allCategories} active={selectedCategories} />
           ) : (
             <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/60">All field notes</p>
           )}
@@ -122,7 +123,7 @@ export default async function BlogPage({
 
         {posts.length ? (
           <div className="border-x border-t border-black p-5">
-            <Pagination hasOlder={false} hasNewer={false} category={category} />
+            <Pagination hasOlder={false} hasNewer={false} categories={selectedCategories} />
           </div>
         ) : null}
       </FutureBand>

@@ -117,7 +117,7 @@ export type BlogPost = {
 
 type BlogRepository = {
   getAllPosts(): BlogPost[];
-  getPublishedPosts(category?: string): BlogPost[];
+  getPublishedPosts(categories?: string | string[]): BlogPost[];
   getPublishedPost(slug: string): BlogPost | null;
   getCategoryOptions(): Array<{ label: string; value: string }>;
 };
@@ -298,9 +298,13 @@ export function createBlogRepository(contentDirectory = defaultContentDirectory)
     return posts;
   }
 
-  function getPublishedPosts(category?: string) {
+  function getPublishedPosts(categories?: string | string[]) {
+    const selected = categories === undefined ? [] : Array.isArray(categories) ? categories : [categories];
     return getAllPosts()
-      .filter((post) => !post.draft && (!category || post.categories.includes(category)))
+      .filter(
+        (post) =>
+          !post.draft && (selected.length === 0 || selected.some((category) => post.categories.includes(category)))
+      )
       .sort((left, right) => Date.parse(right.publishedAt) - Date.parse(left.publishedAt));
   }
 

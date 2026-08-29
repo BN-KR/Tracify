@@ -96,6 +96,20 @@ test("category filtering and options use frontmatter categories", () => {
   });
 });
 
+test("category filtering accepts multiple categories with OR matching", () => {
+  withContentDirectory({ "first.mdoc": firstPost, "second.mdoc": secondPost }, (directory) => {
+    const repository = createBlogRepository(directory);
+    assert.deepEqual(
+      repository.getPublishedPosts(["Engineering", "Observability"]).map((post) => post.slug).sort(),
+      ["first-post", "second-post"],
+    );
+    assert.deepEqual(repository.getPublishedPosts([]).map((post) => post.slug).sort(), [
+      "first-post",
+      "second-post",
+    ]);
+  });
+});
+
 test("a post exposes validated metadata and a transformed Markdoc tree", () => {
   withContentDirectory({ "first.mdoc": firstPost }, (directory) => {
     const post = createBlogRepository(directory).getPublishedPost("first-post");
