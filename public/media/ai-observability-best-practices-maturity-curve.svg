@@ -1,0 +1,18 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bpMatTitle bpMatDesc">
+  <title id="bpMatTitle">A maturity curve showing coverage rising while alert noise first spikes then falls</title>
+  <desc id="bpMatDesc">A black canvas shows a line chart with two lines over time: a rising cream line for instrumentation coverage climbing steadily, and an acid-yellow line for alert noise that spikes in the middle phase before falling as thresholds are tuned, illustrating a common and expected mid-rollout noise spike.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">THE EXPECTED MID-ROLLOUT NOISE SPIKE</text>
+
+  <line x1="180" y1="740" x2="180" y2="140" stroke="#f6f1e6" stroke-width="2"/>
+  <line x1="180" y1="740" x2="1450" y2="740" stroke="#f6f1e6" stroke-width="2"/>
+  <text x="1300" y="780" fill="#f6f1e6" font-family="monospace" font-size="14">time since rollout start</text>
+
+  <path d="M 180 700 C 500 620, 900 350, 1440 200" fill="none" stroke="#f6f1e6" stroke-width="4"/>
+  <text x="1100" y="260" fill="#f6f1e6" font-family="monospace" font-size="13">instrumentation coverage</text>
+
+  <path d="M 180 690 C 420 500, 620 300, 800 320 S 1100 550, 1440 650" fill="none" stroke="#f4d44d" stroke-width="4"/>
+  <text x="620" y="280" fill="#f4d44d" font-family="monospace" font-size="13">alert noise (spikes, then tuned down)</text>
+
+  <text x="800" y="850" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · rising noise mid-rollout is a tuning signal, not proof the rollout failed</text>
+</svg>

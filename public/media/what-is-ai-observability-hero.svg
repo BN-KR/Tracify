@@ -1,0 +1,35 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="waoHeroTitle waoHeroDesc">
+  <title id="waoHeroTitle">A black box AI system opened into three inspectable layers: inputs, execution, and outcome</title>
+  <desc id="waoHeroDesc">A black canvas shows a cream cube labeled BLACK BOX on the left with a question mark, an acid-yellow arrow pointing right toward three stacked cream panels labeled INPUTS, EXECUTION, OUTCOME, representing the shift from an opaque AI system to an observable one.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="70" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">FROM BLACK BOX TO EVIDENCE</text>
+
+  <g transform="translate(150,330)">
+    <rect x="0" y="0" width="280" height="240" fill="#f6f1e6"/>
+    <text x="140" y="110" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="64" font-weight="700">?</text>
+    <text x="140" y="200" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="18" font-weight="700">AI SYSTEM</text>
+  </g>
+
+  <path d="M470 450 L 700 450" stroke="#f4d44d" stroke-width="6"/>
+  <path d="M680 420 L 720 450 L 680 480" fill="none" stroke="#f4d44d" stroke-width="6"/>
+
+  <g transform="translate(760,220)">
+    <rect x="0" y="0" width="690" height="140" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+    <text x="30" y="55" fill="#f6f1e6" font-family="monospace" font-size="18" font-weight="700">INPUTS</text>
+    <text x="30" y="95" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.75">prompt, context, tools, retrieved data</text>
+  </g>
+
+  <g transform="translate(760,380)">
+    <rect x="0" y="0" width="690" height="140" fill="#f4d44d"/>
+    <text x="30" y="55" fill="#0a0a0a" font-family="monospace" font-size="18" font-weight="700">EXECUTION</text>
+    <text x="30" y="95" fill="#0a0a0a" font-family="monospace" font-size="14" opacity="0.8">model calls, tool calls, retries, decisions</text>
+  </g>
+
+  <g transform="translate(760,540)">
+    <rect x="0" y="0" width="690" height="140" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+    <text x="30" y="55" fill="#f6f1e6" font-family="monospace" font-size="18" font-weight="700">OUTCOME</text>
+    <text x="30" y="95" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.75">result, cost, latency, user effect</text>
+  </g>
+
+  <text x="800" y="830" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="16" opacity="0.6">OBSERVABILITY = THE ABILITY TO EXPLAIN THE MIDDLE LAYER</text>
+</svg>

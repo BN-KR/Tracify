@@ -1,0 +1,31 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="metCostTitle metCostDesc">
+  <title id="metCostTitle">A cost-per-quality-point scatter plot revealing a model swap that cut cost but also cut quality</title>
+  <desc id="metCostDesc">A black canvas shows a scatter plot with cost per run on the horizontal axis and quality score on the vertical axis, with two clusters of points labeled before model swap in cream, positioned higher and to the right, and after model swap in acid-yellow, positioned lower and to the left, illustrating a cost reduction that came with a quality trade-off that a cost-only metric would miss.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">COST SAVED, QUALITY LOST</text>
+
+  <line x1="200" y1="760" x2="200" y2="140" stroke="#f6f1e6" stroke-width="2"/>
+  <line x1="200" y1="760" x2="1450" y2="760" stroke="#f6f1e6" stroke-width="2"/>
+  <text x="1300" y="800" fill="#f6f1e6" font-family="monospace" font-size="14">cost per run</text>
+  <text x="90" y="150" fill="#f6f1e6" font-family="monospace" font-size="14">quality</text>
+
+  <g fill="#f6f1e6">
+    <circle cx="1050" cy="260" r="10"/>
+    <circle cx="1100" cy="290" r="10"/>
+    <circle cx="1000" cy="240" r="10"/>
+    <circle cx="1080" cy="310" r="10"/>
+    <circle cx="1120" cy="270" r="10"/>
+  </g>
+  <text x="1080" y="200" fill="#f6f1e6" font-family="monospace" font-size="13">before swap</text>
+
+  <g fill="#f4d44d">
+    <circle cx="480" cy="520" r="10"/>
+    <circle cx="520" cy="560" r="10"/>
+    <circle cx="450" cy="540" r="10"/>
+    <circle cx="500" cy="590" r="10"/>
+    <circle cx="540" cy="510" r="10"/>
+  </g>
+  <text x="500" y="640" fill="#f4d44d" font-family="monospace" font-size="13">after swap</text>
+
+  <text x="800" y="850" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · a cost dashboard alone would only show the good news half of this chart</text>
+</svg>

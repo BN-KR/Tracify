@@ -1,0 +1,38 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="toolsHeroTitle toolsHeroDesc">
+  <title id="toolsHeroTitle">A workbench of five labeled tool categories arranged around a central trace record</title>
+  <desc id="toolsHeroDesc">A black canvas shows a central cream card labeled TRACE RECORD surrounded by five acid-yellow tool tags: tracing SDK, evaluation harness, cost dashboard, alerting, and prompt registry, connected to the center by thin lines like a workbench layout.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="70" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">THE AI OBSERVABILITY TOOL STACK</text>
+
+  <rect x="620" y="360" width="360" height="180" fill="#f6f1e6"/>
+  <text x="800" y="440" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="20" font-weight="700">TRACE</text>
+  <text x="800" y="470" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="20" font-weight="700">RECORD</text>
+
+  <g font-family="monospace" font-size="15" font-weight="700" fill="#0a0a0a" text-anchor="middle">
+    <g>
+      <line x1="800" y1="360" x2="330" y2="180" stroke="#f6f1e6" stroke-width="1.5" opacity="0.5"/>
+      <rect x="180" y="130" width="300" height="80" fill="#f4d44d"/>
+      <text x="330" y="177">TRACING SDK</text>
+    </g>
+    <g>
+      <line x1="980" y1="380" x2="1350" y2="180" stroke="#f6f1e6" stroke-width="1.5" opacity="0.5"/>
+      <rect x="1150" y="130" width="300" height="80" fill="#f4d44d"/>
+      <text x="1300" y="177">EVAL HARNESS</text>
+    </g>
+    <g>
+      <line x1="640" y1="500" x2="330" y2="700" stroke="#f6f1e6" stroke-width="1.5" opacity="0.5"/>
+      <rect x="180" y="660" width="300" height="80" fill="#f4d44d"/>
+      <text x="330" y="707">COST DASHBOARD</text>
+    </g>
+    <g>
+      <line x1="960" y1="510" x2="1350" y2="700" stroke="#f6f1e6" stroke-width="1.5" opacity="0.5"/>
+      <rect x="1150" y="660" width="300" height="80" fill="#f4d44d"/>
+      <text x="1300" y="707">ALERTING</text>
+    </g>
+    <g>
+      <line x1="800" y1="540" x2="800" y2="800" stroke="#f6f1e6" stroke-width="1.5" opacity="0.5"/>
+      <rect x="650" y="800" width="300" height="80" fill="#f4d44d"/>
+      <text x="800" y="847">PROMPT REGISTRY</text>
+    </g>
+  </g>
+</svg>

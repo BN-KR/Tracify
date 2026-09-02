@@ -1,0 +1,35 @@
+<svg viewBox="0 0 1600 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="toolsOrderTitle toolsOrderDesc">
+  <title id="toolsOrderTitle">A four step build-out order for adopting AI observability tools</title>
+  <desc id="toolsOrderDesc">A black canvas shows four numbered acid-yellow tiles connected left to right by arrows, labeled INSTRUMENT, EVALUATE, ALERT, GOVERN, representing the recommended order for adopting an AI observability tool stack.</desc>
+  <rect width="1600" height="620" fill="#0a0a0a"/>
+  <text x="800" y="70" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="20" letter-spacing="2">ADOPTION ORDER, NOT A SHOPPING LIST</text>
+
+  <g font-family="monospace" font-size="18" font-weight="700" fill="#0a0a0a" text-anchor="middle">
+    <rect x="100" y="220" width="300" height="180" fill="#f4d44d"/>
+    <text x="250" y="300">1. INSTRUMENT</text>
+    <text x="250" y="330" font-size="12" font-weight="400">capture traces first</text>
+
+    <rect x="470" y="220" width="300" height="180" fill="#f4d44d"/>
+    <text x="620" y="300">2. EVALUATE</text>
+    <text x="620" y="330" font-size="12" font-weight="400">score outcome quality</text>
+
+    <rect x="840" y="220" width="300" height="180" fill="#f4d44d"/>
+    <text x="990" y="300">3. ALERT</text>
+    <text x="990" y="330" font-size="12" font-weight="400">route regressions to owners</text>
+
+    <rect x="1210" y="220" width="290" height="180" fill="#f4d44d"/>
+    <text x="1355" y="300">4. GOVERN</text>
+    <text x="1355" y="330" font-size="12" font-weight="400">retention, access, cost</text>
+  </g>
+
+  <g stroke="#f6f1e6" stroke-width="4" fill="none">
+    <path d="M400 310 L 470 310" marker-end="url(#arrow)"/>
+    <path d="M770 310 L 840 310" marker-end="url(#arrow)"/>
+    <path d="M1140 310 L 1210 310" marker-end="url(#arrow)"/>
+  </g>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#f6f1e6"/>
+    </marker>
+  </defs>
+</svg>

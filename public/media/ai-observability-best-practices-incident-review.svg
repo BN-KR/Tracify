@@ -1,0 +1,25 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bpIncTitle bpIncDesc">
+  <title id="bpIncTitle">A first-incident review checklist scoring whether the rollout caught it cleanly</title>
+  <desc id="bpIncDesc">A black canvas shows a vertical checklist of three questions in cream boxes: did the alert fire with lead time, did it carry sufficient evidence, did the named owner see it, each followed by a yes marked in acid-yellow, illustrating a structured post-incident review of the observability rollout itself.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">THE FIRST-INCIDENT REVIEW</text>
+
+  <g font-family="monospace" font-size="15" font-weight="700">
+    <rect x="200" y="140" width="900" height="90" fill="#f6f1e6"/>
+    <text x="230" y="192" fill="#0a0a0a">Did the alert fire with enough lead time to matter?</text>
+    <rect x="1140" y="140" width="140" height="90" fill="#f4d44d"/>
+    <text x="1210" y="192" text-anchor="middle" fill="#0a0a0a">YES</text>
+
+    <rect x="200" y="270" width="900" height="90" fill="#f6f1e6"/>
+    <text x="230" y="322" fill="#0a0a0a">Did it carry evidence sufficient to act without digging?</text>
+    <rect x="1140" y="270" width="140" height="90" fill="#f4d44d"/>
+    <text x="1210" y="322" text-anchor="middle" fill="#0a0a0a">YES</text>
+
+    <rect x="200" y="400" width="900" height="90" fill="#f6f1e6"/>
+    <text x="230" y="452" fill="#0a0a0a">Did the named owner actually see and act on it?</text>
+    <rect x="1140" y="400" width="140" height="90" fill="none" stroke="#e2543a" stroke-width="3"/>
+    <text x="1210" y="452" text-anchor="middle" fill="#e2543a">CHECK</text>
+  </g>
+
+  <text x="800" y="600" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · the first real incident is the most honest test the rollout will get</text>
+</svg>

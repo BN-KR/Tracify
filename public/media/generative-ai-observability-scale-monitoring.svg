@@ -1,0 +1,20 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="genScaleTitle genScaleDesc">
+  <title id="genScaleTitle">Sampling strategy shifting from full review to statistical sampling as generation volume grows</title>
+  <desc id="genScaleDesc">A black canvas shows a line chart with generation volume rising left to right on the x-axis and review coverage percentage on the y-axis, with a cream line starting near 100 percent full review at low volume and curving down to a smaller acid-yellow sampled percentage at high volume, annotated with a fixed absolute review count that stays constant.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">SAMPLING AT SCALE</text>
+
+  <line x1="180" y1="760" x2="180" y2="140" stroke="#f6f1e6" stroke-width="2"/>
+  <line x1="180" y1="760" x2="1450" y2="760" stroke="#f6f1e6" stroke-width="2"/>
+  <text x="80" y="150" fill="#f6f1e6" font-family="monospace" font-size="13">100%</text>
+  <text x="100" y="760" fill="#f6f1e6" font-family="monospace" font-size="13">0%</text>
+  <text x="1300" y="800" fill="#f6f1e6" font-family="monospace" font-size="14">generation volume</text>
+
+  <path d="M 180 160 C 400 200, 550 500, 900 650 S 1300 720, 1440 730" fill="none" stroke="#f4d44d" stroke-width="4"/>
+  <text x="1000" y="600" fill="#f4d44d" font-family="monospace" font-size="13">review coverage %</text>
+
+  <line x1="180" y1="700" x2="1440" y2="700" stroke="#f6f1e6" stroke-width="2" stroke-dasharray="8,8"/>
+  <text x="1250" y="690" fill="#f6f1e6" font-family="monospace" font-size="13">fixed absolute review count/day</text>
+
+  <text x="800" y="850" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · hold the absolute number of human-reviewed outputs steady, not the percentage</text>
+</svg>

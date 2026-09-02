@@ -1,0 +1,26 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bpPhaseTitle bpPhaseDesc">
+  <title id="bpPhaseTitle">Four rollout phases listed vertically with their exit criteria beside each</title>
+  <desc id="bpPhaseDesc">A black canvas shows four horizontal rows labeled pilot, expand, standardize, and govern, each with a short exit criterion listed beside it in acid-yellow text, illustrating that each phase requires a specific, checkable condition before the next phase begins.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">EACH PHASE HAS AN EXIT CRITERION</text>
+
+  <g font-family="monospace" font-size="15" font-weight="700">
+    <rect x="120" y="130" width="260" height="80" fill="#f6f1e6"/>
+    <text x="250" y="177" text-anchor="middle" fill="#0a0a0a">PILOT</text>
+    <text x="410" y="177" fill="#f4d44d" font-size="14">exit: proven value on one real workflow</text>
+
+    <rect x="120" y="260" width="260" height="80" fill="#f6f1e6"/>
+    <text x="250" y="307" text-anchor="middle" fill="#0a0a0a">EXPAND</text>
+    <text x="410" y="307" fill="#f4d44d" font-size="14">exit: alert precision above agreed bar</text>
+
+    <rect x="120" y="390" width="260" height="80" fill="#f4d44d"/>
+    <text x="250" y="437" text-anchor="middle" fill="#0a0a0a">STANDARDIZE</text>
+    <text x="410" y="437" fill="#f6f1e6" font-size="14">exit: new workflow onboards on shared schema</text>
+
+    <rect x="120" y="520" width="260" height="80" fill="#f4d44d"/>
+    <text x="250" y="567" text-anchor="middle" fill="#0a0a0a">GOVERN</text>
+    <text x="410" y="567" fill="#f6f1e6" font-size="14">exit: every workflow has a named owner</text>
+  </g>
+
+  <text x="800" y="700" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · a phase without a checkable exit criterion is a phase that never actually ends</text>
+</svg>

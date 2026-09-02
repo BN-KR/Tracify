@@ -1,0 +1,26 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="agRecTitle agRecDesc">
+  <title id="agRecTitle">Two divergence outcomes: a visible recovery decision versus a silent false assumption</title>
+  <desc id="agRecDesc">A black canvas splits into two columns: the left column in cream shows a divergence followed by an explicit re-plan decision box; the right column outlined in red shows the same divergence followed by a silent continuation with no recorded decision, illustrating that the absence of a visible recovery choice is the real defect.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">DIVERGENCE: TWO OUTCOMES</text>
+
+  <g font-family="monospace" font-size="14" font-weight="700" text-anchor="middle">
+    <text x="400" y="130" fill="#f6f1e6" font-size="16">VISIBLE RECOVERY</text>
+    <rect x="240" y="170" width="320" height="80" fill="#f6f1e6"/>
+    <text x="400" y="215" fill="#0a0a0a">DIVERGENCE DETECTED</text>
+    <line x1="400" y1="250" x2="400" y2="320" stroke="#f4d44d" stroke-width="4"/>
+    <rect x="240" y="320" width="320" height="90" fill="#f4d44d"/>
+    <text x="400" y="360" fill="#0a0a0a">RE-PLAN DECISION</text>
+    <text x="400" y="382" fill="#0a0a0a" font-size="12">recorded, with rationale</text>
+
+    <text x="1200" y="130" fill="#e2543a" font-size="16">SILENT CONTINUATION</text>
+    <rect x="1040" y="170" width="320" height="80" fill="none" stroke="#e2543a" stroke-width="3"/>
+    <text x="1200" y="215" fill="#e2543a">DIVERGENCE DETECTED</text>
+    <line x1="1200" y1="250" x2="1200" y2="320" stroke="#e2543a" stroke-width="4" stroke-dasharray="6,6"/>
+    <rect x="1040" y="320" width="320" height="90" fill="none" stroke="#e2543a" stroke-width="3"/>
+    <text x="1200" y="358" fill="#e2543a">NO DECISION RECORDED</text>
+    <text x="1200" y="382" fill="#f6f1e6" font-size="12">proceeds on stale assumption</text>
+  </g>
+
+  <text x="800" y="520" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · the divergence itself is normal; a missing recovery decision is the alertable defect</text>
+</svg>
