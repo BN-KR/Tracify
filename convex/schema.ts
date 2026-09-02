@@ -567,4 +567,34 @@ export default defineSchema({
     .index("by_projectId", ["projectId"])
     .index("by_projectId_and_traceId", ["projectId", "traceId"])
     .index("by_dedupeKey", ["dedupeKey"]),
+
+  leadSubmissions: defineTable({
+    name: v.string(),
+    email: v.string(),
+    company: v.optional(v.string()),
+    intent: v.string(),
+    role: v.optional(v.string()),
+    useCase: v.optional(v.string()),
+    stack: v.optional(v.string()),
+    message: v.optional(v.string()),
+    preferredTime: v.optional(v.string()),
+    marketingConsent: v.boolean(),
+    sourcePath: v.string(),
+    campaign: v.optional(v.string()),
+    status: v.union(v.literal("new"), v.literal("contacted"), v.literal("qualified"), v.literal("converted"), v.literal("closed")),
+    assignedTo: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_createdAt", ["createdAt"])
+    .index("by_status", ["status"])
+    .index("by_intent", ["intent"])
+    .index("by_email", ["email"])
+    .index("by_company", ["company"]),
+
+  leadNotes: defineTable({
+    leadId: v.id("leadSubmissions"),
+    author: v.string(),
+    body: v.string(),
+    createdAt: v.number(),
+  }).index("by_leadId", ["leadId"]),
 });

@@ -21,6 +21,7 @@ import type * as evaluationEngine from "../evaluationEngine.js";
 import type * as evaluators from "../evaluators.js";
 import type * as experiments from "../experiments.js";
 import type * as http from "../http.js";
+import type * as leads from "../leads.js";
 import type * as projects from "../projects.js";
 import type * as prompts from "../prompts.js";
 import type * as resilience from "../resilience.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   evaluators: typeof evaluators;
   experiments: typeof experiments;
   http: typeof http;
+  leads: typeof leads;
   projects: typeof projects;
   prompts: typeof prompts;
   resilience: typeof resilience;
