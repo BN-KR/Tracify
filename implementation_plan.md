@@ -8,7 +8,7 @@
 6. [pending owner] Create and test the live one-time $1,000 Stripe Payment Link in the intended account; store the URL privately.
 7. [pending owner] Qualify the remaining account gap, personally send 10 initial messages per weekday plus follow-ups, run discovery, send same-day offers, collect payment before evidence, and deliver one review using the operating kit.
 8. [completed] Publish draft PR #75 from `codex/first-customer-review`.
-9. [pending] Inspect PR #75 hosted checks and merge after review; do not deploy this branch as production.
+9. [completed] Inspect PR #75 hosted checks and squash-merge it into `main` as `1cc8f88`. Record the unrelated comparison-blog framework failure separately and do not deploy as part of this merge.
 
 # Cursor removal and fit verification — 2026-08-24
 
