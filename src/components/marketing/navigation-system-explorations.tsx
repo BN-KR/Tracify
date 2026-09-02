@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Future19Pricing } from "@/components/marketing/future19-pricing";
 import { ThirdPartyLogo } from "@/components/third-party-logo";
+import { LandingSampleRun } from "@/components/marketing/landing-sample-run";
 
 const integrationMarks = [
   { name: "OpenAI", mark: "✳", className: "font-semibold tracking-[-0.05em]" },
@@ -136,50 +137,7 @@ export function NavigationSystemExplorations({
                 </Link>
               </div>
             </div>
-            <div className="bg-black p-6 text-white md:p-8">
-              <div className="flex items-start justify-between gap-5 border-b border-white/15 pb-6">
-                <div>
-                  <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/62">
-                    Sample run / illustrative evidence
-                  </p>
-                  <p className="mt-3 font-mono text-sm">support-agent / v2.4</p>
-                </div>
-                <span className="border border-[#f4d44d] px-2 py-1 font-mono text-[8px] uppercase tracking-[0.12em] text-[#f4d44d]">
-                  Review
-                </span>
-              </div>
-              <div className="mt-7 border border-white/15">
-                {[
-                  ["12:41:08.120", "MODEL", "response drafted", false],
-                  ["12:41:08.604", "TOOL", "knowledge.search → 0 results", true],
-                  ["12:41:09.011", "RETRY", "fallback model invoked", false],
-                  ["12:41:09.842", "EVAL", "groundedness → 0.42", false],
-                ].map(([time, kind, detail, selected]) => (
-                  <div
-                    key={time}
-                    className={`grid grid-cols-[auto_auto_1fr] gap-3 border-b border-white/10 px-4 py-4 font-mono text-[9px] last:border-b-0 ${selected ? "bg-[#f4d44d] text-black" : "text-white/72"}`}
-                  >
-                    <span className="text-[8px] opacity-60">{time}</span>
-                    <span className="text-[8px] opacity-60">{kind}</span>
-                    <span>{detail}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-7 flex items-center justify-between border-t border-white/15 pt-6">
-                <div>
-                  <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/55">
-                    Root cause
-                  </p>
-                  <p className="mt-2 text-sm">Empty retrieval reached fallback.</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-[#f4d44d]">
-                    Release decision
-                  </p>
-                  <p className="mt-2 font-pixel text-3xl tracking-[-0.05em]">Hold</p>
-                </div>
-              </div>
-            </div>
+            <LandingSampleRun />
           </div>
         </div>
       </section>
