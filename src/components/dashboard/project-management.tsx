@@ -30,9 +30,9 @@ const isPostHogConfigured = Boolean(
 
 export function ProjectManagement({ projectId }: { projectId: string }) {
   const router = useRouter();
-  const summary = useQuery(api.projects.getProjectManagementSummary, {
+  const summary = useQuery(api.projects.getProjectManagementSummary, projectId ? {
     projectId: projectId as Id<"projects">,
-  });
+  } : "skip");
   const deleteProject = useMutation(api.projects.deleteProject);
   const [confirmationName, setConfirmationName] = useState("");
   const [confirmationWord, setConfirmationWord] = useState("");
