@@ -1,0 +1,28 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="cptTitle cptDesc">
+  <title id="cptTitle">A cost waterfall growing from token price to true cost per successful task</title>
+  <desc id="cptDesc">A black canvas shows a stepped waterfall bar chart with five bars of increasing height, labeled token cost, tool cost, retry overhead, escalation cost, and true cost per successful task, the final bar roughly three times the height of the first, making a hidden-cost gap visible before any text is read.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI AGENT COST PER TASK</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">the cost waterfall</text>
+
+  <g font-family="monospace" font-size="12" fill="#f6f1e6">
+    <rect x="180" y="620" width="180" height="80" fill="#f6f1e6" fill-opacity="0.5"/>
+    <text x="270" y="740" text-anchor="middle" opacity="0.75">TOKEN</text>
+
+    <rect x="400" y="560" width="180" height="140" fill="#f6f1e6" fill-opacity="0.5"/>
+    <text x="490" y="740" text-anchor="middle" opacity="0.75">+ TOOL</text>
+
+    <rect x="620" y="470" width="180" height="230" fill="#f6f1e6" fill-opacity="0.5"/>
+    <text x="710" y="740" text-anchor="middle" opacity="0.75">+ RETRY</text>
+
+    <rect x="840" y="350" width="180" height="350" fill="#f6f1e6" fill-opacity="0.5"/>
+    <text x="930" y="740" text-anchor="middle" opacity="0.75">+ ESCALATION</text>
+
+    <rect x="1060" y="230" width="220" height="470" fill="#f4d44d" fill-opacity="0.9"/>
+    <text x="1170" y="740" text-anchor="middle" fill="#f4d44d" font-weight="bold">TRUE COST</text>
+  </g>
+
+  <line x1="180" y1="700" x2="1280" y2="700" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="1.5"/>
+
+  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">$0.02 per model call vs. $0.31 per successful task — the gap is real</text>
+</svg>

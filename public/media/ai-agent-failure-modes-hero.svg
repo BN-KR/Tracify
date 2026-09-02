@@ -1,0 +1,57 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="famTitle famDesc">
+  <title id="famTitle">One failed span buried inside a normal-looking agent trace</title>
+  <desc id="famDesc">A black canvas shows a vertical waterfall of eight labeled trace spans, evenly spaced and identically styled except for one span highlighted in acid yellow with a small annotation callout pointing at it, illustrating that a failure can look structurally identical to healthy spans.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI AGENT FAILURE TAXONOMY</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">agent.run / trace waterfall</text>
+
+  <g font-family="monospace" font-size="13">
+    <!-- 8 spans -->
+    <g>
+      <rect x="140" y="180" width="900" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.35"/>
+      <text x="160" y="208" fill="#f6f1e6" opacity="0.75">agent.run</text>
+      <text x="1000" y="208" fill="#f6f1e6" opacity="0.5">2.84s</text>
+    </g>
+    <g>
+      <rect x="180" y="240" width="760" height="42" fill="none" stroke="#f6f1e6" stroke-opacity="0.3"/>
+      <text x="200" y="266" fill="#f6f1e6" opacity="0.65">llm.plan</text>
+      <text x="900" y="266" fill="#f6f1e6" opacity="0.45">640ms</text>
+    </g>
+    <g>
+      <rect x="220" y="296" width="680" height="42" fill="none" stroke="#f6f1e6" stroke-opacity="0.3"/>
+      <text x="240" y="322" fill="#f6f1e6" opacity="0.65">tool.search_kb</text>
+      <text x="860" y="322" fill="#f6f1e6" opacity="0.45">1.21s</text>
+    </g>
+    <!-- highlighted failing span -->
+    <g>
+      <rect x="260" y="352" width="600" height="52" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-width="2"/>
+      <text x="280" y="384" fill="#f4d44d" font-weight="bold">tool.search_kb.result</text>
+      <text x="760" y="384" fill="#f4d44d">stale · 90ms</text>
+    </g>
+    <g>
+      <rect x="220" y="418" width="680" height="42" fill="none" stroke="#f6f1e6" stroke-opacity="0.3"/>
+      <text x="240" y="444" fill="#f6f1e6" opacity="0.65">llm.answer</text>
+      <text x="860" y="444" fill="#f6f1e6" opacity="0.45">810ms</text>
+    </g>
+    <g>
+      <rect x="180" y="474" width="760" height="42" fill="none" stroke="#f6f1e6" stroke-opacity="0.3"/>
+      <text x="200" y="500" fill="#f6f1e6" opacity="0.65">output.format_check</text>
+      <text x="900" y="500" fill="#f6f1e6" opacity="0.45">12ms</text>
+    </g>
+    <g>
+      <rect x="140" y="530" width="900" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.35"/>
+      <text x="160" y="558" fill="#f6f1e6" opacity="0.75">agent.run.complete</text>
+      <text x="1000" y="558" fill="#f6f1e6" opacity="0.5">200 OK</text>
+    </g>
+  </g>
+
+  <!-- annotation callout -->
+  <line x1="920" y1="378" x2="1080" y2="330" stroke="#f4d44d" stroke-width="1.5"/>
+  <circle cx="920" cy="378" r="4" fill="#f4d44d"/>
+  <rect x="1080" y="260" width="380" height="90" fill="#0a0a0a" stroke="#f4d44d" stroke-width="1.5"/>
+  <text x="1102" y="288" fill="#f4d44d" font-family="monospace" font-size="13" font-weight="bold">ONE FAILURE.</text>
+  <text x="1102" y="310" fill="#f6f1e6" font-family="monospace" font-size="12">buried inside a run that looks</text>
+  <text x="1102" y="328" fill="#f6f1e6" font-family="monospace" font-size="12">otherwise completely normal.</text>
+
+  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">12 named failure types · trace evidence · owning team</text>
+</svg>

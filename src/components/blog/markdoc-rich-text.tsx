@@ -4,9 +4,17 @@ import React from "react";
 import { BlogCodeBlock } from "@/components/blog/blog-code-block";
 import { BlogImage } from "@/components/blog/blog-image-lightbox";
 import { ContextBudgetCalculator } from "@/components/blog/context-budget-calculator";
+import { CostPerTaskCalculator } from "@/components/blog/cost-per-task-calculator";
+import { EvalSourceExplorer, EvalSourceOption } from "@/components/blog/eval-source-explorer";
 import { FailureModeExplorer, FailureModeOption } from "@/components/blog/failure-mode-explorer";
+import { LayerScenario, LayerScenarioQuiz } from "@/components/blog/layer-scenario-quiz";
+import { ReleaseReadinessChecklist } from "@/components/blog/release-readiness-checklist";
 import { RolloutStrategyPicker } from "@/components/blog/rollout-strategy-picker";
+import { RubricSelector, RubricSelectorOption } from "@/components/blog/rubric-selector";
+import { SloDesignWorksheet } from "@/components/blog/slo-design-worksheet";
 import { TopologyPicker } from "@/components/blog/topology-picker";
+import { ToolPermissionMatrix } from "@/components/blog/tool-permission-matrix";
+import { TraceFieldExplorer } from "@/components/blog/trace-field-explorer";
 import { slugifyBlogHeading, type BlogPost } from "@/lib/markdoc-blog";
 
 function textFromChildren(value: React.ReactNode): string {
@@ -99,6 +107,17 @@ export function MarkdocRichText({ content }: Pick<BlogPost, "content">) {
           "failure-mode-explorer": FailureModeExplorer,
           "failure-mode-option": FailureModeOption,
           "topology-picker": TopologyPicker,
+          "release-readiness-checklist": ReleaseReadinessChecklist,
+          "eval-source-explorer": EvalSourceExplorer,
+          "eval-source-option": EvalSourceOption,
+          "trace-field-explorer": TraceFieldExplorer,
+          "rubric-selector": RubricSelector,
+          "rubric-selector-option": RubricSelectorOption,
+          "cost-per-task-calculator": CostPerTaskCalculator,
+          "tool-permission-matrix": ToolPermissionMatrix,
+          "slo-design-worksheet": SloDesignWorksheet,
+          "layer-scenario-quiz": LayerScenarioQuiz,
+          "layer-scenario": LayerScenario,
           img: BlogImage,
           h2: BlogH2,
           h3: BlogH3,

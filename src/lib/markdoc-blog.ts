@@ -72,6 +72,94 @@ export const blogMarkdocConfig = {
       selfClosing: true,
       attributes: {},
     },
+    "release-readiness-checklist": {
+      render: "release-readiness-checklist",
+      selfClosing: true,
+      attributes: {
+        title: { type: String, required: true },
+      },
+    },
+    "eval-source-explorer": {
+      render: "eval-source-explorer",
+      attributes: {
+        title: { type: String, required: true },
+        intro: { type: String, required: false },
+      },
+    },
+    "tool-permission-matrix": {
+      render: "tool-permission-matrix",
+      selfClosing: true,
+      attributes: {},
+    },
+    "eval-source-option": {
+      render: "eval-source-option",
+      selfClosing: true,
+      attributes: {
+        label: { type: String, required: true },
+        extracted: { type: String, required: true },
+        redacted: { type: String, required: true },
+        category: { type: String, required: false },
+      },
+    },
+    "trace-field-explorer": {
+      render: "trace-field-explorer",
+      selfClosing: true,
+      attributes: {
+        title: { type: String, required: true },
+        intro: { type: String, required: false },
+      },
+    },
+    "rubric-selector": {
+      render: "rubric-selector",
+      attributes: {
+        title: { type: String, required: true },
+        intro: { type: String, required: false },
+      },
+    },
+    "rubric-selector-option": {
+      render: "rubric-selector-option",
+      selfClosing: true,
+      attributes: {
+        label: { type: String, required: true },
+        layer: { type: String, required: true },
+        fixedLogic: { type: String, required: true },
+        subjectiveJudgment: { type: String, required: true },
+        reason: { type: String, required: true },
+      },
+    },
+    "cost-per-task-calculator": {
+      render: "cost-per-task-calculator",
+      attributes: {
+        title: { type: String, required: true },
+        modelCostPerRun: { type: Number, required: true },
+        toolCostPerRun: { type: Number, required: true },
+        retryRate: { type: Number, required: true },
+        successRate: { type: Number, required: true },
+      },
+    },
+    "slo-design-worksheet": {
+      render: "slo-design-worksheet",
+      selfClosing: true,
+      attributes: {
+        title: { type: String, required: true },
+      },
+    },
+    "layer-scenario-quiz": {
+      render: "layer-scenario-quiz",
+      attributes: {
+        title: { type: String, required: true },
+        intro: { type: String, required: false },
+      },
+    },
+    "layer-scenario": {
+      render: "layer-scenario",
+      selfClosing: true,
+      attributes: {
+        scenario: { type: String, required: true },
+        answer: { type: String, required: true, matches: ["apm", "ai-observability", "both"] },
+        reason: { type: String, required: true },
+      },
+    },
   },
 };
 

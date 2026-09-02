@@ -1,0 +1,28 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="tsTitle tsDesc">
+  <title id="tsTitle">A trace document unfolding from run to trace to span to event</title>
+  <desc id="tsDesc">A black canvas shows four nested boxes labeled RUN, TRACE, SPAN, and EVENT, each progressively smaller and offset to the right, each labeled with two or three example fields, illustrating an exploded view of one trace document's data model.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI AGENT TRACE SCHEMA</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">run / trace / span / event</text>
+
+  <g font-family="monospace" font-size="14">
+    <rect x="140" y="180" width="1180" height="600" fill="none" stroke="#f6f1e6" stroke-opacity="0.35" stroke-width="2"/>
+    <text x="170" y="220" fill="#f6f1e6" opacity="0.85">RUN</text>
+    <text x="170" y="244" fill="#f6f1e6" opacity="0.45" font-size="12">run_id · goal · outcome</text>
+
+    <rect x="240" y="270" width="980" height="470" fill="none" stroke="#f6f1e6" stroke-opacity="0.45" stroke-width="2"/>
+    <text x="270" y="310" fill="#f6f1e6" opacity="0.85">TRACE</text>
+    <text x="270" y="334" fill="#f6f1e6" opacity="0.45" font-size="12">trace_id · start · end · status</text>
+
+    <rect x="340" y="360" width="780" height="330" fill="none" stroke="#f4d44d" stroke-opacity="0.6" stroke-width="2"/>
+    <text x="370" y="400" fill="#f4d44d" opacity="0.9">SPAN</text>
+    <text x="370" y="424" fill="#f4d44d" opacity="0.55" font-size="12">span_id · type · input · output · status</text>
+
+    <rect x="440" y="450" width="560" height="190" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-width="2"/>
+    <text x="470" y="490" fill="#f4d44d" font-weight="bold">EVENT</text>
+    <text x="470" y="514" fill="#f4d44d" opacity="0.75" font-size="12">event_id · type · timestamp</text>
+    <text x="470" y="534" fill="#f4d44d" opacity="0.55" font-size="12">e.g. retry_attempted</text>
+  </g>
+
+  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">one schema, three uses — debugging, evaluation, cost analysis</text>
+</svg>
