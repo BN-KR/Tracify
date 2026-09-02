@@ -5,8 +5,6 @@ import { useConvexAuth, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 
 import { api } from "convex/_generated/api";
-import { NoProjectState } from "@/components/dashboard/no-project-state";
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 
 const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
@@ -53,20 +51,15 @@ export function ProjectRouteGate({
   }
 
   if (routeState.status === "no_projects") {
-    return <NoProjectSurface surface={projectId} />;
+    // A missing project is a valid read-only dashboard context. The route
+    // components keep their normal page shell and render their own empty
+    // states; only their write actions should be disabled.
+    return <>{children}</>;
   }
 
   if (routeState.status !== "ready") {
-    return <NoProjectState title="Project unavailable." description="This project does not exist or you do not have access to it. Choose another project or return to the dashboard." />;
+    return <>{children}</>;
   }
 
   return <>{children}</>;
-}
-
-function NoProjectSurface({ surface }: { surface: string }) {
-  const pages: Record<string, { title: string; description: string; content: React.ReactNode }> = {
-  };
-  const page = pages[surface];
-  if (!page) return <NoProjectState title="No project selected" description="This view is ready for read-only use. Select a project to load its data." />;
-  return <div className="flex flex-col gap-6"><DashboardTopbar title={page.title} description={page.description} /><div className="px-6 pb-10">{page.content}</div></div>;
 }
