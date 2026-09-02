@@ -1,3 +1,15 @@
+# First-customer execution — 2026-09-02
+
+1. [completed] Make the offer sellable: qualification-only contact CTA, seeded-demo failure CTA, valid SDK quickstarts, first-party documentation link, and no inactive connection button.
+2. [completed] Make the review deliverable: customer scope, report template, evidence boundary, retention/deletion record, discovery/close scripts, follow-up cadence, demo script, and objection taxonomy.
+3. [completed] Build the editable execution workbook from current public sources with 50 candidate accounts, 100 contact slots, founder/technical-owner profiles where public, outreach drafts, daily funnel formulas, and stop rules.
+4. [completed] Apply an evidence threshold to prospect research: 15 accounts are Qualified by public filters, 28 remain Watch, and 7 are Disqualified. Do not inflate the qualified count or infer incidents/frameworks that are not public.
+5. [completed] Verify focused lint, both local SDK examples, public route status, the email actions, the seeded demo, desktop/mobile layout, and unchanged $19/$39 pricing. Record the unrelated existing production TypeScript blocker separately.
+6. [pending owner] Create and test the live one-time $1,000 Stripe Payment Link in the intended account; store the URL privately.
+7. [pending owner] Qualify the remaining account gap, personally send 10 initial messages per weekday plus follow-ups, run discovery, send same-day offers, collect payment before evidence, and deliver one review using the operating kit.
+8. [completed] Publish draft PR #75 from `codex/first-customer-review`.
+9. [pending] Inspect PR #75 hosted checks and merge after review; do not deploy this branch as production.
+
 # Cursor removal and fit verification — 2026-08-24
 
 - [completed] Remove the shared cursor component, scene cursor paths, click timing, and cursor CSS.

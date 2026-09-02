@@ -135,11 +135,11 @@ function Overview() {
               Latest traces
             </p>
             <h2 className="mt-2 text-xl text-white">
-              What happened in production
+              What a production trace could show
             </h2>
           </div>
           <span className="font-mono text-[10px] uppercase text-zinc-500">
-            live sample
+            seeded sample
           </span>
         </div>
         <div className="mt-5 space-y-2">
@@ -183,6 +183,24 @@ function Overview() {
               </div>
             </div>
           ))}
+        </div>
+        <div className="mt-5 flex flex-col gap-4 border border-[#f4d44d]/50 bg-[#f4d44d]/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[#f4d44d]">
+              Have a real failed run?
+            </p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-300">
+              Bring the symptom and your stack to a free 20-minute fit call.
+              We will confirm whether a sanitized staging investigation is
+              appropriate.
+            </p>
+          </div>
+          <Link
+            href="mailto:hello@tracify.tech?subject=Agent%20Failure%20Fit%20Call"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 border border-[#f4d44d] px-4 font-mono text-[10px] uppercase tracking-widest text-[#f4d44d] transition-colors hover:bg-[#f4d44d] hover:text-black"
+          >
+            Book fit call <ArrowRight className="size-4" />
+          </Link>
         </div>
       </section>
     </div>
