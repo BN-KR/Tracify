@@ -4,7 +4,7 @@ slug: ai-agent-trace-schema
 excerpt: A practical run/trace/span/event data model for AI agents, with the required and optional fields that make one schema support debugging, evaluation, and cost analysis at once.
 publishedAt: 2026-09-03T09:00:00.000Z
 author: Tracify Team
-draft: true
+draft: false
 categories:
   - engineering
 tags:
@@ -78,6 +78,8 @@ The core claim of this article is that the same span-level fields, captured once
 - **Cost analysis** asks: what did this run cost, and where did the money go? It needs per-span cost, token counts, and — critically — the retry and failure fields, because a retried or failed span still costs money without producing a successful outcome.
 
 None of these three jobs need their own schema. They need three different *views* into fields that were already captured because they were cheap to capture at call time and expensive to reconstruct after the fact.
+
+![A black canvas diagram showing a small set of trace fields on the left branching into three labeled outcome lanes on the right — debug, evaluate, and cost](/media/ai-agent-trace-schema-lanes.svg)
 
 ## Model-call-specific fields
 
@@ -165,7 +167,7 @@ The fields above make a single span legible on its own. This section covers the 
 
 Retention is a related but distinct decision, and there's no universal answer to how long traces should be kept — it depends on your debugging window, storage cost, and whatever data-handling policy your organization or regulatory environment requires. A practical starting point is to set two windows deliberately rather than by default: a short, full-fidelity window (days to a few weeks) where every field including redacted-but-recoverable content is available for active debugging, and a longer, aggregate-only window where individual traces are dropped but the summary statistics they fed into (cost totals, evaluation scores, error rates) are retained. Treat both windows as decisions to write down and revisit, not defaults to leave unexamined.
 
-> **Boundary note:** None of this is legal or compliance advice. If your traces touch regulated data — health records, payment details, data covered by a specific privacy regulation — involve your own legal or privacy function in setting the actual redaction rules and retention windows. This section describes an engineering starting practice, not a compliance guarantee.
+> **Note:** None of this is legal or compliance advice. If your traces touch regulated data — health records, payment details, data covered by a specific privacy regulation — involve your own legal or privacy function in setting the actual redaction rules and retention windows. This section describes an engineering starting practice, not a compliance guarantee.
 
 ## An illustrative trace schema (JSON)
 

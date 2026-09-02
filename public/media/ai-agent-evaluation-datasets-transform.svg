@@ -1,0 +1,28 @@
+<svg viewBox="0 0 1600 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="edTransTitle edTransDesc">
+  <title id="edTransTitle">A raw trace transformed into a sanitized, categorized test case</title>
+  <desc id="edTransDesc">A black canvas showing a raw trace excerpt on the left with a customer name and phone number visible, an arrow pointing right, and a cleaned test-case object on the right with those fields replaced by redaction markers and a category label added.</desc>
+  <rect width="1600" height="520" fill="#0a0a0a"/>
+  <g font-family="monospace" font-size="13">
+    <text x="60" y="50" fill="#f4d44d" font-size="16">RAW TRACE → TEST CASE</text>
+
+    <rect x="60" y="90" width="620" height="320" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="80" y="120" fill="#f6f1e6" opacity="0.55">raw trace</text>
+    <text x="80" y="160" fill="#f6f1e6">caller: "Jane Whitfield"</text>
+    <text x="80" y="190" fill="#f6f1e6">phone: "555-0142"</text>
+    <text x="80" y="220" fill="#f6f1e6">tool_call: lookup_order(id=48213)</text>
+    <text x="80" y="250" fill="#e06a5a">tool_result: 500 error</text>
+    <text x="80" y="290" fill="#f6f1e6" opacity="0.7">final_output: "I can't find that order."</text>
+
+    <path d="M 700 250 L 900 250" stroke="#f4d44d" stroke-width="2"/>
+    <polygon points="900,250 880,240 880,260" fill="#f4d44d"/>
+
+    <rect x="920" y="90" width="620" height="320" fill="#f4d44d" fill-opacity="0.08" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="940" y="120" fill="#f4d44d" opacity="0.85">sanitized test case</text>
+    <text x="940" y="160" fill="#f6f1e6">caller: [REDACTED]</text>
+    <text x="940" y="190" fill="#f6f1e6">phone: [REDACTED]</text>
+    <text x="940" y="220" fill="#f6f1e6">tool_call: lookup_order(id=[ID])</text>
+    <text x="940" y="250" fill="#f4d44d">category: tool-call-error</text>
+    <text x="940" y="290" fill="#f6f1e6" opacity="0.7">expected: graceful retry, not a dead end</text>
+  </g>
+  <text x="60" y="470" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">sourced from a real failure, safe to store, ready to score against</text>
+</svg>

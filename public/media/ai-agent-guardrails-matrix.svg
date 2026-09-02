@@ -1,0 +1,38 @@
+<svg viewBox="0 0 1600 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="grMatrixTitle grMatrixDesc">
+  <title id="grMatrixTitle">Refund tool permission matrix by risk tier and role</title>
+  <desc id="grMatrixDesc">A black canvas grid with three role columns — end user, support agent, admin — against three risk tiers of a refund tool, each cell labeled auto-allow, requires approval, or blocked, illustrating that permission decisions follow from risk times role.</desc>
+  <rect width="1600" height="560" fill="#0a0a0a"/>
+  <g font-family="monospace" font-size="13" fill="#f6f1e6">
+    <text x="60" y="50" fill="#f4d44d" font-size="16">TOOL-PERMISSION MATRIX: REFUND TOOL</text>
+    <text x="420" y="100" opacity="0.6">END USER</text>
+    <text x="700" y="100" opacity="0.6">SUPPORT AGENT</text>
+    <text x="1020" y="100" opacity="0.6">ADMIN</text>
+
+    <text x="60" y="160" opacity="0.75">UNDER $50</text>
+    <text x="60" y="230" opacity="0.75">$50–$500</text>
+    <text x="60" y="300" opacity="0.75">OVER $500</text>
+  </g>
+  <g font-family="monospace" font-size="13">
+    <rect x="360" y="130" width="200" height="46" fill="none" stroke="#7fbf7f" stroke-width="1.5"/>
+    <text x="380" y="160" fill="#7fbf7f">blocked</text>
+    <rect x="640" y="130" width="240" height="46" fill="#7fbf7f" fill-opacity="0.15" stroke="#7fbf7f" stroke-width="1.5"/>
+    <text x="660" y="160" fill="#7fbf7f">auto-allow</text>
+    <rect x="960" y="130" width="200" height="46" fill="#7fbf7f" fill-opacity="0.15" stroke="#7fbf7f" stroke-width="1.5"/>
+    <text x="980" y="160" fill="#7fbf7f">auto-allow</text>
+
+    <rect x="360" y="200" width="200" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="380" y="230" opacity="0.6">blocked</text>
+    <rect x="640" y="200" width="240" height="46" fill="#f4d44d" fill-opacity="0.15" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="660" y="230" fill="#f4d44d">requires approval</text>
+    <rect x="960" y="200" width="200" height="46" fill="#7fbf7f" fill-opacity="0.15" stroke="#7fbf7f" stroke-width="1.5"/>
+    <text x="980" y="230" fill="#7fbf7f">auto-allow</text>
+
+    <rect x="360" y="270" width="200" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="380" y="300" opacity="0.6">blocked</text>
+    <rect x="640" y="270" width="240" height="46" fill="none" stroke="#e06a5a" stroke-width="1.5"/>
+    <text x="660" y="300" fill="#e06a5a">blocked</text>
+    <rect x="960" y="270" width="200" height="46" fill="#f4d44d" fill-opacity="0.15" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="980" y="300" fill="#f4d44d">requires approval</text>
+  </g>
+  <text x="60" y="450" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the incident in this article happened in the cell that was never filled in</text>
+</svg>

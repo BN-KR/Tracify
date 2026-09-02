@@ -1,0 +1,21 @@
+<svg viewBox="0 0 1600 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="apmArchTitle apmArchDesc">
+  <title id="apmArchTitle">One request, one shared trace ID, two instrumentation layers</title>
+  <desc id="apmArchDesc">A black canvas showing a single request path as a vertical line through a lower APM-instrumented band and an upper AI-observability-instrumented band, with a shared trace ID label connecting one span in each band, showing both layers observing the same request.</desc>
+  <rect width="1600" height="520" fill="#0a0a0a"/>
+  <g font-family="monospace" font-size="13" fill="#f6f1e6">
+    <text x="60" y="50" fill="#f4d44d" font-size="16">SHARED TRACE ID, TWO LAYERS</text>
+
+    <rect x="200" y="280" width="1200" height="140" fill="#f6f1e6" fill-opacity="0.06" stroke="#f6f1e6" stroke-opacity="0.5"/>
+    <text x="220" y="310" opacity="0.75">APM SPAN</text>
+    <text x="220" y="340" opacity="0.5">http.request · 214ms · 200 OK</text>
+
+    <rect x="200" y="90" width="1200" height="140" fill="#f4d44d" fill-opacity="0.08" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="220" y="120" fill="#f4d44d">AI OBSERVABILITY SPAN</text>
+    <text x="220" y="150" fill="#f4d44d" opacity="0.8">agent.answer · correctness: unscored</text>
+
+    <line x1="800" y1="90" x2="800" y2="420" stroke="#f6f1e6" stroke-width="1.5" stroke-dasharray="3 6"/>
+    <rect x="700" y="230" width="200" height="34" fill="#0a0a0a" stroke="#f6f1e6"/>
+    <text x="800" y="253" text-anchor="middle" font-size="12">trace_id: 8f21a</text>
+  </g>
+  <text x="60" y="470" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the request is healthy in the lower band and unverified in the upper one — at the same instant</text>
+</svg>

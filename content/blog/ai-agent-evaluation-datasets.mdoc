@@ -4,7 +4,7 @@ slug: ai-agent-evaluation-datasets
 excerpt: A five-signal method for sourcing AI agent evaluation datasets from production traces, plus a test-case schema, a sanitization checklist, and a worked before/after example.
 publishedAt: 2026-09-03T12:00:00.000Z
 author: Tracify Team
-draft: true
+draft: false
 categories:
   - evaluation
 tags:
@@ -84,6 +84,8 @@ Any run where a tool call returned an error, an unexpected shape, or was invoked
 
 Tool-call errors also tend to cluster around integration changes — an API that changed its response shape, a rate limit that started triggering, a parameter that became required. A dataset with good tool-error coverage catches exactly the kind of regression described in this article's opening scenario.
 
+> **Trade-off:** Sourcing every case from failure signals produces a dataset that's excellent at catching regressions and poor at telling you whether ordinary traffic is still healthy. A dataset skewed entirely toward failure cases can pass every regression check while a slow, non-failing quality drift goes completely undetected — which is exactly what random sampling below is for.
+
 ### Representative random sampling
 
 The first four signals are all failure-seeking by design, which means a dataset built only from them will overrepresent failure and underrepresent everything that's working normally. Random sampling — pulling a fixed percentage of unflagged, ordinary runs on a regular cadence — keeps the dataset honest about what typical traffic actually looks like, and gives you a baseline to detect regressions in behavior that hasn't failed yet but has started to drift.
@@ -122,6 +124,8 @@ A working sanitization checklist before a case is marked `sanitized`:
 - [ ] Cases that can't be safely sanitized without destroying the failure signal are rebuilt as a synthetic case instead of stored raw.
 
 That last point matters: if sanitizing a case would strip out the exact detail that made it fail, don't force it into the dataset raw. Rebuild the same failure shape with fabricated details instead — you lose the case's status as "verified real" but keep the coverage, and mark `sanitization_status` as `synthetic` so nobody mistakes it for a cleared production case later.
+
+![A black canvas showing a raw trace excerpt on the left with a customer name and phone number visible, an arrow pointing right, and a cleaned test-case object on the right with those fields redacted and a category label added](/media/ai-agent-evaluation-datasets-transform.svg)
 
 {% editorial-panel eyebrow="Boundary" title="Sanitization is a practice, not a certification." body="Nothing in this checklist constitutes legal advice or a compliance guarantee. What counts as sensitive, how long a sanitized case can be retained, and whether it needs further review varies by jurisdiction, industry, and your own data agreements. Treat this checklist as a starting point and route real production data through your legal or privacy function before it enters a stored dataset." tone="dark" /%}
 

@@ -4,7 +4,7 @@ slug: llm-as-a-judge-evaluation
 excerpt: A three-layer routing model for deciding when to use an LLM judge, a deterministic check, or a human reviewer, plus the judge biases that quietly break trust in a score.
 publishedAt: 2026-09-03T12:00:00.000Z
 author: Tracify Team
-draft: true
+draft: false
 categories: [evaluation]
 tags: [LLM as a judge, LLM evaluation, judge bias, AI output grading]
 relatedPosts: [ai-evaluation-metrics, ai-agent-evaluation-practical-guide, human-in-the-loop-ai-agents, rag-evaluation-guide]
@@ -94,6 +94,8 @@ A judge asked to compare Answer A and Answer B will, in a documented pattern acr
 This is the failure mode from the opening scenario, and it deserves emphasis because it is easy to introduce accidentally. A judge instructed to score "helpfulness" or "completeness" without an explicit length constraint will often reward the longer of two answers, because longer answers *look* more thorough even when they pad with restatement, hedging, or tangential detail. The mitigation is not to cap length arbitrarily — that trades one bias for another — but to write the rubric so it explicitly separates thoroughness from length, and to calibrate the judge against human scores across a sample that varies deliberately in length so the bias becomes visible if it's still present.
 
 {% editorial-panel eyebrow="Illustrative transcript" title="Same content, different length, same judge" body="Rubric: score helpfulness 1–5. Answer A (46 words) states the correct fix and stops. Answer B (210 words) states the same fix, then adds three paragraphs of general context the user didn't ask for. An uncalibrated judge scores B a 5 and A a 3, citing 'thoroughness.' A human reviewer scores both a 4 — B's extra length didn't add correctness, only length. This is the pattern a calibration sample is built to catch." tone="dark" /%}
+
+![A black canvas showing two answer transcripts side by side, a short 46-word correct answer scored 3 out of 5 by an LLM judge, and a 210-word padded answer scored 5 out of 5 by the same judge, with a human reviewer's scores of 4 and 4 shown beneath both](/media/llm-as-a-judge-evaluation-transcript.svg)
 
 ### Self-preference / agreement bias
 

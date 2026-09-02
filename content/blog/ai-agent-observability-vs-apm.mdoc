@@ -4,7 +4,7 @@ slug: ai-agent-observability-vs-apm
 excerpt: "A category-level comparison of what traditional APM covers, what AI-specific observability adds for agents, and why most production AI systems need both layers working together."
 publishedAt: 2026-09-03T09:00:00.000Z
 author: Tracify Team
-draft: true
+draft: false
 categories:
   - engineering
   - platform-comparison
@@ -168,6 +168,8 @@ Neither layer substitutes for the other, but the honest answer to "do I need bot
 
 **Where both layers earn their cost immediately:** any agent in a regulated, customer-facing, or financially consequential path. The cost asymmetry matters here — APM is usually already paid for and running; the marginal cost of adding AI-specific observability on top is what should be weighed, not the cost of AI observability against the (already sunk) cost of APM.
 
+> **Decision rule:** If a wrong answer from the agent could cost a user money, time, or a bad decision, add AI-specific observability regardless of how healthy APM looks — a green infrastructure dashboard is not evidence the agent is behaving correctly, only evidence the request path is working.
+
 ## A buyer evaluation scorecard
 
 If you're assessing whether your current stack is sufficient, work through these questions in order. Each maps to a specific gap this article has covered.
@@ -212,7 +214,9 @@ Neither layer, alone or together, replaces a human decision about acceptable ris
 
 ## The two-layer architecture, visually
 
-Picture a single request drawn as one vertical line passing through two horizontal bands: a lower infrastructure band instrumented by APM, and an upper decision band instrumented by AI-specific observability, with a shared trace ID connecting one span in each band. That's the same layered architecture described in the worked example above, and it's the visual this section is built around — {% highlight %}every span in the lower band has an equivalent status-code-and-timer shape, while every span in the upper band requires reading actual content{% /highlight %}, and that structural difference is why one set of tools was never going to naturally grow into the other.
+![A black canvas showing a single request path as a vertical line through a lower APM-instrumented band and an upper AI-observability-instrumented band, with a shared trace ID connecting one span in each band](/media/ai-agent-observability-vs-apm-architecture.svg)
+
+That's the same layered architecture described in the worked example above, drawn as two bands a single request passes through, connected by a shared trace ID. Notice that {% highlight %}every span in the lower band has an equivalent status-code-and-timer shape, while every span in the upper band requires reading actual content{% /highlight %} — that structural difference is why one set of tools was never going to naturally grow into the other.
 
 ### What changes the recommendation
 

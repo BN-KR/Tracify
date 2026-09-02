@@ -1,0 +1,25 @@
+<svg viewBox="0 0 1600 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="jgTransTitle jgTransDesc">
+  <title id="jgTransTitle">A short correct answer scored below a long padded answer by an uncalibrated judge</title>
+  <desc id="jgTransTitle jgTransDesc">A black canvas showing two answer transcripts side by side, a short 46-word correct answer scored 3 out of 5 by an LLM judge, and a 210-word padded answer scored 5 out of 5 by the same judge, with a human reviewer's scores of 4 and 4 shown beneath both, illustrating verbosity bias.</desc>
+  <rect width="1600" height="560" fill="#0a0a0a"/>
+  <g font-family="monospace" font-size="13" fill="#f6f1e6">
+    <text x="60" y="50" fill="#f4d44d" font-size="16">VERBOSITY BIAS, ILLUSTRATED</text>
+
+    <rect x="60" y="90" width="700" height="300" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="80" y="120" opacity="0.6">SHORT ANSWER · 46 WORDS</text>
+    <text x="80" y="160" opacity="0.8">"Refunds over $500 require</text>
+    <text x="80" y="182" opacity="0.8">manager approval. Submit the</text>
+    <text x="80" y="204" opacity="0.8">request with the order ID."</text>
+    <text x="80" y="260" fill="#e06a5a">JUDGE SCORE: 3 / 5</text>
+    <text x="80" y="290" fill="#7fbf7f">HUMAN SCORE: 4 / 5</text>
+
+    <rect x="840" y="90" width="700" height="300" fill="#f4d44d" fill-opacity="0.06" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="860" y="120" fill="#f4d44d" opacity="0.85">PADDED ANSWER · 210 WORDS</text>
+    <text x="860" y="160" opacity="0.8">"Great question! Refund policies</text>
+    <text x="860" y="182" opacity="0.8">can vary, but generally speaking,</text>
+    <text x="860" y="204" opacity="0.8">for amounts exceeding $500..."</text>
+    <text x="860" y="260" fill="#f4d44d" font-weight="bold">JUDGE SCORE: 5 / 5</text>
+    <text x="860" y="290" fill="#7fbf7f">HUMAN SCORE: 4 / 5</text>
+  </g>
+  <text x="60" y="450" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">same accuracy, same human score — the judge rewarded length, not quality</text>
+</svg>

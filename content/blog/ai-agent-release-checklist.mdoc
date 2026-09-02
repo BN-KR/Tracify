@@ -4,7 +4,7 @@ slug: ai-agent-release-checklist
 excerpt: A change-type-specific checklist for releasing prompt, model, tool, retrieval, and orchestration changes to a live AI agent, with a rollback-trigger table and a worked model-upgrade scenario.
 publishedAt: 2026-09-03T10:00:00.000Z
 author: Tracify Team
-draft: true
+draft: false
 categories: [operations]
 tags: [AI agent release checklist, AI deployment, rollback triggers, staged rollout]
 relatedPosts: [ai-agent-production-checklist, prompt-versioning-and-prompt-management, agent-deployment-rollback-strategies, ai-agent-regression-testing]
@@ -67,6 +67,8 @@ Putting those five change types next to the checks they need produces a single r
 | Tool | Required | Recommended | Required | Required | Required |
 | Retrieval | Recommended | Required (groundedness) | Recommended | Required | Required |
 | Orchestration | Required | Required (scenario-level) | Required | Required | Required |
+
+![A black canvas grid with five change-type rows against five check-type columns, each cell shaded to indicate required, recommended, or optional](/media/ai-agent-release-checklist-matrix.svg)
 
 Two columns are required for every change type without exception: a rollback trigger and a named owner. That is deliberate. Even the smallest, most reversible change should have a defined condition that reverts it and a person watching for that condition — the cost of writing those two things down is small, and the cost of skipping them is exactly the opening scenario: a change reaches full traffic with no one specifically watching and no line that says when to pull it back.
 

@@ -4,7 +4,7 @@ slug: ai-agent-drift-detection
 excerpt: A five-source drift model and baseline/comparison-window method for catching silent AI agent behavior changes that aggregate dashboards miss.
 publishedAt: 2026-09-03T12:00:00.000Z
 author: Tracify Team
-draft: true
+draft: false
 categories:
   - observability
 tags:
@@ -122,6 +122,8 @@ The opening scenario exists precisely because segment-level comparison catches w
 *Accuracy figures are illustrative, from a hypothetical periodic eval sample — not a claim about any specific automated scoring system.
 
 Notice the blended average moved by two points — well within normal week-to-week noise for most teams. Only the Product C row shows the real signal: accuracy fell 18 points, and the retrieval source changed from the current documentation collection to a legacy one, consistent with a migration that left old content still indexed and now ranking higher for some queries. That is a textbook retrieval-data drift fingerprint, and it is invisible unless you look at Product C on its own.
+
+![A black canvas showing two horizontal bar comparisons, the aggregate accuracy bar showing almost no change week over week, and beneath it four segment bars by traffic channel, one of which shows a clear drop](/media/ai-agent-drift-detection-segment.svg)
 
 The practical rule: define your segments in advance (by product, customer tier, channel, or request type — whatever partitions your real traffic meaningfully), and run every comparison at that granularity before you also check the rollup. {% highlight %}The rollup is a screening tool, not the whole investigation{% /highlight %}.
 
