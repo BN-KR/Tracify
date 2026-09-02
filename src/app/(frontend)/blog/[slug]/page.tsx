@@ -6,6 +6,7 @@ import { RelatedPosts } from "@/components/blog/related-posts";
 import { ShareButtons } from "@/components/blog/share-buttons";
 import { getReadingTime } from "@/components/blog/reading-time";
 import {
+  extractBlogFaqItems,
   getPostDate,
   getPublishedPost,
   getPublishedPosts,
@@ -76,6 +77,8 @@ function absoluteUrl(value: string) {
 function jsonLd(post: BlogPost) {
   const canonical = post.seo?.canonicalUrl || `https://www.tracify.tech/blog/${post.slug}`;
   const image = post.heroImage?.og || post.heroImage?.src;
+  const faqItems = extractBlogFaqItems(post.body);
+
   return [
     {
       "@context": "https://schema.org",
@@ -99,6 +102,19 @@ function jsonLd(post: BlogPost) {
         { "@type": "ListItem", position: 3, name: post.title, item: canonical },
       ],
     },
+    ...(faqItems.length
+      ? [
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqItems.map((item) => ({
+              "@type": "Question",
+              name: item.question,
+              acceptedAnswer: { "@type": "Answer", text: item.answer },
+            })),
+          },
+        ]
+      : []),
   ];
 }
 
