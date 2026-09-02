@@ -7,9 +7,6 @@ import { useRouter } from "next/navigation";
 import { api } from "convex/_generated/api";
 import { NoProjectState } from "@/components/dashboard/no-project-state";
 import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
-import { RunsTable } from "@/components/dashboard/runs-table";
-import { SessionsList } from "@/components/dashboard/sessions-list";
-import { TraceSearch } from "@/components/dashboard/trace-search";
 
 const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
@@ -68,9 +65,6 @@ export function ProjectRouteGate({
 
 function NoProjectSurface({ surface }: { surface: string }) {
   const pages: Record<string, { title: string; description: string; content: React.ReactNode }> = {
-    runs: { title: "Agent Runs", description: "View and trace all recent execution streams.", content: <RunsTable projectId="" /> },
-    sessions: { title: "Sessions", description: "Group multi-turn and multi-step agent activity.", content: <SessionsList projectId="" /> },
-    search: { title: "Trace Search", description: "Find runs across sessions, environments, releases, cost, latency, and errors.", content: <TraceSearch projectId="" /> },
   };
   const page = pages[surface];
   if (!page) return <NoProjectState title="No project selected" description="This view is ready for read-only use. Select a project to load its data." />;
