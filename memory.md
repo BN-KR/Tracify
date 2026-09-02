@@ -1,6 +1,7 @@
 # Project Memory
 
 ## 2026-09-02 first-customer review execution system
+- Draft PR: `#75` from `codex/first-customer-review`; do not merge or deploy until review and hosted checks are complete.
 - The active 30-day commercial objective is one paid **Founding Agent Failure Review** at **$1,000 upfront**. The service covers one workflow, one consequential failure, five business days, sanitized staging evidence only, an annotated trace, one evidence-backed mechanism, one tested fix or stop/rollback recommendation, five regression cases, a concise report, and a 45-minute readout. Existing $19/$39 subscriptions remain unchanged.
 - `/contact` now offers a free 20-minute **Agent Failure Fit Call** strictly for qualification and evidence scoping; it does not promise written findings, regression cases, or a release recommendation. `/demo` remains explicitly seeded and adds a fit-call CTA while preserving self-serve signup.
 - The dashboard quickstart now uses `pip install tracify-sdk` with `from tracify import ...`, valid Python `async def`, the local TypeScript `tracify-sdk` contract, and a real `/docs/quickstart` destination. The inactive “Check Connection” control was removed because the regional health endpoint cannot prove SDK ingestion.

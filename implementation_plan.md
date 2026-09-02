@@ -7,7 +7,8 @@
 5. [completed] Verify focused lint, both local SDK examples, public route status, the email actions, the seeded demo, desktop/mobile layout, and unchanged $19/$39 pricing. Record the unrelated existing production TypeScript blocker separately.
 6. [pending owner] Create and test the live one-time $1,000 Stripe Payment Link in the intended account; store the URL privately.
 7. [pending owner] Qualify the remaining account gap, personally send 10 initial messages per weekday plus follow-ups, run discovery, send same-day offers, collect payment before evidence, and deliver one review using the operating kit.
-8. [pending] Publish the branch as a draft pull request, inspect hosted checks, and merge after review.
+8. [completed] Publish draft PR #75 from `codex/first-customer-review`.
+9. [pending] Inspect PR #75 hosted checks and merge after review; do not deploy this branch as production.
 
 # Cursor removal and fit verification — 2026-08-24
 

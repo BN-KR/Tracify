@@ -9,7 +9,8 @@
 - [pending owner] Create the live one-time $1,000 Stripe Payment Link in the intended Stripe account using `docs/first-customer/stripe-payment-link-setup.md`; no Stripe credentials were available to this workspace.
 - [pending owner] Verify public contact channels and one current trigger for the 15 Qualified accounts, then personally send outreach. Continue research until 50 accounts meet the full qualification gate; do not count Watch accounts as qualified.
 - [pending owner] Execute the 30-day funnel: 100 personalized sends, 5 calls, 2 written offers, 1 payment, and 1 delivered evidence-backed review.
-- [pending] Publish the `codex/first-customer-review` draft pull request, inspect hosted checks, and merge only after review.
+- [completed] Publish draft PR #75 from `codex/first-customer-review`.
+- [pending] Inspect PR #75 hosted checks and merge only after review; do not deploy this branch as production.
 
 # 2026-08-24 — Cursor removal and fit verification
 
