@@ -23,6 +23,7 @@ export function PromptManagement({ projectId }: { projectId: string }) {
   const selectedPrompt = prompts?.find((prompt) => prompt._id === selected) ?? prompts?.[0];
 
   async function create() {
+    if (!projectId) return;
     try {
       await createPrompt({ projectId: projectId as never, name, content, type: "text" });
       setName("");
@@ -33,6 +34,7 @@ export function PromptManagement({ projectId }: { projectId: string }) {
   }
 
   async function saveVersion() {
+    if (!projectId) return;
     if (!selectedPrompt) return;
     try {
       await createVersion({ projectId: projectId as never, promptId: selectedPrompt._id, content: draft, labels: ["latest"] });
@@ -44,10 +46,12 @@ export function PromptManagement({ projectId }: { projectId: string }) {
   }
 
   async function promote(versionId: string, labels: string[], environment = "production") {
+    if (!projectId) return;
     await updateLabels({ projectId: projectId as never, versionId: versionId as never, labels: [...labels.filter((label) => !["development", "staging", "production"].includes(label)), environment] });
     setStatus("Version promoted to " + environment + ".");
   }
   async function saveDetails() {
+    if (!projectId) return;
     if (!selectedPrompt) return;
     try {
       await updatePrompt({ projectId: projectId as never, promptId: selectedPrompt._id, name: editName || selectedPrompt.name, description: editDescription });

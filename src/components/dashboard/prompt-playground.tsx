@@ -13,6 +13,7 @@ export function PromptPlayground({ projectId }: { projectId: string }) {
   const [meta, setMeta] = useState("");
   const [running, setRunning] = useState(false);
   async function run() {
+    if (!projectId) return;
     setRunning(true); setOutput("");
     try {
       const models = [model, comparisonModel].filter(Boolean);

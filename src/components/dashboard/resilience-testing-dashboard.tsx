@@ -54,6 +54,7 @@ export function ResilienceTestingDashboard({ projectId }: ResilienceTestingDashb
   );
 
   async function handleRun() {
+    if (!projectId) return;
     const parsedIterations = Number(iterations);
     if (!Number.isInteger(parsedIterations) || parsedIterations < 1 || parsedIterations > 200) {
       setError("Iterations must be an integer between 1 and 200");

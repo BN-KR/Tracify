@@ -33,6 +33,7 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleRotate() {
+    if (!projectId) return;
     if (!window.confirm("Rotating your API key will immediately invalidate the existing key. Any agents using the old key will fail to ingest data. Continue?")) {
       return;
     }

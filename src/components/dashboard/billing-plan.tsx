@@ -253,6 +253,7 @@ function PlanCard({
 function CheckoutButton({ projectId, plan, interval }: { projectId: string; plan: "pro" | "team"; interval: "monthly" | "annual" }) {
   const [pending, setPending] = useState(false);
   const startCheckout = async () => {
+    if (!projectId) return;
     setPending(true);
     try {
       const response = await fetch("/api/stripe/checkout", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ projectId, plan, interval }) });
@@ -270,6 +271,7 @@ function CheckoutButton({ projectId, plan, interval }: { projectId: string; plan
 function PortalButton({ projectId }: { projectId: string }) {
   const [pending, setPending] = useState(false);
   const openPortal = async () => {
+    if (!projectId) return;
     setPending(true);
     const response = await fetch("/api/stripe/portal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ projectId }) });
     const data = await response.json() as { url?: string };

@@ -67,6 +67,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
   /* eslint-enable react-hooks/set-state-in-effect */
 
   async function handleSave() {
+    if (!projectId) return;
     const parsed = validateSettings({
       name,
       clientName,
@@ -116,6 +117,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
   }
 
   async function handleSendTestAlert() {
+    if (!projectId) return;
     if (!isValidSlackWebhookUrl(slackWebhookUrl.trim())) {
       setNotice(null);
       setError("Add a valid Slack webhook URL before sending a test alert");
@@ -139,6 +141,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
   }
 
   async function handleSendTeamsTestAlert() {
+    if (!projectId) return;
     if (!isValidTeamsWebhookUrl(teamsWebhookUrl.trim())) {
       setNotice(null);
       setError("Add a valid Teams webhook URL before sending a test alert");

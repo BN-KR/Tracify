@@ -129,6 +129,7 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
   }
 
   async function handleSave() {
+    if (!projectId) return;
     const parsed = validatePolicy(policy);
     if (!parsed.ok) {
       setNotice(null);
