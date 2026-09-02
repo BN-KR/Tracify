@@ -253,7 +253,11 @@ export function CostDashboard({ projectId }: { projectId: string }) {
                         : "Peak baseline",
                   ]}
                   labelFormatter={(value) =>
-                    new Date(value).toLocaleDateString("en-US", {
+                    new Date(
+                      typeof value === "string" || typeof value === "number"
+                        ? value
+                        : 0,
+                    ).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
                     })
