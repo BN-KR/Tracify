@@ -1,0 +1,21 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="apmTitle apmDesc">
+  <title id="apmTitle">One request passing through an infrastructure band and a decisions band</title>
+  <desc id="apmDesc">A black canvas shows two translucent horizontal bands stacked vertically, a lower band labeled APM covering infrastructure signals and an upper band labeled AI OBSERVABILITY covering decisions and content, with a single vertical arrow representing one request passing through both bands.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI OBSERVABILITY VS TRADITIONAL APM</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">two layers, one request</text>
+
+  <rect x="220" y="500" width="1160" height="220" fill="#f6f1e6" fill-opacity="0.08" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2"/>
+  <text x="250" y="550" fill="#f6f1e6" font-family="monospace" font-size="16" opacity="0.85">APM</text>
+  <text x="250" y="576" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.55">latency · error rate · uptime · CPU</text>
+
+  <rect x="220" y="220" width="1160" height="220" fill="#f4d44d" fill-opacity="0.1" stroke="#f4d44d" stroke-width="2"/>
+  <text x="250" y="270" fill="#f4d44d" font-family="monospace" font-size="16" font-weight="bold">AI OBSERVABILITY</text>
+  <text x="250" y="296" fill="#f4d44d" font-family="monospace" font-size="13" opacity="0.8">prompts · decisions · tool calls · correctness</text>
+
+  <line x1="800" y1="180" x2="800" y2="760" stroke="#f6f1e6" stroke-width="2" stroke-dasharray="3 7"/>
+  <polygon points="800,760 788,735 812,735" fill="#f6f1e6"/>
+  <text x="820" y="200" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.7">one request</text>
+
+  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a green APM dashboard can coexist with two days of confidently wrong answers</text>
+</svg>

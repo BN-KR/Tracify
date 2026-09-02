@@ -1,0 +1,40 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="rcTitle rcDesc">
+  <title id="rcTitle">A single change passing through four release gates before reaching full traffic</title>
+  <desc id="rcDesc">A black canvas shows a horizontal rail starting at a box labeled CHANGE, passing through four gate checkpoints labeled contract, eval, staged exposure, and monitoring, ending at a box labeled 100% TRAFFIC, with one dashed branch diverting downward to a box labeled ROLLBACK.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI AGENT RELEASE CHECKLIST</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">change-type release matrix / gate rail</text>
+
+  <line x1="220" y1="450" x2="1420" y2="450" stroke="#f6f1e6" stroke-opacity="0.35" stroke-width="2"/>
+
+  <g font-family="monospace" font-size="13">
+    <rect x="140" y="410" width="160" height="80" fill="#f6f1e6" fill-opacity="0.08" stroke="#f6f1e6" stroke-opacity="0.5"/>
+    <text x="220" y="455" fill="#f6f1e6" text-anchor="middle">CHANGE</text>
+
+    <g>
+      <circle cx="470" cy="450" r="26" fill="none" stroke="#f4d44d" stroke-width="2"/>
+      <text x="470" y="405" fill="#f4d44d" text-anchor="middle">CONTRACT</text>
+    </g>
+    <g>
+      <circle cx="670" cy="450" r="26" fill="none" stroke="#f4d44d" stroke-width="2"/>
+      <text x="670" y="405" fill="#f4d44d" text-anchor="middle">EVAL</text>
+    </g>
+    <g>
+      <circle cx="870" cy="450" r="26" fill="none" stroke="#f4d44d" stroke-width="2"/>
+      <text x="870" y="405" fill="#f4d44d" text-anchor="middle">STAGED</text>
+    </g>
+    <g>
+      <circle cx="1070" cy="450" r="26" fill="none" stroke="#f4d44d" stroke-width="2"/>
+      <text x="1070" y="405" fill="#f4d44d" text-anchor="middle">MONITOR</text>
+    </g>
+
+    <rect x="1300" y="410" width="180" height="80" fill="#f4d44d" fill-opacity="0.15" stroke="#f4d44d" stroke-width="2"/>
+    <text x="1390" y="455" fill="#f4d44d" text-anchor="middle" font-weight="bold">100% TRAFFIC</text>
+  </g>
+
+  <path d="M 870 476 Q 900 620 1000 660" stroke="#f6f1e6" stroke-opacity="0.6" stroke-width="1.5" stroke-dasharray="6 6" fill="none"/>
+  <rect x="960" y="660" width="180" height="60" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
+  <text x="1050" y="696" fill="#f6f1e6" font-family="monospace" font-size="13" text-anchor="middle" opacity="0.75">ROLLBACK</text>
+
+  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">prompt · model · tool · retrieval · orchestration — different gates, same rail</text>
+</svg>

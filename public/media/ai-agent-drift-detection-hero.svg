@@ -1,0 +1,37 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="drTitle drDesc">
+  <title id="drTitle">Two nearly identical trace waterfalls, one week apart, with one subtle difference</title>
+  <desc id="drDesc">A black canvas shows two visually near-identical vertical trace waterfalls side by side, labeled last week and this week, with every span matching except one retrieval span whose source label subtly differs and is highlighted in acid yellow, illustrating that drift can look the same at a glance.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI AGENT DRIFT DETECTION</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">looks the same. isn't.</text>
+
+  <g font-family="monospace" font-size="12" fill="#f6f1e6">
+    <text x="220" y="170" opacity="0.55">LAST WEEK</text>
+    <text x="920" y="170" opacity="0.55">THIS WEEK</text>
+
+    <!-- left waterfall -->
+    <g opacity="0.7">
+      <rect x="200" y="200" width="500" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+      <rect x="230" y="250" width="440" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+      <rect x="260" y="300" width="380" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+      <text x="280" y="325">retrieve: docs/kb-v3</text>
+      <rect x="230" y="350" width="440" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+      <rect x="200" y="400" width="500" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    </g>
+
+    <!-- right waterfall -->
+    <g opacity="0.7">
+      <rect x="900" y="200" width="500" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+      <rect x="930" y="250" width="440" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+      <rect x="960" y="300" width="380" height="40" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-width="2"/>
+      <text x="980" y="325" fill="#f4d44d" font-weight="bold">retrieve: docs/kb-v4-stale</text>
+      <rect x="930" y="350" width="440" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+      <rect x="900" y="400" width="500" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    </g>
+  </g>
+
+  <text x="100" y="600" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.5">latency: unchanged · error rate: unchanged · response length: unchanged</text>
+  <text x="100" y="626" fill="#f4d44d" font-family="monospace" font-size="13">retrieval source: quietly changed</text>
+
+  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">five sources of drift, none of them visible on an aggregate dashboard alone</text>
+</svg>

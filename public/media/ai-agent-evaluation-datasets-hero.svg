@@ -1,0 +1,31 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="edTitle edDesc">
+  <title id="edTitle">Five production signal streams converging into one versioned evaluation dataset</title>
+  <desc id="edDesc">A black canvas shows five labeled input streams — user-reported failures, low review scores, expensive or retried runs, tool-call errors, and random sampling — drawn as converging diagonal lines feeding into a single funnel shape, which narrows into a labeled box reading versioned dataset.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI AGENT EVALUATION DATASETS</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">five-signal sourcing model</text>
+
+  <g font-family="monospace" font-size="13" fill="#f6f1e6" opacity="0.75">
+    <text x="140" y="210">user-reported failures</text>
+    <text x="140" y="300">low review scores</text>
+    <text x="140" y="390">expensive / retried runs</text>
+    <text x="140" y="480">tool-call errors</text>
+    <text x="140" y="570">random sampling</text>
+  </g>
+
+  <g stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="1.5" fill="none">
+    <line x1="480" y1="205" x2="820" y2="390"/>
+    <line x1="480" y1="295" x2="820" y2="400"/>
+    <line x1="480" y1="385" x2="820" y2="410"/>
+    <line x1="480" y1="475" x2="820" y2="420"/>
+    <line x1="480" y1="565" x2="820" y2="430"/>
+  </g>
+
+  <path d="M 820 370 L 1000 400 L 1000 460 L 1150 560 L 1150 640 L 870 640 L 870 560 L 1020 460 L 1020 400 L 820 430 Z" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-width="2"/>
+
+  <rect x="850" y="660" width="290" height="90" fill="#f4d44d" fill-opacity="0.15" stroke="#f4d44d" stroke-width="2"/>
+  <text x="995" y="700" fill="#f4d44d" text-anchor="middle" font-family="monospace" font-size="15" font-weight="bold">VERSIONED</text>
+  <text x="995" y="722" fill="#f4d44d" text-anchor="middle" font-family="monospace" font-size="15" font-weight="bold">DATASET</text>
+
+  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">sanitized · categorized · sourced from real production behavior</text>
+</svg>
