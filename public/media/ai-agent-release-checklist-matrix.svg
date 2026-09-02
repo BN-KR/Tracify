@@ -1,0 +1,54 @@
+<svg viewBox="0 0 1600 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="rcDiagTitle rcDiagDesc">
+  <title id="rcDiagTitle">Change-type release matrix showing required checks per change type</title>
+  <desc id="rcDiagDesc">A black canvas grid with five change-type rows — prompt, model, tool, retrieval, orchestration — against five check-type columns — contract, eval, staged exposure, rollback trigger, owner — each cell shaded to indicate required, recommended, or optional.</desc>
+  <rect width="1600" height="620" fill="#0a0a0a"/>
+  <g font-family="monospace" font-size="13" fill="#f6f1e6">
+    <text x="60" y="50" fill="#f4d44d" font-size="16">CHANGE-TYPE RELEASE MATRIX</text>
+    <text x="300" y="90" opacity="0.6">CONTRACT</text>
+    <text x="470" y="90" opacity="0.6">EVAL</text>
+    <text x="600" y="90" opacity="0.6">STAGED</text>
+    <text x="760" y="90" opacity="0.6">ROLLBACK</text>
+    <text x="930" y="90" opacity="0.6">OWNER</text>
+
+    <text x="60" y="140" opacity="0.75">PROMPT</text>
+    <text x="60" y="200" opacity="0.75">MODEL</text>
+    <text x="60" y="260" opacity="0.75">TOOL</text>
+    <text x="60" y="320" opacity="0.75">RETRIEVAL</text>
+    <text x="60" y="380" opacity="0.75">ORCHESTRATION</text>
+  </g>
+  <g>
+    <!-- rows x cols, required=filled yellow, recommended=outline yellow, optional=faint -->
+    <!-- prompt -->
+    <rect x="280" y="115" width="140" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="450" y="115" width="100" height="34" fill="#f4d44d" fill-opacity="0.3"/>
+    <rect x="580" y="115" width="130" height="34" fill="none" stroke="#f6f1e6" stroke-opacity="0.3"/>
+    <rect x="740" y="115" width="140" height="34" fill="#f4d44d" fill-opacity="0.3"/>
+    <rect x="910" y="115" width="120" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <!-- model -->
+    <rect x="280" y="175" width="140" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="450" y="175" width="100" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="580" y="175" width="130" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="740" y="175" width="140" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="910" y="175" width="120" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <!-- tool -->
+    <rect x="280" y="235" width="140" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="450" y="235" width="100" height="34" fill="#f4d44d" fill-opacity="0.3"/>
+    <rect x="580" y="235" width="130" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="740" y="235" width="140" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="910" y="235" width="120" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <!-- retrieval -->
+    <rect x="280" y="295" width="140" height="34" fill="none" stroke="#f6f1e6" stroke-opacity="0.3"/>
+    <rect x="450" y="295" width="100" height="34" fill="#f4d44d" fill-opacity="0.3"/>
+    <rect x="580" y="295" width="130" height="34" fill="#f4d44d" fill-opacity="0.3"/>
+    <rect x="740" y="295" width="140" height="34" fill="#f4d44d" fill-opacity="0.3"/>
+    <rect x="910" y="295" width="120" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <!-- orchestration -->
+    <rect x="280" y="355" width="140" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="450" y="355" width="100" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="580" y="355" width="130" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="740" y="355" width="140" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+    <rect x="910" y="355" width="120" height="34" fill="#f4d44d" fill-opacity="0.8"/>
+  </g>
+  <text x="60" y="450" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.5">filled = required · light = recommended · outline = optional</text>
+  <text x="60" y="480" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a tool change and a model upgrade do not need identical gates</text>
+</svg>

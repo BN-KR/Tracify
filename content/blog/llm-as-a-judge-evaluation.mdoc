@@ -95,6 +95,8 @@ This is the failure mode from the opening scenario, and it deserves emphasis bec
 
 {% editorial-panel eyebrow="Illustrative transcript" title="Same content, different length, same judge" body="Rubric: score helpfulness 1–5. Answer A (46 words) states the correct fix and stops. Answer B (210 words) states the same fix, then adds three paragraphs of general context the user didn't ask for. An uncalibrated judge scores B a 5 and A a 3, citing 'thoroughness.' A human reviewer scores both a 4 — B's extra length didn't add correctness, only length. This is the pattern a calibration sample is built to catch." tone="dark" /%}
 
+![A black canvas showing two answer transcripts side by side, a short 46-word correct answer scored 3 out of 5 by an LLM judge, and a 210-word padded answer scored 5 out of 5 by the same judge, with a human reviewer's scores of 4 and 4 shown beneath both](/media/llm-as-a-judge-evaluation-transcript.svg)
+
 ### Self-preference / agreement bias
 
 When the judge model and the model being evaluated share a lineage — the same provider, the same base model, or even the same model at a different checkpoint — some evaluations show the judge favoring outputs that match its own stylistic tendencies. This does not mean judge and candidate must always come from different vendors; it means {% highlight %}the possibility of self-preference should be treated as a risk to check for, not assumed absent{% /highlight %}. Comparing agreement rates when the judge and candidate are matched versus mismatched is one way to surface whether this is happening in your setup.

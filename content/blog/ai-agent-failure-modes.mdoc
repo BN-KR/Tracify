@@ -49,6 +49,8 @@ Most "hallucinations" reported by support teams are something else wearing the s
 
 This is the reference table. Bookmark it — it is the fastest path from "something's wrong" to "here's who to page."
 
+![A black canvas grid grouping the twelve failure types into four owning-team columns — model/prompt, retrieval, tool integration, and platform/product — with each failure type shown as a small labeled block under its owning team](/media/ai-agent-failure-modes-taxonomy.svg)
+
 | # | Failure type | One-line definition | Primary trace evidence | Typical owning team | Suggested regression-test type |
 | --- | --- | --- | --- | --- | --- |
 | 1 | Reasoning error | The model had correct, complete input but drew an invalid conclusion from it | Model span input/output pair shows sound context but an unsupported inference in the output | Model/prompt | Eval case with the same input, scored for logical validity |

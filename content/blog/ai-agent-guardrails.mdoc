@@ -186,6 +186,8 @@ There's a second, quieter cost worth naming: the friction a guardrail adds is ra
 
 Distinguish, too, between friction that's doing its job and friction that's just cost. A guardrail that delays a genuinely risky action while a human reviews it is friction with a purpose — the delay is the point. A guardrail that delays a routine, low-risk action because its risk tier was set too conservatively, or because the authorization rule wasn't scoped tightly enough, is pure cost with no corresponding risk reduction. The fix for the second case is almost never "add an exception" — exceptions accumulate into exactly the erosion described in the field note above — it's revisiting the risk tier or the rule's scope so the classification itself is more accurate.
 
+> **Warning:** No layer in this model, and no combination of them, guarantees that an agent can never be misused or that every attack is caught. Guardrails reduce the probability and blast radius of an unsafe action; they do not eliminate it. Treat every claim in this article as risk reduction, never as a safety guarantee.
+
 ## What guardrails cannot guarantee
 
 None of the seven layers, individually or composed, guarantee that an agent will never take an unsafe action. That claim would be false, and it's worth stating plainly rather than letting a layered model imply completeness it doesn't have.
@@ -216,6 +218,8 @@ Pulling the model together against the opening scenario. The original refund too
 7. **Audit logging** — every field in the illustrative policy's `log_fields` list is recorded regardless of the outcome.
 
 The original incident happened because layer 4 didn't exist and nothing else in the pipeline was positioned to catch its absence — business-logic validation at layer "0" (folded into the tool's own code, not shown above because it isn't one of the seven) answered a different question than authorization does, and no layer downstream of it was checking who was calling. Adding tool authorization as an explicit, independently-owned layer — not a stricter version of the existing amount check — is what closes that specific gap.
+
+![A black canvas grid with three role columns — end user, support agent, admin — against three risk tiers of a refund tool, each cell labeled auto-allow, requires approval, or blocked](/media/ai-agent-guardrails-matrix.svg)
 
 ## Read the lower half visually
 

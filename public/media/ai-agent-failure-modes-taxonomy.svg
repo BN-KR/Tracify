@@ -1,0 +1,45 @@
+<svg viewBox="0 0 1600 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="famDiagTitle famDiagDesc">
+  <title id="famDiagTitle">Twelve failure types grouped by owning team</title>
+  <desc id="famDiagDesc">A black canvas grid grouping the twelve failure types into four owning-team columns — model/prompt, retrieval, tool integration, and platform/product — with each failure type shown as a small labeled block under its owning team.</desc>
+  <rect width="1600" height="700" fill="#0a0a0a"/>
+  <g font-family="monospace" font-size="13" fill="#f6f1e6">
+    <text x="80" y="60" fill="#f4d44d" font-size="16" letter-spacing="1">OWNING TEAM →</text>
+
+    <text x="120" y="120" opacity="0.6">MODEL / PROMPT</text>
+    <rect x="80" y="140" width="280" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="100" y="168">Reasoning error</text>
+    <rect x="80" y="196" width="280" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="100" y="224">Hallucinated fact</text>
+    <rect x="80" y="252" width="280" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="100" y="280">Output-format violation</text>
+
+    <text x="440" y="120" opacity="0.6">RETRIEVAL</text>
+    <rect x="400" y="140" width="280" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="420" y="168">Retrieval miss</text>
+    <rect x="400" y="196" width="280" height="46" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="420" y="224" fill="#f4d44d">Stale retrieval</text>
+    <rect x="400" y="252" width="280" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="420" y="280">Irrelevant retrieval</text>
+
+    <text x="760" y="120" opacity="0.6">TOOL INTEGRATION</text>
+    <rect x="720" y="140" width="280" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="740" y="168">Tool-selection error</text>
+    <rect x="720" y="196" width="280" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="740" y="224">Tool-execution error</text>
+    <rect x="720" y="252" width="280" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="740" y="280">Argument-construction error</text>
+
+    <text x="1080" y="120" opacity="0.6">PLATFORM / PRODUCT</text>
+    <rect x="1040" y="140" width="440" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="1060" y="168">Permission / authorization failure</text>
+    <rect x="1040" y="196" width="440" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="1060" y="224">Context-window truncation</text>
+    <rect x="1040" y="252" width="440" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="1060" y="280">Loop / repeated calls</text>
+    <rect x="1040" y="308" width="440" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="1060" y="336">Human-approval bottleneck</text>
+    <rect x="1040" y="364" width="440" height="46" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="1060" y="392">Cascading multi-step failure</text>
+  </g>
+  <text x="80" y="620" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the same wrong answer can trace back to any of four different owners</text>
+</svg>

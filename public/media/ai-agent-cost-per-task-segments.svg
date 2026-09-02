@@ -1,0 +1,40 @@
+<svg viewBox="0 0 1600 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="cptSegTitle cptSegDesc">
+  <title id="cptSegTitle">Cost concentration by workflow and failure type, shown as a graded grid</title>
+  <desc id="cptSegDesc">A black canvas grid with four workflow rows and four failure-type columns, each cell shaded darker for higher cost concentration, with one cell — retry-driven waste in the refund workflow — shown darkest to highlight where spend actually concentrates.</desc>
+  <rect width="1600" height="560" fill="#0a0a0a"/>
+  <g font-family="monospace" font-size="12" fill="#f6f1e6">
+    <text x="60" y="50" fill="#f4d44d" font-size="16">WHERE COST CONCENTRATES</text>
+    <text x="360" y="90" opacity="0.6">FIRST-ATTEMPT</text>
+    <text x="600" y="90" opacity="0.6">RETRY</text>
+    <text x="800" y="90" opacity="0.6">TOOL ERROR</text>
+    <text x="1020" y="90" opacity="0.6">ESCALATION</text>
+
+    <text x="60" y="140" opacity="0.75">SUPPORT</text>
+    <text x="60" y="200" opacity="0.75">REFUNDS</text>
+    <text x="60" y="260" opacity="0.75">ONBOARDING</text>
+    <text x="60" y="320" opacity="0.75">SEARCH</text>
+  </g>
+  <g>
+    <rect x="300" y="115" width="180" height="40" fill="#f4d44d" fill-opacity="0.15"/>
+    <rect x="540" y="115" width="180" height="40" fill="#f4d44d" fill-opacity="0.3"/>
+    <rect x="760" y="115" width="180" height="40" fill="#f4d44d" fill-opacity="0.2"/>
+    <rect x="980" y="115" width="180" height="40" fill="#f4d44d" fill-opacity="0.15"/>
+
+    <rect x="300" y="175" width="180" height="40" fill="#f4d44d" fill-opacity="0.2"/>
+    <rect x="540" y="175" width="180" height="40" fill="#f4d44d" fill-opacity="0.95"/>
+    <rect x="760" y="175" width="180" height="40" fill="#f4d44d" fill-opacity="0.25"/>
+    <rect x="980" y="175" width="180" height="40" fill="#f4d44d" fill-opacity="0.4"/>
+
+    <rect x="300" y="235" width="180" height="40" fill="#f4d44d" fill-opacity="0.1"/>
+    <rect x="540" y="235" width="180" height="40" fill="#f4d44d" fill-opacity="0.15"/>
+    <rect x="760" y="235" width="180" height="40" fill="#f4d44d" fill-opacity="0.1"/>
+    <rect x="980" y="235" width="180" height="40" fill="#f4d44d" fill-opacity="0.1"/>
+
+    <rect x="300" y="295" width="180" height="40" fill="#f4d44d" fill-opacity="0.15"/>
+    <rect x="540" y="295" width="180" height="40" fill="#f4d44d" fill-opacity="0.2"/>
+    <rect x="760" y="295" width="180" height="40" fill="#f4d44d" fill-opacity="0.3"/>
+    <rect x="980" y="295" width="180" height="40" fill="#f4d44d" fill-opacity="0.1"/>
+  </g>
+  <text x="540" y="200" fill="#0a0a0a" font-family="monospace" font-size="12" font-weight="bold">↑ retry waste</text>
+  <text x="60" y="480" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">darker cells = higher cost concentration — the refund/retry cell is where this article's worked example lives</text>
+</svg>

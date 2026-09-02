@@ -14,7 +14,7 @@ tags:
   - AI operations
 relatedPosts:
   - reduce-llm-costs-without-hurting-quality
-  - ai-agent-cost-calculator
+  - ai-agent-cost-optimization
   - ai-observability-metrics-that-matter
 heroImage:
   src: /media/ai-agent-cost-per-task-hero.svg
@@ -24,11 +24,11 @@ seo:
   metaDescription: A cost-per-successful-task formula for AI agents that accounts for retries, tool calls, and failed runs, not just token price.
 ---
 
-A support team tells leadership their AI agent costs "$0.02 per model call." It's a true number, and it's nearly useless. Once retries, tool calls, and human escalations are counted against the tickets the agent actually resolved, the same workflow costs $0.31 per successfully resolved ticket — a 15x gap that the token-only figure hid completely. Both numbers are hypothetical here, but the gap between them is the real subject of this article.
+{% trace-scenario title="The $0.02 number that hid a $0.31 reality" prompt="A support team tells leadership their AI agent costs $0.02 per model call. It's a true number, taken straight from the model provider's invoice." outcome="Once retries, tool calls, and human escalations are counted against the tickets the agent actually resolved, the same workflow costs $0.31 per successfully resolved ticket — a 15x gap the token-only figure hid completely. Both numbers are hypothetical here, but the gap between them is the real subject of this article." /%}
 
 **Cost per successful task equals total workflow cost — model calls, tool and API calls, retries, and failed attempts — divided by the number of tasks that actually succeeded in that period, not by total runs.** This distinction matters because a retried or failed run still costs money and produces no successful outcome, so dividing by total runs (or worse, only counting token spend) understates the real cost of getting one task done.
 
-This article covers the measurement methodology: the formula, what belongs in "total cost," how to segment spend to find where it concentrates, and how the numbers move in a worked retry-waste scenario. It does not repeat general LLM cost-reduction tactics — that ground is covered in [reducing LLM costs without hurting quality](/blog/reduce-llm-costs-without-hurting-quality) — and it does not re-introduce the interactive [cost calculator tool](/blog/ai-agent-cost-calculator) built for a different job. This is the piece that explains the denominator those two take for granted.
+This article covers the measurement methodology: the formula, what belongs in "total cost," how to segment spend to find where it concentrates, and how the numbers move in a worked retry-waste scenario. It does not repeat general LLM cost-reduction tactics — that ground is covered in [reducing LLM costs without hurting quality](/blog/reduce-llm-costs-without-hurting-quality) — and it does not re-introduce the interactive [cost calculator tool](/blog/ai-agent-cost-optimization) built for a different job. This is the piece that explains the denominator those two take for granted.
 
 ## At a glance
 
@@ -163,6 +163,8 @@ Two things are worth noticing in a table shaped like that one. First, the "cheap
 ### Reading a segmentation table as a heatmap
 
 Once you have cost broken out by workflow and by failure type together, it's worth looking at the two dimensions crossed against each other rather than separately. The cell where a high-cost workflow meets a high-cost failure type is where spend concentrates hardest — and it's often not the cell a team would guess from intuition alone.
+
+![A black canvas grid with four workflow rows and four failure-type columns, each cell shaded darker for higher cost concentration, with the retry-driven refund workflow cell shown darkest](/media/ai-agent-cost-per-task-segments.svg)
 
 | Workflow \ Failure type | Tool timeout | Validation error | Policy ambiguity |
 | --- | --- | --- | --- |

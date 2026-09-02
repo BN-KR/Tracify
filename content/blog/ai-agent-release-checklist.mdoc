@@ -68,6 +68,8 @@ Putting those five change types next to the checks they need produces a single r
 | Retrieval | Recommended | Required (groundedness) | Recommended | Required | Required |
 | Orchestration | Required | Required (scenario-level) | Required | Required | Required |
 
+![A black canvas grid with five change-type rows against five check-type columns, each cell shaded to indicate required, recommended, or optional](/media/ai-agent-release-checklist-matrix.svg)
+
 Two columns are required for every change type without exception: a rollback trigger and a named owner. That is deliberate. Even the smallest, most reversible change should have a defined condition that reverts it and a person watching for that condition — the cost of writing those two things down is small, and the cost of skipping them is exactly the opening scenario: a change reaches full traffic with no one specifically watching and no line that says when to pull it back.
 
 {% editorial-panel eyebrow="Operating principle" title="Match the eval suite's shape to the change's blast radius, not its line count." body="A one-line model-version string change and a one-line prompt wording change are the same size on a diff and completely different in risk. Size the eval suite to what the change type can plausibly move — full representative coverage for a model swap, targeted regression cases for a narrow prompt edit — rather than to how much text changed." tone="yellow" /%}

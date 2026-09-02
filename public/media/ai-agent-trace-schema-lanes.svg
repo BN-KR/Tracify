@@ -1,0 +1,36 @@
+<svg viewBox="0 0 1600 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="tsLanesTitle tsLanesDesc">
+  <title id="tsLanesTitle">One schema, three uses: debug, evaluate, and cost, sharing the same fields</title>
+  <desc id="tsLanesDesc">A black canvas diagram showing a small set of trace fields on the left branching into three labeled outcome lanes on the right — debug, evaluate, and cost — with each field connected by a line to every lane it feeds, illustrating that one schema supports three separate jobs.</desc>
+  <rect width="1600" height="640" fill="#0a0a0a"/>
+  <g font-family="monospace" font-size="13" fill="#f6f1e6">
+    <text x="60" y="50" fill="#f4d44d" font-size="16">ONE SCHEMA, THREE USES</text>
+
+    <text x="80" y="130">span_id</text>
+    <text x="80" y="190">input / output</text>
+    <text x="80" y="250">status</text>
+    <text x="80" y="310">latency_ms</text>
+    <text x="80" y="370">tokens</text>
+    <text x="80" y="430">cost_usd</text>
+
+    <rect x="1120" y="90" width="160" height="60" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
+    <text x="1200" y="126" text-anchor="middle" opacity="0.85">DEBUG</text>
+
+    <rect x="1120" y="270" width="160" height="60" fill="#f4d44d" fill-opacity="0.9"/>
+    <text x="1200" y="306" text-anchor="middle" fill="#0a0a0a" font-weight="bold">EVALUATE</text>
+
+    <rect x="1120" y="450" width="160" height="60" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
+    <text x="1200" y="486" text-anchor="middle" opacity="0.85">COST</text>
+  </g>
+  <g stroke="#f6f1e6" stroke-opacity="0.35" stroke-width="1.2">
+    <line x1="220" y1="125" x2="1120" y2="120"/>
+    <line x1="220" y1="185" x2="1120" y2="120"/>
+    <line x1="220" y1="245" x2="1120" y2="120"/>
+    <line x1="220" y1="185" x2="1120" y2="300"/>
+    <line x1="220" y1="245" x2="1120" y2="300"/>
+    <line x1="220" y1="365" x2="1120" y2="300"/>
+    <line x1="220" y1="305" x2="1120" y2="480"/>
+    <line x1="220" y1="365" x2="1120" y2="480"/>
+    <line x1="220" y1="425" x2="1120" y2="480"/>
+  </g>
+  <text x="60" y="580" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the same six fields, read differently depending on the question being asked</text>
+</svg>

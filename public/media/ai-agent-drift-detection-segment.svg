@@ -1,0 +1,23 @@
+<svg viewBox="0 0 1600 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="drSegTitle drSegDesc">
+  <title id="drSegTitle">A drift signal invisible in aggregate, visible by segment</title>
+  <desc id="drSegDesc">A black canvas showing two horizontal bar comparisons, the aggregate accuracy bar showing almost no change week over week, and beneath it four segment bars by traffic channel, one of which shows a clear drop, illustrating that segment-level comparison catches what aggregate metrics miss.</desc>
+  <rect width="1600" height="480" fill="#0a0a0a"/>
+  <g font-family="monospace" font-size="13" fill="#f6f1e6">
+    <text x="60" y="50" fill="#f4d44d" font-size="16">AGGREGATE VS. SEGMENT</text>
+
+    <text x="60" y="100" opacity="0.6">AGGREGATE ACCURACY</text>
+    <rect x="360" y="80" width="300" height="24" fill="#7fbf7f" fill-opacity="0.5"/>
+    <text x="680" y="98" opacity="0.6">96.1% → 95.8%</text>
+
+    <text x="60" y="180" opacity="0.75">CHANNEL: WEB</text>
+    <rect x="360" y="162" width="300" height="24" fill="#7fbf7f" fill-opacity="0.5"/>
+    <text x="60" y="230" opacity="0.75">CHANNEL: MOBILE</text>
+    <rect x="360" y="212" width="300" height="24" fill="#7fbf7f" fill-opacity="0.5"/>
+    <text x="60" y="280" opacity="0.75">CHANNEL: PARTNER API</text>
+    <rect x="360" y="262" width="150" height="24" fill="#e06a5a" fill-opacity="0.8"/>
+    <text x="520" y="280" fill="#e06a5a">96% → 71%</text>
+    <text x="60" y="330" opacity="0.75">CHANNEL: INTERNAL</text>
+    <rect x="360" y="312" width="300" height="24" fill="#7fbf7f" fill-opacity="0.5"/>
+  </g>
+  <text x="60" y="400" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the partner-api segment absorbed the whole regression while everything else stayed flat</text>
+</svg>

@@ -1,0 +1,23 @@
+<svg viewBox="0 0 1600 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="sloLanesTitle sloLanesDesc">
+  <title id="sloLanesTitle">Two pairs of indicators: did it run, and did it run well</title>
+  <desc id="sloLanesDesc">A black canvas diagram splitting the four SLO indicators into two labeled groups — did it run, covering availability and reliability, and did it run well, covering quality and efficiency — showing why a single blended score hides which pair is failing.</desc>
+  <rect width="1600" height="520" fill="#0a0a0a"/>
+  <g font-family="monospace" font-size="14" fill="#f6f1e6">
+    <text x="60" y="50" fill="#f4d44d" font-size="16">TWO QUESTIONS, FOUR INDICATORS</text>
+
+    <rect x="80" y="100" width="620" height="280" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="110" y="140" opacity="0.75">DID IT RUN?</text>
+    <rect x="110" y="170" width="240" height="50" fill="none" stroke="#7fbf7f" stroke-width="1.5"/>
+    <text x="130" y="200" fill="#7fbf7f">Availability</text>
+    <rect x="110" y="240" width="240" height="50" fill="none" stroke="#7fbf7f" stroke-width="1.5"/>
+    <text x="130" y="270" fill="#7fbf7f">Reliability</text>
+
+    <rect x="900" y="100" width="620" height="280" fill="#f4d44d" fill-opacity="0.06" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="930" y="140" fill="#f4d44d">DID IT RUN WELL?</text>
+    <rect x="930" y="170" width="240" height="50" fill="#f4d44d" fill-opacity="0.15" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="950" y="200" fill="#f4d44d">Quality</text>
+    <rect x="930" y="240" width="240" height="50" fill="none" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="950" y="270" fill="#f4d44d">Efficiency</text>
+  </g>
+  <text x="60" y="440" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a system can pass the left pair completely and still be failing the right pair every day</text>
+</svg>
