@@ -376,6 +376,8 @@ The choice between Datadog and Tracify is primarily about **workload shape and c
 
 For teams shipping agent-only products, the cost difference alone -- often $5,000-15,000/month at meaningful scale -- frequently funds the engineering effort to integrate a second platform outright. For enterprises with existing Datadog infrastructure, the decision instead hinges on whether agent-specific features justify managing that second platform for the agent slice of traffic. Either way, tie the decision to production velocity: how quickly do you need evaluation results, cost insights, and failure analysis to ship the next iteration? Datadog typically requires weeks of custom dashboard and metric work to get there; Tracify has these built in from the first trace. If cost efficiency across your stack is the underlying goal rather than observability alone, [reducing LLM costs without hurting quality](/blog/reduce-llm-costs-without-hurting-quality) covers the model- and prompt-level levers that compound with whichever observability platform you choose.
 
+> **Decision rule:** Compare the cost of the agent slice at its projected volume, then add the engineering cost of building evaluation and cost attribution before choosing on subscription price alone.
+
 ## Action checklist
 
 - [ ] You've measured (not guessed) your current agent-workload share of total observability volume.

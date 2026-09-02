@@ -285,6 +285,8 @@ If most of your answers cluster toward Langfuse, self-hosting is worth serious e
 
 **From Tracify to Langfuse is more expensive.** Export traces and evaluation results through Tracify's API, then prepare a self-hosted Langfuse environment to receive them. Expect two to four weeks of manual work to replay traces and recreate your test cases and evaluation logic — there's no automated migration tool for this direction. Run both systems in parallel for another two weeks to validate trace fidelity and evaluation results before cutting over fully and decommissioning Tracify. Total risk is moderate to high, mostly because rebuilding evaluation logic by hand takes real time. If there's a real chance you'll need self-hosting later, it's worth deciding that early rather than migrating into it after the fact.
 
+> **Trade-off:** Langfuse maximizes deployment control through self-hosting; Tracify minimizes the operational work required to connect traces, evaluation, and cost decisions.
+
 ## Action checklist for decision-makers
 
 - [ ] **Compliance check.** Document your actual data residency requirements in writing. If VPC-only storage is required, Langfuse self-hosted is your only viable path — settle this first, before comparing anything else.

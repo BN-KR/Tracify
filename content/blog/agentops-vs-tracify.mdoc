@@ -440,6 +440,8 @@ Teams occasionally move this direction when evaluation and cost tracking turn ou
 
 **Total migration risk:** Moderate. The instrumentation swap itself is easy; the real cost is losing a working evaluation layer and needing to consciously decide what replaces it, if anything.
 
+> **Decision rule:** Choose the platform that matches the failure you need to prevent next: AgentOps for fast replay-led debugging, or Tracify when evaluation and cost accountability must operate across runs.
+
 ## Action checklist for decision-makers
 
 - [ ] **Stage check:** Are you pre-launch and iterating on agent behavior daily, or post-launch defending a quality bar? This alone answers most of the AgentOps-vs-Tracify question.

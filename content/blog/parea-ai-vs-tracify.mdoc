@@ -371,6 +371,15 @@ If Scenario 3 is where your team is heading, the mechanics of connecting the two
 - **A quiet production regression goes unnoticed for days:** Tracify's continuous evaluation and alerting is your primary defense.
 - **Cost quietly climbs without anyone noticing:** Tracify's automatic cost tracking is the only one of the two built to catch this.
 
+> **Trade-off:** Parea is optimized for fast offline prompt iteration; Tracify is optimized for understanding and evaluating live agent behavior after deployment.
+
+```python
+if production_traffic:
+    observe_with = "tracify"
+else:
+    iterate_with = "parea"
+```
+
 ## Action checklist
 
 - [ ] **Identify your current bottleneck.** Is it prompt quality before launch, or production visibility after launch? Be honest about which one is actually costing you time and money right now.
