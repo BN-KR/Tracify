@@ -196,7 +196,7 @@ function Overview() {
             </p>
           </div>
           <Link
-            href="mailto:hello@tracify.tech?subject=Agent%20Failure%20Fit%20Call"
+            href="/contact?intent=fit-call"
             className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 border border-[#f4d44d] px-4 font-mono text-[10px] uppercase tracking-widest text-[#f4d44d] transition-colors hover:bg-[#f4d44d] hover:text-black"
           >
             Book fit call <ArrowRight className="size-4" />

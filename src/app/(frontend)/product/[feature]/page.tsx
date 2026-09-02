@@ -6,6 +6,7 @@ import { Fragment } from "react";
 import { FutureAction, FutureBand, FuturePage } from "@/components/marketing/future19-page";
 
 type Detail = { title: string; body: string };
+type FaqItem = { q: string; a: string };
 type FeaturePage = {
   title: string;
   eyebrow: string;
@@ -16,6 +17,7 @@ type FeaturePage = {
   workflow: readonly Detail[];
   visual: "trace" | "cost" | "tools" | "models" | "failures" | "reports" | "control" | "evaluation" | "lifecycle";
   related: readonly [string, string];
+  faq: readonly [FaqItem, FaqItem, FaqItem, FaqItem, FaqItem];
 };
 
 const productFeatures = {
@@ -38,6 +40,13 @@ const productFeatures = {
     ],
     visual: "trace",
     related: ["evaluation-engine", "failures"],
+    faq: [
+      { q: "What is a trace viewer for AI agents?", a: "A trace viewer is a tool that shows every step an AI agent took to produce a result, including model calls, tool calls, retries, timing, and cost, arranged in the order they executed." },
+      { q: "How do I debug a failing AI agent run?", a: "Open the trace for the affected run, jump to the first error or divergent span, and inspect the payloads and timing around it to find where execution departed from expected behavior." },
+      { q: "What is a span in LLM tracing?", a: "A span is a single recorded operation inside a trace, such as one model call or one tool call, with its own timing, inputs, outputs, and status." },
+      { q: "Can I see nested tool calls inside an agent trace?", a: "Yes. Trace Viewer shows parent and child spans as a timeline or graph so nested tool calls, retries, and parallel branches stay visible inside the parent run." },
+      { q: "Does trace viewing replace application logs?", a: "No, it complements them. Trace Viewer keeps timing, cost, payloads, and quality evidence attached to the specific run, which raw logs alone do not correlate." },
+    ],
   },
   "cost-dashboard": {
     title: "Cost Dashboard",
@@ -58,6 +67,13 @@ const productFeatures = {
     ],
     visual: "cost",
     related: ["runtime-control", "llm-calls"],
+    faq: [
+      { q: "How do I track LLM API costs?", a: "Track LLM API costs by attaching cost data to each model and tool call at the trace level, then aggregating by day, model, and run so spend can be traced back to its source." },
+      { q: "Why are my LLM costs so high?", a: "The most common causes are expensive default models, unnecessary retries or fallback chains, and tool calls that run more often than the workflow requires. A cost dashboard broken down by model and tool ranks these contributors." },
+      { q: "How do I reduce OpenAI API costs?", a: "Compare cost by model and route lower-stakes calls to cheaper models, cap retries with runtime policy, and confirm expensive changes against real trace evidence before rolling them out broadly." },
+      { q: "What is the difference between primary cost and retry cost?", a: "Primary cost is the spend from the intended execution path. Retry and fallback cost is the additional spend from recovery behavior, and separating the two shows how much resilience policy is actually costing." },
+      { q: "Can I compare AI agent costs by model?", a: "Yes. Cost Dashboard breaks down calls, latency, and total spend by model so you can identify which model choices or routing decisions are driving the bill." },
+    ],
   },
   "tool-calls": {
     title: "Tool Calls",
@@ -78,6 +94,13 @@ const productFeatures = {
     ],
     visual: "tools",
     related: ["trace-viewer", "failures"],
+    faq: [
+      { q: "What is a tool call in an LLM agent?", a: "A tool call is an action an agent takes outside the model itself, such as a search, database query, browser action, or API request, recorded with its arguments, result, timing, and status." },
+      { q: "How do I monitor tool calls in production?", a: "Record every tool call's arguments, result, latency, and failure state alongside the trace that selected it, then aggregate by tool name to find noisy or failing integrations." },
+      { q: "Why does my agent keep failing tool calls?", a: "Tool call failures usually come from either a reasoning failure, where the agent chose the wrong tool or bad arguments, or an integration failure, where the tool itself errored or timed out. Inspecting the call alongside the reasoning span that selected it shows which one occurred." },
+      { q: "How do I know if an agent picked the wrong tool?", a: "Open the trace, find the model span that made the selection, and compare it against the arguments and result of the tool call it produced." },
+      { q: "Can I aggregate tool usage across an agent?", a: "Yes. Per-tool summaries aggregate calls, latency, and failure rate by tool name to surface which integrations are slow or unreliable in production." },
+    ],
   },
   "llm-calls": {
     title: "LLM Calls",
@@ -98,6 +121,13 @@ const productFeatures = {
     ],
     visual: "models",
     related: ["cost-dashboard", "evaluation-engine"],
+    faq: [
+      { q: "What is an LLM call trace?", a: "An LLM call trace records the model used, its input and output, token counts, cost, latency, and time to first token for a single model generation inside an agent run." },
+      { q: "What is time to first token (TTFT)?", a: "TTFT is the delay between sending a request to a model and receiving the first streamed token back. It is tracked separately from total latency because it determines perceived responsiveness." },
+      { q: "How do I compare models for an AI agent?", a: "Compare models on the same trace metadata: token mix, latency, TTFT, cost, and quality, ideally over a versioned dataset with repeatable evaluators before promoting a change." },
+      { q: "How do I know which model call caused a bad response?", a: "Open the trace and select the model span responsible for the decision, then inspect its payload, token mix, and downstream effects together." },
+      { q: "Does token counting include both input and output tokens?", a: "Yes. Input and output token counts are recorded per generation and aggregated into the run total so cost and context usage stay accountable." },
+    ],
   },
   failures: {
     title: "Failure Analysis",
@@ -118,6 +148,13 @@ const productFeatures = {
     ],
     visual: "failures",
     related: ["trace-viewer", "runtime-control"],
+    faq: [
+      { q: "Why did my AI agent run fail?", a: "Check the failed run's trace for the first error-bearing span, then look at retry count, latency thresholds, and fallback outcomes around it to find the operation that broke the expected path." },
+      { q: "How do I detect retry storms in an AI agent?", a: "Retry storms show up as a high retry count on the same operation within a short window. Recording retry count and orchestration metadata per span makes them visible before they exhaust a fallback chain." },
+      { q: "What is the difference between a stall and a hard failure?", a: "A stall shows high latency or a long time to first token without an error. A hard failure produces an explicit error span. Comparing duration against threshold evidence distinguishes the two." },
+      { q: "Can I get alerted when an AI agent fails?", a: "Yes. Configured project alerts can route failure and threshold breaches to a validated Slack webhook so responders reach the relevant trace evidence directly." },
+      { q: "How do I reduce recurring AI agent failures?", a: "After fixing the immediate cause, add the corrected case to an evaluation dataset or runtime policy so the same failure mode is caught before the next release." },
+    ],
   },
   reports: {
     title: "Project Reports",
@@ -138,6 +175,13 @@ const productFeatures = {
     ],
     visual: "reports",
     related: ["cost-dashboard", "failures"],
+    faq: [
+      { q: "What should an AI agent operating report include?", a: "A useful report includes run volume, spend, failure counts, model and tool usage breakdowns, and alert activity for a defined time window, grounded in the same telemetry engineers inspect." },
+      { q: "Can I export an AI agent report as a PDF?", a: "Yes. Project Reports use a purpose-built print layout so the browser print flow produces a clean PDF or physical review packet." },
+      { q: "How often should agent reports be reviewed?", a: "Most teams review reports on a release or weekly cadence, matching the report window to the review meeting it supports." },
+      { q: "Who typically uses project reports instead of the dashboard?", a: "Engineering leads, product owners, and stakeholders who need a stable operating summary without navigating live dashboards or exporting raw traces themselves." },
+      { q: "Does a project report replace live monitoring?", a: "No. It summarizes a defined window for review purposes; live monitoring and alerting still cover real-time detection." },
+    ],
   },
   "runtime-control": {
     title: "Runtime Control",
@@ -158,6 +202,13 @@ const productFeatures = {
     ],
     visual: "control",
     related: ["cost-dashboard", "failures"],
+    faq: [
+      { q: "What is runtime control for AI agents?", a: "Runtime control lets teams set explicit execution policy, such as cost ceilings, latency budgets, model fallback chains, and retry behavior, instead of hardcoding those limits into application code." },
+      { q: "What is observe mode versus enforce mode?", a: "Observe mode records what a policy would have blocked or rerouted without changing live behavior. Enforce mode actively applies the policy once its thresholds are validated." },
+      { q: "How do I set a cost ceiling for an AI agent?", a: "Define a positive per-run and daily spend limit based on baseline traces, run it in observe mode first, then enable enforcement once the limit reflects real production behavior." },
+      { q: "What is a model fallback chain?", a: "A fallback chain is an ordered list of model identifiers used for recovery when a primary model call fails or times out, rather than relying on implicit provider behavior." },
+      { q: "How do I set a retry policy for LLM calls?", a: "Configure attempt count, initial backoff, backoff multiplier, and which error classes are retryable, then monitor retry and fallback cost after enabling the policy." },
+    ],
   },
   "evaluation-engine": {
     title: "Evaluation Engine",
@@ -178,6 +229,13 @@ const productFeatures = {
     ],
     visual: "evaluation",
     related: ["lifecycle", "trace-viewer"],
+    faq: [
+      { q: "What is AI agent evaluation?", a: "AI agent evaluation is the practice of running versioned datasets through deterministic or model-based evaluators to score agent behavior repeatably, instead of relying on subjective spot checks." },
+      { q: "What is the difference between offline and online evaluation?", a: "Offline evaluation runs a suite of evaluators over a fixed dataset before release. Online evaluation attaches live scores to production traces or spans using the same evaluator versions." },
+      { q: "What is a code evaluator versus a model-based evaluator?", a: "A code evaluator applies a deterministic check, such as a schema or string match. A model-based evaluator uses another model as a judge and returns a numeric, boolean, categorical, or text result with an explanation." },
+      { q: "How do I build a dataset for agent evaluation?", a: "Collect representative inputs, expected outputs, metadata, and selected production traces into a versioned dataset that reflects the product behavior or risk being tested." },
+      { q: "Can I monitor evaluation scores in production?", a: "Yes. Sampled live traffic and human or user feedback can be scored continuously, with alerts triggered when a score distribution crosses a defined threshold." },
+    ],
   },
   lifecycle: {
     title: "AI Engineering Lifecycle",
@@ -198,6 +256,13 @@ const productFeatures = {
     ],
     visual: "lifecycle",
     related: ["evaluation-engine", "trace-viewer"],
+    faq: [
+      { q: "What is the AI engineering lifecycle?", a: "The AI engineering lifecycle is the loop from observing production traces, to curating datasets, to running experiments, to releasing and monitoring, so that production evidence directly informs the next change." },
+      { q: "What is LLM observability?", a: "LLM observability is the practice of recording traces, sessions, model and tool spans, cost, latency, errors, and feedback for AI applications so their behavior can be inspected and debugged like any other production system." },
+      { q: "How does a production trace become a test case?", a: "A representative trace or user signal is promoted into a versioned dataset with an expected outcome, which then becomes a repeatable check for future prompt, model, or workflow changes." },
+      { q: "Why keep release context connected to live traces?", a: "Connecting release context to live traces lets a team compare deployed behavior directly against evaluated expectations, closing the loop between what was tested and what shipped." },
+      { q: "Who uses an AI engineering lifecycle platform?", a: "AI product teams that need to coordinate debugging, prompt iteration, evaluation, experimentation, and release monitoring without rebuilding context at every stage." },
+    ],
   },
 } as const satisfies Record<string, FeaturePage>;
 
@@ -223,6 +288,35 @@ function ProductBreadcrumb({ title, slug }: { title: string; slug: string }) {
     ],
   };
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }} />;
+}
+
+function ProductFaqSchema({ faq }: { faq: FeaturePage["faq"] }) {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }} />;
+}
+
+function ProductFaq({ faq }: { faq: FeaturePage["faq"] }) {
+  return (
+    <div className="divide-y divide-black border-x border-black">
+      {faq.map((item) => (
+        <details key={item.q} className="group p-6 md:p-8">
+          <summary className="cursor-pointer list-none font-mono text-[11px] uppercase tracking-[0.12em] marker:content-none">
+            <span className="mr-2 text-black/35">Q.</span>
+            {item.q}
+          </summary>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-black/60">{item.a}</p>
+        </details>
+      ))}
+    </div>
+  );
 }
 
 function ProductHero({ page, index }: { page: FeaturePage; index: number }) {
@@ -277,10 +371,12 @@ export default async function ProductFeaturePage({ params }: { params: Promise<{
   const index = Object.keys(productFeatures).indexOf(feature);
   return <FuturePage>
     <ProductBreadcrumb title={page.title} slug={feature} />
+    <ProductFaqSchema faq={page.faq} />
     <ProductHero page={page} index={index} />
     <FutureBand label="Operating outcome"><div className="grid border-x border-black md:grid-cols-[1fr_1.25fr]"><p className="border-b border-black bg-[#f4d44d] p-7 font-pixel text-4xl leading-[0.92] tracking-[-0.045em] md:border-b-0 md:border-r md:p-10">{page.outcome}</p><div className="p-7 md:p-10"><p className="font-mono text-[8px] uppercase tracking-[0.14em] text-black/45">Use it when</p><p className="mt-5 max-w-2xl text-base leading-7 text-black/65">{page.bestFor}</p></div></div></FutureBand>
     <FutureBand label={`${page.title} / capability record`}><DetailGrid details={page.details} visual={page.visual} /></FutureBand>
     <FutureBand label="From signal to action"><Workflow page={page} /></FutureBand>
+    <FutureBand label="Frequently asked questions"><ProductFaq faq={page.faq} /></FutureBand>
     <FutureBand tone="ink" label="Continue through the system"><div className="grid border-x border-white/20 md:grid-cols-[1fr_360px]"><div className="p-7 md:p-10"><p className="max-w-3xl font-pixel text-5xl leading-[0.9] tracking-[-0.055em] md:text-7xl">The evidence stays connected after the page ends.</p><div className="mt-9 flex flex-wrap gap-3"><FutureAction href="/demo" inverted>Open the demo</FutureAction><FutureAction href="/sign-up" inverted>Start free</FutureAction></div></div><nav aria-label="Related product capabilities" className="border-t border-white/20 md:border-l md:border-t-0">{page.related.map((slug)=><Link key={slug} href={`/product/${slug}`} className="flex min-h-24 items-center justify-between border-b border-white/20 px-6 font-mono text-[9px] uppercase tracking-[0.12em] last:border-b-0 hover:bg-[#f4d44d] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#f4d44d]"><span>{productFeatures[slug as Feature].title}</span><ArrowRight className="size-4" aria-hidden="true" /></Link>)}</nav></div></FutureBand>
   </FuturePage>;
 }

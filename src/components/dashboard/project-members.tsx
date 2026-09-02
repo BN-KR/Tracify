@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function ProjectMembers() {
+export function ProjectMembers({ readOnly = false }: { readOnly?: boolean }) {
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const { data: organization, isPending: organizationPending } = authClient.useActiveOrganization();
   const [inviteEmail, setInviteEmail] = useState("");
@@ -16,6 +16,7 @@ export function ProjectMembers() {
   const [inviting, setInviting] = useState(false);
 
   async function invite() {
+    if (readOnly) return;
     if (!organization || !inviteEmail.trim()) return;
     setInviting(true);
     setStatus("");
@@ -36,11 +37,11 @@ export function ProjectMembers() {
   return <div className="space-y-6">
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div><h3 className="font-mono text-[14px] uppercase tracking-widest text-black">{organization.name} members</h3><p className="mt-1 text-[11px] text-black/55">Manage who has access to this workspace.</p></div>
-      <div className="flex flex-wrap gap-2">
+      {!readOnly ? <div className="flex flex-wrap gap-2">
         <input value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="teammate@example.com" type="email" className="h-9 w-52 border border-black/15 bg-white px-3 font-mono text-[10px] text-black/70 outline-none focus:border-black/30" />
         <select value={inviteRole} onChange={(event) => setInviteRole(event.target.value as "member" | "admin")} className="h-9 border border-black/15 bg-white px-2 font-mono text-[10px] uppercase text-black/70"><option value="member">Developer</option><option value="admin">Admin</option></select>
         <Button onClick={() => void invite()} disabled={inviting || !inviteEmail.trim()} className="rounded-none font-mono text-[10px] uppercase"><UserPlus className="size-4" />{inviting ? "Sending..." : "Invite"}</Button>
-      </div>
+      </div> : <span className="font-mono text-[10px] uppercase tracking-widest text-black/45">Read only</span>}
     </div>
     <Card className="divide-y divide-black/15 rounded-none border-border bg-white shadow-none">
       {organization.members?.map((membership) => <MemberRow key={membership.id} name={membership.user.name} email={membership.user.email} role={formatRole(membership.role)} isMe={membership.userId === session?.user.id} />)}
