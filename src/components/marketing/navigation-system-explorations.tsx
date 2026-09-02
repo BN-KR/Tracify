@@ -103,9 +103,9 @@ export function NavigationSystemExplorations({
         className="bg-[#eceae3] px-6 py-14 text-black md:px-10 md:py-16"
       >
         <div className="mx-auto max-w-[1240px]">
-          <div className="flex items-center justify-between border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/70">
+          <div className="flex flex-col gap-2 border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/70 sm:flex-row sm:items-center sm:justify-between">
             <span>AI agent observability / evaluation</span>
-            <span className="hidden sm:inline">Production infrastructure</span>
+            <span>Production infrastructure</span>
           </div>
           <div className="mt-7 grid border border-black/20 bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[0.95fr_1.05fr] md:mt-8">
             <div className="flex min-h-[470px] flex-col justify-between border-b border-black/15 p-6 md:p-8 lg:border-b-0 lg:border-r">
@@ -274,7 +274,7 @@ export function NavigationSystemExplorations({
           <div className="mt-10 grid border border-black/20 bg-white lg:grid-cols-[0.8fr_1.2fr]">
             <div className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
               <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/70">
-                Incident / run_018204
+                Incident / sample run_018204
               </p>
               <h3 className="mt-8 font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
                 The failure is a decision trail.
@@ -323,7 +323,7 @@ export function NavigationSystemExplorations({
               <div className="flex flex-col justify-between gap-6 border-b border-black/15 pb-7 sm:flex-row sm:items-end">
                 <div>
                   <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/70">
-                    Candidate comparison
+                    Candidate comparison / sample data
                   </p>
                   <h3 className="mt-5 font-pixel text-5xl leading-[0.9] tracking-[-0.07em] sm:text-6xl">
                     Release 2.4 wins.
@@ -401,6 +401,9 @@ export function NavigationSystemExplorations({
             <div className="flex flex-col justify-between bg-black p-7 text-white">
               <Sparkles className="size-6 text-[#f4d44d]" />
               <div>
+                <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/55">
+                  Sample result
+                </p>
                 <p className="font-pixel text-6xl tracking-[-0.07em]">+12%</p>
                 <p className="mt-3 text-sm leading-6 text-white/62">
                   quality uplift on the same production-derived evaluation set
