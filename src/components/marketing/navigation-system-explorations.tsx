@@ -154,23 +154,26 @@ export function NavigationSystemExplorations({
 
       <section
         id="navsys-hero-split"
-        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
+        className="bg-[#eceae3] px-6 py-14 text-black md:px-10 md:py-16"
       >
         <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="01" title="outcome hero" />
-          <div className="mt-10 grid border border-black/20 bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="flex min-h-[560px] flex-col justify-between border-b border-black/15 p-7 md:p-10 lg:border-b-0 lg:border-r">
+          <div className="flex items-center justify-between border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/70">
+            <span>AI agent observability / evaluation</span>
+            <span className="hidden sm:inline">Production infrastructure</span>
+          </div>
+          <div className="mt-7 grid border border-black/20 bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[0.95fr_1.05fr] md:mt-8">
+            <div className="flex min-h-[470px] flex-col justify-between border-b border-black/15 p-6 md:p-8 lg:border-b-0 lg:border-r">
               <div>
                 <span className="inline-flex items-center gap-2 bg-black px-3 py-2 font-mono text-[8px] uppercase tracking-[0.13em] text-white">
-                  <Radio className="size-3 text-[#f4d44d]" /> production signal
-                  connected
+                  <Radio className="size-3 text-[#f4d44d]" /> the run explains
+                  the release
                 </span>
-                <h3 className="mt-9 max-w-[740px] font-pixel text-7xl leading-[0.8] tracking-[-0.08em] md:text-9xl">
-                  The run explains the release.
-                </h3>
-                <p className="mt-7 max-w-xl text-lg leading-8 text-black/70">
-                  Trace what happened. Test what changed. Ship the version that
-                  proves itself.
+                <h1 className="mt-7 max-w-[740px] font-pixel text-7xl leading-[0.82] tracking-[-0.08em] md:text-7xl">
+                  See why it failed. Ship with proof.
+                </h1>
+                <p className="mt-5 max-w-xl text-base leading-7 text-black/70 md:text-lg">
+                  Trace every model, tool, retrieval, and fallback decision.
+                  Evaluate the fix before it reaches production.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -188,36 +191,48 @@ export function NavigationSystemExplorations({
                 </Link>
               </div>
             </div>
-            <div className="grid grid-rows-[1fr_auto] bg-black text-white">
-              <div className="p-7 md:p-9">
-                <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/62">
-                  Live release proof
-                </p>
-                <div className="mt-16 flex items-end justify-between border-b border-white/15 pb-7">
-                  <span className="font-pixel text-6xl tracking-[-0.07em]">
-                    0.94
-                  </span>
-                  <span className="font-mono text-[9px] uppercase text-[#f4d44d]">
-                    quality
-                  </span>
+            <div className="bg-black p-6 text-white md:p-8">
+              <div className="flex items-start justify-between gap-5 border-b border-white/15 pb-6">
+                <div>
+                  <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/62">
+                    Sample run / illustrative evidence
+                  </p>
+                  <p className="mt-3 font-mono text-sm">support-agent / v2.4</p>
                 </div>
-                <div className="grid grid-cols-3 divide-x divide-white/15 py-7 font-mono">
-                  <div>
-                    <p className="text-[8px] uppercase text-white/62">Runs</p>
-                    <p className="mt-3 text-sm">18,204</p>
-                  </div>
-                  <div className="pl-4">
-                    <p className="text-[8px] uppercase text-white/62">p95</p>
-                    <p className="mt-3 text-sm">2.8s</p>
-                  </div>
-                  <div className="pl-4">
-                    <p className="text-[8px] uppercase text-white/62">Spend</p>
-                    <p className="mt-3 text-sm">$0.041</p>
-                  </div>
-                </div>
+                <span className="border border-[#f4d44d] px-2 py-1 font-mono text-[8px] uppercase tracking-[0.12em] text-[#f4d44d]">
+                  Review
+                </span>
               </div>
-              <div className="flex items-center gap-3 bg-[#f4d44d] p-5 font-mono text-[9px] uppercase tracking-[0.12em] text-black">
-                <ShieldCheck className="size-4" /> Regression check passed
+              <div className="mt-7 border border-white/15">
+                {[
+                  ["12:41:08.120", "MODEL", "response drafted", false],
+                  ["12:41:08.604", "TOOL", "knowledge.search → 0 results", true],
+                  ["12:41:09.011", "RETRY", "fallback model invoked", false],
+                  ["12:41:09.842", "EVAL", "groundedness → 0.42", false],
+                ].map(([time, kind, detail, selected]) => (
+                  <div
+                    key={time}
+                    className={`grid grid-cols-[auto_auto_1fr] gap-3 border-b border-white/10 px-4 py-4 font-mono text-[9px] last:border-b-0 ${selected ? "bg-[#f4d44d] text-black" : "text-white/72"}`}
+                  >
+                    <span className="text-[8px] opacity-60">{time}</span>
+                    <span className="text-[8px] opacity-60">{kind}</span>
+                    <span>{detail}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-7 flex items-center justify-between border-t border-white/15 pt-6">
+                <div>
+                  <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/55">
+                    Root cause
+                  </p>
+                  <p className="mt-2 text-sm">Empty retrieval reached fallback.</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-[#f4d44d]">
+                    Release decision
+                  </p>
+                  <p className="mt-2 font-pixel text-3xl tracking-[-0.05em]">Hold</p>
+                </div>
               </div>
             </div>
           </div>
