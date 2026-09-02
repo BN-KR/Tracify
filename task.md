@@ -10,7 +10,7 @@
 - [pending owner] Verify public contact channels and one current trigger for the 15 Qualified accounts, then personally send outreach. Continue research until 50 accounts meet the full qualification gate; do not count Watch accounts as qualified.
 - [pending owner] Execute the 30-day funnel: 100 personalized sends, 5 calls, 2 written offers, 1 payment, and 1 delivered evidence-backed review.
 - [completed] Publish draft PR #75 from `codex/first-customer-review`.
-- [pending] Inspect PR #75 hosted checks and merge only after review; do not deploy this branch as production.
+- [completed] Inspect PR #75 hosted checks and squash-merge it into `main` as `1cc8f88`. Vercel previews, adapter, and security passed; the unrelated existing comparison-blog framework gate remained red. No production deployment was performed.
 
 # 2026-08-24 — Cursor removal and fit verification
 
