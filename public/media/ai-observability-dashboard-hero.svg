@@ -1,0 +1,36 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dashHeroTitle dashHeroDesc">
+  <title id="dashHeroTitle">A dashboard layout with a top status row, a middle trend chart, and a bottom drill-down table</title>
+  <desc id="dashHeroDesc">A black canvas shows a mock dashboard: a top row of four cream KPI tiles for latency, cost, error rate, and quality score, a middle acid-yellow trend chart spanning the width, and a bottom drill-down table listing recent flagged runs, illustrating a three-tier dashboard layout from summary to detail.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="55" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">DASHBOARD: SUMMARY TO DETAIL</text>
+
+  <g font-family="monospace" font-size="13" font-weight="700" text-anchor="middle">
+    <rect x="100" y="90" width="330" height="90" fill="#f6f1e6"/>
+    <text x="265" y="130" fill="#0a0a0a">LATENCY p95</text>
+    <text x="265" y="155" fill="#0a0a0a" font-size="20">1.8s</text>
+
+    <rect x="460" y="90" width="330" height="90" fill="#f6f1e6"/>
+    <text x="625" y="130" fill="#0a0a0a">COST / RUN</text>
+    <text x="625" y="155" fill="#0a0a0a" font-size="20">$0.021</text>
+
+    <rect x="820" y="90" width="330" height="90" fill="#f6f1e6"/>
+    <text x="985" y="130" fill="#0a0a0a">ERROR RATE</text>
+    <text x="985" y="155" fill="#0a0a0a" font-size="20">1.4%</text>
+
+    <rect x="1180" y="90" width="320" height="90" fill="#f6f1e6"/>
+    <text x="1340" y="130" fill="#0a0a0a">QUALITY SCORE</text>
+    <text x="1340" y="155" fill="#0a0a0a" font-size="20">0.93</text>
+  </g>
+
+  <rect x="100" y="230" width="1400" height="260" fill="none" stroke="#f4d44d" stroke-width="3"/>
+  <polyline points="140,420 300,380 460,400 620,340 780,360 940,300 1100,330 1260,280 1420,310" fill="none" stroke="#f4d44d" stroke-width="4"/>
+  <text x="800" y="260" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="14">QUALITY SCORE TREND, 30 DAYS</text>
+
+  <rect x="100" y="530" width="1400" height="260" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+  <text x="800" y="560" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">FLAGGED RUNS (DRILL-DOWN)</text>
+  <text x="130" y="600" fill="#f6f1e6" font-family="monospace" font-size="12">run_9f21c   groundedness 0.61   owner: risk-ops   [investigate]</text>
+  <text x="130" y="630" fill="#f6f1e6" font-family="monospace" font-size="12">run_7c2f1   retries 4            owner: platform    [investigate]</text>
+  <text x="130" y="660" fill="#f6f1e6" font-family="monospace" font-size="12">run_5b8a0   cost spike 3.2x       owner: platform    [investigate]</text>
+
+  <text x="800" y="855" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · summary tiles, one honest trend, and a drill-down path to the actual evidence</text>
+</svg>

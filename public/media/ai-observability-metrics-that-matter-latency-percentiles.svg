@@ -1,0 +1,36 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="metLatTitle metLatDesc">
+  <title id="metLatTitle">A latency distribution histogram showing why p50 hides the p99 tail that users actually complain about</title>
+  <desc id="metLatDesc">A black canvas shows a histogram of request latencies skewed right, with a cream marker at the p50 median position near the peak and a red marker far out on the long tail at p99, illustrating that an average or median latency figure can look healthy while a meaningful share of requests experience much higher latency.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">WHY THE MEDIAN LIES</text>
+
+  <line x1="150" y1="740" x2="150" y2="140" stroke="#f6f1e6" stroke-width="2"/>
+  <line x1="150" y1="740" x2="1470" y2="740" stroke="#f6f1e6" stroke-width="2"/>
+
+  <g fill="#f4d44d">
+    <rect x="180" y="600" width="40" height="140"/>
+    <rect x="230" y="480" width="40" height="260"/>
+    <rect x="280" y="380" width="40" height="360"/>
+    <rect x="330" y="320" width="40" height="420"/>
+    <rect x="380" y="300" width="40" height="440"/>
+    <rect x="430" y="330" width="40" height="410"/>
+    <rect x="480" y="390" width="40" height="350"/>
+    <rect x="530" y="460" width="40" height="280"/>
+    <rect x="580" y="540" width="40" height="200"/>
+    <rect x="630" y="610" width="40" height="130"/>
+    <rect x="680" y="660" width="40" height="80"/>
+    <rect x="730" y="690" width="40" height="50"/>
+    <rect x="780" y="705" width="40" height="35"/>
+    <rect x="900" y="725" width="30" height="15"/>
+    <rect x="1050" y="732" width="25" height="8"/>
+    <rect x="1300" y="736" width="20" height="4"/>
+  </g>
+
+  <line x1="400" y1="740" x2="400" y2="270" stroke="#f6f1e6" stroke-width="3" stroke-dasharray="6,6"/>
+  <text x="400" y="260" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">p50: 1.1s</text>
+
+  <line x1="1300" y1="740" x2="1300" y2="260" stroke="#e2543a" stroke-width="3" stroke-dasharray="6,6"/>
+  <text x="1300" y="250" text-anchor="middle" fill="#e2543a" font-family="monospace" font-size="14">p99: 8.4s</text>
+
+  <text x="800" y="820" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · the p50 looks fine while roughly one in a hundred users waits 8 seconds</text>
+</svg>

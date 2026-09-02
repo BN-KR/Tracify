@@ -1,0 +1,42 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="agHeroTitle agHeroDesc">
+  <title id="agHeroTitle">A chain of agent steps branching into a tool call, a reasoning step, and a failure recovery path</title>
+  <desc id="agHeroDesc">A black canvas shows a horizontal chain of five numbered agent steps in cream boxes connected by acid-yellow arrows; step three branches downward into a tool-call box, and step four branches into a red-outlined recovery box, illustrating how an agentic system's reasoning trace can diverge from its plan.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="70" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">THE AGENT REASONING TRACE</text>
+
+  <g font-family="monospace" font-size="15" font-weight="700" text-anchor="middle">
+    <rect x="80" y="180" width="220" height="80" fill="#f6f1e6"/>
+    <text x="190" y="225" fill="#0a0a0a">1. PLAN</text>
+
+    <rect x="380" y="180" width="220" height="80" fill="#f6f1e6"/>
+    <text x="490" y="225" fill="#0a0a0a">2. REASON</text>
+
+    <rect x="680" y="180" width="220" height="80" fill="#f4d44d"/>
+    <text x="790" y="225" fill="#0a0a0a">3. TOOL CALL</text>
+
+    <rect x="980" y="180" width="220" height="80" fill="#f4d44d"/>
+    <text x="1090" y="225" fill="#0a0a0a">4. OBSERVE</text>
+
+    <rect x="1280" y="180" width="220" height="80" fill="#f6f1e6"/>
+    <text x="1390" y="225" fill="#0a0a0a">5. ACT</text>
+
+    <line x1="300" y1="220" x2="380" y2="220" stroke="#f4d44d" stroke-width="4"/>
+    <line x1="600" y1="220" x2="680" y2="220" stroke="#f4d44d" stroke-width="4"/>
+    <line x1="900" y1="220" x2="980" y2="220" stroke="#f4d44d" stroke-width="4"/>
+    <line x1="1200" y1="220" x2="1280" y2="220" stroke="#f4d44d" stroke-width="4"/>
+
+    <line x1="790" y1="260" x2="790" y2="400" stroke="#f4d44d" stroke-width="3" stroke-dasharray="6,6"/>
+    <rect x="650" y="400" width="280" height="90" fill="none" stroke="#f4d44d" stroke-width="3"/>
+    <text x="790" y="440" fill="#f6f1e6" font-size="13">TOOL: search_orders(id)</text>
+    <text x="790" y="465" fill="#f6f1e6" font-size="13">latency 340ms · cost $0.0009</text>
+
+    <line x1="1090" y1="260" x2="1090" y2="400" stroke="#e2543a" stroke-width="3" stroke-dasharray="6,6"/>
+    <rect x="950" y="400" width="280" height="120" fill="none" stroke="#e2543a" stroke-width="3"/>
+    <text x="1090" y="435" fill="#e2543a" font-size="13">DIVERGENCE</text>
+    <text x="1090" y="460" fill="#f6f1e6" font-size="12">observed result contradicts</text>
+    <text x="1090" y="480" fill="#f6f1e6" font-size="12">the plan's assumption</text>
+    <text x="1090" y="502" fill="#f6f1e6" font-size="12">recovery: re-plan or escalate</text>
+  </g>
+
+  <text x="800" y="820" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · agentic observability captures the branch, not just the final answer</text>
+</svg>

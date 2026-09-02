@@ -1,0 +1,38 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bpRaciTitle bpRaciDesc">
+  <title id="bpRaciTitle">An ownership grid mapping observability responsibilities against three teams</title>
+  <desc id="bpRaciDesc">A black canvas shows a grid with rows for instrumentation, alert response, and evaluation criteria, and columns for platform team, application team, and risk or compliance team, with acid-yellow cells marking primary ownership and cream cells marking consulted, illustrating that unclear ownership is a common rollout failure.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">WHO OWNS WHAT</text>
+
+  <g font-family="monospace" font-size="14" font-weight="700">
+    <text x="480" y="130" fill="#f6f1e6">PLATFORM</text>
+    <text x="800" y="130" fill="#f6f1e6">APPLICATION</text>
+    <text x="1150" y="130" fill="#f6f1e6">RISK/COMPLIANCE</text>
+
+    <text x="120" y="220" fill="#f6f1e6">INSTRUMENTATION</text>
+    <rect x="420" y="180" width="180" height="70" fill="#f4d44d"/>
+    <text x="510" y="222" text-anchor="middle" fill="#0a0a0a">OWNS</text>
+    <rect x="720" y="180" width="180" height="70" fill="#f6f1e6"/>
+    <text x="810" y="222" text-anchor="middle" fill="#0a0a0a">consulted</text>
+    <rect x="1080" y="180" width="180" height="70" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+    <text x="1170" y="222" text-anchor="middle" fill="#f6f1e6">—</text>
+
+    <text x="120" y="340" fill="#f6f1e6">ALERT RESPONSE</text>
+    <rect x="420" y="300" width="180" height="70" fill="#f6f1e6"/>
+    <text x="510" y="342" text-anchor="middle" fill="#0a0a0a">consulted</text>
+    <rect x="720" y="300" width="180" height="70" fill="#f4d44d"/>
+    <text x="810" y="342" text-anchor="middle" fill="#0a0a0a">OWNS</text>
+    <rect x="1080" y="300" width="180" height="70" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+    <text x="1170" y="342" text-anchor="middle" fill="#f6f1e6">—</text>
+
+    <text x="120" y="460" fill="#f6f1e6">EVAL CRITERIA</text>
+    <rect x="420" y="420" width="180" height="70" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+    <text x="510" y="462" text-anchor="middle" fill="#f6f1e6">—</text>
+    <rect x="720" y="420" width="180" height="70" fill="#f6f1e6"/>
+    <text x="810" y="462" text-anchor="middle" fill="#0a0a0a">consulted</text>
+    <rect x="1080" y="420" width="180" height="70" fill="#f4d44d"/>
+    <text x="1170" y="462" text-anchor="middle" fill="#0a0a0a">OWNS</text>
+  </g>
+
+  <text x="800" y="600" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · rollouts stall most often at undefined ownership, not missing tooling</text>
+</svg>

@@ -1,0 +1,29 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dashCompTitle dashCompDesc">
+  <title id="dashCompTitle">A single composite health score decomposed back into three separately moving dimensions</title>
+  <desc id="dashCompDesc">A black canvas shows one large cream circle labeled composite health score 87 on the left, with an arrow pointing right to three smaller acid-yellow bars labeled quality, cost, and reliability, where quality is dropping and cost is rising even though the composite score stays flat, illustrating how a single score can hide offsetting movements.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">ONE SCORE CAN HIDE THE TRUTH</text>
+
+  <circle cx="320" cy="420" r="150" fill="#f6f1e6"/>
+  <text x="320" y="410" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="16" font-weight="700">HEALTH SCORE</text>
+  <text x="320" y="450" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="34" font-weight="700">87</text>
+  <text x="320" y="480" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="12">flat for 3 weeks</text>
+
+  <line x1="500" y1="420" x2="620" y2="420" stroke="#f6f1e6" stroke-width="3"/>
+
+  <g font-family="monospace" font-size="13" font-weight="700">
+    <text x="660" y="270" fill="#f6f1e6">QUALITY</text>
+    <rect x="660" y="290" width="300" height="30" fill="#e2543a"/>
+    <text x="970" y="310" fill="#e2543a" font-size="12">falling</text>
+
+    <text x="660" y="420" fill="#f6f1e6">COST</text>
+    <rect x="660" y="440" width="300" height="30" fill="#f4d44d"/>
+    <text x="970" y="460" fill="#f4d44d" font-size="12">rising</text>
+
+    <text x="660" y="570" fill="#f6f1e6">RELIABILITY</text>
+    <rect x="660" y="590" width="300" height="30" fill="#f6f1e6"/>
+    <text x="970" y="610" fill="#f6f1e6" font-size="12">stable</text>
+  </g>
+
+  <text x="800" y="800" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · quality falling and cost rising can offset each other inside one composite number</text>
+</svg>

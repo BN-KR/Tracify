@@ -1,0 +1,34 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="metHeroTitle metHeroDesc">
+  <title id="metHeroTitle">Five metric categories arranged around a central run record: latency, cost, reliability, quality, and tool success</title>
+  <desc id="metHeroDesc">A black canvas shows a central cream circle labeled one run record surrounded by five acid-yellow satellite boxes labeled latency, cost, reliability, quality, and tool-call success, each connected by a line to the center, illustrating that the metrics that matter are the ones tied back to the same run identity.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="55" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">FIVE METRICS, ONE RUN RECORD</text>
+
+  <circle cx="800" cy="470" r="130" fill="#f6f1e6"/>
+  <text x="800" y="465" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="15" font-weight="700">ONE RUN</text>
+  <text x="800" y="488" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="15" font-weight="700">RECORD</text>
+
+  <g font-family="monospace" font-size="14" font-weight="700" text-anchor="middle">
+    <line x1="800" y1="340" x2="800" y2="220" stroke="#f4d44d" stroke-width="3"/>
+    <rect x="670" y="150" width="260" height="70" fill="#f4d44d"/>
+    <text x="800" y="192" fill="#0a0a0a">LATENCY</text>
+
+    <line x1="920" y1="400" x2="1150" y2="270" stroke="#f4d44d" stroke-width="3"/>
+    <rect x="1120" y="200" width="260" height="70" fill="#f4d44d"/>
+    <text x="1250" y="242" fill="#0a0a0a">COST</text>
+
+    <line x1="920" y1="540" x2="1150" y2="650" stroke="#f4d44d" stroke-width="3"/>
+    <rect x="1120" y="650" width="260" height="70" fill="#f4d44d"/>
+    <text x="1250" y="692" fill="#0a0a0a">RELIABILITY</text>
+
+    <line x1="800" y1="600" x2="800" y2="720" stroke="#f4d44d" stroke-width="3"/>
+    <rect x="670" y="720" width="260" height="70" fill="#f4d44d"/>
+    <text x="800" y="762" fill="#0a0a0a">QUALITY</text>
+
+    <line x1="680" y1="400" x2="450" y2="270" stroke="#f4d44d" stroke-width="3"/>
+    <rect x="220" y="200" width="260" height="70" fill="#f4d44d"/>
+    <text x="350" y="242" fill="#0a0a0a">TOOL SUCCESS</text>
+  </g>
+
+  <text x="800" y="850" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · a metric that cannot be traced back to a run record cannot be diagnosed</text>
+</svg>

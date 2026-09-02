@@ -1,0 +1,33 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dashAlertTitle dashAlertDesc">
+  <title id="dashAlertTitle">An alert flowing from threshold breach through evidence attachment to a named owner</title>
+  <desc id="dashAlertDesc">A black canvas shows a horizontal flow of four acid-yellow boxes: threshold breach, representative trace attached, likely cause labeled, and routed to named owner, connected by arrows, contrasted with a red crossed-out box below labeled generic alert with no evidence and no owner.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">ALERT ROUTING, DONE WELL</text>
+
+  <g font-family="monospace" font-size="13" font-weight="700" text-anchor="middle">
+    <rect x="60" y="150" width="320" height="90" fill="#f4d44d"/>
+    <text x="220" y="200" fill="#0a0a0a">THRESHOLD BREACH</text>
+
+    <rect x="440" y="150" width="320" height="90" fill="#f4d44d"/>
+    <text x="600" y="190" fill="#0a0a0a">TRACE ATTACHED</text>
+    <text x="600" y="210" fill="#0a0a0a" font-size="11">run_9f21c</text>
+
+    <rect x="820" y="150" width="320" height="90" fill="#f4d44d"/>
+    <text x="980" y="190" fill="#0a0a0a">LIKELY CAUSE</text>
+    <text x="980" y="210" fill="#0a0a0a" font-size="11">retrieval gap</text>
+
+    <rect x="1200" y="150" width="320" height="90" fill="#f4d44d"/>
+    <text x="1360" y="190" fill="#0a0a0a">ROUTED TO OWNER</text>
+    <text x="1360" y="210" fill="#0a0a0a" font-size="11">risk-ops on-call</text>
+
+    <line x1="380" y1="195" x2="440" y2="195" stroke="#f6f1e6" stroke-width="3"/>
+    <line x1="760" y1="195" x2="820" y2="195" stroke="#f6f1e6" stroke-width="3"/>
+    <line x1="1140" y1="195" x2="1200" y2="195" stroke="#f6f1e6" stroke-width="3"/>
+  </g>
+
+  <rect x="440" y="380" width="600" height="90" fill="none" stroke="#e2543a" stroke-width="3"/>
+  <text x="740" y="420" text-anchor="middle" fill="#e2543a" font-family="monospace" font-size="14" font-weight="700">GENERIC ALERT: NO EVIDENCE, NO OWNER</text>
+  <text x="740" y="445" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="12">lands in a shared channel, ages out unread</text>
+
+  <text x="800" y="560" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · an alert without evidence and an owner is a notification, not an alert</text>
+</svg>

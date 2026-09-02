@@ -1,0 +1,25 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="genHallTitle genHallDesc">
+  <title id="genHallTitle">Three hallucination categories mapped by how each is detected</title>
+  <desc id="genHallDesc">A black canvas shows three cream columns labeled factual fabrication, unsupported extrapolation, and source contradiction, each listing its typical detection method underneath in acid-yellow text, illustrating that different hallucination types require different detection techniques.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">THREE HALLUCINATION CATEGORIES</text>
+
+  <g font-family="monospace" text-anchor="middle">
+    <rect x="120" y="140" width="420" height="90" fill="#f6f1e6"/>
+    <text x="330" y="185" fill="#0a0a0a" font-size="16" font-weight="700">FACTUAL FABRICATION</text>
+    <text x="330" y="207" fill="#0a0a0a" font-size="12">invented facts with no source</text>
+    <text x="330" y="270" fill="#f4d44d" font-size="13">detect: fact-check vs known KB</text>
+
+    <rect x="590" y="140" width="420" height="90" fill="#f6f1e6"/>
+    <text x="800" y="185" fill="#0a0a0a" font-size="16" font-weight="700">UNSUPPORTED EXTRAPOLATION</text>
+    <text x="800" y="207" fill="#0a0a0a" font-size="12">plausible but unverified leap</text>
+    <text x="800" y="270" fill="#f4d44d" font-size="13">detect: groundedness scoring</text>
+
+    <rect x="1060" y="140" width="420" height="90" fill="#f6f1e6"/>
+    <text x="1270" y="185" fill="#0a0a0a" font-size="16" font-weight="700">SOURCE CONTRADICTION</text>
+    <text x="1270" y="207" fill="#0a0a0a" font-size="12">output conflicts with retrieved doc</text>
+    <text x="1270" y="270" fill="#f4d44d" font-size="13">detect: NLI entailment check</text>
+  </g>
+
+  <text x="800" y="820" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · a single hallucination rate metric hides which of these three you actually have</text>
+</svg>

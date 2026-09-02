@@ -1,0 +1,20 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dashTierTitle dashTierDesc">
+  <title id="dashTierTitle">Three stacked dashboard tiers each answering a different reader question</title>
+  <desc id="dashTierDesc">A black canvas shows three stacked horizontal bands labeled summary, trend, and drill-down from top to bottom, each in a different shade, with the question it answers written beside it: is anything wrong, is it getting worse, and what caused it and who owns it.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">THREE TIERS, THREE QUESTIONS</text>
+
+  <rect x="200" y="140" width="1200" height="180" fill="#f6f1e6"/>
+  <text x="800" y="220" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="20" font-weight="700">SUMMARY</text>
+  <text x="800" y="250" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="14">is anything wrong right now?</text>
+
+  <rect x="200" y="360" width="1200" height="180" fill="#f4d44d"/>
+  <text x="800" y="440" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="20" font-weight="700">TREND</text>
+  <text x="800" y="470" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="14">is it getting better or worse over time?</text>
+
+  <rect x="200" y="580" width="1200" height="180" fill="none" stroke="#f6f1e6" stroke-width="3"/>
+  <text x="800" y="660" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="20" font-weight="700">DRILL-DOWN</text>
+  <text x="800" y="690" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">what caused it, and who owns the fix?</text>
+
+  <text x="800" y="830" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · collapsing all three into one view is the most common dashboard mistake</text>
+</svg>

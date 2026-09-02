@@ -1,0 +1,38 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="metPairTitle metPairDesc">
+  <title id="metPairTitle">Five metrics each paired with the metric it most commonly trades off against</title>
+  <desc id="metPairDesc">A black canvas shows five pairs of connected cream and acid-yellow boxes: latency paired with quality, cost paired with quality, reliability paired with latency, quality paired with cost and latency, and tool success paired with reliability, illustrating that nearly every metric has a natural trade-off partner worth checking together.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="55" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">EVERY METRIC HAS A TRADE-OFF PARTNER</text>
+
+  <g font-family="monospace" font-size="14" font-weight="700" text-anchor="middle">
+    <rect x="80" y="140" width="260" height="70" fill="#f6f1e6"/>
+    <text x="210" y="182" fill="#0a0a0a">LATENCY</text>
+    <line x1="340" y1="175" x2="420" y2="175" stroke="#f4d44d" stroke-width="3"/>
+    <rect x="420" y="140" width="260" height="70" fill="#f4d44d"/>
+    <text x="550" y="182" fill="#0a0a0a">QUALITY</text>
+
+    <rect x="80" y="260" width="260" height="70" fill="#f6f1e6"/>
+    <text x="210" y="302" fill="#0a0a0a">COST</text>
+    <line x1="340" y1="295" x2="420" y2="295" stroke="#f4d44d" stroke-width="3"/>
+    <rect x="420" y="260" width="260" height="70" fill="#f4d44d"/>
+    <text x="550" y="302" fill="#0a0a0a">QUALITY</text>
+
+    <rect x="80" y="380" width="260" height="70" fill="#f6f1e6"/>
+    <text x="210" y="422" fill="#0a0a0a">RELIABILITY</text>
+    <line x1="340" y1="415" x2="420" y2="415" stroke="#f4d44d" stroke-width="3"/>
+    <rect x="420" y="380" width="260" height="70" fill="#f4d44d"/>
+    <text x="550" y="422" fill="#0a0a0a">LATENCY</text>
+
+    <rect x="80" y="500" width="260" height="70" fill="#f6f1e6"/>
+    <text x="210" y="542" fill="#0a0a0a">TOOL SUCCESS</text>
+    <line x1="340" y1="535" x2="420" y2="535" stroke="#f4d44d" stroke-width="3"/>
+    <rect x="420" y="500" width="260" height="70" fill="#f4d44d"/>
+    <text x="550" y="542" fill="#0a0a0a">RELIABILITY</text>
+
+    <rect x="900" y="320" width="300" height="90" fill="#f6f1e6"/>
+    <text x="1050" y="360" fill="#0a0a0a">QUALITY trades against</text>
+    <text x="1050" y="385" fill="#0a0a0a">COST and LATENCY both</text>
+  </g>
+
+  <text x="800" y="850" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · check the pair before trusting a single number's story</text>
+</svg>

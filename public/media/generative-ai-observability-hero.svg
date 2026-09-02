@@ -1,0 +1,32 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="genHeroTitle genHeroDesc">
+  <title id="genHeroTitle">A funnel of generated outputs narrowing through three quality checks before reaching users</title>
+  <desc id="genHeroDesc">A black canvas shows a wide band of small cream squares representing generated outputs at the top, narrowing through three acid-yellow filter bars labeled groundedness check, policy check, and drift check, down to a smaller band of outputs reaching users, with a red side-channel showing filtered outputs routed to review.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">THE GENERATIVE OUTPUT FUNNEL</text>
+
+  <g>
+    <text x="800" y="120" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="13">ALL GENERATED OUTPUTS</text>
+    <g fill="#f6f1e6">
+      <rect x="260" y="140" width="1080" height="18"/>
+    </g>
+
+    <rect x="300" y="220" width="1000" height="60" fill="#f4d44d"/>
+    <text x="800" y="258" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="14" font-weight="700">GROUNDEDNESS CHECK</text>
+
+    <rect x="400" y="340" width="800" height="60" fill="#f4d44d"/>
+    <text x="800" y="378" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="14" font-weight="700">POLICY / SAFETY CHECK</text>
+
+    <rect x="500" y="460" width="600" height="60" fill="#f4d44d"/>
+    <text x="800" y="498" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="14" font-weight="700">DRIFT CHECK vs BASELINE</text>
+
+    <rect x="600" y="580" width="400" height="70" fill="#f6f1e6"/>
+    <text x="800" y="623" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="13" font-weight="700">SHOWN TO USERS</text>
+
+    <path d="M 900 250 L 1250 250 L 1250 690 L 1050 690" fill="none" stroke="#e2543a" stroke-width="3" stroke-dasharray="6,6"/>
+    <rect x="1050" y="655" width="260" height="70" fill="none" stroke="#e2543a" stroke-width="3"/>
+    <text x="1180" y="685" text-anchor="middle" fill="#e2543a" font-family="monospace" font-size="12">ROUTED TO HUMAN REVIEW</text>
+    <text x="1180" y="705" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="11">flagged, not discarded</text>
+  </g>
+
+  <text x="800" y="830" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14">tracify.tech · every generated output needs a recorded reason it passed or was routed for review</text>
+</svg>
