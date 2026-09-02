@@ -581,6 +581,7 @@ export default defineSchema({
     marketingConsent: v.boolean(),
     sourcePath: v.string(),
     campaign: v.optional(v.string()),
+    dedupeKey: v.optional(v.string()),
     status: v.union(v.literal("new"), v.literal("contacted"), v.literal("qualified"), v.literal("converted"), v.literal("closed")),
     assignedTo: v.optional(v.string()),
     createdAt: v.number(),
@@ -589,7 +590,8 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_intent", ["intent"])
     .index("by_email", ["email"])
-    .index("by_company", ["company"]),
+    .index("by_company", ["company"])
+    .index("by_dedupeKey", ["dedupeKey"]),
 
   leadNotes: defineTable({
     leadId: v.id("leadSubmissions"),
@@ -597,4 +599,11 @@ export default defineSchema({
     body: v.string(),
     createdAt: v.number(),
   }).index("by_leadId", ["leadId"]),
+
+  notificationPreferences: defineTable({
+    userKey: v.string(),
+    operational: v.boolean(),
+    product: v.boolean(),
+    updatedAt: v.number(),
+  }).index("by_userKey", ["userKey"]),
 });

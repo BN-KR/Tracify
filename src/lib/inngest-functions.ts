@@ -5,6 +5,7 @@ import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
 import { ingestSpan } from "@/lib/tinybird";
 import { getTracifyRegion } from "@/lib/regions";
+import { sendTransactionalEmail } from "@/lib/transactional-email";
 
 /**
  * Milestone 2 activation pipeline:
@@ -172,6 +173,17 @@ export const processSpan = inngest.createFunction(
     });
 
     return { ok: true, spanId: span.spanId };
+  },
+);
+
+export const onboardingReminder = inngest.createFunction(
+  { id: "onboarding-reminder", name: "Send onboarding reminder", retries: 3, triggers: [{ event: "tracify/onboarding.reminder" }] },
+  async ({ event, step }) => {
+    await step.sleep("wait-one-day", "1d");
+    const state = await step.run("check-activation", async () => getConvexClient().query(api.agentRuns.getProjectOnboardingState, { projectId: event.data.projectId as Id<"projects"> }));
+    if (state?.hasReceivedFirstSpan) return { skipped: true, reason: "activated" };
+    await step.run("send-reminder", async () => sendTransactionalEmail({ to: event.data.email, subject: "Your Tracify project is ready", text: `Hi ${event.data.name || "there"},\n\nYour Tracify project is ready, but it has not received a first trace yet. Continue setup: ${getTracifyRegion().origin}/onboarding`, html: `<p>Hi ${event.data.name || "there"},</p><p>Your Tracify project is ready, but it has not received a first trace yet.</p><p><a href="${getTracifyRegion().origin}/onboarding">Continue setup</a></p>`, idempotencyKey: `onboarding-reminder-${event.data.projectId}` }));
+    return { skipped: false };
   },
 );
 

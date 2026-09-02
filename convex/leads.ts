@@ -9,8 +9,15 @@ export const submit = mutation({
     role: v.optional(v.string()), useCase: v.optional(v.string()), stack: v.optional(v.string()),
     message: v.optional(v.string()), preferredTime: v.optional(v.string()), marketingConsent: v.boolean(),
     sourcePath: v.string(), campaign: v.optional(v.string()),
+    dedupeKey: v.optional(v.string()),
   },
-  handler: async (ctx, args) => ctx.db.insert("leadSubmissions", { ...args, status: "new", createdAt: Date.now() }),
+  handler: async (ctx, args) => {
+    if (args.dedupeKey) {
+      const existing = await ctx.db.query("leadSubmissions").withIndex("by_dedupeKey", (q) => q.eq("dedupeKey", args.dedupeKey)).unique();
+      if (existing && Date.now() - existing.createdAt < 10 * 60 * 1000) return existing._id;
+    }
+    return ctx.db.insert("leadSubmissions", { ...args, status: "new", createdAt: Date.now() });
+  },
 });
 
 function isLeadAdmin(identity: { email?: string | null; subject: string }) {
@@ -36,7 +43,9 @@ export const updateStatus = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity || !isLeadAdmin(identity)) throw new Error("Admin access required");
-    await ctx.db.patch(args.leadId, { status: args.status, assignedTo: args.assignedTo });
+    const lead = await ctx.db.get(args.leadId);
+    if (!lead) throw new Error("Lead not found");
+    await ctx.db.patch(args.leadId, { status: args.status, assignedTo: args.assignedTo?.trim() || undefined });
   },
 });
 
@@ -45,6 +54,19 @@ export const addNote = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity || !isLeadAdmin(identity)) throw new Error("Admin access required");
-    return ctx.db.insert("leadNotes", { leadId: args.leadId, author: identity.email ?? identity.subject, body: args.body.trim(), createdAt: Date.now() });
+    const body = args.body.trim();
+    if (!body || body.length > 4000) throw new Error("Note must contain 1-4000 characters");
+    const lead = await ctx.db.get(args.leadId);
+    if (!lead) throw new Error("Lead not found");
+    return ctx.db.insert("leadNotes", { leadId: args.leadId, author: identity.email ?? identity.subject, body, createdAt: Date.now() });
+  },
+});
+
+export const listNotes = query({
+  args: { leadId: v.id("leadSubmissions") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity || !isLeadAdmin(identity)) throw new Error("Admin access required");
+    return ctx.db.query("leadNotes").withIndex("by_leadId", (q) => q.eq("leadId", args.leadId)).order("desc").take(50);
   },
 });
