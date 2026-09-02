@@ -1,0 +1,24 @@
+<svg viewBox="0 0 1600 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="waoMaturityTitle waoMaturityDesc">
+  <title id="waoMaturityTitle">A five step maturity staircase from no logs to a closed learning loop</title>
+  <desc id="waoMaturityDesc">A rising staircase of five acid-yellow steps on a black background, labeled from left to right: no logs, raw logs, traces, evaluations, closed loop, showing increasing observability maturity from left to right.</desc>
+  <rect width="1600" height="700" fill="#0a0a0a"/>
+  <text x="800" y="70" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="20" letter-spacing="2">THE OBSERVABILITY MATURITY STAIRCASE</text>
+
+  <g fill="#f4d44d">
+    <rect x="140" y="560" width="220" height="40"/>
+    <rect x="380" y="480" width="220" height="120"/>
+    <rect x="620" y="400" width="220" height="200"/>
+    <rect x="860" y="320" width="220" height="280"/>
+    <rect x="1100" y="240" width="220" height="360"/>
+  </g>
+
+  <g fill="#0a0a0a" font-family="monospace" font-size="13" font-weight="700" text-anchor="middle">
+    <text x="250" y="545">NO LOGS</text>
+    <text x="490" y="465">RAW LOGS</text>
+    <text x="730" y="385">TRACES</text>
+    <text x="970" y="305">EVALUATIONS</text>
+    <text x="1210" y="225">CLOSED LOOP</text>
+  </g>
+
+  <text x="800" y="660" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.65">EACH STEP ADDS EVIDENCE THE PREVIOUS STEP COULD NOT PRODUCE</text>
+</svg>

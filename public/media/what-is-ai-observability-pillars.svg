@@ -1,0 +1,36 @@
+<svg viewBox="0 0 1600 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="waoPillarsTitle waoPillarsDesc">
+  <title id="waoPillarsTitle">Four pillars of AI observability: traces, evaluations, cost and latency, and alerts</title>
+  <desc id="waoPillarsDesc">Four cream columns on a black background, each labeled with one pillar of AI observability and a short description of what it answers, standing on a shared acid-yellow foundation labeled EVIDENCE BASE.</desc>
+  <rect width="1600" height="700" fill="#0a0a0a"/>
+
+  <g transform="translate(120,140)">
+    <rect x="0" y="0" width="300" height="380" fill="#f6f1e6"/>
+    <text x="150" y="60" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="20" font-weight="700">TRACES</text>
+    <text x="150" y="220" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="13">What did the</text>
+    <text x="150" y="245" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="13">system actually do?</text>
+  </g>
+
+  <g transform="translate(460,140)">
+    <rect x="0" y="0" width="300" height="380" fill="#f6f1e6"/>
+    <text x="150" y="60" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="20" font-weight="700">EVALUATIONS</text>
+    <text x="150" y="220" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="13">Was the result</text>
+    <text x="150" y="245" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="13">actually good?</text>
+  </g>
+
+  <g transform="translate(800,140)">
+    <rect x="0" y="0" width="300" height="380" fill="#f6f1e6"/>
+    <text x="150" y="60" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="19" font-weight="700">COST / LATENCY</text>
+    <text x="150" y="220" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="13">What did it cost,</text>
+    <text x="150" y="245" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="13">and how long?</text>
+  </g>
+
+  <g transform="translate(1140,140)">
+    <rect x="0" y="0" width="300" height="380" fill="#f6f1e6"/>
+    <text x="150" y="60" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="20" font-weight="700">ALERTS</text>
+    <text x="150" y="220" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="13">Who needs to act,</text>
+    <text x="150" y="245" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="13">and how fast?</text>
+  </g>
+
+  <rect x="80" y="560" width="1400" height="40" fill="#f4d44d"/>
+  <text x="800" y="587" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="16" font-weight="700" letter-spacing="1">SHARED EVIDENCE BASE: TRACES, VERSIONS, IDENTIFIERS</text>
+</svg>

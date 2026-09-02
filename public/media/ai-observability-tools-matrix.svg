@@ -1,0 +1,27 @@
+<svg viewBox="0 0 1600 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="toolsMatrixTitle toolsMatrixDesc">
+  <title id="toolsMatrixTitle">A two by two matrix plotting tool category coverage against integration effort</title>
+  <desc id="toolsMatrixDesc">A black canvas shows a cream grid with a vertical axis labeled COVERAGE and a horizontal axis labeled INTEGRATION EFFORT, with four acid-yellow dots placed in different quadrants representing a point tracer, an open-source stack, a narrow evaluator, and an integrated platform.</desc>
+  <rect width="1600" height="800" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="20" letter-spacing="2">COVERAGE VS INTEGRATION EFFORT</text>
+
+  <line x1="260" y1="120" x2="260" y2="680" stroke="#f6f1e6" stroke-width="2"/>
+  <line x1="260" y1="680" x2="1400" y2="680" stroke="#f6f1e6" stroke-width="2"/>
+  <text x="230" y="140" text-anchor="end" fill="#f6f1e6" font-family="monospace" font-size="14">HIGH</text>
+  <text x="230" y="670" text-anchor="end" fill="#f6f1e6" font-family="monospace" font-size="14">LOW</text>
+  <text x="140" y="400" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="15" transform="rotate(-90 140 400)">COVERAGE</text>
+  <text x="300" y="720" fill="#f6f1e6" font-family="monospace" font-size="14">LOW EFFORT</text>
+  <text x="1240" y="720" fill="#f6f1e6" font-family="monospace" font-size="14">HIGH EFFORT</text>
+  <text x="800" y="760" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="15">INTEGRATION EFFORT</text>
+
+  <circle cx="420" cy="580" r="16" fill="#f4d44d"/>
+  <text x="420" y="550" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="13">POINT TRACER</text>
+
+  <circle cx="1180" cy="260" r="16" fill="#f4d44d"/>
+  <text x="1180" y="230" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="13">OPEN-SOURCE STACK</text>
+
+  <circle cx="500" cy="300" r="16" fill="#f4d44d"/>
+  <text x="500" y="270" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="13">NARROW EVALUATOR</text>
+
+  <circle cx="900" cy="200" r="16" fill="#f4d44d"/>
+  <text x="900" y="170" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="13">INTEGRATED PLATFORM</text>
+</svg>

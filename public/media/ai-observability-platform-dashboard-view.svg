@@ -1,0 +1,26 @@
+<svg viewBox="0 0 1600 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="platDashTitle platDashDesc">
+  <title id="platDashTitle">A single workflow dashboard view combining quality, cost, and reliability side by side</title>
+  <desc id="platDashDesc">A black canvas shows one cream dashboard card split into three acid-yellow panels labeled QUALITY, COST, RELIABILITY, all tied to the same workflow name at the top, illustrating a platform-owned view versus three separate disconnected tabs.</desc>
+  <rect width="1600" height="700" fill="#0a0a0a"/>
+  <text x="800" y="60" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="20" letter-spacing="2">ONE WORKFLOW, ONE VIEW</text>
+
+  <rect x="140" y="110" width="1320" height="500" fill="#f6f1e6"/>
+  <text x="800" y="160" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="18" font-weight="700">WORKFLOW: refund-approval</text>
+
+  <g font-family="monospace" font-size="15" font-weight="700" fill="#0a0a0a" text-anchor="middle">
+    <rect x="190" y="200" width="380" height="360" fill="#f4d44d"/>
+    <text x="380" y="250">QUALITY</text>
+    <text x="380" y="290" font-size="12" font-weight="400">groundedness: 0.94</text>
+    <text x="380" y="315" font-size="12" font-weight="400">policy match: 0.88</text>
+
+    <rect x="610" y="200" width="380" height="360" fill="#f4d44d"/>
+    <text x="800" y="250">COST</text>
+    <text x="800" y="290" font-size="12" font-weight="400">$0.014 / run</text>
+    <text x="800" y="315" font-size="12" font-weight="400">+6% vs last release</text>
+
+    <rect x="1030" y="200" width="380" height="360" fill="#f4d44d"/>
+    <text x="1220" y="250">RELIABILITY</text>
+    <text x="1220" y="290" font-size="12" font-weight="400">p95: 1.8s</text>
+    <text x="1220" y="315" font-size="12" font-weight="400">retry rate: 2.1%</text>
+  </g>
+</svg>

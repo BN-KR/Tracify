@@ -1,0 +1,25 @@
+<svg viewBox="0 0 1600 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="platBuildTitle platBuildDesc">
+  <title id="platBuildTitle">A side by side comparison of an assembled tool stack versus a single integrated platform</title>
+  <desc id="platBuildDesc">A black canvas shows two cream columns side by side. The left column, labeled ASSEMBLED STACK, shows four small disconnected acid-yellow blocks with gaps between them. The right column, labeled INTEGRATED PLATFORM, shows the same four blocks joined into one continuous acid-yellow bar, illustrating fewer integration seams.</desc>
+  <rect width="1600" height="800" fill="#0a0a0a"/>
+  <text x="800" y="70" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="20" letter-spacing="2">SEAMS ARE WHERE EVIDENCE GETS LOST</text>
+
+  <text x="400" y="140" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="17" font-weight="700">ASSEMBLED STACK</text>
+  <g fill="#f4d44d">
+    <rect x="220" y="190" width="140" height="90"/>
+    <rect x="390" y="190" width="140" height="90"/>
+    <rect x="560" y="190" width="140" height="90"/>
+    <rect x="220" y="330" width="140" height="90"/>
+  </g>
+  <g stroke="#f6f1e6" stroke-width="2" stroke-dasharray="6 6" opacity="0.5">
+    <line x1="360" y1="235" x2="390" y2="235"/>
+    <line x1="530" y1="235" x2="560" y2="235"/>
+  </g>
+  <text x="450" y="500" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="13">gaps = manual joins,</text>
+  <text x="450" y="525" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="13">broken identifiers, drift</text>
+
+  <text x="1200" y="140" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="17" font-weight="700">INTEGRATED PLATFORM</text>
+  <rect x="1020" y="190" width="360" height="230" fill="#f4d44d"/>
+  <text x="1200" y="500" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="13">one schema, one identity,</text>
+  <text x="1200" y="525" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="13">one place to look</text>
+</svg>

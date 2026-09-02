@@ -1,0 +1,25 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="platHeroTitle platHeroDesc">
+  <title id="platHeroTitle">A stack of platform layers rising from raw telemetry to an executive decision</title>
+  <desc id="platHeroDesc">A black canvas shows five stacked cream and acid-yellow layers rising like a tower, labeled from bottom to top: ingestion, storage, traces, evaluation and alerting, and decision, illustrating how a platform turns raw telemetry into a governed decision.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="70" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">THE PLATFORM STACK</text>
+
+  <g font-family="monospace" font-size="16" font-weight="700" text-anchor="middle">
+    <rect x="450" y="700" width="700" height="90" fill="#f6f1e6"/>
+    <text x="800" y="753" fill="#0a0a0a">INGESTION (SDK, OTEL)</text>
+
+    <rect x="480" y="600" width="640" height="90" fill="#f6f1e6"/>
+    <text x="800" y="653" fill="#0a0a0a">STORAGE (TIME SERIES + METADATA)</text>
+
+    <rect x="510" y="500" width="580" height="90" fill="#f4d44d"/>
+    <text x="800" y="553" fill="#0a0a0a">TRACES</text>
+
+    <rect x="540" y="400" width="520" height="90" fill="#f4d44d"/>
+    <text x="800" y="453" fill="#0a0a0a">EVALUATION + ALERTING</text>
+
+    <rect x="570" y="300" width="460" height="90" fill="#f4d44d"/>
+    <text x="800" y="353" fill="#0a0a0a">DECISION</text>
+  </g>
+
+  <text x="800" y="240" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="15" opacity="0.7">A PLATFORM OWNS THE WHOLE STACK, NOT ONE LAYER</text>
+</svg>
