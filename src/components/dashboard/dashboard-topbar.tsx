@@ -51,13 +51,13 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
   const projectId = params?.projectId as string | undefined;
   const projectSettingsHref = projectId
     ? `/dashboard/${projectId}/settings`
-    : "/onboarding/project";
+    : "/dashboard/account";
   const projectManageHref = projectId
     ? `/dashboard/${projectId}/manage`
-    : "/onboarding/project";
+    : "/dashboard";
   const projectDocsHref = projectId
     ? `/dashboard/${projectId}/docs`
-    : "/onboarding/project";
+    : "/docs";
   const dashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
   const environmentContext = searchParams.get("environment")?.trim() || "all environments";
   const usesRunsWindow = pathname.includes("/runs") || pathname.includes("/search");
@@ -219,7 +219,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href={projectSettingsHref}>
+                <Link href="/dashboard/account">
                 <UserPen size={14} className="opacity-60" />
                 <span>Manage Account</span>
                 </Link>
