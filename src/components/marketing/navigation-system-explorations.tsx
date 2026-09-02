@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
-  Check,
   CircleDot,
   Code2,
   LockKeyhole,
@@ -11,10 +10,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Future19Pricing } from "@/components/marketing/future19-pricing";
-import {
-  getThirdPartyBrand,
-  ThirdPartyLogo,
-} from "@/components/third-party-logo";
+import { ThirdPartyLogo } from "@/components/third-party-logo";
+import { LandingSampleRun } from "@/components/marketing/landing-sample-run";
 
 const integrationMarks = [
   { name: "OpenAI", mark: "✳", className: "font-semibold tracking-[-0.05em]" },
@@ -39,35 +36,6 @@ const integrationMarks = [
     mark: "◎",
     className: "font-semibold tracking-[-0.07em]",
   },
-] as const;
-
-const integrationRows = [
-  [
-    "Models",
-    [
-      ["OpenAI", "openai"],
-      ["Anthropic", "anthropic"],
-      ["Google", "google"],
-      ["Mistral AI", "mistralai"],
-      ["Cohere", "cohere"],
-    ],
-  ],
-  [
-    "Frameworks",
-    [
-      ["Vercel AI SDK", "vercel"],
-      ["LangChain", "langchain"],
-      ["LlamaIndex", "llamaindex"],
-    ],
-  ],
-  [
-    "Telemetry",
-    [
-      ["Tracify", "tracify"],
-      ["OpenTelemetry", "opentelemetry"],
-      ["HTTP", "http"],
-    ],
-  ],
 ] as const;
 
 function StudyLabel({ number, title }: { number: string; title: string }) {
@@ -95,28 +63,6 @@ function TextLink({
     >
       {children} <ArrowUpRight className="size-3" />
     </Link>
-  );
-}
-
-function FourGrid({
-  items,
-}: {
-  items: readonly (readonly [string, string])[];
-}) {
-  return (
-    <div className="grid border-l border-t border-black/15 sm:grid-cols-2">
-      {items.map(([title, body]) => (
-        <div
-          key={title}
-          className="group min-h-44 border-b border-r border-black/15 bg-white p-6 transition-colors hover:bg-[#f4d44d]"
-        >
-          <h3 className="font-pixel text-4xl tracking-[-0.06em]">{title}</h3>
-          <p className="mt-4 max-w-sm text-sm leading-6 text-black/70">
-            {body}
-          </p>
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -154,23 +100,26 @@ export function NavigationSystemExplorations({
 
       <section
         id="navsys-hero-split"
-        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
+        className="bg-[#eceae3] px-6 py-14 text-black md:px-10 md:py-16"
       >
         <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="01" title="outcome hero" />
-          <div className="mt-10 grid border border-black/20 bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="flex min-h-[560px] flex-col justify-between border-b border-black/15 p-7 md:p-10 lg:border-b-0 lg:border-r">
+          <div className="flex flex-col gap-2 border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/70 sm:flex-row sm:items-center sm:justify-between">
+            <span>AI agent observability / evaluation</span>
+            <span>Production infrastructure</span>
+          </div>
+          <div className="mt-7 grid border border-black/20 bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[0.95fr_1.05fr] md:mt-8">
+            <div className="flex min-h-[470px] flex-col justify-between border-b border-black/15 p-6 md:p-8 lg:border-b-0 lg:border-r">
               <div>
                 <span className="inline-flex items-center gap-2 bg-black px-3 py-2 font-mono text-[8px] uppercase tracking-[0.13em] text-white">
-                  <Radio className="size-3 text-[#f4d44d]" /> production signal
-                  connected
+                  <Radio className="size-3 text-[#f4d44d]" /> the run explains
+                  the release
                 </span>
-                <h3 className="mt-9 max-w-[740px] font-pixel text-7xl leading-[0.8] tracking-[-0.08em] md:text-9xl">
-                  The run explains the release.
-                </h3>
-                <p className="mt-7 max-w-xl text-lg leading-8 text-black/70">
-                  Trace what happened. Test what changed. Ship the version that
-                  proves itself.
+                <h1 className="mt-7 max-w-[740px] font-pixel text-7xl leading-[0.82] tracking-[-0.08em] md:text-7xl">
+                  See why it failed. Ship with proof.
+                </h1>
+                <p className="mt-5 max-w-xl text-base leading-7 text-black/70 md:text-lg">
+                  Trace every model, tool, retrieval, and fallback decision.
+                  Evaluate the fix before it reaches production.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -188,86 +137,44 @@ export function NavigationSystemExplorations({
                 </Link>
               </div>
             </div>
-            <div className="grid grid-rows-[1fr_auto] bg-black text-white">
-              <div className="p-7 md:p-9">
-                <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/62">
-                  Live release proof
-                </p>
-                <div className="mt-16 flex items-end justify-between border-b border-white/15 pb-7">
-                  <span className="font-pixel text-6xl tracking-[-0.07em]">
-                    0.94
-                  </span>
-                  <span className="font-mono text-[9px] uppercase text-[#f4d44d]">
-                    quality
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 divide-x divide-white/15 py-7 font-mono">
-                  <div>
-                    <p className="text-[8px] uppercase text-white/62">Runs</p>
-                    <p className="mt-3 text-sm">18,204</p>
-                  </div>
-                  <div className="pl-4">
-                    <p className="text-[8px] uppercase text-white/62">p95</p>
-                    <p className="mt-3 text-sm">2.8s</p>
-                  </div>
-                  <div className="pl-4">
-                    <p className="text-[8px] uppercase text-white/62">Spend</p>
-                    <p className="mt-3 text-sm">$0.041</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 bg-[#f4d44d] p-5 font-mono text-[9px] uppercase tracking-[0.12em] text-black">
-                <ShieldCheck className="size-4" /> Regression check passed
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section
-        id="navsys-signal-grid"
-        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
-      >
-        <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="02" title="signal directory" />
-          <div className="mt-10 grid gap-px bg-black/15 lg:grid-cols-[0.7fr_1.3fr]">
-            <div className="bg-black p-8 text-white md:p-10">
-              <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/62">
-                Product map
-              </p>
-              <h3 className="mt-12 font-pixel text-6xl leading-[0.85] tracking-[-0.07em]">
-                One system for every decision after deploy.
-              </h3>
-              <p className="mt-6 text-sm leading-7 text-white/72">
-                Each tile opens a different part of the operating loop.
-              </p>
-            </div>
-            <FourGrid
-              items={[
-                ["Observe", "Traces, sessions, costs, and failures."],
-                ["Improve", "Evaluations, datasets, prompts, and review."],
-                ["Release", "Experiments, gates, monitors, and versions."],
-                ["Operate", "Alerts, reports, integrations, and controls."],
-              ]}
-            />
+            <LandingSampleRun />
           </div>
         </div>
       </section>
 
       <section id="navsys-proof-band" className="bg-[#eceae3] py-20 text-black">
         <div className="mx-auto max-w-[1240px] px-6 md:px-10">
-          <StudyLabel number="03" title="proof band" />
+          <StudyLabel number="02" title="verified proof strip" />
           <div className="mt-10 flex flex-col justify-between gap-8 md:flex-row md:items-end">
             <div>
               <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
-                Integrations
+                What the record contains
               </p>
               <h3 className="mt-5 max-w-2xl font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
-                Connect to the stack you already use.
+                Evidence that survives the handoff.
               </h3>
             </div>
           </div>
+          <div className="mt-10 grid border-y border-black/15 sm:grid-cols-3">
+            {[
+              ["01", "Full run context", "Model, tool, retrieval, fallback, and evaluation in one trail."],
+              ["02", "Release evidence", "Quality, latency, cost, and a decision you can defend."],
+              ["03", "Native transport", "SDK, OpenTelemetry, and HTTP for the stack you already run."],
+            ].map(([number, title, body], index) => (
+              <div
+                key={title}
+                className={`min-h-44 border-b border-black/15 p-6 sm:border-b-0 sm:border-r last:border-r-0 ${index === 1 ? "bg-[#f4d44d]" : "bg-white"}`}
+              >
+                <span className="font-mono text-[9px] text-black/60">{number}</span>
+                <h4 className="mt-8 font-pixel text-3xl tracking-[-0.06em]">{title}</h4>
+                <p className="mt-3 text-sm leading-6 text-black/70">{body}</p>
+              </div>
+            ))}
+          </div>
         </div>
+        <p className="mt-10 px-6 font-mono text-[8px] uppercase tracking-[0.13em] text-black/60 md:px-10">
+          Supported runtimes / current integration coverage
+        </p>
         <div className="mt-12 grid border-y border-black/15 sm:grid-cols-3 lg:grid-cols-6">
           {integrationMarks.map(({ name, className }) => (
             <div
@@ -286,7 +193,7 @@ export function NavigationSystemExplorations({
         className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
       >
         <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="04" title="lifecycle map" />
+          <StudyLabel number="03" title="observe / evaluate / release" />
           <div className="mt-10 border border-black/20 bg-white">
             <div className="grid md:grid-cols-4">
               {[
@@ -321,6 +228,40 @@ export function NavigationSystemExplorations({
               </Link>
             </div>
           </div>
+          <div className="mt-12 border border-black/20 bg-white">
+            <div className="border-b border-black/15 p-6 md:flex md:items-end md:justify-between md:gap-8">
+              <div>
+                <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
+                  Use cases
+                </p>
+                <h3 className="mt-4 max-w-2xl font-pixel text-5xl leading-[0.88] tracking-[-0.07em]">
+                  Apply the record to the agent you ship.
+                </h3>
+              </div>
+              <p className="mt-4 max-w-sm text-sm leading-6 text-black/70 md:mt-0">
+                Start with the failure mode that costs your team the most time.
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                ["Support", "Escalations, retrieval, handoffs", "/use-cases/support"],
+                ["Research", "Sources, browsing, synthesis", "/use-cases/research"],
+                ["Automation", "Workflows, retries, stalls", "/use-cases/automation"],
+                ["Tool calling", "APIs, loops, hidden spend", "/use-cases/tool-calling"],
+              ].map(([title, body, href], index) => (
+                <Link
+                  key={title}
+                  href={href}
+                  className={`group border-b border-r border-black/15 p-5 last:border-r-0 ${index === 0 ? "bg-black text-white" : "bg-white hover:bg-[#f4d44d]"}`}
+                >
+                  <span className="font-mono text-[8px] uppercase opacity-45">0{index + 1}</span>
+                  <h4 className="mt-8 font-pixel text-4xl tracking-[-0.06em]">{title}</h4>
+                  <p className={`mt-3 text-sm leading-6 ${index === 0 ? "text-white/62" : "text-black/70"}`}>{body}</p>
+                  <ArrowUpRight className="mt-6 size-4" />
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -329,11 +270,11 @@ export function NavigationSystemExplorations({
         className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
       >
         <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="05" title="trace report" />
+          <StudyLabel number="04" title="observe / decision trail" />
           <div className="mt-10 grid border border-black/20 bg-white lg:grid-cols-[0.8fr_1.2fr]">
             <div className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
               <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/70">
-                Incident / run_018204
+                Incident / sample run_018204
               </p>
               <h3 className="mt-8 font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
                 The failure is a decision trail.
@@ -375,20 +316,14 @@ export function NavigationSystemExplorations({
             </div>
           </div>
         </div>
-      </section>
-
-      <section
-        id="navsys-eval-scoreboard"
-        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
-      >
-        <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="06" title="evaluation scoreboard" />
+        <div className="mt-12 border-t border-black/15 pt-12">
+          <StudyLabel number="05" title="evaluate / release decision" />
           <div className="mt-10 grid gap-px bg-black/15 lg:grid-cols-[1fr_0.42fr]">
             <div className="bg-white p-7 md:p-10">
               <div className="flex flex-col justify-between gap-6 border-b border-black/15 pb-7 sm:flex-row sm:items-end">
                 <div>
                   <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/70">
-                    Candidate comparison
+                    Candidate comparison / sample data
                   </p>
                   <h3 className="mt-5 font-pixel text-5xl leading-[0.9] tracking-[-0.07em] sm:text-6xl">
                     Release 2.4 wins.
@@ -466,6 +401,9 @@ export function NavigationSystemExplorations({
             <div className="flex flex-col justify-between bg-black p-7 text-white">
               <Sparkles className="size-6 text-[#f4d44d]" />
               <div>
+                <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/55">
+                  Sample result
+                </p>
                 <p className="font-pixel text-6xl tracking-[-0.07em]">+12%</p>
                 <p className="mt-3 text-sm leading-6 text-white/62">
                   quality uplift on the same production-derived evaluation set
@@ -481,7 +419,7 @@ export function NavigationSystemExplorations({
         className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
       >
         <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="07" title="developer install" />
+          <StudyLabel number="06" title="developer setup" />
           <div className="mt-10 grid border border-black/20 bg-white lg:grid-cols-[0.72fr_1.28fr]">
             <div className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
               <Code2 className="size-7" />
@@ -525,124 +463,11 @@ export function NavigationSystemExplorations({
       </section>
 
       <section
-        id="navsys-integration-index"
-        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
-      >
-        <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="08" title="integration index" />
-          <div className="mt-10 grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">
-            <div>
-              <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
-                Connect your runtime
-              </p>
-              <h3 className="mt-5 font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
-                Your stack stays your stack.
-              </h3>
-              <p className="mt-6 text-sm leading-7 text-black/70">
-                Native SDKs and OTLP meet the frameworks and model providers you
-                already use.
-              </p>
-            </div>
-            <div className="border border-black/20 bg-white">
-              {integrationRows.map(([category, logos], index) => (
-                /*
-                ["Models", "OpenAI · Anthropic · Google"],
-                ["Frameworks", "Vercel AI SDK · LangChain · LlamaIndex"],
-                ["Transport", "Tracify SDK · OpenTelemetry · HTTP"],
-                ["Destinations", "Slack · alerts · reports"],
-                */
-                <div
-                  key={category}
-                  className={`grid gap-5 border-b border-black/15 p-5 last:border-b-0 sm:grid-cols-[150px_1fr] sm:items-center ${index === 1 ? "bg-[#f4d44d]" : ""}`}
-                >
-                  <span className="font-pixel text-3xl tracking-[-0.05em]">
-                    {category}
-                  </span>
-                  <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-                    {logos.map(([name]) => {
-                      const brand = name === "Tracify" || name === "HTTP" ? null : getThirdPartyBrand(name);
-                      return (
-                      <span
-                        key={name}
-                        title={name}
-                        className="inline-flex size-7 items-center justify-center"
-                      >
-                        {brand ? (
-                          <ThirdPartyLogo brand={brand} className="size-6 object-contain" />
-                        ) : (
-                          <span className="font-mono text-[8px] font-semibold uppercase">{name}</span>
-                        )}
-                      </span>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section
-        id="navsys-usecase-switchboard"
-        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
-      >
-        <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="09" title="use-case switchboard" />
-          <div className="mt-10 grid border-l border-t border-black/15 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              [
-                "Support",
-                "Escalations, retrieval, handoffs",
-                "/use-cases/support",
-              ],
-              [
-                "Research",
-                "Sources, browsing, synthesis",
-                "/use-cases/research",
-              ],
-              [
-                "Automation",
-                "Workflows, retries, stalls",
-                "/use-cases/automation",
-              ],
-              [
-                "Tool calling",
-                "APIs, loops, hidden spend",
-                "/use-cases/tool-calling",
-              ],
-            ].map(([title, body, href], index) => (
-              <Link
-                key={title}
-                href={href}
-                className={`group flex min-h-80 flex-col justify-between border-b border-r border-black/15 p-6 ${index === 0 ? "bg-black text-white" : "bg-white hover:bg-[#f4d44d]"}`}
-              >
-                <span className="font-mono text-[8px] uppercase opacity-45">
-                  0{index + 1}
-                </span>
-                <div>
-                  <h3 className="font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">
-                    {title}
-                  </h3>
-                  <p
-                    className={`mt-4 text-sm leading-6 ${index === 0 ? "text-white/62" : "text-black/70"}`}
-                  >
-                    {body}
-                  </p>
-                  <ArrowUpRight className="mt-7 size-4" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section
         id="navsys-security-controls"
         className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
       >
         <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="10" title="security controls" />
+          <StudyLabel number="07" title="production trust" />
           <div className="mt-10 grid border border-black/20 bg-white lg:grid-cols-[1fr_1fr]">
             <div className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
               <LockKeyhole className="size-7" />
@@ -678,15 +503,11 @@ export function NavigationSystemExplorations({
             </div>
           </div>
         </div>
-      </section>
-
-      <section
-        id="navsys-comparison-matrix"
-        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
-      >
-        <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="11" title="comparison matrix" />
-          <div className="mt-10 overflow-x-auto border border-black/20 bg-white">
+        <div className="mt-12 border-t border-black/15 pt-12">
+          <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
+            Operating model / why the record is different
+          </p>
+          <div className="mt-5 overflow-x-auto border border-black/20 bg-white">
             <table className="w-full min-w-[720px] text-left">
               <thead>
                 <tr className="border-b border-black/15 font-mono text-[8px] uppercase tracking-[0.12em] text-black/70">
@@ -698,20 +519,12 @@ export function NavigationSystemExplorations({
               </thead>
               <tbody>
                 {[
-                  [
-                    "Complete run context",
-                    "Partial",
-                    "Aggregated",
-                    "Connected",
-                  ],
+                  ["Complete run context", "Partial", "Aggregated", "Connected"],
                   ["Model + tool decisions", "Manual", "Limited", "Native"],
                   ["Quality evidence", "Separate", "Trend only", "Run-level"],
                   ["Release decision", "Human guess", "External", "Built in"],
                 ].map((row) => (
-                  <tr
-                    key={row[0]}
-                    className="border-b border-black/15 last:border-b-0"
-                  >
+                  <tr key={row[0]} className="border-b border-black/15 last:border-b-0">
                     {row.map((cell, index) => (
                       <td
                         key={cell}
@@ -731,63 +544,11 @@ export function NavigationSystemExplorations({
       <Future19Pricing />
 
       <section
-        id="navsys-pricing-ledger"
-        className="hidden bg-[#eceae3] px-6 py-20 text-black md:px-10"
-      >
-        <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="12" title="pricing ledger" />
-          <div className="mt-10 grid gap-px bg-black/15 lg:grid-cols-3">
-            {[
-              ["Free", "$0", "10k spans", "7-day retention"],
-              ["Pro", "$19", "100k spans", "30-day retention"],
-              ["Team", "$39", "500k spans", "90-day retention"],
-            ].map(([name, price, volume, retention], index) => (
-              <article
-                key={name}
-                className={`flex min-h-[430px] flex-col p-7 ${index === 1 ? "bg-[#f4d44d]" : "bg-white"}`}
-              >
-                <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/70">
-                  {name}
-                </p>
-                <div className="mt-8 flex items-baseline gap-2">
-                  <span className="font-pixel text-7xl tracking-[-0.07em]">
-                    {price}
-                  </span>
-                  <span className="text-sm text-black/70">/mo</span>
-                </div>
-                <div className="mt-8 space-y-4 border-t border-black/15 pt-6 text-sm">
-                  <p className="flex items-center gap-3">
-                    <Check className="size-4" />
-                    {volume}
-                  </p>
-                  <p className="flex items-center gap-3">
-                    <Check className="size-4" />
-                    {retention}
-                  </p>
-                  <p className="flex items-center gap-3">
-                    <Check className="size-4" />
-                    SDK + OTLP
-                  </p>
-                </div>
-                <Link
-                  href="/sign-up"
-                  className="mt-auto flex items-center justify-between border-t border-black/15 pt-5 font-mono text-[9px] uppercase tracking-[0.12em]"
-                >
-                  Choose {name}
-                  <ArrowRight className="size-3" />
-                </Link>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section
-        id="navsys-resource-desk"
+        id="navsys-final-conversion"
         className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
       >
         <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="13" title="resource desk" />
+          <StudyLabel number="08" title="pricing + field notes" />
           <div className="mt-10 grid gap-px bg-black/15 lg:grid-cols-[1.25fr_0.75fr]">
             <article className="flex min-h-[480px] flex-col justify-between bg-black p-8 text-white md:p-10">
               <div>
@@ -827,14 +588,10 @@ export function NavigationSystemExplorations({
             </div>
           </div>
         </div>
-      </section>
-
-      <section
-        id="navsys-cta-workshop"
-        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
-      >
-        <div className="mx-auto max-w-[1240px]">
-          <StudyLabel number="14" title="conversion workshop" />
+        <div className="mt-12 border-t border-black/15 pt-12">
+          <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
+            Start with a real run
+          </p>
           <div className="mt-10 grid border border-black/20 bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[1.25fr_0.75fr]">
             <div className="p-8 md:p-12">
               <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
