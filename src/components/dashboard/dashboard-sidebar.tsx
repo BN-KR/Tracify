@@ -79,7 +79,7 @@ export function DashboardSidebar({
   const params = useParams();
   const projectId = (params?.projectId as string) || "";
   const projectDashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
-  const projectSetupHref = projectId ? `/dashboard/${projectId}` : "/onboarding/project";
+  const projectSetupHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
   const region = getTracifyRegion();
   const dynamicGroups = useMemo<NavGroup[]>(() => [
     {
@@ -94,17 +94,17 @@ export function DashboardSidebar({
         {
           title: "Runs",
           icon: Activity,
-          href: projectId ? `/dashboard/${projectId}/runs` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/runs` : "/dashboard/runs",
         },
         {
           title: "Sessions",
           icon: Activity,
-          href: projectId ? `/dashboard/${projectId}/sessions` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions",
         },
         {
           title: "Search",
           icon: Search,
-          href: projectId ? `/dashboard/${projectId}/search` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/search` : "/dashboard/search",
         },
       ],
     },
@@ -115,22 +115,22 @@ export function DashboardSidebar({
         {
           title: "Costs",
           icon: BarChart3,
-          href: projectId ? `/dashboard/${projectId}/costs` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/costs` : "/dashboard/costs",
         },
         {
           title: "Reports",
           icon: FileText,
-          href: projectId ? `/dashboard/${projectId}/reports` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/reports` : "/dashboard/reports",
         },
         {
           title: "Trace Compare",
           icon: GitCompare,
-          href: projectId ? `/dashboard/${projectId}/compare` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare",
         },
         {
           title: "Investigation",
           icon: Search,
-          href: projectId ? `/dashboard/${projectId}/investigate` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/investigate` : "/dashboard/investigate",
         },
       ],
     },
@@ -141,32 +141,32 @@ export function DashboardSidebar({
         {
           title: "Prompts",
           icon: MessageSquareText,
-          href: projectId ? "/dashboard/" + projectId + "/prompts" : projectSetupHref,
+          href: projectId ? "/dashboard/" + projectId + "/prompts" : "/dashboard/prompts",
         },
         {
           title: "Evaluation",
           icon: FlaskConical,
-          href: projectId ? "/dashboard/" + projectId + "/evaluation" : projectSetupHref,
+          href: projectId ? "/dashboard/" + projectId + "/evaluation" : "/dashboard/evaluation",
         },
         {
           title: "Datasets",
           icon: Database,
-          href: projectId ? "/dashboard/" + projectId + "/datasets" : projectSetupHref,
+          href: projectId ? "/dashboard/" + projectId + "/datasets" : "/dashboard/datasets",
         },
         {
           title: "Experiments",
           icon: GitCompare,
-          href: projectId ? "/dashboard/" + projectId + "/experiments" : projectSetupHref,
+          href: projectId ? "/dashboard/" + projectId + "/experiments" : "/dashboard/experiments",
         },
         {
           title: "Playground",
           icon: PlaygroundIcon,
-          href: projectId ? "/dashboard/" + projectId + "/playground" : projectSetupHref,
+          href: projectId ? "/dashboard/" + projectId + "/playground" : "/dashboard/playground",
         },
         {
           title: "Resilience",
           icon: Zap,
-          href: projectId ? "/dashboard/" + projectId + "/resilience" : projectSetupHref,
+          href: projectId ? "/dashboard/" + projectId + "/resilience" : "/dashboard/resilience",
         },
       ],
     },
@@ -177,12 +177,12 @@ export function DashboardSidebar({
         {
           title: "Runtime Policy",
           icon: ShieldCheck,
-          href: projectId ? `/dashboard/${projectId}/control` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/control` : "/dashboard/control",
         },
         {
           title: "Alerts",
           icon: Activity,
-          href: projectId ? `/dashboard/${projectId}/alerts` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/alerts` : "/dashboard/alerts",
         },
         {
           title: "Integrations",
@@ -199,27 +199,27 @@ export function DashboardSidebar({
         {
           title: "Settings",
           icon: Settings2,
-          href: projectId ? `/dashboard/${projectId}/settings` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/settings` : "/dashboard/settings",
         },
         {
           title: "Members",
           icon: Activity,
-          href: projectId ? `/dashboard/${projectId}/settings?tab=members` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/settings?tab=members` : "/dashboard/members",
         },
         {
           title: "Manage",
           icon: SlidersHorizontal,
-          href: projectId ? `/dashboard/${projectId}/manage` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/manage` : "/dashboard/manage",
         },
         {
           title: "API Keys",
           icon: Terminal,
-          href: projectId ? `/dashboard/${projectId}/api-keys` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/api-keys` : "/dashboard/api-keys",
         },
         {
           title: "Billing",
           icon: FileText,
-          href: projectId ? `/dashboard/${projectId}/billing` : projectSetupHref,
+          href: projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing",
         },
       ],
     },
@@ -230,7 +230,7 @@ export function DashboardSidebar({
         {
           title: "Quickstart",
           icon: Terminal,
-          href: projectId ? `/dashboard/${projectId}/quickstart` : "/onboarding/project",
+          href: projectId ? `/dashboard/${projectId}/quickstart` : "/dashboard/quickstart",
         },
         {
           title: "Docs",

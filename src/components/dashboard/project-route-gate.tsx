@@ -5,6 +5,7 @@ import { useConvexAuth, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 
 import { api } from "convex/_generated/api";
+import { NoProjectState } from "@/components/dashboard/no-project-state";
 
 const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
@@ -39,17 +40,23 @@ export function ProjectRouteGate({
 
     window.localStorage.removeItem(LAST_PROJECT_STORAGE_KEY);
     window.sessionStorage.removeItem(PROJECT_ID_STORAGE_KEY);
-    router.replace(
-      routeState.status === "no_projects" ? "/onboarding/project" : "/dashboard",
-    );
+    return;
   }, [isAuthenticated, isLoading, routeState, router]);
 
-  if (isLoading || !isAuthenticated || routeState?.status !== "ready") {
+  if (isLoading || !isAuthenticated || routeState === undefined) {
     return (
       <div className="px-6 py-6 font-mono text-sm text-black/55">
         Loading project...
       </div>
     );
+  }
+
+  if (routeState.status === "no_projects") {
+    return <NoProjectState />;
+  }
+
+  if (routeState.status !== "ready") {
+    return <NoProjectState title="Project unavailable." description="This project does not exist or you do not have access to it. Choose another project or return to the dashboard." />;
   }
 
   return <>{children}</>;
