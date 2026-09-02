@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Mail, MessagesSquare, ShieldCheck } from "lucide-react";
+import { LeadForm } from "@/components/marketing/lead-form";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -144,6 +145,10 @@ export default function ContactPage() {
             })}
           </div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-[1440px] border-b border-black p-5 md:p-10">
+        <div className="mx-auto max-w-3xl"><LeadForm /></div>
       </section>
 
       <section className="border-b border-black bg-[#d9d5ca]">

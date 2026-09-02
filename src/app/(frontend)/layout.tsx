@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GeistPixelSquare } from "geist/font/pixel";
 import "./globals.css";
+import { ConsentBanner } from "@/components/privacy/consent-banner";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -44,7 +45,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
         <ConvexClientProvider initialToken={await getToken()}>
-          <TooltipProvider><SiteChrome>{children}</SiteChrome></TooltipProvider>
+          <TooltipProvider><SiteChrome>{children}</SiteChrome><ConsentBanner /></TooltipProvider>
         </ConvexClientProvider>
       </body>
     </html>

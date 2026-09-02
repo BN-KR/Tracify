@@ -39,6 +39,10 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  if (!projectId) {
+    return <div className="border border-black/15 bg-white p-6"><h2 className="font-mono text-xl text-black">Project Management</h2><p className="mt-2 max-w-xl font-sans text-sm leading-6 text-black/60">No project data is available yet. The management view is read-only until a project is selected.</p></div>;
+  }
+
   const canDelete = useMemo(() => {
     if (!summary) return false;
     return (
