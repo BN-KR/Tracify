@@ -222,6 +222,18 @@ export function extractBlogHeadings(body: string): BlogHeading[] {
   return headings;
 }
 
+export type BlogFaqItem = { question: string; answer: string };
+
+export function extractBlogFaqItems(body: string): BlogFaqItem[] {
+  const items: BlogFaqItem[] = [];
+  const pattern = /{%\s*faq-item\s+question="([^"]*)"\s+answer="([^"]*)"\s*\/%}/g;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(body)) !== null) {
+    items.push({ question: match[1], answer: match[2] });
+  }
+  return items;
+}
+
 function parsePost(source: string, filename: string): BlogPost {
   const { frontmatter, body } = splitFrontmatter(source, filename);
   const data = requireRecord(frontmatter, filename);

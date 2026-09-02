@@ -7,6 +7,7 @@ author: Tracify Team
 draft: false
 categories:
   - engineering
+  - platform-comparison
 tags:
   - agent observability
   - platform comparison
@@ -438,6 +439,8 @@ Teams occasionally move this direction when evaluation and cost tracking turn ou
 4. **Accept the evaluation gap consciously (ongoing):** Whatever quality gates existed in Tracify don't have a direct equivalent on AgentOps; either rebuild them externally or accept a return to manual review.
 
 **Total migration risk:** Moderate. The instrumentation swap itself is easy; the real cost is losing a working evaluation layer and needing to consciously decide what replaces it, if anything.
+
+> **Decision rule:** Choose the platform that matches the failure you need to prevent next: AgentOps for fast replay-led debugging, or Tracify when evaluation and cost accountability must operate across runs.
 
 ## Action checklist for decision-makers
 

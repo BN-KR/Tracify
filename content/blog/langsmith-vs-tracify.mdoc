@@ -282,6 +282,8 @@ If the math above points toward switching, the migration itself is more mechanic
 
 **6. Re-run the volume math quarterly, not once.** The tier boundaries in this article aren't static for your account — they move as your product grows. A decision that was correct at 8M traces/month can be stale at 40M.
 
+> **Decision rule:** Pick LangSmith when LangChain-native development workflow is the constraint; pick Tracify when cross-framework production diagnosis and cost accountability are the constraint.
+
 ## Action checklist
 
 - [ ] Pull your actual monthly trace volume from LangSmith Settings → Usage, or calculate it with the formula above if you're not yet instrumented.

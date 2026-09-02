@@ -7,6 +7,7 @@ author: Tracify Team
 draft: false
 categories:
   - engineering
+  - platform-comparison
 tags:
   - new relic
   - apm
@@ -253,6 +254,8 @@ Teams do this when the agent-traffic-share crossover has clearly passed and New 
 5. **Keep New Relic instrumented on any non-agent services that specific team owns.** This is a migration of the agent slice specifically, not a wholesale platform switch — most teams doing this still use New Relic elsewhere in the company.
 
 **Total migration risk:** Moderate. The instrumentation swap is mechanical, but rebuilding any custom NRQL dashboards or checks takes deliberate effort, and you should confirm nothing your on-call team relies on silently stops working during the transition.
+
+> **Decision rule:** Keep New Relic for fleet and service telemetry when it is already working; add Tracify for the agent-specific quality, trace, and cost questions it does not answer natively.
 
 ## Action checklist
 

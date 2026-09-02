@@ -7,6 +7,7 @@ author: Tracify Team
 draft: false
 categories:
   - engineering
+  - platform-comparison
 tags:
   - agent observability
   - platform comparison
@@ -283,6 +284,8 @@ If most of your answers cluster toward Langfuse, self-hosting is worth serious e
 **From Langfuse to Tracify is comparatively low-risk.** Add the Tracify SDK alongside your existing Langfuse instrumentation and send identical spans to both platforms for two to four weeks. Build equivalent test cases in Tracify and compare evaluation results against what you're already getting from Langfuse, and verify that Tracify's automatic cost calculations line up with your expectations. If the comparison looks good, redirect instrumentation fully to Tracify and keep Langfuse running for another two weeks as a safety net before shutting it down. You can roll back to Langfuse within about 24 hours at any point in this process, which makes it a genuinely low-risk way to evaluate the switch.
 
 **From Tracify to Langfuse is more expensive.** Export traces and evaluation results through Tracify's API, then prepare a self-hosted Langfuse environment to receive them. Expect two to four weeks of manual work to replay traces and recreate your test cases and evaluation logic — there's no automated migration tool for this direction. Run both systems in parallel for another two weeks to validate trace fidelity and evaluation results before cutting over fully and decommissioning Tracify. Total risk is moderate to high, mostly because rebuilding evaluation logic by hand takes real time. If there's a real chance you'll need self-hosting later, it's worth deciding that early rather than migrating into it after the fact.
+
+> **Trade-off:** Langfuse maximizes deployment control through self-hosting; Tracify minimizes the operational work required to connect traces, evaluation, and cost decisions.
 
 ## Action checklist for decision-makers
 

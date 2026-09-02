@@ -12,6 +12,7 @@ const files = [
   "src/components/marketing/command-center-story.tsx",
   "src/components/marketing/navigation-system-explorations.tsx",
   "src/components/dashboard/docs-viewer.tsx",
+  "src/components/dashboard/dashboard-start-state.tsx",
 ];
 
 const source = files
@@ -26,5 +27,8 @@ assert.match(source, /npm install tracify-sdk/, "canonical npm package is missin
 assert.match(source, /pip install tracify-sdk/, "canonical Python package is missing");
 assert.match(source, /traceAgent/, "canonical TypeScript wrapper is missing");
 assert.match(source, /trace_agent/, "canonical Python wrapper is missing");
+assert.match(source, /href=\{hasFirstTrace \? `\/dashboard\/\$\{effectiveProjectId\}\/runs` : "\/demo"\}/, "authenticated first-trace handoff is missing");
+assert.doesNotMatch(source, /temporary until the trace viewer milestone/, "stale temporary sample-trace copy remains");
+assert.match(source, /seeded example for exploring the workflow/, "seeded demo disclosure is missing");
 
 console.log(`Activation contract passed for ${files.length} user-facing sources.`);

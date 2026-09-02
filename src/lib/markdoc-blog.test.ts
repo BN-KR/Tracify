@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { blogMarkdocConfig, createBlogRepository } from "./markdoc-blog.ts";
+import { blogMarkdocConfig, createBlogRepository, extractBlogFaqItems } from "./markdoc-blog.ts";
 
 function withContentDirectory(files: Record<string, string>, run: (directory: string) => void) {
   const directory = mkdtempSync(path.join(tmpdir(), "tracify-markdoc-"));
@@ -142,6 +142,24 @@ test("decorative title punctuation does not change heading anchors", () => {
       assert.equal(post?.headings[0]?.id, "section-evidence-action");
     },
   );
+});
+
+test("extractBlogFaqItems reads question and answer pairs for FAQPage schema", () => {
+  const body = [
+    "# Heading",
+    "",
+    '{% faq-item question="What is a span?" answer="A single recorded operation inside a trace." /%}',
+    '{% faq-item question="What is a trace?" answer="An end to end record of one agent run." /%}',
+  ].join("\n");
+  const items = extractBlogFaqItems(body);
+  assert.deepEqual(items, [
+    { question: "What is a span?", answer: "A single recorded operation inside a trace." },
+    { question: "What is a trace?", answer: "An end to end record of one agent run." },
+  ]);
+});
+
+test("extractBlogFaqItems returns an empty list when a post has no FAQ tags", () => {
+  assert.deepEqual(extractBlogFaqItems("# Heading\n\nJust a paragraph."), []);
 });
 
 test("invalid frontmatter fails with the source filename", () => {

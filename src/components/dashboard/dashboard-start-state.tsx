@@ -80,7 +80,7 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
     { label: "Copy API key", status: onboardingSession.hasCopiedKey ? "completed" : hasProject ? "current" : "pending" },
     { label: "Install SDK", status: installReady ? "completed" : onboardingSession.hasCopiedKey ? "current" : "pending" },
     { label: "Run your agent", status: hasFirstTrace ? "completed" : installReady ? "current" : "pending" },
-    { label: "Open first trace", status: "pending" },
+    { label: "Open first trace", status: hasFirstTrace ? "current" : "pending" },
   ] satisfies Array<{ label: string; status: ChecklistStatus }>;
 
   return (
@@ -135,16 +135,16 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
                 className: "h-9 px-4 uppercase",
               })}
             >
-              {hasProject ? "Open quickstart" : "Create project"}
+              {hasProject ? "Continue setup" : "Create project"}
             </Link>
             <Link
-              href="/demo"
+              href={hasFirstTrace ? `/dashboard/${effectiveProjectId}/runs` : "/demo"}
               className={buttonVariants({
                 variant: "secondary",
                 className: "h-9 px-4 uppercase",
               })}
             >
-              Open sample trace
+              {hasFirstTrace ? "Open your runs" : "Explore seeded demo"}
             </Link>
           </div>
         </section>
@@ -189,18 +189,18 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
             Inspect a completed run while your first span is pending.
           </h2>
           <p className="mt-2 max-w-2xl font-sans text-sm leading-6 text-black/60">
-            The sample entry point is temporary until the trace viewer milestone
-            creates the real run inspection UI.
+            This is a seeded example for exploring the workflow. It is separate
+            from your project data and does not represent a customer run.
           </p>
         </div>
         <Link
-          href="/demo"
+          href={hasFirstTrace ? `/dashboard/${effectiveProjectId}/runs` : "/demo"}
           className={buttonVariants({
             variant: "secondary",
             className: "h-9 px-4 uppercase",
           })}
         >
-          Open sample trace
+          {hasFirstTrace ? "Open your runs" : "Explore seeded demo"}
         </Link>
       </section>
     </div>

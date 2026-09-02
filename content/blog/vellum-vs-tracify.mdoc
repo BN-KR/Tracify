@@ -7,6 +7,7 @@ author: Tracify Team
 draft: false
 categories:
   - engineering
+  - platform-comparison
 tags:
   - platform comparison
   - llm engineering
@@ -320,6 +321,8 @@ Choosing Vellum without a production observability layer means you will eventual
 4. **Compare before/after using Tracify's own evaluation history.** Since Tracify was already tracing the old version, you have a real production baseline to compare the Vellum-authored version against — a stronger comparison than an offline eval set alone.
 
 **Risk:** Low-to-moderate. The main risk is scope creep — treating this as an excuse to rewrite working production logic rather than simply changing how future iterations are authored.
+
+> **Trade-off:** Vellum addresses workflow authoring and offline iteration; Tracify addresses the evidence loop once real users exercise the deployed workflow.
 
 ## Action checklist
 

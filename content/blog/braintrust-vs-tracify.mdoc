@@ -7,6 +7,7 @@ author: Tracify Team
 draft: false
 categories:
   - engineering
+  - platform-comparison
 tags:
   - braintrust
   - evaluation
@@ -378,6 +379,13 @@ If you need deeper evaluation customization later:
 1. Export evaluation test cases and results from Tracify via the API.
 2. Import test cases into Braintrust; map your scoring logic to custom evaluators.
 3. Expect this to be manual work — avoid it later by making the evaluation-complexity call early, using the decision table above.
+
+> **Trade-off:** Braintrust is the stronger choice when custom evaluator logic is the bottleneck; Tracify is the stronger choice when tracing, cost, and evaluation need to share one operational workflow.
+
+```ts
+const decision = { traceProductionRuns: true, customEvaluatorLogic: false };
+const platform = decision.customEvaluatorLogic ? "braintrust" : "tracify";
+```
 
 ## Action checklist
 
