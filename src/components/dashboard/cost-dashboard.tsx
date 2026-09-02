@@ -30,9 +30,9 @@ import { AnalyticsRefreshControl } from "./analytics-refresh-control";
 export function CostDashboard({ projectId }: { projectId: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const summary = useQuery(api.projects.getProjectManagementSummary, {
+  const summary = useQuery(api.projects.getProjectManagementSummary, projectId ? {
     projectId: projectId as Id<"projects">,
-  });
+  } : "skip");
   const [range, setRange] = useState(() => Number(searchParams.get("days")) || 30);
   const liveRefreshKey =
     summary?.latestActivityAt ??

@@ -56,9 +56,9 @@ const PLANS = [
 
 export function BillingPlan({ projectId }: { projectId: string }) {
   const [annual, setAnnual] = useState(false);
-  const summary = useQuery(api.projects.getProjectManagementSummary, {
+  const summary = useQuery(api.projects.getProjectManagementSummary, projectId ? {
     projectId: projectId as Id<"projects">,
-  });
+  } : "skip");
 
   if (summary === undefined) {
     return (
