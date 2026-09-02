@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function ExperimentLab({ projectId }: { projectId: string }) {
-  const datasets = useQuery(api.evaluation.listDatasets, { projectId: projectId as never });
-  const prompts = useQuery(api.prompts.list, { projectId: projectId as never });
-  const experiments = useQuery(api.experiments.list, { projectId: projectId as never });
-  const evaluationOverview = useQuery(api.evaluationEngine.overview, { projectId: projectId as never });
+  const datasets = useQuery(api.evaluation.listDatasets, projectId ? { projectId: projectId as never } : "skip");
+  const prompts = useQuery(api.prompts.list, projectId ? { projectId: projectId as never } : "skip");
+  const experiments = useQuery(api.experiments.list, projectId ? { projectId: projectId as never } : "skip");
+  const evaluationOverview = useQuery(api.evaluationEngine.overview, projectId ? { projectId: projectId as never } : "skip");
   const createExperiment = useMutation(api.experiments.create);
   const setStatus = useMutation(api.experiments.setStatus);
   const recordResult = useMutation(api.experiments.recordResult);

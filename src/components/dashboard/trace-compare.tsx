@@ -27,7 +27,7 @@ export function TraceCompare({ projectId }: { projectId: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const runs = useQuery(api.agentRuns.listByProject, { projectId: projectId as Id<"projects"> }) as Run[] | undefined;
+  const runs = useQuery(api.agentRuns.listByProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip") as Run[] | undefined;
   const [leftId, setLeftId] = useState(searchParams.get("left") ?? "");
   const [rightId, setRightId] = useState(searchParams.get("right") ?? "");
   const [leftSpans, setLeftSpans] = useState<Span[]>([]);

@@ -15,12 +15,12 @@ import { useProjectStats } from "@/hooks/use-project-stats";
 import { formatCurrency, formatRelativeTime } from "@/lib/utils";
 
 export function ProjectReport({ projectId }: { projectId: string }) {
-  const summary = useQuery(api.projects.getProjectManagementSummary, {
+  const summary = useQuery(api.projects.getProjectManagementSummary, projectId ? {
     projectId: projectId as Id<"projects">,
-  });
-  const alerts = useQuery(api.alerts.listByProject, {
+  } : "skip");
+  const alerts = useQuery(api.alerts.listByProject, projectId ? {
     projectId: projectId as Id<"projects">,
-  });
+  } : "skip");
   const liveRefreshKey =
     summary?.latestActivityAt ??
     summary?.totals.totalRuns ??

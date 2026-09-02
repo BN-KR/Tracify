@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function PromptManagement({ projectId }: { projectId: string }) {
-  const prompts = useQuery(api.prompts.list, { projectId: projectId as never });
-  const traceLinks = useQuery(api.prompts.listTraceLinks, { projectId: projectId as never });
+  const prompts = useQuery(api.prompts.list, projectId ? { projectId: projectId as never } : "skip");
+  const traceLinks = useQuery(api.prompts.listTraceLinks, projectId ? { projectId: projectId as never } : "skip");
   const createPrompt = useMutation(api.prompts.create);
   const createVersion = useMutation(api.prompts.createVersion);
   const updateLabels = useMutation(api.prompts.updateLabels);

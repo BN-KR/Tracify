@@ -27,7 +27,7 @@ export function InvestigationMode({ projectId }: { projectId: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const runs = useQuery(api.agentRuns.listByProject, { projectId: projectId as Id<"projects"> }) as Run[] | undefined;
+  const runs = useQuery(api.agentRuns.listByProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip") as Run[] | undefined;
   const [runId, setRunId] = useState(searchParams.get("run") ?? "");
   const [spans, setSpans] = useState<Span[]>([]);
   const [loading, setLoading] = useState(false);

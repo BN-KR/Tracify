@@ -13,15 +13,15 @@ const tabs = [
 ] as const;
 
 export function EvaluationEngineDashboard({ projectId, section = "overview" }: { projectId: string; section?: string }) {
-  const overview = useQuery(api.evaluationEngine.overview, { projectId: projectId as never });
-  const evaluators = useQuery(api.evaluators.list, { projectId: projectId as never });
-  const datasets = useQuery(api.evaluation.listDatasets, { projectId: projectId as never });
-  const prompts = useQuery(api.prompts.list, { projectId: projectId as never });
+  const overview = useQuery(api.evaluationEngine.overview, projectId ? { projectId: projectId as never } : "skip");
+  const evaluators = useQuery(api.evaluators.list, projectId ? { projectId: projectId as never } : "skip");
+  const datasets = useQuery(api.evaluation.listDatasets, projectId ? { projectId: projectId as never } : "skip");
+  const prompts = useQuery(api.prompts.list, projectId ? { projectId: projectId as never } : "skip");
   const createEvaluator = useMutation(api.evaluationEngine.createEvaluator);
   const createSuite = useMutation(api.evaluationEngine.createSuite);
   const createJob = useMutation(api.evaluationEngine.createJob);
   const createMonitor = useMutation(api.evaluationEngine.createMonitor);
-    const monitors = useQuery(api.evaluationEngine.listMonitors, { projectId: projectId as never });
+    const monitors = useQuery(api.evaluationEngine.listMonitors, projectId ? { projectId: projectId as never } : "skip");
     const latestGateJob = overview?.recentJobs.find((job) => job.suiteId);
     const latestGate = useQuery(api.evaluationEngine.suiteGate, latestGateJob?.suiteId ? { projectId: projectId as never, suiteId: latestGateJob.suiteId, jobId: latestGateJob._id } : "skip");
   const setMonitorActive = useMutation(api.evaluationEngine.setMonitorActive);
