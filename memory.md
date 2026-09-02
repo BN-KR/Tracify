@@ -1,5 +1,14 @@
 # Project Memory
 
+## 2026-09-02 first-customer review execution system
+- The active 30-day commercial objective is one paid **Founding Agent Failure Review** at **$1,000 upfront**. The service covers one workflow, one consequential failure, five business days, sanitized staging evidence only, an annotated trace, one evidence-backed mechanism, one tested fix or stop/rollback recommendation, five regression cases, a concise report, and a 45-minute readout. Existing $19/$39 subscriptions remain unchanged.
+- `/contact` now offers a free 20-minute **Agent Failure Fit Call** strictly for qualification and evidence scoping; it does not promise written findings, regression cases, or a release recommendation. `/demo` remains explicitly seeded and adds a fit-call CTA while preserving self-serve signup.
+- The dashboard quickstart now uses `pip install tracify-sdk` with `from tracify import ...`, valid Python `async def`, the local TypeScript `tracify-sdk` contract, and a real `/docs/quickstart` destination. The inactive “Check Connection” control was removed because the regional health endpoint cannot prove SDK ingestion.
+- The operating kit lives under `docs/first-customer/`: customer scope, report template, pilot sanitization/retention checklist, sales/demo playbook, and Stripe Payment Link setup.
+- The editable execution workbook is `C:/Tracify/outputs/first-customer-execution/tracify-first-customer-crm.xlsx`. It contains 50 current source-backed candidates and 100 contact slots; the initial public-evidence pass marks 15 Qualified, 28 Watch, and 7 Disqualified. Never describe all 50 as qualified until concrete failure, technical ownership, sanitized staging evidence, and purchase authority are verified. No outreach has been sent.
+- No Stripe product or Payment Link was created because this workspace has neither a Stripe CLI login nor `STRIPE_SECRET_KEY`; follow the documented Dashboard procedure and keep the live URL out of source control.
+- Verification: focused ESLint passes; both quickstart snippets compile against the local SDK sources; `/contact`, `/demo`, `/docs/quickstart`, `/pricing`, and `/sign-up` return 200; clean-browser desktop/mobile checks confirm the fit-call path and seeded demo; pricing remains $19/$39. The production build compiles but is blocked by an unrelated existing TypeScript error in `src/components/dashboard/cost-dashboard.tsx:256` (`new Date(value)` receives `ReactNode`).
+
 ## 2026-08-26 AI evaluation metrics editorial rebuild
 - Replaced the stale H3/paragraph tail of `content/blog/ai-evaluation-metrics.mdoc` with varied release-room tables, trace storytelling, difficult-case guidance, layered gates, a worked release decision, and a visual checklist.
 - Added shared slash-separated display titles and centralized yellow `highlight` Markdoc rendering in the blog system; local route verified at `/blog/ai-evaluation-metrics` with the required Convex placeholder environment.
@@ -85,7 +94,7 @@
 - Public docs now live in `content/docs/*.mdoc`, separate from `content/blog/*.mdoc`, with Markdoc parsing, searchable navigation, and repository-boundary tests.
 - Keep public SDK examples aligned to the published `tracify` package and `TracifyClient` API. The strongest editorial references remain `/product/trace-viewer` and `/security`: concrete, structured, and restrained.
 - Avoid fabricated resource titles or generic blog links when a card makes a specific promise; use a real published slug or clearly label the resource as a guide.
-- The trace-clinic CTA promise is 30 minutes, one real trace, a root-cause map, and a release-gate recommendation. Preserve that context at the contact destination.
+- Superseded 2026-09-02: do not restore the old free trace-clinic promise. The free contact offer is now a 20-minute Agent Failure Fit Call for qualification and evidence scoping only; root-cause findings and release recommendations belong to the paid review.
 
 ## 2026-08-14 Better Auth SAML login integration
 - Added `@better-auth/sso` to the Convex-hosted Better Auth configuration and the React auth client.

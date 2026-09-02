@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
@@ -31,12 +32,11 @@ export function QuickstartGuide({ projectId }: QuickstartGuideProps) {
   const pythonCode = `from tracify import trace_agent, llm_call
 
 @trace_agent()
-async function run_my_agent():
-    # Your agent logic here
+async def run_my_agent():
     llm_call(
-        input_data="Hello, world!",
-        output_data="Hello! How can I help?",
-        model_id="gpt-4",
+        input_data="What is Tracify?",
+        output_data="Observability for AI agents.",
+        model_id="gpt-4o",
         cost_usd=0.002,
         latency_ms=450
     )
@@ -44,12 +44,11 @@ async function run_my_agent():
 
   const tsCode = `import { traceAgent, llmCall } from 'tracify-sdk';
 
-const agent = traceAgent(async () => {
-  // Your agent logic here
+const runAgent = traceAgent(async () => {
   await llmCall({
-    input: "Hello, world!",
-    output: "Hello! How can I help?",
-    modelId: "gpt-4",
+    input: "What is Tracify?",
+    output: "Observability for AI agents.",
+    modelId: "gpt-4o",
     costUsd: 0.002,
     latencyMs: 450
   });
@@ -132,12 +131,12 @@ const agent = traceAgent(async () => {
       </section>
 
       <div className="pt-10 flex gap-4">
-        <Button variant="outline" className="rounded-none font-mono text-[10px] uppercase border-black/15 gap-2">
+        <Link
+          href="/docs/quickstart"
+          className="inline-flex h-9 items-center justify-center gap-2 border border-black/15 px-4 font-mono text-[10px] uppercase transition-colors hover:border-black hover:bg-black hover:text-white"
+        >
           <BookOpen className="size-4" /> Full Documentation
-        </Button>
-        <Button className="rounded-none font-mono text-[10px] uppercase gap-2">
-          Check Connection
-        </Button>
+        </Link>
       </div>
     </div>
   );

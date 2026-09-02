@@ -1,3 +1,16 @@
+# 2026-09-02 — First-customer execution
+
+- [completed] Replace the free root-cause clinic with a qualification-only 20-minute Agent Failure Fit Call and a pre-addressed email action.
+- [completed] Keep the demo explicitly seeded, preserve self-serve project creation, and add the failed-run fit-call CTA.
+- [completed] Correct Python and TypeScript dashboard quickstarts against the local SDK contracts, link first-party documentation, and remove the inactive connection control.
+- [completed] Create the customer scope, investigation report, data sanitization/retention checklist, sales/demo playbook, and Stripe setup guide under `docs/first-customer/`.
+- [completed] Create and verify `C:/Tracify/outputs/first-customer-execution/tracify-first-customer-crm.xlsx` with 50 source-backed candidates, 100 contact slots, formulas, status controls, outreach drafts, activity logging, and objection tracking. Initial status: 15 Qualified, 28 Watch, 7 Disqualified; no messages sent.
+- [completed] Pass focused lint, local SDK snippet compilation, route checks, and desktop/mobile browser QA. Production compilation succeeds, then the build stops on the unrelated existing `src/components/dashboard/cost-dashboard.tsx:256` TypeScript error.
+- [pending owner] Create the live one-time $1,000 Stripe Payment Link in the intended Stripe account using `docs/first-customer/stripe-payment-link-setup.md`; no Stripe credentials were available to this workspace.
+- [pending owner] Verify public contact channels and one current trigger for the 15 Qualified accounts, then personally send outreach. Continue research until 50 accounts meet the full qualification gate; do not count Watch accounts as qualified.
+- [pending owner] Execute the 30-day funnel: 100 personalized sends, 5 calls, 2 written offers, 1 payment, and 1 delivered evidence-backed review.
+- [pending] Publish the `codex/first-customer-review` draft pull request, inspect hosted checks, and merge only after review.
+
 # 2026-08-24 — Cursor removal and fit verification
 
 - [x] Remove the mouse cursor and click feedback from all four scenes.
