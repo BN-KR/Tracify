@@ -1,0 +1,58 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="vaHeroTitle vaHeroDesc">
+  <title id="vaHeroTitle">A voice turn moving through five pipeline stages with barge-in cutting across all of them</title>
+  <desc id="vaHeroDesc">A black canvas shows a waveform entering from the left and passing through five labeled stages arranged left to right — CAPTURE, RECOGNIZE, INTERPRET, SYNTHESIZE, and PLAY — connected by thin lines, with a yellow dashed arrow labeled BARGE-IN looping from the PLAY stage back over the whole pipeline to represent an interruption that can occur at any point in the turn.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">VOICE AI AGENT OBSERVABILITY</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">capture / recognize / interpret / synthesize / play</text>
+
+  <g font-family="monospace" font-size="13">
+    <!-- incoming waveform -->
+    <g stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2" fill="none">
+      <path d="M100 260 L110 260 L118 230 L126 300 L134 210 L142 310 L150 240 L158 280 L166 260 L176 260"/>
+    </g>
+    <text x="100" y="330" fill="#f6f1e6" opacity="0.45">user audio in</text>
+
+    <!-- five stage boxes -->
+    <g stroke-width="2">
+      <rect x="230" y="210" width="230" height="100" fill="none" stroke="#f6f1e6" stroke-opacity="0.55"/>
+      <text x="345" y="255" fill="#f6f1e6" text-anchor="middle" opacity="0.9">CAPTURE</text>
+      <text x="345" y="278" fill="#f6f1e6" text-anchor="middle" opacity="0.45" font-size="11">VAD · endpoint</text>
+
+      <rect x="510" y="210" width="230" height="100" fill="none" stroke="#f6f1e6" stroke-opacity="0.55"/>
+      <text x="625" y="255" fill="#f6f1e6" text-anchor="middle" opacity="0.9">RECOGNIZE</text>
+      <text x="625" y="278" fill="#f6f1e6" text-anchor="middle" opacity="0.45" font-size="11">ASR · partial/final</text>
+
+      <rect x="790" y="210" width="230" height="100" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-opacity="0.85"/>
+      <text x="905" y="255" fill="#f4d44d" text-anchor="middle">INTERPRET</text>
+      <text x="905" y="278" fill="#f4d44d" text-anchor="middle" opacity="0.7" font-size="11">LLM · turn logic</text>
+
+      <rect x="1070" y="210" width="230" height="100" fill="none" stroke="#f6f1e6" stroke-opacity="0.55"/>
+      <text x="1185" y="255" fill="#f6f1e6" text-anchor="middle" opacity="0.9">SYNTHESIZE</text>
+      <text x="1185" y="278" fill="#f6f1e6" text-anchor="middle" opacity="0.45" font-size="11">TTS · first byte</text>
+
+      <rect x="1350" y="210" width="180" height="100" fill="none" stroke="#f6f1e6" stroke-opacity="0.55"/>
+      <text x="1440" y="255" fill="#f6f1e6" text-anchor="middle" opacity="0.9">PLAY</text>
+      <text x="1440" y="278" fill="#f6f1e6" text-anchor="middle" opacity="0.45" font-size="11">playback</text>
+    </g>
+
+    <g stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="1.5">
+      <line x1="460" y1="260" x2="510" y2="260"/>
+      <line x1="740" y1="260" x2="790" y2="260"/>
+      <line x1="1020" y1="260" x2="1070" y2="260"/>
+      <line x1="1300" y1="260" x2="1350" y2="260"/>
+    </g>
+
+    <!-- outgoing waveform -->
+    <g stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2" fill="none">
+      <path d="M1350 400 L1360 400 L1368 370 L1376 440 L1384 350 L1392 450 L1400 380 L1408 420 L1416 400 L1426 400"/>
+    </g>
+    <text x="1350" y="470" fill="#f6f1e6" opacity="0.45">agent audio out</text>
+
+    <!-- barge-in arrow crossing the whole pipeline -->
+    <path d="M1440 330 C1440 560 345 560 345 330" fill="none" stroke="#f4d44d" stroke-width="2" stroke-dasharray="8 7" opacity="0.85"/>
+    <polygon points="345,330 336,312 356,316" fill="#f4d44d" opacity="0.85"/>
+    <text x="890" y="610" fill="#f4d44d" text-anchor="middle" font-size="16" letter-spacing="1">BARGE-IN — can interrupt any stage</text>
+  </g>
+
+  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">one turn, five stages, one cross-cutting failure mode</text>
+</svg>
