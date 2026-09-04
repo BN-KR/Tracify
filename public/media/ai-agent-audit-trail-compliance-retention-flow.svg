@@ -1,0 +1,30 @@
+<svg viewBox="0 0 1600 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="aatRetentionTitle aatRetentionDesc">
+  <title id="aatRetentionTitle">Retention splits raw run data into decision metadata and content payload at the moment of capture</title>
+  <desc id="aatRetentionDesc">A black canvas shows a box labeled raw run data at the top, splitting into two paths. The left path leads to a box labeled decision metadata, containing hashed actor identifiers, action type, policy version, and disposition, retained for seven years as evidence of control operation. The right path leads to a box labeled content payload, containing account fields, dispute text, and tool arguments, retained for ninety days and then redacted or purged, illustrating that the minimization decision is made once at write time rather than during a later cleanup pass.</desc>
+  <rect width="1600" height="620" fill="#0a0a0a"/>
+  <text x="80" y="60" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1.5">RETENTION SPLITS AT CAPTURE</text>
+  <text x="80" y="88" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.55">not decided later during a cleanup pass</text>
+
+  <rect x="640" y="120" width="320" height="60" fill="none" stroke="#f6f1e6" stroke-width="1.5"/>
+  <text x="800" y="157" fill="#f6f1e6" text-anchor="middle" font-family="monospace" font-size="14">RAW RUN DATA</text>
+
+  <path d="M760 180 L 460 260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+  <path d="M840 180 L 1140 260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+
+  <g font-family="monospace">
+    <rect x="180" y="260" width="560" height="150" fill="none" stroke="#7fbf7f" stroke-width="2"/>
+    <text x="210" y="295" fill="#7fbf7f" font-size="15">DECISION METADATA</text>
+    <text x="210" y="322" fill="#7fbf7f" opacity="0.7" font-size="12">actor hash, action type, policy version,</text>
+    <text x="210" y="342" fill="#7fbf7f" opacity="0.7" font-size="12">timestamps, disposition</text>
+    <text x="210" y="385" fill="#7fbf7f" font-size="13">retained 7 years · pseudonymous</text>
+
+    <rect x="860" y="260" width="560" height="150" fill="#f4d44d" fill-opacity="0.08" stroke="#f4d44d" stroke-width="2"/>
+    <text x="890" y="295" fill="#f4d44d" font-size="15">CONTENT PAYLOAD</text>
+    <text x="890" y="322" fill="#f4d44d" opacity="0.75" font-size="12">account fields, dispute text,</text>
+    <text x="890" y="342" fill="#f4d44d" opacity="0.75" font-size="12">tool arguments, retrieved records</text>
+    <text x="890" y="385" fill="#f4d44d" font-size="13">retained 90 days · then redact or purge</text>
+  </g>
+
+  <text x="80" y="470" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.5">the record on the left still proves the control ran after the payload on the right is gone</text>
+  <text x="80" y="580" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">evidentiary completeness and storage limitation stop competing once they are different objects</text>
+</svg>

@@ -1,0 +1,56 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="aatHeroTitle aatHeroDesc">
+  <title id="aatHeroTitle">One audit record exploded into its five evidentiary fields, answering a data-subject access request</title>
+  <desc id="aatHeroDesc">A black canvas shows a vertical ledger of stacked agent run records on the left, with one record highlighted and expanded on the right into five labeled fields: actor, action, data touched, basis, and disposition, each with a short example value. A dashed green arrow on the lower left represents a GDPR Article 15 access request pointing into the highlighted record, illustrating that the request is answered from stored evidence rather than reconstructed from memory.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI AGENT AUDIT TRAIL</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">actor · action · data · basis · disposition</text>
+
+  <g font-family="monospace" font-size="12">
+    <rect x="100" y="200" width="380" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.25" stroke-width="1.5"/>
+    <text x="118" y="225" fill="#f6f1e6" opacity="0.4">run_8a11 · read · closed</text>
+
+    <rect x="100" y="248" width="380" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.25" stroke-width="1.5"/>
+    <text x="118" y="273" fill="#f6f1e6" opacity="0.4">run_8a12 · propose · pending</text>
+
+    <rect x="100" y="296" width="380" height="46" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-width="2"/>
+    <text x="118" y="325" fill="#f4d44d">run_8a13 · waive_fee · disposed</text>
+
+    <rect x="100" y="350" width="380" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.25" stroke-width="1.5"/>
+    <text x="118" y="375" fill="#f6f1e6" opacity="0.4">run_8a14 · notify · closed</text>
+
+    <rect x="100" y="398" width="380" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.25" stroke-width="1.5"/>
+    <text x="118" y="423" fill="#f6f1e6" opacity="0.4">run_8a15 · read · closed</text>
+  </g>
+
+  <path d="M480 319 L 560 319 L 620 195" stroke="#f4d44d" stroke-width="1.5" fill="none" opacity="0.6"/>
+
+  <g font-family="monospace" font-size="13">
+    <rect x="620" y="150" width="880" height="90" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="650" y="185" fill="#f6f1e6" opacity="0.85">ACTOR</text>
+    <text x="650" y="209" fill="#f6f1e6" opacity="0.5" font-size="12">svc_billing-agent acting for user_4471, session_9c2</text>
+
+    <rect x="620" y="250" width="880" height="90" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="650" y="285" fill="#f6f1e6" opacity="0.85">ACTION</text>
+    <text x="650" y="309" fill="#f6f1e6" opacity="0.5" font-size="12">waive_late_fee · amount 34.00 usd · tool v3</text>
+
+    <rect x="620" y="350" width="880" height="90" fill="#f4d44d" fill-opacity="0.1" stroke="#f4d44d" stroke-width="2"/>
+    <text x="650" y="385" fill="#f4d44d">DATA TOUCHED</text>
+    <text x="650" y="409" fill="#f4d44d" opacity="0.75" font-size="12">account_id, invoice_id, dispute_reason (redacted after 90d)</text>
+
+    <rect x="620" y="450" width="880" height="90" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="650" y="485" fill="#f6f1e6" opacity="0.85">BASIS</text>
+    <text x="650" y="509" fill="#f6f1e6" opacity="0.5" font-size="12">policy fee-waiver-v6, tenure &gt;= 18mo, first dispute</text>
+
+    <rect x="620" y="550" width="880" height="90" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="650" y="585" fill="#f6f1e6" opacity="0.85">DISPOSITION</text>
+    <text x="650" y="609" fill="#f6f1e6" opacity="0.5" font-size="12">auto-approved, no human override, hash sealed 03:12</text>
+  </g>
+
+  <g font-family="monospace" font-size="13">
+    <path d="M100 700 L 300 320" stroke="#7fbf7f" stroke-width="1.5" fill="none" stroke-dasharray="4 4" opacity="0.6"/>
+    <text x="100" y="730" fill="#7fbf7f" opacity="0.85">GDPR Art. 15 request</text>
+    <text x="100" y="752" fill="#7fbf7f" opacity="0.55" font-size="12">"what did the agent do with my data?"</text>
+  </g>
+
+  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the answer comes from the trail, not from memory</text>
+</svg>
