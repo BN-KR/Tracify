@@ -19,7 +19,7 @@ relatedPosts:
   - reduce-llm-costs-without-hurting-quality
 heroImage:
   src: /media/ai-agent-cost-attribution-hero.svg
-  alt: Three tenant usage streams converging into one provider invoice box, then diverging into three tenant ledgers and a dashed red unattributed bucket
+  alt: A pooled provider invoice torn along a jagged line into three tenant receipts, each stamped OK with its own dollar total, and one crumpled unattributed scrap left over with no tenant name to write on it
 seo:
   metaTitle: "AI Agent Cost Attribution: Chargeback and Showback"
   metaDescription: A four-stage model for attributing AI agent spend to tenants, reconciling it against billed revenue, and enforcing budgets before the invoice is wrong.
@@ -66,7 +66,7 @@ First, **which tenant caused a spend change** — a 20% month-over-month increas
 
 ## The Attribute → Aggregate → Reconcile → Enforce model in practice
 
-![The four-stage attribution chain: attribute, aggregate, reconcile, enforce, each stage's output and its silent failure mode](/media/ai-agent-cost-attribution-chain.svg)
+![A conveyor belt carrying usage tokens through four physical checkpoints — a tag stamp, a ledger book, a balance scale, and a turnstile gate — with one unstamped token arriving at the ledger blank](/media/ai-agent-cost-attribution-chain.svg)
 
 *A break in any stage propagates forward: a missing tag becomes a wrong ledger becomes an incorrect invoice.*
 
@@ -233,7 +233,7 @@ A tenant should be able to see their own usage and cost, at whatever granularity
 
 Attribution is not free, and it does not solve every version of this problem equally well.
 
-![Four tenants compared on a paired bar chart of metered cost against billed revenue, with two tenants outlined in red for a negative monthly margin](/media/ai-agent-cost-attribution-reconciliation.svg)
+![Four printed till receipts, one per tenant, each itemizing metered cost against billed revenue and stamped either MARGIN OK in green or LOSS in red](/media/ai-agent-cost-attribution-reconciliation.svg)
 
 *Tenant B's free-tier usage and Tenant D's pooled shared-feature cost are the two negative-margin cases a platform-wide average would have hidden.*
 

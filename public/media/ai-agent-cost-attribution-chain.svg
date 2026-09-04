@@ -1,53 +1,107 @@
-<svg viewBox="0 0 1600 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="acaChainTitle acaChainDesc">
-  <title id="acaChainTitle">The four-stage attribution chain: attribute, aggregate, reconcile, enforce</title>
-  <desc id="acaChainDesc">A black canvas diagram showing four connected stages in sequence — attribute, aggregate, reconcile, and enforce — each with a one-line description of what it produces, illustrating that skipping an early stage breaks every stage after it.</desc>
-  <rect width="1600" height="560" fill="#0a0a0a"/>
-  <text x="60" y="60" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="2">THE COST ATTRIBUTION CHAIN</text>
-  <text x="60" y="90" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">four stages, each depending on the one before it</text>
+<svg viewBox="0 0 1600 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="acaChainTitle acaChainDesc">
+  <title id="acaChainTitle">A conveyor belt carrying usage events through four physical checkpoints: a tag stamp, a ledger book, a balance scale, and a turnstile gate</title>
+  <desc id="acaChainDesc">An illustration of a factory conveyor belt moving small usage-event tokens left to right through four stations. A stamp press marks each token with a tenant tag. A ledger book collects the stamped tokens into tallied columns. A balance scale weighs the metered pile against the billed pile and tips. A turnstile gate lets a paid-up token through in green and blocks an over-budget token in red. One token that skipped the stamp arrives at the ledger blank and gets rejected.</desc>
+  <rect width="1600" height="640" fill="#0a0a0a"/>
+  <text x="70" y="55" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="2">THE COST ATTRIBUTION LINE</text>
+  <text x="70" y="82" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">four checkpoints on one belt &#8212; skip one and the next one jams</text>
 
-  <g font-family="monospace" font-size="13">
-    <!-- Stage 1 -->
-    <rect x="60" y="150" width="320" height="220" fill="#f4d44d" fill-opacity="0.14" stroke="#f4d44d" stroke-width="1.5"/>
-    <text x="220" y="195" text-anchor="middle" fill="#f4d44d" font-size="15">1. ATTRIBUTE</text>
-    <text x="220" y="230" text-anchor="middle" fill="#f6f1e6" opacity="0.85">tag every span with a</text>
-    <text x="220" y="250" text-anchor="middle" fill="#f6f1e6" opacity="0.85">tenant id at call time</text>
-    <text x="220" y="330" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">fails when tagging happens</text>
-    <text x="220" y="348" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">in a nightly batch job</text>
+  <!-- belt -->
+  <line x1="90" y1="430" x2="1510" y2="430" stroke="#f6f1e6" stroke-opacity="0.55" stroke-width="3"/>
+  <line x1="90" y1="470" x2="1510" y2="470" stroke="#f6f1e6" stroke-opacity="0.55" stroke-width="3"/>
+  <circle cx="90" cy="450" r="26" fill="none" stroke="#f6f1e6" stroke-opacity="0.55" stroke-width="3"/>
+  <circle cx="1510" cy="450" r="26" fill="none" stroke="#f6f1e6" stroke-opacity="0.55" stroke-width="3"/>
+  <g stroke="#f6f1e6" stroke-opacity="0.3" stroke-width="2">
+    <line x1="150" y1="430" x2="150" y2="470"/><line x1="200" y1="430" x2="200" y2="470"/><line x1="250" y1="430" x2="250" y2="470"/>
+    <line x1="600" y1="430" x2="600" y2="470"/><line x1="650" y1="430" x2="650" y2="470"/><line x1="700" y1="430" x2="700" y2="470"/>
+    <line x1="950" y1="430" x2="950" y2="470"/><line x1="1000" y1="430" x2="1000" y2="470"/><line x1="1050" y1="430" x2="1050" y2="470"/>
+    <line x1="1300" y1="430" x2="1300" y2="470"/><line x1="1350" y1="430" x2="1350" y2="470"/><line x1="1400" y1="430" x2="1400" y2="470"/>
+  </g>
+  <polygon points="1420,450 1440,442 1440,458" fill="#f6f1e6" fill-opacity="0.5"/>
 
-    <!-- arrow -->
-    <line x1="380" y1="260" x2="450" y2="260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
-    <polygon points="450,254 464,260 450,266" fill="#f6f1e6" opacity="0.6"/>
-
-    <!-- Stage 2 -->
-    <rect x="470" y="150" width="320" height="220" fill="none" stroke="#f6f1e6" stroke-opacity="0.55" stroke-width="1.5"/>
-    <text x="630" y="195" text-anchor="middle" fill="#f6f1e6" font-size="15">2. AGGREGATE</text>
-    <text x="630" y="230" text-anchor="middle" fill="#f6f1e6" opacity="0.85">roll tagged events into a</text>
-    <text x="630" y="250" text-anchor="middle" fill="#f6f1e6" opacity="0.85">per-tenant, per-period ledger</text>
-    <text x="630" y="330" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">fails when pooled or shared</text>
-    <text x="630" y="348" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">calls get dropped, not split</text>
-
-    <line x1="790" y1="260" x2="860" y2="260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
-    <polygon points="860,254 874,260 860,266" fill="#f6f1e6" opacity="0.6"/>
-
-    <!-- Stage 3 -->
-    <rect x="880" y="150" width="320" height="220" fill="none" stroke="#f6f1e6" stroke-opacity="0.55" stroke-width="1.5"/>
-    <text x="1040" y="195" text-anchor="middle" fill="#f6f1e6" font-size="15">3. RECONCILE</text>
-    <text x="1040" y="230" text-anchor="middle" fill="#f6f1e6" opacity="0.85">compare metered cost to</text>
-    <text x="1040" y="250" text-anchor="middle" fill="#f6f1e6" opacity="0.85">what the tenant was billed</text>
-    <text x="1040" y="330" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">fails when it runs monthly</text>
-    <text x="1040" y="348" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">while overage happens daily</text>
-
-    <line x1="1200" y1="260" x2="1270" y2="260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
-    <polygon points="1270,254 1284,260 1270,266" fill="#f6f1e6" opacity="0.6"/>
-
-    <!-- Stage 4 -->
-    <rect x="1290" y="150" width="260" height="220" fill="#f4d44d" fill-opacity="0.14" stroke="#f4d44d" stroke-width="1.5"/>
-    <text x="1420" y="195" text-anchor="middle" fill="#f4d44d" font-size="15">4. ENFORCE</text>
-    <text x="1420" y="230" text-anchor="middle" fill="#f6f1e6" opacity="0.85">apply budgets and caps</text>
-    <text x="1420" y="250" text-anchor="middle" fill="#f6f1e6" opacity="0.85">before the invoice closes</text>
-    <text x="1420" y="330" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">fails when the cap only</text>
-    <text x="1420" y="348" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">alerts and never blocks</text>
+  <!-- Station 1: stamp -->
+  <g font-family="monospace">
+    <rect x="150" y="130" width="16" height="90" fill="#f6f1e6" fill-opacity="0.6"/>
+    <rect x="120" y="220" width="76" height="30" fill="#f4d44d" stroke="#f4d44d" stroke-width="2"/>
+    <rect x="140" y="392" width="36" height="36" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="158" y="415" text-anchor="middle" fill="#1a1a1a" font-size="9">TEN A</text>
+    <polygon points="158,336 200,378 116,378" fill="none" stroke="#f4d44d" stroke-width="2"/>
+    <text x="158" y="290" text-anchor="middle" fill="#f4d44d" font-size="15" font-weight="bold">1. ATTRIBUTE</text>
+    <text x="158" y="312" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.8">stamp a tenant id</text>
+    <text x="158" y="328" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.8">on at call time</text>
+    <text x="158" y="500" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">fails when tagging happens</text>
+    <text x="158" y="516" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">later, in a nightly batch job</text>
   </g>
 
-  <text x="60" y="470" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a break in any stage propagates forward — a bad tag becomes a bad ledger becomes a wrong invoice</text>
+  <!-- unstamped token that slips through -->
+  <rect x="330" y="392" width="36" height="36" fill="none" stroke="#e2694f" stroke-width="2" stroke-dasharray="5,4"/>
+  <text x="348" y="415" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="9">? ? ?</text>
+  <text x="348" y="500" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="10">unstamped &#8212;</text>
+  <text x="348" y="516" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="10">arrives blank</text>
+
+  <!-- Station 2: ledger book -->
+  <g font-family="monospace">
+    <polygon points="530,170 610,158 610,268 530,280" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <polygon points="690,170 610,158 610,268 690,280" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <line x1="545" y1="190" x2="595" y2="182" stroke="#1a1a1a" stroke-width="1"/>
+    <line x1="545" y1="210" x2="595" y2="202" stroke="#1a1a1a" stroke-width="1"/>
+    <line x1="545" y1="230" x2="595" y2="222" stroke="#1a1a1a" stroke-width="1"/>
+    <line x1="625" y1="182" x2="675" y2="190" stroke="#1a1a1a" stroke-width="1"/>
+    <line x1="625" y1="202" x2="675" y2="210" stroke="#1a1a1a" stroke-width="1"/>
+    <line x1="625" y1="222" x2="675" y2="230" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="610" y="290" text-anchor="middle" fill="#1a1a1a" font-size="9"></text>
+    <rect x="592" y="392" width="36" height="36" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="610" y="415" text-anchor="middle" fill="#1a1a1a" font-size="9">TEN A</text>
+    <text x="610" y="330" text-anchor="middle" fill="#f6f1e6" font-size="15" font-weight="bold">2. AGGREGATE</text>
+    <text x="610" y="352" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.8">roll stamped tokens into</text>
+    <text x="610" y="368" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.8">a per-tenant ledger page</text>
+    <text x="610" y="500" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">fails when pooled or shared</text>
+    <text x="610" y="516" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">calls get dropped, not split</text>
+  </g>
+
+  <!-- Station 3: balance scale -->
+  <g font-family="monospace">
+    <line x1="965" y1="392" x2="965" y2="240" stroke="#f6f1e6" stroke-width="3"/>
+    <polygon points="940,392 990,392 965,412" fill="#f6f1e6"/>
+    <line x1="895" y1="245" x2="1035" y2="255" stroke="#f6f1e6" stroke-width="3"/>
+    <line x1="905" y1="248" x2="895" y2="290" stroke="#f6f1e6" stroke-width="1.5"/>
+    <line x1="915" y1="249" x2="920" y2="291" stroke="#f6f1e6" stroke-width="1.5"/>
+    <polygon points="875,288 935,288 925,308 885,308" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+    <line x1="1025" y1="257" x2="1030" y2="299" stroke="#f6f1e6" stroke-width="1.5"/>
+    <line x1="1015" y1="256" x2="1005" y2="298" stroke="#f6f1e6" stroke-width="1.5"/>
+    <polygon points="985,296 1045,296 1055,316 995,316" fill="none" stroke="#f4d44d" stroke-width="2"/>
+    <text x="905" y="330" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.75">metered</text>
+    <text x="1020" y="336" text-anchor="middle" fill="#f4d44d" font-size="10">billed</text>
+    <text x="965" y="450" text-anchor="middle" fill="#f6f1e6" font-size="9" opacity="0.6" transform="rotate(0)"></text>
+    <text x="965" y="290" text-anchor="middle" fill="#f6f1e6" font-size="15" font-weight="bold" y2="290"></text>
+    <text x="960" y="185" text-anchor="middle" fill="#f6f1e6" font-size="15" font-weight="bold">3. RECONCILE</text>
+    <text x="960" y="207" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.8">weigh metered cost</text>
+    <text x="960" y="223" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.8">against what was billed</text>
+    <text x="960" y="500" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">fails when it runs monthly</text>
+    <text x="960" y="516" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">while overage happens daily</text>
+  </g>
+
+  <!-- Station 4: turnstile gate -->
+  <g font-family="monospace">
+    <rect x="1290" y="330" width="10" height="100" fill="#f6f1e6"/>
+    <rect x="1360" y="330" width="10" height="100" fill="#f6f1e6"/>
+    <rect x="1295" y="360" width="70" height="8" fill="#3f7d3f"/>
+    <rect x="1200" y="392" width="36" height="36" fill="#f6f1e6" stroke="#3f7d3f" stroke-width="2"/>
+    <text x="1218" y="415" text-anchor="middle" fill="#3f7d3f" font-size="9">TEN A</text>
+    <polygon points="1246,410 1266,404 1266,416" fill="#3f7d3f"/>
+
+    <rect x="1420" y="330" width="10" height="100" fill="#f6f1e6"/>
+    <rect x="1490" y="330" width="10" height="100" fill="#f6f1e6"/>
+    <rect x="1425" y="360" width="70" height="8" fill="#e2694f"/>
+    <rect x="1445" y="392" width="36" height="36" fill="none" stroke="#e2694f" stroke-width="2"/>
+    <text x="1463" y="415" text-anchor="middle" fill="#e2694f" font-size="9">TEN D</text>
+    <text x="1463" y="470" text-anchor="middle" fill="#e2694f" font-size="9">STOP &#8212; over budget</text>
+
+    <text x="1330" y="290" text-anchor="middle" fill="#f6f1e6" font-size="15" font-weight="bold">4. ENFORCE</text>
+    <text x="1330" y="312" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.8">let paid-up tenants pass,</text>
+    <text x="1330" y="328" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.8">hold the ones over cap</text>
+    <text x="1330" y="500" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">fails when the gate only</text>
+    <text x="1330" y="516" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">alerts and never actually blocks</text>
+  </g>
+
+  <text x="70" y="600" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a token that skips a checkpoint doesn't vanish &#8212; it just arrives at the next one unreadable</text>
 </svg>

@@ -1,52 +1,86 @@
-<svg viewBox="0 0 1600 760" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="acaReconTitle acaReconDesc">
-  <title id="acaReconTitle">Four tenants compared by metered cost against billed revenue, two of them running a negative margin</title>
-  <desc id="acaReconDesc">A black canvas paired bar chart comparing metered cost and billed revenue for four tenants in one month. Tenant A and Tenant C show revenue bars taller than cost bars, a positive margin. Tenant B, a free-tier account with no revenue bar, and Tenant D, a shared-feature account, show cost taller than revenue and are marked with a dashed red outline as a negative margin risk.</desc>
-  <rect width="1600" height="760" fill="#0a0a0a"/>
-  <text x="80" y="70" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="2">PER-TENANT RECONCILIATION</text>
-  <text x="80" y="100" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">metered cost vs. billed revenue, one illustrative month</text>
+<svg viewBox="0 0 1600 780" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="acaReconTitle acaReconDesc">
+  <title id="acaReconTitle">Four printed till receipts, each showing metered cost against billed revenue, with a green margin stamp or a red loss stamp</title>
+  <desc id="acaReconDesc">An illustration of four paper till receipts standing side by side, each with a perforated top and bottom edge. Tenant A and Tenant C are stamped with a green circular MARGIN mark showing positive numbers. Tenant B, a free-tier account with zero revenue, and Tenant D, a shared-feature account with pooled cost, are stamped with a red circular LOSS mark and outlined in dashed red.</desc>
+  <rect width="1600" height="780" fill="#0a0a0a"/>
+  <text x="80" y="60" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="2">PER-TENANT RECONCILIATION</text>
+  <text x="80" y="88" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">four receipts printed from one illustrative month, read the stamp before the total</text>
 
-  <!-- legend -->
-  <g font-family="monospace" font-size="12" fill="#f6f1e6">
-    <rect x="1160" y="55" width="18" height="18" fill="#f6f1e6" fill-opacity="0.45"/>
-    <text x="1186" y="69">metered cost</text>
-    <rect x="1160" y="80" width="18" height="18" fill="#f4d44d" fill-opacity="0.85"/>
-    <text x="1186" y="94">billed revenue</text>
+  <!-- receipt template helper via repeated groups -->
+  <!-- Tenant A: positive -->
+  <g transform="rotate(-2 260 430)">
+    <polygon points="140,150 380,150 380,690 140,700 152,668 138,644 152,620 138,596 152,572 138,548 152,524 138,500 152,476 138,452 152,428 138,404 152,380 138,356 152,332 138,308 152,284 138,260 152,236 138,212 152,190"
+      fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2" stroke-linejoin="round"/>
+    <text x="260" y="200" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="14" font-weight="bold">TENANT A</text>
+    <text x="260" y="222" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="10" opacity="0.65">Team plan</text>
+    <line x1="165" y1="240" x2="355" y2="240" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="175" y="270" fill="#1a1a1a" font-family="monospace" font-size="11">API calls    $120.40</text>
+    <text x="175" y="292" fill="#1a1a1a" font-family="monospace" font-size="11">Storage       $53.20</text>
+    <line x1="165" y1="312" x2="355" y2="312" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="175" y="340" fill="#1a1a1a" font-family="monospace" font-size="12" font-weight="bold">METERED   $173.60</text>
+    <text x="175" y="368" fill="#1a1a1a" font-family="monospace" font-size="12" font-weight="bold">BILLED     $329.00</text>
+    <line x1="165" y1="388" x2="355" y2="388" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="260" y="420" text-anchor="middle" fill="#3f7d3f" font-family="monospace" font-size="15" font-weight="bold">MARGIN +$155.40</text>
+    <circle cx="300" cy="560" r="56" fill="none" stroke="#3f7d3f" stroke-width="4" transform="rotate(-14 300 560)"/>
+    <text x="300" y="555" text-anchor="middle" fill="#3f7d3f" font-family="monospace" font-size="13" font-weight="bold" transform="rotate(-14 300 560)">MARGIN</text>
+    <text x="300" y="572" text-anchor="middle" fill="#3f7d3f" font-family="monospace" font-size="13" font-weight="bold" transform="rotate(-14 300 560)">OK</text>
   </g>
 
-  <line x1="80" y1="620" x2="1520" y2="620" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="1.5"/>
-
-  <g font-family="monospace" font-size="13" fill="#f6f1e6">
-    <!-- Tenant A: cost 173.60 -> 57px, revenue 329 -> 109px (positive) -->
-    <rect x="160" y="563" width="46" height="57" fill="#f6f1e6" fill-opacity="0.45"/>
-    <rect x="212" y="511" width="46" height="109" fill="#f4d44d" fill-opacity="0.85"/>
-    <text x="210" y="655" text-anchor="middle" opacity="0.85">TENANT A</text>
-    <text x="210" y="675" text-anchor="middle" opacity="0.55" font-size="11">Team plan</text>
-    <text x="210" y="500" text-anchor="middle" fill="#7fbf7f" font-size="12">+$155 margin</text>
-
-    <!-- Tenant B: cost 86 -> 28px, revenue 0 -> 0px (free tier abuse, negative) -->
-    <rect x="460" y="591" width="1" height="0"/>
-    <rect x="450" y="592" width="46" height="28" fill="#f6f1e6" fill-opacity="0.45"/>
-    <rect x="502" y="620" width="46" height="0" fill="#f4d44d" fill-opacity="0.85"/>
-    <rect x="435" y="560" width="128" height="70" fill="none" stroke="#e2694f" stroke-width="1.5" stroke-dasharray="6,5"/>
-    <text x="500" y="655" text-anchor="middle" opacity="0.85">TENANT B</text>
-    <text x="500" y="675" text-anchor="middle" opacity="0.55" font-size="11">free tier</text>
-    <text x="500" y="545" text-anchor="middle" fill="#e2694f" font-size="12">-$86, no revenue</text>
-
-    <!-- Tenant C: cost 940 -> 310px, revenue 1150 -> 380px (positive) -->
-    <rect x="750" y="310" width="46" height="310" fill="#f6f1e6" fill-opacity="0.45"/>
-    <rect x="802" y="240" width="46" height="380" fill="#f4d44d" fill-opacity="0.85"/>
-    <text x="800" y="655" text-anchor="middle" opacity="0.85">TENANT C</text>
-    <text x="800" y="675" text-anchor="middle" opacity="0.55" font-size="11">Enterprise, usage-based</text>
-    <text x="800" y="225" text-anchor="middle" fill="#7fbf7f" font-size="12">+$210 margin</text>
-
-    <!-- Tenant D: cost 310 -> 102px, revenue 240 -> 79px (negative, shared feature) -->
-    <rect x="1040" y="518" width="46" height="102" fill="#f6f1e6" fill-opacity="0.45"/>
-    <rect x="1092" y="541" width="46" height="79" fill="#f4d44d" fill-opacity="0.85"/>
-    <rect x="1025" y="500" width="128" height="130" fill="none" stroke="#e2694f" stroke-width="1.5" stroke-dasharray="6,5"/>
-    <text x="1090" y="655" text-anchor="middle" opacity="0.85">TENANT D</text>
-    <text x="1090" y="675" text-anchor="middle" opacity="0.55" font-size="11">shared feature</text>
-    <text x="1090" y="490" text-anchor="middle" fill="#e2694f" font-size="12">-$70, pooled cost</text>
+  <!-- Tenant B: negative, free tier -->
+  <g transform="rotate(3 570 415)">
+    <polygon points="450,170 690,170 690,680 450,668 462,644 448,620 462,596 448,572 462,548 448,524 462,500 448,476 462,452 448,428 462,404 448,380 462,356 448,332 462,308 448,284 462,260 448,236 462,212"
+      fill="#f6f1e6" stroke="#e2694f" stroke-width="2.5" stroke-dasharray="8,5" stroke-linejoin="round"/>
+    <text x="570" y="220" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="14" font-weight="bold">TENANT B</text>
+    <text x="570" y="242" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="10" opacity="0.65">Free tier</text>
+    <line x1="475" y1="260" x2="665" y2="260" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="485" y="290" fill="#1a1a1a" font-family="monospace" font-size="11">API calls     $86.00</text>
+    <text x="485" y="312" fill="#1a1a1a" font-family="monospace" font-size="11">Retries        $0.00</text>
+    <line x1="475" y1="332" x2="665" y2="332" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="485" y="360" fill="#1a1a1a" font-family="monospace" font-size="12" font-weight="bold">METERED    $86.00</text>
+    <text x="485" y="388" fill="#1a1a1a" font-family="monospace" font-size="12" font-weight="bold">BILLED      $0.00</text>
+    <line x1="475" y1="408" x2="665" y2="408" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="570" y="438" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="15" font-weight="bold">LOSS -$86.00</text>
+    <circle cx="605" cy="560" r="56" fill="none" stroke="#e2694f" stroke-width="4" transform="rotate(11 605 560)"/>
+    <text x="605" y="555" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="13" font-weight="bold" transform="rotate(11 605 560)">LOSS</text>
+    <text x="605" y="572" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="10" font-weight="bold" transform="rotate(11 605 560)">no revenue</text>
   </g>
 
-  <text x="80" y="725" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the dashed tenants are the ones a monthly-average dashboard would have hidden</text>
+  <!-- Tenant C: positive, enterprise -->
+  <g transform="rotate(1 900 400)">
+    <polygon points="780,120 1020,120 1020,660 780,648 792,624 778,600 792,576 778,552 792,528 778,504 792,480 778,456 792,432 778,408 792,384 778,360 792,336 778,312 792,288 778,264 792,240 778,216 792,192 778,168"
+      fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2" stroke-linejoin="round"/>
+    <text x="900" y="170" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="14" font-weight="bold">TENANT C</text>
+    <text x="900" y="192" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="10" opacity="0.65">Enterprise, usage-based</text>
+    <line x1="805" y1="210" x2="995" y2="210" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="815" y="240" fill="#1a1a1a" font-family="monospace" font-size="11">API calls   $712.00</text>
+    <text x="815" y="262" fill="#1a1a1a" font-family="monospace" font-size="11">Tool calls   $228.00</text>
+    <line x1="805" y1="282" x2="995" y2="282" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="815" y="310" fill="#1a1a1a" font-family="monospace" font-size="12" font-weight="bold">METERED    $940.00</text>
+    <text x="815" y="338" fill="#1a1a1a" font-family="monospace" font-size="12" font-weight="bold">BILLED    $1,150.00</text>
+    <line x1="805" y1="358" x2="995" y2="358" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="900" y="388" text-anchor="middle" fill="#3f7d3f" font-family="monospace" font-size="15" font-weight="bold">MARGIN +$210.00</text>
+    <circle cx="940" cy="530" r="56" fill="none" stroke="#3f7d3f" stroke-width="4" transform="rotate(-9 940 530)"/>
+    <text x="940" y="525" text-anchor="middle" fill="#3f7d3f" font-family="monospace" font-size="13" font-weight="bold" transform="rotate(-9 940 530)">MARGIN</text>
+    <text x="940" y="542" text-anchor="middle" fill="#3f7d3f" font-family="monospace" font-size="13" font-weight="bold" transform="rotate(-9 940 530)">OK</text>
+  </g>
+
+  <!-- Tenant D: negative, shared/pooled -->
+  <g transform="rotate(-4 1210 420)">
+    <polygon points="1090,190 1330,190 1330,660 1090,648 1102,624 1088,600 1102,576 1088,552 1102,528 1088,504 1102,480 1088,456 1102,432 1088,408 1102,384 1088,360 1102,336 1088,312 1102,288 1088,264 1102,240 1088,216"
+      fill="#f6f1e6" stroke="#e2694f" stroke-width="2.5" stroke-dasharray="8,5" stroke-linejoin="round"/>
+    <text x="1210" y="240" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="14" font-weight="bold">TENANT D</text>
+    <text x="1210" y="262" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="10" opacity="0.65">Shared feature, pooled</text>
+    <line x1="1115" y1="280" x2="1305" y2="280" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="1125" y="310" fill="#1a1a1a" font-family="monospace" font-size="11">Pooled share $310.00</text>
+    <text x="1125" y="332" fill="#1a1a1a" font-family="monospace" font-size="11">(4-way split, unmetered)</text>
+    <line x1="1115" y1="352" x2="1305" y2="352" stroke="#1a1a1a" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="1125" y="380" fill="#1a1a1a" font-family="monospace" font-size="12" font-weight="bold">METERED    $310.00</text>
+    <text x="1125" y="408" fill="#1a1a1a" font-family="monospace" font-size="12" font-weight="bold">BILLED      $240.00</text>
+    <line x1="1115" y1="428" x2="1305" y2="428" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="1210" y="458" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="15" font-weight="bold">LOSS -$70.00</text>
+    <circle cx="1250" cy="570" r="56" fill="none" stroke="#e2694f" stroke-width="4" transform="rotate(13 1250 570)"/>
+    <text x="1250" y="565" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="13" font-weight="bold" transform="rotate(13 1250 570)">LOSS</text>
+    <text x="1250" y="582" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="10" font-weight="bold" transform="rotate(13 1250 570)">pooled cost</text>
+  </g>
+
+  <text x="80" y="745" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the two stamped LOSS are the receipts a monthly-average dashboard would have hidden</text>
 </svg>

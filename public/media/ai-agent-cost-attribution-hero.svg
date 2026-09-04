@@ -1,55 +1,82 @@
 <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="acaHeroTitle acaHeroDesc">
-  <title id="acaHeroTitle">Three tenant usage streams merge into one provider invoice, then split back into ledgers with a leftover unattributed slice</title>
-  <desc id="acaHeroDesc">A black canvas diagram showing three labeled tenant streams converging into a single box marked provider invoice, then diverging into four boxes on the right: three tenant ledgers with dollar figures and a fourth dashed red-outlined box labeled unattributed, showing the spend nobody can bill or explain when tagging happens after the invoice arrives.</desc>
+  <title id="acaHeroTitle">A pooled provider invoice torn into three tenant receipts, with one crumpled unattributed scrap left over</title>
+  <desc id="acaHeroDesc">An illustration of one large cream invoice sheet reading PROVIDER INVOICE, TOTAL DUE $14,208, with a jagged tear line down its right edge. Three narrower torn receipt strips peel away from that tear, each stamped OK and printed with a tenant name and its own dollar figure. A fourth, smaller, crumpled scrap sits apart with a dashed red outline, labeled UNATTRIBUTED, with no tenant name to write on it.</desc>
   <rect width="1600" height="900" fill="#0a0a0a"/>
-  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI AGENT COST ATTRIBUTION</text>
-  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">chargeback and showback for multi-tenant spend</text>
+  <text x="90" y="70" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI AGENT COST ATTRIBUTION</text>
+  <text x="90" y="100" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">one invoice, torn by hand into who actually owes what</text>
 
-  <g font-family="monospace" font-size="13" fill="#f6f1e6">
-    <!-- left tenant source nodes -->
-    <rect x="120" y="230" width="230" height="70" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
-    <text x="235" y="270" text-anchor="middle" opacity="0.85">TENANT A CALLS</text>
-
-    <rect x="120" y="410" width="230" height="70" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
-    <text x="235" y="450" text-anchor="middle" opacity="0.85">TENANT B CALLS</text>
-
-    <rect x="120" y="590" width="230" height="70" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
-    <text x="235" y="630" text-anchor="middle" opacity="0.85">TENANT C CALLS</text>
-
-    <!-- converging lines into invoice box -->
-    <line x1="350" y1="265" x2="650" y2="400" stroke="#f6f1e6" stroke-opacity="0.35" stroke-width="1.5"/>
-    <line x1="350" y1="445" x2="650" y2="450" stroke="#f6f1e6" stroke-opacity="0.35" stroke-width="1.5"/>
-    <line x1="350" y1="625" x2="650" y2="500" stroke="#f6f1e6" stroke-opacity="0.35" stroke-width="1.5"/>
-
-    <!-- central invoice box -->
-    <rect x="650" y="360" width="300" height="180" fill="#f6f1e6" fill-opacity="0.08" stroke="#f6f1e6" stroke-width="1.5"/>
-    <text x="800" y="430" text-anchor="middle" fill="#f4d44d" font-size="15">PROVIDER INVOICE</text>
-    <text x="800" y="460" text-anchor="middle" opacity="0.75">$14,208 / month</text>
-    <text x="800" y="485" text-anchor="middle" opacity="0.5" font-size="11">one pooled number</text>
-
-    <!-- diverging lines out to ledgers -->
-    <line x1="950" y1="410" x2="1150" y2="185" stroke="#f6f1e6" stroke-opacity="0.35" stroke-width="1.5"/>
-    <line x1="950" y1="440" x2="1150" y2="365" stroke="#f6f1e6" stroke-opacity="0.35" stroke-width="1.5"/>
-    <line x1="950" y1="470" x2="1150" y2="545" stroke="#f6f1e6" stroke-opacity="0.35" stroke-width="1.5"/>
-    <line x1="950" y1="500" x2="1150" y2="725" stroke="#e2694f" stroke-opacity="0.6" stroke-width="1.5" stroke-dasharray="6,5"/>
-
-    <!-- right ledger nodes -->
-    <rect x="1150" y="150" width="280" height="70" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-width="1.5"/>
-    <text x="1290" y="180" text-anchor="middle" fill="#f4d44d">TENANT A LEDGER</text>
-    <text x="1290" y="202" text-anchor="middle" opacity="0.7" font-size="12">$4,900 metered</text>
-
-    <rect x="1150" y="330" width="280" height="70" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-width="1.5"/>
-    <text x="1290" y="360" text-anchor="middle" fill="#f4d44d">TENANT B LEDGER</text>
-    <text x="1290" y="382" text-anchor="middle" opacity="0.7" font-size="12">$3,150 metered</text>
-
-    <rect x="1150" y="510" width="280" height="70" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-width="1.5"/>
-    <text x="1290" y="540" text-anchor="middle" fill="#f4d44d">TENANT C LEDGER</text>
-    <text x="1290" y="562" text-anchor="middle" opacity="0.7" font-size="12">$2,760 metered</text>
-
-    <rect x="1150" y="690" width="280" height="70" fill="none" stroke="#e2694f" stroke-width="1.5" stroke-dasharray="6,5"/>
-    <text x="1290" y="720" text-anchor="middle" fill="#e2694f">UNATTRIBUTED</text>
-    <text x="1290" y="742" text-anchor="middle" fill="#e2694f" opacity="0.8" font-size="12">$3,398 — nobody to bill</text>
+  <!-- main pooled invoice sheet -->
+  <g transform="rotate(-3 330 420)">
+    <rect x="140" y="140" width="380" height="560" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="330" y="195" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="17" font-weight="bold">PROVIDER INVOICE</text>
+    <text x="330" y="220" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="12" opacity="0.65">Sept 2026 &#183; one pooled account</text>
+    <line x1="170" y1="245" x2="490" y2="245" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="175" y="280" fill="#1a1a1a" font-family="monospace" font-size="13">GPT-4o calls .......... $9,420</text>
+    <text x="175" y="305" fill="#1a1a1a" font-family="monospace" font-size="13">Claude calls .......... $3,116</text>
+    <text x="175" y="330" fill="#1a1a1a" font-family="monospace" font-size="13">Tool execution ......... $1,672</text>
+    <line x1="170" y1="355" x2="490" y2="355" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="330" y="392" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="16" font-weight="bold">TOTAL DUE $14,208</text>
+    <text x="330" y="416" text-anchor="middle" fill="#b91c1c" font-family="monospace" font-size="11">no tenant column anywhere on this page</text>
+    <!-- barcode -->
+    <g fill="#1a1a1a">
+      <rect x="175" y="600" width="3" height="46"/><rect x="182" y="600" width="6" height="46"/><rect x="192" y="600" width="2" height="46"/>
+      <rect x="199" y="600" width="4" height="46"/><rect x="208" y="600" width="7" height="46"/><rect x="220" y="600" width="2" height="46"/>
+      <rect x="227" y="600" width="5" height="46"/><rect x="237" y="600" width="2" height="46"/><rect x="244" y="600" width="6" height="46"/>
+      <rect x="255" y="600" width="3" height="46"/><rect x="263" y="600" width="7" height="46"/><rect x="275" y="600" width="2" height="46"/>
+      <rect x="282" y="600" width="4" height="46"/><rect x="291" y="600" width="6" height="46"/>
+    </g>
+    <text x="330" y="665" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="10" opacity="0.55">acct #4471-B &#183; pooled billing</text>
+    <!-- jagged tear along the right edge -->
+    <polyline points="520,140 508,168 522,190 506,214 521,238 505,262 522,286 507,312 520,336 506,360 521,384 507,410 520,434 506,458 522,482 506,508 521,532 507,558 520,582 506,606 522,630 507,656 520,680 512,700"
+      fill="none" stroke="#1a1a1a" stroke-width="2"/>
   </g>
 
-  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">tag at the span, or the invoice arrives already unmixed and impossible to trace back</text>
+  <!-- three torn tenant receipt strips -->
+  <g transform="rotate(4 615 400)">
+    <polygon points="530,150 700,150 700,660 530,650 542,600 528,556 544,510 526,466 542,420 528,376 544,330 528,286 542,240 526,196"
+      fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2" stroke-linejoin="round"/>
+    <text x="615" y="200" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="15" font-weight="bold">TENANT A</text>
+    <text x="615" y="224" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="11" opacity="0.7">Team plan &#183; 812 calls</text>
+    <line x1="552" y1="244" x2="678" y2="244" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="615" y="290" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="15" font-weight="bold">$4,900</text>
+    <text x="615" y="312" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="10" opacity="0.6">metered this period</text>
+    <circle cx="615" cy="410" r="42" fill="none" stroke="#3f7d3f" stroke-width="3" transform="rotate(-10 615 410)"/>
+    <text x="615" y="416" text-anchor="middle" fill="#3f7d3f" font-family="monospace" font-size="14" font-weight="bold" transform="rotate(-10 615 410)">OK</text>
+  </g>
+
+  <g transform="rotate(-5 850 430)">
+    <polygon points="765,180 935,180 935,690 765,678 779,628 763,584 780,538 762,494 779,448 763,404 780,358 763,314 780,268 763,224"
+      fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2" stroke-linejoin="round"/>
+    <text x="850" y="230" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="15" font-weight="bold">TENANT B</text>
+    <text x="850" y="254" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="11" opacity="0.7">Growth plan &#183; 519 calls</text>
+    <line x1="787" y1="274" x2="913" y2="274" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="850" y="320" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="15" font-weight="bold">$3,150</text>
+    <text x="850" y="342" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="10" opacity="0.6">metered this period</text>
+    <circle cx="850" cy="440" r="42" fill="none" stroke="#3f7d3f" stroke-width="3" transform="rotate(8 850 440)"/>
+    <text x="850" y="446" text-anchor="middle" fill="#3f7d3f" font-family="monospace" font-size="14" font-weight="bold" transform="rotate(8 850 440)">OK</text>
+  </g>
+
+  <g transform="rotate(6 1085 405)">
+    <polygon points="1000,155 1170,155 1170,620 1000,610 1013,562 998,518 1014,472 997,428 1014,382 998,338 1014,292 998,248 1014,202"
+      fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2" stroke-linejoin="round"/>
+    <text x="1085" y="205" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="15" font-weight="bold">TENANT C</text>
+    <text x="1085" y="229" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="11" opacity="0.7">Starter plan &#183; 311 calls</text>
+    <line x1="1022" y1="249" x2="1148" y2="249" stroke="#1a1a1a" stroke-width="1"/>
+    <text x="1085" y="295" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="15" font-weight="bold">$2,760</text>
+    <text x="1085" y="317" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="10" opacity="0.6">metered this period</text>
+    <circle cx="1085" cy="405" r="42" fill="none" stroke="#3f7d3f" stroke-width="3" transform="rotate(-6 1085 405)"/>
+    <text x="1085" y="411" text-anchor="middle" fill="#3f7d3f" font-family="monospace" font-size="14" font-weight="bold" transform="rotate(-6 1085 405)">OK</text>
+  </g>
+
+  <!-- the crumpled unattributed scrap, off on its own -->
+  <g transform="rotate(-11 1330 660)">
+    <polygon points="1230,600 1290,588 1360,606 1410,592 1428,630 1408,662 1432,690 1398,718 1352,704 1310,726 1268,706 1244,672 1258,636"
+      fill="#1a1a1a" fill-opacity="0.25" stroke="#e2694f" stroke-width="2" stroke-dasharray="7,6"/>
+    <text x="1330" y="648" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="13" font-weight="bold">UNATTRIBUTED</text>
+    <text x="1330" y="668" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="15" font-weight="bold">$3,398</text>
+    <text x="1330" y="690" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="10" opacity="0.85">no name to write on it</text>
+  </g>
+  <line x1="1195" y1="560" x2="1235" y2="600" stroke="#e2694f" stroke-opacity="0.6" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+  <text x="90" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">tag spend at the span, or the invoice arrives already pooled and impossible to tear back apart</text>
 </svg>
