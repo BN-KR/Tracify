@@ -1,0 +1,58 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="scLoopTitle scLoopDesc">
+  <title id="scLoopTitle">The Match, Verify, Serve, Audit loop with a feedback line from Audit back into Verify</title>
+  <desc id="scLoopDesc">A black canvas shows four stages arranged in a closed loop: Match, Verify, Serve, and Audit, connected by arrows in sequence. A dashed acid-yellow line runs from Audit back to Verify, labeled tightens the entity-check rule, and a second dashed line runs from Audit back to Match, labeled expires a stale cache entry, illustrating that auditing sampled cache hits is what tunes the threshold and invalidation policy rather than a one-time configuration choice.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="60" y="60" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1">THE MVSA LOOP</text>
+  <text x="60" y="88" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">audit is the input, not the report</text>
+
+  <g font-family="monospace" font-size="14">
+    <!-- Match -->
+    <rect x="140" y="200" width="280" height="140" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="170" y="240" fill="#f6f1e6" font-size="16">MATCH</text>
+    <text x="170" y="270" fill="#f6f1e6" opacity="0.6" font-size="12">nearest cached query</text>
+    <text x="170" y="292" fill="#f6f1e6" opacity="0.6" font-size="12">by embedding distance</text>
+    <text x="170" y="314" fill="#f6f1e6" opacity="0.45" font-size="11">cache.match_similarity</text>
+
+    <!-- Verify -->
+    <rect x="660" y="200" width="280" height="140" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="690" y="240" fill="#f6f1e6" font-size="16">VERIFY</text>
+    <text x="690" y="270" fill="#f6f1e6" opacity="0.6" font-size="12">entity, tenant, and</text>
+    <text x="690" y="292" fill="#f6f1e6" opacity="0.6" font-size="12">recency checks</text>
+    <text x="690" y="314" fill="#f6f1e6" opacity="0.45" font-size="11">cache.verify_passed</text>
+
+    <!-- Serve -->
+    <rect x="1180" y="200" width="280" height="140" fill="none" stroke="#7fbf7f" stroke-opacity="0.7" stroke-width="1.5"/>
+    <text x="1210" y="240" fill="#7fbf7f" font-size="16">SERVE</text>
+    <text x="1210" y="270" fill="#f6f1e6" opacity="0.6" font-size="12">tagged cache response</text>
+    <text x="1210" y="292" fill="#f6f1e6" opacity="0.6" font-size="12">or fall through to model</text>
+    <text x="1210" y="314" fill="#f6f1e6" opacity="0.45" font-size="11">cache.served = true|false</text>
+
+    <!-- Audit -->
+    <rect x="660" y="560" width="280" height="140" fill="#f4d44d" fill-opacity="0.1" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="690" y="600" fill="#f4d44d" font-size="16">AUDIT</text>
+    <text x="690" y="630" fill="#f6f1e6" opacity="0.7" font-size="12">sample hits vs. fresh</text>
+    <text x="690" y="652" fill="#f6f1e6" opacity="0.7" font-size="12">model answers</text>
+    <text x="690" y="674" fill="#f6f1e6" opacity="0.45" font-size="11">false_hit_rate, agreement</text>
+  </g>
+
+  <!-- forward arrows -->
+  <line x1="420" y1="270" x2="660" y2="270" stroke="#f6f1e6" stroke-opacity="0.6" stroke-width="2"/>
+  <polygon points="650,262 670,270 650,278" fill="#f6f1e6" fill-opacity="0.6"/>
+  <line x1="940" y1="270" x2="1180" y2="270" stroke="#f6f1e6" stroke-opacity="0.6" stroke-width="2"/>
+  <polygon points="1170,262 1190,270 1170,278" fill="#f6f1e6" fill-opacity="0.6"/>
+  <line x1="1320" y1="340" x2="1320" y2="630" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="2"/>
+  <line x1="1320" y1="630" x2="940" y2="630" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="2"/>
+  <polygon points="950,622 930,630 950,638" fill="#f6f1e6" fill-opacity="0.4"/>
+
+  <!-- feedback: Audit -> Verify -->
+  <line x1="800" y1="560" x2="800" y2="340" stroke="#f4d44d" stroke-width="2" stroke-dasharray="6 6"/>
+  <polygon points="792,350 808,350 800,332" fill="#f4d44d"/>
+  <text x="815" y="460" fill="#f4d44d" font-family="monospace" font-size="12">tightens the entity-check rule</text>
+
+  <!-- feedback: Audit -> Match -->
+  <path d="M660 640 C 300 640, 260 400, 280 340" fill="none" stroke="#f4d44d" stroke-width="2" stroke-dasharray="6 6"/>
+  <polygon points="272,350 268,332 288,342" fill="#f4d44d"/>
+  <text x="120" y="500" fill="#f4d44d" font-family="monospace" font-size="12">expires a stale cache entry</text>
+
+  <text x="60" y="820" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.5">every span in the loop is a trace attribute, not an aggregate percentage</text>
+</svg>

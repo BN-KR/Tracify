@@ -1,0 +1,38 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="scHeroTitle scHeroDesc">
+  <title id="scHeroTitle">A 0.94-similarity match about to serve the wrong plan's refund policy</title>
+  <desc id="scHeroDesc">A black canvas shows a cached query, "What's the refund window for a Pro plan," beside a new query, "What's the refund window for a Team plan," connected by a dashed line labeled cosine similarity 0.94. An arrow points from the cached answer, thirty days prorated after day fourteen, toward a served-response box highlighted in acid yellow and marked wrong plan, illustrating that a high similarity score does not guarantee the cached answer is correct.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">SEMANTIC CACHING FOR LLM APPLICATIONS</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">sounds alike is not the same as is true</text>
+
+  <g font-family="monospace" font-size="13" fill="#f6f1e6">
+    <!-- cached query card -->
+    <rect x="120" y="190" width="560" height="150" fill="none" stroke="#f6f1e6" stroke-opacity="0.45"/>
+    <text x="150" y="225" opacity="0.55">CACHED QUERY</text>
+    <text x="150" y="258" font-size="15">"What's the refund window</text>
+    <text x="150" y="280" font-size="15">for a Pro plan?"</text>
+    <text x="150" y="312" fill="#7fbf7f">answer: 30 days, prorated after day 14</text>
+
+    <!-- new query card -->
+    <rect x="920" y="190" width="560" height="150" fill="none" stroke="#f6f1e6" stroke-opacity="0.45"/>
+    <text x="950" y="225" opacity="0.55">NEW QUERY</text>
+    <text x="950" y="258" font-size="15">"What's the refund window</text>
+    <text x="950" y="280" font-size="15">for a Team plan?"</text>
+    <text x="950" y="312" opacity="0.6">actual answer: 14 days, no proration</text>
+  </g>
+
+  <line x1="680" y1="265" x2="920" y2="265" stroke="#f4d44d" stroke-width="2" stroke-dasharray="6 6"/>
+  <text x="700" y="245" fill="#f4d44d" font-family="monospace" font-size="14" font-weight="bold">cosine similarity 0.94</text>
+
+  <!-- arrow down to served answer -->
+  <line x1="800" y1="340" x2="800" y2="420" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2"/>
+  <polygon points="790,412 810,412 800,432" fill="#f6f1e6" fill-opacity="0.5"/>
+
+  <rect x="500" y="440" width="600" height="130" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-width="2"/>
+  <text x="530" y="475" fill="#f4d44d" font-family="monospace" font-size="15" font-weight="bold">SERVED FROM CACHE: 30 days, prorated</text>
+  <text x="530" y="505" fill="#f4d44d" font-family="monospace" font-size="14">wrong plan — Team refund window is 14 days</text>
+  <text x="530" y="535" fill="#f6f1e6" font-family="monospace" font-size="12" opacity="0.65">no entity check ran before this was served</text>
+
+  <text x="100" y="820" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.5">match found a plausible neighbor. verify never ran.</text>
+  <text x="100" y="850" fill="#f4d44d" font-family="monospace" font-size="13">a similarity score is a candidate, not a permission slip</text>
+</svg>
