@@ -1,0 +1,52 @@
+<svg viewBox="0 0 1600 760" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="acaReconTitle acaReconDesc">
+  <title id="acaReconTitle">Four tenants compared by metered cost against billed revenue, two of them running a negative margin</title>
+  <desc id="acaReconDesc">A black canvas paired bar chart comparing metered cost and billed revenue for four tenants in one month. Tenant A and Tenant C show revenue bars taller than cost bars, a positive margin. Tenant B, a free-tier account with no revenue bar, and Tenant D, a shared-feature account, show cost taller than revenue and are marked with a dashed red outline as a negative margin risk.</desc>
+  <rect width="1600" height="760" fill="#0a0a0a"/>
+  <text x="80" y="70" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="2">PER-TENANT RECONCILIATION</text>
+  <text x="80" y="100" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">metered cost vs. billed revenue, one illustrative month</text>
+
+  <!-- legend -->
+  <g font-family="monospace" font-size="12" fill="#f6f1e6">
+    <rect x="1160" y="55" width="18" height="18" fill="#f6f1e6" fill-opacity="0.45"/>
+    <text x="1186" y="69">metered cost</text>
+    <rect x="1160" y="80" width="18" height="18" fill="#f4d44d" fill-opacity="0.85"/>
+    <text x="1186" y="94">billed revenue</text>
+  </g>
+
+  <line x1="80" y1="620" x2="1520" y2="620" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="1.5"/>
+
+  <g font-family="monospace" font-size="13" fill="#f6f1e6">
+    <!-- Tenant A: cost 173.60 -> 57px, revenue 329 -> 109px (positive) -->
+    <rect x="160" y="563" width="46" height="57" fill="#f6f1e6" fill-opacity="0.45"/>
+    <rect x="212" y="511" width="46" height="109" fill="#f4d44d" fill-opacity="0.85"/>
+    <text x="210" y="655" text-anchor="middle" opacity="0.85">TENANT A</text>
+    <text x="210" y="675" text-anchor="middle" opacity="0.55" font-size="11">Team plan</text>
+    <text x="210" y="500" text-anchor="middle" fill="#7fbf7f" font-size="12">+$155 margin</text>
+
+    <!-- Tenant B: cost 86 -> 28px, revenue 0 -> 0px (free tier abuse, negative) -->
+    <rect x="460" y="591" width="1" height="0"/>
+    <rect x="450" y="592" width="46" height="28" fill="#f6f1e6" fill-opacity="0.45"/>
+    <rect x="502" y="620" width="46" height="0" fill="#f4d44d" fill-opacity="0.85"/>
+    <rect x="435" y="560" width="128" height="70" fill="none" stroke="#e2694f" stroke-width="1.5" stroke-dasharray="6,5"/>
+    <text x="500" y="655" text-anchor="middle" opacity="0.85">TENANT B</text>
+    <text x="500" y="675" text-anchor="middle" opacity="0.55" font-size="11">free tier</text>
+    <text x="500" y="545" text-anchor="middle" fill="#e2694f" font-size="12">-$86, no revenue</text>
+
+    <!-- Tenant C: cost 940 -> 310px, revenue 1150 -> 380px (positive) -->
+    <rect x="750" y="310" width="46" height="310" fill="#f6f1e6" fill-opacity="0.45"/>
+    <rect x="802" y="240" width="46" height="380" fill="#f4d44d" fill-opacity="0.85"/>
+    <text x="800" y="655" text-anchor="middle" opacity="0.85">TENANT C</text>
+    <text x="800" y="675" text-anchor="middle" opacity="0.55" font-size="11">Enterprise, usage-based</text>
+    <text x="800" y="225" text-anchor="middle" fill="#7fbf7f" font-size="12">+$210 margin</text>
+
+    <!-- Tenant D: cost 310 -> 102px, revenue 240 -> 79px (negative, shared feature) -->
+    <rect x="1040" y="518" width="46" height="102" fill="#f6f1e6" fill-opacity="0.45"/>
+    <rect x="1092" y="541" width="46" height="79" fill="#f4d44d" fill-opacity="0.85"/>
+    <rect x="1025" y="500" width="128" height="130" fill="none" stroke="#e2694f" stroke-width="1.5" stroke-dasharray="6,5"/>
+    <text x="1090" y="655" text-anchor="middle" opacity="0.85">TENANT D</text>
+    <text x="1090" y="675" text-anchor="middle" opacity="0.55" font-size="11">shared feature</text>
+    <text x="1090" y="490" text-anchor="middle" fill="#e2694f" font-size="12">-$70, pooled cost</text>
+  </g>
+
+  <text x="80" y="725" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the dashed tenants are the ones a monthly-average dashboard would have hidden</text>
+</svg>

@@ -1,0 +1,53 @@
+<svg viewBox="0 0 1600 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="acaChainTitle acaChainDesc">
+  <title id="acaChainTitle">The four-stage attribution chain: attribute, aggregate, reconcile, enforce</title>
+  <desc id="acaChainDesc">A black canvas diagram showing four connected stages in sequence — attribute, aggregate, reconcile, and enforce — each with a one-line description of what it produces, illustrating that skipping an early stage breaks every stage after it.</desc>
+  <rect width="1600" height="560" fill="#0a0a0a"/>
+  <text x="60" y="60" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="2">THE COST ATTRIBUTION CHAIN</text>
+  <text x="60" y="90" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">four stages, each depending on the one before it</text>
+
+  <g font-family="monospace" font-size="13">
+    <!-- Stage 1 -->
+    <rect x="60" y="150" width="320" height="220" fill="#f4d44d" fill-opacity="0.14" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="220" y="195" text-anchor="middle" fill="#f4d44d" font-size="15">1. ATTRIBUTE</text>
+    <text x="220" y="230" text-anchor="middle" fill="#f6f1e6" opacity="0.85">tag every span with a</text>
+    <text x="220" y="250" text-anchor="middle" fill="#f6f1e6" opacity="0.85">tenant id at call time</text>
+    <text x="220" y="330" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">fails when tagging happens</text>
+    <text x="220" y="348" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">in a nightly batch job</text>
+
+    <!-- arrow -->
+    <line x1="380" y1="260" x2="450" y2="260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <polygon points="450,254 464,260 450,266" fill="#f6f1e6" opacity="0.6"/>
+
+    <!-- Stage 2 -->
+    <rect x="470" y="150" width="320" height="220" fill="none" stroke="#f6f1e6" stroke-opacity="0.55" stroke-width="1.5"/>
+    <text x="630" y="195" text-anchor="middle" fill="#f6f1e6" font-size="15">2. AGGREGATE</text>
+    <text x="630" y="230" text-anchor="middle" fill="#f6f1e6" opacity="0.85">roll tagged events into a</text>
+    <text x="630" y="250" text-anchor="middle" fill="#f6f1e6" opacity="0.85">per-tenant, per-period ledger</text>
+    <text x="630" y="330" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">fails when pooled or shared</text>
+    <text x="630" y="348" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">calls get dropped, not split</text>
+
+    <line x1="790" y1="260" x2="860" y2="260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <polygon points="860,254 874,260 860,266" fill="#f6f1e6" opacity="0.6"/>
+
+    <!-- Stage 3 -->
+    <rect x="880" y="150" width="320" height="220" fill="none" stroke="#f6f1e6" stroke-opacity="0.55" stroke-width="1.5"/>
+    <text x="1040" y="195" text-anchor="middle" fill="#f6f1e6" font-size="15">3. RECONCILE</text>
+    <text x="1040" y="230" text-anchor="middle" fill="#f6f1e6" opacity="0.85">compare metered cost to</text>
+    <text x="1040" y="250" text-anchor="middle" fill="#f6f1e6" opacity="0.85">what the tenant was billed</text>
+    <text x="1040" y="330" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">fails when it runs monthly</text>
+    <text x="1040" y="348" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">while overage happens daily</text>
+
+    <line x1="1200" y1="260" x2="1270" y2="260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <polygon points="1270,254 1284,260 1270,266" fill="#f6f1e6" opacity="0.6"/>
+
+    <!-- Stage 4 -->
+    <rect x="1290" y="150" width="260" height="220" fill="#f4d44d" fill-opacity="0.14" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="1420" y="195" text-anchor="middle" fill="#f4d44d" font-size="15">4. ENFORCE</text>
+    <text x="1420" y="230" text-anchor="middle" fill="#f6f1e6" opacity="0.85">apply budgets and caps</text>
+    <text x="1420" y="250" text-anchor="middle" fill="#f6f1e6" opacity="0.85">before the invoice closes</text>
+    <text x="1420" y="330" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">fails when the cap only</text>
+    <text x="1420" y="348" text-anchor="middle" fill="#f6f1e6" opacity="0.5" font-size="11">alerts and never blocks</text>
+  </g>
+
+  <text x="60" y="470" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a break in any stage propagates forward — a bad tag becomes a bad ledger becomes a wrong invoice</text>
+</svg>
