@@ -1,0 +1,68 @@
+<svg viewBox="0 0 1600 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="lgmrSignalTitle lgmrSignalDesc">
+  <title id="lgmrSignalTitle">The five-stage routing ledger model, from eligibility to the recorded decision</title>
+  <desc id="lgmrSignalDesc">A black canvas diagram showing five connected stages in a horizontal pipeline: eligibility, candidates, signal, fallback, and ledger. Each stage is a labeled box with a short description of the question it answers, connected by arrows to show the order a request moves through before a model serves it.</desc>
+  <rect width="1600" height="520" fill="#0a0a0a"/>
+  <text x="60" y="55" fill="#f4d44d" font-family="monospace" font-size="18">THE ROUTING LEDGER MODEL</text>
+  <text x="60" y="82" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">five stages a request passes through before a model ever sees it</text>
+
+  <g font-family="monospace" font-size="13">
+    <!-- stage 1 -->
+    <rect x="60" y="140" width="260" height="220" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="190" y="175" fill="#f6f1e6" text-anchor="middle" font-weight="bold">1. ELIGIBILITY</text>
+    <text x="190" y="210" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">Can this request</text>
+    <text x="190" y="228" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">go to any of these</text>
+    <text x="190" y="246" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">providers at all?</text>
+    <text x="190" y="290" fill="#f6f1e6" text-anchor="middle" opacity="0.5" font-size="11">residency, safety tier,</text>
+    <text x="190" y="308" fill="#f6f1e6" text-anchor="middle" opacity="0.5" font-size="11">contractual limits</text>
+
+    <!-- stage 2 -->
+    <rect x="380" y="140" width="260" height="220" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="510" y="175" fill="#f6f1e6" text-anchor="middle" font-weight="bold">2. CANDIDATES</text>
+    <text x="510" y="210" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">Which models can</text>
+    <text x="510" y="228" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">actually do this class</text>
+    <text x="510" y="246" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">of task well?</text>
+    <text x="510" y="290" fill="#f6f1e6" text-anchor="middle" opacity="0.5" font-size="11">task type, tool support,</text>
+    <text x="510" y="308" fill="#f6f1e6" text-anchor="middle" opacity="0.5" font-size="11">context length</text>
+
+    <!-- stage 3 (emphasized) -->
+    <rect x="700" y="120" width="260" height="260" fill="#f4d44d" fill-opacity="0.08" stroke="#f4d44d" stroke-width="2"/>
+    <text x="830" y="158" fill="#f4d44d" text-anchor="middle" font-weight="bold">3. SIGNAL</text>
+    <text x="830" y="194" fill="#f4d44d" text-anchor="middle" opacity="0.85" font-size="12">What decides which</text>
+    <text x="830" y="212" fill="#f4d44d" text-anchor="middle" opacity="0.85" font-size="12">candidate serves this</text>
+    <text x="830" y="230" fill="#f4d44d" text-anchor="middle" opacity="0.85" font-size="12">specific request?</text>
+    <text x="830" y="280" fill="#f4d44d" text-anchor="middle" opacity="0.6" font-size="11">cost-first, latency,</text>
+    <text x="830" y="298" fill="#f4d44d" text-anchor="middle" opacity="0.6" font-size="11">confidence, task class</text>
+
+    <!-- stage 4 -->
+    <rect x="1020" y="140" width="260" height="220" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="1150" y="175" fill="#f6f1e6" text-anchor="middle" font-weight="bold">4. FALLBACK</text>
+    <text x="1150" y="210" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">What happens when</text>
+    <text x="1150" y="228" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">the chosen model or</text>
+    <text x="1150" y="246" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">provider fails?</text>
+    <text x="1150" y="290" fill="#f6f1e6" text-anchor="middle" opacity="0.5" font-size="11">ordered chain, circuit</text>
+    <text x="1150" y="308" fill="#f6f1e6" text-anchor="middle" opacity="0.5" font-size="11">breaker, safe default</text>
+
+    <!-- stage 5 -->
+    <rect x="1340" y="140" width="200" height="220" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="1440" y="175" fill="#f6f1e6" text-anchor="middle" font-weight="bold">5. LEDGER</text>
+    <text x="1440" y="210" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">What gets</text>
+    <text x="1440" y="228" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">recorded so the</text>
+    <text x="1440" y="246" fill="#f6f1e6" text-anchor="middle" opacity="0.75" font-size="12">decision is auditable?</text>
+    <text x="1440" y="290" fill="#f6f1e6" text-anchor="middle" opacity="0.5" font-size="11">tier, model, reason,</text>
+    <text x="1440" y="308" fill="#f6f1e6" text-anchor="middle" opacity="0.5" font-size="11">version, cost</text>
+  </g>
+
+  <g stroke="#f4d44d" stroke-width="2" fill="none">
+    <path d="M 320 250 L 375 250" marker-end="url(#lgmrArrow)"/>
+    <path d="M 640 250 L 695 250" marker-end="url(#lgmrArrow)"/>
+    <path d="M 960 250 L 1015 250" marker-end="url(#lgmrArrow)"/>
+    <path d="M 1280 250 L 1335 250" marker-end="url(#lgmrArrow)"/>
+  </g>
+  <defs>
+    <marker id="lgmrArrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#f4d44d"/>
+    </marker>
+  </defs>
+
+  <text x="60" y="470" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">skipping stage 5 is the most common reason a routing regression gets blamed on the wrong model</text>
+</svg>

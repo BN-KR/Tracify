@@ -1,0 +1,58 @@
+<svg viewBox="0 0 1600 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="lgmrFallbackTitle lgmrFallbackDesc">
+  <title id="lgmrFallbackTitle">A three-step fallback chain with a ledger entry written at each step, ending in a safe static response</title>
+  <desc id="lgmrFallbackDesc">A black canvas shows a fallback chain moving left to right: the primary model tier fails, the request moves to a secondary provider on a different vendor, and if that also fails the system returns a safe static response instead of a silent low-quality answer. A ledger entry branches downward from each step recording the reason for that step, showing that every fallback is written down, not inferred later from missing data.</desc>
+  <rect width="1600" height="620" fill="#0a0a0a"/>
+  <text x="60" y="55" fill="#f4d44d" font-family="monospace" font-size="18">FALLBACK CHAIN, WITH A LEDGER ENTRY AT EVERY STEP</text>
+  <text x="60" y="82" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">an outage should change which model answers, never whether the decision is recorded</text>
+
+  <g font-family="monospace" font-size="13">
+    <rect x="80" y="140" width="300" height="110" fill="none" stroke="#e06a5a" stroke-width="1.5"/>
+    <text x="230" y="175" fill="#e06a5a" text-anchor="middle" font-weight="bold">PRIMARY TIER</text>
+    <text x="230" y="198" fill="#e06a5a" text-anchor="middle" opacity="0.8" font-size="12">provider 1, model A</text>
+    <text x="230" y="222" fill="#e06a5a" text-anchor="middle" opacity="0.6" font-size="11">times out / 5xx</text>
+
+    <rect x="480" y="140" width="300" height="110" fill="none" stroke="#f4d44d" stroke-width="1.5"/>
+    <text x="630" y="175" fill="#f4d44d" text-anchor="middle" font-weight="bold">SECONDARY</text>
+    <text x="630" y="198" fill="#f4d44d" text-anchor="middle" opacity="0.8" font-size="12">provider 2, model B</text>
+    <text x="630" y="222" fill="#f4d44d" text-anchor="middle" opacity="0.6" font-size="11">different vendor, degraded</text>
+
+    <rect x="880" y="140" width="300" height="110" fill="none" stroke="#7fbf7f" stroke-width="1.5"/>
+    <text x="1030" y="175" fill="#7fbf7f" text-anchor="middle" font-weight="bold">SAFE DEFAULT</text>
+    <text x="1030" y="198" fill="#7fbf7f" text-anchor="middle" opacity="0.8" font-size="12">static response or</text>
+    <text x="1030" y="222" fill="#7fbf7f" text-anchor="middle" opacity="0.6" font-size="11">queue for human review</text>
+  </g>
+
+  <g stroke="#f6f1e6" stroke-width="2" fill="none">
+    <path d="M 380 195 L 475 195" marker-end="url(#lgmrArrow2)"/>
+    <path d="M 780 195 L 875 195" marker-end="url(#lgmrArrow2)"/>
+  </g>
+  <defs>
+    <marker id="lgmrArrow2" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#f6f1e6"/>
+    </marker>
+  </defs>
+
+  <g stroke="#f6f1e6" stroke-opacity="0.3" stroke-width="1.5">
+    <line x1="230" y1="250" x2="230" y2="400"/>
+    <line x1="630" y1="250" x2="630" y2="400"/>
+    <line x1="1030" y1="250" x2="1030" y2="400"/>
+  </g>
+
+  <rect x="80" y="400" width="1100" height="150" fill="#f4d44d" fill-opacity="0.06" stroke="#f4d44d" stroke-width="2"/>
+  <text x="630" y="430" fill="#f4d44d" text-anchor="middle" font-family="monospace" font-size="15" font-weight="bold">LEDGER (one row per attempt)</text>
+  <g font-family="monospace" font-size="12" fill="#f6f1e6">
+    <text x="230" y="460" text-anchor="middle" opacity="0.8">tier=primary</text>
+    <text x="230" y="480" text-anchor="middle" opacity="0.6">reason=timeout_5000ms</text>
+    <text x="230" y="500" text-anchor="middle" opacity="0.6">outcome=failed</text>
+
+    <text x="630" y="460" text-anchor="middle" opacity="0.8">tier=secondary</text>
+    <text x="630" y="480" text-anchor="middle" opacity="0.6">reason=primary_unavailable</text>
+    <text x="630" y="500" text-anchor="middle" opacity="0.6">outcome=served, quality_flag=review</text>
+
+    <text x="1030" y="460" text-anchor="middle" opacity="0.8">tier=safe_default</text>
+    <text x="1030" y="480" text-anchor="middle" opacity="0.6">reason=chain_exhausted</text>
+    <text x="1030" y="500" text-anchor="middle" opacity="0.6">outcome=queued</text>
+  </g>
+
+  <text x="60" y="590" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the secondary tier's answer looked fine in isolation — only the ledger showed it had degraded twice before serving</text>
+</svg>
