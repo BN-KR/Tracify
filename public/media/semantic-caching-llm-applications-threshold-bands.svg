@@ -1,0 +1,52 @@
+<svg viewBox="0 0 1600 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="scBandsTitle scBandsDesc">
+  <title id="scBandsTitle">Three sorting hoppers catching queries by similarity score, with the 0.94 Pro-versus-Team ticket pulled from the still-verify basket and restamped a miss</title>
+  <desc id="scBandsDesc">An illustration of three funnel-shaped sorting hoppers labeled reject, verify, and still verify by similarity score range, each feeding a basket of ticket icons. A highlighted ticket marked 0.94 sits in the still-verify basket. An inspector with a magnifying glass pulls that ticket out, checks it against the entity rule, and drops it into a separate red-outlined basket labeled RECLASSIFIED AS MISS, showing that even the highest score still has to clear a check before it is served.</desc>
+  <rect width="1600" height="700" fill="#0a0a0a"/>
+  <text x="70" y="55" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1">SIMILARITY THRESHOLD BANDS</text>
+  <text x="70" y="82" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">every hopper still empties into an inspector &#8212; none of them skip the check</text>
+
+  <!-- Hopper 1: REJECT -->
+  <text x="330" y="130" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="13">below 0.80 &#8212; REJECT</text>
+  <polygon points="140,150 520,150 400,270 260,270" fill="none" stroke="#e2694f" stroke-opacity="0.7" stroke-width="2"/>
+  <rect x="230" y="270" width="200" height="80" fill="#e2694f" fill-opacity="0.1" stroke="#e2694f" stroke-width="1.5"/>
+  <rect x="255" y="295" width="34" height="24" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
+  <rect x="300" y="295" width="34" height="24" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
+  <rect x="345" y="295" width="34" height="24" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
+  <text x="330" y="378" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="11" opacity="0.65">compute fresh, always</text>
+
+  <!-- Hopper 2: VERIFY -->
+  <text x="810" y="130" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="13">0.80&#8211;0.93 &#8212; VERIFY</text>
+  <polygon points="620,150 1000,150 880,270 740,270" fill="none" stroke="#f4d44d" stroke-opacity="0.8" stroke-width="2"/>
+  <rect x="710" y="270" width="200" height="80" fill="#f4d44d" fill-opacity="0.1" stroke="#f4d44d" stroke-width="1.5"/>
+  <rect x="735" y="295" width="34" height="24" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
+  <rect x="780" y="295" width="34" height="24" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
+  <rect x="825" y="295" width="34" height="24" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
+  <text x="810" y="378" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="11" opacity="0.65">entity, tenant, recency check</text>
+
+  <!-- Hopper 3: STILL VERIFY -->
+  <text x="1290" y="130" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="13">0.93&#8211;1.0 &#8212; STILL VERIFY</text>
+  <polygon points="1100,150 1480,150 1360,270 1220,270" fill="none" stroke="#f4d44d" stroke-width="2.5"/>
+  <rect x="1190" y="270" width="200" height="80" fill="#f4d44d" fill-opacity="0.16" stroke="#f4d44d" stroke-width="2"/>
+  <rect x="1215" y="295" width="34" height="24" fill="none" stroke="#f6f1e6" stroke-opacity="0.5"/>
+  <rect x="1305" y="295" width="34" height="24" fill="none" stroke="#f6f1e6" stroke-opacity="0.5"/>
+  <g transform="rotate(-6 1277 307)">
+    <rect x="1260" y="295" width="34" height="24" fill="#f4d44d"/>
+    <text x="1277" y="312" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="9" font-weight="bold">.94</text>
+  </g>
+  <text x="1290" y="378" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="11" opacity="0.7">the check still runs anyway</text>
+
+  <!-- inspector pulling the 0.94 ticket -->
+  <line x1="1290" y1="360" x2="1290" y2="440" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="5,4"/>
+  <circle cx="1290" cy="470" r="26" fill="none" stroke="#f6f1e6" stroke-width="3"/>
+  <line x1="1308" y1="488" x2="1330" y2="510" stroke="#f6f1e6" stroke-width="4"/>
+  <text x="1360" y="465" fill="#f6f1e6" font-family="monospace" font-size="12">inspector checks:</text>
+  <text x="1360" y="486" fill="#e2694f" font-family="monospace" font-size="12">Pro plan &#8800; Team plan</text>
+
+  <line x1="1290" y1="496" x2="1290" y2="560" stroke="#e2694f" stroke-width="2"/>
+  <polygon points="1280,552 1300,552 1290,570" fill="#e2694f"/>
+  <rect x="1130" y="575" width="320" height="90" fill="none" stroke="#e2694f" stroke-width="2.5" stroke-dasharray="7,5"/>
+  <text x="1290" y="610" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="15" font-weight="bold">RECLASSIFIED AS MISS</text>
+  <text x="1290" y="634" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="11" opacity="0.7">falls through to a fresh model call</text>
+
+  <text x="70" y="682" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a higher score narrows which hopper a query lands in &#8212; it never empties the inspector's desk</text>
+</svg>

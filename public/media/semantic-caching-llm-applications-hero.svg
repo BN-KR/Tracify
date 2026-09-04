@@ -1,0 +1,57 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="scHeroTitle scHeroDesc">
+  <title id="scHeroTitle">Two chat bubbles at 0.94 similarity on a gauge, about to serve the wrong plan's refund policy</title>
+  <desc id="scHeroDesc">An illustration of two speech bubbles: a cached question about a Pro plan refund window, and a new question about a Team plan refund window. Between them a speedometer-style gauge reads 0.94 with its needle deep in the red still-verify zone. Below, a printed cache-served ticket carries the Pro plan's 30-day answer with a large red WRONG PLAN stamp across it, because the fourteen-day Team answer was never checked.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="90" y="66" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">SEMANTIC CACHING FOR LLM APPLICATIONS</text>
+  <text x="90" y="94" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">sounds alike is not the same as is true</text>
+
+  <!-- cached query speech bubble -->
+  <path d="M140,150 h520 a24,24 0 0 1 24,24 v120 a24,24 0 0 1 -24,24 h-370 l-50,46 v-46 h-100 a24,24 0 0 1 -24,-24 v-120 a24,24 0 0 1 24,-24 z"
+    fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="175" y="200" fill="#1a1a1a" font-family="monospace" font-size="11" opacity="0.6">CACHED QUESTION</text>
+  <text x="175" y="228" fill="#1a1a1a" font-family="monospace" font-size="15">&#8220;Refund window for a</text>
+  <text x="175" y="250" fill="#1a1a1a" font-family="monospace" font-size="15">Pro plan?&#8221;</text>
+  <text x="175" y="278" fill="#3f7d3f" font-family="monospace" font-size="12">stored answer: 30 days, prorated after day 14</text>
+
+  <!-- new query speech bubble -->
+  <path d="M940,150 h520 a24,24 0 0 1 24,24 v120 a24,24 0 0 1 -24,24 h-100 v46 l-50,-46 h-370 a24,24 0 0 1 -24,-24 v-120 a24,24 0 0 1 24,-24 z"
+    fill="#f6f1e6" stroke="#f4d44d" stroke-width="2.5"/>
+  <text x="975" y="200" fill="#1a1a1a" font-family="monospace" font-size="11" opacity="0.6">NEW QUESTION, RIGHT NOW</text>
+  <text x="975" y="228" fill="#1a1a1a" font-family="monospace" font-size="15">&#8220;Refund window for a</text>
+  <text x="975" y="250" fill="#1a1a1a" font-family="monospace" font-size="15">Team plan?&#8221;</text>
+  <text x="975" y="278" fill="#1a1a1a" font-family="monospace" font-size="12" opacity="0.75">true answer: 14 days, no proration</text>
+
+  <!-- similarity gauge -->
+  <path d="M800,430 L660,430 A140,140 0 0 1 913,348 Z" fill="#6f7a6f" fill-opacity="0.35" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="1.5"/>
+  <path d="M800,430 L913,348 A140,140 0 0 1 937,400 Z" fill="#f4d44d" fill-opacity="0.35" stroke="#f4d44d" stroke-opacity="0.6" stroke-width="1.5"/>
+  <path d="M800,430 L937,400 A140,140 0 0 1 940,430 Z" fill="#e2694f" fill-opacity="0.55" stroke="#e2694f" stroke-width="1.5"/>
+  <line x1="660" y1="430" x2="940" y2="430" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="2"/>
+
+  <text x="655" y="460" fill="#f6f1e6" font-family="monospace" font-size="11" opacity="0.6">0.0</text>
+  <text x="940" y="460" text-anchor="end" fill="#e2694f" font-family="monospace" font-size="11">1.0</text>
+  <text x="700" y="410" fill="#f6f1e6" font-family="monospace" font-size="11" opacity="0.65">reject, compute fresh</text>
+  <text x="905" y="330" fill="#f4d44d" font-family="monospace" font-size="11">verify</text>
+  <text x="948" y="392" fill="#e2694f" font-family="monospace" font-size="11">still verify</text>
+
+  <!-- needle at 0.94 -->
+  <line x1="800" y1="430" x2="947" y2="402" stroke="#f4d44d" stroke-width="4"/>
+  <circle cx="800" cy="430" r="10" fill="#f4d44d"/>
+  <text x="800" y="500" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="26" font-weight="bold">0.94</text>
+  <text x="800" y="522" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="12" opacity="0.65">cosine similarity &#8212; a candidate, not a permission slip</text>
+
+  <!-- served-from-cache ticket, stamped wrong -->
+  <g transform="rotate(-1 800 680)">
+    <rect x="530" y="590" width="540" height="150" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="560" y="625" fill="#1a1a1a" font-family="monospace" font-size="13" font-weight="bold">SERVED FROM CACHE</text>
+    <text x="560" y="652" fill="#1a1a1a" font-family="monospace" font-size="13">&#8220;30 days, prorated after day 14&#8221;</text>
+    <text x="560" y="676" fill="#1a1a1a" font-family="monospace" font-size="11" opacity="0.6">no entity check ran before this was served</text>
+    <text x="560" y="716" fill="#e2694f" font-family="monospace" font-size="12">Team plan is actually 14 days, no proration</text>
+  </g>
+  <g transform="rotate(-9 970 645)">
+    <rect x="880" y="605" width="180" height="80" fill="none" stroke="#e2694f" stroke-width="5"/>
+    <text x="970" y="640" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="17" font-weight="bold">WRONG</text>
+    <text x="970" y="662" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="13" font-weight="bold">PLAN</text>
+  </g>
+
+  <text x="90" y="820" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.5">match found a plausible neighbor. verify never ran.</text>
+</svg>

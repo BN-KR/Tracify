@@ -1,0 +1,81 @@
+<svg viewBox="0 0 1600 780" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="scLoopTitle scLoopDesc">
+  <title id="scLoopTitle">A belt of answered tickets passing a magnet, a clipboard, and a customer chute, with a crane sampling one ticket for audit against a fresh answer</title>
+  <desc id="scLoopDesc">An illustration of a conveyor belt carrying query tickets through a Match magnet, a Verify clipboard, and a Serve chute that hands the answer to a waiting customer. Above the belt, an audit crane periodically lifts one served ticket, compares it side by side with a freshly computed answer card, marks a mismatch with a red X, then sends two dashed feedback pipes backward: one tightening the Verify clipboard's rule, one telling the Match magnet to expire a stale entry.</desc>
+  <rect width="1600" height="780" fill="#0a0a0a"/>
+  <text x="70" y="55" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1">THE MATCH &#8594; VERIFY &#8594; SERVE LINE, AUDITED</text>
+  <text x="70" y="82" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">audit is the input that resets the other two stations, not a report nobody reads</text>
+
+  <!-- belt -->
+  <line x1="90" y1="470" x2="1350" y2="470" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="3"/>
+  <line x1="90" y1="504" x2="1350" y2="504" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="3"/>
+  <circle cx="90" cy="487" r="24" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="3"/>
+  <circle cx="1350" cy="487" r="24" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="3"/>
+  <polygon points="1260,487 1280,480 1280,494" fill="#f6f1e6" fill-opacity="0.5"/>
+
+  <!-- Station 1: Match magnet -->
+  <g font-family="monospace">
+    <circle cx="300" cy="300" r="40" fill="none" stroke="#f6f1e6" stroke-width="3"/>
+    <circle cx="300" cy="300" r="22" fill="none" stroke="#f6f1e6" stroke-width="3"/>
+    <circle cx="300" cy="300" r="5" fill="#f6f1e6"/>
+    <line x1="300" y1="345" x2="300" y2="449" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="4,4"/>
+    <rect x="282" y="449" width="36" height="30" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="300" y="240" text-anchor="middle" fill="#f6f1e6" font-size="16" font-weight="bold">MATCH</text>
+    <text x="300" y="600" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.65">nearest cached query</text>
+    <text x="300" y="618" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.65">by embedding distance</text>
+  </g>
+
+  <!-- Station 2: Verify clipboard -->
+  <g font-family="monospace">
+    <rect x="675" y="255" width="80" height="100" rx="4" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <rect x="700" y="248" width="30" height="14" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <line x1="690" y1="285" x2="740" y2="285" stroke="#1a1a1a" stroke-width="2"/>
+    <line x1="690" y1="303" x2="740" y2="303" stroke="#1a1a1a" stroke-width="2"/>
+    <polyline points="690,325 700,335 742,300" fill="none" stroke="#3f7d3f" stroke-width="3"/>
+    <line x1="715" y1="355" x2="715" y2="449" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="4,4"/>
+    <rect x="697" y="449" width="36" height="30" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="715" y="230" text-anchor="middle" fill="#f6f1e6" font-size="16" font-weight="bold">VERIFY</text>
+    <text x="715" y="600" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.65">entity, tenant, and</text>
+    <text x="715" y="618" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.65">recency checks</text>
+  </g>
+
+  <!-- Station 3: Serve chute to customer -->
+  <g font-family="monospace">
+    <polygon points="1080,449 1140,449 1160,510 1060,510" fill="none" stroke="#7fbf7f" stroke-width="2.5"/>
+    <circle cx="1230" cy="530" r="18" fill="none" stroke="#7fbf7f" stroke-width="3"/>
+    <line x1="1230" y1="548" x2="1230" y2="590" stroke="#7fbf7f" stroke-width="3"/>
+    <line x1="1230" y1="560" x2="1206" y2="578" stroke="#7fbf7f" stroke-width="3"/>
+    <line x1="1230" y1="560" x2="1254" y2="578" stroke="#7fbf7f" stroke-width="3"/>
+    <line x1="1160" y1="480" x2="1210" y2="520" stroke="#7fbf7f" stroke-opacity="0.6" stroke-width="2"/>
+    <text x="1110" y="420" text-anchor="middle" fill="#7fbf7f" font-size="16" font-weight="bold">SERVE</text>
+    <text x="1110" y="640" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.65">tagged cache response</text>
+    <text x="1110" y="658" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.65">reaches the customer</text>
+  </g>
+
+  <!-- Audit crane sampling a served ticket -->
+  <line x1="1230" y1="150" x2="1230" y2="480" stroke="#f4d44d" stroke-width="3"/>
+  <line x1="1190" y1="150" x2="1270" y2="150" stroke="#f4d44d" stroke-width="4"/>
+  <text x="1230" y="128" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="16" font-weight="bold">AUDIT</text>
+
+  <rect x="1060" y="170" width="150" height="90" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="1135" y="196" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="10">SERVED TICKET</text>
+  <text x="1135" y="220" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="11">30 days, prorated</text>
+
+  <text x="1230" y="196" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="18">&#8800;</text>
+
+  <rect x="1250" y="170" width="150" height="90" fill="#f6f1e6" stroke="#3f7d3f" stroke-width="2"/>
+  <text x="1325" y="196" text-anchor="middle" fill="#1a1a1a" font-family="monospace" font-size="10">FRESH MODEL CALL</text>
+  <text x="1325" y="220" text-anchor="middle" fill="#3f7d3f" font-family="monospace" font-size="11">14 days, no proration</text>
+
+  <text x="1230" y="290" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="12">sampled hit disagreed with a fresh call</text>
+
+  <!-- feedback pipes back to Verify and Match -->
+  <path d="M1180 300 C 950 300, 850 320, 730 355" fill="none" stroke="#f4d44d" stroke-width="2" stroke-dasharray="6,6"/>
+  <polygon points="722,348 738,352 730,368" fill="#f4d44d"/>
+  <text x="960" y="335" fill="#f4d44d" font-family="monospace" font-size="12">tightens the Verify rule</text>
+
+  <path d="M1170 320 C 700 400, 420 380, 315 350" fill="none" stroke="#f4d44d" stroke-width="2" stroke-dasharray="6,6"/>
+  <polygon points="308,344 322,349 316,365" fill="#f4d44d"/>
+  <text x="560" y="410" fill="#f4d44d" font-family="monospace" font-size="12">expires the stale Match entry</text>
+
+  <text x="70" y="730" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.5">every ticket on this belt is a trace attribute, not a monthly aggregate percentage</text>
+</svg>
