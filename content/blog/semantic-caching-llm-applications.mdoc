@@ -18,7 +18,7 @@ relatedPosts:
   - vector-database-guide
 heroImage:
   src: /media/semantic-caching-llm-applications-hero.svg
-  alt: A 0.94-similarity match about to serve a Pro plan refund answer to a Team plan question, flagged as a false cache hit
+  alt: Two chat bubbles, a cached Pro-plan question and a new Team-plan question, linked by a speedometer gauge reading 0.94, above a served-from-cache ticket stamped WRONG PLAN in red
 seo:
   metaTitle: Semantic Caching for LLM Applications
   metaDescription: When embedding-based response caching for LLM calls saves money safely, when it breaks quality, and how to instrument the difference.
@@ -124,7 +124,7 @@ A naive semantic cache with a threshold of 0.90 treats 0.94 as an easy auto-serv
 
 {% editorial-panel eyebrow="Operating principle" title="Similarity is a search result, not a permission slip." body="A 0.94 score means the text sounds alike; it says nothing about whether the plan, account, date range, or permission level inside the text is the same. Route every candidate through an explicit equivalence check before it reaches the user, regardless of how high the score is." tone="yellow" /%}
 
-![Similarity score axis divided into reject, verify, and still-verify bands, with the 0.94 Pro-versus-Team refund example plotted inside the still-verify band](/media/semantic-caching-llm-applications-threshold-bands.svg)
+![Three funnel-shaped sorting hoppers labeled reject, verify, and still verify, with an inspector pulling the 0.94 ticket from the still-verify basket and restamping it a miss](/media/semantic-caching-llm-applications-threshold-bands.svg)
 
 *A 0.94 match sits well inside most teams' auto-serve range — until a plan-name check reclassifies it as a miss.*
 
@@ -209,7 +209,7 @@ Every cache-eligible request should produce trace attributes for each stage of t
 
 It's tempting to only instrument hits, since misses "just" fall through to the normal model call. But a miss that should have been a hit — because the threshold is too conservative, or Verify is too strict — is exactly the kind of regression an aggregate hit-rate metric will never surface on its own. Log the nearest candidate and its similarity score even on a miss, so a reviewer tuning the threshold has real distribution data instead of guessing from the hits alone.
 
-![The Match, Verify, Serve, Audit loop shown as a closed circuit, with dashed feedback lines from Audit back into Verify and Match](/media/semantic-caching-llm-applications-audit-loop.svg)
+![A conveyor belt carrying tickets through a Match magnet, a Verify clipboard, and a Serve chute to a customer, with an audit crane comparing a sampled ticket against a fresh answer and feeding two dashed pipes back upstream](/media/semantic-caching-llm-applications-audit-loop.svg)
 
 *Audit isn't a report you read once a quarter — it's the input that tightens Verify's entity rules and the input that expires a stale cache entry.*
 
