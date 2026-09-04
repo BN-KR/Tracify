@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Database, Globe2, ShieldCheck } from "lucide-react";
+import { ArrowRight, Database, Globe2, ShieldCheck, Sparkles, Wrench } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { getAvailableRegions } from "@/lib/regions";
 
 export const metadata: Metadata = {
-  title: "Select your Tracify Cloud region",
-  description: "Choose the Tracify Cloud region where your account and telemetry will be stored.",
+  title: "Explore or build with Tracify",
+  description: "Explore a simulated Tracify workspace or choose a region for a real project.",
   alternates: { canonical: "/cloud" },
   robots: { index: false, follow: false },
 };
@@ -37,8 +37,8 @@ export default async function CloudRegionPage({
             <span>Regional cloud</span><Globe2 className="size-5 text-[#f4d44d]" />
           </div>
           <div className="my-14 lg:my-0">
-            <h1 className="max-w-3xl font-pixel text-[clamp(4rem,7vw,7.5rem)] leading-[0.8] tracking-[-0.075em]">Select your region.</h1>
-            <p className="mt-8 max-w-xl text-base leading-7 text-white/60">Choose where Tracify stores your account, projects, API keys, and agent telemetry.</p>
+            <h1 className="max-w-3xl font-pixel text-[clamp(4rem,7vw,7.5rem)] leading-[0.8] tracking-[-0.075em]">Choose your path.</h1>
+            <p className="mt-8 max-w-xl text-base leading-7 text-white/60">Explore the product with realistic simulated traces, or build a real project in a regional cloud.</p>
           </div>
           <div className="border-t border-white/20 pt-5 text-xs leading-6 text-white/55">Regions are isolated. Choosing another region does not move an existing account or its data.</div>
         </aside>
@@ -50,7 +50,21 @@ export default async function CloudRegionPage({
               <Fact icon={ShieldCheck} label="Regional boundary" />
               <Fact icon={Globe2} label="Closer access" />
             </div>
-            <div className="border border-black bg-white">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Link href="/api/region/select?region=eu&next=/playground" className="group border border-black bg-[#f4d44d] p-6 hover:bg-black hover:text-white">
+                <Sparkles className="size-7" />
+                <span className="mt-12 block font-pixel text-4xl leading-none tracking-[-0.055em]">Explore</span>
+                <span className="mt-4 block text-sm leading-6 text-black/65 group-hover:text-white/65">Open a private, populated playground. No region or real telemetry required.</span>
+                <span className="mt-8 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em]">Enter playground <ArrowRight className="size-4" /></span>
+              </Link>
+              <div className="border border-black bg-white p-6">
+                <Wrench className="size-7" />
+                <span className="mt-12 block font-pixel text-4xl leading-none tracking-[-0.055em]">Build</span>
+                <span className="mt-4 block text-sm leading-6 text-black/65">Create a real project, API key, and regional telemetry boundary.</span>
+                <span className="mt-8 block font-mono text-[9px] uppercase tracking-[0.12em] text-black/50">Choose a region below</span>
+              </div>
+            </div>
+            <div className="mt-6 border border-black bg-white">
               {regions.map((region) => (
                 <Link
                   key={region.id}
@@ -66,7 +80,7 @@ export default async function CloudRegionPage({
                 </Link>
               ))}
             </div>
-            <p className="mt-6 text-sm leading-6 text-black/55">Already have an account? Select the region where you created it. Accounts and credentials are not shared between regions.</p>
+            <p className="mt-6 text-sm leading-6 text-black/55">Build uses the region where your account and telemetry will live. Explore is region-independent and uses simulated data only.</p>
           </div>
         </section>
       </div>

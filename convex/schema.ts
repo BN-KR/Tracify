@@ -606,4 +606,12 @@ export default defineSchema({
     product: v.boolean(),
     updatedAt: v.number(),
   }).index("by_userKey", ["userKey"]),
+
+  sandboxWorkspaces: defineTable({
+    userKey: v.string(),
+    fixtureVersion: v.string(),
+    scenarioId: v.string(),
+    dismissedAlertIds: v.array(v.string()),
+    updatedAt: v.number(),
+  }).index("by_userKey", ["userKey"]),
 });
