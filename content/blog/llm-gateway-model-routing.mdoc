@@ -10,7 +10,7 @@ tags: [LLM gateway, model routing, multi-provider, LLM observability]
 relatedPosts: [llm-api-guide, ai-agent-cost-per-task, llm-latency-optimization]
 heroImage:
   src: /media/llm-gateway-model-routing-hero.svg
-  alt: A request stream splitting across cheap, mid, and premium model tiers at a routing gateway, with a ledger recording which model served each request
+  alt: A telephone switchboard with one cable physically plugged from the incoming request jack into the mid-tier model jack, the cheap and premium jacks left coiled and idle, above a printed routing-ledger slip
 seo:
   metaTitle: "LLM Gateway & Model Routing: A Decision Framework"
   metaDescription: A decision framework for routing requests across multiple LLM providers by cost, latency, and task, with the observability needed to trace a regression to a routing change.
@@ -20,7 +20,7 @@ seo:
 
 ## At a glance
 
-![The routing ledger model shown as five connected stages: eligibility, candidates, signal, fallback, and ledger](/media/llm-gateway-model-routing-signal-map.svg)
+![A control desk holding five instruments in sequence: a turnstile gate for eligibility, a fanned rack of model cards for candidates, a needle gauge for signal, a breaker lever for fallback, and a printer for the ledger](/media/llm-gateway-model-routing-signal-map.svg)
 
 *Five stages a request moves through before any model sees it — skipping the last one is why routing bugs get misdiagnosed as model bugs.*
 
@@ -187,7 +187,7 @@ The root-cause fix is not to retrain or replace the cheap model — it was never
 
 ### What belongs in the ledger
 
-![A three-step fallback chain moving from a failed primary tier to a secondary provider to a safe static response, with a ledger entry written at each step](/media/llm-gateway-model-routing-fallback-chain.svg)
+![An electrical panel with three breakers wired in series: a tripped, sparking primary breaker, a live secondary breaker carrying the rerouted current, and a lit safe-default warning lamp, each with its own paper ticket](/media/llm-gateway-model-routing-fallback-chain.svg)
 
 *Every step in the chain writes its own ledger row — a fallback that happens silently is a fallback you cannot audit later.*
 

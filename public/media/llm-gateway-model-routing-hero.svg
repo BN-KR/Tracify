@@ -1,69 +1,51 @@
 <svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="lgmrHeroTitle lgmrHeroDesc">
-  <title id="lgmrHeroTitle">One request stream splitting across three model tiers at a routing gateway, with a ledger recording every decision</title>
-  <desc id="lgmrHeroDesc">A black canvas shows a single incoming request stream entering a gateway box on the left, then splitting into three lanes labeled cheap and fast, mid tier, and premium, each leading to a different provider block on the right. A thin connecting line runs from every lane down to a ledger strip at the bottom that records which model served each request and why, illustrating that the routing decision itself is a piece of evidence, not just the model's output.</desc>
+  <title id="lgmrHeroTitle">A patch panel with one physical cable plugged from the incoming request jack into the mid-tier model jack, the other two jacks left coiled and idle</title>
+  <desc id="lgmrHeroDesc">An illustration of an old-style telephone switchboard mounted with four jacks: one incoming request jack on the left and three model-tier jacks on the right, labeled cheap and fast, mid tier, and premium. A single curved cable is plugged from the request jack into the mid-tier jack. The cheap-and-fast and premium jacks sit idle with their cables coiled and hanging. Below the panel, a printed ledger slip records the tier, model, signal value, and reason for this one connection.</desc>
   <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="90" y="66" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">LLM GATEWAY &amp; MODEL ROUTING</text>
+  <text x="90" y="94" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">one request, one plug, one recorded reason</text>
 
-  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">LLM GATEWAY &amp; MODEL ROUTING</text>
-  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">one request, three eligible tiers, one recorded decision</text>
-
-  <!-- incoming request -->
-  <g font-family="monospace" font-size="13">
-    <rect x="90" y="380" width="180" height="70" fill="none" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
-    <text x="180" y="410" fill="#f6f1e6" text-anchor="middle" opacity="0.85">INCOMING</text>
-    <text x="180" y="430" fill="#f6f1e6" text-anchor="middle" opacity="0.85">REQUEST</text>
+  <!-- switchboard panel -->
+  <rect x="160" y="170" width="1280" height="420" fill="#161616" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2"/>
+  <g stroke="#f6f1e6" stroke-opacity="0.15">
+    <line x1="160" y1="230" x2="1440" y2="230"/>
+    <line x1="160" y1="530" x2="1440" y2="530"/>
   </g>
 
-  <!-- gateway -->
-  <rect x="340" y="350" width="220" height="130" fill="#f4d44d" fill-opacity="0.1" stroke="#f4d44d" stroke-width="2"/>
-  <text x="450" y="405" fill="#f4d44d" text-anchor="middle" font-family="monospace" font-size="15" font-weight="bold">GATEWAY</text>
-  <text x="450" y="428" fill="#f4d44d" text-anchor="middle" font-family="monospace" font-size="12" opacity="0.85">eligibility +</text>
-  <text x="450" y="446" fill="#f4d44d" text-anchor="middle" font-family="monospace" font-size="12" opacity="0.85">routing signal</text>
+  <!-- input jack -->
+  <circle cx="260" cy="380" r="30" fill="#0a0a0a" stroke="#f6f1e6" stroke-width="3"/>
+  <circle cx="260" cy="380" r="10" fill="#f6f1e6"/>
+  <text x="260" y="440" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="12">REQUEST IN</text>
+  <text x="260" y="460" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="10" opacity="0.55">mixed billing + code intent</text>
 
-  <line x1="270" y1="415" x2="340" y2="415" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5"/>
+  <!-- output jacks -->
+  <circle cx="1340" cy="250" r="26" fill="#0a0a0a" stroke="#7fbf7f" stroke-width="3"/>
+  <text x="1250" y="230" text-anchor="middle" fill="#7fbf7f" font-family="monospace" font-size="13" font-weight="bold">CHEAP &amp; FAST</text>
+  <text x="1250" y="200" text-anchor="middle" fill="#7fbf7f" font-family="monospace" font-size="10" opacity="0.7">idle this request</text>
+  <path d="M1340 276 q 0 40 -40 46 q -40 6 -40 40" fill="none" stroke="#7fbf7f" stroke-opacity="0.4" stroke-width="4"/>
 
-  <!-- three lanes -->
-  <g stroke="#f6f1e6" stroke-opacity="0.35" stroke-width="1.5">
-    <path d="M 560 390 L 700 220" fill="none"/>
-    <path d="M 560 415 L 700 415" fill="none"/>
-    <path d="M 560 440 L 700 610" fill="none"/>
+  <circle cx="1340" cy="380" r="30" fill="#0a0a0a" stroke="#f4d44d" stroke-width="4"/>
+  <circle cx="1340" cy="380" r="10" fill="#f4d44d"/>
+  <text x="1340" y="440" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="13" font-weight="bold">MID TIER</text>
+  <text x="1340" y="460" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="10">plugged &#8212; this request</text>
+
+  <circle cx="1340" cy="510" r="26" fill="#0a0a0a" stroke="#e2694f" stroke-width="3"/>
+  <text x="1250" y="540" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="13" font-weight="bold">PREMIUM</text>
+  <text x="1250" y="565" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="10" opacity="0.7">idle this request</text>
+  <path d="M1340 484 q 0 -40 -40 -46 q -40 -6 -40 -40" fill="none" stroke="#e2694f" stroke-opacity="0.4" stroke-width="4"/>
+
+  <!-- the one live patch cable -->
+  <path d="M285 380 C 600 260, 900 500, 1310 380" fill="none" stroke="#f4d44d" stroke-width="6" stroke-linecap="round"/>
+  <path d="M285 380 C 600 260, 900 500, 1310 380" fill="none" stroke="#f6f1e6" stroke-opacity="0.25" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- ledger slip -->
+  <g transform="rotate(-1 800 760)">
+    <rect x="480" y="700" width="640" height="120" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="510" y="732" fill="#1a1a1a" font-family="monospace" font-size="12" font-weight="bold">ROUTING LEDGER</text>
+    <text x="510" y="758" fill="#1a1a1a" font-family="monospace" font-size="12">tier=MID &#183; model=provider-2-mid &#183; signal=0.62</text>
+    <text x="510" y="782" fill="#1a1a1a" font-family="monospace" font-size="12" opacity="0.75">reason: confidence below the cheap-tier cutoff</text>
+    <text x="510" y="804" fill="#1a1a1a" font-family="monospace" font-size="10" opacity="0.5">written before the model call, not after</text>
   </g>
 
-  <g font-family="monospace" font-size="13">
-    <rect x="700" y="170" width="260" height="100" fill="none" stroke="#7fbf7f" stroke-width="1.5"/>
-    <text x="830" y="210" fill="#7fbf7f" text-anchor="middle" font-weight="bold">CHEAP &amp; FAST</text>
-    <text x="830" y="232" fill="#7fbf7f" text-anchor="middle" opacity="0.75">first attempt, most traffic</text>
-    <text x="830" y="252" fill="#7fbf7f" text-anchor="middle" opacity="0.6" font-size="11">tier A</text>
-
-    <rect x="700" y="365" width="260" height="100" fill="none" stroke="#f4d44d" stroke-width="1.5"/>
-    <text x="830" y="405" fill="#f4d44d" text-anchor="middle" font-weight="bold">MID TIER</text>
-    <text x="830" y="427" fill="#f4d44d" text-anchor="middle" opacity="0.75">escalate on low confidence</text>
-    <text x="830" y="447" fill="#f4d44d" text-anchor="middle" opacity="0.6" font-size="11">tier B</text>
-
-    <rect x="700" y="560" width="260" height="100" fill="none" stroke="#e06a5a" stroke-width="1.5"/>
-    <text x="830" y="600" fill="#e06a5a" text-anchor="middle" font-weight="bold">PREMIUM</text>
-    <text x="830" y="622" fill="#e06a5a" text-anchor="middle" opacity="0.75">hard tasks, high stakes</text>
-    <text x="830" y="642" fill="#e06a5a" text-anchor="middle" opacity="0.6" font-size="11">tier C</text>
-  </g>
-
-  <!-- provider blocks -->
-  <g font-family="monospace" font-size="12" fill="#f6f1e6" opacity="0.7">
-    <line x1="960" y1="220" x2="1080" y2="220" stroke="#f6f1e6" stroke-opacity="0.35"/>
-    <text x="1090" y="224">provider 1</text>
-    <line x1="960" y1="415" x2="1080" y2="415" stroke="#f6f1e6" stroke-opacity="0.35"/>
-    <text x="1090" y="419">provider 2</text>
-    <line x1="960" y1="610" x2="1080" y2="610" stroke="#f6f1e6" stroke-opacity="0.35"/>
-    <text x="1090" y="614">provider 1 or 3</text>
-  </g>
-
-  <!-- ledger strip -->
-  <g stroke="#f6f1e6" stroke-opacity="0.25" stroke-width="1">
-    <line x1="830" y1="270" x2="830" y2="740"/>
-    <line x1="830" y1="465" x2="830" y2="740"/>
-    <line x1="830" y1="660" x2="830" y2="740"/>
-  </g>
-  <rect x="450" y="740" width="760" height="90" fill="#f4d44d" fill-opacity="0.08" stroke="#f4d44d" stroke-width="2"/>
-  <text x="830" y="775" fill="#f4d44d" text-anchor="middle" font-family="monospace" font-size="15" font-weight="bold">ROUTING LEDGER</text>
-  <text x="830" y="800" fill="#f6f1e6" text-anchor="middle" font-family="monospace" font-size="12" opacity="0.75">tier, model, signal value, and reason recorded on every request</text>
-
-  <text x="100" y="855" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a quality regression can come from the model or from the decision that picked it — only the ledger can tell you which</text>
+  <text x="90" y="855" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a quality regression can come from the model or from the plug that picked it &#8212; only the ledger can tell you which</text>
 </svg>
