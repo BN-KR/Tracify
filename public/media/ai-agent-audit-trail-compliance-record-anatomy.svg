@@ -1,48 +1,80 @@
-<svg viewBox="0 0 1600 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="aatAnatomyTitle aatAnatomyDesc">
-  <title id="aatAnatomyTitle">When each of the five audit-record fields is captured during a single agent run</title>
-  <desc id="aatAnatomyDesc">A black canvas shows six run stages across the top — request, auth, tool call, policy check, execution, and completion — connected by a horizontal line. Below, five rows for actor, action, data touched, basis, and disposition each show a marker under the stage where that field is written, illustrating that the record is assembled incrementally rather than written once at the end.</desc>
-  <rect width="1600" height="620" fill="#0a0a0a"/>
-  <text x="80" y="60" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1.5">WHEN EACH FIELD IS CAPTURED</text>
-  <text x="80" y="88" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.55">a record assembled across the run, not written once at the end</text>
+<svg viewBox="0 0 1600 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="aatAnatomyTitle aatAnatomyDesc">
+  <title id="aatAnatomyTitle">Five field cards, each punched with an ink stamp at the run stage where that field actually gets captured</title>
+  <desc id="aatAnatomyDesc">An illustration of five ticket cards, one per audit field &#8212; actor, action, data touched, basis, and disposition &#8212; laid beside a row of six run stages: request, auth, tool call, policy check, execution, and completion. Each card carries a red ink stamp mark under the stage where that field is actually written, showing that the record is assembled incrementally across the run rather than written once at the end.</desc>
+  <rect width="1600" height="640" fill="#0a0a0a"/>
+  <text x="80" y="55" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1.5">WHEN EACH FIELD GETS STAMPED</text>
+  <text x="80" y="82" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.55">a record assembled across the run, not written once at the end</text>
 
-  <line x1="150" y1="140" x2="1450" y2="140" stroke="#f6f1e6" stroke-opacity="0.35" stroke-width="1.5"/>
-  <g font-family="monospace" font-size="12" fill="#f6f1e6">
-    <circle cx="150" cy="140" r="5" fill="#f6f1e6" opacity="0.6"/>
-    <text x="150" y="120" text-anchor="middle" opacity="0.65">REQUEST</text>
-    <circle cx="410" cy="140" r="5" fill="#f6f1e6" opacity="0.6"/>
-    <text x="410" y="120" text-anchor="middle" opacity="0.65">AUTH</text>
-    <circle cx="670" cy="140" r="5" fill="#f6f1e6" opacity="0.6"/>
-    <text x="670" y="120" text-anchor="middle" opacity="0.65">TOOL CALL</text>
-    <circle cx="930" cy="140" r="5" fill="#f6f1e6" opacity="0.6"/>
-    <text x="930" y="120" text-anchor="middle" opacity="0.65">POLICY CHECK</text>
-    <circle cx="1190" cy="140" r="5" fill="#f6f1e6" opacity="0.6"/>
-    <text x="1190" y="120" text-anchor="middle" opacity="0.65">EXECUTION</text>
-    <circle cx="1450" cy="140" r="5" fill="#f6f1e6" opacity="0.6"/>
-    <text x="1450" y="120" text-anchor="middle" opacity="0.65">COMPLETION</text>
+  <!-- stage headers -->
+  <g font-family="monospace" font-size="11" fill="#f6f1e6" opacity="0.7">
+    <text x="330" y="125" text-anchor="middle">REQUEST</text>
+    <text x="500" y="125" text-anchor="middle">AUTH</text>
+    <text x="670" y="125" text-anchor="middle">TOOL CALL</text>
+    <text x="840" y="125" text-anchor="middle">POLICY CHECK</text>
+    <text x="1010" y="125" text-anchor="middle">EXECUTION</text>
+    <text x="1180" y="125" text-anchor="middle">COMPLETION</text>
+  </g>
+  <line x1="290" y1="140" x2="1220" y2="140" stroke="#f6f1e6" stroke-opacity="0.25" stroke-width="1.5"/>
+
+  <!-- helper: stamp mark drawn inline per row -->
+  <!-- row 1: ACTOR, stamped at AUTH -->
+  <g font-family="monospace">
+    <rect x="90" y="165" width="170" height="66" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="175" y="204" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="bold">ACTOR</text>
+    <line x1="290" y1="198" x2="1220" y2="198" stroke="#f6f1e6" stroke-opacity="0.12" stroke-width="8"/>
+    <g transform="rotate(-12 500 198)">
+      <circle cx="500" cy="198" r="22" fill="none" stroke="#e2694f" stroke-width="3"/>
+      <text x="500" y="203" text-anchor="middle" fill="#e2694f" font-size="9" font-weight="bold">SET</text>
+    </g>
   </g>
 
-  <g font-family="monospace" font-size="13">
-    <text x="60" y="235" fill="#f6f1e6" opacity="0.75">ACTOR</text>
-    <line x1="150" y1="230" x2="1450" y2="230" stroke="#f6f1e6" stroke-opacity="0.15" stroke-width="1"/>
-    <circle cx="410" cy="230" r="7" fill="#f4d44d"/>
-
-    <text x="60" y="300" fill="#f6f1e6" opacity="0.75">ACTION</text>
-    <line x1="150" y1="295" x2="1450" y2="295" stroke="#f6f1e6" stroke-opacity="0.15" stroke-width="1"/>
-    <circle cx="670" cy="295" r="7" fill="#f4d44d"/>
-
-    <text x="60" y="365" fill="#f6f1e6" opacity="0.75">DATA TOUCHED</text>
-    <line x1="150" y1="360" x2="1450" y2="360" stroke="#f6f1e6" stroke-opacity="0.15" stroke-width="1"/>
-    <circle cx="670" cy="360" r="7" fill="#f4d44d"/>
-    <circle cx="1190" cy="360" r="7" fill="#f4d44d" fill-opacity="0.55"/>
-
-    <text x="60" y="430" fill="#f6f1e6" opacity="0.75">BASIS</text>
-    <line x1="150" y1="425" x2="1450" y2="425" stroke="#f6f1e6" stroke-opacity="0.15" stroke-width="1"/>
-    <circle cx="930" cy="425" r="7" fill="#f4d44d"/>
-
-    <text x="60" y="495" fill="#f6f1e6" opacity="0.75">DISPOSITION</text>
-    <line x1="150" y1="490" x2="1450" y2="490" stroke="#f6f1e6" stroke-opacity="0.15" stroke-width="1"/>
-    <circle cx="1450" cy="490" r="7" fill="#f4d44d"/>
+  <!-- row 2: ACTION, stamped at TOOL CALL -->
+  <g font-family="monospace">
+    <rect x="90" y="245" width="170" height="66" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="175" y="284" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="bold">ACTION</text>
+    <line x1="290" y1="278" x2="1220" y2="278" stroke="#f6f1e6" stroke-opacity="0.12" stroke-width="8"/>
+    <g transform="rotate(9 670 278)">
+      <circle cx="670" cy="278" r="22" fill="none" stroke="#e2694f" stroke-width="3"/>
+      <text x="670" y="283" text-anchor="middle" fill="#e2694f" font-size="9" font-weight="bold">SET</text>
+    </g>
   </g>
 
-  <text x="80" y="580" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a field captured late is a field an operator has to reconstruct from memory</text>
+  <!-- row 3: DATA TOUCHED, stamped at TOOL CALL and again at EXECUTION -->
+  <g font-family="monospace">
+    <rect x="90" y="325" width="170" height="66" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d" stroke-width="2.5"/>
+    <text x="175" y="364" text-anchor="middle" fill="#f4d44d" font-size="13" font-weight="bold">DATA TOUCHED</text>
+    <line x1="290" y1="358" x2="1220" y2="358" stroke="#f6f1e6" stroke-opacity="0.12" stroke-width="8"/>
+    <g transform="rotate(-7 670 358)">
+      <circle cx="670" cy="358" r="22" fill="none" stroke="#f4d44d" stroke-width="3"/>
+      <text x="670" y="363" text-anchor="middle" fill="#f4d44d" font-size="9" font-weight="bold">SET</text>
+    </g>
+    <g transform="rotate(10 1010 358)">
+      <circle cx="1010" cy="358" r="22" fill="none" stroke="#f4d44d" stroke-opacity="0.65" stroke-width="3"/>
+      <text x="1010" y="363" text-anchor="middle" fill="#f4d44d" opacity="0.85" font-size="9" font-weight="bold">+MORE</text>
+    </g>
+  </g>
+
+  <!-- row 4: BASIS, stamped at POLICY CHECK -->
+  <g font-family="monospace">
+    <rect x="90" y="405" width="170" height="66" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="175" y="444" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="bold">BASIS</text>
+    <line x1="290" y1="438" x2="1220" y2="438" stroke="#f6f1e6" stroke-opacity="0.12" stroke-width="8"/>
+    <g transform="rotate(13 840 438)">
+      <circle cx="840" cy="438" r="22" fill="none" stroke="#e2694f" stroke-width="3"/>
+      <text x="840" y="443" text-anchor="middle" fill="#e2694f" font-size="9" font-weight="bold">SET</text>
+    </g>
+  </g>
+
+  <!-- row 5: DISPOSITION, stamped at COMPLETION -->
+  <g font-family="monospace">
+    <rect x="90" y="485" width="170" height="66" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="175" y="524" text-anchor="middle" fill="#1a1a1a" font-size="13" font-weight="bold">DISPOSITION</text>
+    <line x1="290" y1="518" x2="1220" y2="518" stroke="#f6f1e6" stroke-opacity="0.12" stroke-width="8"/>
+    <g transform="rotate(-15 1180 518)">
+      <circle cx="1180" cy="518" r="22" fill="none" stroke="#e2694f" stroke-width="3"/>
+      <text x="1180" y="523" text-anchor="middle" fill="#e2694f" font-size="9" font-weight="bold">SET</text>
+    </g>
+  </g>
+
+  <text x="80" y="600" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a field stamped late is a field an operator has to reconstruct from memory</text>
 </svg>

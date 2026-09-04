@@ -1,30 +1,45 @@
-<svg viewBox="0 0 1600 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="aatRetentionTitle aatRetentionDesc">
-  <title id="aatRetentionTitle">Retention splits raw run data into decision metadata and content payload at the moment of capture</title>
-  <desc id="aatRetentionDesc">A black canvas shows a box labeled raw run data at the top, splitting into two paths. The left path leads to a box labeled decision metadata, containing hashed actor identifiers, action type, policy version, and disposition, retained for seven years as evidence of control operation. The right path leads to a box labeled content payload, containing account fields, dispute text, and tool arguments, retained for ninety days and then redacted or purged, illustrating that the minimization decision is made once at write time rather than during a later cleanup pass.</desc>
-  <rect width="1600" height="620" fill="#0a0a0a"/>
-  <text x="80" y="60" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1.5">RETENTION SPLITS AT CAPTURE</text>
-  <text x="80" y="88" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.55">not decided later during a cleanup pass</text>
+<svg viewBox="0 0 1600 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="aatRetentionTitle aatRetentionDesc">
+  <title id="aatRetentionTitle">One raw run record splitting at capture into a locked seven-year vault and a ninety-day paper shredder</title>
+  <desc id="aatRetentionDesc">An illustration of a single raw run record splitting into two physical destinations at the moment it is captured. The left path leads into a bank vault door holding hashed actor identifiers, action type, policy version, and disposition, retained for seven years as evidence the control ran. The right path leads into a paper shredder consuming account fields, dispute text, and tool arguments, retained for ninety days and then destroyed, showing the minimization decision is made once at write time rather than during a later cleanup pass.</desc>
+  <rect width="1600" height="640" fill="#0a0a0a"/>
+  <text x="80" y="55" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1.5">RETENTION SPLITS AT CAPTURE</text>
+  <text x="80" y="82" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.55">not decided later during a cleanup pass</text>
 
-  <rect x="640" y="120" width="320" height="60" fill="none" stroke="#f6f1e6" stroke-width="1.5"/>
-  <text x="800" y="157" fill="#f6f1e6" text-anchor="middle" font-family="monospace" font-size="14">RAW RUN DATA</text>
+  <rect x="650" y="110" width="300" height="60" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="800" y="147" fill="#1a1a1a" text-anchor="middle" font-family="monospace" font-size="14">RAW RUN RECORD</text>
 
-  <path d="M760 180 L 460 260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
-  <path d="M840 180 L 1140 260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+  <path d="M700 170 L 420 260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2" fill="none"/>
+  <path d="M900 170 L 1180 260" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2" fill="none"/>
 
+  <!-- Vault: decision metadata, kept 7 years -->
   <g font-family="monospace">
-    <rect x="180" y="260" width="560" height="150" fill="none" stroke="#7fbf7f" stroke-width="2"/>
-    <text x="210" y="295" fill="#7fbf7f" font-size="15">DECISION METADATA</text>
-    <text x="210" y="322" fill="#7fbf7f" opacity="0.7" font-size="12">actor hash, action type, policy version,</text>
-    <text x="210" y="342" fill="#7fbf7f" opacity="0.7" font-size="12">timestamps, disposition</text>
-    <text x="210" y="385" fill="#7fbf7f" font-size="13">retained 7 years · pseudonymous</text>
-
-    <rect x="860" y="260" width="560" height="150" fill="#f4d44d" fill-opacity="0.08" stroke="#f4d44d" stroke-width="2"/>
-    <text x="890" y="295" fill="#f4d44d" font-size="15">CONTENT PAYLOAD</text>
-    <text x="890" y="322" fill="#f4d44d" opacity="0.75" font-size="12">account fields, dispute text,</text>
-    <text x="890" y="342" fill="#f4d44d" opacity="0.75" font-size="12">tool arguments, retrieved records</text>
-    <text x="890" y="385" fill="#f4d44d" font-size="13">retained 90 days · then redact or purge</text>
+    <rect x="200" y="260" width="440" height="260" fill="none" stroke="#7fbf7f" stroke-width="3"/>
+    <circle cx="420" cy="390" r="90" fill="#161616" stroke="#7fbf7f" stroke-width="4"/>
+    <circle cx="420" cy="390" r="55" fill="none" stroke="#7fbf7f" stroke-width="3"/>
+    <circle cx="420" cy="390" r="10" fill="#7fbf7f"/>
+    <line x1="420" y1="390" x2="460" y2="360" stroke="#7fbf7f" stroke-width="4"/>
+    <text x="420" y="250" text-anchor="middle" fill="#7fbf7f" font-size="15" font-weight="bold">DECISION METADATA</text>
+    <text x="420" y="545" text-anchor="middle" fill="#7fbf7f" font-size="13">retained 7 years &#183; pseudonymous</text>
+    <text x="420" y="568" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.6">actor hash, action type, policy version, disposition</text>
   </g>
 
-  <text x="80" y="470" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.5">the record on the left still proves the control ran after the payload on the right is gone</text>
-  <text x="80" y="580" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">evidentiary completeness and storage limitation stop competing once they are different objects</text>
+  <!-- Shredder: content payload, purged after 90 days -->
+  <g font-family="monospace">
+    <rect x="980" y="260" width="440" height="260" fill="none" stroke="#e2694f" stroke-width="3" stroke-dasharray="8,6"/>
+    <rect x="1120" y="290" width="160" height="70" fill="#1a1a1a" stroke="#e2694f" stroke-width="3"/>
+    <g stroke="#e2694f" stroke-width="2">
+      <line x1="1150" y1="360" x2="1140" y2="470"/>
+      <line x1="1170" y1="360" x2="1165" y2="470"/>
+      <line x1="1190" y1="360" x2="1190" y2="470"/>
+      <line x1="1210" y1="360" x2="1215" y2="470"/>
+      <line x1="1230" y1="360" x2="1240" y2="470"/>
+      <line x1="1250" y1="360" x2="1260" y2="470"/>
+    </g>
+    <rect x="1180" y="278" width="20" height="16" fill="#1a1a1a"/>
+    <text x="1200" y="250" text-anchor="middle" fill="#e2694f" font-size="15" font-weight="bold">CONTENT PAYLOAD</text>
+    <text x="1200" y="545" text-anchor="middle" fill="#e2694f" font-size="13">retained 90 days &#183; then shredded</text>
+    <text x="1200" y="568" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.6">account fields, dispute text, tool arguments</text>
+  </g>
+
+  <text x="80" y="605" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the vault still proves the control ran after the shredder has consumed the payload</text>
 </svg>

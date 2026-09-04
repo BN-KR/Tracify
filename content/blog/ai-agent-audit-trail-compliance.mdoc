@@ -18,7 +18,7 @@ relatedPosts:
   - human-in-the-loop-ai-agents
 heroImage:
   src: /media/ai-agent-audit-trail-compliance-hero.svg
-  alt: One audit record exploded into five labeled fields — actor, action, data touched, basis, disposition — beside a dashed arrow showing a GDPR access request answered from the record
+  alt: A manila exhibit folder holding a printed run record with two black redaction bars, a red wax seal stamped SEALED AND HASHED, and a chain-of-custody tag, pulled open by a GDPR Article 15 request
 seo:
   metaTitle: "AI Agent Audit Trails for SOC 2 and GDPR Evidence"
   metaDescription: Build compliance-ready audit trails for AI agents with a five-field evidence model, retention tiers, redaction strategy, and tamper-evidence controls.
@@ -60,7 +60,7 @@ Not every agent action needs the full five-field record. A read-only lookup that
 | Basis | Policy version and the threshold it evaluated | `fee-waiver-v6`: tenure ≥ 18mo, first dispute |
 | Disposition | Auto-executed, approved, overridden, or blocked | Auto-approved, no override, sealed 03:12 UTC |
 
-![Timeline of six run stages — request, auth, tool call, policy check, execution, completion — with markers showing when each of the five audit fields is captured](/media/ai-agent-audit-trail-compliance-record-anatomy.svg)
+![Five field tickets, each carrying a red ink stamp under the run stage — request, auth, tool call, policy check, execution, or completion — where that field is actually captured](/media/ai-agent-audit-trail-compliance-record-anatomy.svg)
 
 ### Field-level detail by consequence tier
 
@@ -140,7 +140,7 @@ This is the tension the brief for this article named directly, and it deserves t
 
 The resolution is the same move the retention table above already makes: **split the record into a layer that proves the control ran and a layer that contains the personal data the control acted on, and give them different lifecycles.** The decision-metadata layer — actor hash, policy version, threshold evaluated, disposition — is evidence of *process*, not a copy of the customer's data. It can be pseudonymized once and kept for years without violating minimization, because a hash of an account identifier is not the account holder's personal data in any form a downstream reader can act on without the separate key. The content-payload layer is where the actual personal data lives, and it is where the short retention window and aggressive redaction belong.
 
-![Raw run data splitting into two paths: decision metadata retained seven years pseudonymously, and content payload retained ninety days then redacted or purged](/media/ai-agent-audit-trail-compliance-retention-flow.svg)
+![A raw run record splitting into a locked bank vault holding decision metadata for seven years, and a paper shredder consuming the content payload after ninety days](/media/ai-agent-audit-trail-compliance-retention-flow.svg)
 
 {% editorial-panel eyebrow="Decision room" title="Tokenize what you'll query later; redact what you'll only ever display." body="A field an investigator needs to filter or join on — an account ID, a case number — should be tokenized with a reversible lookup behind a controlled key, not irreversibly redacted, or you lose the ability to answer 'every action for this subject.' A field that only ever gets read by a human during a rare deep investigation — free-text dispute reasons, retrieved document contents — can be redacted outright, because nothing downstream needs to compute over it." tone="dark" /%}
 
