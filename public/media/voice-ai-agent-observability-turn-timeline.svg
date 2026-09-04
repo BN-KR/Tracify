@@ -1,46 +1,78 @@
-<svg viewBox="0 0 1600 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="vaTimelineTitle vaTimelineDesc">
-  <title id="vaTimelineTitle">A single voice turn broken into stage latencies on a shared timeline, from end of user speech to first audio played back</title>
-  <desc id="vaTimelineDesc">A black canvas shows a horizontal timeline in milliseconds with five stacked bars representing one voice turn: endpoint detection, ASR finalization, LLM time to first token, TTS time to first audio byte, and network playback delay. A yellow marker labeled "user hears the agent" sits at the end of the bars, and a bracket above the whole row is labeled "turn latency budget," showing how each stage consumes part of the same budget.</desc>
-  <rect width="1600" height="700" fill="#0a0a0a"/>
-  <text x="80" y="70" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1">ONE TURN, FIVE LATENCIES</text>
-  <text x="80" y="98" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">measured from end-of-speech to first audible response</text>
+<svg viewBox="0 0 1600 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="vaTimelineTitle vaTimelineDesc">
+  <title id="vaTimelineTitle">A five-leg relay race where each runner carries the turn baton for one pipeline stage, finishing at the moment the user hears the agent</title>
+  <desc id="vaTimelineDesc">An illustration of a relay race track divided into five legs of different lengths: endpoint detection, ASR finalize, LLM first token, TTS first byte, and network playback. A baton is handed from runner to runner at each leg boundary, with the millisecond cost of that leg written on the track. The LLM leg is drawn noticeably longer than the others. A finish-line flag at the end is labeled user hears the agent, at roughly 1730 milliseconds total.</desc>
+  <rect width="1600" height="640" fill="#0a0a0a"/>
+  <text x="80" y="55" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1">ONE TURN, FIVE LEGS OF THE SAME RACE</text>
+  <text x="80" y="82" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">measured from end-of-speech to first audible response</text>
 
-  <g font-family="monospace" font-size="13">
-    <!-- axis -->
-    <line x1="360" y1="600" x2="1520" y2="600" stroke="#f6f1e6" stroke-opacity="0.35"/>
-    <text x="360" y="622" fill="#f6f1e6" opacity="0.45" font-size="11">0 ms</text>
-    <text x="1500" y="622" fill="#f6f1e6" opacity="0.45" font-size="11">2000 ms</text>
+  <!-- track -->
+  <line x1="120" y1="420" x2="1520" y2="420" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="4"/>
+  <text x="120" y="446" fill="#f6f1e6" font-family="monospace" font-size="11" opacity="0.5">start &#8212; user stops talking</text>
 
-    <!-- bracket -->
-    <path d="M360 150 L360 130 L1520 130 L1520 150" fill="none" stroke="#f4d44d" stroke-opacity="0.6" stroke-width="1.5"/>
-    <text x="940" y="118" fill="#f4d44d" text-anchor="middle" font-size="13">turn latency budget</text>
-
-    <!-- rows -->
-    <text x="80" y="205" fill="#f6f1e6" opacity="0.75">endpoint detect</text>
-    <rect x="360" y="180" width="90" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
-    <text x="405" y="205" fill="#f6f1e6" text-anchor="middle" font-size="11" opacity="0.7">150ms</text>
-
-    <text x="80" y="275" fill="#f6f1e6" opacity="0.75">ASR finalize</text>
-    <rect x="450" y="250" width="180" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
-    <text x="540" y="275" fill="#f6f1e6" text-anchor="middle" font-size="11" opacity="0.7">300ms</text>
-
-    <text x="80" y="345" fill="#f6f1e6" opacity="0.75">LLM first token</text>
-    <rect x="630" y="320" width="420" height="40" fill="#f4d44d" fill-opacity="0.14" stroke="#f4d44d" stroke-opacity="0.8"/>
-    <text x="840" y="345" fill="#f4d44d" text-anchor="middle" font-size="11">700ms</text>
-
-    <text x="80" y="415" fill="#f6f1e6" opacity="0.75">TTS first byte</text>
-    <rect x="1050" y="390" width="240" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
-    <text x="1170" y="415" fill="#f6f1e6" text-anchor="middle" font-size="11" opacity="0.7">400ms</text>
-
-    <text x="80" y="485" fill="#f6f1e6" opacity="0.75">network + jitter</text>
-    <rect x="1290" y="460" width="120" height="40" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
-    <text x="1350" y="485" fill="#f6f1e6" text-anchor="middle" font-size="11" opacity="0.7">180ms</text>
-
-    <!-- marker -->
-    <line x1="1410" y1="150" x2="1410" y2="600" stroke="#f4d44d" stroke-width="2" stroke-dasharray="6 5"/>
-    <text x="1420" y="560" fill="#f4d44d" font-size="13">user hears the agent</text>
-    <text x="1420" y="580" fill="#f4d44d" opacity="0.7" font-size="12">~1730ms total</text>
+  <!-- leg dividers, proportional to ms: 150,300,700,400,180 out of 1730 scaled to track length ~1330px -->
+  <!-- start 190, endpoint 190-305, asr 305-536, llm 536-1073, tts 1073-1381, net 1381-1519 -->
+  <g stroke="#f6f1e6" stroke-opacity="0.3" stroke-width="2">
+    <line x1="305" y1="380" x2="305" y2="460"/>
+    <line x1="536" y1="380" x2="536" y2="460"/>
+    <line x1="1073" y1="380" x2="1073" y2="460"/>
+    <line x1="1381" y1="380" x2="1381" y2="460"/>
   </g>
 
-  <text x="80" y="660" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">time-to-first-audio-byte is the sum of every stage before it, not one span in isolation</text>
+  <!-- baton -->
+  <rect x="230" y="412" width="46" height="16" rx="8" fill="#f4d44d"/>
+
+  <!-- runner icons at each handoff, simple stick figures -->
+  <g stroke="#f6f1e6" stroke-width="3" fill="none" stroke-linecap="round">
+    <circle cx="190" cy="360" r="12" fill="#f6f1e6" stroke="none"/>
+    <line x1="190" y1="372" x2="190" y2="405"/><line x1="190" y1="385" x2="170" y2="400"/><line x1="190" y1="385" x2="215" y2="375"/>
+    <line x1="190" y1="405" x2="175" y2="418"/><line x1="190" y1="405" x2="205" y2="418"/>
+  </g>
+  <g stroke="#f6f1e6" stroke-width="3" fill="none" stroke-linecap="round">
+    <circle cx="305" cy="360" r="12" fill="#f6f1e6" stroke="none"/>
+    <line x1="305" y1="372" x2="305" y2="405"/><line x1="305" y1="385" x2="285" y2="398"/><line x1="305" y1="385" x2="325" y2="372"/>
+    <line x1="305" y1="405" x2="288" y2="418"/><line x1="305" y1="405" x2="322" y2="418"/>
+  </g>
+  <g stroke="#f4d44d" stroke-width="3" fill="none" stroke-linecap="round">
+    <circle cx="536" cy="360" r="12" fill="#f4d44d" stroke="none"/>
+    <line x1="536" y1="372" x2="536" y2="405"/><line x1="536" y1="385" x2="516" y2="396"/><line x1="536" y1="385" x2="558" y2="370"/>
+    <line x1="536" y1="405" x2="518" y2="418"/><line x1="536" y1="405" x2="554" y2="418"/>
+  </g>
+  <g stroke="#f6f1e6" stroke-width="3" fill="none" stroke-linecap="round">
+    <circle cx="1073" cy="360" r="12" fill="#f6f1e6" stroke="none"/>
+    <line x1="1073" y1="372" x2="1073" y2="405"/><line x1="1073" y1="385" x2="1053" y2="398"/><line x1="1073" y1="385" x2="1095" y2="372"/>
+    <line x1="1073" y1="405" x2="1056" y2="418"/><line x1="1073" y1="405" x2="1090" y2="418"/>
+  </g>
+  <g stroke="#f6f1e6" stroke-width="3" fill="none" stroke-linecap="round">
+    <circle cx="1381" cy="360" r="12" fill="#f6f1e6" stroke="none"/>
+    <line x1="1381" y1="372" x2="1381" y2="405"/><line x1="1381" y1="385" x2="1361" y2="398"/><line x1="1381" y1="385" x2="1403" y2="372"/>
+    <line x1="1381" y1="405" x2="1364" y2="418"/><line x1="1381" y1="405" x2="1398" y2="418"/>
+  </g>
+
+  <!-- leg labels and ms costs -->
+  <g font-family="monospace" font-size="12" fill="#f6f1e6">
+    <text x="247" y="480" text-anchor="middle" opacity="0.75">endpoint detect</text>
+    <text x="247" y="500" text-anchor="middle" opacity="0.5" font-size="11">150ms</text>
+
+    <text x="420" y="480" text-anchor="middle" opacity="0.75">ASR finalize</text>
+    <text x="420" y="500" text-anchor="middle" opacity="0.5" font-size="11">300ms</text>
+
+    <text x="804" y="480" text-anchor="middle" fill="#f4d44d">LLM first token</text>
+    <text x="804" y="500" text-anchor="middle" fill="#f4d44d" opacity="0.85" font-size="11">700ms &#8212; the long leg</text>
+
+    <text x="1227" y="480" text-anchor="middle" opacity="0.75">TTS first byte</text>
+    <text x="1227" y="500" text-anchor="middle" opacity="0.5" font-size="11">400ms</text>
+
+    <text x="1450" y="480" text-anchor="middle" opacity="0.75">network</text>
+    <text x="1450" y="500" text-anchor="middle" opacity="0.5" font-size="11">180ms</text>
+  </g>
+
+  <!-- finish line -->
+  <g>
+    <line x1="1520" y1="330" x2="1520" y2="420" stroke="#f4d44d" stroke-width="3"/>
+    <polygon points="1520,330 1560,338 1520,346" fill="#f4d44d"/>
+    <text x="1520" y="310" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="13" font-weight="bold">user hears the agent</text>
+    <text x="1520" y="290" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="12" opacity="0.8">~1730ms total</text>
+  </g>
+
+  <text x="80" y="580" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">time-to-first-audio-byte is every leg run one after another, not one span measured in isolation</text>
 </svg>

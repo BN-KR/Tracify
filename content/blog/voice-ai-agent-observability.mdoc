@@ -18,7 +18,7 @@ relatedPosts:
   - llm-tracing-explained
 heroImage:
   src: /media/voice-ai-agent-observability-hero.svg
-  alt: A waveform passing through five pipeline stages — capture, recognize, interpret, synthesize, play — with a yellow barge-in arrow looping across the whole chain
+  alt: One audio timeline with a real jagged waveform during capture and play, dead silence with a thinking indicator during interpret and synthesize, and a second waveform barging in and overlapping the agent near the end
 seo:
   metaTitle: "Voice AI Agent Observability: Tracing Real-Time Turns"
   metaDescription: A trace model and metric set for real-time voice agents — ASR, LLM, TTS, barge-in, and the conversational failures text tracing misses.
@@ -32,7 +32,7 @@ Nothing in that trace explains what the caller experienced, because nothing in t
 
 ## At a glance
 
-![A timeline showing five stacked stage latencies inside one voice turn, from endpoint detection through network playback, ending at the moment the user hears the agent](/media/voice-ai-agent-observability-turn-timeline.svg)
+![A five-leg relay race track where a baton is handed from runner to runner for endpoint detection, ASR, the LLM's noticeably longer leg, TTS, and network playback, ending at a finish line labeled user hears the agent](/media/voice-ai-agent-observability-turn-timeline.svg)
 
 This guide is for engineers building or operating a real-time voice agent — a phone-based support line, a voice assistant, or any system where a person talks and the agent talks back with an audible pause in between. It teaches a trace model for one voice **turn** — not one LLM call — and the metrics that expose failures a text-agent dashboard cannot see: dead air, talk-over, mispronunciation, and silent misrecognition. {% highlight %}A voice agent can pass every text-agent health check and still be unusable on a phone call{% /highlight %}, because the pipeline has stages, timing relationships, and interruption behavior that a request/response trace was never built to hold.
 
@@ -137,7 +137,7 @@ Trace three separate timestamps for every turn where barge-in is possible: `barg
 
 ## A worked example: the agent talks over an interruption
 
-![A sequence diagram showing the agent's audio continuing after the user starts speaking, with a yellow talk-over window marking the barge-in response gap](/media/voice-ai-agent-observability-barge-in.svg)
+![Two real overlapping waveforms, agent audio on top and user audio below, with a shaded talk-over window marking the gap between the user starting to talk and the agent's waveform actually stopping](/media/voice-ai-agent-observability-barge-in.svg)
 
 Return to the opening scenario. The caller says the agent spoke over her while she tried to correct a wrong account number. The team pulls the CRISP trace instead of the plain LLM/TTS trace, and gets a very different picture.
 

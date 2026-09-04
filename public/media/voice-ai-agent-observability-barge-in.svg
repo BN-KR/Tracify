@@ -1,40 +1,48 @@
 <svg viewBox="0 0 1600 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="vaBargeTitle vaBargeDesc">
-  <title id="vaBargeTitle">A barge-in sequence showing the agent still speaking after the user starts talking, and the resulting talk-over window</title>
-  <desc id="vaBargeDesc">A black canvas shows two horizontal swimlanes, agent audio on top and user audio on bottom, moving left to right in time. The agent lane shows a continuous speaking block. Partway through, the user lane shows the user starting to speak. A yellow shaded region marks the gap between the user's first word and the moment the agent's audio actually stops, labeled "talk-over window — barge-in response time," illustrating the interval a voice trace must capture to explain why the agent kept talking.</desc>
+  <title id="vaBargeTitle">Two real waveforms, agent audio on top and user audio below, overlapping in a shaded talk-over window where the agent kept speaking after the user started</title>
+  <desc id="vaBargeDesc">An illustration of two jagged audio waveforms on a shared timeline. The agent's waveform runs continuously across the top lane. Partway through, the user's waveform starts in the bottom lane while the agent's waveform is still going. A shaded region between the moment the user's waveform starts and the moment the agent's waveform actually stops is labeled the talk-over window, with its duration marked as the barge-in response time.</desc>
   <rect width="1600" height="640" fill="#0a0a0a"/>
-  <text x="80" y="60" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1">THE BARGE-IN RACE</text>
-  <text x="80" y="88" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">agent audio vs. user audio, same clock</text>
+  <text x="80" y="55" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1">THE BARGE-IN RACE</text>
+  <text x="80" y="82" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">agent audio vs. user audio, same clock, drawn as it was actually recorded</text>
 
-  <g font-family="monospace" font-size="13">
-    <!-- lane labels -->
-    <text x="80" y="200" fill="#f6f1e6" opacity="0.75">AGENT AUDIO</text>
-    <text x="80" y="380" fill="#f6f1e6" opacity="0.75">USER AUDIO</text>
+  <!-- lane labels -->
+  <text x="80" y="200" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.75">AGENT AUDIO</text>
+  <text x="80" y="420" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.75">USER AUDIO</text>
 
-    <!-- timeline axis -->
-    <line x1="320" y1="480" x2="1520" y2="480" stroke="#f6f1e6" stroke-opacity="0.3"/>
-    <text x="320" y="502" fill="#f6f1e6" opacity="0.45" font-size="11">t = 0ms</text>
-    <text x="1470" y="502" fill="#f6f1e6" opacity="0.45" font-size="11">t = 900ms</text>
+  <!-- timeline axis -->
+  <line x1="320" y1="500" x2="1520" y2="500" stroke="#f6f1e6" stroke-opacity="0.3"/>
+  <text x="320" y="522" fill="#f6f1e6" opacity="0.45" font-family="monospace" font-size="11">t = 0ms</text>
+  <text x="1470" y="522" fill="#f6f1e6" opacity="0.45" font-family="monospace" font-size="11">t = 900ms</text>
 
-    <!-- agent speaking block, continues through interruption -->
-    <rect x="320" y="150" width="1050" height="60" fill="none" stroke="#f6f1e6" stroke-opacity="0.6" stroke-width="2"/>
-    <text x="845" y="188" fill="#f6f1e6" text-anchor="middle" opacity="0.7">agent still speaking</text>
+  <!-- agent waveform, continues through interruption -->
+  <path d="M320,230 L340,230 L352,180 L364,275 L376,160 L388,285 L400,190 L412,260 L424,205 L436,245
+           L460,230 L472,175 L484,280 L496,165 L508,290 L520,195 L532,255 L544,210 L556,240
+           L580,230 L592,178 L604,278 L616,168 L628,285 L640,198 L652,250 L664,215 L676,240
+           L700,230 L712,182 L724,272 L736,172 L748,282 L760,200 L772,252 L784,212 L796,240
+           L820,230 L832,180 L844,275 L856,168 L868,285 L880,195 L892,255 L904,210 L916,240
+           L940,230 L952,182 L964,272 L976,172 L988,282 L1000,200 L1012,252 L1024,212 L1036,240
+           L1060,230 L1072,180 L1084,275 L1096,168 L1108,285 L1120,195 L1132,255 L1144,210 L1156,240
+           L1180,230 L1192,182 L1204,272 L1216,172 L1228,282 L1240,200 L1252,252 L1264,212 L1276,240 L1300,230"
+    fill="none" stroke="#f6f1e6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
 
-    <!-- user speech starting mid-way -->
-    <rect x="760" y="330" width="560" height="60" fill="#f6f1e6" fill-opacity="0.12" stroke="#f6f1e6" stroke-opacity="0.6" stroke-width="2"/>
-    <text x="1040" y="368" fill="#f6f1e6" text-anchor="middle" opacity="0.7">user interrupts</text>
+  <!-- user waveform, starts mid-way and overlaps -->
+  <path d="M760,420 L772,420 L784,380 L796,455 L808,365 L820,460 L832,390 L844,440 L856,400 L868,430
+           L892,420 L904,375 L916,458 L928,362 L940,462 L952,392 L964,438 L976,402 L988,428
+           L1012,420 L1024,378 L1036,456 L1048,368 L1060,460 L1072,394 L1084,436 L1096,404 L1108,428
+           L1132,420 L1144,380 L1156,455 L1168,365 L1180,458 L1192,392 L1204,436 L1216,406 L1228,428 L1260,420"
+    fill="none" stroke="#7fbf7f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 
-    <!-- markers -->
-    <line x1="760" y1="140" x2="760" y2="480" stroke="#f4d44d" stroke-width="2"/>
-    <text x="760" y="128" fill="#f4d44d" text-anchor="middle" font-size="12">user starts talking</text>
+  <!-- markers -->
+  <line x1="760" y1="140" x2="760" y2="500" stroke="#f4d44d" stroke-width="2"/>
+  <text x="760" y="125" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="12">user starts talking</text>
 
-    <line x1="1100" y1="140" x2="1100" y2="480" stroke="#f4d44d" stroke-width="2" stroke-dasharray="6 5"/>
-    <text x="1100" y="128" fill="#f4d44d" text-anchor="middle" font-size="12">agent audio actually stops</text>
+  <line x1="1100" y1="140" x2="1100" y2="500" stroke="#f4d44d" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="1100" y="125" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="12">agent audio actually stops</text>
 
-    <!-- talk-over window -->
-    <rect x="760" y="150" width="340" height="60" fill="#f4d44d" fill-opacity="0.35"/>
-    <text x="930" y="440" fill="#f4d44d" text-anchor="middle" font-size="13">talk-over window</text>
-    <text x="930" y="460" fill="#f4d44d" text-anchor="middle" font-size="12" opacity="0.8">barge-in response time ≈ 340ms</text>
-  </g>
+  <!-- talk-over window shading -->
+  <rect x="760" y="150" width="340" height="130" fill="#e2694f" fill-opacity="0.16" stroke="#e2694f" stroke-width="2" stroke-dasharray="6,5"/>
+  <text x="930" y="565" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="13" font-weight="bold">talk-over window</text>
+  <text x="930" y="587" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="12" opacity="0.85">barge-in response time &#8776; 340ms</text>
 
-  <text x="80" y="600" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a trace with only start/stop timestamps hides this gap; the gap is the incident</text>
+  <text x="80" y="625" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a trace with only start/stop timestamps hides this overlap; the overlap is the incident</text>
 </svg>
