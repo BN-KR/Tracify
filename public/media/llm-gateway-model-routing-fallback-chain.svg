@@ -1,0 +1,58 @@
+<svg viewBox="0 0 1600 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="lgmrFallbackTitle lgmrFallbackDesc">
+  <title id="lgmrFallbackTitle">A three-breaker electrical panel: the primary breaker trips and sparks, current reroutes through the secondary breaker, and a safe-default lamp lights up as the last resort</title>
+  <desc id="lgmrFallbackDesc">An illustration of an electrical breaker panel with three switches wired in series. The primary breaker has tripped to off with a spark mark and a ticket recording a timeout. The current is shown rerouting through the secondary breaker, still on, with a ticket recording that it is a different vendor running in a degraded state. A wire continues to a safe-default warning lamp that is lit, with a ticket recording that the chain is exhausted and the request was queued for human review.</desc>
+  <rect width="1600" height="640" fill="#0a0a0a"/>
+  <text x="60" y="50" fill="#f4d44d" font-family="monospace" font-size="17">THREE BREAKERS, ONE CIRCUIT, A TICKET AT EVERY SWITCH</text>
+  <text x="60" y="76" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">an outage changes which breaker is live &#8212; it never skips writing the ticket</text>
+
+  <!-- power line -->
+  <line x1="80" y1="230" x2="1520" y2="230" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="3"/>
+
+  <!-- Breaker 1: primary, tripped -->
+  <g font-family="monospace">
+    <rect x="170" y="180" width="90" height="100" fill="none" stroke="#e2694f" stroke-width="3"/>
+    <line x1="215" y1="260" x2="245" y2="205" stroke="#e2694f" stroke-width="5"/>
+    <polygon points="248,198 262,206 250,216 240,204" fill="#e2694f"/>
+    <polygon points="256,192 266,182 262,196 272,188" fill="#f4d44d"/>
+    <text x="215" y="150" text-anchor="middle" fill="#e2694f" font-size="15" font-weight="bold">PRIMARY &#8212; TRIPPED</text>
+    <text x="215" y="310" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">provider 1, model A</text>
+    <rect x="130" y="330" width="170" height="90" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="215" y="356" text-anchor="middle" fill="#1a1a1a" font-size="11" font-weight="bold">TICKET</text>
+    <text x="215" y="378" text-anchor="middle" fill="#1a1a1a" font-size="10">reason: timeout_5000ms</text>
+    <text x="215" y="398" text-anchor="middle" fill="#e2694f" font-size="10">outcome: failed</text>
+  </g>
+
+  <!-- rerouted wire down and across -->
+  <path d="M260 230 L 340 230 L 340 130 L 660 130 L 660 230" fill="none" stroke="#f4d44d" stroke-width="3"/>
+
+  <!-- Breaker 2: secondary, live -->
+  <g font-family="monospace">
+    <rect x="615" y="180" width="90" height="100" fill="none" stroke="#f4d44d" stroke-width="3"/>
+    <line x1="640" y1="270" x2="680" y2="195" stroke="#f4d44d" stroke-width="5"/>
+    <text x="660" y="150" text-anchor="middle" fill="#f4d44d" font-size="15" font-weight="bold">SECONDARY &#8212; ON</text>
+    <text x="660" y="310" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">provider 2, model B</text>
+    <rect x="575" y="330" width="170" height="110" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="660" y="356" text-anchor="middle" fill="#1a1a1a" font-size="11" font-weight="bold">TICKET</text>
+    <text x="660" y="378" text-anchor="middle" fill="#1a1a1a" font-size="10">reason: primary_unavailable</text>
+    <text x="660" y="398" text-anchor="middle" fill="#1a1a1a" font-size="10">outcome: served</text>
+    <text x="660" y="418" text-anchor="middle" fill="#e2694f" font-size="10">quality_flag: review</text>
+  </g>
+
+  <!-- wire to safe-default lamp -->
+  <path d="M705 230 L 780 230 L 780 130 L 1100 130 L 1100 220" fill="none" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="3" stroke-dasharray="6,5"/>
+
+  <!-- Safe default lamp -->
+  <g font-family="monospace">
+    <circle cx="1100" cy="255" r="42" fill="#f4d44d" fill-opacity="0.25" stroke="#f4d44d" stroke-width="3"/>
+    <circle cx="1100" cy="255" r="18" fill="#f4d44d"/>
+    <text x="1100" y="150" text-anchor="middle" fill="#7fbf7f" font-size="15" font-weight="bold">SAFE DEFAULT</text>
+    <text x="1100" y="330" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">static response or</text>
+    <text x="1100" y="348" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">queue for human review</text>
+    <rect x="1000" y="370" width="200" height="90" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="1100" y="396" text-anchor="middle" fill="#1a1a1a" font-size="11" font-weight="bold">TICKET</text>
+    <text x="1100" y="418" text-anchor="middle" fill="#1a1a1a" font-size="10">reason: chain_exhausted</text>
+    <text x="1100" y="438" text-anchor="middle" fill="#1a1a1a" font-size="10">outcome: queued</text>
+  </g>
+
+  <text x="60" y="600" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the secondary breaker's answer looked fine in isolation &#8212; only its ticket showed it had degraded twice before serving</text>
+</svg>

@@ -1,0 +1,72 @@
+<svg viewBox="0 0 1600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="lgmrSignalTitle lgmrSignalDesc">
+  <title id="lgmrSignalTitle">A control desk with five physical instruments: a turnstile gate, a fanned card rack, a needle gauge, a breaker lever, and a receipt printer</title>
+  <desc id="lgmrSignalDesc">An illustration of one operator's console holding five instruments in sequence: a turnstile gate for eligibility, a fanned rack of model cards for candidates, a needle gauge for the routing signal, a breaker switch with a lever for fallback, and a small printer feeding out a paper ledger strip. A cable runs along the desk connecting all five, showing the order a request passes through before a model ever answers it.</desc>
+  <rect width="1600" height="600" fill="#0a0a0a"/>
+  <text x="60" y="50" fill="#f4d44d" font-family="monospace" font-size="18">THE ROUTING LEDGER MODEL</text>
+  <text x="60" y="76" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.6">five instruments on one desk, in order, before a model ever answers</text>
+
+  <!-- desk cable -->
+  <line x1="140" y1="400" x2="1470" y2="400" stroke="#f6f1e6" stroke-opacity="0.3" stroke-width="3"/>
+
+  <!-- 1. Eligibility: turnstile -->
+  <g font-family="monospace">
+    <rect x="170" y="330" width="8" height="70" fill="#f6f1e6"/>
+    <rect x="230" y="330" width="8" height="70" fill="#f6f1e6"/>
+    <rect x="174" y="358" width="60" height="7" fill="#f6f1e6" fill-opacity="0.7"/>
+    <text x="205" y="150" text-anchor="middle" fill="#f6f1e6" font-size="15" font-weight="bold">1. ELIGIBILITY</text>
+    <text x="205" y="184" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">can this request go</text>
+    <text x="205" y="202" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">to any of these at all?</text>
+    <text x="205" y="450" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">residency, safety tier,</text>
+    <text x="205" y="468" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">contractual limits</text>
+  </g>
+
+  <!-- 2. Candidates: fanned card rack -->
+  <g font-family="monospace">
+    <rect x="470" y="330" width="70" height="90" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2" transform="rotate(-10 505 375)"/>
+    <rect x="480" y="330" width="70" height="90" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2" transform="rotate(0 515 375)"/>
+    <rect x="490" y="330" width="70" height="90" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2" transform="rotate(10 525 375)"/>
+    <text x="515" y="150" text-anchor="middle" fill="#f6f1e6" font-size="15" font-weight="bold">2. CANDIDATES</text>
+    <text x="515" y="184" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">which models can do</text>
+    <text x="515" y="202" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">this class of task well?</text>
+    <text x="515" y="450" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">task type, tool support,</text>
+    <text x="515" y="468" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">context length</text>
+  </g>
+
+  <!-- 3. Signal: needle gauge (emphasized) -->
+  <g font-family="monospace">
+    <path d="M830,400 L770,400 A60,60 0 0 1 890,400 Z" fill="#f4d44d" fill-opacity="0.15" stroke="#f4d44d" stroke-width="2"/>
+    <line x1="830" y1="400" x2="795" y2="352" stroke="#f4d44d" stroke-width="4"/>
+    <circle cx="830" cy="400" r="7" fill="#f4d44d"/>
+    <text x="830" y="130" text-anchor="middle" fill="#f4d44d" font-size="16" font-weight="bold">3. SIGNAL</text>
+    <text x="830" y="164" text-anchor="middle" fill="#f4d44d" font-size="12" opacity="0.9">what decides which</text>
+    <text x="830" y="182" text-anchor="middle" fill="#f4d44d" font-size="12" opacity="0.9">candidate serves this</text>
+    <text x="830" y="200" text-anchor="middle" fill="#f4d44d" font-size="12" opacity="0.9">one request?</text>
+    <text x="830" y="450" text-anchor="middle" fill="#f4d44d" font-size="10" opacity="0.7">cost-first, latency,</text>
+    <text x="830" y="468" text-anchor="middle" fill="#f4d44d" font-size="10" opacity="0.7">confidence, task class</text>
+  </g>
+
+  <!-- 4. Fallback: breaker lever -->
+  <g font-family="monospace">
+    <rect x="1105" y="335" width="70" height="90" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+    <circle cx="1140" cy="380" r="6" fill="#f6f1e6"/>
+    <line x1="1140" y1="380" x2="1163" y2="356" stroke="#f6f1e6" stroke-width="4"/>
+    <text x="1140" y="150" text-anchor="middle" fill="#f6f1e6" font-size="15" font-weight="bold">4. FALLBACK</text>
+    <text x="1140" y="184" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">what happens when the</text>
+    <text x="1140" y="202" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">chosen model fails?</text>
+    <text x="1140" y="450" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">ordered chain, circuit</text>
+    <text x="1140" y="468" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">breaker, safe default</text>
+  </g>
+
+  <!-- 5. Ledger: printer -->
+  <g font-family="monospace">
+    <rect x="1390" y="360" width="90" height="50" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <rect x="1405" y="330" width="60" height="34" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="1435" y="150" text-anchor="middle" fill="#f6f1e6" font-size="15" font-weight="bold">5. LEDGER</text>
+    <text x="1435" y="184" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">what gets recorded so</text>
+    <text x="1435" y="202" text-anchor="middle" fill="#f6f1e6" font-size="11" opacity="0.75">the decision is auditable?</text>
+    <text x="1435" y="450" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">tier, model, reason,</text>
+    <text x="1435" y="468" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.5">version, cost</text>
+  </g>
+
+  <text x="60" y="555" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">skipping the printer is the most common reason a routing regression gets blamed on the wrong model</text>
+</svg>

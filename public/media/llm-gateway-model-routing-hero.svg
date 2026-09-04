@@ -1,0 +1,51 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="lgmrHeroTitle lgmrHeroDesc">
+  <title id="lgmrHeroTitle">A patch panel with one physical cable plugged from the incoming request jack into the mid-tier model jack, the other two jacks left coiled and idle</title>
+  <desc id="lgmrHeroDesc">An illustration of an old-style telephone switchboard mounted with four jacks: one incoming request jack on the left and three model-tier jacks on the right, labeled cheap and fast, mid tier, and premium. A single curved cable is plugged from the request jack into the mid-tier jack. The cheap-and-fast and premium jacks sit idle with their cables coiled and hanging. Below the panel, a printed ledger slip records the tier, model, signal value, and reason for this one connection.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="90" y="66" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">LLM GATEWAY &amp; MODEL ROUTING</text>
+  <text x="90" y="94" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">one request, one plug, one recorded reason</text>
+
+  <!-- switchboard panel -->
+  <rect x="160" y="170" width="1280" height="420" fill="#161616" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2"/>
+  <g stroke="#f6f1e6" stroke-opacity="0.15">
+    <line x1="160" y1="230" x2="1440" y2="230"/>
+    <line x1="160" y1="530" x2="1440" y2="530"/>
+  </g>
+
+  <!-- input jack -->
+  <circle cx="260" cy="380" r="30" fill="#0a0a0a" stroke="#f6f1e6" stroke-width="3"/>
+  <circle cx="260" cy="380" r="10" fill="#f6f1e6"/>
+  <text x="260" y="440" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="12">REQUEST IN</text>
+  <text x="260" y="460" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="10" opacity="0.55">mixed billing + code intent</text>
+
+  <!-- output jacks -->
+  <circle cx="1340" cy="250" r="26" fill="#0a0a0a" stroke="#7fbf7f" stroke-width="3"/>
+  <text x="1250" y="230" text-anchor="middle" fill="#7fbf7f" font-family="monospace" font-size="13" font-weight="bold">CHEAP &amp; FAST</text>
+  <text x="1250" y="200" text-anchor="middle" fill="#7fbf7f" font-family="monospace" font-size="10" opacity="0.7">idle this request</text>
+  <path d="M1340 276 q 0 40 -40 46 q -40 6 -40 40" fill="none" stroke="#7fbf7f" stroke-opacity="0.4" stroke-width="4"/>
+
+  <circle cx="1340" cy="380" r="30" fill="#0a0a0a" stroke="#f4d44d" stroke-width="4"/>
+  <circle cx="1340" cy="380" r="10" fill="#f4d44d"/>
+  <text x="1340" y="440" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="13" font-weight="bold">MID TIER</text>
+  <text x="1340" y="460" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="10">plugged &#8212; this request</text>
+
+  <circle cx="1340" cy="510" r="26" fill="#0a0a0a" stroke="#e2694f" stroke-width="3"/>
+  <text x="1250" y="540" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="13" font-weight="bold">PREMIUM</text>
+  <text x="1250" y="565" text-anchor="middle" fill="#e2694f" font-family="monospace" font-size="10" opacity="0.7">idle this request</text>
+  <path d="M1340 484 q 0 -40 -40 -46 q -40 -6 -40 -40" fill="none" stroke="#e2694f" stroke-opacity="0.4" stroke-width="4"/>
+
+  <!-- the one live patch cable -->
+  <path d="M285 380 C 600 260, 900 500, 1310 380" fill="none" stroke="#f4d44d" stroke-width="6" stroke-linecap="round"/>
+  <path d="M285 380 C 600 260, 900 500, 1310 380" fill="none" stroke="#f6f1e6" stroke-opacity="0.25" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- ledger slip -->
+  <g transform="rotate(-1 800 760)">
+    <rect x="480" y="700" width="640" height="120" fill="#f6f1e6" stroke="#1a1a1a" stroke-width="2"/>
+    <text x="510" y="732" fill="#1a1a1a" font-family="monospace" font-size="12" font-weight="bold">ROUTING LEDGER</text>
+    <text x="510" y="758" fill="#1a1a1a" font-family="monospace" font-size="12">tier=MID &#183; model=provider-2-mid &#183; signal=0.62</text>
+    <text x="510" y="782" fill="#1a1a1a" font-family="monospace" font-size="12" opacity="0.75">reason: confidence below the cheap-tier cutoff</text>
+    <text x="510" y="804" fill="#1a1a1a" font-family="monospace" font-size="10" opacity="0.5">written before the model call, not after</text>
+  </g>
+
+  <text x="90" y="855" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">a quality regression can come from the model or from the plug that picked it &#8212; only the ledger can tell you which</text>
+</svg>
