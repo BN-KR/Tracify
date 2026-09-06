@@ -27,7 +27,7 @@ export function getOneTimeApiKey() {
 }
 
 export function hasOneTimeApiKey() {
-  return apiKey.length > 0;
+  return apiKey.length > 0 || (typeof window !== "undefined" && window.sessionStorage.getItem(ONE_TIME_API_KEY_STORAGE_KEY) !== null);
 }
 
 export function clearOneTimeApiKey() {

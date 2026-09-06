@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { isRegionAvailable, parseTracifyRegion, TRACIFY_REGION_COOKIE, TRACIFY_REGIONS } from "@/lib/regions";
+import { parseEntryIntent, safeRelativePath } from "@/lib/navigation-context";
 
 export function GET(request: NextRequest) {
   const regionId = parseTracifyRegion(request.nextUrl.searchParams.get("region"));
@@ -10,10 +11,10 @@ export function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/cloud", request.url));
   }
 
-  const requestedNext = request.nextUrl.searchParams.get("next");
-  const next = requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
-    ? requestedNext
-    : "/sign-in";
+  const next = safeRelativePath(request.nextUrl.searchParams.get("next"), "/sign-in");
+  const intent = parseEntryIntent(request.nextUrl.searchParams.get("intent"));
+  const destinationPath = new URL(next, "https://tracify.invalid");
+  if (intent) destinationPath.searchParams.set("intent", intent);
   // Selecting a region from a local marketing server must not jump to the live
   // regional host, or local sign-in lands on production. TRACIFY_LOCAL_CLOUD_ORIGIN
   // points at the locally running cloud host (see `npm run dev:cloud`).
@@ -22,7 +23,7 @@ export function GET(request: NextRequest) {
     (request.nextUrl.hostname === "localhost" || request.nextUrl.hostname === "127.0.0.1")
       ? (process.env.TRACIFY_LOCAL_CLOUD_ORIGIN ?? "http://localhost:4000")
       : null;
-  const destination = new URL(next, localCloudOrigin ?? TRACIFY_REGIONS[regionId].origin);
+  const destination = new URL(`${destinationPath.pathname}${destinationPath.search}`, localCloudOrigin ?? TRACIFY_REGIONS[regionId].origin);
   const response = NextResponse.redirect(destination);
   response.cookies.set(TRACIFY_REGION_COOKIE, regionId, {
     domain: request.nextUrl.hostname.endsWith("tracify.tech") ? ".tracify.tech" : undefined,

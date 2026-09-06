@@ -165,8 +165,8 @@ export function LeadGenerationExplorations() {
                 promote, and follow up.
               </p>
               <form
-                action="/contact"
-                method="get"
+                action="/api/leads"
+                method="post"
                 className="mt-8 flex max-w-[620px] flex-col border border-black sm:flex-row"
               >
                 <label className="sr-only" htmlFor="benchmark-email">

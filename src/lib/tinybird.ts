@@ -165,7 +165,12 @@ export async function getCostByModel(projectId: string, days = 30) {
       modelId,
       sum(costUsd)   AS totalCostUsd,
       count()        AS spanCount,
-      avg(latencyMs) AS avgLatencyMs
+      avg(latencyMs) AS avgLatencyMs,
+      quantile(0.50)(latencyMs) AS p50LatencyMs,
+      quantile(0.75)(latencyMs) AS p75LatencyMs,
+      quantile(0.90)(latencyMs) AS p90LatencyMs,
+      quantile(0.95)(latencyMs) AS p95LatencyMs,
+      quantile(0.99)(latencyMs) AS p99LatencyMs
     FROM spans
     WHERE projectId = '${projectId}'
       AND spanType = 'llm_call'
@@ -181,7 +186,7 @@ export async function getCostByModel(projectId: string, days = 30) {
     throw new Error(`Tinybird query failed: ${res.status} ${body}`);
   }
   const data = await res.json();
-  return data.data as { modelId: string; totalCostUsd: number; spanCount: number; avgLatencyMs: number }[];
+  return data.data as { modelId: string; totalCostUsd: number; spanCount: number; avgLatencyMs: number; p50LatencyMs: number; p75LatencyMs: number; p90LatencyMs: number; p95LatencyMs: number; p99LatencyMs: number }[];
 }
 
 /**

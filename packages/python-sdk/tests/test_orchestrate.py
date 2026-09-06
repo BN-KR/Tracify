@@ -142,6 +142,25 @@ class TestTracifyClient:
         assert payload["metadata"]["customKey"] == "customValue"
 
     @patch(MOCK_TARGET)
+    def test_client_context_is_added_to_ingested_payload(self, mock_http):
+        mock_http.return_value = MagicMock(status_code=202)
+        client = TracifyClient(
+            api_key="test-key",
+            release="release-42",
+            environment="production",
+            session_id="session-1",
+            tags=["checkout"],
+        )
+
+        client.ingest(runId="run-1", spanType="llm_call")
+
+        payload = mock_http.call_args.kwargs.get("json") or mock_http.call_args[1].get("json")
+        assert payload["release"] == "release-42"
+        assert payload["environment"] == "production"
+        assert payload["sessionId"] == "session-1"
+        assert payload["tags"] == ["checkout"]
+
+    @patch(MOCK_TARGET)
     def test_orchestrate_success_on_first_model(self, mock_http):
         mock_http.return_value = MagicMock(status_code=202)
         client = TracifyClient(api_key="test-key")

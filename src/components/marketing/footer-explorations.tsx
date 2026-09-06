@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Check, Code2, Rss } from "lucide-react";
+import { ArrowUpRight, Check, Code2, Rss } from "lucide-react";
+import { NewsletterCapture } from "@/components/marketing/newsletter-capture";
 
 const linkGroups = [
   { title: "Product", links: [["Trace viewer", "/product/trace-viewer"], ["Evaluation", "/product/evaluation-engine"], ["Cost analysis", "/product/cost-dashboard"], ["Lifecycle", "/product/lifecycle"], ["Pricing", "/pricing"]] },
@@ -23,14 +24,8 @@ function FooterLinks({ inverse = false, compact = false }: { inverse?: boolean; 
   );
 }
 
-function NewsletterForm({ inverse = false, buttonLabel = "Subscribe" }: { inverse?: boolean; buttonLabel?: string }) {
-  return (
-    <form action="/contact" method="get" className={`flex border ${inverse ? "border-black/25" : "border-white/25"}`}>
-      <label htmlFor={`newsletter-${inverse ? "light" : "dark"}-${buttonLabel.replaceAll(" ", "-")}`} className="sr-only">Work email for Tracify newsletter</label>
-      <input id={`newsletter-${inverse ? "light" : "dark"}-${buttonLabel.replaceAll(" ", "-")}`} name="email" type="email" autoComplete="email" required placeholder="you@company.com" className={`min-w-0 flex-1 bg-transparent px-4 py-3 font-mono text-[10px] outline-none placeholder:text-zinc-600 focus-visible:ring-1 focus-visible:ring-inset ${inverse ? "text-black focus-visible:ring-black" : "text-white focus-visible:ring-white"}`} />
-      <button type="submit" className={`inline-flex items-center gap-2 px-4 font-mono text-[9px] uppercase tracking-[0.13em] transition-colors ${inverse ? "bg-black text-white hover:bg-zinc-800" : "bg-white text-black hover:bg-zinc-200"}`}>{buttonLabel}<ArrowRight className="size-3" /></button>
-    </form>
-  );
+function NewsletterForm({ inverse = false }: { inverse?: boolean; buttonLabel?: string }) {
+  return <NewsletterCapture inverse={inverse} />;
 }
 
 function VariationLabel({ number, name, inverse = false }: { number: string; name: string; inverse?: boolean }) {

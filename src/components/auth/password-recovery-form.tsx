@@ -5,12 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { safeRelativePath, parseEntryIntent } from "@/lib/navigation-context";
 
 export function PasswordRecoveryForm({ mode }: { mode: "request" | "reset" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const invalidToken = searchParams.get("error") === "INVALID_TOKEN";
+  const returnPath = safeRelativePath(searchParams.get("redirect_url"), "/dashboard");
+  const intent = parseEntryIntent(searchParams.get("intent"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,7 +27,10 @@ export function PasswordRecoveryForm({ mode }: { mode: "request" | "reset" }) {
     setError("");
 
     if (mode === "request") {
-      const result = await authClient.requestPasswordReset({ email: email.trim(), redirectTo: new URL("/reset-password", window.location.origin).toString() });
+      const resetPath = new URL("/reset-password", window.location.origin);
+      resetPath.searchParams.set("redirect_url", returnPath);
+      if (intent) resetPath.searchParams.set("intent", intent);
+      const result = await authClient.requestPasswordReset({ email: email.trim(), redirectTo: resetPath.toString() });
       setPending(false);
       if (result.error) return setError(result.error.message || "We could not send the reset email.");
       setSent(true);
@@ -42,7 +48,11 @@ export function PasswordRecoveryForm({ mode }: { mode: "request" | "reset" }) {
     const result = await authClient.resetPassword({ newPassword: password, token });
     setPending(false);
     if (result.error) return setError(result.error.message || "We could not reset your password.");
-    router.push("/sign-in?reset=success");
+    const signIn = new URL("/sign-in", window.location.origin);
+    signIn.searchParams.set("reset", "success");
+    signIn.searchParams.set("redirect_url", returnPath);
+    if (intent) signIn.searchParams.set("intent", intent);
+    router.push(`${signIn.pathname}${signIn.search}`);
   }
 
   if (sent) return <Status title="Check your inbox" body="If an account exists for that email, a secure reset link is on its way. The link expires in one hour." />;
@@ -56,7 +66,7 @@ export function PasswordRecoveryForm({ mode }: { mode: "request" | "reset" }) {
         {(error || invalidToken) ? <p role="alert" className="border border-black bg-[#f4d44d] p-3 text-xs leading-5">{error || "This reset link is invalid or has expired."}</p> : null}
         <button disabled={pending || (mode === "request" ? !email.trim() : password.length < 8 || confirmPassword.length < 8 || !token || invalidToken)} className="active-press flex h-12 w-full items-center justify-between bg-black px-4 font-mono text-[10px] uppercase tracking-[0.13em] text-white transition-colors hover:bg-[#f4d44d] hover:text-black disabled:opacity-50"><span>{pending ? "Working…" : mode === "request" ? "Send reset link" : "Update password"}</span><ArrowRight className="size-4" /></button>
       </form>
-      <Link href="/sign-in" className="active-press mt-6 inline-flex min-h-11 items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-black/55 hover:text-black"><ArrowLeft className="size-3.5" /> Back to sign in</Link>
+      <Link href={`/sign-in?redirect_url=${encodeURIComponent(returnPath)}${intent ? `&intent=${intent}` : ""}`} className="active-press mt-6 inline-flex min-h-11 items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-black/55 hover:text-black"><ArrowLeft className="size-3.5" /> Back to sign in</Link>
     </div>
   );
 }

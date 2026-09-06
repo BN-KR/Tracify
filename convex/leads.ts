@@ -13,10 +13,12 @@ export const submit = mutation({
   },
   handler: async (ctx, args) => {
     if (args.dedupeKey) {
-      const existing = await ctx.db.query("leadSubmissions").withIndex("by_dedupeKey", (q) => q.eq("dedupeKey", args.dedupeKey)).unique();
-      if (existing && Date.now() - existing.createdAt < 10 * 60 * 1000) return existing._id;
+      const existing = await ctx.db.query("leadIdempotency").withIndex("by_key", (q) => q.eq("key", args.dedupeKey!)).unique();
+      if (existing && Date.now() - existing.createdAt < 10 * 60 * 1000) return existing.leadId;
     }
-    return ctx.db.insert("leadSubmissions", { ...args, status: "new", createdAt: Date.now() });
+    const leadId = await ctx.db.insert("leadSubmissions", { ...args, status: "new", internalEmailStatus: "pending", acknowledgementEmailStatus: "pending", createdAt: Date.now() });
+    if (args.dedupeKey) await ctx.db.insert("leadIdempotency", { key: args.dedupeKey, leadId, createdAt: Date.now() });
+    return leadId;
   },
 });
 
@@ -59,6 +61,21 @@ export const addNote = mutation({
     const lead = await ctx.db.get(args.leadId);
     if (!lead) throw new Error("Lead not found");
     return ctx.db.insert("leadNotes", { leadId: args.leadId, author: identity.email ?? identity.subject, body, createdAt: Date.now() });
+  },
+});
+
+export const recordDelivery = mutation({
+  args: {
+    deliverySecret: v.string(),
+    leadId: v.id("leadSubmissions"),
+    internalEmailStatus: v.union(v.literal("pending"), v.literal("sent"), v.literal("failed")),
+    acknowledgementEmailStatus: v.union(v.literal("pending"), v.literal("sent"), v.literal("failed")),
+    emailError: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    if (!process.env.TRACIFY_LEAD_DELIVERY_SECRET || args.deliverySecret !== process.env.TRACIFY_LEAD_DELIVERY_SECRET) throw new Error("Invalid delivery secret");
+    const { deliverySecret: _deliverySecret, leadId, ...delivery } = args;
+    await ctx.db.patch(leadId, delivery);
   },
 });
 

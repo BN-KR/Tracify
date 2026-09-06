@@ -1,8 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { AlertTriangle, ArrowUpRight, KeyRound, MailCheck, RotateCcw, ShieldCheck, UserPlus } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { BrandLogo } from "@/components/brand-logo";
-import { getTracifyRegion } from "@/lib/regions";
+import { getRegionForHostname, getTracifyRegion } from "@/lib/regions";
 
 type AuthMode = "sign-in" | "sign-up" | "forgot-password" | "reset-password" | "invitation" | "error";
 
@@ -18,7 +20,13 @@ const copy = {
 export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactNode }) {
   const modeCopy = copy[mode];
   const ModeIcon = modeCopy.icon;
-  const region = getTracifyRegion();
+  const [regionId, setRegionId] = useState(getTracifyRegion().id);
+  useEffect(() => {
+    // The host is only available in the browser; this replaces the deployment fallback after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRegionId(getRegionForHostname(window.location.host) ?? getTracifyRegion().id);
+  }, []);
+  const region = getTracifyRegion(regionId);
 
   return (
     <main className="min-h-screen bg-[#eceae3] text-black selection:bg-[#f4d44d]">
@@ -27,7 +35,7 @@ export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactN
           <BrandLogo />
         </Link>
         <div className="flex items-center gap-5">
-          <Link href={`https://www.tracify.tech/cloud?next=/${mode === "sign-up" ? "sign-up" : "sign-in"}`} className="font-mono text-[9px] uppercase tracking-[0.14em] hover:text-black/55">{region.flag} {region.shortName} region · Change</Link>
+          <Link href={`/cloud?next=/${mode === "sign-up" ? "sign-up" : "sign-in"}`} className="font-mono text-[9px] uppercase tracking-[0.14em] hover:text-black/55">{region.flag} {region.shortName} region · Change</Link>
           <Link href="https://www.tracify.tech" className="active-press hidden min-h-11 items-center gap-2 font-mono text-[9px] uppercase tracking-[0.14em] hover:text-black/55 sm:flex">
             Return to site <ArrowUpRight className="size-3.5" />
           </Link>

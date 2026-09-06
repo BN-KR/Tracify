@@ -81,6 +81,12 @@ class TracifyClient {
             throw new Error(`Tracify API key region mismatch: this key belongs to ${keyRegion.toUpperCase()}, but the client is configured for ${selectedHostRegion.toUpperCase()}.`);
         }
         this.projectId = config.projectId;
+        this.release = config.release;
+        this.environment = config.environment;
+        this.deploymentId = config.deploymentId;
+        this.sessionId = config.sessionId;
+        this.endUserId = config.endUserId;
+        this.tags = config.tags;
         this.ingestUrl = `${this.host}/api/ingest`;
         this.checkCostUrl = `${this.host}/api/orchestration/check-cost`;
     }
@@ -94,6 +100,12 @@ class TracifyClient {
             metadata: data.metadata || {},
             input: typeof data.input === 'string' ? data.input : JSON.stringify(data.input || ''),
             output: typeof data.output === 'string' ? data.output : JSON.stringify(data.output || ''),
+            release: data.release ?? this.release,
+            environment: data.environment ?? this.environment,
+            deploymentId: data.metadata?.deploymentId ?? this.deploymentId,
+            sessionId: data.sessionId ?? this.sessionId,
+            endUserId: data.endUserId ?? this.endUserId,
+            tags: data.tags ?? this.tags,
             ...data,
         };
         try {

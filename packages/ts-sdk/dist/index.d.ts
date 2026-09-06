@@ -4,6 +4,13 @@ export interface TracifyConfig {
     /** Tracify Cloud data region. Ignored when `host` is provided. Defaults to TRACIFY_REGION or EU. */
     region?: TracifyRegion;
     projectId?: string;
+    /** Release and environment are copied onto observations created by this client. */
+    release?: string;
+    environment?: string;
+    deploymentId?: string;
+    sessionId?: string;
+    endUserId?: string;
+    tags?: string[];
 }
 export type TracifyRegion = "eu" | "us";
 export declare const TRACIFY_REGION_HOSTS: Record<TracifyRegion, string>;
@@ -21,6 +28,7 @@ export interface SpanData {
     parentSpanId?: string;
     sessionId?: string;
     endUserId?: string;
+    deploymentId?: string;
     environment?: string;
     release?: string;
     tags?: string[];
@@ -88,6 +96,12 @@ export declare class TracifyClient {
     private checkCostUrl;
     private _lastFailOpen;
     private promptCache;
+    private release?;
+    private environment?;
+    private deploymentId?;
+    private sessionId?;
+    private endUserId?;
+    private tags?;
     constructor(config?: TracifyConfig);
     ingest(data: SpanData): Promise<void>;
     /** Resolve a prompt version labeled for an environment without redeploying application code. */

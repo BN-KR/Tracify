@@ -22,6 +22,7 @@ import { Id } from "../../../convex/_generated/dataModel";
 
 import { buttonVariants } from "@/components/ui/button";
 import { getOnboardingHref } from "@/lib/onboarding-navigation";
+import { getTracifyRegion } from "@/lib/regions";
 
 import { authClient } from "@/lib/auth-client";
 import { OrganizationSwitcher } from "@/components/auth/organization-switcher";
@@ -67,6 +68,9 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
     : usesRunsWindow
       ? "30d"
       : "7d";
+  const rangeValue = rangeContext.replace("d", "");
+  const environmentValue = environmentContext === "all environments" ? "all" : environmentContext;
+  const region = getTracifyRegion();
   const { data: session } = authClient.useSession();
   const { data: organization } = authClient.useActiveOrganization();
   const user = session?.user;
@@ -87,6 +91,12 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
   const initials = user?.name?.charAt(0) || user?.email?.charAt(0) || "U";
 
   const router = useRouter();
+
+  function updateDashboardQuery(key: "range" | "days" | "environment", value: string) {
+    const next = new URLSearchParams(searchParams.toString());
+    next.set(key, value);
+    router.push(`${pathname}?${next.toString()}`);
+  }
 
   const handleOnboardingClick = () => {
     setReturnPath(pathname);
@@ -112,7 +122,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
       : dashboardHref;
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-black/15 bg-[#f3f2ed] px-4 font-mono lg:px-6">
+    <header className="tracify-dashboard-topbar flex h-14 shrink-0 items-center justify-between border-b border-black/15 bg-[#f3f2ed] px-4 font-mono lg:px-6">
       <span className="sr-only">{title || "Dashboard"}{description ? `: ${description}` : ""}</span>
       <div className="flex min-w-0 items-center gap-4">
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-black/55">
@@ -149,6 +159,34 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
       </div>
 
       <div className="flex items-center gap-2 text-[12px] text-black/60">
+        <div className="tracify-topbar-controls hidden items-center gap-1 lg:flex">
+          <Link
+            href={`/cloud/region?next=${encodeURIComponent(pathname)}`}
+            className="tracify-topbar-region inline-flex h-8 items-center gap-1.5 border border-black/15 bg-white px-2.5 font-mono text-[10px] uppercase tracking-[0.08em] text-black/70 transition-colors hover:border-black hover:text-black"
+            title="Switch regional cloud"
+          >
+            <span aria-hidden="true">{region.flag}</span>
+            <span>{region.shortName} cloud</span>
+          </Link>
+          <label className="tracify-topbar-select">
+            <span className="sr-only">Dashboard time range</span>
+            <select aria-label="Dashboard time range" value={rangeValue} onChange={(event) => updateDashboardQuery(usesRunsWindow ? "days" : "range", event.target.value)}>
+              <option value="1">1d</option>
+              <option value="7">7d</option>
+              <option value="30">30d</option>
+              <option value="90">90d</option>
+            </select>
+          </label>
+          <label className="tracify-topbar-select">
+            <span className="sr-only">Environment</span>
+            <select aria-label="Environment" value={environmentValue} onChange={(event) => updateDashboardQuery("environment", event.target.value === "all" ? "all environments" : event.target.value)}>
+              <option value="all">All environments</option>
+              <option value="default">default</option>
+              <option value="production">production</option>
+            </select>
+          </label>
+          <button type="button" className="tracify-topbar-filter" onClick={() => window.dispatchEvent(new Event("tracify:toggle-dashboard-filters"))}>Filters</button>
+        </div>
         <DashboardCommandMenu projectId={projectId} />
         <OrganizationSwitcher />
         {!hasDismissedOnboarding() ? (

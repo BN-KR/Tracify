@@ -114,6 +114,20 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               }
             | {
                 data: {
+                  domain: string;
+                  domainVerificationToken?: null | string;
+                  domainVerified?: boolean;
+                  issuer: string;
+                  oidcConfig?: null | string;
+                  organizationId?: null | string;
+                  providerId: string;
+                  samlConfig?: null | string;
+                  userId?: null | string;
+                };
+                model: "ssoProvider";
+              }
+            | {
+                data: {
                   createdAt: number;
                   expiresAt?: null | number;
                   privateKey: string;
@@ -285,12 +299,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 where?: Array<{
                   connector?: "AND" | "OR";
                   field:
-                    | "name"
-                    | "slug"
-                    | "logo"
-                    | "createdAt"
-                    | "metadata"
-                    | "_id";
+                    "name" | "slug" | "logo" | "createdAt" | "metadata" | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
                     | "lt"
@@ -318,11 +327,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 where?: Array<{
                   connector?: "AND" | "OR";
                   field:
-                    | "organizationId"
-                    | "userId"
-                    | "role"
-                    | "createdAt"
-                    | "_id";
+                    "organizationId" | "userId" | "role" | "createdAt" | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
                     | "lt"
@@ -357,6 +362,43 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "expiresAt"
                     | "createdAt"
                     | "inviterId"
+                    | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
+                model: "ssoProvider";
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "issuer"
+                    | "domain"
+                    | "oidcConfig"
+                    | "samlConfig"
+                    | "userId"
+                    | "providerId"
+                    | "organizationId"
+                    | "domainVerified"
+                    | "domainVerificationToken"
                     | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
@@ -606,12 +648,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 where?: Array<{
                   connector?: "AND" | "OR";
                   field:
-                    | "name"
-                    | "slug"
-                    | "logo"
-                    | "createdAt"
-                    | "metadata"
-                    | "_id";
+                    "name" | "slug" | "logo" | "createdAt" | "metadata" | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
                     | "lt"
@@ -639,11 +676,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 where?: Array<{
                   connector?: "AND" | "OR";
                   field:
-                    | "organizationId"
-                    | "userId"
-                    | "role"
-                    | "createdAt"
-                    | "_id";
+                    "organizationId" | "userId" | "role" | "createdAt" | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
                     | "lt"
@@ -678,6 +711,43 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "expiresAt"
                     | "createdAt"
                     | "inviterId"
+                    | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
+                model: "ssoProvider";
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "issuer"
+                    | "domain"
+                    | "oidcConfig"
+                    | "samlConfig"
+                    | "userId"
+                    | "providerId"
+                    | "organizationId"
+                    | "domainVerified"
+                    | "domainVerificationToken"
                     | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
@@ -779,6 +849,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | "organization"
             | "member"
             | "invitation"
+            | "ssoProvider"
             | "jwks"
             | "rateLimit";
           offset?: number;
@@ -809,12 +880,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               | "starts_with"
               | "ends_with";
             value:
-              | string
-              | number
-              | boolean
-              | Array<string>
-              | Array<number>
-              | null;
+              string | number | boolean | Array<string> | Array<number> | null;
           }>;
         },
         any,
@@ -833,6 +899,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
             | "organization"
             | "member"
             | "invitation"
+            | "ssoProvider"
             | "jwks"
             | "rateLimit";
           select?: Array<string>;
@@ -853,12 +920,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
               | "starts_with"
               | "ends_with";
             value:
-              | string
-              | number
-              | boolean
-              | Array<string>
-              | Array<number>
-              | null;
+              string | number | boolean | Array<string> | Array<number> | null;
           }>;
         },
         any,
@@ -1065,12 +1127,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 where?: Array<{
                   connector?: "AND" | "OR";
                   field:
-                    | "name"
-                    | "slug"
-                    | "logo"
-                    | "createdAt"
-                    | "metadata"
-                    | "_id";
+                    "name" | "slug" | "logo" | "createdAt" | "metadata" | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
                     | "lt"
@@ -1104,11 +1161,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 where?: Array<{
                   connector?: "AND" | "OR";
                   field:
-                    | "organizationId"
-                    | "userId"
-                    | "role"
-                    | "createdAt"
-                    | "_id";
+                    "organizationId" | "userId" | "role" | "createdAt" | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
                     | "lt"
@@ -1152,6 +1205,54 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "expiresAt"
                     | "createdAt"
                     | "inviterId"
+                    | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
+                model: "ssoProvider";
+                update: {
+                  domain?: string;
+                  domainVerificationToken?: null | string;
+                  domainVerified?: boolean;
+                  issuer?: string;
+                  oidcConfig?: null | string;
+                  organizationId?: null | string;
+                  providerId?: string;
+                  samlConfig?: null | string;
+                  userId?: null | string;
+                };
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "issuer"
+                    | "domain"
+                    | "oidcConfig"
+                    | "samlConfig"
+                    | "userId"
+                    | "providerId"
+                    | "organizationId"
+                    | "domainVerified"
+                    | "domainVerificationToken"
                     | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
@@ -1455,12 +1556,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 where?: Array<{
                   connector?: "AND" | "OR";
                   field:
-                    | "name"
-                    | "slug"
-                    | "logo"
-                    | "createdAt"
-                    | "metadata"
-                    | "_id";
+                    "name" | "slug" | "logo" | "createdAt" | "metadata" | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
                     | "lt"
@@ -1494,11 +1590,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                 where?: Array<{
                   connector?: "AND" | "OR";
                   field:
-                    | "organizationId"
-                    | "userId"
-                    | "role"
-                    | "createdAt"
-                    | "_id";
+                    "organizationId" | "userId" | "role" | "createdAt" | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:
                     | "lt"
@@ -1542,6 +1634,54 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "expiresAt"
                     | "createdAt"
                     | "inviterId"
+                    | "_id";
+                  mode?: "sensitive" | "insensitive";
+                  operator?:
+                    | "lt"
+                    | "lte"
+                    | "gt"
+                    | "gte"
+                    | "eq"
+                    | "in"
+                    | "not_in"
+                    | "ne"
+                    | "contains"
+                    | "starts_with"
+                    | "ends_with";
+                  value:
+                    | string
+                    | number
+                    | boolean
+                    | Array<string>
+                    | Array<number>
+                    | null;
+                }>;
+              }
+            | {
+                model: "ssoProvider";
+                update: {
+                  domain?: string;
+                  domainVerificationToken?: null | string;
+                  domainVerified?: boolean;
+                  issuer?: string;
+                  oidcConfig?: null | string;
+                  organizationId?: null | string;
+                  providerId?: string;
+                  samlConfig?: null | string;
+                  userId?: null | string;
+                };
+                where?: Array<{
+                  connector?: "AND" | "OR";
+                  field:
+                    | "issuer"
+                    | "domain"
+                    | "oidcConfig"
+                    | "samlConfig"
+                    | "userId"
+                    | "providerId"
+                    | "organizationId"
+                    | "domainVerified"
+                    | "domainVerificationToken"
                     | "_id";
                   mode?: "sensitive" | "insensitive";
                   operator?:

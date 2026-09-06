@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getDoc, getDocs } from "./markdoc-docs.ts";
+import { getDoc, getDocs, getDocsMarkdownIndex, getPublicDocs } from "./markdoc-docs.ts";
 import { getAllPosts } from "./markdoc-blog.ts";
 
 test("public docs load from their dedicated Markdoc repository", () => {
@@ -10,4 +10,6 @@ test("public docs load from their dedicated Markdoc repository", () => {
   assert.equal(getDoc("quickstart")?.title, "Start with your first trace");
   assert.equal(getDoc("missing"), null);
   assert.ok(docs.every((doc) => !getAllPosts().some((post) => post.slug === doc.slug)));
+  assert.ok(getPublicDocs().every((doc) => !doc.noindex));
+  assert.ok(getDocsMarkdownIndex().includes("/docs/quickstart.md"));
 });

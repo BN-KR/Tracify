@@ -34,7 +34,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CancelRunButton } from "./cancel-run-button";
 import { useNow } from "@/hooks/use-now";
-import posthog from "posthog-js";
+import { captureAnalytics } from "@/lib/analytics";
 
 const isPostHogConfigured = Boolean(
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
@@ -616,7 +616,7 @@ function SpanCard({ span, index, projectId, replayActive, onSelect }: { span: Sp
       });
       setCommentContent("");
       if (isPostHogConfigured) {
-        posthog.capture("span_comment_added");
+        captureAnalytics("span_comment_added");
       }
     } catch (err) {
       console.error(err);

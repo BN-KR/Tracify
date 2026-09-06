@@ -10,11 +10,16 @@
     "deploy:tinybird:evaluation": "powershell -ExecutionPolicy Bypass -File scripts/deploy-evaluation-tinybird.ps1",
     "start": "next start",
     "lint": "eslint src convex scripts",
+    "typecheck": "tsc --noEmit",
     "validate:blog": "node .agents/skills/tracify-blog-tool/scripts/validate-blog-post.mjs",
     "test:blog-quality": "node --test .agents/skills/tracify-blog-tool/scripts/validate-blog-post.test.mjs",
-    "test:content": "node --test --experimental-strip-types src/lib/markdoc-blog.test.ts src/lib/blog-framework.test.ts src/lib/markdoc-docs.test.ts src/lib/blog-internal-links.test.ts src/components/blog/reading-time.test.ts scripts/lexical-to-markdoc.test.mjs scripts/blog-index-contract.test.mjs scripts/llms-txt-contract.test.mjs .agents/skills/tracify-blog-tool/scripts/validate-blog-post.test.mjs",
+    "test:content": "node --test --experimental-strip-types src/lib/markdoc-blog.test.ts src/lib/blog-framework.test.ts src/lib/markdoc-docs.test.ts src/lib/docs-search.test.ts src/lib/blog-internal-links.test.ts src/components/blog/reading-time.test.ts scripts/lexical-to-markdoc.test.mjs scripts/blog-index-contract.test.mjs scripts/llms-txt-contract.test.mjs .agents/skills/tracify-blog-tool/scripts/validate-blog-post.test.mjs",
     "test:activation": "node scripts/activation-contract.test.mjs",
     "test:regions": "node --test --experimental-strip-types src/lib/regions.test.ts",
+    "test:consent": "node --test --experimental-strip-types src/lib/consent.test.ts src/lib/analytics-lifecycle.test.ts",
+    "test:erpnext": "vitest run src/lib/erpnext.test.ts src/lib/integration-crypto.test.ts",
+    "test:leads": "playwright test tests/e2e/leads.spec.ts",
+    "test:convex:leads": "vitest run convex/leads.test.ts",
     "verify:regions": "node scripts/verify-regional-cloud.mjs",
     "test:sdk:ts": "npm test --prefix packages/ts-sdk",
     "test:sdk:python": "python -m pytest packages/python-sdk/tests -q",
@@ -26,7 +31,10 @@
     "verify:eu-trace": "node scripts/verify-eu-trace.mjs",
     "dev:marketing": "node scripts/dev-host.mjs marketing",
     "dev:cloud": "node scripts/dev-host.mjs cloud",
-    "publish:sdks": "node scripts/publish-sdks.mjs"
+    "publish:sdks": "node scripts/publish-sdks.mjs",
+    "release:metadata": "node scripts/release-metadata.mjs",
+    "validate:release-log": "node scripts/validate-release-log.mjs",
+    "prepare:m365-index": "node scripts/m365-file-index.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
@@ -61,14 +69,17 @@
     "yaml": "^2.9.0"
   },
   "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
     "@libsql/client": "^0.17.4",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "convex-test": "^0.0.56",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.11"
   }
 }

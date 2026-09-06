@@ -5,6 +5,7 @@ import { ConvexReactClient } from "convex/react";
 import { useEffect, useRef } from "react";
 import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
+import { CONSENT_EVENT, readConsent } from "@/lib/consent";
 
 // Auth and marketing routes do not need Convex. Avoid constructing a client
 // with an empty address so those routes remain usable when local/preview
@@ -23,14 +24,23 @@ function PostHogIdentity() {
   const identifiedUserId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (isPending || !isPostHogConfigured) return;
+    const handleConsent = (event: Event) => {
+      if (!(event as CustomEvent<{ analytics: boolean }>).detail.analytics) {
+        posthog.reset();
+        identifiedUserId.current = null;
+      }
+    };
+    window.addEventListener(CONSENT_EVENT, handleConsent);
+    if (isPending || !isPostHogConfigured || !readConsent().analytics) {
+      return () => window.removeEventListener(CONSENT_EVENT, handleConsent);
+    }
 
     if (!user) {
       if (identifiedUserId.current) {
         posthog.reset();
         identifiedUserId.current = null;
       }
-      return;
+      return () => window.removeEventListener(CONSENT_EVENT, handleConsent);
     }
 
     if (identifiedUserId.current && identifiedUserId.current !== user.id) {
@@ -42,6 +52,7 @@ function PostHogIdentity() {
       ...(user.name ? { name: user.name } : {}),
     });
     identifiedUserId.current = user.id;
+    return () => window.removeEventListener(CONSENT_EVENT, handleConsent);
   }, [isPending, user]);
 
   return null;

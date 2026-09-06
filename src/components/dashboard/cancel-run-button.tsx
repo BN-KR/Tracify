@@ -8,7 +8,7 @@ import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import posthog from "posthog-js";
+import { captureAnalytics } from "@/lib/analytics";
 
 const isPostHogConfigured = Boolean(
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
@@ -43,7 +43,7 @@ export function CancelRunButton({
       });
       setConfirming(false);
       if (isPostHogConfigured) {
-        posthog.capture("run_cancelled");
+        captureAnalytics("run_cancelled");
       }
     } catch (error) {
       console.error(error);

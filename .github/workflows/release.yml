@@ -1,0 +1,136 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Semantic version, for example 0.3.0"
+        required: true
+        type: string
+      dry_run:
+        description: "Validate and build without publishing or deploying"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: release-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify release source
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          git fetch origin main --depth=1
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          if git tag --list "v${RELEASE_VERSION}" | grep -q .; then
+            echo "Release tag already exists"
+            exit 1
+          fi
+      - name: Install application dependencies
+        run: npm ci --legacy-peer-deps
+      - name: Validate application
+        run: |
+          npm run test:activation
+          npm run test:regions
+          npm run test:content
+          npm run validate:release-log
+          npm run lint
+          npm run typecheck
+          npm run build
+      - name: Validate Convex generated bindings
+        run: npx.cmd convex codegen
+      - name: Verify generated bindings are committed
+        run: git diff --exit-code -- convex/_generated
+      - name: Validate TypeScript SDK
+        working-directory: packages/ts-sdk
+        run: |
+          npm ci --legacy-peer-deps
+          npm run build
+          npm test
+          npm pack --json > ../../artifacts-ts-pack.json
+      - name: Validate Python SDK
+        working-directory: packages/python-sdk
+        run: |
+          python -m pip install --upgrade build twine pytest
+          python -m pip install -e .
+          python -m pytest -q
+          python -m build
+          python -m twine check dist/*
+      - name: Generate release metadata
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          RELEASE_VERSION_CHECK: "true"
+          GITHUB_SHA: ${{ github.sha }}
+        run: node scripts/release-metadata.mjs
+      - name: Prepare SharePoint discovery index
+        run: npm run prepare:m365-index
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ inputs.version }}
+          path: |
+            artifacts/release-metadata.json
+            packages/ts-sdk/*.tgz
+            packages/python-sdk/dist/*
+          if-no-files-found: error
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: false
+
+  draft:
+    name: Create draft release
+    needs: validate
+    if: ${{ inputs.dry_run == false }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create draft GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          gh release create "v${VERSION}" --draft --target "$GITHUB_SHA" --title "v${VERSION}" --generate-notes
+
+  promote:
+    name: Production promotion
+    needs: draft
+    if: ${{ inputs.dry_run == false }}
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm exact release commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          target=$(gh release view "v${VERSION}" --json targetCommitish --jq .targetCommitish)
+          test "$target" = "$GITHUB_SHA"
+      - name: Publish release after deployment verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: gh release edit "v${VERSION}" --draft=false

@@ -1,4 +1,4 @@
-# Tracify
+# Tracify TypeScript SDK
 
 Observability and tracing for AI agents. Gain full visibility into your agent's decision-making process, tool usage, and LLM costs.
 
@@ -7,7 +7,7 @@ Observability and tracing for AI agents. Gain full visibility into your agent's 
 ```bash
 npm install tracify-sdk
 # or
-yarn add tracify
+yarn add tracify-sdk
 ```
 
 ## Quickstart
@@ -43,7 +43,7 @@ const agent = traceAgent(async (query: string) => {
   });
   
   return "Final Answer";
-});
+}, { environment: "development", release: "quickstart" });
 ```
 
 ## Features

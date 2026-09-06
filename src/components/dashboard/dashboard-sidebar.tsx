@@ -21,8 +21,9 @@ import {
   Terminal,
   Globe2,
   Zap,
+  Users,
 } from "lucide-react";
-import { useMemo, useState, type ComponentType } from "react";
+import { useEffect, useMemo, useState, type ComponentType } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProjectSwitcher } from "@/components/dashboard/project-switcher";
@@ -54,14 +55,16 @@ type NavGroup = {
 
 const GROUP_STORAGE_KEY = "tracify:dashboard-sidebar-groups";
 const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
-const COLLAPSED_WIDTH = 64;
-const EXPANDED_WIDTH = 240;
+// Matches the captured dashboard shell's 3rem collapsed rail.
+const COLLAPSED_WIDTH = 48;
+// Matches the captured dashboard shell's 11.5rem expanded sidebar.
+const EXPANDED_WIDTH = 184;
 
-function isActivePath(pathname: string, href: string, projectId: string) {
+function isActivePath(pathname: string, href: string, projectId: string, isPreview = false) {
   if (href.startsWith("http")) return false;
   const hrefPath = href.split("?")[0];
   if (hrefPath === `/dashboard/${projectId}`) {
-    return pathname === "/dashboard" || pathname === hrefPath;
+    return pathname === "/dashboard" || pathname === hrefPath || (isPreview && pathname.startsWith("/tracify-preview"));
   }
   return pathname === hrefPath || pathname.startsWith(`${hrefPath}/`);
 }
@@ -70,16 +73,19 @@ export function DashboardSidebar({
   canAccessContent,
   isCollapsed,
   onCollapsedChange,
+  projectIdOverride,
+  previewProjectName,
 }: {
   canAccessContent: boolean;
   isCollapsed: boolean;
   onCollapsedChange: (next: boolean) => void;
+  projectIdOverride?: string;
+  previewProjectName?: string;
 }) {
   const pathname = usePathname();
   const params = useParams();
-  const projectId = (params?.projectId as string) || "";
+  const projectId = projectIdOverride || (params?.projectId as string) || "";
   const projectDashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
-  const projectSetupHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
   const region = getTracifyRegion();
   const dynamicGroups = useMemo<NavGroup[]>(() => [
     {
@@ -87,19 +93,29 @@ export function DashboardSidebar({
       label: "Observe",
       items: [
         {
-          title: "Overview",
+          title: "Home",
           icon: LayoutDashboard,
           href: projectDashboardHref,
         },
         {
-          title: "Runs",
+          title: "Dashboards",
+          icon: LayoutDashboard,
+          href: projectId ? `/dashboard/${projectId}/dashboards` : "/dashboard/dashboards",
+        },
+        {
+          title: "Tracing",
           icon: Activity,
-          href: projectId ? `/dashboard/${projectId}/runs` : "/dashboard/runs",
+          href: projectId ? `/dashboard/${projectId}/tracing` : "/dashboard/runs",
         },
         {
           title: "Sessions",
           icon: Activity,
           href: projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions",
+        },
+        {
+          title: "Users",
+          icon: Users,
+          href: projectId ? `/dashboard/${projectId}/users` : "/dashboard/users",
         },
         {
           title: "Search",
@@ -139,14 +155,29 @@ export function DashboardSidebar({
       label: "Improve",
       items: [
         {
-          title: "Prompts",
+          title: "Prompt Management",
           icon: MessageSquareText,
-          href: projectId ? "/dashboard/" + projectId + "/prompts" : "/dashboard/prompts",
+          href: projectId ? "/dashboard/" + projectId + "/prompt-management" : "/dashboard/prompts",
         },
         {
           title: "Evaluation",
           icon: FlaskConical,
           href: projectId ? "/dashboard/" + projectId + "/evaluation" : "/dashboard/evaluation",
+        },
+        {
+          title: "Scores",
+          icon: BarChart3,
+          href: projectId ? `/dashboard/${projectId}/scores` : "/dashboard/evaluation",
+        },
+        {
+          title: "Evaluators",
+          icon: FlaskConical,
+          href: projectId ? `/dashboard/${projectId}/evaluators` : "/dashboard/evaluation",
+        },
+        {
+          title: "Human Annotation",
+          icon: MessageSquareText,
+          href: projectId ? `/dashboard/${projectId}/human-annotation` : "/dashboard/evaluation",
         },
         {
           title: "Datasets",
@@ -185,10 +216,19 @@ export function DashboardSidebar({
           href: projectId ? `/dashboard/${projectId}/alerts` : "/dashboard/alerts",
         },
         {
+          title: "Automations",
+          icon: Zap,
+          href: projectId ? `/dashboard/${projectId}/automations` : "/dashboard/automations",
+        },
+        {
+          title: "Operations",
+          icon: Globe2,
+          href: projectId ? `/dashboard/${projectId}/operations` : "/dashboard/operations",
+        },
+        {
           title: "Integrations",
           icon: Terminal,
-          href: "/integrations",
-          external: true,
+          href: projectId ? `/dashboard/${projectId}/settings/integrations` : "/integrations",
         },
       ],
     },
@@ -221,6 +261,16 @@ export function DashboardSidebar({
           icon: FileText,
           href: projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing",
         },
+        {
+          title: "Widget library",
+          icon: Settings2,
+          href: projectId ? `/dashboard/${projectId}/widgets` : "/dashboard/widgets",
+        },
+        {
+          title: "Upgrade Plan",
+          icon: Zap,
+          href: projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing",
+        },
       ],
     },
     {
@@ -239,6 +289,12 @@ export function DashboardSidebar({
           external: true,
         },
         {
+          title: "Support",
+          icon: MessageSquareText,
+          href: "/contact",
+          external: true,
+        },
+        {
           title: "Roadmap",
           icon: FileText,
           href: "/roadmap",
@@ -251,7 +307,7 @@ export function DashboardSidebar({
           : []),
       ],
     },
-  ], [canAccessContent, projectDashboardHref, projectId, projectSetupHref]);
+  ], [canAccessContent, projectDashboardHref, projectId]);
 
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
     if (typeof window === "undefined") {
@@ -280,6 +336,12 @@ export function DashboardSidebar({
   function toggleCollapsed() {
     onCollapsedChange(!isCollapsed);
   }
+
+  useEffect(() => {
+    function onShellToggle() { onCollapsedChange(!isCollapsed); }
+    window.addEventListener("tracify:toggle-sidebar", onShellToggle);
+    return () => window.removeEventListener("tracify:toggle-sidebar", onShellToggle);
+  }, [isCollapsed, onCollapsedChange]);
 
   function expandSidebar(groupId?: GroupId) {
     if (groupId) {
@@ -310,13 +372,13 @@ export function DashboardSidebar({
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-30 flex flex-col border-r border-black/15 bg-white transition-[width] duration-150 ease-out motion-reduce:transition-none",
+        "tracify-shell-sidebar fixed inset-y-0 left-0 z-30 flex flex-col border-r border-black/15 bg-white transition-[width] duration-150 ease-out motion-reduce:transition-none",
       )}
       style={{ width: visualWidth }}
     >
       <div
         className={cn(
-          "flex h-[60px] items-center border-b border-black/15",
+          "flex h-11 items-center border-b border-black/15",
           showExpandedContent ? "justify-between px-4" : "justify-center px-0",
         )}
       >
@@ -352,10 +414,22 @@ export function DashboardSidebar({
         </Tooltip>
       </div>
       <div className="border-b border-black/15 p-3">
-        <ProjectSwitcher isCollapsed={!showExpandedContent} />
+        <ProjectSwitcher isCollapsed={!showExpandedContent} previewProjectName={previewProjectName} />
       </div>
 
       <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4 scrollbar-hide">
+        <button
+          type="button"
+          aria-label="Go to"
+          onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}
+          className={cn(
+            "mb-4 flex h-8 w-full items-center gap-2 border border-transparent px-2 text-left font-mono text-[12px] text-black/70 transition-colors hover:border-black/15 hover:bg-[#f3f2ed] hover:text-black",
+            !showExpandedContent && "justify-center px-0",
+          )}
+        >
+          <Search className="size-4 shrink-0" />
+          {showExpandedContent ? <><span className="truncate">Go to...</span><kbd className="ml-auto border border-black/15 px-1.5 py-0.5 text-[9px] leading-none text-black/50">Ctrl K</kbd></> : null}
+        </button>
         {dynamicGroups.map((group) => (
           <SidebarGroup
             key={group.id}
@@ -364,6 +438,7 @@ export function DashboardSidebar({
             isOpen={openGroups[group.id]}
             pathname={pathname}
             projectId={projectId}
+            isPreview={Boolean(projectIdOverride)}
             onToggle={() => toggleGroup(group.id)}
             onNavClick={(href) => {
               const navGroup = dynamicGroups.find((group) => group.items.some((item) => item.href === href));
@@ -392,6 +467,7 @@ function SidebarGroup({
   isOpen,
   pathname,
   projectId,
+  isPreview,
   onToggle,
   onNavClick,
 }: {
@@ -400,11 +476,12 @@ function SidebarGroup({
   isOpen: boolean;
   pathname: string;
   projectId: string;
+  isPreview: boolean;
   onToggle: () => void;
   onNavClick: (href: string) => void;
 }) {
   const hasActiveItem = group.items.some((item) =>
-    isActivePath(pathname, item.href, projectId),
+    isActivePath(pathname, item.href, projectId, isPreview),
   );
   const isVisuallyOpen = isOpen || hasActiveItem;
   const visibleItems = useMemo(
@@ -441,7 +518,7 @@ function SidebarGroup({
               key={item.title}
               item={item}
               showExpandedContent={showExpandedContent}
-              isActive={isActivePath(pathname, item.href, projectId)}
+              isActive={isActivePath(pathname, item.href, projectId, isPreview)}
               onNavClick={() => onNavClick(item.href)}
             />
           ))}

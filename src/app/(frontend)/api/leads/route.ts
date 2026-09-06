@@ -13,23 +13,40 @@ export async function POST(request: NextRequest) {
   try {
     const contentType = request.headers.get("content-type") || "";
     if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) { body = Object.fromEntries((await request.formData()).entries()); browserForm = true; }
-    else body = await request.json();
+    else {
+      const parsed = await request.json();
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Invalid body");
+      body = parsed as Record<string, unknown>;
+    }
   } catch { return NextResponse.json({ error: "Invalid request" }, { status: 422 }); }
+  if (JSON.stringify(body).length > 16_000) return browserForm ? NextResponse.redirect(new URL("/contact?submitted=error", request.url)) : NextResponse.json({ error: "Invalid request" }, { status: 422 });
   if (clean(body.website)) return NextResponse.json({ ok: true });
-  if (Object.entries(limits).some(([key, max]) => typeof body[key] === "string" && clean(body[key]).length > max)) return browserForm ? NextResponse.redirect(new URL("/contact?submitted=error", request.url)) : NextResponse.json({ error: "Invalid request" }, { status: 422 });
+  if (Object.entries(body).some(([key, value]) => key !== "website" && key !== "marketingConsent" && typeof value !== "string") || Object.entries(limits).some(([key, max]) => typeof body[key] === "string" && clean(body[key]).length > max)) return browserForm ? NextResponse.redirect(new URL("/contact?submitted=error", request.url)) : NextResponse.json({ error: "Invalid request" }, { status: 422 });
   const name = clean(body.name) || "Newsletter subscriber", email = clean(body.email).toLowerCase(), message = clean(body.message) || (clean(body.intent) === "newsletter" ? "Newsletter subscription" : "Contact request");
   if (!email || !/^\S+@\S+\.\S+$/.test(email) || (!clean(body.intent) && !clean(body.message))) return browserForm ? NextResponse.redirect(new URL("/contact?submitted=error", request.url)) : NextResponse.json({ error: "Invalid request" }, { status: 422 });
   const sourcePath = clean(body.sourcePath) || "/contact";
   const dedupeKey = createHash("sha256").update(`${email}|${sourcePath}|${message}`).digest("hex").slice(0, 32);
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const rate = await consumeRateLimit(`tracify:lead:${ip}`, 1, 5, 600);
+    let rate = { allowed: true };
+    try { rate = await consumeRateLimit(`tracify:lead:${ip}`, 1, 5, 600); } catch { /* Redis is optional for local development. */ }
     if (!rate.allowed) return NextResponse.json({ error: "Please try again later" }, { status: 429 });
-    const leadId = await getConvexClient().mutation(api.leads.submit, { name, email, company: clean(body.company) || undefined, intent: clean(body.intent) || "contact", role: clean(body.role) || undefined, useCase: clean(body.useCase) || undefined, stack: clean(body.stack) || undefined, message, preferredTime: clean(body.preferredTime) || undefined, marketingConsent: body.marketingConsent === true, sourcePath, campaign: clean(body.campaign) || undefined, dedupeKey });
+    const intent = clean(body.intent) || "contact";
+    const marketingConsent = body.marketingConsent === true || clean(body.marketingConsent).toLowerCase() === "true" || intent === "newsletter";
+    const leadId = await getConvexClient().mutation(api.leads.submit, { name, email, company: clean(body.company) || undefined, intent, role: clean(body.role) || undefined, useCase: clean(body.useCase) || undefined, stack: clean(body.stack) || undefined, message, preferredTime: clean(body.preferredTime) || undefined, marketingConsent, sourcePath, campaign: clean(body.campaign) || undefined, dedupeKey });
     const escape = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
-    const text = `New Tracify lead\n\n${name}\nSource: ${sourcePath}`;
-    await sendTransactionalEmail({ to: process.env.LEADS_TO_EMAIL || "hello@tracify.tech", subject: "[Tracify lead] New request", text, html: `<h2>New Tracify lead</h2><p><strong>${escape(name)}</strong></p><p>${escape(message).replaceAll("\n", "<br>")}</p><p>Source: ${escape(sourcePath)}</p>`, idempotencyKey: `lead-${leadId}` }).catch(() => undefined);
-    await sendTransactionalEmail({ to: email, subject: "We received your Tracify request", text: "Thanks—we received your request and usually reply within one business day.", html: "<p>Thanks—we received your request and usually reply within one business day.</p>", idempotencyKey: `lead-ack-${leadId}` }).catch(() => undefined);
+    const text = `New Tracify lead\n\n${name} <${email}>\nSource: ${sourcePath}`;
+    let internalEmailStatus: "sent" | "failed" = "sent";
+    let acknowledgementEmailStatus: "pending" | "sent" | "failed" = "pending";
+    let emailError: string | undefined;
+    try {
+      await sendTransactionalEmail({ to: process.env.LEADS_TO_EMAIL || "hello@tracify.tech", subject: "[Tracify lead] New request", text, html: `<h2>New Tracify lead</h2><p><strong>${escape(name)}</strong> &lt;${escape(email)}&gt;</p><p>${escape(message).replaceAll("\n", "<br>")}</p><p>Source: ${escape(sourcePath)}</p>`, replyTo: email, idempotencyKey: `lead-${leadId}` });
+    } catch (error) { internalEmailStatus = "failed"; emailError = error instanceof Error ? error.message.slice(0, 200) : "provider failure"; }
+    if (body.marketingConsent === true || clean(body.marketingConsent).toLowerCase() === "true") {
+      try { await sendTransactionalEmail({ to: email, subject: "We received your Tracify request", text: "Thanks—we received your request and usually reply within one business day.", html: "<p>Thanks—we received your request and usually reply within one business day.</p>", idempotencyKey: `lead-ack-${leadId}` }); } catch (error) { acknowledgementEmailStatus = "failed"; emailError ??= error instanceof Error ? error.message.slice(0, 200) : "provider failure"; }
+    } else { acknowledgementEmailStatus = "pending"; }
+    if (internalEmailStatus === "failed" || acknowledgementEmailStatus === "failed") console.error("Lead email delivery failed", { leadId, internalEmailStatus, acknowledgementEmailStatus, error: emailError });
+    if (process.env.TRACIFY_LEAD_DELIVERY_SECRET) await getConvexClient().mutation(api.leads.recordDelivery, { deliverySecret: process.env.TRACIFY_LEAD_DELIVERY_SECRET, leadId, internalEmailStatus, acknowledgementEmailStatus, emailError });
     return browserForm ? NextResponse.redirect(new URL("/contact?submitted=success", request.url)) : NextResponse.json({ ok: true });
   } catch { return NextResponse.json({ error: "Unable to submit" }, { status: 503 }); }
 }

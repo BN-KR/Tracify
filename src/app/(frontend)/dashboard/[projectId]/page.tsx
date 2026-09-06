@@ -1,5 +1,4 @@
 import { ProjectDashboardContent } from "@/components/dashboard/project-dashboard-content";
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 
 export default async function ProjectDashboardPage({
   params,
@@ -8,12 +7,5 @@ export default async function ProjectDashboardPage({
 }) {
   const { projectId } = await params;
 
-  return (
-    <div className="flex flex-col gap-6">
-      <DashboardTopbar title="Overview" />
-      <div className="px-6 pb-10">
-        <ProjectDashboardContent projectId={projectId} />
-      </div>
-    </div>
-  );
+  return <ProjectDashboardContent projectId={projectId} />;
 }

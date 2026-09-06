@@ -430,7 +430,7 @@ export function NavigationSystemExplorations({
                 Install, trace, and inspect without rebuilding your agent stack.
               </p>
               <div className="mt-10">
-                <TextLink href="/docs">Read quickstart</TextLink>
+                <TextLink href="/docs/quickstart">Read quickstart</TextLink>
               </div>
             </div>
             <div className="bg-black p-6 font-mono text-[12px] leading-7 text-white/80 md:p-9">
@@ -641,8 +641,8 @@ export function NavigationSystemExplorations({
                   The operating record for the agents your team ships.
                 </p>
                 <form
-                  action="/contact"
-                  method="get"
+                  action="/api/leads"
+                  method="post"
                   className="mt-7 flex max-w-md border border-black/25 bg-white"
                 >
                   <input type="hidden" name="intent" value="newsletter" />
@@ -689,7 +689,7 @@ export function NavigationSystemExplorations({
                     [
                       "Developers",
                       [
-                        ["Docs", "/docs"],
+                        ["Docs", "/docs/quickstart"],
                         ["Quickstart", "/docs/typescript"],
                         ["API reference", "/docs/api"],
                       ],

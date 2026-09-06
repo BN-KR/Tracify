@@ -1,9 +1,21 @@
 export const CONSENT_VERSION = "2026-09-02";
 export type ConsentState = { version: string; analytics: boolean; marketing: boolean };
 export const CONSENT_KEY = "tracify.consent";
-// Analytics is enabled by default for a frictionless product experience. Users
-// can reject it from the banner or reopen preferences from the privacy footer.
+// Analytics is enabled by default; marketing remains opt-in. Users can reject analytics from the banner.
 export const defaultConsent: ConsentState = { version: CONSENT_VERSION, analytics: true, marketing: false };
+
+export const CONSENT_EVENT = "tracify:consent" as const;
+export type ConsentEvent = CustomEvent<ConsentState>;
+
+export function hasCurrentConsent(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = window.localStorage.getItem(CONSENT_KEY);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw) as Partial<ConsentState>;
+    return parsed?.version === CONSENT_VERSION && typeof parsed.analytics === "boolean" && typeof parsed.marketing === "boolean";
+  } catch { return false; }
+}
 
 export function readConsent(): ConsentState {
   if (typeof window === "undefined") return defaultConsent;
@@ -16,7 +28,7 @@ export function readConsent(): ConsentState {
 
 export function writeConsent(value: Omit<ConsentState, "version">) {
   const next = { version: CONSENT_VERSION, ...value };
-  window.localStorage.setItem(CONSENT_KEY, JSON.stringify(next));
-  window.dispatchEvent(new CustomEvent("tracify:consent", { detail: next }));
+  try { window.localStorage.setItem(CONSENT_KEY, JSON.stringify(next)); } catch { /* private browsing / blocked storage */ }
+  window.dispatchEvent(new CustomEvent<ConsentState>(CONSENT_EVENT, { detail: next }));
   return next;
 }

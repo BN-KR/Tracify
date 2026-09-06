@@ -1,34 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Database, Globe2, ShieldCheck } from "lucide-react";
+import { ArrowRight, Database, Globe2, ShieldCheck, Sparkles, Wrench } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
-import { getAvailableRegions } from "@/lib/regions";
 
 export const metadata: Metadata = {
-  title: "Select your Tracify Cloud region",
-  description: "Choose the Tracify Cloud region where your account and telemetry will be stored.",
+  title: "Explore or build with Tracify",
+  description: "Explore a simulated Tracify workspace or choose a region for a real project.",
   alternates: { canonical: "/cloud" },
   robots: { index: false, follow: false },
 };
 
-export default async function CloudRegionPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ next?: string }>;
-}) {
-  const requestedNext = (await searchParams).next;
-  const next = requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
-    ? requestedNext
-    : "/sign-in";
-  const regions = getAvailableRegions();
-
+export default function CloudRegionPage() {
   return (
     <main className="min-h-screen bg-[#eceae3] text-black selection:bg-[#f4d44d]">
       <header className="flex h-[54px] items-center justify-between border-b border-black px-5 md:px-8">
         <Link href="https://www.tracify.tech" aria-label="Tracify home">
           <BrandLogo />
         </Link>
-        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/45">Cloud directory / {String(regions.length).padStart(2, "0")} {regions.length === 1 ? "region" : "regions"}</span>
+        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/45">Cloud directory / step 01 of 02</span>
       </header>
 
       <div className="mx-auto grid min-h-[calc(100vh-54px)] max-w-[1440px] lg:grid-cols-[minmax(320px,0.72fr)_minmax(0,1.28fr)]">
@@ -37,8 +26,8 @@ export default async function CloudRegionPage({
             <span>Regional cloud</span><Globe2 className="size-5 text-[#f4d44d]" />
           </div>
           <div className="my-14 lg:my-0">
-            <h1 className="max-w-3xl font-pixel text-[clamp(4rem,7vw,7.5rem)] leading-[0.8] tracking-[-0.075em]">Select your region.</h1>
-            <p className="mt-8 max-w-xl text-base leading-7 text-white/60">Choose where Tracify stores your account, projects, API keys, and agent telemetry.</p>
+            <h1 className="max-w-3xl font-pixel text-[clamp(4rem,7vw,7.5rem)] leading-[0.8] tracking-[-0.075em]">Choose your path.</h1>
+            <p className="mt-8 max-w-xl text-base leading-7 text-white/60">Explore the product with realistic simulated traces, or build a real project in a regional cloud.</p>
           </div>
           <div className="border-t border-white/20 pt-5 text-xs leading-6 text-white/55">Regions are isolated. Choosing another region does not move an existing account or its data.</div>
         </aside>
@@ -50,23 +39,22 @@ export default async function CloudRegionPage({
               <Fact icon={ShieldCheck} label="Regional boundary" />
               <Fact icon={Globe2} label="Closer access" />
             </div>
-            <div className="border border-black bg-white">
-              {regions.map((region) => (
-                <Link
-                  key={region.id}
-                  href={`/api/region/select?region=${region.id}&next=${encodeURIComponent(next)}`}
-                  className="group grid min-h-32 grid-cols-[64px_1fr_auto] items-center gap-4 border-b border-black p-5 last:border-b-0 hover:bg-[#f4d44d] sm:grid-cols-[80px_1fr_auto] sm:p-7"
-                >
-                  <span className="text-3xl" aria-hidden="true">{region.flag}</span>
-                  <span>
-                    <span className="block font-pixel text-4xl leading-none tracking-[-0.055em]">{region.name}</span>
-                    <span className="mt-3 block font-mono text-[9px] uppercase tracking-[0.1em] text-black/50">{region.hostname} · {region.location} · {region.infrastructure}</span>
-                  </span>
-                  <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
-                </Link>
-              ))}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Link href="/cloud/region?next=%2Fplayground&intent=explore" className="group border border-black bg-[#f4d44d] p-6 hover:bg-black hover:text-white">
+                <Sparkles className="size-7" />
+                <span className="mt-12 block font-pixel text-4xl leading-none tracking-[-0.055em]">Explore</span>
+                <span className="mt-4 block text-sm leading-6 text-black/65 group-hover:text-white/65">Open a private, populated playground. No region or real telemetry required.</span>
+                <span className="mt-8 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em]">Choose region <ArrowRight className="size-4" /></span>
+              </Link>
+              <Link href="/cloud/region?next=%2Fsign-up&intent=build" className="group border border-black bg-white p-6 hover:bg-[#f4d44d]">
+                <Wrench className="size-7" />
+                <span className="mt-12 block font-pixel text-4xl leading-none tracking-[-0.055em]">Build</span>
+                <span className="mt-4 block text-sm leading-6 text-black/65">Create a real project, API key, and regional telemetry boundary.</span>
+                <span className="mt-8 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em]">Choose region <ArrowRight className="size-4" /></span>
+              </Link>
             </div>
-            <p className="mt-6 text-sm leading-6 text-black/55">Already have an account? Select the region where you created it. Accounts and credentials are not shared between regions.</p>
+            <p className="mt-6 text-sm leading-6 text-black/55">Your choice is saved for the next step. Explore uses simulated data; Build creates a real project and regional telemetry boundary.</p>
+            {process.env.NODE_ENV !== "production" ? <div className="mt-5 flex flex-wrap gap-3"><Link href="/tracify-preview?ui=tracify-v2" className="inline-flex items-center gap-2 border border-black bg-black px-4 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black">Preview Tracify theme <ArrowRight className="size-4" /></Link><Link href="/tracify-preview?ui=legacy" className="inline-flex items-center gap-2 border border-black px-4 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white">Preview legacy theme <ArrowRight className="size-4" /></Link><Link href="/tracify-preview?edit=1&ui=tracify-v2" className="inline-flex items-center gap-2 border border-black px-4 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white">Preview branded editor <ArrowRight className="size-4" /></Link><Link href="/tracing-preview" className="inline-flex items-center gap-2 border border-black px-4 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white">Preview tracing <ArrowRight className="size-4" /></Link><Link href="/operations-preview" className="inline-flex items-center gap-2 border border-black px-4 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-black hover:bg-black hover:text-white">Preview operations <ArrowRight className="size-4" /></Link></div> : null}
           </div>
         </section>
       </div>

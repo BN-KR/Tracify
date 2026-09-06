@@ -29,6 +29,9 @@ export default defineSchema({
     apiKeyStatus: v.optional(v.union(v.literal("active"), v.literal("revoked"))),
     apiKeyCreatedAt: v.optional(v.number()),
     apiKeyLastUsedAt: v.optional(v.number()),
+    onboardingStep: v.optional(v.union(v.literal("project"), v.literal("api-key"), v.literal("install"), v.literal("waiting"), v.literal("success"))),
+    onboardingDismissedAt: v.optional(v.number()),
+    onboardingSdk: v.optional(v.union(v.literal("python"), v.literal("typescript"))),
     costThresholdUsd: v.optional(v.number()),
     maxDurationSeconds: v.optional(v.number()),
     maxStallMinutes: v.optional(v.number()),
@@ -121,6 +124,41 @@ export default defineSchema({
     .index("by_projectId", ["projectId"])
     .index("by_runId", ["runId"]),
 
+  automations: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    eventSource: v.string(),
+    actionType: v.string(),
+    destination: v.string(),
+    active: v.boolean(),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_projectId_and_name", ["projectId", "name"]),
+
+  dashboardConfigs: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    isDefault: v.boolean(),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_projectId_and_name", ["projectId", "name"]),
+
+  dashboardWidgets: defineTable({
+    dashboardId: v.id("dashboardConfigs"),
+    projectId: v.id("projects"),
+    widgetType: v.string(),
+    position: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_dashboardId", ["dashboardId"])
+    .index("by_projectId", ["projectId"]),
+
   comments: defineTable({
     spanId: v.string(), // Tinybird spanId
     projectId: v.id("projects"),
@@ -147,6 +185,11 @@ export default defineSchema({
       totalCostUsd: v.number(),
       spanCount: v.number(),
       avgLatencyMs: v.optional(v.number()),
+      p50LatencyMs: v.optional(v.number()),
+      p75LatencyMs: v.optional(v.number()),
+      p90LatencyMs: v.optional(v.number()),
+      p95LatencyMs: v.optional(v.number()),
+      p99LatencyMs: v.optional(v.number()),
     })),
     toolCosts: v.optional(v.array(v.object({
       toolName: v.string(),
@@ -584,6 +627,10 @@ export default defineSchema({
     dedupeKey: v.optional(v.string()),
     status: v.union(v.literal("new"), v.literal("contacted"), v.literal("qualified"), v.literal("converted"), v.literal("closed")),
     assignedTo: v.optional(v.string()),
+    // Optional for backwards compatibility with submissions created before delivery tracking was added.
+    internalEmailStatus: v.optional(v.union(v.literal("pending"), v.literal("sent"), v.literal("failed"))),
+    acknowledgementEmailStatus: v.optional(v.union(v.literal("pending"), v.literal("sent"), v.literal("failed"))),
+    emailError: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_createdAt", ["createdAt"])
@@ -600,10 +647,37 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_leadId", ["leadId"]),
 
+  leadIdempotency: defineTable({
+    key: v.string(),
+    leadId: v.id("leadSubmissions"),
+    createdAt: v.number(),
+  }).index("by_key", ["key"]),
+
   notificationPreferences: defineTable({
     userKey: v.string(),
     operational: v.boolean(),
     product: v.boolean(),
+    updatedAt: v.number(),
+  }).index("by_userKey", ["userKey"]),
+
+  auditLogs: defineTable({
+    projectId: v.id("projects"),
+    actorId: v.string(),
+    actorEmail: v.optional(v.string()),
+    action: v.string(),
+    resource: v.string(),
+    summary: v.string(),
+    metadata: v.optional(v.record(v.string(), v.string())),
+    createdAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_projectId_and_createdAt", ["projectId", "createdAt"]),
+
+  sandboxWorkspaces: defineTable({
+    userKey: v.string(),
+    fixtureVersion: v.string(),
+    scenarioId: v.string(),
+    dismissedAlertIds: v.array(v.string()),
     updatedAt: v.number(),
   }).index("by_userKey", ["userKey"]),
 });
