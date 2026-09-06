@@ -1861,3 +1861,9 @@
 - TypeScript, focused ESLint, and local preview HTTP checks pass for both theme URLs on ports 3000 and 4000.
 - Extended the branded shell treatment beyond Home so the shared sidebar and top bar receive the same Tracify accent on dashboard routes; overview chart color overrides remain scoped to the overview surface.
 - Revalidated TypeScript, focused ESLint, and both local/EU preview URLs after the shell-scope correction.
+
+## 2026-09-07 — Account-flow deployment recovery
+
+- Standardized Vercel and the activation workflow on the committed pnpm lockfile, declared the root Playwright dependency, and restored green marketing and EU cloud builds.
+- Deployed the matching Convex schema/functions to production and corrected the EU cloud `NEXT_PUBLIC_CONVEX_URL` to the verified production deployment.
+- The Explore flow uses a stable simulated user identifier in the URL and workspace banner so the playground reads like a real account while remaining isolated from production telemetry.

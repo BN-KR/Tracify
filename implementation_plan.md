@@ -1411,3 +1411,4 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 77. Verify the production build artifact and regional runtime URLs after the final editor mutations.
 78. Preserve final handoff links and document the remaining backend expansion points.
 79. Add a reversible Tracify-branded dashboard presentation layer with legacy/v2 preview controls while preserving existing functionality.
+80. Keep the Explore and region choices as separate steps, carry a stable simulated user ID into the playground URL, and verify the production Vercel and Convex deployments before release.

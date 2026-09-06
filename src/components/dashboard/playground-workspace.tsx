@@ -5,7 +5,9 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { Activity, ArrowRight, BarChart3, CheckCircle2, CircleAlert, Filter, Gauge, RotateCcw, Sparkles, X } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { DashboardTopbar } from "./dashboard-topbar";
+import { PLAYGROUND_DEMO_USER_ID } from "@/lib/playground-demo";
 
 type Scenario = "healthy" | "latency" | "failures";
 
@@ -23,6 +25,8 @@ const runs = [
 ];
 
 export function PlaygroundWorkspace() {
+  const searchParams = useSearchParams();
+  const demoUserId = searchParams.get("userId") || PLAYGROUND_DEMO_USER_ID;
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
   const session = useQuery(api.sandbox.getWorkspace, {});
   const saveWorkspace = useMutation(api.sandbox.saveWorkspace);
@@ -60,7 +64,7 @@ export function PlaygroundWorkspace() {
     <DashboardTopbar title="Explore / Playground" description="A simulated workspace with realistic agent telemetry." />
     <div className="px-6 pb-12">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border border-black bg-black p-5 text-white">
-        <div className="flex items-start gap-3"><Sparkles className="mt-0.5 size-5 text-[#f4d44d]" /><div><p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#f4d44d]">Simulated workspace</p><p className="mt-2 max-w-2xl text-sm leading-6 text-white/60">Everything here is safe to explore. No real project, region, API key, or telemetry is involved.</p></div></div>
+        <div className="flex items-start gap-3"><Sparkles className="mt-0.5 size-5 text-[#f4d44d]" /><div><p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#f4d44d]">Simulated workspace · {demoUserId}</p><p className="mt-2 max-w-2xl text-sm leading-6 text-white/60">Everything here is safe to explore. No real project, region, API key, or telemetry is involved.</p></div></div>
         <Link href="/cloud?next=/onboarding" className="inline-flex items-center gap-2 bg-[#f4d44d] px-4 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-black">Build a real project <ArrowRight className="size-4" /></Link>
       </div>
       <div className="grid gap-4 border-y border-black py-5 md:grid-cols-3">
