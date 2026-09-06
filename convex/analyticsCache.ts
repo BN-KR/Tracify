@@ -16,6 +16,11 @@ const modelCostValidator = v.object({
   totalCostUsd: v.number(),
   spanCount: v.number(),
   avgLatencyMs: v.optional(v.number()),
+  p50LatencyMs: v.optional(v.number()),
+  p75LatencyMs: v.optional(v.number()),
+  p90LatencyMs: v.optional(v.number()),
+  p95LatencyMs: v.optional(v.number()),
+  p99LatencyMs: v.optional(v.number()),
 });
 
 const toolCostValidator = v.object({

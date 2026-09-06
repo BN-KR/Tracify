@@ -4,6 +4,13 @@ export interface TracifyConfig {
   /** Tracify Cloud data region. Ignored when `host` is provided. Defaults to TRACIFY_REGION or EU. */
   region?: TracifyRegion;
   projectId?: string;
+  /** Release and environment are copied onto observations created by this client. */
+  release?: string;
+  environment?: string;
+  deploymentId?: string;
+  sessionId?: string;
+  endUserId?: string;
+  tags?: string[];
 }
 
 export type TracifyRegion = "eu" | "us";
@@ -39,6 +46,7 @@ export interface SpanData {
   parentSpanId?: string;
   sessionId?: string;
   endUserId?: string;
+  deploymentId?: string;
   environment?: string;
   release?: string;
   tags?: string[];
@@ -143,6 +151,12 @@ export class TracifyClient {
   private checkCostUrl: string;
   private _lastFailOpen: boolean = false;
   private promptCache = new Map<string, { value: PromptResolution; expiresAt: number }>();
+  private release?: string;
+  private environment?: string;
+  private deploymentId?: string;
+  private sessionId?: string;
+  private endUserId?: string;
+  private tags?: string[];
 
   constructor(config: TracifyConfig = {}) {
     this.apiKey = config.apiKey || process.env.TRACIFY_API_KEY || '';
@@ -157,6 +171,12 @@ export class TracifyClient {
       throw new Error(`Tracify API key region mismatch: this key belongs to ${keyRegion.toUpperCase()}, but the client is configured for ${selectedHostRegion.toUpperCase()}.`);
     }
     this.projectId = config.projectId;
+    this.release = config.release;
+    this.environment = config.environment;
+    this.deploymentId = config.deploymentId;
+    this.sessionId = config.sessionId;
+    this.endUserId = config.endUserId;
+    this.tags = config.tags;
     this.ingestUrl = `${this.host}/api/ingest`;
     this.checkCostUrl = `${this.host}/api/orchestration/check-cost`;
   }
@@ -171,6 +191,12 @@ export class TracifyClient {
       metadata: data.metadata || {},
       input: typeof data.input === 'string' ? data.input : JSON.stringify(data.input || ''),
       output: typeof data.output === 'string' ? data.output : JSON.stringify(data.output || ''),
+      release: data.release ?? this.release,
+      environment: data.environment ?? this.environment,
+      deploymentId: data.metadata?.deploymentId ?? this.deploymentId,
+      sessionId: data.sessionId ?? this.sessionId,
+      endUserId: data.endUserId ?? this.endUserId,
+      tags: data.tags ?? this.tags,
       ...data,
     };
 

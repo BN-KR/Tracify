@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import posthog from "posthog-js";
+import { captureAnalytics } from "@/lib/analytics";
+import { useMutation } from "convex/react";
+import { api } from "convex/_generated/api";
+import type { Id } from "convex/_generated/dataModel";
 
 import { CodeCopyBlock } from "@/components/onboarding/code-copy-block";
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
@@ -65,6 +68,7 @@ TRACIFY_API_KEY=your_key_here`,
 };
 
 export function InstallStep() {
+  const updateProgress = useMutation(api.projects.updateOnboardingProgress);
   const [tab, setTab] = useState<keyof typeof snippets>("python");
   const active = snippets[tab];
   const region = getTracifyRegion(getDeploymentRegion());
@@ -118,9 +122,11 @@ export function InstallStep() {
         type="button"
         onClick={() => {
           if (isPostHogConfigured) {
-            posthog.capture("onboarding_install_ready", { runtime: tab });
+            captureAnalytics("onboarding_install_ready", { runtime: tab });
           }
           window.sessionStorage.setItem(INSTALL_READY_STORAGE_KEY, "true");
+          const projectId = window.sessionStorage.getItem("tracify.onboarding.projectId");
+          if (projectId) void updateProgress({ projectId: projectId as Id<"projects">, step: "waiting", sdk: tab === "python" ? "python" : "typescript" });
           window.location.assign("/onboarding/waiting");
         }}
         className="mt-6 h-10 border border-black bg-black px-4 text-[13px] text-white transition-colors hover:bg-[#CCCCCC]"

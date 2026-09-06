@@ -1,26 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 
 const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
 const LEGACY_COLLAPSED_STORAGE_KEY = "tracify:dashboard-sidebar";
 
-const COLLAPSED_WIDTH = 64;
-const EXPANDED_WIDTH = 240;
+// Matches the captured dashboard shell's 3rem collapsed rail.
+const COLLAPSED_WIDTH = 48;
+// Matches the captured dashboard shell's 11.5rem expanded sidebar.
+const EXPANDED_WIDTH = 184;
+type DashboardTheme = "legacy" | "tracify-v2";
 
 export function DashboardShell({
   children,
   canAccessContent,
+  preview = false,
+  previewProjectId,
+  previewProjectName,
+  dashboardTheme,
 }: {
   children: React.ReactNode;
   canAccessContent: boolean;
+  preview?: boolean;
+  previewProjectId?: string;
+  previewProjectName?: string;
+  dashboardTheme?: DashboardTheme;
 }) {
   const router = useRouter();
   const params = useParams();
+  const pathname = usePathname();
   const projectId = params?.projectId as string | undefined;
+  const isDashboardRoute = preview || pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const isTracifyOverview = preview || Boolean(projectId && pathname === `/dashboard/${projectId}`);
+  const [activeTheme] = useState<DashboardTheme>(() => {
+    if (dashboardTheme) return dashboardTheme;
+    if (typeof window !== "undefined") {
+      const requestedTheme = new URLSearchParams(window.location.search).get("ui");
+      if (requestedTheme === "legacy" || requestedTheme === "tracify-v2") return requestedTheme;
+    }
+    return process.env.NEXT_PUBLIC_TRACIFY_DASHBOARD_V2 === "true" ? "tracify-v2" : "legacy";
+  });
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
     const stored = window.localStorage.getItem(COLLAPSED_STORAGE_KEY);
@@ -57,17 +79,19 @@ export function DashboardShell({
   const layoutSidebarWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
   return (
-    <div className="flex min-h-svh w-full bg-[#eceae3] font-mono text-black/70">
+    <div data-dashboard-theme={activeTheme} className={`flex min-h-svh w-full font-mono text-black/70 ${isDashboardRoute ? "tracify-cloud-shell" : "bg-[#eceae3]"} ${isTracifyOverview ? "tracify-shell" : ""}`}>
       <DashboardSidebar
         canAccessContent={canAccessContent}
         isCollapsed={isCollapsed}
         onCollapsedChange={updateCollapsed}
+        projectIdOverride={previewProjectId}
+        previewProjectName={previewProjectName}
       />
       <div
-        className="flex min-h-svh min-w-0 flex-1 flex-col bg-[#eceae3] transition-[padding] duration-150 motion-reduce:transition-none"
+        className={`flex min-h-svh min-w-0 flex-1 flex-col transition-[padding] duration-150 motion-reduce:transition-none ${isDashboardRoute ? "bg-[#101010]" : "bg-[#eceae3]"}`}
         style={{ paddingLeft: layoutSidebarWidth }}
       >
-        <main className="h-svh pb-0 overflow-y-auto bg-[#eceae3] p-4 lg:p-6 scrollbar-hide">
+        <main className={`h-svh pb-0 overflow-y-auto scrollbar-hide ${isTracifyOverview ? "bg-[#101010] p-0" : isDashboardRoute ? "bg-[#101010] p-4 lg:p-6" : "bg-[#eceae3] p-4 lg:p-6"}`}>
           {children}
         </main>
       </div>

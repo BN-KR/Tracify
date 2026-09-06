@@ -310,6 +310,9 @@ function publicProject(project: Doc<"projects">) {
     apiKeyStatus: project.apiKeyStatus,
     apiKeyCreatedAt: project.apiKeyCreatedAt,
     apiKeyLastUsedAt: project.apiKeyLastUsedAt ?? null,
+    onboardingStep: project.onboardingStep ?? null,
+    onboardingDismissedAt: project.onboardingDismissedAt ?? null,
+    onboardingSdk: project.onboardingSdk ?? null,
     costThresholdUsd: project.costThresholdUsd,
     maxDurationSeconds: project.maxDurationSeconds,
     maxStallMinutes: project.maxStallMinutes,
@@ -366,6 +369,7 @@ export const createProject = mutation({
       costThresholdUsd: 1,
       maxDurationSeconds: 300,
       maxStallMinutes: 5,
+      onboardingStep: "api-key",
     });
 
     return {
@@ -377,6 +381,28 @@ export const createProject = mutation({
       apiKeyPrefix: prefix,
       apiKeyLast4: plaintextApiKey.slice(-4),
     };
+  },
+});
+
+export const updateOnboardingProgress = mutation({
+  args: {
+    projectId: v.id("projects"),
+    step: v.optional(v.union(v.literal("project"), v.literal("api-key"), v.literal("install"), v.literal("waiting"), v.literal("success"))),
+    dismissed: v.optional(v.boolean()),
+    sdk: v.optional(v.union(v.literal("python"), v.literal("typescript"))),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+    const project = await ctx.db.get(args.projectId);
+    if (!project || !canAdminProject(project, identity)) throw new Error("Project not found or access denied");
+    await ctx.db.patch(args.projectId, {
+      ...(args.step ? { onboardingStep: args.step } : {}),
+      ...(args.sdk ? { onboardingSdk: args.sdk } : {}),
+      ...(args.dismissed !== undefined ? { onboardingDismissedAt: args.dismissed ? Date.now() : undefined } : {}),
+      updatedAt: Date.now(),
+    });
+    return null;
   },
 });
 
@@ -611,35 +637,58 @@ export const getProject = query({
 });
 
 export const getProjectManagementSummary = query({
-  args: { projectId: v.id("projects") },
-  handler: async (ctx, { projectId }) => {
+  args: { projectId: v.id("projects"), environment: v.optional(v.string()), days: v.optional(v.number()), traceName: v.optional(v.string()), sessionId: v.optional(v.string()), endUserId: v.optional(v.string()), release: v.optional(v.string()), model: v.optional(v.string()) },
+  handler: async (ctx, { projectId, environment, days, traceName, sessionId, endUserId, release, model }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
     const project = await ctx.db.get(projectId);
     if (!project || !canAccessProject(project, identity)) return null;
 
-    const runs = await ctx.db
+    const allRuns = await ctx.db
       .query("agentRuns")
       .withIndex("by_projectId_createdAt", (q) => q.eq("projectId", projectId))
       .order("desc")
       .take(250);
+    const sessions = traceName || endUserId
+      ? await ctx.db.query("sessions").withIndex("by_projectId_and_lastSeenAt", (q) => q.eq("projectId", projectId)).take(500)
+      : [];
+    const matchingSessionIds = sessions.filter((session) =>
+      (!traceName || session.traceName?.toLowerCase().includes(traceName.toLowerCase())) &&
+      (!endUserId || session.endUserId?.toLowerCase().includes(endUserId.toLowerCase())),
+    ).map((session) => session.sessionId);
+    const cutoff = days && days > 0 ? Date.now() - days * 24 * 60 * 60 * 1000 : null;
+    const runs = environment && environment !== "all"
+      ? allRuns.filter((run) => run.environment === environment)
+      : allRuns;
+    const rangedRuns = cutoff === null
+      ? runs
+      : runs.filter((run) => Date.parse(run.createdAt ?? run.startedAt) >= cutoff);
+    const filteredRuns = rangedRuns.filter((run) =>
+      (!traceName || run.runId.toLowerCase().includes(traceName.toLowerCase()) || matchingSessionIds.includes(run.sessionId ?? "")) &&
+      (!sessionId || run.sessionId?.toLowerCase().includes(sessionId.toLowerCase())) &&
+      (!release || run.release?.toLowerCase().includes(release.toLowerCase())) &&
+      (!model || model === "All models" || run.primaryModel?.toLowerCase().includes(model.toLowerCase())) &&
+      (!endUserId || matchingSessionIds.includes(run.sessionId ?? "")),
+    );
 
     const alerts = await ctx.db
       .query("alerts")
       .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
       .take(250);
 
-    const totalRuns = runs.length;
-    const activeRuns = runs.filter((run) => run.status === "running").length;
-    const failedRuns = runs.filter((run) => run.status === "failed").length;
-    const completedRuns = runs.filter((run) => run.status === "completed").length;
-    const totalSpans = runs.reduce((sum, run) => sum + run.spanCount, 0);
-    const totalCostUsd = runs.reduce((sum, run) => sum + run.totalCostUsd, 0);
-    const lastRun = runs[0] ?? null;
+    const totalRuns = filteredRuns.length;
+    const activeRuns = filteredRuns.filter((run) => run.status === "running").length;
+    const failedRuns = filteredRuns.filter((run) => run.status === "failed").length;
+    const completedRuns = filteredRuns.filter((run) => run.status === "completed").length;
+    const totalSpans = filteredRuns.reduce((sum, run) => sum + run.spanCount, 0);
+    const totalCostUsd = filteredRuns.reduce((sum, run) => sum + run.totalCostUsd, 0);
+    const lastRun = filteredRuns[0] ?? null;
 
     return {
       project: publicProject(project),
+      environments: [...new Set(allRuns.map((run) => run.environment).filter((value): value is string => Boolean(value)))].sort(),
+      models: [...new Set(allRuns.map((run) => run.primaryModel).filter((value): value is string => Boolean(value)))].sort(),
       totals: {
         totalRuns,
         activeRuns,
@@ -651,7 +700,7 @@ export const getProjectManagementSummary = query({
       },
       latestActivityAt:
         lastRun?.lastSpanAt ?? lastRun?.createdAt ?? lastRun?.startedAt ?? null,
-      recentRuns: runs.slice(0, 8).map((run) => ({
+      recentRuns: filteredRuns.slice(0, 8).map((run) => ({
         _id: run._id,
         runId: run.runId,
         status: run.status,
@@ -744,6 +793,16 @@ export const updateProject = mutation({
       ...updates,
       updatedAt: Date.now(),
     });
+    await ctx.db.insert("auditLogs", {
+      projectId,
+      actorId: identity.subject,
+      actorEmail: identity.email,
+      action: "updated",
+      resource: "project_settings",
+      summary: "Project settings updated",
+      metadata: { fields: Object.keys(updates).join(",") },
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -828,6 +887,15 @@ export const rotateApiKey = mutation({
       apiKeyCreatedAt: now,
       apiKeyLastUsedAt: undefined,
       updatedAt: now,
+    });
+    await ctx.db.insert("auditLogs", {
+      projectId: args.projectId,
+      actorId: identity.subject,
+      actorEmail: identity.email,
+      action: "rotated",
+      resource: "api_key",
+      summary: "Project API key rotated",
+      createdAt: now,
     });
 
     return {

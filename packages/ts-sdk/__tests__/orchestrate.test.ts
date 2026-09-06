@@ -106,6 +106,25 @@ describe("TracifyClient", () => {
     expect(client).toBeInstanceOf(TracifyClient);
     delete process.env.TRACIFY_API_KEY;
   });
+
+  it("copies release context onto ingested observations", async () => {
+    const client = new TracifyClient({
+      apiKey: "test-key",
+      host: "http://localhost:9999",
+      release: "release-42",
+      environment: "production",
+      sessionId: "session-1",
+      tags: ["checkout"],
+    });
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok: true } as Response);
+    await client.ingest({ spanType: "llm_call", input: "hello" });
+    const body = JSON.parse(String(fetchSpy.mock.calls[0]?.[1]?.body));
+    expect(body.release).toBe("release-42");
+    expect(body.environment).toBe("production");
+    expect(body.sessionId).toBe("session-1");
+    expect(body.tags).toEqual(["checkout"]);
+    fetchSpy.mockRestore();
+  });
 });
 
 // ─── orchestrate — success on primary model ───────────────────────

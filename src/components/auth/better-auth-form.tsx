@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { parseEntryIntent, safeRelativePath } from "@/lib/navigation-context";
 
 export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const searchParams = useSearchParams();
@@ -14,7 +15,9 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
-  const callbackPath = searchParams.get("redirect") || searchParams.get("redirect_url") || (mode === "sign-up" ? "/onboarding" : "/dashboard");
+  const requestedPath = searchParams.get("redirect") || searchParams.get("redirect_url");
+  const callbackPath = safeRelativePath(requestedPath, mode === "sign-up" ? "/onboarding" : "/dashboard");
+  const intent = parseEntryIntent(searchParams.get("intent"));
 
   function absolute(path: string) {
     return new URL(path, window.location.origin).toString();
@@ -32,7 +35,9 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       if (mode === "sign-up") {
         await fetch("/api/lifecycle/welcome", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email.trim(), name: name.trim() }) }).catch(() => undefined);
       }
-      window.location.assign(callbackPath);
+      const destination = new URL(callbackPath, window.location.origin);
+      if (intent) destination.searchParams.set("intent", intent);
+      window.location.assign(`${destination.pathname}${destination.search}${destination.hash}`);
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Authentication failed.");
     } finally {

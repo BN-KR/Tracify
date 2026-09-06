@@ -11,34 +11,50 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-type CommandMenuProps = { projectId?: string };
+type CommandMenuProps = { projectId?: string; showTrigger?: boolean };
 
-export function DashboardCommandMenu({ projectId }: CommandMenuProps) {
+export function DashboardCommandMenu({ projectId, showTrigger = true }: CommandMenuProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      if ((event.metaKey || event.ctrlKey) && ["k", "i"].includes(event.key.toLowerCase())) {
         event.preventDefault();
         setOpen(true);
       }
     }
+    function onAssistantOpen() { setOpen(true); }
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("tracify:open-command", onAssistantOpen);
+    return () => { window.removeEventListener("keydown", onKeyDown); window.removeEventListener("tracify:open-command", onAssistantOpen); };
   }, []);
 
   const items = useMemo(() => {
     const base = projectId ? `/dashboard/${projectId}` : "/dashboard";
     const destinations = [
       ["Overview", base],
+      ["Dashboards", `${base}/dashboards`],
+      ["Tracing", `${base}/tracing`],
       ["Runs", `${base}/runs`],
       ["Sessions", `${base}/sessions`],
+      ["Users", `${base}/users`],
+      ["Alerts", `${base}/alerts`],
+      ["Automations", `${base}/automations`],
+      ["Widget library", `${base}/widgets`],
       ["Search traces", `${base}/search`],
       ["Costs", `${base}/costs`],
+      ["Scores", `${base}/scores`],
+      ["Scores analytics", `${base}/scores/analytics`],
+      ["Evaluators", `${base}/evaluators`],
+      ["Human Annotation", `${base}/human-annotation`],
       ["Evaluation", `${base}/evaluation`],
+      ["Evaluation rules", `${base}/evals/rules`],
       ["Resilience", `${base}/resilience`],
+      ["Prompt Management", `${base}/prompt-management`],
       ["Prompts", `${base}/prompts`],
+      ["Playground", `${base}/playground`],
+      ["Operations", `${base}/operations`],
       ["Settings", `${base}/settings`],
       ["Quickstart", `${base}/quickstart`],
     ];
@@ -59,7 +75,7 @@ export function DashboardCommandMenu({ projectId }: CommandMenuProps) {
 
   return (
     <>
-      <button
+      {showTrigger ? <button
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open command menu"
@@ -68,7 +84,7 @@ export function DashboardCommandMenu({ projectId }: CommandMenuProps) {
         <Command className="size-3" aria-hidden="true" />
         <span>Command</span>
         <kbd className="border border-black/25 px-1.5 py-0.5 text-[9px] text-black/55">⌘K</kbd>
-      </button>
+      </button> : null}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-xl gap-0 overflow-hidden border-black/25 bg-white p-0 shadow-2xl" showCloseButton={false}>
           <DialogTitle className="sr-only">Dashboard command menu</DialogTitle>
@@ -100,7 +116,7 @@ export function DashboardCommandMenu({ projectId }: CommandMenuProps) {
               <div className="p-8 text-center font-mono text-[10px] uppercase tracking-widest text-black/55">No destinations found</div>
             )}
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-black/15 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-black/55"><span>Navigate workspace surfaces</span><span>⌘⇧O active project</span><span>Ctrl+\ sidebar</span></div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-black/15 px-4 py-2 font-mono text-[9px] uppercase tracking-widest text-black/55"><span>Navigate workspace surfaces</span><span>⌘K / Ctrl+I assistant</span><span>Ctrl+\ sidebar</span></div>
         </DialogContent>
       </Dialog>
     </>

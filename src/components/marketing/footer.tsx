@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
+import { NewsletterCapture } from "@/components/marketing/newsletter-capture";
 
 const footerGroups = [
   [
@@ -53,11 +54,10 @@ export function Footer() {
             <p className="mt-5 max-w-sm text-sm leading-7 text-black/55">
               The operating record for the agents your team ships.
             </p>
-            <form
-              action="/contact"
-              method="get"
-              className="mt-7 flex max-w-md border border-black/25 bg-white"
-            >
+            <div className="mt-7">
+              <NewsletterCapture inverse />
+            </div>
+            {/*
               <input type="hidden" name="intent" value="newsletter" />
               <label htmlFor="site-newsletter" className="sr-only">
                 Work email for the Tracify newsletter
@@ -77,7 +77,7 @@ export function Footer() {
               >
                 Subscribe
               </button>
-            </form>
+            </form> */}
             <p className="mt-3 font-mono text-[8px] uppercase tracking-[0.11em] text-black/55">
               One technical dispatch a month. Unsubscribe anytime.
             </p>

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, ArrowRight, Send, Save } from "lucide-react";
-import posthog from "posthog-js";
+import { captureAnalytics } from "@/lib/analytics";
 import { DEFAULT_REDACTION_RULES } from "@/lib/redaction";
 
 const isPostHogConfigured = Boolean(
@@ -110,7 +110,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
         retentionDays: parsed.value.retentionDays,
       });
       if (isPostHogConfigured) {
-        posthog.capture("project_settings_saved");
+        captureAnalytics("project_settings_saved");
       }
       setNotice("Settings saved");
     } catch (err) {
@@ -134,7 +134,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
     try {
       await sendTestAlert({ projectId: projectId as Id<"projects">, channel: "slack" });
       if (isPostHogConfigured) {
-        posthog.capture("test_alert_sent");
+        captureAnalytics("test_alert_sent");
       }
       setNotice("Test alert sent");
     } catch (err) {
@@ -158,7 +158,7 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
     try {
       await sendTestAlert({ projectId: projectId as Id<"projects">, channel: "teams" });
       if (isPostHogConfigured) {
-        posthog.capture("test_alert_sent_teams");
+        captureAnalytics("test_alert_sent_teams");
       }
       setNotice("Test alert sent");
     } catch (err) {

@@ -1,5 +1,117 @@
 # Project Memory
 
+## 2026-09-06 account access and onboarding flow
+- Implemented `src/lib/navigation-context.ts` with safe relative-path validation and Explore/Build intent parsing.
+- Regional selection now preserves validated destinations and intent; Explore enters `/playground` with `intent=explore`, Build preserves `intent=build`.
+- Better Auth email flow preserves intent; OAuth callback redirects are validated, wait for both Better Auth and Convex, and show a retry state after 15 seconds.
+- Auth region-change links now stay on the current host, and one-time API-key detection reads persisted session storage after reload.
+- Focused ESLint, TypeScript, and `git diff --check` passed using the bundled runtime. The worktree contains substantial unrelated user changes; none were removed.
+- Completed the persistence/recovery slice: project onboarding now stores step, SDK, and dismissal timestamp in Convex; dashboard setup links resume from the stored step; password reset preserves redirect and intent; invitation failures are classified and no longer show a false success action.
+- Regenerated Convex bindings successfully. Added four navigation-context unit tests (all pass). Public Playwright smoke was attempted: the auth redirect test passed, while two page tests timed out because the local app server was not healthy at `127.0.0.1:3000`.
+- AuthShell now derives the displayed region from the request Host, so direct regional cloud URLs show their own region. Invitation acceptance now validates the invitation first and activates the accepted organization before offering the dashboard link. TypeScript and focused ESLint pass after this change.
+- Warmed local server probes returned 200 for `/`, `/cloud`, `/sign-in`, and `/docs`. Playwright public smoke then passed the public product and sign-in redirect tests; the consent test exposed an accessible-name mismatch, which was corrected to `Privacy preferences` and its fixture now clears consent before navigation. A subsequent consent run still hung in the dev server, so full browser verification remains unproven.
+- Adjusted the consent fixture to use commit navigation and explicit UI readiness; the local dev server still stalls the isolated browser run after rendering the page, so this remains an environment-level verification issue rather than a failing assertion.
+- Production-style verification completed: rebuilt with the EU site origin, started `next start` on port 3100, and ran `tests/e2e/public-smoke.spec.ts` with 3/3 passing. The run exposed a real consent hydration bug; initializing browser consent state after hydration fixed it. Focused ESLint, TypeScript, Vitest (4/4), and diff checks pass.
+- Added `tests/e2e/account-access-contract.spec.ts` covering cloud Explore/Build entry and intent links, auth/recovery forms, missing invitations, and mobile keyboard/overflow behavior. Production-style browser run passes 4/4; focused ESLint, TypeScript, and diff checks pass. Provider-backed authenticated journeys remain gated by `TRACIFY_E2E_AUTH=1` credentials.
+- Split the cloud directory into explicit sequential screens: `/cloud` is path choice (step 01), `/cloud/region` is region choice (step 02), and intent/destination are carried through the regional redirect. Production build and updated account-access contract suite pass (4/4).
+
+## 2026-09-04 favicon candidates
+- Superseded the first literal trace-path and pixel-`T` drafts after review; those marks were too busy and too logo-like for a tab bar.
+- Added a cleaner pair under `public/`: `favicon-signal.svg` for a measured telemetry pulse and `favicon-open-trace.svg` for a restrained open-loop trace mark.
+- Added 16px, 32px, and 48px PNG renders for both candidates and a combined preview at `public/favicon-candidates-preview.png`.
+- Replaced `src/app/(frontend)/favicon.ico` with a proper multi-size ICO built from the signal mark; `public/favicon-open-trace.ico` remains ready as the alternate.
+- Verified the SVG sources parse correctly and visually checked both new marks at 16px and 48px.
+- Packaged the three-bar cascade variant under `public/favicons/cascade-t-three-bar/` with SVG, ICO, and 16/32/48/180/512px PNG exports.
+
+## 2026-09-04 Explore / Build playground and site assistant
+- Added an Explore / Build switcher to `src/app/(frontend)/cloud/page.tsx`. Explore uses the EU auth boundary only to reach the account session, then enters a region-independent simulated workspace at `/playground`; Build preserves the existing region selector and real onboarding path.
+- Added an authenticated playground shell at `src/app/(frontend)/playground/` with deterministic healthy, latency-regression, and tool-call-failure scenarios, populated runs/metrics/alert data, filters, and safe real-project CTA. It does not use a fake project ID or `/api/ingest`.
+- Added account-scoped `sandboxWorkspaces` persistence in `convex/schema.ts` and `convex/sandbox.ts`; generated API typings were updated manually because the local Convex CLI binary failed before codegen (`Cannot read properties of undefined (reading 'toString')`).
+- Added the public `SiteAssistant` widget and `/api/site-assistant`. It answers from a curated local public knowledge set, returns allowlisted citations, applies request bounds/rate limiting, falls back deterministically without `OPENAI_API_KEY`, and optionally sends redacted internal traces through `TRACIFY_INTERNAL_INGEST_URL` + `TRACIFY_INTERNAL_API_KEY` without blocking the response.
+- Verification: focused ESLint and TypeScript pass; the assistant endpoint returns a cited playground answer locally. Full page HTTP smoke tests are blocked by the existing local Convex service dependency on `127.0.0.1:3211`, not by the new route code. The worktree contains substantial pre-existing user changes; none were removed.
+- Updated the assistant to use `gpt-5.6-luna` with low reasoning effort. Added a separate optional `TRACIFY_ASSISTANT_OPENAI_API_KEY`, Redis-backed per-IP 5/minute and global 100/day limits with local fallback, and a configurable 300-token output cap.
+
+## 2026-09-04 EU cloud hostname TLS incident
+- `eu.cloud.tracify.tech` initially returned `NXDOMAIN` because the Cloudflare `eu.cloud` CNAME target was malformed and displayed as `5ee7be47305fd6c5.vercel-dns-017.com.5ee7be47305fd6c5.vercel-dns-017.com`.
+- Corrected the CNAME target to exactly `5ee7be47305fd6c5.vercel-dns-017.com`; Vercel's `tracify-cloud-eu` project already had `eu.cloud.tracify.tech` attached to Production with a valid configuration and did not require a domain change.
+- DNS-only direct-to-Vercel then exposed a Chromium TLS failure (`ERR_SSL_VERSION_OR_CIPHER_MISMATCH`): the Vercel edge requested TLS 1.3 renegotiation, which Windows curl tolerated but Chrome rejected. The Vercel certificate itself was valid for `eu.cloud.tracify.tech`.
+- Final working fix: set the Cloudflare CNAME to **Proxied** (orange cloud), allowing Cloudflare to terminate visitor TLS and proxy to Vercel. Public DNS then returned Cloudflare edge IPs and both Chrome and the EU `/sign-up` route loaded successfully.
+- Future regional-hostname rule: for this nested hostname, keep the exact Vercel CNAME target and Cloudflare proxy enabled. Cloudflare's free Universal SSL certificate covers `*.tracify.tech` but not the two-level `eu.cloud.tracify.tech`; do not disable proxying unless Vercel/Chromium TLS behavior has been revalidated. Advanced Certificate Manager would be needed to terminate this nested hostname directly at Cloudflare with a dedicated edge certificate.
+
+## 2026-09-03 ERPNext integration discovery
+- User approved integrating ERPNext into Tracify; no connector currently exists.
+- Proposed outbound project-scoped delivery of failed-run and alert metadata to ERPNext `ToDo` records, with links back to Tracify evidence.
+- Added `docs/erpnext-integration.md` with mapping, implementation sequence, and SSRF/secret/RBAC requirements. Live connection testing requires an ERPNext sandbox URL and dedicated API credentials.
+- Added `src/lib/erpnext.ts` and `src/lib/erpnext.test.ts` for the server-side REST boundary, including HTTPS/private-target checks, token auth, fixed endpoints, bounded payloads, timeout, and no-redirect behavior. Test execution is blocked because npm is unavailable on PATH.
+- The bundled Node runtime was located through workspace dependencies; the focused ERPNext suite now passes 6/6.
+- Documented the future `TRACIFY_INTEGRATION_ENCRYPTION_KEY` deployment contract in `.env.local.example` and the ERPNext runbook; live credential storage remains disabled until the encrypted Convex path is implemented.
+- Added `src/lib/integration-crypto.ts`, a versioned AES-GCM envelope helper with fresh IVs and safe decryption errors, plus focused tests; ERPNext and crypto tests pass 9/9.
+
+## 2026-09-03 release log and SharePoint discovery
+- Added canonical `docs/releases.md`, a release-log validator, and `/changelog` rendering from the repository source.
+- Added release-workflow validation and SharePoint package generation through `npm run prepare:m365-index`, producing `artifacts/m365-sharepoint/` with 10 approved documents and `m365-file-index.json`.
+- Added `docs/sharepoint-discovery.md`; direct SharePoint upload remains blocked until a tenant/site URL and authenticated Microsoft 365 connector are supplied.
+- Focused release-log validation, export generation, TypeScript typecheck, and `git diff --check` pass.
+
+## 2026-09-03 demo dashboard seed attempt
+- For the authenticated `admin@tracify.tech` account, `tracify-demo` already existed at the EU cloud project route. With explicit user authorization, rotated the project key, sent 383 synthetic support-agent spans across 90 traces through `https://eu.cloud.tracify.tech/api/ingest` (379 accepted), then rotated the key again to retire the temporary seed credential.
+- The dashboard remained in its verified empty state after waiting for asynchronous processing. Direct calls to the production Convex `agentRuns:upsertRun` mutation returned server errors, so no claim of populated dashboard data was made. Follow-up requires diagnosing the EU ingestion/Convex rollup deployment.
+
+## 2026-09-03 Langfuse parity-plus planning
+- Added a detailed 33-capability roadmap to `implementation_plan.md`, translating the Langfuse August release into a Tracify-native trace-to-release system: evidence sets, evaluator workbench, reusable rules, cost/comparability controls, multimodal evidence, search/timeline/comparison, alerts, API/CLI/SDK parity, governance, deployment trust, and release operations.
+- Sequenced the roadmap around the first paid Agent Failure Review: P0 evidence/evaluation/release loop first, then multimodal and investigation depth, then developer-platform and enterprise capabilities.
+- Updated `AGENTS.md` so agents remove completed entries, stale headings, and superseded duplicates from active task files before finishing; durable history belongs in memory, changelogs, PR history, or explicitly historical sections.
+
+## 2026-09-03 transactional sender configuration
+- Configured the shared transactional email adapter defaults for a more personal customer-facing identity: `Kristoffer from Tracify <kb@tracify.tech>` with `kb@tracify.tech` as the default reply-to address.
+- Added `RESEND_API_KEY`, `EMAIL_FROM`, and `EMAIL_REPLY_TO` to `.env.local.example`; the production Resend key remains intentionally user-supplied through Vercel environment variables.
+
+## 2026-09-02 lead workflow completion audit
+- Preserved the existing lead implementation and tightened JSON body shape and aggregate payload limits on `POST /api/leads`.
+- Improved `/admin/leads` metadata presentation for source/campaign, company, intent, stack, created time, owner, and message while keeping the monochrome sharp-corner system; added recoverable mutation errors and client-side empty-note feedback.
+- Added Convex coverage for the authorized empty state and expanded browser API validation cases. Bundled Node focused ESLint passes; Convex lead tests pass 4/4; `git diff --check` passes. The configured Convex deployment still returns the valid browser submission as 503 and the CLI requires interactive authentication.
+- Direct HTTPS probing confirms the Convex hostname responds, but `convex dev --once --typecheck disable` stops at interactive login; the remaining valid-submission failure is deployment/auth state rather than lead validation.
+- Bundled TypeScript now passes cleanly after removing the stale Vite type reference from the Convex lead test and updating the Stripe SDK API-version literal. Production build compiled successfully but had not exited from its optimization/type phase within the observation window.
+- Webpack production build subsequently completed successfully: TypeScript finished, 184 static pages generated, and route optimization/build traces finalized. Live browser persistence remains blocked by the authenticated Convex dev deployment.
+
+## 2026-09-02 lead workflow hardening
+- Hardened the existing lead slice: bounded/validated POST fields, optional Redis rate limit, deterministic ten-minute dedupe, safe email encoding, non-fatal email delivery, and no personal-data logging in the email adapter.
+- Added indexed lead dedupe storage, lead existence checks, owner normalization, and non-empty note validation to Convex operations.
+- Expanded `/admin/leads` with all lead metadata, status filtering/transitions, assignment, internal note listing/creation, and recoverable UI errors.
+- Verification is blocked in this shell because Node/npm/npx are not on PATH; Convex codegen and tests remain to run in the bundled runtime.
+- Bundled runtime later became available: focused lead ESLint and activation tests pass; lead Playwright file lists four tests. `next build` compiles successfully but stops at TypeScript output in this runner before a final status; Convex codegen remains 401 due missing CLI token.
+- Added `convex-test`, Vitest, and Edge Runtime coverage. `pnpm run test:convex:leads` passes all 3 tests for unauthorized access, admin lifecycle operations, blank-note rejection, and deduplication.
+
+## 2026-09-02 consent-gated analytics completion
+- Tightened the existing consent slice to default-deny optional analytics, invalidate malformed/old versions, tolerate blocked storage, and expose a typed consent event.
+- PostHog now initializes only from valid analytics consent, avoids duplicate initialization, opts out immediately on withdrawal, and gates authenticated identity calls.
+- Consent UI now has explicit reject/preferences/accept controls, separate analytics/marketing choices, privacy links, accessible labels, and mobile-safe overflow behavior. Added `src/lib/consent.test.ts`.
+- Bundled Node verification: focused consent tests pass (3/3), focused ESLint passes, and `git diff --check` passes. Full TypeScript remains blocked by pre-existing generated-route errors and the unrelated Stripe API-version error; browser coverage was not run because no dev server was available.
+
+## 2026-09-02 activation path follow-up
+- Audited the public-to-authenticated activation surfaces and made a focused handoff correction: homepage quickstart links now target `/docs/quickstart`; the authenticated empty state distinguishes seeded demo data from project data and routes users with a first trace to their own runs.
+- Added activation contract assertions for the corrected quickstart destination and seeded-demo/first-trace copy.
+
+## 2026-09-02 EU deployment readiness audit
+- Added `docs/eu-deployment-readiness-audit-2026-09-02.md` based on source, regional contract/runbook, git history, and safe public probes.
+- Public EU health returned 503: Convex and Tinybird passed, Redis failed, and Inngest was configuration-only healthy. Ingest/OTLP auth failures and dormant-US rejection behaved as expected.
+- Confirmed the repository does not claim end-to-end EU residency: Inngest Cloud is documented in AWS us-east-2 and receives redacted span input/output. Owner follow-up remains required for Redis, EU Stripe variables, and any strict-EU queue replacement.
+
+## 2026-09-02 trust-first lifecycle implementation
+- Added the first implementation slice for consent-gated PostHog, real lead submission plumbing, Convex lead storage/admin functions, and a Resend-compatible transactional email adapter with development-safe logging.
+- Added `src/components/privacy/consent-banner.tsx`, `src/lib/consent.ts`, `src/components/marketing/lead-form.tsx`, `src/app/(frontend)/api/leads/route.ts`, and `convex/leads.ts`. Convex codegen and runtime verification remain pending because this shell cannot locate Node.
+- Analytics preference changed per user request: enabled by default with explicit opt-out; added `/cookie-policy`. Node is now reachable through Cursor's bundled runtime, but Convex codegen is blocked by missing CLI authentication.
+- Added protected `/admin/leads` inbox UI with status filtering and updates. New lifecycle files pass targeted TypeScript filtering; full verification still has unrelated generated-route, dashboard-members, and Stripe API-version errors.
+- Added signup welcome-email endpoint and client trigger, account notification preferences, and first lifecycle wiring. Targeted TypeScript filtering and diff hygiene remain clean.
+- Added first-trace lifecycle email trigger from onboarding once a first run is observed, with idempotent delivery and direct trace link.
+- Added Better Auth server-side user-create welcome hook covering email and OAuth accounts, plus migrated the primary footer newsletter capture to the real `/api/leads` endpoint.
+- Migrated the remaining static marketing POST forms from `/contact` GET navigation to `/api/leads`; the endpoint now supports browser form bodies and redirects to a user-safe result state. Demo fit-call CTA now routes to the structured contact flow.
+- Added delayed onboarding reminder scheduling through Inngest: after project creation, wait 24 hours, check for a first span, and email only if the project remains inactive.
+- Added authenticated Convex notification-preference storage with local fallback migration; account preferences now sync server-side. Added lead-note listing backend (admin UI note controls remain a small follow-up).
+- Completed lead-note UI in the protected inbox: expandable note history and add-note control are now available per lead.
+- Revalidated current worktree after concurrent edits: restored analytics default and lead inbox, moved account preferences to a lint-clean derived-state implementation, and verified changed privacy/admin files with ESLint.
+- Completion audit found a concurrent revert of the analytics default and its consent tests; restored both to analytics-on by default and verified the three affected privacy/admin files with ESLint.
+
 ## 2026-09-02 first-customer review execution system
 - PR #75 was squash-merged into `main` as commit `1cc8f88` on 2026-09-02. Both Vercel previews, the Playwright adapter, and GitGuardian passed; the activation workflow remained red only on pre-existing comparison-blog framework violations outside this change. No production deployment was performed as part of the merge.
 - The active 30-day commercial objective is one paid **Founding Agent Failure Review** at **$1,000 upfront**. The service covers one workflow, one consequential failure, five business days, sanitized staging evidence only, an annotated trace, one evidence-backed mechanism, one tested fix or stop/rollback recommendation, five regression cases, a concise report, and a 45-minute readout. Existing $19/$39 subscriptions remain unchanged.
@@ -1385,3 +1497,367 @@
 - The approved article passes with 5,533 words, 3 body visuals, 11 highlights, 3 panel tones, 8 tables, 2 notes, 1 interaction, 3 internal links, and 5 FAQs. A deliberately bad fixture fails the expected gates. The complete content suite passes 22 tests, the focused blog lint passes, the skill package validator passes, and `git diff --check` passes.
 - Full lint still reports the same unrelated 18 errors across existing share buttons, ToC, marketing, UI, and hook files. The production bundle compiles and then reaches the same unrelated `cost-dashboard.tsx:256` `ReactNode`/`Date` type error.
 - The new skill reference and validator scripts are hidden by the repository’s local `.git/info/exclude` rule for `.agents/`; force-add them with the three ignored article PNGs when preparing the PR.
+# Release-readiness disclosure update — 2026-09-02
+
+- Updated the public Privacy and Security pages to disclose that EU account data, traces, and cache are stored in Ireland, Stripe handles billing data separately, and Inngest Cloud currently processes queued span events in US infrastructure. The pages now explicitly avoid claiming end-to-end EU residency and describe analytics as enabled by default.
+# 2026-09-03 SEO/AEO blog ideation
+- Reviewed the canonical Tracify blog skill/playbook and current corpus of published topics.
+- Prepared 10 new, non-duplicative blog concepts designed for search intent and answer-engine extraction; no blog content or publication state was changed.
+# 2026-09-03 — Langfuse parity and release operating model
+
+- Tracify currently has `.github/workflows/publish-sdks.yml`, triggered manually or by `sdk-v*` tags; it builds/tests TS and Python SDKs and publishes npm/PyPI packages, but it is not a complete application release process.
+- Application package version is `0.1.0`; both TS and Python SDK manifests are `0.2.0`; Playwright package is `0.1.0`.
+- Existing product code includes prompts, datasets, evaluators, experiments, alerts, comments, agent tracing, typed scores, cost ceilings, and TS/Python SDKs.
+- Recommended first milestone: release foundation plus a v0.3.0 candidate, then trace-linked evaluation regression gates and accurate model/token/cost accounting.
+- Executable backlog spec: `docs/tracify-parity-and-release-spec.md`; no external issue was opened.
+# 2026-09-03 — Plane integration documentation
+
+- Added `content/docs/plane-integration.mdoc`, a Plane-specific integration guide covering ownership boundaries, failure-review workflow, API/webhook guardrails, self-hosting separation, and links to Plane's official developer documentation.
+# 2026-09-03 — Internal Plane workspace correction
+
+- Corrected Plane scope to private Tracify project management, removed the mistaken public `content/docs/plane-integration.mdoc`, and added `docs/plane-internal-ops.md`.
+- VPS, DNS/Cloudflare Access, SMTP, and backup provisioning remain pending because no provider credentials or target server were supplied.
+# 2026-09-03 — Cloudflare Tunnel security correction
+
+- Updated the internal Plane runbook to use an outbound Cloudflare Tunnel and Cloudflare Access with MFA. The VPS should expose SSH only; Plane HTTP/HTTPS remains private behind the tunnel.
+- On 2026-09-04 the owner changed `tracify.tech` nameservers at Domeneshop to Cloudflare's assigned `margo.ns.cloudflare.com` and `sue.ns.cloudflare.com`. Cloudflare reports the zone is waiting for propagation; `nslookup` against 1.1.1.1 still returns the old `ns1/ns2/ns3.hyp.net` nameservers. No DNS records were changed because the scanned records were already present at Domeneshop.
+
+## 2026-09-04 — Assistant spend guardrails
+
+- Added the non-secret assistant runtime settings to the Vercel `tracify` Production project: `TRACIFY_ASSISTANT_MODEL=gpt-5.6-luna`, `TRACIFY_ASSISTANT_REQUESTS_PER_MINUTE=5`, `TRACIFY_ASSISTANT_REQUESTS_PER_DAY=100`, and `TRACIFY_ASSISTANT_MAX_COMPLETION_TOKENS=300`.
+- Triggered Vercel production deployment `8X1Z1DWAniuH5th2gPHf8fSs2SFV` from `main` commit `fbd51b1`; Vercel reported `Ready` and `www.tracify.tech` assigned.
+- The OpenAI organization limits page still redirects to login. The owner must sign in manually before a provider-side budget/usage limit can be configured; no API key, password, MFA code, or billing setting was entered by the agent.
+- Live homepage verification succeeded, but the current `main` deployment did not show the locally uncommitted assistant widget/playground changes. Do not describe those code changes as production-live until they are committed, reviewed, merged, and redeployed.
+- Committed the isolated feature as `c00e8aa` on `codex/assistant-spend-guardrails`, pushed it to GitHub, and confirmed both marketing and EU Vercel previews built successfully and reported `Ready`. The GitHub draft-PR form is prepared but not submitted pending confirmation for that external action.
+- OpenAI sign-in is now complete. The organization Limits page exposes rate limits but no editable spend cap; Billing shows `$0.00` free-trial credit and no payment method, so adding billing details would be required before a provider monthly budget can exist.
+
+## 2026-09-05 — EU cloud TLS regression
+
+- `eu.cloud.tracify.tech` currently resolves through Cloudflare and its CNAME is still exact (`5ee7be47305fd6c5.vercel-dns-017.com`) with proxy enabled.
+- Chrome and Windows curl fail the public HTTPS handshake with `ERR_SSL_VERSION_OR_CIPHER_MISMATCH` / Schannel `SEC_E_ILLEGAL_MESSAGE`.
+- Cloudflare Edge Certificates shows only the free Universal certificate for `tracify.tech` and `*.tracify.tech`; the full-setup zone does not cover the two-level `eu.cloud.tracify.tech` hostname.
+- Vercel project `tracify-cloud-eu` is attached to the custom domain and its production deployment is Ready. DNS-only is not an acceptable fallback because the Vercel edge requests TLS renegotiation that Chrome rejects.
+- Direct fix requires Cloudflare Advanced Certificate Manager ($10/month) with a certificate covering `eu.cloud.tracify.tech`, or a deliberate migration to a one-level hostname such as `eu-cloud.tracify.tech`; do not purchase the add-on or change the public hostname without owner choice.
+- Owner requested the no-Cloudflare path. Set the Cloudflare CNAME to DNS only; fresh curl requests now reach Vercel and return `200 OK` on `/sign-in`, but Chrome still returns `ERR_SSL_VERSION_OR_CIPHER_MISMATCH`, confirming the remaining issue is Vercel's TLS renegotiation behavior for this custom domain.
+
+## 2026-09-05 — Favicon cascade preview
+
+- Replaced the isolated deploy branch favicon with the transparent three-bar cascade-T ICO and pushed commit `19082d7` to `codex/favicon-cascade-t`.
+- Vercel Git integration picked up the branch and created previews for both `tracify` and `tracify-cloud-eu`; the main preview URL is `https://tracify-c93nkvd62-tracify-tech.vercel.app/` and was still building at handoff.
+
+## 2026-09-06 — Cascade wordmark lockup
+
+- The rejected horizontal cascade lockup was moved to `scratch/superseded-favicons/logo-mockups/`; `public/logos/` is now empty and reserved for explicitly approved logos. Existing `public/logo.png` and `public/favicons/` were left untouched.
+- Owner clarified that only the Cascade A family is approved. Consolidated the A and three-bar exports under `public/logos/cascade-t-a/`; moved Cascade B, signal, open-trace, and preview experiments to `scratch/superseded-favicons/unselected/`.
+- Created the Photoshop-ready transparent lockup `public/logos/cascade-t-a/tracify-cascade-a-lockup.png` using only the approved Cascade A icon and the owner-supplied Tracify wordmark.
+- Added the matching self-contained SVG at `public/logos/cascade-t-a/tracify-cascade-a-lockup.svg`; the icon is vector geometry and the supplied pixel wordmark is embedded to preserve its exact appearance.
+
+## 2026-09-06 — Langfuse clone surface
+
+- Added a local `/langfuse` clone route modeled from the supplied authenticated Langfuse demo trace screen and empty-project state.
+- Demo project ID `clkpwwm0m000gmm094odg11gi` renders a filterable trace table with seeded rows, sidebar navigation, chart/table toggle, project header, and pagination controls.
+- Other project IDs, including `cmsjau8t70iv9ad0g1mkndml8`, render a first-run empty project state with onboarding cards.
+- Focused ESLint and `git diff --check` pass; full browser/build verification remains pending.
+
+## 2026-09-06 — Langfuse empty dashboard parity
+
+- Replaced the empty-project branch of the authenticated Tracify project overview with a local, componentized dark dashboard modeled on `C:/opencrawl/output/langfuse-capture/pages/empty-home.html`.
+- Added metric cards, empty chart panels, tabs, model selectors, environment/time-range controls, keyboard-visible assistant affordance, and Tracify-native quickstart/report links. The controls are local UI state only until matching data contracts are available.
+- Added a scoped dark shell/sidebar treatment only for the empty project overview; populated projects continue using the existing Tracify overview.
+- Focused ESLint passes. Full typecheck remains blocked by stale `.next/dev/types` references to removed `/langfuse` source routes, and browser verification is blocked by the existing local Convex dependency refusing connections on `127.0.0.1:3211`.
+- Restored local Convex function startup by making the two lead-delivery status fields optional in the schema for legacy records; new lead writes still populate both fields. Convex dev now reports functions ready, but the local browser session has no authenticated project to render the production route.
+- A clean isolated Next preview rendered the component at the captured desktop viewport; the visual structure matched the reference and tab/model controls changed state in the browser. The authenticated production route remains unverified because the local session reports no projects. TypeScript and focused ESLint pass; the sidebar hook warning is pre-existing.
+- Rechecked the real route with local Convex running: the dashboard shell renders, but `/onboarding/project` resolves to `Sign in to create a project` and the project route remains `Loading project...`. This confirms the remaining gap is authentication/project state, not a Convex startup failure or component render error.
+- Renamed the implementation-facing dashboard surface from the captured-reference name to Tracify: `tracify-empty-overview.tsx`, `TracifyEmptyOverview`, and `tracify-*`/`tracify-shell*` selectors. The source tree no longer contains the reference name; it remains only in historical notes and the supplied capture folder.
+- Started the built-in local host pair for visual review: marketing Tracify on `localhost:3000` and EU cloud on `localhost:4000`, with local Convex running. Added a development-only `/tracify-preview` entry and a cloud-directory link immediately after the region list so the dashboard selectors are visible without authentication; the route returns 404 in production.
+- Broadened dashboard parity: all `/dashboard` routes now use the dark Tracify cloud shell/canvas, existing dashboard topbars share interactive time-range, environment, and filter controls, and the local preview remains available for visual review. TypeScript and focused ESLint pass; the only lint output is the existing sidebar dependency warning.
+- Added a development-only populated tracing preview at `/tracing-preview` on both local hosts. It has seeded trace rows, search, type/status/environment filters, table/chart toggle, column visibility, trace metadata, cost/latency/model fields, and a volume chart. TypeScript, focused ESLint, and diff checks pass.
+- 2026-09-06: Added local-only Tracify operations preview with Sessions, Users, and Alerts tabs, search, severity filters, seeded activity rows, and dark dashboard treatment. Available on both local hosts at `/operations-preview`.
+- 2026-09-06: Aligned the dashboard sidebar with the captured navigation by adding Home, Dashboards, Tracing, Users, and Prompt Management labels; added project routes for `/dashboard/[projectId]/dashboards` and `/dashboard/[projectId]/users`.
+- 2026-09-06: Exposed Scores, Evaluators, and Human Annotation as first-class Improve navigation items; added `/dashboard/[projectId]/scores` backed by the existing evaluation engine and linked the evaluator/review routes.
+- 2026-09-06: Replaced the seeded Users dashboard rows with a Convex-backed aggregation of the project's sessions by `endUserId`, including trace/span totals and latest activity; the route now accepts and passes the real project ID.
+- 2026-09-06: Completed the captured sidebar coverage pass by adding Upgrade Plan and Support destinations alongside the existing project-scoped dashboard modules.
+- 2026-09-06: Added dashboard-mode controls to the project Dashboards route: Add Widget and Clone now provide visible local interaction feedback above the overview canvas, matching the captured dashboard workflow.
+- 2026-09-06: Upgraded dashboard-mode Add Widget into an interactive widget library with Trace volume, Cost by model, Latency percentiles, and Score analytics choices; selected widgets are tracked and the clone action reports draft state.
+- 2026-09-06: Added direct project routes `/dashboard/[projectId]/evaluators` and `/dashboard/[projectId]/human-annotation`, matching the captured destination names while reusing the authenticated evaluation engine and review queue.
+- 2026-09-06: Expanded the dashboard command menu to cover Dashboards, Users, Alerts, Scores, Evaluators, Human Annotation, Playground, and Operations so keyboard navigation matches the visible sidebar feature set.
+- 2026-09-06: Fixed project settings query navigation: `/dashboard/[projectId]/settings?tab=members` and the other supported tab values now open the requested panel instead of always defaulting to General.
+- 2026-09-06: Added captured-style project settings secondary navigation for General, API Keys, MCP & CLI, LLM Connections, Model Definitions, Scores Configs, Members, Integrations, Exports, Batch Actions, Audit Logs, Notifications, and Billing, mapped to real Tracify workflows.
+- 2026-09-06: Added `/dashboard/organizations` with live Better Auth organization switching, Convex project cards, and a New project action; added it to the project switcher.
+- 2026-09-06: Added a real New organization form to the organization workspace using Better Auth create/set-active behavior, with accessible status feedback.
+- 2026-09-06: Added first-class `/dashboard/[projectId]/tracing` route backed by the existing live RunsTable and moved the sidebar/command-menu Tracing destinations to it; `/runs` remains available for compatibility.
+- 2026-09-06: Added first-class `/dashboard/[projectId]/prompt-management` route backed by the existing prompt manager and lifecycle navigation; `/prompts` remains available for compatibility.
+- 2026-09-06: Connected the dark Home/Dashboards overview to live Convex project totals when used by authenticated project routes: traces, cost, observations/spans, and evaluation score counts now replace fixed zero values while the standalone visual previews remain deterministic.
+- 2026-09-06: Connected authenticated overview chart summaries to the existing project-stats API: Model Usage, User consumption, and Model latencies now render live cached analytics when available.
+- 2026-09-06: Added live model-cost and end-user token breakdown rows inside the overview panels, capped to the top four entries for a compact captured-dashboard layout.
+- 2026-09-06: Made the dashboard editor's widget library render selected widgets into a dedicated Added Widgets area, so Add Widget changes the dashboard view rather than only showing a notice.
+- 2026-09-06: Persisted selected dashboard widgets per project under `tracify.dashboard.widgets.<projectId>`, restoring the editor layout after refresh while keeping preview routes isolated.
+- 2026-09-06: Added per-widget removal controls to the dashboard editor, completing the add/persist/remove interaction loop.
+- 2026-09-06: Added a first-class `/dashboard/[projectId]/settings/llm-connections` workflow with provider/adapter/base URL/API-key entry, masked display, project-scoped metadata persistence, and removal; raw secrets are not persisted.
+- 2026-09-06: Made the overview Filters control interactive with trace name, session ID, end-user, and release fields, active-state indication, and Clear all behavior.
+- 2026-09-06: Added first-class `/dashboard/[projectId]/settings/model-definitions` with provider/model/token-pricing editing, project-scoped persistence, and removal; Settings navigation now points there.
+- 2026-09-06: Added first-class `/dashboard/[projectId]/settings/scores-configs` with score name, type, threshold editing, project-scoped persistence, and removal; Settings navigation now points there.
+- 2026-09-06: Added first-class `/dashboard/[projectId]/settings/mcp-cli` with Tracify CLI, MCP server, and REST API snippets plus copy feedback; Settings navigation now points there.
+- 2026-09-06: Added first-class `/dashboard/[projectId]/settings/exports` backed by the live filterable RunsTable and its CSV export action; Settings navigation now points there.
+- 2026-09-06: Added first-class `/dashboard/[projectId]/settings/notifications` backed by the existing notification-preferences component; Settings navigation now points to the project-scoped route.
+- 2026-09-06: Added authenticated Operations route at `/dashboard/[projectId]/operations`; its Sessions, Users, and Alerts tabs query Convex sessions/alerts when a project ID is supplied, while the standalone local preview keeps seeded data for visual review.
+## 2026-09-06 — Regional selector order
+
+- Moved the regional cloud switcher into the dashboard top bar before the time-range, environment, and filter selectors so the selector order is consistent across the Tracify and EU cloud local previews.
+## 2026-09-06 — Batch actions settings surface
+
+- Added a dedicated project settings Batch Actions route backed by the existing selectable runs table and corrected the settings navigation to link to it.
+- Enabled the existing Notifications tab instead of leaving it disabled.
+## 2026-09-06 — Project audit logs
+
+- Added the Convex `auditLogs` table with project-scoped access, listing, and recording functions.
+- Project setting updates and API-key rotations now create audit events; added the dedicated Audit Logs settings page and linked it from project settings.
+## 2026-09-06 — Organization settings parity
+
+- Added a dedicated organization settings route with active workspace identity, project access cards, and the existing real member/invitation workflow.
+- Added an Organization settings entry from the organization workspace when an organization is active.
+## 2026-09-06 — Project integrations parity
+
+- Added a project-scoped Integrations settings page with SDK, OpenTelemetry, MCP/CLI links and editable Slack/Teams alert destinations with test actions.
+- Updated project settings navigation to use the authenticated project integrations route instead of the public marketing page.
+## 2026-09-06 — Dashboard editor behavior
+
+- Dashboard mode now persists a per-project dashboard list, exposes an active dashboard selector, and makes Clone create a durable custom dashboard name instead of only showing a notification.
+## 2026-09-06 — Integrations navigation alignment
+
+- Updated the authenticated dashboard sidebar Integrations entry to open the project-scoped integrations workspace; public users still use the marketing integrations page.
+## 2026-09-06 — Sessions controls
+
+- Added live search across session and end-user IDs plus an environment selector to the project Sessions page; filtering runs against the existing Convex session data.
+## 2026-09-06 — User detail parity
+
+- Made live Users rows navigable and added a project-scoped user detail page with aggregated traces, spans, cost, and linked sessions.
+## 2026-09-06 — User detail navigation
+
+- Added navigable user identities and a live user detail page aggregating sessions, traces, spans, cost, environment, and last activity.
+## 2026-09-06 — Live dashboard environment filtering
+
+- Connected the dashboard environment selector to `getProjectManagementSummary`; live totals and latest activity now filter by the selected environment instead of changing only UI state.
+## 2026-09-06 — Live dashboard time-range filtering
+
+- Connected the dashboard time-range selector to the Convex project summary query; headline metrics and recent activity now use the selected 1d, 7d, or 30d window alongside environment filtering.
+## 2026-09-06 — Live dashboard filter dimensions
+
+- Connected dashboard Trace name, Session ID, End user, and Release filters to the Convex summary query; filtered headline metrics and recent runs now reflect those values together with range and environment.
+## 2026-09-06 — Dynamic environment selector
+
+- Dashboard summary responses now expose observed project environments, and the dashboard environment selector populates additional environments dynamically instead of only offering hardcoded values.
+## 2026-09-06 — Costs context alignment
+
+- Updated the Costs dashboard summary fallback to use the selected `days` and `environment` query context, keeping cost totals aligned with dashboard filters when analytics data is unavailable.
+## 2026-09-06 — Live dashboard model filtering
+
+- Connected the Model Usage/Model latencies selector to the Convex project summary query so selected model values filter headline totals and recent activity.
+## 2026-09-06 — Dynamic model selector
+
+- Dashboard summary responses now expose observed primary models, and both model selectors in the dashboard populate from live project telemetry instead of fixed provider labels.
+## 2026-09-06 — Dashboard tab behavior
+
+- Dashboard Model Usage and User Consumption tabs now calculate different live values: cost vs span usage, cost by type vs model, and token cost vs trace count.
+## 2026-09-06 — Model filter consistency
+
+- Model selection now filters the Model Usage breakdown rows and Model Latencies metric as well as the headline summary value.
+## 2026-09-06 — Usage by type semantics
+
+- Usage by type now combines live model spans and tool spans, while cost by type combines model and tool costs.
+## 2026-09-06 — Real latency percentiles
+
+- Added p50, p75, p90, p95, and p99 latency aggregation to the Tinybird model-cost query, analytics cache validators, stats API types, and dashboard selector rendering.
+## 2026-09-06 — Assistant interaction
+
+- Wired the Home surface Assistant button and Ctrl+I shortcut into the real dashboard command menu; the existing Ctrl+K shortcut remains supported.
+## 2026-09-06 — Home shell sidebar control
+
+- Wired the captured Home sidebar toggle button into the real dashboard sidebar collapse state through a shared event; Ctrl+\\ and the sidebar button continue to work together.
+## 2026-09-06 — Sidebar hook cleanup
+
+- Removed the unused project setup dependency from the sidebar navigation memo; the dashboard sidebar and Home shell controls now lint without the previous hook warning.
+## 2026-09-06 — Topbar filters interaction
+
+- Connected the dashboard topbar Filters button to the Home filter popover, so both shell entry points open the same live trace/session/user/release filters.
+## 2026-09-06 — Per-dashboard widget layouts
+
+- Dashboard widget selections are now keyed by project and dashboard name; cloned dashboards start with their own layout and switching dashboards loads the corresponding saved widgets.
+## 2026-09-06 — Saved dashboard management
+
+- Added Rename and Delete actions for custom Tracify dashboards. The default `Tracify Home` dashboard is protected, while custom dashboard names and widget layouts remain persisted per project.
+## 2026-09-06 — Dashboard-only local preview
+
+- The local `/tracify-preview` and EU Cloud `/tracify-preview` previews now render through the real dashboard shell with the Tracify sidebar and dark dashboard canvas, rather than the public marketing chrome. The regional cloud directory remains the first step before region selection.
+## 2026-09-06 — Preview project context
+
+- Local and EU Cloud dashboard previews now use a consistent `local-preview` project context and display `local-pr` in the sidebar project switcher, matching the project shown in the dashboard header and generating project-scoped navigation links.
+## 2026-09-06 — Preview Home active state
+
+- The dashboard sidebar now marks Home active on the `/tracify-preview` route when it is rendering the preview project context, matching the active state of the real project Home route.
+## 2026-09-06 — Sidebar command entry
+
+- Added the captured dashboard sidebar `Go to...` command entry with `Ctrl K`, wired to the existing Tracify command menu. Preview verification also confirms Home is visibly active.
+## 2026-09-06 — Preview command menu behavior
+
+- Mounted the shared dashboard command menu inside the standalone Home preview without adding a second visible trigger, so the sidebar `Go to...`, Assistant control, Ctrl+K, and Ctrl+I all have a live menu target in preview mode.
+## 2026-09-06 — Captured sidebar width parity
+
+- Matched the expanded dashboard sidebar to the captured stylesheet's `11.5rem` width (184px) in both the shell layout offset and sidebar surface; preview verification shows the dashboard grid starting at the captured horizontal position.
+## 2026-09-06 — Widget layout audit
+
+- Compared the captured Home layout metadata with the Tracify preview. The captured shell uses a 184px sidebar and the preview now matches that measurement; the dashboard widget inventory and selector set remain present across the same Home surface.
+## 2026-09-06 — Captured collapsed rail parity
+
+- Matched the collapsed dashboard sidebar rail to the captured stylesheet's `3rem` width (48px), alongside the already aligned 184px expanded width.
+## 2026-09-06 — Shell selector interactions
+
+- Made the dashboard workspace breadcrumb navigate to organization settings and made the project breadcrumb open the existing project switcher dropdown through a shared event, matching the captured shell's selector behavior.
+## 2026-09-06 — Environment selector semantics
+
+- Fixed the Home environment selector to use the backend's `all environments` sentinel, so switching from a specific environment clears the filter instead of querying for a literal environment named `all`.
+## 2026-09-06 — Sidebar chrome row parity
+
+- Matched the sidebar chrome row to the captured `min-h-11` measurement (44px), keeping the expanded and collapsed rail widths aligned with the supplied dashboard shell.
+## 2026-09-06 — Dashboard route audit
+
+- Both local and EU Cloud preview entry points return HTTP 200. Representative project-scoped Dashboard and Quickstart routes also return HTTP 200; the EU dev server is slower because it compiles those routes on first request, not because they are missing.
+## 2026-09-06 — Dashboard layout reset
+
+- Added a Reset action to the dashboard editor. It clears the active dashboard's saved custom widget additions while preserving the dashboard name and the default Tracify Home protection rules.
+## 2026-09-06 — Widget order controls
+
+- Added durable move-up and move-down controls for custom dashboard widgets. Reordering updates the same per-project/per-dashboard local layout that Clone, Reset, and Delete use.
+## 2026-09-06 — Standalone editor preview
+
+- Added `?edit=1` to the local and EU Cloud-compatible `/tracify-preview` route so dashboard editor controls can be inspected without authentication redirect. Runtime verification shows Add Widget, Clone, Rename, Reset, and Delete controls alongside the captured Home layout.
+## 2026-09-06 — Editor preview verification
+
+- Verified both local and EU Cloud `/tracify-preview?edit=1` responses return 200 and contain the editor controls, including Add Widget, Clone, and Reset. The EU route is slower on first compile but completes successfully.
+## 2026-09-06 — Region-first editor discovery
+
+- Added a development-only `Preview dashboard editor` link beside the existing dashboard selector preview in the regional cloud directory. It routes to `/tracify-preview?edit=1` while preserving the region-first production flow.
+## 2026-09-06 — Reference viewport grid parity
+
+- Lowered the dashboard two-column breakpoint from 1100px to 900px. At the preview's 1068px viewport, the Home metric cards now remain in the captured three-column row while narrower devices still collapse to two and then one column.
+## 2026-09-06 — Region-first selector flow
+
+- Added a development-only continuation on `/cloud/region` that selects the available EU region and redirects to the dashboard selector preview. The region page now explicitly supports the requested order: choose region, then inspect dashboard selectors.
+
+## 2026-09-06 — Capture inventory audit
+
+- Compared the captured manifest's primary dashboard pages and linked surfaces with Tracify's project route tree. The main navigation surfaces and project settings pages are present; remaining capture-only detail URLs are data-specific linked examples rather than missing top-level Tracify routes.
+
+## 2026-09-06 — Linked dashboard surfaces
+
+- Added Tracify route entry points for the captured widget library, dashboard creation/detail, automations, alert creation, prompt creation, score analytics, and evaluation rules surfaces. These render inside the shared dashboard shell and preserve the project-scoped visual language.
+- TypeScript verification passes, and all new routes returned HTTP 200 from the local runtime.
+
+## 2026-09-06 — Navigation parity
+
+- Promoted Automations and Widget library into the project sidebar and added Scores analytics and Evaluation rules to the shared command menu, so the linked captured surfaces are reachable through the same dashboard navigation model.
+- Focused TypeScript and ESLint checks pass for the navigation and linked-surface files.
+
+## 2026-09-06 — Linked surface controls
+
+- Upgraded the reusable linked-surface workspace from static cards to an interactive Tracify pattern with Overview/Activity/Configuration tabs, search, time-range and environment selectors, active filter summary, and create action.
+- TypeScript and focused ESLint checks pass for the upgraded surface.
+
+## 2026-09-06 — Rendered parity verification
+
+- Inspected the live EU preview accessibility tree after the navigation update. It now exposes the full project navigation including Automations and Widget library, plus the captured Home controls: time range, environment, filters, dashboard selector, Add Widget, Clone, Reset, model selector, and latency percentile tabs.
+
+## 2026-09-06 — Create-flow behavior
+
+- Wired the shared linked-surface Create new action to an observable draft-created state with dismiss behavior, so the new Automations, Widgets, alert, prompt, analytics, and evaluation-rule entry points have a working interaction instead of a decorative button.
+- TypeScript and focused ESLint checks pass.
+
+## 2026-09-06 — Capture path parity
+
+- Audited every distinct project path in the capture manifest and added the missing Tracify aliases for `/traces`, `/traces/setup`, `/annotation-queues`, `/evals`, and `/settings/api-keys`.
+- All five aliases returned HTTP 200 on the local runtime; the first three also returned HTTP 200 on the EU runtime during its incremental compile verification. TypeScript passes.
+
+## 2026-09-06 — Regional completion audit
+
+- Rechecked the complete normalized capture path inventory against the Tracify project route tree; no captured top-level project paths remain missing.
+- Verified the remaining EU aliases individually: `/evals` and `/settings/api-keys` both returned HTTP 200. The full alias set is now confirmed across local and EU runtimes.
+
+## 2026-09-06 — Home visual comparison
+
+- Opened the captured Home page and the Tracify editor preview together at the same in-app browser viewport. The primary shell, breadcrumb row, time range, assistant, environment, filters, dashboard selector, metric cards, chart panels, model selector, usage tabs, and latency percentile tabs are all present in the same order and with the same labels.
+- The Tracify sidebar intentionally retains additional Tracify-native destinations while preserving the captured core navigation and project-scoped behavior.
+
+## 2026-09-06 — Final implementation checks
+
+- Final focused typecheck, dashboard lint, and `git diff --check` all pass.
+
+## 2026-09-06 — Linked list views
+
+- Added a captured-style table header and empty-state body to the shared linked-surface workspace. Automations, widgets, prompts, alerts, score analytics, and evaluation rules now have a list-oriented content area beneath their filters and actions.
+- TypeScript and focused ESLint checks pass after the change.
+
+## 2026-09-06 — Linked create forms
+
+- Added a reusable create/configure form to create-oriented captured routes, with required name, environment, description, and save-state behavior. This covers alert, automation, prompt, dashboard, and tracing setup entry points.
+- TypeScript and focused ESLint checks pass.
+
+## 2026-09-06 — Durable linked drafts
+
+- Persisted create/configure draft markers per Tracify project and surface in local storage, and restore the saved state after reload. This gives the linked create flows the same durable project-scoped behavior as dashboard editor state.
+- TypeScript and focused ESLint checks pass.
+
+## 2026-09-06 — Backend integration audit
+
+- Read the Convex AI guidelines and audited the existing schema/functions before changing persistence. Prompt and evaluation data models already exist; generic alert/automation/widget/dashboard draft persistence needs a deliberate schema/API design rather than an unsafe inferred mutation.
+
+## 2026-09-06 — Existing backend feature reuse
+
+- Replaced the captured `/prompts/new` shell with the existing typed PromptManagement workspace, including real prompt listing, version creation, labels, trace links, and Convex-backed creation.
+- Replaced `/evals/rules` with the existing Convex-backed EvaluationEngineDashboard evaluator workspace, including evaluator creation and evaluation lifecycle controls.
+- Focused TypeScript and ESLint checks pass.
+
+## 2026-09-06 — Backend route verification
+
+- Verified `/dashboard/local-preview/prompts/new` and `/dashboard/local-preview/evals/rules` return HTTP 200 in both local and EU runtimes after the Convex-backed route substitutions.
+
+## 2026-09-06 — Alert creation backend wiring
+
+- Reused the existing project-owned `alerts` schema and `api.alerts.create` mutation to replace the generic `/alerts/new` surface with a real Tracify alert form supporting alert name, signal type, message, and active-state creation.
+- Focused TypeScript and ESLint checks pass.
+
+## 2026-09-06 — Automations backend wiring
+
+- Added a project-owned `automations` Convex table with access-checked list/create mutations and replaced the generic Automations page with a real workspace showing persisted automations plus event source, action, and destination creation controls.
+- Convex generated API bindings updated; TypeScript and focused ESLint checks pass.
+
+## 2026-09-06 — Saved dashboard backend contract
+
+- Added project-owned `dashboardConfigs` and `dashboardWidgets` tables with access-checked list, create-dashboard, and add-widget mutations. Widget rows are separate records so positions remain bounded and future reorder/reset/delete operations can be transactional.
+- TypeScript and focused Convex/dashboard ESLint checks pass. The existing editor still uses its compatibility local state until the authenticated dashboard route is switched to these records.
+
+## 2026-09-06 — Authenticated editor persistence
+
+- Connected the authenticated Home/Dashboards editor to the dashboard backend query and mutations: real project dashboards now sync their persisted names, Clone writes a dashboard record, and Add Widget writes a widget row. The unauthenticated preview continues using the compatibility local state.
+- TypeScript and focused ESLint checks pass.
+
+## 2026-09-06 — Persisted editor actions
+
+- Added access-checked Convex mutations for dashboard rename, delete, reset, and widget reorder, including default-dashboard protections and widget ownership validation.
+- Wired the authenticated editor actions to those mutations; local preview behavior remains compatible and isolated.
+- TypeScript and focused ESLint checks pass.
+
+## 2026-09-06 — Production build verification
+
+- Ran the Next.js production build after the persisted editor changes. The application compiled successfully, completed its TypeScript phase, and produced a `.next/BUILD_ID` artifact.
+
+## 2026-09-06 — Dashboard regression pass
+
+- Local runtime returned HTTP 200 for dashboard list/detail, Automations, Alerts, Prompt creation, and Evaluation rules after the Convex persistence changes. EU dashboard list also returned HTTP 200; the other EU routes were already verified individually during their incremental compiles.
+
+## 2026-09-06 — Reversible Tracify dashboard branding layer
+
+- Added a presentation-only dashboard theme switch to the shared shell. `ui=legacy` preserves the existing treatment; `ui=tracify-v2` applies Tracify’s yellow accent, branded navigation emphasis, and control focus states without changing routes, APIs, storage keys, or dashboard behavior.
+- Added development preview links for both themes and the branded editor at `/cloud`; the theme also honors `NEXT_PUBLIC_TRACIFY_DASHBOARD_V2=true` when no query override is present.
+- TypeScript, focused ESLint, and local preview HTTP checks pass for both theme URLs on ports 3000 and 4000.
+- Extended the branded shell treatment beyond Home so the shared sidebar and top bar receive the same Tracify accent on dashboard routes; overview chart color overrides remain scoped to the overview surface.
+- Revalidated TypeScript, focused ESLint, and both local/EU preview URLs after the shell-scope correction.

@@ -1,5 +1,20 @@
 # 2026-09-02 — First-customer execution
 
+## 2026-09-06 — Account access and onboarding flow
+
+- [completed] Add shared safe relative redirect validation and preserve Explore/Build intent through regional selection and authentication callbacks.
+- [completed] Add an authentication callback timeout/retry state and make region-change links local-safe.
+- [completed] Fix one-time API-key resume detection when the key exists in session storage after reload.
+- [completed] Persist project onboarding step, SDK selection, and dismissal state in Convex; resume setup from the dashboard; preserve recovery redirects; classify invitation failures.
+- [completed] Resolve direct regional-host display and activate the accepted organization after invitation acceptance.
+- [completed] Improve consent browser-test determinism by clearing consent before navigation and giving the dialog its tested accessible name.
+- [pending owner] Stabilize the local Next dev server or run the full browser matrix against a production/cloud-auth test host; isolated consent navigation still stalls after page render.
+- [completed] Run the public browser smoke suite against a production-style build on port 3100; all 3 tests pass after fixing consent hydration.
+- [pending owner] Run authenticated Explore/Build, onboarding, invitation, recovery, checkout, and first-trace journeys with provider-backed test credentials (`TRACIFY_E2E_AUTH=1`).
+- [completed] Add and pass deterministic browser contract coverage for cloud entry, auth/recovery surfaces, missing invitations, mobile layout, and keyboard focus (4/4 on production-style server).
+- [completed] Split Explore/Build and region selection into separate `/cloud` and `/cloud/region` steps, preserving intent and destination.
+- [pending owner] Run the full Playwright journey against a healthy local or cloud-auth test host; the current local server timed out on public page loads.
+
 - [completed] Replace the free root-cause clinic with a qualification-only 20-minute Agent Failure Fit Call and a pre-addressed email action.
 - [completed] Keep the demo explicitly seeded, preserve self-serve project creation, and add the failed-run fit-call CTA.
 - [completed] Correct Python and TypeScript dashboard quickstarts against the local SDK contracts, link first-party documentation, and remove the inactive connection control.
@@ -1338,3 +1353,213 @@ Follow-ups still open:
 2. [completed] Update the UI label to “Tracify Blog Tool” and the explicit invocation to `$tracify-blog-tool`.
 3. [completed] Update `AGENTS.md`, package scripts, publishing documentation, the canonical playbook, and maintained path references.
 4. [completed] Pass skill validation, UI-YAML parsing, targeted blog validation, two validator tests, all 22 content tests, and diff hygiene after the rename.
+# 2026-09-02 — Trust-first lifecycle implementation
+
+- [x] Add consent state and banner with analytics disabled by default.
+- [x] Gate PostHog initialization on analytics consent.
+- [x] Add validated `/api/leads` submission route with honeypot and acknowledgement/team email hooks.
+- [x] Add Convex lead submissions, notes, admin listing, status updates, and indexes.
+- [x] Set analytics on by default with explicit opt-out and add a cookie policy route.
+- [x] Add protected admin lead inbox with filtering and status updates.
+- [x] Wire welcome email after email signup and add account notification preferences.
+- [x] Wire first-trace email after onboarding observes the first run.
+- [x] Add server-side welcome hook for email and OAuth user creation.
+- [x] Migrate the primary footer newsletter form to the structured lead endpoint.
+- [x] Migrate remaining static marketing forms and demo CTA to POST lead submission flow.
+- [x] Add a 24-hour onboarding reminder that suppresses itself after first trace activation.
+- [x] Persist authenticated notification preferences in Convex with local fallback.
+- [x] Add admin lead-note listing backend.
+- [x] Add expandable lead-note history and note creation controls to the admin inbox.
+- [x] Keep privacy and admin components lint-clean after concurrent worktree changes.
+- [ ] Run Convex codegen and focused runtime/build verification after authenticating the Convex CLI.
+# EU deployment readiness audit — 2026-09-02
+
+1. [completed] Audit regional architecture, configuration invariants, public selection, auth failures, and health behavior without exposing secrets.
+2. [completed] Record the Inngest US-processing limitation and Redis health failure as launch evidence; do not claim end-to-end EU residency.
+3. [completed] Add `docs/eu-deployment-readiness-audit-2026-09-02.md` with provider evidence, unresolved risks, owner actions, and verification commands.
+4. [blocked] Provider-side Redis health, EU Stripe billing variables, and any EU queue replacement require owner access and must not be changed in this task.
+# 2026-09-02 — Activation path follow-up
+
+- [completed] Audit existing public activation surfaces and local SDK contracts.
+- [completed] Align public quickstart links with `/docs/quickstart`.
+- [completed] Make the authenticated empty state distinguish seeded demo data and hand off to the user’s runs after first ingestion.
+- [pending] Run focused contract, lint, typecheck, and browser verification.
+## Consent-gated analytics
+
+- Completed the consent/PostHog hardening slice: default-deny, version-safe storage, typed events, immediate opt-out/opt-in, identity gating, and accessible mobile-safe controls.
+- Added focused consent utility tests in `src/lib/consent.test.ts`.
+- Verification pending in this shell because Node tooling is unavailable on PATH.
+# Lead workflow hardening — 2026-09-02
+
+- [x] Harden public lead persistence, dedupe, rate limiting, and email failure handling
+- [x] Enforce admin authorization and note validation in Convex
+- [x] Expand authenticated admin inbox with filtering, assignment, statuses, and notes
+- [x] Add focused browser/API contract coverage (`tests/e2e/leads.spec.ts`); execution requires the app server and Convex credentials
+- [x] Add and run Convex lead authorization/lifecycle tests (`convex/leads.test.ts`)
+- [ ] Run codegen, lint, typecheck, build, and diff checks in a Node-enabled environment
+# Lead workflow completion audit
+
+- [x] Read the supplied goal objective and repository guidance.
+- [x] Preserve unrelated existing worktree changes.
+- [x] Tighten lead API object-shape and aggregate payload validation.
+- [x] Improve admin lead metadata presentation and responsive layout.
+- [ ] Run Node-backed lint, typecheck, tests, Convex codegen, and build when the bundled runtime is available.
+# Release-readiness disclosure update — 2026-09-02
+
+- [x] Updated `/privacy` and `/security` to disclose the accepted Inngest US-processing limitation, EU storage location, Stripe payment-provider boundary, and approved-by-default analytics behavior.
+# 2026-09-03 — SEO/AEO blog ideation
+
+- [completed] Review the canonical Tracify blog workflow, quality bar, content map, and existing blog corpus.
+- [completed] Prepare 10 non-duplicative, specialist-ready blog briefs with search intent, AEO targets, evidence, structure, and internal-link direction.
+## 2026-09-03 email sender configuration
+- Set transactional email defaults to `Kristoffer from Tracify <kb@tracify.tech>` and `kb@tracify.tech` reply-to.
+- Added the required Resend/Vercel variable names to `.env.local.example`; API key must be supplied by the owner.
+# 2026-09-03 — Langfuse parity and release operating model
+
+- [completed] Inventory the full Langfuse release history and identify its major capability arcs.
+- [completed] Inspect Tracify's current SDK manifests, publish workflow, package scripts, and existing parity features.
+- [completed] Define a prioritized parity and release-engineering roadmap.
+- [pending] Implement the release foundation and first v0.3.0 release candidate after owner approval.
+- [completed] Write the executable parity/release spec at `docs/tracify-parity-and-release-spec.md`.
+# 2026-09-03 — Release log and Microsoft 365 discovery
+
+- [completed] Add canonical release log and render `/changelog` from it.
+- [completed] Add release-log validation and release-workflow gates.
+- [completed] Generate the approved SharePoint package and searchable file index.
+- [pending owner] Supply SharePoint site URL and Microsoft 365 connector/authentication for direct upload or synchronization.
+# Plane integration documentation — 2026-09-03
+
+# ERPNext integration — 2026-09-03
+
+1. [completed] Inspect existing project integration, alert, auth, and Convex patterns.
+2. [completed] Read ERPNext and official Frappe REST API/authentication documentation.
+3. [completed] Define the first outbound integration and security boundaries in `docs/erpnext-integration.md`.
+4. [pending owner] Supply an ERPNext sandbox URL and dedicated API credentials.
+5. [pending] Implement connector, settings UI, event delivery, and security tests.
+6. [completed] Add the safe REST client boundary and focused validation tests.
+7. [completed] Run the focused ERPNext test with the bundled Node runtime (6/6 passing).
+8. [completed] Document the encryption-key deployment contract without adding a plaintext credential path.
+9. [completed] Add and test the versioned AES-GCM integration-secret envelope.
+
+1. [completed] Inspect the existing Tracify self-hosting documentation and Plane developer documentation.
+2. [completed] Add a Plane integration guide with evidence links, API/webhook boundaries, and self-hosting guidance.
+3. [pending] Run documentation/content validation and review the rendered route.
+
+# Private Plane workspace — 2026-09-04
+
+1. [completed] Correct scope to internal Tracify project management.
+2. [completed] Remove the mistaken public Plane integration page.
+3. [completed] Add the internal Plane VPS, security, workspace, backup, and go-live runbook.
+4. [completed] Point tracify.tech at Cloudflare nameservers; Cloudflare is now waiting for registrar propagation.
+5. [pending] Provision a dedicated VPS and complete the pinned Plane Docker Compose deployment.
+6. [pending] After Cloudflare activation, create the Tunnel, Access/MFA policy, and `plane.tracify.tech` route.
+# 2026-09-04 — Explore / Build playground and site assistant
+
+- [pending owner] Run authenticated Convex codegen/deployment and configure the internal assistant Tracify credentials in the target deployment.
+- [pending] Add browser E2E coverage for the new paths.
+- [pending] Submit and review the prepared draft PR for `codex/assistant-spend-guardrails` before merging and deploying the playground/assistant to production.
+- [pending owner] Add OpenAI billing details/credits, then configure the provider-side organization/project budget limit; application-side caps are already configured.
+
+# Langfuse clone surface — 2026-09-06
+
+1. [completed] Inspect the supplied Langfuse demo trace and empty-project states.
+2. [completed] Add local `/langfuse` routes for demo traces and empty project onboarding.
+3. [completed] Add working search, filter toggle, chart/table toggle, sidebar collapse, and seeded trace rows.
+4. [completed] Run focused ESLint and diff hygiene checks.
+
+# Langfuse empty dashboard parity — 2026-09-06
+
+1. [completed] Read the supplied handoff and compare the captured empty-home layout at desktop scale.
+2. [completed] Implement the Tracify project overview parity surface with responsive cards, chart states, tabs, and local controls.
+3. [completed] Preserve populated-project behavior and connect setup/report controls to existing Tracify routes.
+4. [completed] Run focused lint, TypeScript, and diff checks; document environment blockers.
+5. [completed] Restore local Convex functions and verify the remaining blocker is the local browser session having no usable project identity.
+6. [completed] Compare the clean isolated preview against the captured reference and verify interactive tab/model controls.
+7. [pending] Complete the authenticated production-route comparison after the local browser session has a usable project identity.
+
+# 2026-09-05 — EU cloud TLS regression
+
+- [completed] Reproduce the failure in Chrome and Windows curl.
+- [completed] Verify Cloudflare DNS, proxy status, edge certificate coverage, and Vercel production readiness.
+- [completed] Switch the CNAME to DNS only at the owner's request; Vercel responds to curl, but Chrome still fails the TLS handshake.
+- [pending] Resolve Vercel custom-domain TLS renegotiation or migrate to a one-level hostname covered by the free certificate.
+# Tracify dashboard feature parity — 2026-09-06
+
+1. [completed] Add the dark Tracify cloud shell and shared selectors.
+2. [completed] Add local populated tracing and operations previews for visual review.
+3. [pending] Wire preview data to authenticated Convex-backed data and complete parity across the remaining dashboard modules.
+4. [pending] Finish route-by-route parity for dashboards, users, scores, evaluators, human annotation, and settings using authenticated project data.
+5. [in progress] Validate every captured dashboard route at the same viewport; Users and the authenticated Operations route now aggregate/query Convex project data.
+6. [pending] Perform the route-by-route visual comparison and close remaining interaction/layout gaps.
+7. [in progress] Match dashboard editor controls and remaining captured interaction details before the final route audit.
+8. [completed] Add interactive widget-library and clone behavior to the Dashboards route.
+9. [completed] Add direct Evaluators and Human Annotation routes for captured navigation parity.
+10. [completed] Align keyboard command navigation with the expanded dashboard destinations.
+11. [completed] Fix project settings deep-link tab selection.
+12. [completed] Add captured-style project settings secondary navigation and workflow links.
+13. [completed] Add organization workspace route and project-switcher entry.
+14. [completed] Add real New organization creation to the workspace route.
+15. [completed] Add first-class Tracing route and preserve Runs compatibility.
+16. [completed] Add first-class Prompt Management route and preserve Prompts compatibility.
+17. [completed] Connect authenticated project overview totals to the captured dashboard metric cards.
+18. [completed] Connect authenticated overview chart summaries to project stats.
+19. [completed] Add compact live model and end-user breakdowns to the overview panels.
+20. [completed] Make dashboard-editor Add Widget render selected widgets.
+21. [completed] Persist dashboard-editor widget selection per project.
+22. [completed] Add dashboard-editor widget removal controls.
+23. [completed] Add dedicated LLM Connections settings workflow.
+24. [completed] Add functional overview filter popover and clear behavior.
+25. [completed] Add dedicated Model Definitions settings workflow.
+26. [completed] Add dedicated Scores Configs settings workflow.
+27. [completed] Add dedicated MCP & CLI settings workflow.
+28. [completed] Add dedicated Exports settings workflow.
+29. [completed] Add dedicated project-scoped Notifications settings workflow.
+30. [x] Place the regional cloud selector before the dashboard time-range/environment/filter selectors.
+31. [x] Add dedicated Batch Actions settings route and enable Notifications in project settings.
+32. [x] Add project-scoped audit logs with settings/API-key events and a dedicated settings page.
+33. [x] Add organization settings page with workspace identity, projects, and member management.
+34. [x] Add authenticated project Integrations settings surface with Slack/Teams configuration and test actions.
+35. [x] Persist dashboard names and implement working Clone behavior in the dashboard editor.
+36. [x] Point authenticated sidebar Integrations navigation to project settings.
+37. [x] Add search and environment filters to the live Sessions page.
+38. [x] Add live user detail page and link user identities from the Users table.
+39. [x] Add live user detail route and links from the Users table.
+40. [x] Make the dashboard environment selector recalculate live project summary metrics.
+41. [x] Make dashboard time-range selection filter live summary metrics.
+42. [x] Make dashboard trace, session, end-user, and release filters affect live project summary metrics.
+43. [x] Make dashboard environment options dynamic from live project runs.
+44. [x] Make Costs summary fallback honor selected range and environment.
+45. [x] Make dashboard model selector affect live summary metrics.
+46. [x] Make dashboard model options dynamic from live project telemetry.
+47. [x] Wire Model Usage and User Consumption tabs to distinct live metrics.
+48. [x] Make model selection consistent across dashboard headline, breakdown, and latency panels.
+49. [x] Make dashboard usage-by-type and cost-by-type metrics include tool telemetry.
+50. [x] Add real p50/p75/p90/p95/p99 model latency values to dashboard analytics.
+51. [x] Wire Home Assistant button and Ctrl+I to the real command menu.
+52. [x] Wire Home sidebar toggle to the real dashboard collapse state.
+53. [x] Clean the stale sidebar hook dependency and verify shell lint.
+54. [x] Wire topbar Filters button to the live Home filter popover.
+55. [x] Separate widget layouts per dashboard name and verify dashboard editor lint.
+56. [x] Add rename/delete actions for custom dashboards and protect the default Tracify Home dashboard.
+57. [x] Make local and EU Cloud dashboard previews render with the Tracify sidebar and dashboard canvas.
+58. Continue visual parity review of linked dashboard surfaces against their captured references.
+59. Compare linked-surface content and controls against the captured screenshots and wire the highest-value interactions.
+60. Verify the upgraded linked-surface controls through the authenticated-style preview and refine visual spacing against the capture.
+61. Continue behavior parity audit for dashboard editor actions and linked-surface create flows.
+62. Exercise the editor and linked create-flow state changes in-browser at the reference viewport.
+63. Complete the remaining capture-path and feature audit across both regional runtimes.
+64. Perform final visual comparison of the Home dashboard against the captured reference at the same viewport.
+65. Continue feature-depth parity for non-Home captured surfaces with real list/detail interactions.
+66. Extend linked forms with persistence-backed project data where the corresponding Tracify API exists.
+67. Replace local draft markers with Convex mutations for surfaces that have backend schemas.
+68. Wire prompt and evaluation create forms to their existing typed Convex mutations, then design schemas for the remaining linked surfaces.
+69. Verify prompt and evaluation linked routes with authenticated project data and preserve the generic surfaces for schema-less features.
+70. Add explicit Convex-backed schemas for the remaining high-value captured surfaces, starting with alerts and automations.
+71. Verify the alert creation route against an authenticated project and then design the automation contract.
+72. Verify Automations in both regional runtimes and continue the saved-dashboard/widget backend contract.
+73. Switch authenticated dashboard editor reads/writes from compatibility local storage to dashboardConfigs/dashboardWidgets.
+74. Add persisted rename, delete, reset, and reorder mutations for dashboard editor parity.
+75. Verify authenticated editor actions end-to-end against a real project session.
+76. Verify the production build artifact and regional runtime URLs after the final editor mutations.
+77. Preserve final handoff links and document the remaining backend expansion points.
+78. [x] Add reversible Tracify-branded dashboard presentation layer with legacy/v2 preview controls while preserving existing functionality.

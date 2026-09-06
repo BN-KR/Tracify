@@ -1,3 +1,103 @@
+# Langfuse parity-plus product epic — 2026-09-03
+
+## Account access and onboarding flow — 2026-09-06
+
+Implementation slice completed: centralized redirect validation, preserved Explore/Build intent through regional selection and Better Auth, added OAuth callback timeout/retry behavior, kept auth region changes local-safe, persisted project onboarding step/SDK/dismissal state in Convex, resumed setup from the dashboard, preserved recovery redirects, classified invitation failures, activated the accepted organization, and derived direct-host region display. Full Playwright journey coverage remains pending on a healthy auth-capable test host.
+
+Verification update: production-style build and server smoke passed all public browser tests (3/3) on port 3100. Authenticated browser journeys remain pending provider-backed credentials.
+Added deterministic account-access browser contract coverage; its production-style run passes 4/4 for Explore/Build entry, auth/recovery forms, missing invitations, and mobile keyboard/overflow behavior.
+Cloud entry is now explicitly sequential: path selection at `/cloud`, region confirmation at `/cloud/region`, then the regional auth/playground destination.
+
+## Objective
+
+Build a Tracify-native version of the complete trace-to-release workflow signaled by the Langfuse August update, with a sharper focus on consequential agent failures: fast investigation, trustworthy evidence, repeatable evaluation, cost-aware decisions, and an operational path from finding to ship/rollback. “Everything they have, just better” means covering the capability surface, not copying the implementation or committing to one giant release.
+
+## Product thesis
+
+Langfuse’s release is one coherent system: capture observations → select comparable evidence → configure and preview an evaluator → run scores across text and rich media → compare versions → alert and visualize → operate through APIs/CLI/self-hosting. Tracify should own the stronger outcome: explain why an agent failed, prove whether a fix works, and make the release decision auditable.
+
+## Detailed capability backlog
+
+### P0 — Failure-evidence and evaluation loop (first paid-review multiplier)
+
+1. **Representative evidence sets** — curate traces, spans, attachments, and expected outcomes into named regression sets; support inclusion from Runs/Trace Viewer and immutable snapshot membership for a review or release.
+2. **Evaluator workbench** — create LLM-as-a-Judge, deterministic/code, rubric, and threshold evaluators; preview against real observations before saving; expose the exact inputs, mapped variables, model, prompt, score definition, and failure explanation.
+3. **Visual variable mapping** — map evaluator inputs by selecting fields from a real trace/span/attachment rather than hand-writing paths; show missing/null values before execution.
+4. **Reusable evaluation rules** — separate “which observations are selected” from “how they are scored”; support filters, sampling, environment/release/status constraints, and a visible matched-volume preview.
+5. **Cost and latency preview** — estimate evaluation token cost, model cost, expected run time, and sample count before online execution; block or warn when a configured budget is exceeded.
+6. **Comparable runs** — pin evaluator version, rule version, sample membership, model, and prompt; guarantee that side-by-side evaluators can run over the same evidence set and expose comparability metadata.
+7. **Trace-linked results** — every score must link back to the source trace/span and preserve evaluator version, input snapshot, explanation, timestamp, and execution status.
+8. **Failure review report export** — generate an annotated trace, evidence summary, mechanism hypothesis, tested-fix result, regression table, and ship/fix/rollback recommendation for the paid review workflow.
+9. **Release gate** — define pass/fail thresholds and required regression cases; compare baseline versus candidate release and produce a deterministic decision with override reason and actor.
+
+### P1 — Multimodal and rich-agent evidence
+
+10. **Attachment-aware traces** — model images, audio, video, PDFs, and files as inspectable evidence with safe previews, metadata, size/type limits, retention behavior, and redaction boundaries.
+11. **Multimodal evaluators** — allow evaluators to score rich attachments alongside text; support multiple prompt messages for criteria, evaluated content, and example output.
+12. **Agent-specific templates** — ship templates for coding agents, browser agents, voice agents, RAG groundedness, tool correctness, policy adherence, exact match, and customer-defined failure taxonomies.
+13. **Evidence quality controls** — detect missing attachments, unsupported formats, truncated payloads, inaccessible URLs, and non-comparable samples before an evaluation run starts.
+
+### P1 — Investigation and scale
+
+14. **Full-text and structured trace search** — search trace/span input, output, errors, tools, models, sessions, environments, releases, and evaluator results with composable filters.
+15. **Large-run timeline** — provide a zoomable, pan-able timeline for hundreds or thousands of observations; color and group by observation type; preserve keyboard and mobile alternatives.
+16. **Trace comparison** — compare two runs, two releases, or baseline/candidate evidence sets with synchronized spans, latency, cost, errors, and score deltas.
+17. **Saved investigation views** — save/share filter, sort, time window, and comparison context with project-scoped permissions and URL deep links.
+18. **Performance budgets** — define measurable targets for run-list load, trace load, search, timeline rendering, and evaluation result queries; instrument p50/p95/p99 rather than claim generic speed improvements.
+
+### P1 — Alerts and operational feedback
+
+19. **Score and cost alerts** — alert on score regression, failure-rate change, cost ceiling, latency tail, evaluator execution failure, and missing evidence; support active/resolved/muted lifecycle.
+20. **Dashboard widgets** — turn score trends, cost, failure classes, evaluator coverage, and release gates into configurable project widgets.
+21. **Annotation queues** — route uncertain or high-impact failures to reviewers from the trace/results surface; record ownership, decision, labels, and resolution.
+22. **Evaluator version recovery** — restore any prior evaluator configuration as a draft, compare versions, and require an explicit publish action.
+
+### P2 — Developer platform and ecosystem
+
+23. **Stable public API v2** — expose ID-based endpoints for evaluators, rules, evidence sets, runs, scores, alerts, annotations, and release decisions with pagination and machine-readable errors.
+24. **Production CLI** — provide typed flags, fast startup, pagination, JSON/NDJSON output, deterministic exit codes, project/environment selection, and API-version detection; keep runtime dependencies minimal.
+25. **Prompt and configuration portability** — import/export prompts, evaluators, rules, templates, and release gates as versioned JSON with validation and secret redaction.
+26. **SDK parity** — add typed TypeScript and Python helpers for tracing rich evidence, starting evaluations, retrieving scores, and checking release gates; publish compatibility and clean-install smoke tests.
+27. **Integration breadth** — prioritize integrations by customer demand and failure-review relevance, beginning with model providers, agent frameworks, browser/voice tooling, RAG/retrieval, and MCP/tool servers.
+28. **OpenTelemetry compatibility** — accept and normalize OTel-compatible spans without weakening Tracify’s agent-specific evidence model.
+
+### P2 — Trust, governance, and deployment depth
+
+29. **Accurate model/token/cost accounting** — version pricing tables, account for model parameters and provider modes, show source and uncertainty, and allow audited corrections.
+30. **Team governance** — roles, evaluator/rule permissions, approval/publish controls, audit log, ownership, and organization-level feature flags.
+31. **Retention/export controls** — configure evidence retention, deletion, export, and redaction with explicit regional-processing behavior.
+32. **Self-hosting and air-gapped operation** — document deployment, API reference, migrations, health checks, exports, and offline/air-gapped constraints without overstating residency.
+33. **Release operating system** — canonical application versioning, changeset/conventional-commit policy, CI release gates, signed/immutable artifacts, synchronized SDK releases, changelog generation, rollback ownership, and production smoke verification.
+
+## Sequencing and dependency graph
+
+```text
+#1 Evidence sets ─┬─> #2 Evaluator workbench ─> #4 Rules ─> #6 Comparable runs
+                 └─> #10 Rich evidence ───────> #11 Multimodal evaluators
+#6 Comparable runs ─> #7 Trace-linked results ─> #8 Review report ─> #9 Release gate
+#14 Search ─────────> #16 Trace comparison ────> #19 Alerts/widgets
+#23 API v2 ──────────> #24 CLI ────────────────> #26 SDK parity
+#29 Cost correctness ─────────────────────────> #5 Cost preview / #19 Cost alerts
+#30 Governance + #31 Retention + #32 Deployment ─> #33 Release operating system
+```
+
+Phase 1 should make the first paid review repeatable. Phase 2 should make the evidence system compelling for multimodal and high-volume agents. Phase 3 should make it adoptable as a developer platform and trustworthy in larger organizations. Do not begin with broad integrations or enterprise controls before the core evidence/evaluation loop produces a useful release decision.
+
+## Epic acceptance criteria
+
+1. A user can create a named evidence set from real Tracify runs, freeze its membership, and see the source trace/span for every case.
+2. A user can configure an evaluator against a real observation, preview missing mappings, matched volume, estimated cost, and sample count, then run it without writing a path expression by hand.
+3. Two evaluator configurations can score the same frozen evidence set, and the result records enough version metadata to reproduce and compare the run.
+4. A result opens the source trace and explains the score, evaluator inputs, execution status, and any missing or unsupported evidence.
+5. A baseline/candidate comparison produces a deterministic release recommendation from configured thresholds and lists the failing cases.
+6. Text and at least one rich evidence type are supported through the same evidence/evaluator model, with explicit size, type, retention, and failure behavior.
+7. Public API and CLI workflows can create/list/run evaluators and retrieve machine-readable results with pagination and stable errors.
+8. Performance, cost, and reliability claims are backed by instrumented benchmarks and production-safe verification; no “10x” or residency claim is made without evidence.
+
+## Planning rule
+
+Each numbered capability becomes its own 1–3 day implementation issue or a small epic with explicit dependencies. Before implementation, use `/spec` on the selected slice after an `/office-hours` prioritization pass. Every spec must tie the work to a customer outcome, identify current Tracify files and interfaces, and define pass/fail acceptance criteria. Completed items must be removed from active task files under the repository task-file hygiene rule in `AGENTS.md`.
+
 # First-customer execution — 2026-09-02
 
 1. [completed] Make the offer sellable: qualification-only contact CTA, seeded-demo failure CTA, valid SDK quickstarts, first-party documentation link, and no inactive connection button.
@@ -1103,3 +1203,211 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 2. [completed] Redirect all active repository instructions and validation commands to `.agents/skills/tracify-blog-tool/`.
 3. [completed] Validate the renamed skill package, parse its UI metadata, and rerun its strict article gate and 22-test content suite.
 4. [pending] Force-add the renamed skill directory when preparing the focused PR because the local repository exclude rule hides new `.agents` paths.
+# 2026-09-02 — Trust-first lifecycle implementation
+
+Implemented the first slice: consent-gated analytics, a reusable consent utility/banner, real contact lead submission endpoint, Convex lead and note storage with admin authorization, and a Resend-compatible email adapter that logs safely when `RESEND_API_KEY` is absent. Remaining verification is Convex codegen plus lint/type/build checks; the current Windows shell cannot locate Node.
+# EU deployment readiness audit — 2026-09-02
+
+- [x] Inventory regional providers and code paths; verify dormant US remains unavailable.
+- [x] Probe public EU health, region selection, ingest, OTLP, security, and status surfaces.
+- [x] Document evidence-backed residency limits and provider-owner follow-up actions.
+- [ ] Owner: restore/verify EU Redis, configure EU Stripe billing variables, and decide on an EU queue replacement if strict processing residency is required.
+# Activation path follow-up — 2026-09-02
+
+1. [completed] Inspect landing, demo, pricing, contact, signup, quickstart, SDKs, and dashboard start state.
+2. [completed] Correct quickstart navigation and authenticated first-trace/demo handoffs.
+3. [pending] Verify focused contracts, lint/typecheck, and desktop/mobile routes.
+## Consent analytics verification (2026-09-02)
+
+1. Audit all PostHog initialization and capture paths — completed.
+2. Harden consent storage/event lifecycle and PostHog gating — completed.
+3. Finish accessible consent UI and align privacy copy — completed.
+4. Run focused tests, lint, typecheck, and browser coverage — blocked by unavailable Node tooling in current shell.
+# Lead workflow completion
+
+1. Preserve the existing first slice and inspect its auth, schema, and UI conventions.
+2. Harden the public route and Convex persistence with strict bounds, rate limiting, dedupe, safe email handling, and admin-only operations.
+3. Complete the admin inbox interaction model for metadata, filtering, statuses, assignment, notes, and recoverable states.
+4. Run focused tests, codegen, lint/typecheck/build, and diff hygiene checks; record environment blockers.
+## Lead workflow completion audit — 2026-09-02
+
+The existing lead slice already covers Convex persistence, admin authorization, status transitions, assignment, notes, Redis rate limiting, deduplication, and non-fatal email delivery. This pass added aggregate request-size and JSON-object validation and expanded the inbox presentation of required lead metadata. Verification is pending because Node/npm are unavailable in the current shell.
+# Release-readiness disclosure update — 2026-09-02
+
+- [completed] Reconciled public privacy and security disclosures with the current regional architecture: EU storage in Ireland, Stripe as the separate billing processor, and Inngest Cloud span-event processing in US infrastructure. Analytics copy now matches the approved-by-default consent behavior.
+# SEO/AEO blog ideation — 2026-09-03
+
+1. [completed] Inspect canonical editorial requirements and existing published slugs.
+2. [completed] Identify durable topic gaps across agent operations, evaluation, reliability, security, and buyer education.
+3. [completed] Produce 10 detailed briefs with primary queries, question targets, article archetype, outline, evidence, interaction, and conversion path.
+## Email sender configuration
+- [x] Use a personal verified sender identity for transactional mail.
+- [x] Document `RESEND_API_KEY`, `EMAIL_FROM`, and `EMAIL_REPLY_TO` in the local environment template.
+- [ ] Owner adds the Resend API key and verifies `kb@tracify.tech`/`tracify.tech` in Vercel and Resend.
+# 2026-09-03 — Langfuse parity and release operating model
+
+## Findings
+
+- The Langfuse release corpus contains 672 releases from v1.0.0 through the current v4/v3 maintenance streams.
+- Tracify already has early slices for prompts, datasets, evaluators, experiments, alerts, agent tracing, typed scores, cost ceilings, and TS/Python SDKs.
+- The largest parity gaps are production-grade evaluation execution, richer trace/observation querying, model/token/cost correctness, team governance, OpenTelemetry/MCP breadth, and a trustworthy release lifecycle.
+- Current release automation only publishes SDKs manually or on `sdk-v*` tags; there is no single application release manifest, changelog pipeline, release PR, provenance/attestation policy, or rollback runbook.
+
+## Recommended sequence
+
+1. Establish release foundations: canonical version source, Conventional Commit/changeset policy, CI release gate, GitHub Release generation, immutable artifacts, and rollback/runbook documentation.
+2. Make the SDKs production-ready: API compatibility tests, package smoke installs, npm trusted publishing, PyPI trusted publishing, provenance, and synchronized release notes.
+3. Ship the highest-value product parity slice: representative datasets → evaluation suites → trace-linked results → regression thresholds → canary release decision.
+4. Add query and platform depth: full-text/filter search, monitors/alerts, saved views, trace comparison, accurate model pricing/token accounting, and OTel-compatible ingestion.
+5. Add enterprise depth only after the core lifecycle is reliable: RBAC/SCIM, audit log, SSO enforcement, retention/export controls, and regional processing guarantees.
+
+## First release target
+
+Use a v0.3.0 product release plus synchronized SDK patch/minor releases. Do not publish until the release workflow passes application tests, SDK tests, typecheck/build, security checks, package smoke installs, migration checks, and a production smoke test. The first release should include a human-readable changelog with upgrade notes and a rollback owner.
+
+## Favicon candidates — 2026-09-04
+
+The first literal trace-path and pixel-`T` drafts were rejected as too busy and too close to a superhero-style badge. The refined candidates are a measured telemetry signal (`favicon-signal.svg`) and a restrained open trace loop (`favicon-open-trace.svg`), each with 16/32/48px PNG and ICO fallbacks. The signal mark is now the default multi-size app ICO; keep the open-trace version ready as the alternate.
+# Plane integration documentation — 2026-09-03
+
+# ERPNext integration — 2026-09-03
+
+- First slice: outbound Tracify alerts to ERPNext `ToDo` records through the Frappe REST API.
+- Keep trace/span evidence in Tracify; send bounded alert metadata and a trace link.
+- Implement validation, secret-safe persistence/read paths, server-only actions, idempotency, timeout/no-redirect behavior, and project/admin authorization.
+- Do not claim end-to-end completion until a customer-provided ERPNext sandbox is tested successfully.
+- Added the initial REST client boundary in `src/lib/erpnext.ts`; next code work is credential storage, project authorization, delivery wiring, and settings UI.
+
+1. [completed] Keep Plane content separate from Tracify's own self-hosting guide.
+2. [completed] Add a canonical `/docs/plane-integration` Markdoc page grounded in Plane's developer documentation.
+3. [pending] Validate the documentation route and content contracts.
+
+# Private Plane workspace — 2026-09-03
+
+1. [completed] Define Plane as an internal project-management system for Tracify.
+2. [completed] Remove the erroneous public integration page and document the isolated VPS architecture.
+3. [pending] Provision and harden the VPS, configure a Cloudflare Tunnel for `plane.tracify.tech`, Cloudflare Access/MFA, SMTP, backups, and the private Tracify workspace.
+# Explore / Build playground and site assistant — 2026-09-04
+
+## Completed
+
+1. Added a pre-region Explore / Build entry choice. Explore goes through the existing EU authentication boundary and enters a simulated `/playground`; Build continues to the existing region-scoped onboarding.
+2. Added a populated, interactive simulated dashboard surface with healthy, latency, and tool-failure scenarios, persisted account state, filters, alert dismissal, and a real-project CTA. Simulation data never enters the real project/ingestion path.
+3. Added a public Tracify assistant with curated product/setup context, cited internal links, deterministic no-provider fallback, bounded input/rate limiting, and server-only OpenAI usage when configured.
+4. Added optional redacted assistant traces to a dedicated internal Tracify ingestion target and made tracing non-blocking.
+5. Focused ESLint and TypeScript pass. Local assistant API smoke test returns a cited response. Full page smoke is limited by the existing unavailable local Convex service at `127.0.0.1:3211`.
+6. Switched the assistant to `gpt-5.6-luna` with low reasoning effort and added per-IP, daily-global, and output-token guards before enabling paid model calls.
+
+## Follow-up
+
+- Deploy the Convex schema/function change through the normal authenticated Convex deployment/codegen workflow.
+- Add browser E2E coverage for Explore/Build, playground persistence/isolation, and assistant citations/fallbacks.
+- Configure `TRACIFY_INTERNAL_INGEST_URL` and `TRACIFY_INTERNAL_API_KEY` only in the intended server deployment environment.
+- Commit/review/merge the local implementation before treating the playground and assistant as production-live; the Vercel guardrail redeploy used `main` commit `fbd51b1`.
+- Favicon cascade-T preview is pushed as `19082d7`; production promotion remains pending merge/owner approval. Only the approved Cascade A family is stored under `public/logos/cascade-t-a/`; the Photoshop-ready transparent lockup is available as both PNG and SVG, and unselected favicon experiments are archived outside `public/`.
+- Configure the provider-side OpenAI organization/project budget after the owner signs in; application caps are already configured in Vercel Production.
+
+# 2026-09-05 — EU cloud TLS regression
+
+1. [completed] Reproduce the public failure and identify the failing layer.
+2. [completed] Confirm the Cloudflare record and Vercel deployment are otherwise configured.
+3. [completed] Test the owner-selected DNS-only/Vercel path; curl succeeds but Chrome still rejects the Vercel TLS handshake.
+4. [pending] Resolve Vercel custom-domain TLS renegotiation or migrate to a one-level hostname covered by the free certificate.
+
+# Langfuse clone surface — 2026-09-06
+
+- Implemented the first local parity slice for the requested demo and empty-project views.
+- Follow-up scope: add authenticated data wiring and expand remaining project modules only if the user wants a full product-surface parity pass.
+
+# Langfuse empty dashboard parity — 2026-09-06
+
+1. [completed] Read the supplied handoff and inspect the captured empty-home reference.
+2. [completed] Add a maintainable React overview component with dark cards, empty chart states, controls, and responsive behavior.
+3. [completed] Connect the empty-project branch to the existing project route and preserve the populated overview path.
+4. [completed] Add a scoped dark shell/sidebar treatment and Tracify-native navigation links.
+5. [completed] Run focused ESLint, TypeScript, and diff hygiene checks; remove stale generated references created by the existing dev server.
+6. [completed] Restore local Convex startup with a backwards-compatible legacy lead-record schema adjustment; new lead writes still populate both delivery fields.
+7. [completed] Compare a clean isolated preview against the captured desktop reference and verify tab/model controls change state.
+8. [pending] Repeat the comparison through the authenticated production route once the local browser session has a usable project identity.
+
+# Tracify dashboard feature parity — 2026-09-06
+
+1. [completed] Apply the dark Tracify cloud shell and shared selectors across dashboard routes.
+2. [completed] Add a local populated tracing surface with search, filters, table/chart modes, columns, and seeded trace metadata.
+3. [completed] Add the populated tracing surface with search, filters, table/chart modes, columns, and seeded trace metadata.
+4. [completed] Add the operations surface with Sessions, Users, Alerts, search, and alert severity filtering.
+5. [pending] Replace seeded preview data with authenticated Convex-backed trace/session/user data and carry the feature treatment through the remaining dashboard modules.
+6. [in progress] Finish route-by-route parity for dashboards, users, scores, evaluators, human annotation, and settings using authenticated project data; navigation, Scores, Users, and the authenticated Operations route are now exposed.
+7. [pending] Run matching-viewport visual review across the captured route set and fix remaining layout/interaction mismatches.
+8. [in progress] Match dashboard editor controls and remaining captured interaction details before the final route audit.
+9. [completed] Add an interactive dashboard widget library and clone feedback to the project Dashboards route.
+10. [completed] Add direct Evaluators and Human Annotation project routes to match the captured navigation destinations.
+11. [completed] Keep command-menu navigation aligned with the expanded dashboard destination set.
+12. [completed] Make project settings tab query navigation functional for sidebar deep links.
+13. [completed] Add secondary project-settings navigation covering the captured settings destinations and mapping each to an existing Tracify workflow.
+14. [completed] Add the organization workspace route with live organization/project selection and project creation entry point.
+15. [completed] Add real New organization creation to the workspace screen.
+16. [completed] Add a first-class Tracing project route and align navigation with the captured destination name.
+17. [completed] Add a first-class Prompt Management project route and preserve the Prompts compatibility route.
+18. [completed] Connect project overview metrics to authenticated Convex summary/evaluation queries without changing the captured empty-state layout.
+19. [completed] Connect the overview's model, user-consumption, and latency summaries to the existing project-stats API.
+20. [completed] Add compact live model and end-user breakdowns inside the overview panels.
+21. [completed] Render selected dashboard-editor widgets in the overview after Add Widget.
+22. [completed] Persist dashboard-editor widget selection per project for repeatable workspace behavior.
+23. [completed] Add removal controls so persisted dashboard widgets can be edited down as well as added.
+24. [completed] Add a dedicated LLM Connections settings workflow with safe masked local metadata handling.
+25. [completed] Add functional overview filter controls matching the captured dashboard toolbar.
+26. [completed] Add a dedicated Model Definitions settings workflow with editable provider pricing metadata.
+27. [completed] Add a dedicated Scores Configs settings workflow with editable score thresholds.
+28. [completed] Add a dedicated MCP & CLI settings workflow with copyable developer-access snippets.
+29. [completed] Add a dedicated Exports settings workflow backed by live trace filtering and CSV export.
+30. [completed] Add a dedicated project-scoped Notifications settings workflow.
+31. Move the regional cloud switcher into the dashboard top bar before the remaining dashboard selectors; preserve the cloud-directory destination and verify it on both local hosts.
+32. Add a dedicated Batch Actions settings surface using the existing run selection/export workflow and enable the already-implemented Notifications tab.
+33. Add a real project-scoped audit log table, record settings/API-key changes, and expose a dedicated Audit Logs settings page.
+34. Add the captured Organization Settings surface using the existing Better Auth organization and member state.
+35. Add project-scoped Integrations settings with the existing alert destination backend and developer connection links.
+36. Make dashboard editing behavior persistent: named dashboard selector and durable clone action per project.
+37. Align the authenticated sidebar Integrations entry with the project-scoped settings route.
+38. Add captured-style search and environment filtering to live project Sessions.
+39. Add captured-style user detail navigation and live per-user session metrics.
+40. Add user detail navigation and live per-user operational metrics.
+41. Connect dashboard environment filtering to live Convex summary data.
+42. Connect dashboard time range to live summary metrics so cards and charts share the same window.
+43. Connect dashboard trace/session/user/release filters to live summary metrics.
+44. Populate dashboard environment choices from observed project telemetry.
+45. Align Costs summary fallback with selected dashboard range and environment context.
+46. Connect dashboard model selection to live project summary metrics.
+47. Populate dashboard model choices from observed project runs.
+48. Make dashboard usage and consumption tabs change live displayed metrics.
+49. Apply selected model filtering consistently to dashboard breakdowns and latency metrics.
+50. Distinguish model and tool usage in dashboard type-based tabs.
+51. Add real model latency percentile aggregation through Tinybird, Convex cache, stats API, and dashboard rendering.
+52. Connect the captured Home Assistant control to the shared dashboard command menu.
+53. Connect Home shell sidebar toggle to shared dashboard sidebar state.
+54. Remove the stale dashboard sidebar memo dependency after wiring shell controls.
+55. Connect dashboard topbar Filters control to the Home filter state.
+56. Persist dashboard widget layouts independently for each named dashboard.
+57. Add rename and delete actions for custom dashboards while protecting the default Tracify Home dashboard.
+58. Make both local dashboard previews use the authenticated-style Tracify shell for visual comparison.
+59. Continue visual parity review of linked dashboard surfaces against their captured references.
+60. Compare linked-surface content and controls against the captured screenshots and wire the highest-value interactions.
+61. Verify the upgraded linked-surface controls through the authenticated-style preview and refine visual spacing against the capture.
+62. Continue behavior parity audit for dashboard editor actions and linked-surface create flows.
+63. Exercise the editor and linked create-flow state changes in-browser at the reference viewport.
+64. Complete the remaining capture-path and feature audit across both regional runtimes.
+65. Perform final visual comparison of the Home dashboard against the captured reference at the same viewport.
+66. Continue feature-depth parity for non-Home captured surfaces with real list/detail interactions.
+67. Extend linked forms with persistence-backed project data where the corresponding Tracify API exists.
+68. Replace local draft markers with Convex mutations for surfaces that have backend schemas.
+69. Wire prompt and evaluation create forms to their existing typed Convex mutations, then design schemas for the remaining linked surfaces.
+70. Verify prompt and evaluation linked routes with authenticated project data and preserve the generic surfaces for schema-less features.
+71. Add explicit Convex-backed schemas for the remaining high-value captured surfaces, starting with alerts and automations.
+72. Verify the alert creation route against an authenticated project and then design the automation contract.
+73. Verify Automations in both regional runtimes and continue the saved-dashboard/widget backend contract.
+74. Switch authenticated dashboard editor reads/writes from compatibility local storage to dashboardConfigs/dashboardWidgets.
+75. Add persisted rename, delete, reset, and reorder mutations for dashboard editor parity.
+76. Verify authenticated editor actions end-to-end against a real project session.
+77. Verify the production build artifact and regional runtime URLs after the final editor mutations.
+78. Preserve final handoff links and document the remaining backend expansion points.
+79. Add a reversible Tracify-branded dashboard presentation layer with legacy/v2 preview controls while preserving existing functionality.

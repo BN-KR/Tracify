@@ -2,6 +2,9 @@
 
 import { useState, useSyncExternalStore, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "convex/_generated/api";
+import type { Id } from "convex/_generated/dataModel";
 
 import type { OnboardingStepId } from "@/components/onboarding/onboarding-progress";
 import {
@@ -41,6 +44,7 @@ export function OnboardingEscapeLink({
   currentStep: OnboardingStepId;
 }) {
   const router = useRouter();
+  const updateProgress = useMutation(api.projects.updateOnboardingProgress);
   const searchParams = useSearchParams();
   const [isConfirmingLeave, setIsConfirmingLeave] = useState(false);
   const sessionSnapshot = useSyncExternalStore(
@@ -70,6 +74,7 @@ export function OnboardingEscapeLink({
 
   function leaveOnboarding() {
     dismissOnboarding();
+    if (projectId) void updateProgress({ projectId: projectId as Id<"projects">, dismissed: true });
     if (returnPath) {
       clearReturnPath();
     }

@@ -6,7 +6,7 @@ let stripeClient: Stripe | undefined;
 export function getStripe() {
   const apiKey = process.env.STRIPE_SECRET_KEY;
   if (!apiKey) throw new Error("Stripe is not configured");
-  stripeClient ??= new Stripe(apiKey, { apiVersion: "2026-07-29.dahlia" });
+  stripeClient ??= new Stripe(apiKey, { apiVersion: "2026-08-26.dahlia" });
   return stripeClient;
 }
 

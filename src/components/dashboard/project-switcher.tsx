@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -17,10 +18,11 @@ import {
 
 const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 
-export function ProjectSwitcher({ isCollapsed = false }: { isCollapsed?: boolean }) {
+export function ProjectSwitcher({ isCollapsed = false, previewProjectName }: { isCollapsed?: boolean; previewProjectName?: string }) {
   const router = useRouter();
   const params = useParams();
   const currentProjectId = params?.projectId as string | undefined;
+  const [open, setOpen] = useState(false);
 
   const projects = useQuery(api.projects.getProjectsByUserOrOrg) || [];
 
@@ -34,11 +36,17 @@ export function ProjectSwitcher({ isCollapsed = false }: { isCollapsed?: boolean
     router.push(`/dashboard/${projectId}`);
   }
 
-  const label = selectedProject?.name ?? "No projects";
+  const label = previewProjectName ?? selectedProject?.name ?? "No projects";
   const initials = label.slice(0, 1).toUpperCase();
 
+  useEffect(() => {
+    function openProjectSwitcher() { setOpen(true); }
+    window.addEventListener("tracify:open-project-switcher", openProjectSwitcher);
+    return () => window.removeEventListener("tracify:open-project-switcher", openProjectSwitcher);
+  }, []);
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -82,6 +90,9 @@ export function ProjectSwitcher({ isCollapsed = false }: { isCollapsed?: boolean
           <DropdownMenuItem disabled>No projects yet</DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => router.push("/dashboard/organizations")}>
+          <span>Organizations</span>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push("/onboarding/project")}>
           <Plus className="size-4" />
           <span>New project</span>

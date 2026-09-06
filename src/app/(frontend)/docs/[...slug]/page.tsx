@@ -6,7 +6,7 @@ import { DocsActions } from "@/components/docs/docs-actions";
 import { DocsSidebar } from "@/components/docs/docs-sidebar";
 import { MarkdocDoc } from "@/components/docs/markdoc-doc";
 import { FuturePage } from "@/components/marketing/future19-page";
-import { getDoc, getDocs } from "@/lib/markdoc-docs";
+import { getDoc, getDocs, getDocMarkdown } from "@/lib/markdoc-docs";
 
 export function generateStaticParams() {
   return getDocs().map((doc) => ({ slug: [doc.slug] }));
@@ -23,8 +23,10 @@ export default async function DocsArticlePage({ params }: { params: Promise<{ sl
 
   const docs = getDocs();
   const navigationDocs = docs.map(({ slug, title, section }) => ({ slug, title, section }));
-  const markdown = `# ${doc.title}\n\n${doc.description}\n\n${doc.body}`;
-  const next = docs[docs.findIndex((item) => item.slug === doc.slug) + 1];
+  const markdown = getDocMarkdown(doc.slug) ?? "";
+  const index = docs.findIndex((item) => item.slug === doc.slug);
+  const previous = docs[index - 1];
+  const next = docs[index + 1];
 
   return (
     <FuturePage>
@@ -44,12 +46,7 @@ export default async function DocsArticlePage({ params }: { params: Promise<{ sl
               <div className="xl:hidden"><DocsActions markdown={markdown} installUrl="/docs/mcp-server" /></div>
             </div>
             <article className="docs-markdoc mt-10 max-w-3xl"><MarkdocDoc content={doc.content} /></article>
-            {next ? (
-              <Link href={`/docs/${next.slug}`} className="mt-16 flex max-w-3xl items-center justify-between border-t border-black py-6 transition-colors hover:bg-[#f4d44d]">
-                <span><span className="font-mono text-[9px] uppercase tracking-[.13em] text-black/55">Next guide</span><span className="mt-2 block font-pixel text-3xl tracking-[-.05em]">{next.title}</span></span>
-                <ArrowRight className="size-5" />
-              </Link>
-            ) : null}
+            <div className="mt-16 grid max-w-3xl gap-px border-t border-black sm:grid-cols-2">{previous ? <Link href={`/docs/${previous.slug}`} className="flex items-center gap-3 border-b border-black py-6 transition-colors hover:bg-[#f4d44d]"><ChevronLeft className="size-5" /><span><span className="font-mono text-[9px] uppercase tracking-[.13em] text-black/55">Previous</span><span className="mt-2 block font-pixel text-2xl tracking-[-.05em]">{previous.title}</span></span></Link> : <span />}{next ? <Link href={`/docs/${next.slug}`} className="flex items-center justify-between border-b border-black py-6 text-right transition-colors hover:bg-[#f4d44d]"><span><span className="font-mono text-[9px] uppercase tracking-[.13em] text-black/55">Next</span><span className="mt-2 block font-pixel text-2xl tracking-[-.05em]">{next.title}</span></span><ArrowRight className="size-5" /></Link> : null}</div>
           </main>
           <aside className="hidden border-l border-black bg-[#eceae3] p-5 xl:block">
             <div className="sticky top-6">

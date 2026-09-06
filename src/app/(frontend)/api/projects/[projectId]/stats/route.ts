@@ -19,6 +19,11 @@ type StatsCachePayload = {
     totalCostUsd: number;
     spanCount: number;
     avgLatencyMs?: number;
+    p50LatencyMs?: number;
+    p75LatencyMs?: number;
+    p90LatencyMs?: number;
+    p95LatencyMs?: number;
+    p99LatencyMs?: number;
   }>;
   toolCosts: Array<{
     toolName: string;

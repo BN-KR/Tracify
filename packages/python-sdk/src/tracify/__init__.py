@@ -186,7 +186,7 @@ class TracifyClient:
         "us": "https://us.cloud.tracify.tech",
     }
 
-    def __init__(self, api_key: Optional[str] = None, host: Optional[str] = None, project_id: Optional[str] = None, region: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, host: Optional[str] = None, project_id: Optional[str] = None, region: Optional[str] = None, release: Optional[str] = None, environment: Optional[str] = None, deployment_id: Optional[str] = None, session_id: Optional[str] = None, end_user_id: Optional[str] = None, tags: Optional[List[str]] = None):
         self.api_key = api_key or os.environ.get("TRACIFY_API_KEY")
         if not self.api_key:
             raise ValueError("TRACIFY_API_KEY or TRACIFY_API_KEY must be provided or set as an environment variable")
@@ -199,6 +199,12 @@ class TracifyClient:
         if key_region and host_region and key_region != host_region:
             raise ValueError(f"Tracify API key region mismatch: this key belongs to {key_region.upper()}, but the client is configured for {host_region.upper()}.")
         self.project_id = project_id
+        self.release = release
+        self.environment = environment
+        self.deployment_id = deployment_id
+        self.session_id = session_id
+        self.end_user_id = end_user_id
+        self.tags = tags or []
         self.ingest_url = f"{self.host}/api/ingest"
         self.check_cost_url = f"{self.host}/api/orchestration/check-cost"
         self._http = httpx.Client(timeout=10) if _HAS_HTTPX else None
@@ -235,6 +241,12 @@ class TracifyClient:
             "metadata": {},
             **kwargs
         }
+        span.setdefault("release", self.release or os.environ.get("TRACIFY_RELEASE"))
+        span.setdefault("environment", self.environment or os.environ.get("TRACIFY_ENVIRONMENT"))
+        span.setdefault("deploymentId", self.deployment_id)
+        span.setdefault("sessionId", self.session_id)
+        span.setdefault("endUserId", self.end_user_id)
+        span.setdefault("tags", self.tags)
         self._send_span(span)
 
     def get_prompt(self, name: str, environment: str = "production", cache_ttl_seconds: float = 60, fallback: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -477,7 +489,7 @@ class TracifyClient:
         raise last_error or Exception("All fallback models exhausted")
 
 
-def trace_agent(client: Optional[TracifyClient] = None):
+def trace_agent(client: Optional[TracifyClient] = None, environment: Optional[str] = None, release: Optional[str] = None, deployment_id: Optional[str] = None, session_id: Optional[str] = None, end_user_id: Optional[str] = None, tags: Optional[List[str]] = None):
     """
     Decorator to wrap an agent's main entry point.
     Automatically handles runId generation and run_end span.
@@ -487,7 +499,7 @@ def trace_agent(client: Optional[TracifyClient] = None):
         async def async_wrapper(*args, **kwargs):
             nonlocal client
             if client is None:
-                client = TracifyClient()
+                client = TracifyClient(environment=environment, release=release, deployment_id=deployment_id, session_id=session_id, end_user_id=end_user_id, tags=tags)
             
             run_id = str(uuid.uuid4())
             start_time = time.time()
@@ -521,7 +533,7 @@ def trace_agent(client: Optional[TracifyClient] = None):
         def sync_wrapper(*args, **kwargs):
             nonlocal client
             if client is None:
-                client = TracifyClient()
+                client = TracifyClient(environment=environment, release=release, deployment_id=deployment_id, session_id=session_id, end_user_id=end_user_id, tags=tags)
             
             run_id = str(uuid.uuid4())
             start_time = time.time()

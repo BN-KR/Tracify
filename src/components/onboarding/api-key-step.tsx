@@ -2,11 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import posthog from "posthog-js";
+import { captureAnalytics } from "@/lib/analytics";
 
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
 import { getOneTimeApiKey } from "@/lib/onboarding-client-state";
 import { getDeploymentRegion, getTracifyRegion } from "@/lib/regions";
+import { useMutation } from "convex/react";
+import { api } from "convex/_generated/api";
+import type { Id } from "convex/_generated/dataModel";
 
 const API_KEY_COPIED_STORAGE_KEY = "tracify.onboarding.apiKeyCopied";
 const isPostHogConfigured = Boolean(
@@ -20,6 +23,8 @@ export function ApiKeyStep() {
   const [apiKey, setApiKey] = useState("");
   const [initialized, setInitialized] = useState(false);
   const region = getTracifyRegion(getDeploymentRegion());
+  const updateProgress = useMutation(api.projects.updateOnboardingProgress);
+  const projectId = typeof window !== "undefined" ? window.sessionStorage.getItem("tracify.onboarding.projectId") : null;
   useEffect(() => {
     const id = window.setTimeout(() => {
       setApiKey(getOneTimeApiKey());
@@ -36,7 +41,7 @@ export function ApiKeyStep() {
     if (!apiKey) return;
     await navigator.clipboard.writeText(apiKey);
     if (isPostHogConfigured) {
-      posthog.capture("api_key_copied", { issuance_flow: "onboarding" });
+      captureAnalytics("api_key_copied", { issuance_flow: "onboarding" });
     }
     window.sessionStorage.setItem(API_KEY_COPIED_STORAGE_KEY, "true");
     setCopied(true);
@@ -86,7 +91,7 @@ export function ApiKeyStep() {
             <button
               type="button"
               disabled={!copied}
-              onClick={() => window.location.assign("/onboarding/install")}
+              onClick={() => { if (projectId) void updateProgress({ projectId: projectId as Id<"projects">, step: "install" }); window.location.assign("/onboarding/install"); }}
               className="h-10 border border-black/15 bg-white px-4 text-[13px] text-black/70 transition-colors hover:bg-[#f3f2ed] hover:text-black disabled:cursor-not-allowed disabled:text-black/55"
             >
               Continue

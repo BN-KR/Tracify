@@ -6,7 +6,9 @@ import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import Link from "next/link";
 import { AlertTriangle, Check, Loader2, Send } from "lucide-react";
-import posthog from "posthog-js";
+import { captureAnalytics } from "@/lib/analytics";
+import { authClient } from "@/lib/auth-client";
+import { useMutation } from "convex/react";
 
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
 import { clearOneTimeApiKey, getOneTimeApiKey } from "@/lib/onboarding-client-state";
@@ -26,12 +28,14 @@ export function WaitingStep() {
   const [fallbackProjectName, setFallbackProjectName] = useState(FALLBACK_PROJECT_NAME);
   const [apiKeyDisplay, setApiKeyDisplay] = useState("tracify_sk_live_...");
   const [apiKey, setApiKey] = useState("");
+  const { data: session } = authClient.useSession();
   const region = getTracifyRegion(getDeploymentRegion());
   const wrongRegion = useMemo(() => getWrongRegion(apiKey, region.id), [apiKey, region.id]);
   const onboardingState = useQuery(
     api.agentRuns.getProjectOnboardingState,
     projectId ? { projectId: projectId as Id<"projects"> } : "skip",
   );
+  const updateProgress = useMutation(api.projects.updateOnboardingProgress);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -58,17 +62,21 @@ export function WaitingStep() {
     window.location.assign(
       `/onboarding/success?projectId=${onboardingState.projectId}&runId=${onboardingState.firstRunId}`,
     );
-  }, [onboardingState]);
+    void updateProgress({ projectId: onboardingState.projectId, step: "success" });
+  }, [onboardingState, updateProgress]);
 
   useEffect(() => {
     if (!onboardingState?.hasReceivedFirstSpan || capturedFirstTrace.current) return;
     capturedFirstTrace.current = true;
-    posthog.capture("first_trace_received", {
+    if (session?.user.email) {
+      void fetch("/api/lifecycle/first-trace", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: session.user.email, name: session.user.name, projectId: onboardingState.projectId, runId: onboardingState.firstRunId }) }).catch(() => undefined);
+    }
+    captureAnalytics("first_trace_received", {
       elapsed_seconds: elapsed,
       source: probeState === "accepted" ? "onboarding_probe" : "agent",
       region: region.id,
     });
-  }, [elapsed, onboardingState, probeState, region.id]);
+  }, [elapsed, onboardingState, probeState, region.id, session?.user.email, session?.user.name]);
 
   useEffect(() => () => clearOneTimeApiKey(), []);
 
@@ -118,12 +126,12 @@ export function WaitingStep() {
       }
       setProbeState("accepted");
       setProbeMessage("The ingest endpoint accepted a test span. Keep this page open while it reaches the trace viewer.");
-      posthog.capture("onboarding_probe_accepted", { region: region.id });
+      captureAnalytics("onboarding_probe_accepted", { region: region.id });
     } catch (error) {
       const message = error instanceof Error ? error.message : "The test span could not be sent.";
       setProbeState("failed");
       setProbeMessage(message);
-      posthog.capture("onboarding_probe_failed", { region: region.id, error: message.slice(0, 120) });
+      captureAnalytics("onboarding_probe_failed", { region: region.id, error: message.slice(0, 120) });
     }
   }
 

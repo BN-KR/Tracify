@@ -22,7 +22,7 @@ export TRACIFY_API_KEY=your_sk_live_...
 ```python
 from tracify import trace_agent, llm_call, tool_call
 
-@trace_agent()
+@trace_agent(environment="development", release="quickstart")
 async def my_agent(query: str):
     # LLM Call
     llm_call(

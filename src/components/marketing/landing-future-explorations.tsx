@@ -739,8 +739,8 @@ function NewsletterSection() {
             </p>
           </div>
           <form
-            action="/contact"
-            method="get"
+            action="/api/leads"
+            method="post"
             className="border border-black/20 bg-white p-6"
           >
             <label className="font-mono text-[9px] uppercase tracking-[0.13em]">

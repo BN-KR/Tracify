@@ -32,6 +32,8 @@ export function CostDashboard({ projectId }: { projectId: string }) {
   const searchParams = useSearchParams();
   const summary = useQuery(api.projects.getProjectManagementSummary, projectId ? {
     projectId: projectId as Id<"projects">,
+    days: Number(searchParams.get("days")) || 30,
+    environment: searchParams.get("environment") || "all",
   } : "skip");
   const [range, setRange] = useState(() => Number(searchParams.get("days")) || 30);
   const liveRefreshKey =

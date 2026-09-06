@@ -1249,8 +1249,8 @@ function ContactExplorations() {
               </p>
             </div>
             <form
-              action="/contact"
-              method="get"
+              action="/api/leads"
+              method="post"
               className="border border-black/20 bg-[#eceae3] p-7"
             >
               <label className="block font-mono text-[9px] uppercase tracking-[0.13em]">

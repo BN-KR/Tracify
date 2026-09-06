@@ -1,0 +1,87 @@
+name: Release candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish validated SDK artifacts
+        type: boolean
+        default: false
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          npm ci --legacy-peer-deps
+          python -m pip install --upgrade build twine pytest
+      - name: Require a clean release checkout
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain)" || { echo "Release candidates require a clean checkout"; exit 1; }
+      - name: Generate release metadata
+        run: npm run release:metadata
+      - name: Validate release log
+        run: npm run validate:release-log
+      - name: Prepare SharePoint discovery index
+        run: npm run prepare:m365-index
+      - name: Verify application
+        run: |
+          npm run typecheck
+          npm run lint
+          npm run test:content
+          npm run test:activation
+          npm run test:regions
+          npm run build
+      - name: Verify TypeScript SDK
+        working-directory: packages/ts-sdk
+        run: |
+          npm ci --legacy-peer-deps
+          npm run build
+          npm test
+          npm pack --pack-destination ../../release-artifacts
+      - name: Verify Python SDK
+        working-directory: packages/python-sdk
+        run: |
+          python -m pip install -e .
+          python -m pytest -q
+          python -m build --outdir ../../release-artifacts
+          python -m twine check ../../release-artifacts/*
+      - name: Upload candidate artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tracify-release-candidate
+          path: |
+            release-metadata.json
+            release-artifacts/
+      - name: Publish TypeScript SDK
+        if: ${{ inputs.publish == true }}
+        working-directory: packages/ts-sdk
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish Python SDK
+        if: ${{ inputs.publish == true }}
+        run: python -m twine upload release-artifacts/*.whl release-artifacts/*.tar.gz
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}

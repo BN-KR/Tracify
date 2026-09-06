@@ -8,7 +8,7 @@ This is NOT the Next.js you know. This version has breaking changes — APIs, co
 This project uses Convex as its backend. **Always read `convex/_generated/ai/guidelines.md` first** before writing Convex code. The file contains rules that override what you may have learned about Convex from training data.
 <!-- convex-ai-end -->
 
-**Critical:** Read `memory.md` at session start. Update `memory.md`, `task.md`, `implementation_plan.md` after every major task.
+**Critical:** Read `memory.md` at session start. Update `memory.md`, `task.md`, `implementation_plan.md` after every major task. Task-file hygiene is mandatory: when an agent finishes a task, remove the completed item from the active task file rather than leaving it as a permanent checked-off backlog entry. Preserve durable history in `memory.md`, a changelog, PR history, or another explicitly historical section when that history is useful; do not duplicate completed work in active task lists. Before finishing, scan the task files it touched and remove completed entries, stale empty headings, and superseded duplicates while preserving unresolved owner/blocker items.
 
 ## Commands
 - `npm run dev` — Next.js dev server on :3000

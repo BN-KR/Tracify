@@ -1,5 +1,4 @@
 // This file is loaded by the standalone Playwright test runner, not by the Next.js app build.
-// @ts-nocheck
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
@@ -21,7 +20,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
+    command: `${process.execPath} node_modules/next/dist/bin/next dev --webpack`,
     url: "http://127.0.0.1:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tracify
 
-## Getting Started
+Tracify is an observability and failure-prevention platform for AI agents. It captures agent runs, LLM generations, tool calls, costs, evaluations, and failures so teams can understand what happened, fix it, verify the fix, and prevent the same failure from returning.
 
-First, run the development server:
+## The product loop
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+capture → diagnose → assign → fix → verify → prevent recurrence
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Quickstart
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### TypeScript / Node.js
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install tracify-sdk
+export TRACIFY_API_KEY=tracify_sk_live_...
+```
 
-## Learn More
+```typescript
+import { traceAgent, llmCall, toolCall } from "tracify-sdk";
 
-To learn more about Next.js, take a look at the following resources:
+const run = traceAgent(async (question: string) => {
+  await llmCall({ input: question, output: "I will look that up.", modelId: "gpt-4o-mini", costUsd: 0.001 });
+  await toolCall({ toolName: "search", input: { query: question }, output: "Search completed", latencyMs: 120 });
+  return "Done";
+}, { environment: "development", release: "quickstart" });
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+await run("What is agent observability?");
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Python
 
-## Deploy on Vercel
+```bash
+pip install tracify-sdk
+export TRACIFY_API_KEY=tracify_sk_live_...
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```python
+from tracify import trace_agent, llm_call, tool_call
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+@trace_agent(environment="development", release="quickstart")
+async def run_agent(question: str):
+    llm_call(input_data=question, output_data="I will look that up.", model_id="gpt-4o-mini", cost_usd=0.001)
+    tool_call(tool_name="search", input_data={"query": question}, output_data="Search completed", latency_ms=120)
+    return "Done"
+```
+
+Run the example once, then open the [Tracify dashboard](https://tracify.tech/dashboard). The canonical guide is [docs/quickstart.md](docs/quickstart.md).
+
+## What is included
+
+- Agent tracing for nested runs, LLM calls, tools, custom spans, retries, and errors.
+- Failure investigation through trace details, alerts, comments, and review workflows.
+- Evaluation with datasets, evaluators, experiments, typed scores, feedback, and monitors.
+- Prompt versioning, deployment labels, trace links, and playground workflows.
+- Cost and runtime policies with fail-open SDK behavior.
+- Region-aware endpoints and public health/status surfaces.
+
+## Repository map
+
+| Surface | Location | Status |
+| --- | --- | --- |
+| Web app and API | `src/`, `convex/` | Active |
+| TypeScript SDK | `packages/ts-sdk/` | Active; package `tracify-sdk` |
+| Python SDK | `packages/python-sdk/` | Active; package `tracify-sdk` |
+| Playwright package | `packages/playwright/` | Active |
+| Documentation | `content/docs/`, `docs/` | Active |
+| Tinybird analytics | `tinybird/` | Active |
+| Regional configuration | `config/`, `docs/regional-cloud-runbook.md` | Active |
+| CLI / MCP / curated examples | Planned after contracts stabilize |
+
+## Architecture
+
+```text
+SDK / OTLP → Next.js ingest → asynchronous processing
+           → Tinybird raw spans and analytics
+           → Convex metadata, run summaries, workflow state, evaluations
+           → dashboard and future CLI / CI / MCP consumers
+```
+
+Tinybird is the analytical store for high-volume telemetry. Convex is the application store for project-owned metadata and workflow state. SDK telemetry fails open so an observability outage does not interrupt a customer agent.
+
+## Hosted and regional status
+
+The hosted application is the supported path. Regional availability and data-flow claims are documented on the public [status](https://tracify.tech/status), [security](https://tracify.tech/security), and [data regions](content/docs/data-regions.mdoc) surfaces. The EU deployment currently discloses that asynchronous event processing transits the United States; it must not be described as end-to-end EU-resident until that boundary is removed or the product contract changes.
+
+## Verification
+
+```bash
+npm ci --legacy-peer-deps
+npm run typecheck
+npm run lint
+npm run test:content
+npm run test:activation
+npm run test:sdk:ts
+npm run test:sdk:python
+npm run build
+```
+
+See [docs/releasing.md](docs/releasing.md) before publishing or deploying.
+
+## Security
+
+API keys are hashed server-side and shown only once. Redaction is applied before asynchronous telemetry processing. Do not send secrets or unnecessary personal data in trace metadata.
+
+## License
+
+The application and SDKs are MIT licensed unless a subdirectory states otherwise.

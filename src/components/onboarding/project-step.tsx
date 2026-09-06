@@ -6,7 +6,7 @@ import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import posthog from "posthog-js";
+import { captureAnalytics } from "@/lib/analytics";
 
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
 import { setOneTimeApiKey } from "@/lib/onboarding-client-state";
@@ -53,8 +53,9 @@ export function ProjectStep() {
     setError("");
     try {
       const result = await createProject({ name: trimmed });
+      if (session?.user.email) void fetch("/api/lifecycle/onboarding-reminder", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: session.user.email, name: session.user.name, projectId: result.projectId }) }).catch(() => undefined);
       if (isPostHogConfigured) {
-        posthog.capture("project_created", { creation_flow: "onboarding" });
+        captureAnalytics("project_created", { creation_flow: "onboarding" });
       }
       setOneTimeApiKey(result.plaintextApiKey);
       window.sessionStorage.removeItem(API_KEY_COPIED_STORAGE_KEY);

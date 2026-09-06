@@ -21,7 +21,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/utils";
-import posthog from "posthog-js";
+import { captureAnalytics } from "@/lib/analytics";
 
 const isPostHogConfigured = Boolean(
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
@@ -63,7 +63,7 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
         confirmationWord,
       });
       if (isPostHogConfigured) {
-        posthog.capture("project_deleted");
+        captureAnalytics("project_deleted");
       }
       router.replace("/dashboard");
     } catch (err) {

@@ -75,6 +75,7 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
   );
   const installReady = typeof window !== "undefined" && window.sessionStorage.getItem(INSTALL_READY_STORAGE_KEY) === "true";
   const hasFirstTrace = onboardingState?.hasReceivedFirstSpan === true;
+  const persistedStep = onboardingState?.onboardingStep ?? null;
   const checklist = [
     { label: "Create project", status: hasProject ? "completed" : "current" },
     { label: "Copy API key", status: onboardingSession.hasCopiedKey ? "completed" : hasProject ? "current" : "pending" },
@@ -129,7 +130,7 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
-              href={hasProject ? `/dashboard/${effectiveProjectId}/quickstart` : "/onboarding/project"}
+              href={hasProject ? (persistedStep === "api-key" ? "/onboarding/api-key" : persistedStep === "install" ? "/onboarding/install" : persistedStep === "waiting" ? "/onboarding/waiting" : `/dashboard/${effectiveProjectId}/quickstart`) : "/onboarding/project"}
               className={buttonVariants({
                 variant: "default",
                 className: "h-9 px-4 uppercase",
