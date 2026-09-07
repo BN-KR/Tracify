@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { useConvexAuth, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 
 import { api } from "convex/_generated/api";
+import { ConvexAuthState } from "@/components/auth/convex-auth-state";
+import { useConvexAuthReadiness } from "@/hooks/use-convex-auth-readiness";
 
 const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
@@ -17,15 +19,17 @@ export function ProjectRouteGate({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useConvexAuth();
+  const auth = useConvexAuthReadiness();
+  const isAuthenticated = auth.isAuthenticated;
   const routeState = useQuery(
     api.projects.getProjectRouteState,
     isAuthenticated ? { projectId } : "skip",
   );
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace("/sign-in");
+    if (auth.status === "unauthenticated") {
+      const returnPath = `${window.location.pathname}${window.location.search}`;
+      router.replace(`/sign-in?redirect_url=${encodeURIComponent(returnPath)}`);
       return;
     }
 
@@ -40,9 +44,13 @@ export function ProjectRouteGate({
     window.localStorage.removeItem(LAST_PROJECT_STORAGE_KEY);
     window.sessionStorage.removeItem(PROJECT_ID_STORAGE_KEY);
     return;
-  }, [isAuthenticated, isLoading, routeState, router]);
+  }, [auth.status, isAuthenticated, routeState, router]);
 
-  if (isLoading || !isAuthenticated || routeState === undefined) {
+  if (auth.status === "error") {
+    return <ConvexAuthState mode="error" redirectPath={`/dashboard/${projectId}`} />;
+  }
+
+  if (auth.status === "loading" || !isAuthenticated || routeState === undefined) {
     return (
       <div className="px-6 py-6 font-mono text-sm text-black/55">
         Loading project...

@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { api } from "convex/_generated/api";
 import type { BillingInterval, PaidPlan } from "@/lib/billing-links";
+import { ConvexAuthState } from "@/components/auth/convex-auth-state";
+import { useConvexAuthReadiness } from "@/hooks/use-convex-auth-readiness";
 
 function isPaidPlan(value: string | null): value is PaidPlan {
   return value === "pro" || value === "team";
@@ -18,7 +20,8 @@ function isBillingInterval(value: string | null): value is BillingInterval {
 
 export default function PricingCheckoutPage() {
   const searchParams = useSearchParams();
-  const { isAuthenticated, isLoading } = useConvexAuth();
+  const auth = useConvexAuthReadiness();
+  const { isAuthenticated } = auth;
   const projects = useQuery(api.projects.getProjectsByUserOrOrg, isAuthenticated ? {} : "skip");
   const createProject = useMutation(api.projects.createProject);
   const plan = isPaidPlan(searchParams.get("plan")) ? searchParams.get("plan") as PaidPlan : "pro";
@@ -85,7 +88,7 @@ export default function PricingCheckoutPage() {
           {interval === "annual" ? "Annual billing with 20% savings." : "Flexible monthly billing."} Select the project this subscription should cover, then continue to Stripe.
         </p>
 
-        {isLoading || (isAuthenticated && projects === undefined) ? (
+        {auth.status === "error" ? <ConvexAuthState mode="error" redirectPath={returnPath} /> : auth.status === "loading" || (isAuthenticated && projects === undefined) ? (
           <p className="mt-10 border-t border-black/20 pt-6 font-mono text-[10px] uppercase">Loading your workspace…</p>
         ) : !isAuthenticated ? (
           <div className="mt-10 border-t border-black/20 pt-6">

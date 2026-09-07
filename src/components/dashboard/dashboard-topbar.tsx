@@ -283,9 +283,11 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                   <span>Documentation</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <MessageSquare size={14} className="opacity-60" />
-                <span>Send Feedback</span>
+              <DropdownMenuItem asChild>
+                <Link href="/contact">
+                  <MessageSquare size={14} className="opacity-60" />
+                  <span>Send Feedback</span>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

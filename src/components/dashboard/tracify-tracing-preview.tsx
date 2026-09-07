@@ -36,6 +36,7 @@ export function TracifyTracingPreview() {
   const [view, setView] = useState<"table" | "chart">("table");
   const [visibleColumns, setVisibleColumns] = useState<string[]>(["Input", "Output", "Status", "Latency", "Cost", "Model", "Environment"]);
   const [showColumns, setShowColumns] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const filtered = useMemo(() => traces.filter((trace) => {
     const haystack = `${trace.name} ${trace.traceName} ${trace.input} ${trace.output} ${trace.id}`.toLowerCase();
@@ -61,12 +62,13 @@ export function TracifyTracingPreview() {
         <select className="tracify-control" value={type} onChange={(event) => setType(event.target.value)} aria-label="Trace type"><option>All types</option><option>GENERATION</option><option>SPAN</option></select>
         <select className="tracify-control" value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Trace status"><option>All statuses</option><option>Completed</option><option>Failed</option></select>
         <select className="tracify-control" value={environment} onChange={(event) => setEnvironment(event.target.value)} aria-label="Trace environment"><option>All environments</option><option>default</option><option>production</option></select>
-        <button type="button" className="tracify-control"><Filter /> Filters</button>
+        <button type="button" className="tracify-control" aria-expanded={showFilters} onClick={() => setShowFilters((current) => !current)}><Filter /> Filters</button>
         <div className="tracify-toolbar-spacer" />
         <button type="button" className={view === "table" ? "tracify-view-button is-active" : "tracify-view-button"} onClick={() => setView("table")} aria-pressed={view === "table"}><Table2 /> Table</button>
         <button type="button" className={view === "chart" ? "tracify-view-button is-active" : "tracify-view-button"} onClick={() => setView("chart")} aria-pressed={view === "chart"}><BarChart3 /> Chart</button>
         <div className="tracify-column-control"><button type="button" className="tracify-control" onClick={() => setShowColumns((current) => !current)}><Columns3 /> Columns</button>{showColumns ? <div className="tracify-column-menu">{columns.map((column) => <label key={column}><input type="checkbox" checked={visibleColumns.includes(column)} onChange={() => toggleColumn(column)} />{column}</label>)}</div> : null}</div>
       </div>
+      {showFilters ? <div className="tracify-filter-popover" role="dialog" aria-label="Trace filters"><div className="tracify-filter-heading"><strong>Filters</strong><button type="button" onClick={() => { setQuery(""); setType("All types"); setStatus("All statuses"); setEnvironment("All environments"); }}>Clear all</button></div><p className="text-xs text-black/55">Use the controls in the toolbar to narrow traces by type, status, environment, or search text.</p></div> : null}
       {view === "table" ? <TraceTable rows={filtered} visibleColumns={visibleColumns} /> : <TraceChart rows={filtered} />}
     </div>
   );

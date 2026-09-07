@@ -45,7 +45,7 @@ function MetricCard({ title, value, label }: { title: string; value: string; lab
 function TabStrip({ tabs, active, onChange }: { tabs: string[]; active: string; onChange: (tab: string) => void }) {
   return (
     <div className="tracify-tabs" role="tablist">
-      {tabs.map((tab) => (
+      {tabs.length === 1 ? <span role="tab" aria-selected="true" className="is-active">{tabs[0]}</span> : tabs.map((tab) => (
         <button key={tab} type="button" role="tab" aria-selected={active === tab} className={active === tab ? "is-active" : ""} onClick={() => onChange(tab)}>
           {tab}
         </button>
@@ -54,7 +54,7 @@ function TabStrip({ tabs, active, onChange }: { tabs: string[]; active: string; 
   );
 }
 
-export function TracifyEmptyOverview({ projectId, dashboardMode = false, liveData = false }: { projectId: string; dashboardMode?: boolean; liveData?: boolean }) {
+export function TracifyEmptyOverview({ projectId, dashboardId, dashboardMode = false, liveData = false }: { projectId: string; dashboardId?: string; dashboardMode?: boolean; liveData?: boolean }) {
   const [range, setRange] = useState("1d");
   const [environment, setEnvironment] = useState("default");
   const [model, setModel] = useState("All models");
@@ -76,6 +76,7 @@ export function TracifyEmptyOverview({ projectId, dashboardMode = false, liveDat
   const persistedDashboards = useQuery(api.dashboards.list, liveData && projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const createDashboard = useMutation(api.dashboards.create);
   const addPersistedWidget = useMutation(api.dashboards.addWidget);
+  const removePersistedWidget = useMutation(api.dashboards.removeWidget);
   const renamePersistedDashboard = useMutation(api.dashboards.rename);
   const removePersistedDashboard = useMutation(api.dashboards.remove);
   const resetPersistedDashboard = useMutation(api.dashboards.reset);
@@ -98,7 +99,7 @@ export function TracifyEmptyOverview({ projectId, dashboardMode = false, liveDat
   const widgetOptions = WIDGET_OPTIONS;
 
   useEffect(() => {
-    if (!dashboardMode) return;
+    if (!dashboardMode || liveData) return;
     const stored = window.localStorage.getItem(`tracify.dashboard.widgets.${projectId}.${activeDashboard}`);
     if (!stored) return;
     try {
@@ -111,7 +112,7 @@ export function TracifyEmptyOverview({ projectId, dashboardMode = false, liveDat
     } catch {
       window.localStorage.removeItem(`tracify.dashboard.widgets.${projectId}`);
     }
-  }, [activeDashboard, dashboardMode, projectId]);
+  }, [activeDashboard, dashboardMode, liveData, projectId]);
 
   useEffect(() => {
     function onFilterToggle() { setFiltersOpen((current) => !current); }
@@ -140,8 +141,9 @@ export function TracifyEmptyOverview({ projectId, dashboardMode = false, liveDat
   }, [dashboardMode, projectId]);
 
   useEffect(() => {
-    if (!liveData || !persistedDashboards?.length) return;
+    if (!liveData || !persistedDashboards) return;
     const names = persistedDashboards.map((dashboard) => dashboard.name);
+    if (!names.includes("Tracify Home")) names.unshift("Tracify Home");
     // Sync the authenticated editor with project-owned dashboard records.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDashboards(names);
@@ -149,11 +151,27 @@ export function TracifyEmptyOverview({ projectId, dashboardMode = false, liveDat
   }, [liveData, persistedDashboards]);
 
   useEffect(() => {
-    if (dashboardMode) window.localStorage.setItem(`tracify.dashboard.widgets.${projectId}.${activeDashboard}`, JSON.stringify(selectedWidgets));
+    if (!liveData || !dashboardId || !persistedDashboards?.length) return;
+    const selected = persistedDashboards.find((dashboard) => dashboard._id === dashboardId);
+    // The route's dashboard record arrives asynchronously; hydrate the selected name once it is available.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (selected) setActiveDashboard(selected.name);
+  }, [dashboardId, liveData, persistedDashboards]);
+
+  useEffect(() => {
+    if (!liveData || !persistedDashboards) return;
+    const selected = persistedDashboards.find((dashboard) => dashboard.name === activeDashboard);
+    // The Convex dashboard record is the source of truth for authenticated editors.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedWidgets(selected?.widgets.slice().sort((a, b) => a.position - b.position).map((widget) => widget.widgetType) ?? []);
+  }, [activeDashboard, liveData, persistedDashboards]);
+
+  useEffect(() => {
+    if (dashboardMode && !liveData) window.localStorage.setItem(`tracify.dashboard.widgets.${projectId}.${activeDashboard}`, JSON.stringify(selectedWidgets));
   // The dashboard name is intentionally omitted: switching names first loads the new layout,
   // then this effect persists that layout when its widget state changes.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboardMode, projectId, selectedWidgets]);
+  }, [dashboardMode, liveData, projectId, selectedWidgets]);
 
   async function addWidget(widget: string) {
     if (liveData) {
@@ -245,6 +263,31 @@ export function TracifyEmptyOverview({ projectId, dashboardMode = false, liveDat
     }
   }
 
+  async function removeWidget(widget: string) {
+    if (liveData) {
+      const dashboard = persistedDashboards?.find((item) => item.name === activeDashboard);
+      const persistedWidget = dashboard?.widgets.find((item) => item.widgetType === widget);
+      if (dashboard && persistedWidget) {
+        try {
+          await removePersistedWidget({ projectId: projectId as Id<"projects">, dashboardId: dashboard._id, widgetId: persistedWidget._id });
+        } catch (error) {
+          setWidgetNotice(error instanceof Error ? error.message : "Could not remove widget");
+          return;
+        }
+      }
+    }
+    setSelectedWidgets((current) => current.filter((item) => item !== widget));
+    setWidgetNotice(`${widget} removed from this dashboard`);
+  }
+
+  if (liveData && dashboardId && persistedDashboards === undefined) {
+    return <div className="tracify-overview p-6 font-mono text-sm text-black/55" role="status">Loading dashboard…</div>;
+  }
+
+  if (liveData && dashboardId && persistedDashboards && !persistedDashboards.some((dashboard) => dashboard._id === dashboardId)) {
+    return <div className="tracify-overview m-6 border border-black bg-white p-6" role="alert"><p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/50">Dashboard unavailable</p><h1 className="mt-3 font-pixel text-3xl tracking-[-0.05em]">That saved view could not be found.</h1><p className="mt-3 text-sm leading-6 text-black/60">It may have been deleted, or it may belong to another project.</p><Link href={`/dashboard/${projectId}/dashboards`} className="mt-6 inline-flex border border-black bg-black px-4 py-3 font-mono text-[10px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black">Back to dashboards</Link></div>;
+  }
+
   return (
     <div className="tracify-overview">
       <DashboardCommandMenu projectId={projectId} showTrigger={false} />
@@ -310,7 +353,7 @@ export function TracifyEmptyOverview({ projectId, dashboardMode = false, liveDat
         </ChartPanel>
         <ChartPanel title="Scores Analytics" subtitle="Aggregate scores and averages over time" />
       </main>
-      {selectedWidgets.length ? <section className="tracify-added-widgets" aria-label="Added dashboard widgets"><div className="tracify-added-widgets-heading"><span>ADDED WIDGETS</span><span>{selectedWidgets.length}</span></div>{selectedWidgets.map((widget, index) => <div key={widget} className="tracify-added-widget-wrap"><ChartPanel title={widget} subtitle="Custom dashboard widget" className="tracify-added-widget"><div className="tracify-empty-chart"><span>No data</span><Info aria-hidden="true" /></div></ChartPanel><div className="tracify-widget-actions"><button type="button" onClick={() => moveWidget(widget, -1)} disabled={index === 0} aria-label={`Move ${widget} up`}>↑</button><button type="button" onClick={() => moveWidget(widget, 1)} disabled={index === selectedWidgets.length - 1} aria-label={`Move ${widget} down`}>↓</button><button type="button" className="tracify-remove-widget" onClick={() => { setSelectedWidgets((current) => current.filter((item) => item !== widget)); setWidgetNotice(`${widget} removed from this dashboard`); }} aria-label={`Remove ${widget}`}>×</button></div></div>)}</section> : null}
+      {selectedWidgets.length ? <section className="tracify-added-widgets" aria-label="Added dashboard widgets"><div className="tracify-added-widgets-heading"><span>ADDED WIDGETS</span><span>{selectedWidgets.length}</span></div>{selectedWidgets.map((widget, index) => <div key={widget} className="tracify-added-widget-wrap"><ChartPanel title={widget} subtitle="Custom dashboard widget" className="tracify-added-widget"><div className="tracify-empty-chart"><span>No data</span><Info aria-hidden="true" /></div></ChartPanel><div className="tracify-widget-actions"><button type="button" onClick={() => moveWidget(widget, -1)} disabled={index === 0} aria-label={`Move ${widget} up`}>↑</button><button type="button" onClick={() => moveWidget(widget, 1)} disabled={index === selectedWidgets.length - 1} aria-label={`Move ${widget} down`}>↓</button><button type="button" className="tracify-remove-widget" onClick={() => void removeWidget(widget)} aria-label={`Remove ${widget}`}>×</button></div></div>)}</section> : null}
     </div>
   );
 }

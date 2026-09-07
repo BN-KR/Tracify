@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { Activity, ArrowRight, BarChart3, CheckCircle2, CircleAlert, Filter, Gauge, RotateCcw, Sparkles, X } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { DashboardTopbar } from "./dashboard-topbar";
 import { PLAYGROUND_DEMO_USER_ID } from "@/lib/playground-demo";
+import { ConvexAuthState } from "@/components/auth/convex-auth-state";
+import { useConvexAuthReadiness } from "@/hooks/use-convex-auth-readiness";
 
 type Scenario = "healthy" | "latency" | "failures";
 
@@ -27,8 +29,9 @@ const runs = [
 export function PlaygroundWorkspace() {
   const searchParams = useSearchParams();
   const demoUserId = searchParams.get("userId") || PLAYGROUND_DEMO_USER_ID;
-  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
-  const session = useQuery(api.sandbox.getWorkspace, {});
+  const auth = useConvexAuthReadiness();
+  const isAuthenticated = auth.isAuthenticated;
+  const session = useQuery(api.sandbox.getWorkspace, isAuthenticated ? {} : "skip");
   const saveWorkspace = useMutation(api.sandbox.saveWorkspace);
   const [scenario, setScenario] = useState<Scenario>("healthy");
   const [dismissed, setDismissed] = useState(false);
@@ -55,10 +58,11 @@ export function PlaygroundWorkspace() {
   const visibleRuns = useMemo(() => filter === "failed" ? runs.filter((run) => run[2] === "failed") : runs, [filter]);
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) window.location.assign("/sign-in?redirect=/playground");
-  }, [authLoading, isAuthenticated]);
+    if (auth.status === "unauthenticated") window.location.assign("/sign-in?redirect_url=%2Fplayground");
+  }, [auth.status, isAuthenticated]);
 
-  if (authLoading || !isAuthenticated) return <div className="p-6 font-mono text-sm text-black/55">Checking playground access…</div>;
+  if (auth.status === "error") return <ConvexAuthState mode="error" redirectPath="/playground" />;
+  if (auth.status === "loading" || !isAuthenticated) return <div className="p-6 font-mono text-sm text-black/55" role="status">Preparing playground access…</div>;
 
   return <div className="flex flex-col gap-6">
     <DashboardTopbar title="Explore / Playground" description="A simulated workspace with realistic agent telemetry." />

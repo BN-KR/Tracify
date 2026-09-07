@@ -32,6 +32,14 @@ test.describe("account access contract", () => {
     await expect(page.getByText("This invitation link is incomplete.")).toBeVisible();
   });
 
+  test("account-scoped playground exits cleanly when the session is absent", async ({ page }) => {
+    const pageErrors: Error[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error));
+    await page.goto("/playground?intent=explore", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/sign-in\?redirect_url=%2Fplayground$/, { timeout: 30_000 });
+    expect(pageErrors, "the unauthenticated playground must not surface a Convex query error").toEqual([]);
+  });
+
   test("cloud entry remains usable on mobile and by keyboard", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/cloud", { waitUntil: "domcontentloaded" });
