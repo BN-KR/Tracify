@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Database, Globe2, ShieldCheck, Sparkles, Wrench } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
+import { PLAYGROUND_DEMO_USER_ID } from "@/lib/playground-demo";
 
 export const metadata: Metadata = {
   title: "Explore or build with Tracify",
@@ -40,7 +41,7 @@ export default function CloudRegionPage() {
               <Fact icon={Globe2} label="Closer access" />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Link href="/cloud/region?next=%2Fplayground&intent=explore" className="group border border-black bg-[#f4d44d] p-6 hover:bg-black hover:text-white">
+              <Link href={`/cloud/region?next=${encodeURIComponent(`/playground?userId=${PLAYGROUND_DEMO_USER_ID}`)}&intent=explore`} className="group border border-black bg-[#f4d44d] p-6 hover:bg-black hover:text-white">
                 <Sparkles className="size-7" />
                 <span className="mt-12 block font-pixel text-4xl leading-none tracking-[-0.055em]">Explore</span>
                 <span className="mt-4 block text-sm leading-6 text-black/65 group-hover:text-white/65">Open a private, populated playground. No region or real telemetry required.</span>

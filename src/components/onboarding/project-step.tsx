@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { useConvexAuth, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { captureAnalytics } from "@/lib/analytics";
 
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
 import { setOneTimeApiKey } from "@/lib/onboarding-client-state";
+import { ConvexAuthState } from "@/components/auth/convex-auth-state";
+import { useConvexAuthReadiness } from "@/hooks/use-convex-auth-readiness";
 
 const API_KEY_COPIED_STORAGE_KEY = "tracify.onboarding.apiKeyCopied";
 const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
@@ -23,7 +25,9 @@ const isPostHogConfigured = Boolean(
 export function ProjectStep() {
   const router = useRouter();
   const { data: session, isPending: isSessionPending } = authClient.useSession();
-  const { isLoading: isConvexLoading, isAuthenticated } = useConvexAuth();
+  const auth = useConvexAuthReadiness();
+  const isConvexLoading = auth.status === "loading";
+  const isAuthenticated = auth.isAuthenticated;
   const createProject = useMutation(api.projects.createProject);
   const [name, setName] = useState("");
   const [error, setError] = useState("");
@@ -87,6 +91,8 @@ export function ProjectStep() {
       </div>
     );
   }
+
+  if (auth.status === "error") return <ConvexAuthState mode="error" redirectPath="/onboarding/project" />;
 
   if (isConvexLoading || !isAuthenticated) {
     return (

@@ -8,12 +8,10 @@
 - [completed] Persist project onboarding step, SDK selection, and dismissal state in Convex; resume setup from the dashboard; preserve recovery redirects; classify invitation failures.
 - [completed] Resolve direct regional-host display and activate the accepted organization after invitation acceptance.
 - [completed] Improve consent browser-test determinism by clearing consent before navigation and giving the dialog its tested accessible name.
-- [pending owner] Stabilize the local Next dev server or run the full browser matrix against a production/cloud-auth test host; isolated consent navigation still stalls after page render.
 - [completed] Run the public browser smoke suite against a production-style build on port 3100; all 3 tests pass after fixing consent hydration.
 - [pending owner] Run authenticated Explore/Build, onboarding, invitation, recovery, checkout, and first-trace journeys with provider-backed test credentials (`TRACIFY_E2E_AUTH=1`).
-- [completed] Add and pass deterministic browser contract coverage for cloud entry, auth/recovery surfaces, missing invitations, mobile layout, and keyboard focus (4/4 on production-style server).
+- [completed] Add and pass deterministic browser contract coverage for cloud entry, auth/recovery surfaces, missing invitations, mobile layout, keyboard focus, and unauthenticated playground access (5/5 with one worker).
 - [completed] Split Explore/Build and region selection into separate `/cloud` and `/cloud/region` steps, preserving intent and destination.
-- [pending owner] Run the full Playwright journey against a healthy local or cloud-auth test host; the current local server timed out on public page loads.
 
 - [completed] Replace the free root-cause clinic with a qualification-only 20-minute Agent Failure Fit Call and a pre-addressed email action.
 - [completed] Keep the demo explicitly seeded, preserve self-serve project creation, and add the failed-run fit-call CTA.

@@ -1,24 +1,27 @@
 "use client";
 
 import { useEffect } from "react";
-import { useConvexAuth, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { api } from "convex/_generated/api";
 import { BrandLogo } from "@/components/brand-logo";
+import { ConvexAuthState } from "@/components/auth/convex-auth-state";
+import { useConvexAuthReadiness } from "@/hooks/use-convex-auth-readiness";
 
 const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
 const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 
 export function OnboardingEntryRouter() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useConvexAuth();
+  const auth = useConvexAuthReadiness();
+  const isAuthenticated = auth.isAuthenticated;
   const projects = useQuery(
     api.projects.getProjectsByUserOrOrg,
     isAuthenticated ? {} : "skip",
   );
 
   useEffect(() => {
-    if (isLoading || (isAuthenticated && projects === undefined)) return;
+    if (auth.status === "loading" || auth.status === "error" || (isAuthenticated && projects === undefined)) return;
 
     if (!isAuthenticated) {
       router.replace("/onboarding/project");
@@ -45,7 +48,9 @@ export function OnboardingEntryRouter() {
     window.sessionStorage.setItem(PROJECT_ID_STORAGE_KEY, project._id);
     window.localStorage.setItem(LAST_PROJECT_STORAGE_KEY, project._id);
     router.replace(`/dashboard/${project._id}`);
-  }, [isAuthenticated, isLoading, projects, router]);
+  }, [auth.status, isAuthenticated, projects, router]);
+
+  if (auth.status === "error") return <ConvexAuthState mode="error" redirectPath="/onboarding" />;
 
   return (
     <main className="min-h-svh bg-[#f3f2ed] px-4 py-8 font-mono text-black/70">

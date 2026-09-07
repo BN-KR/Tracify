@@ -8,6 +8,12 @@ Verification update: production-style build and server smoke passed all public b
 Added deterministic account-access browser contract coverage; its production-style run passes 4/4 for Explore/Build entry, auth/recovery forms, missing invitations, and mobile keyboard/overflow behavior.
 Cloud entry is now explicitly sequential: path selection at `/cloud`, region confirmation at `/cloud/region`, then the regional auth/playground destination.
 
+## Cloud app auth and dashboard recovery — 2026-09-07
+
+Implemented the approved cloud-app recovery slice: bounded Convex auth readiness and retry states, preserved dashboard return paths, safe unauthenticated playground behavior, persisted dashboard create/detail/widget actions, and working Tracing/account controls. The stable empty-project behavior remains read-only and does not synthesize user data.
+
+Verification passed: production build, TypeScript, focused ESLint, local EU-backed 88-route dashboard sweep, CUA browser review, and the account-access Playwright contract (5/5 with one worker). Full provider-backed authenticated journeys remain a credential-dependent follow-up.
+
 ## Objective
 
 Build a Tracify-native version of the complete trace-to-release workflow signaled by the Langfuse August update, with a sharper focus on consequential agent failures: fast investigation, trustworthy evidence, repeatable evaluation, cost-aware decisions, and an operational path from finding to ship/rollback. “Everything they have, just better” means covering the capability surface, not copying the implementation or committing to one giant release.
@@ -1411,3 +1417,4 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 77. Verify the production build artifact and regional runtime URLs after the final editor mutations.
 78. Preserve final handoff links and document the remaining backend expansion points.
 79. Add a reversible Tracify-branded dashboard presentation layer with legacy/v2 preview controls while preserving existing functionality.
+80. Keep the Explore and region choices as separate steps, carry a stable simulated user ID into the playground URL, and verify the production Vercel and Convex deployments before release.

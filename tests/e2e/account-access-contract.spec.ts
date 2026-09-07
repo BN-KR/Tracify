@@ -9,10 +9,12 @@ test.describe("account access contract", () => {
 
     const explore = page.getByRole("link", { name: /Choose region/i }).first();
     await expect(explore).toHaveAttribute("href", /intent=explore/);
+    await expect(explore).toHaveAttribute("href", /userId%3Dusr_demo_7f3a9c21/);
     await expect(page.locator('a[href*="intent=build"]').first()).toBeVisible();
     await explore.click();
     await expect(page.getByRole("heading", { name: "Choose your region." })).toBeVisible();
     await expect(page.getByText("Europe", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Europe/ })).toHaveAttribute("href", /userId%3Dusr_demo_7f3a9c21/);
   });
 
   test("auth and recovery routes preserve usable forms", async ({ page }) => {
@@ -28,6 +30,14 @@ test.describe("account access contract", () => {
   test("missing invitations explain the recoverable state", async ({ page }) => {
     await page.goto("/accept-invitation", { waitUntil: "domcontentloaded" });
     await expect(page.getByText("This invitation link is incomplete.")).toBeVisible();
+  });
+
+  test("account-scoped playground exits cleanly when the session is absent", async ({ page }) => {
+    const pageErrors: Error[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error));
+    await page.goto("/playground?intent=explore", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/sign-in\?redirect_url=%2Fplayground$/, { timeout: 30_000 });
+    expect(pageErrors, "the unauthenticated playground must not surface a Convex query error").toEqual([]);
   });
 
   test("cloud entry remains usable on mobile and by keyboard", async ({ page }) => {

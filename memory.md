@@ -1861,3 +1861,18 @@
 - TypeScript, focused ESLint, and local preview HTTP checks pass for both theme URLs on ports 3000 and 4000.
 - Extended the branded shell treatment beyond Home so the shared sidebar and top bar receive the same Tracify accent on dashboard routes; overview chart color overrides remain scoped to the overview surface.
 - Revalidated TypeScript, focused ESLint, and both local/EU preview URLs after the shell-scope correction.
+
+## 2026-09-07 — Account-flow deployment recovery
+
+- Standardized Vercel and the activation workflow on the committed pnpm lockfile, declared the root Playwright dependency, and restored green marketing and EU cloud builds.
+- Deployed the matching Convex schema/functions to production and corrected the EU cloud `NEXT_PUBLIC_CONVEX_URL` to the verified production deployment.
+- The Explore flow uses a stable simulated user identifier in the URL and workspace banner so the playground reads like a real account while remaining isolated from production telemetry.
+
+## 2026-09-07 — Cloud app auth and dashboard recovery
+
+- Added a bounded Convex auth-readiness hook and a shared retry/sign-in error state across dashboard home, project routes, onboarding, pricing checkout, auth callback, and playground. Unauthenticated project redirects now preserve the exact requested path.
+- Fixed the playground runtime failure by skipping the account-scoped `sandbox.getWorkspace` query until Convex auth is established. The previous behavior threw `Unauthorized` before redirecting and left the page appearing to loop on access checking.
+- Connected saved dashboard list/create/detail routes to persisted dashboard records, rehydrated saved widgets from Convex, and added persisted widget removal. Empty projects remain stable and do not auto-create or redirect.
+- Audited dashboard controls: Tracing Filters now opens a working clearable filter panel, account-menu feedback navigates to Contact, and single-state chart tabs are rendered as state indicators rather than dead buttons.
+- Verification: production build passes and enumerates 88 dashboard page routes; local EU-backed route sweep returned 88/88 non-5xx responses; account-access Playwright suite passes 5/5 with one worker; CUA browser review verified playground auth redirect, project return-path preservation, tracing Filters, and no fresh runtime errors.
+- Full repository ESLint remains red on pre-existing unrelated files (blog TOC, marketing components, shared hooks, and generated warnings); focused lint for every changed source file passes. Convex codegen itself fails in this environment with the CLI backend-binary `toString` error, but the generated API is type-inferred and the full TypeScript/build checks pass.
