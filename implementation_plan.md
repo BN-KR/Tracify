@@ -1421,3 +1421,4 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 81. [completed] Stabilize direct project-route empty states so invalid or inaccessible IDs never render project-specific Convex queries before authentication and route validation.
 82. [completed] Decouple the deterministic Explore Playground simulator from the stale regional `sandbox` deployment while preserving scenario, filter, alert, and trace-detail interactions.
 83. [completed] Verify the corrected EU Vercel environment binding, production build, TypeScript, focused lint, and 6-case account-access browser contract.
+84. [completed] Add the missing EU Vercel Production `CONVEX_SITE_URL`, confirm the merged main deployment is Ready on `eu.cloud.tracify.tech`, and smoke-test the live Playground controls.

@@ -2,7 +2,7 @@
 
 ## 2026-09-06 — Account access and onboarding flow
 
-Current verification gap: provider-backed authenticated journeys still require a real EU account/session with a project. The unauthenticated route safety, local EU-backed coverage, production auth endpoints, corrected EU Convex browser binding, and deterministic Playground interactions are verified. The regional Convex deployment still needs its missing `sandbox` functions deployed before any future backend-backed Playground persistence is reintroduced.
+Current verification gap: provider-backed authenticated journeys still require a real EU account/session with a project. The unauthenticated route safety, local EU-backed coverage, production auth endpoints, corrected EU Convex browser binding, current Vercel Production deployment, and deterministic Playground interactions are verified. The regional Convex deployment still needs its missing `sandbox` functions deployed before any future backend-backed Playground persistence is reintroduced. The failed PR Preview build also showed that `CONVEX_SITE_URL` is not currently configured for generic Preview branches; Production is configured and live.
 
 - [completed] Add shared safe relative redirect validation and preserve Explore/Build intent through regional selection and authentication callbacks.
 - [completed] Add an authentication callback timeout/retry state and make region-change links local-safe.
