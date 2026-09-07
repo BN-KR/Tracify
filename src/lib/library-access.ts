@@ -13,7 +13,15 @@ function values(name: string) {
 }
 
 export async function getLibraryAccess() {
-  const identity = await fetchAuthQuery(api.auth.getCurrentIdentity, {});
+  let identity: Awaited<ReturnType<typeof fetchAuthQuery<typeof api.auth.getCurrentIdentity>>>;
+  try {
+    identity = await fetchAuthQuery(api.auth.getCurrentIdentity, {});
+  } catch {
+    // A stale or mismatched Better Auth token must not turn an unauthenticated
+    // dashboard visit into a server error. The client route gate will send the
+    // visitor through the normal sign-in flow.
+    return { authenticated: false, authorized: false };
+  }
   if (!identity) return { authenticated: false, authorized: false };
   const userId = identity.subject;
   const orgId = typeof identity.org_id === "string" ? identity.org_id : undefined;
