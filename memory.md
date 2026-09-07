@@ -1876,3 +1876,9 @@
 - Audited dashboard controls: Tracing Filters now opens a working clearable filter panel, account-menu feedback navigates to Contact, and single-state chart tabs are rendered as state indicators rather than dead buttons.
 - Verification: production build passes and enumerates 88 dashboard page routes; local EU-backed route sweep returned 88/88 non-5xx responses; account-access Playwright suite passes 5/5 with one worker; CUA browser review verified playground auth redirect, project return-path preservation, tracing Filters, and no fresh runtime errors.
 - Full repository ESLint remains red on pre-existing unrelated files (blog TOC, marketing components, shared hooks, and generated warnings); focused lint for every changed source file passes. Convex codegen itself fails in this environment with the CLI backend-binary `toString` error, but the generated API is type-inferred and the full TypeScript/build checks pass.
+
+## 2026-09-07 — Production route-state hardening
+
+- The merged auth recovery commit reached the EU production Vercel project at `3e2af86`, and live `/playground?intent=explore` now reaches `/sign-in?redirect_url=%2Fplayground` without fresh browser errors.
+- A live direct project URL exposed a second edge case: invalid or inaccessible project IDs could render project-specific Convex queries before the route state was safe. `ProjectRouteGate` now renders stable Tracify empty states for `no_projects` and `not_found` instead of rendering child queries with invalid IDs.
+- Added a regression covering `/dashboard/demo-project/settings`; account-access Playwright is now 6/6 with focused ESLint and TypeScript passing. PR #95 was merged as `6bead98`; EU preview deployment completed successfully and production promotion should follow the main branch deployment.

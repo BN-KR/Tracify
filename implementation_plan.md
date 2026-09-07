@@ -1418,3 +1418,4 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 78. Preserve final handoff links and document the remaining backend expansion points.
 79. Add a reversible Tracify-branded dashboard presentation layer with legacy/v2 preview controls while preserving existing functionality.
 80. Keep the Explore and region choices as separate steps, carry a stable simulated user ID into the playground URL, and verify the production Vercel and Convex deployments before release.
+81. [completed] Stabilize direct project-route empty states so invalid or inaccessible IDs never render project-specific Convex queries before authentication and route validation.

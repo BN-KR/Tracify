@@ -1483,6 +1483,8 @@ Follow-ups still open:
 - [pending] Resolve Vercel custom-domain TLS renegotiation or migrate to a one-level hostname covered by the free certificate.
 # Tracify dashboard feature parity — 2026-09-06
 
+Current verification gap: authenticated provider-backed journeys still require a real EU account/session. Unauthenticated route safety, local EU-backed coverage, and production auth redirect checks are complete.
+
 1. [completed] Add the dark Tracify cloud shell and shared selectors.
 2. [completed] Add local populated tracing and operations previews for visual review.
 3. [pending] Wire preview data to authenticated Convex-backed data and complete parity across the remaining dashboard modules.
