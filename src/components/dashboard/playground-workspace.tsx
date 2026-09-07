@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "convex/_generated/api";
 import { Activity, ArrowRight, BarChart3, CheckCircle2, CircleAlert, Filter, Gauge, RotateCcw, Sparkles, X } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -26,32 +24,61 @@ const runs = [
   ["run_agent_0c91", "Account context refresh", "running", "gpt-4o-mini", "0.82s", "$0.006"],
 ];
 
+const PLAYGROUND_WORKSPACE_KEY = "tracify.playground.workspace";
+
+type PlaygroundWorkspaceState = {
+  scenarioId: Scenario;
+  dismissedAlertIds: string[];
+};
+
 export function PlaygroundWorkspace() {
   const searchParams = useSearchParams();
   const demoUserId = searchParams.get("userId") || PLAYGROUND_DEMO_USER_ID;
   const auth = useConvexAuthReadiness();
   const isAuthenticated = auth.isAuthenticated;
-  const session = useQuery(api.sandbox.getWorkspace, isAuthenticated ? {} : "skip");
-  const saveWorkspace = useMutation(api.sandbox.saveWorkspace);
   const [scenario, setScenario] = useState<Scenario>("healthy");
   const [dismissed, setDismissed] = useState(false);
   const [filter, setFilter] = useState<"all" | "failed">("all");
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Hydrate the local control from the account-scoped Convex workspace once it arrives.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (session?.scenarioId && session.scenarioId in scenarios) setScenario(session.scenarioId as Scenario);
-  }, [session?.scenarioId]);
+    // The playground is deliberately simulated, so its controls should remain useful
+    // even when the regional Convex deployment does not include product telemetry data.
+    const hydrate = window.setTimeout(() => {
+      try {
+        const stored = window.localStorage.getItem(PLAYGROUND_WORKSPACE_KEY);
+        if (!stored) return;
+        const parsed = JSON.parse(stored) as Partial<PlaygroundWorkspaceState>;
+        if (parsed.scenarioId && parsed.scenarioId in scenarios) {
+          setScenario(parsed.scenarioId);
+        }
+        setDismissed(parsed.dismissedAlertIds?.includes("latency-alert") ?? false);
+      } catch {
+        // A blocked or malformed localStorage entry should not prevent the simulator from loading.
+      }
+    }, 0);
+    return () => window.clearTimeout(hydrate);
+  }, []);
 
-  async function changeScenario(next: Scenario) {
-    setScenario(next);
-    await saveWorkspace({ scenarioId: next, dismissedAlertIds: dismissed ? ["latency-alert"] : [], expectedUpdatedAt: session?.updatedAt });
+  function persistWorkspace(nextScenario: Scenario, nextDismissed: boolean) {
+    try {
+      window.localStorage.setItem(PLAYGROUND_WORKSPACE_KEY, JSON.stringify({
+        scenarioId: nextScenario,
+        dismissedAlertIds: nextDismissed ? ["latency-alert"] : [],
+      } satisfies PlaygroundWorkspaceState));
+    } catch {
+      // Persistence is best effort; the simulator remains fully usable in private browsing.
+    }
   }
 
-  async function dismissAlert() {
+  function changeScenario(next: Scenario) {
+    setScenario(next);
+    persistWorkspace(next, dismissed);
+  }
+
+  function dismissAlert() {
     setDismissed(true);
-    await saveWorkspace({ scenarioId: scenario, dismissedAlertIds: ["latency-alert"], expectedUpdatedAt: session?.updatedAt });
+    persistWorkspace(scenario, true);
   }
 
   const current = scenarios[scenario];

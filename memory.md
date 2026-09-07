@@ -1883,3 +1883,9 @@
 - A live direct project URL exposed a second edge case: invalid or inaccessible project IDs could render project-specific Convex queries before the route state was safe. `ProjectRouteGate` now renders stable Tracify empty states for `no_projects` and `not_found` instead of rendering child queries with invalid IDs.
 - Added a regression covering `/dashboard/demo-project/settings`; account-access Playwright is now 6/6 with focused ESLint and TypeScript passing. PR #95 was merged as `6bead98`; EU preview deployment completed successfully and production promotion should follow the main branch deployment.
 - Live bundle inspection then found the EU Vercel project still compiled `focused-otter-289` into the browser. Updated the project’s `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` to `jovial-owl-711.eu-west-1`, and a fresh deployment is required because queued builds retain their environment snapshot.
+
+## 2026-09-07 — EU runtime parity and Playground recovery
+
+- Verified the corrected EU Vercel deployment (`5Y4LdN5TAXZ4vbgyGfXDP4CfgJ9t`) serves the EU Convex URL in its browser bundle. Vercel runtime logs show the auth token and organization endpoints returning 200 with no runtime errors.
+- Convex logs identified the remaining live Playground failure precisely: the EU deployment did not yet contain the public `sandbox:getWorkspace` function, even though the source and generated bindings contain it. The Playground is a deterministic simulator, so it no longer depends on that regional telemetry query or mutation; scenario selection and alert dismissal now persist best-effort in local storage and remain usable if backend telemetry is stale or unavailable.
+- Verification after the change: focused ESLint passes, TypeScript passes, the production build compiles and generates 209 pages, and the account-access Playwright contract is 6/6 green. Full repository ESLint still has the previously documented unrelated baseline failures.
