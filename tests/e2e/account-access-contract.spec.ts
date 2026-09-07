@@ -40,6 +40,14 @@ test.describe("account access contract", () => {
     expect(pageErrors, "the unauthenticated playground must not surface a Convex query error").toEqual([]);
   });
 
+  test("project routes do not render invalid Convex IDs before authentication", async ({ page }) => {
+    const pageErrors: Error[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error));
+    await page.goto("/dashboard/demo-project/settings", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/sign-in\?redirect_url=%2Fdashboard%2Fdemo-project%2Fsettings$/, { timeout: 30_000 });
+    expect(pageErrors, "an unauthenticated project route must not surface a Convex ID error").toEqual([]);
+  });
+
   test("cloud entry remains usable on mobile and by keyboard", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/cloud", { waitUntil: "domcontentloaded" });

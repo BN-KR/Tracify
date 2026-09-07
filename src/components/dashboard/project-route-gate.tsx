@@ -59,15 +59,60 @@ export function ProjectRouteGate({
   }
 
   if (routeState.status === "no_projects") {
-    // A missing project is a valid read-only dashboard context. The route
-    // components keep their normal page shell and render their own empty
-    // states; only their write actions should be disabled.
-    return <>{children}</>;
+    return (
+      <RouteStatePanel
+        title="No project selected"
+        description="Create a project before opening project-specific settings, traces, or reports."
+        actionLabel="Open dashboard home"
+        actionHref="/dashboard"
+      />
+    );
   }
 
-  if (routeState.status !== "ready") {
-    return <>{children}</>;
+  if (routeState.status === "not_found") {
+    return (
+      <RouteStatePanel
+        title="Project not found"
+        description="This project may have been removed or you may not have access to it."
+        actionLabel="Return to dashboard"
+        actionHref="/dashboard"
+      />
+    );
   }
 
   return <>{children}</>;
+}
+
+function RouteStatePanel({
+  title,
+  description,
+  actionLabel,
+  actionHref,
+}: {
+  title: string;
+  description: string;
+  actionLabel: string;
+  actionHref: string;
+}) {
+  return (
+    <div className="px-6 py-6">
+      <div className="max-w-xl border border-black/15 bg-white p-6">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-black/45">
+          Dashboard state
+        </p>
+        <h1 className="mt-3 font-mono text-xl uppercase tracking-tight text-black">
+          {title}
+        </h1>
+        <p className="mt-3 font-sans text-sm leading-6 text-black/60">
+          {description}
+        </p>
+        <a
+          href={actionHref}
+          className="mt-6 inline-flex border border-black bg-black px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-white transition-colors hover:bg-white hover:text-black"
+        >
+          {actionLabel}
+        </a>
+      </div>
+    </div>
+  );
 }
