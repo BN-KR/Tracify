@@ -47,7 +47,11 @@ export function ProjectRouteGate({
   }, [auth.status, isAuthenticated, routeState, router]);
 
   if (auth.status === "error") {
-    return <ConvexAuthState mode="error" redirectPath={`/dashboard/${projectId}`} />;
+    const returnPath =
+      typeof window === "undefined"
+        ? `/dashboard/${projectId}`
+        : `${window.location.pathname}${window.location.search}`;
+    return <ConvexAuthState mode="error" redirectPath={returnPath} />;
   }
 
   if (auth.status === "loading" || !isAuthenticated || routeState === undefined) {
