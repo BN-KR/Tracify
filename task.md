@@ -2,6 +2,8 @@
 
 ## 2026-09-06 — Account access and onboarding flow
 
+Current verification gap: provider-backed authenticated journeys still require a real EU account/session with a project. The unauthenticated route safety, local EU-backed coverage, production auth endpoints, corrected EU Convex browser binding, and deterministic Playground interactions are verified. The regional Convex deployment still needs its missing `sandbox` functions deployed before any future backend-backed Playground persistence is reintroduced.
+
 - [completed] Add shared safe relative redirect validation and preserve Explore/Build intent through regional selection and authentication callbacks.
 - [completed] Add an authentication callback timeout/retry state and make region-change links local-safe.
 - [completed] Fix one-time API-key resume detection when the key exists in session storage after reload.
@@ -10,7 +12,7 @@
 - [completed] Improve consent browser-test determinism by clearing consent before navigation and giving the dialog its tested accessible name.
 - [completed] Run the public browser smoke suite against a production-style build on port 3100; all 3 tests pass after fixing consent hydration.
 - [pending owner] Run authenticated Explore/Build, onboarding, invitation, recovery, checkout, and first-trace journeys with provider-backed test credentials (`TRACIFY_E2E_AUTH=1`).
-- [completed] Add and pass deterministic browser contract coverage for cloud entry, auth/recovery surfaces, missing invitations, mobile layout, keyboard focus, and unauthenticated playground access (5/5 with one worker).
+- [completed] Add and pass deterministic browser contract coverage for cloud entry, auth/recovery surfaces, missing invitations, mobile layout, keyboard focus, invalid project routes, and unauthenticated playground access (6/6 with one worker).
 - [completed] Split Explore/Build and region selection into separate `/cloud` and `/cloud/region` steps, preserving intent and destination.
 
 - [completed] Replace the free root-cause clinic with a qualification-only 20-minute Agent Failure Fit Call and a pre-addressed email action.
