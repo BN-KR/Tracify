@@ -7,6 +7,7 @@
 - [completed] Add dense Tracing table/chart behavior with presets, environment/search filtering, selectable columns, filter-rail search, trace navigation, and empty-state pagination.
 - [completed] Add populated Session detail layout with chronological events, input/output views, linked traces, scores, and dataset action boundary.
 - [completed] Add populated Dashboards and Scores surfaces with selection/layout controls, metric widgets, score filtering, and score summaries.
+- [completed] Re-run the production build after the parity additions; compilation, TypeScript, and generation of all 211 routes passed.
 - [pending] Add dedicated captured-depth templates for dashboards, prompts, datasets, evaluators, scores, annotation queues, alerts, and settings; then wire the equivalent authenticated Build state.
 
 Implementation contract:
