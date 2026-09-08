@@ -670,5 +670,13 @@ function UsersSurface({ workspace, basePath, recordId }: { workspace: DashboardW
   const [search, setSearch] = useState("");
   const records = workspace.collections.users.records.filter((record) => `${record.id} ${record.name}`.toLowerCase().includes(search.toLowerCase()));
   if (recordId) return <RecordDetail record={records[0] ?? workspace.collections.users.records[0]} surface="users" basePath={basePath} />;
-  return <main className="captured-users-surface"><div className="captured-users-controls"><label><Search /><input aria-label="Search User ID" placeholder="Search (User ID)" value={search} onChange={(event) => setSearch(event.target.value)} /></label><button type="button">Env <span>⌄</span><b>1</b></button><button type="button">Filters <span>⌄</span></button></div><div className="captured-users-table-wrap"><table><thead><tr><th>User ID ⓘ</th><th>Environment</th><th>First Event ⓘ</th><th>Last Event ⓘ</th></tr></thead><tbody>{records.map((record) => <tr key={record.id}><td><Link href={`${basePath}/users/${encodeURIComponent(record.id)}`}>{record.id}</Link></td><td><span>default</span></td><td>{record.timestamp}</td><td>{record.timestamp}</td></tr>)}</tbody></table></div><footer className="captured-table-footer"><span>Rows <strong>50</strong>⌄</span><span>Page <strong>1</strong> of 1</span><button type="button" disabled>‹</button><button type="button" disabled>›</button></footer></main>;
+  return <main className="captured-users-surface"><div className="captured-users-controls"><label><Search /><input aria-label="Search User ID" placeholder="Search (User ID)" value={search} onChange={(event) => setSearch(event.target.value)} /></label><button type="button">Env <span>⌄</span><b>1</b></button><button type="button">Filters <span>⌄</span></button></div><div className="captured-users-table-wrap"><table><thead><tr><th>User ID ⓘ</th><th>Environment</th><th>First Event ⓘ</th><th>Last Event ⓘ</th></tr></thead><tbody>{records.map((record) => <tr key={record.id}><td><Link href={`${basePath}/users/${encodeURIComponent(record.id)}`}>{record.id}</Link></td><td><span>default</span></td><td>{formatUserEventTimestamp(record.timestamp)}</td><td>{formatUserEventTimestamp(record.timestamp)}</td></tr>)}</tbody></table></div><footer className="captured-table-footer"><span>Rows <strong>50</strong>⌄</span><span>Page <strong>1</strong> of 1</span><button type="button" disabled>‹</button><button type="button" disabled>›</button></footer></main>;
+}
+
+function formatUserEventTimestamp(value: string) {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+  if (!match) return value;
+  const [, year, month, day, rawHour, minute, second] = match;
+  const hour = Number(rawHour);
+  return `${Number(month)}/${Number(day)}/${year} ${hour % 12 || 12}:${minute}:${second} ${hour >= 12 ? "PM" : "AM"}`;
 }
