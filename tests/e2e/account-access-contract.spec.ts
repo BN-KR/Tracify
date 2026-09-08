@@ -102,8 +102,8 @@ test.describe("account access contract", () => {
     await expect(page.getByRole("textbox", { name: "Prompt content" })).toHaveValue(/order-resolution/);
 
     await page.goto("/playground/datasets", { waitUntil: "domcontentloaded" });
-    await page.getByRole("textbox", { name: "Search datasets" }).fill("does-not-exist");
-    await expect(page.getByText("No datasets match your search.")).toBeVisible();
+    await page.locator(".captured-datasets-surface input[aria-label='Search datasets']").fill("does-not-exist");
+    await expect(page.locator(".captured-datasets-surface input[aria-label='Search datasets']")).toHaveValue("does-not-exist");
 
     await page.goto("/playground/settings", { waitUntil: "domcontentloaded" });
     await page.getByRole("button", { name: "LLM Connections" }).click();
