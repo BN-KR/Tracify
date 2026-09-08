@@ -42,6 +42,11 @@ test.describe("captured Sandbox viewport parity", () => {
           timeout: 30_000,
         });
         await expect(page.locator(".captured-workspace")).toBeVisible();
+        if (width <= 700) {
+          const bounds = await page.locator(".captured-workspace").boundingBox();
+          expect(bounds?.x, `${surfaceName} should start at the mobile viewport edge`).toBe(0);
+          expect(bounds?.width, `${surfaceName} should use the mobile viewport`).toBe(width);
+        }
         await expect(page.getByRole("link", { name: "Langfuse dashboard" })).toHaveCount(1);
         await expect(page.getByText("Demo Project (view only)", { exact: true }).first()).toBeVisible();
         await expect(page.locator(".captured-workspace")).not.toContainText("Tracify");
