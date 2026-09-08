@@ -63,6 +63,7 @@ export function CapturedWorkspace({
   segments?: string[];
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const hydrated = useSyncExternalStore(
     () => () => undefined,
     () => true,
@@ -71,10 +72,16 @@ export function CapturedWorkspace({
   const surface = parseSurface(segments);
   const recordId = segments[1];
   const basePath = workspace.mode === "sandbox" ? "/playground" : `/dashboard/${workspace.project.id}`;
-  const [range, setRange] = useState("1d");
-  const [environment, setEnvironment] = useState("all");
+  const [range, setRange] = useState(() => searchParams.get("range") ?? "1d");
+  const [environment, setEnvironment] = useState(() => searchParams.get("environment") ?? "all");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
+  function updateRouteState(key: string, value: string) {
+    const next = new URLSearchParams(searchParams.toString());
+    if (!value || value === "all" || (key === "range" && value === "1d")) next.delete(key);
+    else next.set(key, value);
+    router.replace(`?${next.toString()}`, { scroll: false });
+  }
   const [readOnlyAction, setReadOnlyAction] = useState<string | null>(null);
   function handleAction(action: string) {
     if (workspace.mode === "live") {
@@ -118,7 +125,7 @@ export function CapturedWorkspace({
         </div>
         <div className="captured-workspace-header-actions">
           <label className="captured-range">
-            <select aria-label="Dashboard time range" value={range} onChange={(event) => setRange(event.target.value)}>
+            <select aria-label="Dashboard time range" value={range} onChange={(event) => { const value = event.target.value; setRange(value); updateRouteState("range", value); }}>
               <option value="1d">1d</option>
               <option value="7d">7d</option>
               <option value="30d">30d</option>
@@ -136,7 +143,7 @@ export function CapturedWorkspace({
         <h1>{SURFACE_LABELS[surface]}</h1>
         <label className="captured-control">
           <span>Env</span>
-          <select aria-label="Environment" value={environment} onChange={(event) => setEnvironment(event.target.value)}>
+          <select aria-label="Environment" value={environment} onChange={(event) => { const value = event.target.value; setEnvironment(value); updateRouteState("environment", value); }}>
             {workspace.environments.map((option) => <option key={option} value={option}>{option === "all" ? "all environments" : option}</option>)}
           </select>
           <ChevronDown />
@@ -160,8 +167,8 @@ export function CapturedWorkspace({
 
       {filtersOpen ? (
         <div className="captured-filter-panel" role="dialog" aria-label="Dashboard filters">
-          <label><Search /> Search<input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Filter ${SURFACE_LABELS[surface].toLowerCase()}`} /></label>
-          <button type="button" onClick={() => { setQuery(""); setEnvironment("all"); }}>Clear all</button>
+          <label><Search /> Search<input value={query} onChange={(event) => { const value = event.target.value; setQuery(value); updateRouteState("q", value); }} placeholder={`Filter ${SURFACE_LABELS[surface].toLowerCase()}`} /></label>
+          <button type="button" onClick={() => { setQuery(""); setEnvironment("all"); updateRouteState("q", ""); updateRouteState("environment", "all"); }}>Clear all</button>
         </div>
       ) : null}
 
@@ -268,10 +275,14 @@ function AlertsSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspac
 }
 
 function TracingSurface({ workspace, basePath, query, environment, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; query: string; environment: string; onReadOnly: (action: string) => void }) {
-  const [view, setView] = useState<"table" | "chart">("table");
-  const [preset, setPreset] = useState("all");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [view, setView] = useState<"table" | "chart">(() => searchParams.get("view") === "chart" ? "chart" : "table");
+  const [preset, setPreset] = useState(() => searchParams.get("preset") ?? "all");
+  const [page, setPage] = useState(() => Math.max(1, Number.parseInt(searchParams.get("page") ?? "1", 10) || 1));
   const [columnsOpen, setColumnsOpen] = useState(false);
-  const [selectedColumns, setSelectedColumns] = useState(["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Metadata", "Status", "Latency (s)", "Cost ($)", "Time To First Token (s)", "Provided Model Name", "Prompt Name", "Environment", "Trace Tags", "SDK Name"]);
+  const defaultColumns = ["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Metadata", "Status", "Latency (s)", "Cost ($)", "Time To First Token (s)", "Provided Model Name", "Prompt Name", "Environment", "Trace Tags", "SDK Name"];
+  const [selectedColumns, setSelectedColumns] = useState(() => searchParams.get("columns")?.split(",").filter(Boolean) ?? defaultColumns);
   const [filterSearch, setFilterSearch] = useState("");
   const columns = ["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Metadata", "Status", "Latency (s)", "Cost ($)", "Time To First Token (s)", "Provided Model Name", "Prompt Name", "Model ID", "Environment", "Trace Tags", "SDK Name", "SDK Version", "Ingestion Source", "Input Tokens", "Output Tokens", "Total Tokens", "Input Cost ($)", "Output Cost ($)", "Tool Calls", "Categorical Scores", "Boolean Scores", "Comment Count", "Comment Content"];
   const filterNames = ["Name", "Is Root Observation", "Type", "Environment", "Trace Name", "Metadata", "Trace Tags", "Session ID", "User ID", "Trace ID", "Status", "Provided Model Name", "Prompt Name", "Latency (s)", "Numeric Scores", "Model ID", "Version", "Release", "Status Message", "API Key", "SDK Name", "SDK Version", "Ingestion Source", "Experiment Dataset ID", "Experiment ID", "Experiment Name", "Time To First Token (s)", "Input Tokens", "Cached Input Tokens", "Output Tokens", "Total Tokens", "Input Cost ($)", "Cached Input Cost ($)", "Output Cost ($)", "Cost ($)", "Tool Names (Available)", "Tool Names (Called)", "Available Tools", "Tool Calls", "Categorical Scores", "Boolean Scores", "Comment Count", "Comment Content"];
@@ -282,16 +293,34 @@ function TracingSurface({ workspace, basePath, query, environment, onReadOnly }:
     const matchesPreset = preset === "all" || (preset === "quality" ? Number(record.score ?? 0) >= 0.8 : preset === "slow" ? Number.parseFloat(record.latency ?? "0") >= 2 : Number.parseFloat(record.cost?.replace("$", "") ?? "0") >= 0.02);
     return matchesEnvironment && matchesQuery && matchesPreset;
   });
-  const toggleColumn = (column: string) => setSelectedColumns((current) => current.includes(column) ? current.filter((item) => item !== column) : [...current, column]);
+  const updateTracingState = (key: string, value: string) => {
+    const next = new URLSearchParams(searchParams.toString());
+    if (!value || value === "all" || (key === "view" && value === "table")) next.delete(key);
+    else next.set(key, value);
+    router.replace(`?${next.toString()}`, { scroll: false });
+  };
+  const toggleColumn = (column: string) => setSelectedColumns((current) => {
+    const next = current.includes(column) ? current.filter((item) => item !== column) : [...current, column];
+    updateTracingState("columns", next.join(","));
+    return next;
+  });
+  const pageSize = 50;
+  const pageCount = Math.max(1, Math.ceil(records.length / pageSize));
+  const visibleRecords = records.slice((page - 1) * pageSize, page * pageSize);
+  const changePage = (nextPage: number) => {
+    const bounded = Math.min(pageCount, Math.max(1, nextPage));
+    setPage(bounded);
+    updateTracingState("page", String(bounded));
+  };
   return <main className="captured-tracing">
     <div className="captured-tracing-actions">
-      {(["all", "quality", "slow", "cost"] as const).map((item) => <button key={item} type="button" className={preset === item ? "is-active" : ""} onClick={() => setPreset(item)}>{item === "all" ? "Filters" : item[0].toUpperCase() + item.slice(1)}</button>)}
-      <button type="button" className={view === "table" ? "is-active" : ""} onClick={() => setView("table")}>▦ Table</button><button type="button" className={view === "chart" ? "is-active" : ""} onClick={() => setView("chart")}>▥ Chart</button>
+      {["all", "quality", "slow", "cost"].map((item) => <button key={item} type="button" className={preset === item ? "is-active" : ""} onClick={() => { setPreset(item); updateTracingState("preset", item); }}>{item === "all" ? "Filters" : item[0].toUpperCase() + item.slice(1)}</button>)}
+      <button type="button" className={view === "table" ? "is-active" : ""} onClick={() => { setView("table"); updateTracingState("view", "table"); }}>▦ Table</button><button type="button" className={view === "chart" ? "is-active" : ""} onClick={() => { setView("chart"); updateTracingState("view", "chart"); }}>▥ Chart</button>
       <div className="captured-tracing-columns"><button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)}>Columns {selectedColumns.length}/40 ▾</button>{columnsOpen ? <div className="captured-column-menu" role="menu">{columns.map((column) => <label key={column}><input type="checkbox" checked={selectedColumns.includes(column)} onChange={() => toggleColumn(column)} />{column}</label>)}</div> : null}</div>
     </div>
     <div className="captured-tracing-layout">
       <aside className="captured-filter-rail"><div className="captured-filter-rail-heading"><strong>Filters</strong><button type="button" onClick={() => setFilterSearch("")}>Clear</button></div><label>Search filters<input value={filterSearch} onChange={(event) => setFilterSearch(event.target.value)} placeholder="Search filters" aria-label="Search filters" /></label>{filterNames.filter((name) => name.toLowerCase().includes(filterSearch.toLowerCase())).map((name) => <button className="captured-filter-row" type="button" key={name} onClick={() => name === "Environment" ? undefined : onReadOnly(`Open ${name} filter`)}><span>{name}</span><span>⌄</span></button>)}</aside>
-      <section className="captured-tracing-results">{view === "chart" ? <div className="captured-trace-chart"><span>Count per bucket</span><div>{records.map((record, index) => <i key={record.id} style={{ height: `${28 + ((index * 19) % 65)}%` }} title={record.name} />)}</div></div> : <div className="captured-trace-table-wrap"><table><thead><tr>{selectedColumns.map((column) => <th key={column}>{column}</th>)}</tr></thead><tbody>{records.map((record) => <tr key={record.id}>{selectedColumns.map((column) => <td key={column}>{renderTraceCell(column, record, basePath)}</td>)}</tr>)}</tbody></table>{records.length === 0 ? <div className="captured-empty">No traces match the current filters.</div> : null}<footer className="captured-table-footer">Total {records.length} · Rows per page 50 · Page 1</footer></div>}</section>
+      <section className="captured-tracing-results">{view === "chart" ? <div className="captured-trace-chart"><span>Count per bucket</span><div>{records.map((record, index) => <i key={record.id} style={{ height: `${28 + ((index * 19) % 65)}%` }} title={record.name} />)}</div></div> : <div className="captured-trace-table-wrap"><table><thead><tr>{selectedColumns.map((column) => <th key={column}>{column}</th>)}</tr></thead><tbody>{visibleRecords.map((record) => <tr key={record.id}>{selectedColumns.map((column) => <td key={column}>{renderTraceCell(column, record, basePath)}</td>)}</tr>)}</tbody></table>{records.length === 0 ? <div className="captured-empty">No traces match the current filters.</div> : null}<footer className="captured-table-footer"><span>Total {records.length} · Rows per page 50 · Page {page}</span><span className="captured-pagination"><button type="button" disabled={page <= 1} aria-label="Go to previous page" onClick={() => changePage(page - 1)}>‹</button><button type="button" disabled={page >= pageCount} aria-label="Go to next page" onClick={() => changePage(page + 1)}>›</button></span></footer></div>}</section>
     </div>
   </main>;
 }
