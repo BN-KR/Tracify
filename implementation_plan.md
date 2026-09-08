@@ -16,6 +16,8 @@
 - [completed] Commit the implementation and newly created live adapters cleanly (`43e670a`, `45b5e25`, `b9f4444`, `55befa5`); unrelated scratch/archive files remain excluded.
 - [completed] Push the implementation branch to PR #106; GitGuardian, activation, adapter, and primary Vercel checks passed. EU Vercel remained pending at handoff.
 - [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
+- [completed] Remove the invalid Tracing-level Create new action and verify the read-only create boundary on Datasets; targeted account-access interaction test passes.
+- [completed] Re-run the final production build after the captured Tracing changes; all 211 routes compile and generate successfully.
 
 ## Captured Tracify dashboard implementation — 2026-09-08
 
