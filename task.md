@@ -23,6 +23,7 @@
 - [completed] Re-run the production build after the final captured Tracing changes; all 211 routes compiled, type-checked, and generated successfully.
 - [completed] Fix captured Tracing filter search state/URL synchronization, align the interaction contract with the populated fixture, and add the dedicated mobile-aware Sessions surface.
 - [completed] Run a clean isolated production build for the final captured workspace commit; all 211 routes compiled, type-checked, and generated successfully.
+- [completed] Resolve the local E2E environment mismatch by using an isolated EU-configured production build, align assertions with the populated captured fixture, and pass the complete 10-test account-access contract.
 
 ## 2026-09-06 — Account access and onboarding flow
 

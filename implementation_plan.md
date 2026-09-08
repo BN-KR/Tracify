@@ -20,6 +20,7 @@
 - [completed] Re-run the final production build after the captured Tracing changes; all 211 routes compile and generate successfully.
 - [completed] Fix captured Tracing filter state/URL synchronization, align the browser contract with the populated fixture, and add the dedicated mobile-aware Sessions surface.
 - [completed] Run a clean isolated production build for the final captured workspace commit; all 211 routes compile, type-check, and generate successfully.
+- [completed] Run the complete 10-test account-access contract against an isolated EU-configured production build; all route, link, filter, detail, read-only, auth-safety, and mobile/keyboard checks pass.
 
 ## Captured Tracify dashboard implementation — 2026-09-08
 
