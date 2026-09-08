@@ -1948,6 +1948,11 @@
 - Alerts now use Convex alert records in the captured collection view; Settings uses the captured settings surface while the existing project settings/member/API-key mutation components remain available for action wiring.
 - Focused ESLint and TypeScript pass.
 
+## 2026-09-08 — Captured trace-detail interaction fix
+
+- Fixed captured Tracing links so `/playground/tracing/:traceId` renders the captured record-detail view instead of reopening the tracing table.
+- The focused Sandbox filter/detail/read-only interaction test now passes; TypeScript and focused ESLint remain green.
+
 ## 2026-09-08 — Auth callback loop and return-path recovery
 
 - Root cause: `/auth/callback` redirected to `/sign-in` whenever Convex briefly reported unauthenticated, even when Better Auth already had a valid session. That transient JWT exchange state created the sign-in loop after regional OAuth handoff.

@@ -1464,6 +1464,8 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 90. [next] Restore captured prompt/evaluation action wiring and migrate Alerts and Settings while preserving existing mutations.
 91. [completed] Migrate authenticated Alerts and Settings presentation to the captured renderer with live project data.
 92. [next] Restore action wiring for captured prompt/evaluation/admin controls and run the full authenticated route/interactions verification matrix.
+93. [completed] Fix captured tracing record links to render detail views and verify the filter/detail/read-only interaction path.
+94. [next] Run the complete account-access contract and final Build route/button audit after the latest parity changes.
 
 ## Explore/Build parity spec — 2026-09-08
 
