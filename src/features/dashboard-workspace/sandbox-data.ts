@@ -22,7 +22,11 @@ const traces = [
   ["trace_104433", "handle-chatbot-message", "Completed", "production", "2026-09-06 10:44:33", "36.27s", "—", "default", "0.62", "usr_olivia", "session_support_433"],
 ] as const;
 
-const traceRecords = traces.map(([id, name, status, environment, timestamp, latency, cost, model, score, userId, sessionId]) => ({
+const referenceTraceInputs = [
+  "abc", "I mean integration", "how we can setup OpenAPI along with Langfuse", "My backend logic is C#, can I use all the features of langfuse?", "What can I use Langfuse for?", "What can I use Langfuse for?", "show me the trace", "py", "adk2", "show me", "yes", "What is 1 + 1?", "What can I use Langfuse for?", "What can I use Langfuse for?", "A sunset over mountains in watercolor style", "[{},{}]", "where is the answer to my question?", "Explain how I can utilize Langfuse as an SRE", "What can I use Langfuse for?", "How do I get started with tracing?",
+] as const;
+
+const traceRecords = traces.map(([id, name, status, environment, timestamp, latency, cost, model, score, userId, sessionId], index) => ({
   id,
   name,
   status,
@@ -34,8 +38,8 @@ const traceRecords = traces.map(([id, name, status, environment, timestamp, late
   score,
   userId,
   sessionId,
-  input: `Investigate ${name.toLowerCase()} and return a grounded answer.`,
-  output: (status as string) === "Failed" ? "Tool request timed out before a verified answer was available." : "Completed with linked evidence and a verified final response.",
+  input: referenceTraceInputs[index] ?? `Investigate ${name.toLowerCase()} and return a grounded answer.`,
+  output: (status as string) === "Failed" ? "Tool request timed out before a verified answer was available." : index === 0 ? "Could you share what you need help with in Langfuse—for example SDK setup..." : "Completed with linked evidence and a verified final response.",
 }));
 
 

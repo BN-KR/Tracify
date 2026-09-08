@@ -22,6 +22,7 @@
 - [completed] Run a clean isolated production build for the final captured workspace commit; all 211 routes compile, type-check, and generate successfully.
 - [completed] Run the complete 10-test account-access contract against an isolated EU-configured production build; all route, link, filter, detail, read-only, auth-safety, and mobile/keyboard checks pass.
 - [completed] Run the 14-surface captured viewport matrix at six desktop, tablet, and mobile sizes; all six responsive runs pass against the isolated EU production build.
+- [completed] Align populated Sandbox trace input/output values with the captured reference’s visible content while retaining deterministic read-only behavior.
 
 ## Captured Tracify dashboard implementation — 2026-09-08
 
