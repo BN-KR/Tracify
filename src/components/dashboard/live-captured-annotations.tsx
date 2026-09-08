@@ -9,6 +9,7 @@ import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
 export function LiveCapturedAnnotations({ projectId }: { projectId: string }) {
   const identity = useQuery(api.auth.getCurrentIdentity);
   const assignNext = useMutation(api.annotations.assignNext);
+  const submitReview = useMutation(api.annotations.submitReview);
   const project = useQuery(api.projects.getProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const annotations = useQuery(api.annotations.list, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   if (project === undefined || project === null || annotations === undefined) return <div className="captured-build-loading">Loading annotation queue…</div>;
@@ -19,5 +20,8 @@ export function LiveCapturedAnnotations({ projectId }: { projectId: string }) {
     const result = await assignNext({ projectId: projectId as Id<"projects">, reviewerIds: [identity.subject], strategy: "least_loaded" });
     return result?.annotationId ?? null;
   }
-  return <CapturedWorkspace workspace={workspace} segments={["annotation-queues"]} onAnnotationClaim={claimNext} />;
+  async function review(input: { annotationId: string; label: string; score?: number; notes: string }) {
+    await submitReview({ projectId: projectId as Id<"projects">, annotationId: input.annotationId as Id<"annotations">, label: input.label, score: input.score, notes: input.notes });
+  }
+  return <CapturedWorkspace workspace={workspace} segments={["annotation-queues"]} onAnnotationClaim={claimNext} onAnnotationReview={review} />;
 }
