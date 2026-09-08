@@ -107,8 +107,8 @@ test.describe("account access contract", () => {
 
     await page.goto("/playground/settings", { waitUntil: "domcontentloaded" });
     await page.locator(".captured-settings nav button", { hasText: "LLM Connections" }).click();
-    await expect(page.getByText("Project settings / LLM Connections", { exact: true })).toBeVisible();
-    await page.getByRole("button", { name: "Open LLM Connections" }).click();
+    await expect(page.locator(".captured-settings button", { hasText: "Open LLM Connections" })).toBeVisible();
+    await page.locator(".captured-settings button", { hasText: "Open LLM Connections" }).click();
     await expect(page.getByRole("dialog", { name: /This workspace is view only|ready in your live project/ })).toBeVisible();
   });
 
