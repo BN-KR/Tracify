@@ -1462,6 +1462,8 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 88. [next] Wire captured prompt editor actions to the existing prompt mutations, then migrate evaluations, datasets, scores, alerts, and settings.
 89. [completed] Migrate authenticated Evaluators, Datasets, and Scores presentations to the captured renderer with live Convex records.
 90. [next] Restore captured prompt/evaluation action wiring and migrate Alerts and Settings while preserving existing mutations.
+91. [completed] Migrate authenticated Alerts and Settings presentation to the captured renderer with live project data.
+92. [next] Restore action wiring for captured prompt/evaluation/admin controls and run the full authenticated route/interactions verification matrix.
 
 ## Explore/Build parity spec — 2026-09-08
 

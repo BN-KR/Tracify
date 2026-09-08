@@ -1942,6 +1942,12 @@
 - These routes now render through the captured collection/table system while sourcing evaluator state, dataset access/item counts, score values, and timestamps from Convex.
 - Focused ESLint and TypeScript pass; action wiring for the captured collection controls remains the next parity step.
 
+## 2026-09-08 — Build captured Alerts and Settings migration
+
+- Added a live admin adapter and routed authenticated Alerts and Settings through the captured workspace presentation.
+- Alerts now use Convex alert records in the captured collection view; Settings uses the captured settings surface while the existing project settings/member/API-key mutation components remain available for action wiring.
+- Focused ESLint and TypeScript pass.
+
 ## 2026-09-08 — Auth callback loop and return-path recovery
 
 - Root cause: `/auth/callback` redirected to `/sign-in` whenever Convex briefly reported unauthenticated, even when Better Auth already had a valid session. That transient JWT exchange state created the sign-in loop after regional OAuth handoff.
