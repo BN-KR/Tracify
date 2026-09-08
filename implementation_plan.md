@@ -9,6 +9,7 @@
 - [completed] Add populated Dashboards and Scores surfaces with selection/layout controls, metric widgets, score filtering, and score summaries.
 - [completed] Re-run the production build after the parity additions; compilation, TypeScript, and generation of all 211 routes passed.
 - [completed] Add Prompt Management and Evaluators captured-depth surfaces with editor tabs, prompt selection, evaluator filters, run/status columns, and action boundaries.
+- [completed] Add Datasets, Human Annotation, Alerts, and Settings captured-depth surfaces with search, queue/status filters, review actions, alert cards, and functional settings tabs.
 - [pending] Add dedicated captured-depth templates for dashboards, prompts, datasets, evaluators, scores, annotation queues, alerts, and settings; then wire the equivalent authenticated Build state.
 
 Implementation contract:

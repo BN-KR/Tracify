@@ -156,6 +156,12 @@ export function CapturedWorkspace({
         <PromptsSurface workspace={workspace} basePath={basePath} onReadOnly={setReadOnlyAction} />
       ) : surface === "evaluators" ? (
         <EvaluatorsSurface workspace={workspace} onReadOnly={setReadOnlyAction} />
+      ) : surface === "datasets" ? (
+        <DatasetsSurface workspace={workspace} onReadOnly={setReadOnlyAction} />
+      ) : surface === "annotation-queues" ? (
+        <AnnotationSurface workspace={workspace} onReadOnly={setReadOnlyAction} />
+      ) : surface === "alerts" ? (
+        <AlertsSurface workspace={workspace} onReadOnly={setReadOnlyAction} />
       ) : (
         <CollectionSurface
           workspace={workspace}
@@ -210,6 +216,24 @@ function EvaluatorsSurface({ workspace, onReadOnly }: { workspace: DashboardWork
   const [enabledOnly, setEnabledOnly] = useState(false);
   const records = workspace.collections.evaluators.records.filter((record) => !enabledOnly || record.status === "active" || record.status === "enabled");
   return <main className="captured-collection captured-evaluators-surface"><div className="captured-collection-summary"><div><strong>Evaluators</strong><span> Reusable quality checks for Tracify traces</span></div><div className="captured-evaluator-actions"><button type="button" onClick={() => setEnabledOnly((value) => !value)}>{enabledOnly ? "All evaluators" : "Enabled only"}</button><button type="button" onClick={() => onReadOnly("Create evaluator")}>New evaluator</button></div></div><div className="captured-table-scroll"><table><thead><tr><th>Name</th><th>Status</th><th>Last 5 runs</th><th>Type</th><th>Total cost (7d)</th><th>Model</th><th>Updated</th><th /></tr></thead><tbody>{records.map((record) => <tr key={record.id}><td><Link href={`/playground/evaluators/${encodeURIComponent(record.id)}`}><strong>{record.name}</strong><small>{record.id}</small></Link></td><td><span className={`captured-status ${record.status}`}>{record.status}</span></td><td>✓ ✓ ✓ — ✓</td><td>LLM as a judge</td><td>{record.cost ?? "$0.0042"}</td><td>{record.model ?? workspace.models[1]}</td><td>{record.timestamp}</td><td><button type="button" onClick={() => onReadOnly(`Edit ${record.name}`)}>•••</button></td></tr>)}</tbody></table>{!records.length ? <div className="captured-empty">No evaluators match the current filter.</div> : null}</div></main>;
+}
+
+function DatasetsSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
+  const [search, setSearch] = useState("");
+  const records = workspace.collections.datasets.records.filter((record) => `${record.name} ${record.id}`.toLowerCase().includes(search.toLowerCase()));
+  return <main className="captured-collection captured-datasets-surface"><div className="captured-collection-summary"><div><strong>Datasets</strong><span> Curated evidence sets for repeatable evaluation</span></div><div className="captured-inline-actions"><input aria-label="Search datasets" placeholder="Search datasets" value={search} onChange={(event) => setSearch(event.target.value)} /><button type="button" onClick={() => onReadOnly("Create dataset")}>New dataset</button></div></div><div className="captured-table-scroll"><table><thead><tr><th>Name</th><th>Description</th><th>Items</th><th>Experiments</th><th>Created</th><th>Last run</th><th>Input schema</th><th>Expected output</th><th>Actions</th></tr></thead><tbody>{records.map((record) => <tr key={record.id}><td><Link href={`/playground/datasets/${encodeURIComponent(record.id)}`}><strong>{record.name}</strong><small>{record.id}</small></Link></td><td>Regression evidence set</td><td>24</td><td>3</td><td>{record.timestamp}</td><td>Today</td><td>JSON</td><td>JSON</td><td><button type="button" onClick={() => onReadOnly(`Manage ${record.name}`)}>•••</button></td></tr>)}</tbody></table>{!records.length ? <div className="captured-empty">No datasets match your search.</div> : null}</div></main>;
+}
+
+function AnnotationSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
+  const [queue, setQueue] = useState("Needs review");
+  const records = workspace.collections["annotation-queues"].records;
+  return <main className="captured-collection captured-annotation-surface"><div className="captured-collection-summary"><div><strong>Human Annotation</strong><span> Review traces that need a human decision</span></div><div className="captured-inline-actions"><select aria-label="Annotation queue" value={queue} onChange={(event) => setQueue(event.target.value)}><option>Needs review</option><option>Assigned to me</option><option>Completed</option></select><button type="button" onClick={() => onReadOnly("Create annotation queue")}>New queue</button></div></div><div className="captured-review-banner"><strong>{records.length || 12} traces ready for review</strong><span>Claim the next trace, score it, and leave a decision note.</span><button type="button" onClick={() => onReadOnly("Claim next trace")}>Claim next</button></div><div className="captured-table-scroll"><table><thead><tr><th>Trace</th><th>Queue</th><th>Status</th><th>Assignee</th><th>Last updated</th><th>Action</th></tr></thead><tbody>{(records.length ? records : [{ id: "review-1", name: "QA support response", status: "needs-review", environment: "production", timestamp: "5m ago" }]).map((record) => <tr key={record.id}><td><strong>{record.name}</strong><small>{record.id}</small></td><td>{queue}</td><td><span className="captured-status needs-review">Needs review</span></td><td>Unassigned</td><td>{record.timestamp}</td><td><button type="button" onClick={() => onReadOnly(`Review ${record.name}`)}>Open review</button></td></tr>)}</tbody></table></div></main>;
+}
+
+function AlertsSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
+  const [status, setStatus] = useState("all");
+  const records = workspace.collections.alerts.records.filter((record) => status === "all" || record.status === status);
+  return <main className="captured-collection captured-alerts-surface"><div className="captured-collection-summary"><div><strong>Alerts</strong><span> Notify your team when quality or cost changes</span></div><div className="captured-inline-actions"><select aria-label="Alert status" value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="paused">Paused</option></select><button type="button" onClick={() => onReadOnly("Create alert")}>Add alert</button></div></div><div className="captured-alert-cards">{records.map((record) => <article key={record.id}><div><span className={`captured-status ${record.status}`}>{record.status}</span><h3>{record.name}</h3><p>Threshold condition · production environment</p></div><button type="button" onClick={() => onReadOnly(`Edit ${record.name}`)}>•••</button></article>)}</div>{!records.length ? <div className="captured-empty">No alerts match this status.</div> : null}</main>;
 }
 
 function TracingSurface({ workspace, basePath, query, environment, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; query: string; environment: string; onReadOnly: (action: string) => void }) {
@@ -350,5 +374,7 @@ function PromptPlaygroundSurface({ workspace, onReadOnly }: { workspace: Dashboa
 }
 
 function SettingsSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
-  return <main className="captured-settings"><nav>{["General", "Members", "API Keys", "LLM Connections", "Scores", "Integrations", "Audit log"].map((item, index) => <button key={item} type="button" className={index === 0 ? "active" : ""} onClick={() => index === 0 ? undefined : onReadOnly(`Open ${item}`)}>{item}</button>)}</nav><section><span>Project settings</span><h2>{workspace.project.name}</h2><label>Project name<input value={workspace.project.name} readOnly /></label><label>Project ID<input value={workspace.project.id} readOnly /></label><button type="button" onClick={() => onReadOnly("Save project settings")}>Save changes</button></section></main>;
+  const [tab, setTab] = useState("General");
+  const tabs = ["General", "Members", "API Keys", "LLM Connections", "Scores", "Integrations", "Audit log"];
+  return <main className="captured-settings"><nav>{tabs.map((item) => <button key={item} type="button" className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav><section><span>Project settings / {tab}</span><h2>{tab === "General" ? workspace.project.name : tab}</h2>{tab === "General" ? <><label>Project name<input value={workspace.project.name} readOnly /></label><label>Project ID<input value={workspace.project.id} readOnly /></label><button type="button" onClick={() => onReadOnly("Save project settings")}>Save changes</button></> : <><p className="captured-settings-placeholder">{tab} controls are available in the live project workspace.</p><button type="button" onClick={() => onReadOnly(`Open ${tab}`)}>Open {tab}</button></>}</section></main>;
 }
