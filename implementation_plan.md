@@ -1,5 +1,19 @@
 # Langfuse parity-plus product epic — 2026-09-03
 
+## Captured Tracify dashboard implementation — 2026-09-08
+
+Implementation contract:
+
+1. Treat `C:\opencrawl\output\langfuse-capture` only as the supplied visual authority; the product, routes, fixtures, and visible labels remain Tracify-branded.
+2. Maintain two distinct adapters behind one visual system: a deterministic, populated, public read-only Sandbox and authenticated Build routes backed by existing Tracify APIs.
+3. Match the captured shell and 14 primary surfaces without a redesign; keep nested list/detail URLs, filters, selectors, prompt execution, and explicit Sandbox write boundaries functional.
+4. Select region first at `/cloud`; show Sandbox and Build only after the browser reaches `/cloud/mode` on the selected regional host.
+5. Keep the capture-style Home stable before and after first trace data arrives, rather than switching authenticated projects to a second dashboard design.
+6. Prevent login loops by waiting for both Better Auth and Convex readiness and preserving validated return paths.
+7. Gate release on TypeScript, lint, auth-state tests, browser route/interaction coverage, a production build, matching-viewport visual review, and a clean PR containing no unrelated generated or scratch changes.
+
+Implemented locally. The only unverified runtime boundary is provider-backed signed-in mutation and ingestion behavior because this machine has no EU test-account credentials.
+
 ## Account access and onboarding flow — 2026-09-06
 
 Implementation slice completed: centralized redirect validation, preserved Explore/Build intent through regional selection and Better Auth, added OAuth callback timeout/retry behavior, kept auth region changes local-safe, persisted project onboarding step/SDK/dismissal state in Convex, resumed setup from the dashboard, preserved recovery redirects, classified invitation failures, activated the accepted organization, and derived direct-host region display. Full Playwright journey coverage remains pending on a healthy auth-capable test host.
