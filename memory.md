@@ -1930,6 +1930,12 @@
 - Costs uses live project trace records for total cost, average cost per trace, top users, environment breakdown, and percentile visualization; Tracify branding and existing project routing remain intact.
 - Focused ESLint and TypeScript pass; prompt/evaluation and remaining authenticated surface migrations are still open.
 
+## 2026-09-08 — Build captured Prompts migration
+
+- Replaced authenticated Build Prompt Management presentation with the captured prompt collection surface, populated from Convex prompts and their latest versions.
+- Prompt names, production/draft state, update dates, models, and content now feed the captured view; the existing prompt mutations remain available in the underlying product contract for follow-up wiring of editor actions.
+- Focused ESLint and TypeScript pass.
+
 ## 2026-09-08 — Auth callback loop and return-path recovery
 
 - Root cause: `/auth/callback` redirected to `/sign-in` whenever Convex briefly reported unauthenticated, even when Better Auth already had a valid session. That transient JWT exchange state created the sign-in loop after regional OAuth handoff.
