@@ -1456,6 +1456,9 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 83. [completed] Verify the corrected EU Vercel environment binding, production build, TypeScript, focused lint, and 6-case account-access browser contract.
 84. [completed] Add the missing EU Vercel Production `CONVEX_SITE_URL`, confirm the merged main deployment is Ready on `eu.cloud.tracify.tech`, and smoke-test the live Playground controls.
 
+85. [in progress] Migrate authenticated Build Sessions list and detail routes to the captured localhost:4173 workspace renderer with live Convex records.
+86. [next] Migrate the remaining high-value authenticated Build surfaces (home/dashboard, costs, prompts, evaluations, datasets, scores, alerts, and settings) to the captured renderer, retaining Tracify branding and real project data.
+
 ## Explore/Build parity spec — 2026-09-08
 
 Objective: give first-time visitors a reliable Tracify Explore experience that visually follows the supplied populated dashboard capture while keeping production account data, authentication, and regional telemetry out of the demo path.

@@ -1918,6 +1918,12 @@
 - Added the non-secret EU `CONVEX_SITE_URL` to the Vercel Production environment after a preview-build diagnostic exposed that the generic site URL was absent from the cloud build context. The current main deployment `9vJY7VegtjorJdu8RypnkNe3BqSE` is Ready and owns `eu.cloud.tracify.tech`.
 - Live EU smoke verification after the merged deployment: Playground rendered without the stale `sandbox:getWorkspace` error; scenario selection changed metrics and alert state, failure filtering reduced the table to the failed run, trace detail opened, and alert dismissal removed the alert. No live browser errors were reported.
 
+## 2026-09-08 — Build captured Sessions migration
+
+- Replaced the authenticated Build Sessions list and session-detail routes with the captured localhost:4173 workspace renderer, preserving the dense two-pane visual treatment while sourcing session summaries and linked recent runs from Convex.
+- Live session records now carry status, environment, cost, user, timestamps, and linked trace rows; loading is explicit and inaccessible/empty data does not fabricate rendered rows.
+- Focused ESLint and TypeScript pass. Remaining Build parity work is still required for dashboards, costs, prompts, evaluations, datasets, settings, and the other authenticated surfaces.
+
 ## 2026-09-08 — Auth callback loop and return-path recovery
 
 - Root cause: `/auth/callback` redirected to `/sign-in` whenever Convex briefly reported unauthenticated, even when Better Auth already had a valid session. That transient JWT exchange state created the sign-in loop after regional OAuth handoff.
