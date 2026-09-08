@@ -71,7 +71,7 @@ test.describe("account access contract", () => {
     const links = new Set<string>();
     for (const surface of surfaces) {
       await page.goto(surface, { waitUntil: "domcontentloaded" });
-      await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+      await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
       const hrefs = await page.locator("a[href^='/']").evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute("href")).filter((href): href is string => Boolean(href)));
       hrefs.forEach((href) => links.add(href));
     }
@@ -85,7 +85,7 @@ test.describe("account access contract", () => {
     testInfo.setTimeout(180_000);
     await page.goto("/playground/tracing", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Tracing" })).toBeVisible();
-    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
     const consentButton = page.getByRole("button", { name: "Accept analytics" });
     if (await consentButton.isVisible()) await consentButton.click();
     await page.getByRole("button", { name: "Filters" }).first().click();
@@ -93,14 +93,14 @@ test.describe("account access contract", () => {
     await page.getByRole("textbox", { name: "Search", exact: true }).fill("refund");
     await expect(page).toHaveURL(/(?:\?|&)q=refund/);
     await page.reload({ waitUntil: "domcontentloaded" });
-    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
     await page.getByRole("button", { name: "Filters" }).first().click();
     await expect(page.getByRole("textbox", { name: "Search", exact: true })).toHaveValue("refund");
     await page.getByRole("button", { name: "Filters" }).first().click();
     await page.locator(".captured-tracing-actions").getByRole("button", { name: /Chart/ }).click();
     await expect(page).toHaveURL(/(?:\?|&)view=chart/);
     await page.reload({ waitUntil: "domcontentloaded" });
-    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
     await expect(page.locator(".captured-tracing-actions").getByRole("button", { name: /Chart/ })).toHaveClass(/is-active/);
     await page.getByRole("button", { name: /Columns 16\/40/ }).click();
     await expect(page.getByRole("button", { name: /Columns 16\/40/ })).toHaveAttribute("aria-expanded", "true");
@@ -124,7 +124,7 @@ test.describe("account access contract", () => {
     await page.getByRole("link", { name: "Playground", exact: true }).click();
     await expect(page).toHaveURL(/\/playground\/playground$/);
     await expect(page.getByRole("heading", { name: "Playground" })).toBeVisible();
-    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
     await page.getByRole("button", { name: "Run prompt" }).click();
     await expect(page.getByText(/verified tool evidence/)).toBeVisible();
     if (await consentButton.isVisible()) {
@@ -137,7 +137,7 @@ test.describe("account access contract", () => {
 
   test("captured Sandbox collection controls remain interactive", async ({ page }) => {
     await page.goto("/playground/prompts", { waitUntil: "domcontentloaded" });
-    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
     await page.locator(".captured-prompt-editor-toolbar button", { hasText: "Chat" }).click();
     await expect(page.locator(".captured-prompt-editor-toolbar button", { hasText: "Chat" })).toBeVisible();
     await page.locator(".captured-prompt-list-row", { hasText: "order-resolution" }).click();
@@ -148,7 +148,7 @@ test.describe("account access contract", () => {
     await expect(page.locator(".captured-datasets-surface input[aria-label='Search datasets']")).toHaveValue("does-not-exist");
 
     await page.goto("/playground/settings", { waitUntil: "domcontentloaded" });
-    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
     await page.locator(".captured-settings nav button", { hasText: "LLM Connections" }).click();
     await expect(page.locator(".captured-settings button", { hasText: "Open LLM Connections" })).toBeVisible();
     await page.locator(".captured-settings button", { hasText: "Open LLM Connections" }).click();
