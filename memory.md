@@ -1924,6 +1924,12 @@
 - Live session records now carry status, environment, cost, user, timestamps, and linked trace rows; loading is explicit and inaccessible/empty data does not fabricate rendered rows.
 - Focused ESLint and TypeScript pass. Remaining Build parity work is still required for dashboards, costs, prompts, evaluations, datasets, settings, and the other authenticated surfaces.
 
+## 2026-09-08 — Build captured Costs migration
+
+- Added `costs` as a first-class captured workspace surface and replaced the authenticated Build Costs route with the captured card/chart composition.
+- Costs uses live project trace records for total cost, average cost per trace, top users, environment breakdown, and percentile visualization; Tracify branding and existing project routing remain intact.
+- Focused ESLint and TypeScript pass; prompt/evaluation and remaining authenticated surface migrations are still open.
+
 ## 2026-09-08 — Auth callback loop and return-path recovery
 
 - Root cause: `/auth/callback` redirected to `/sign-in` whenever Convex briefly reported unauthenticated, even when Better Auth already had a valid session. That transient JWT exchange state created the sign-in loop after regional OAuth handoff.
