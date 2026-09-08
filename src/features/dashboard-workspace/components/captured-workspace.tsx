@@ -77,6 +77,7 @@ export function CapturedWorkspace({
   onAlertCreate,
   onDashboardCreate,
   onProjectSettingsSave,
+  onAnnotationClaim,
 }: {
   workspace: DashboardWorkspace;
   segments?: string[];
@@ -86,6 +87,7 @@ export function CapturedWorkspace({
   onAlertCreate?: (input: { name: string; metric: string; threshold: string }) => Promise<void>;
   onDashboardCreate?: (input: { name: string }) => Promise<void>;
   onProjectSettingsSave?: (input: { name: string }) => Promise<void>;
+  onAnnotationClaim?: () => Promise<string | null>;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -223,7 +225,7 @@ export function CapturedWorkspace({
       ) : surface === "datasets" ? (
         <DatasetsSurface workspace={workspace} onReadOnly={handleAction} onCreate={onDatasetCreate} />
       ) : surface === "annotation-queues" ? (
-        <AnnotationSurface workspace={workspace} onReadOnly={handleAction} />
+        <AnnotationSurface workspace={workspace} onReadOnly={handleAction} onClaim={onAnnotationClaim} />
       ) : surface === "alerts" ? (
         <AlertsSurface workspace={workspace} onReadOnly={handleAction} onCreate={onAlertCreate} />
       ) : (
@@ -334,10 +336,13 @@ function DatasetsSurface({ workspace, onReadOnly, onCreate }: { workspace: Dashb
   return <main className="captured-collection captured-datasets-surface"><div className="captured-collection-summary"><div><strong>Datasets</strong><span> Curated evidence sets for repeatable evaluation</span></div><div className="captured-inline-actions"><input aria-label="Search datasets" placeholder="Search datasets" value={search} onChange={(event) => setSearch(event.target.value)} /><button type="button" onClick={() => onReadOnly("Create dataset")}>New dataset</button></div></div><div className="captured-table-scroll"><table><thead><tr><th>Name</th><th>Description</th><th>Items</th><th>Experiments</th><th>Created</th><th>Last run</th><th>Input schema</th><th>Expected output</th><th>Actions</th></tr></thead><tbody>{records.map((record) => <tr key={record.id}><td><Link href={`/playground/datasets/${encodeURIComponent(record.id)}`}><strong>{record.name}</strong><small>{record.id}</small></Link></td><td>Regression evidence set</td><td>24</td><td>3</td><td>{record.timestamp}</td><td>Today</td><td>JSON</td><td>JSON</td><td><button type="button" onClick={() => onReadOnly(`Manage ${record.name}`)}>•••</button></td></tr>)}</tbody></table>{!records.length ? <div className="captured-empty">No datasets match your search.</div> : null}</div></main>;
 }
 
-function AnnotationSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
+function AnnotationSurface({ workspace, onReadOnly, onClaim }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void; onClaim?: () => Promise<string | null> }) {
   const [queue, setQueue] = useState("Needs review");
+  const [claiming, setClaiming] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const records = workspace.collections["annotation-queues"].records;
-  return <main className="captured-collection captured-annotation-surface"><div className="captured-collection-summary"><div><strong>Human Annotation</strong><span> Review traces that need a human decision</span></div><div className="captured-inline-actions"><select aria-label="Annotation queue" value={queue} onChange={(event) => setQueue(event.target.value)}><option>Needs review</option><option>Assigned to me</option><option>Completed</option></select><button type="button" onClick={() => onReadOnly("Create annotation queue")}>New queue</button></div></div><div className="captured-review-banner"><strong>{records.length || 12} traces ready for review</strong><span>Claim the next trace, score it, and leave a decision note.</span><button type="button" onClick={() => onReadOnly("Claim next trace")}>Claim next</button></div><div className="captured-table-scroll"><table><thead><tr><th>Trace</th><th>Queue</th><th>Status</th><th>Assignee</th><th>Last updated</th><th>Action</th></tr></thead><tbody>{(records.length ? records : [{ id: "review-1", name: "QA support response", status: "needs-review", environment: "production", timestamp: "5m ago" }]).map((record) => <tr key={record.id}><td><strong>{record.name}</strong><small>{record.id}</small></td><td>{queue}</td><td><span className="captured-status needs-review">Needs review</span></td><td>Unassigned</td><td>{record.timestamp}</td><td><button type="button" onClick={() => onReadOnly(`Review ${record.name}`)}>Open review</button></td></tr>)}</tbody></table></div></main>;
+  async function claimNext() { if (!onClaim) { onReadOnly("Claim next trace"); return; } setClaiming(true); setNotice(null); try { const result = await onClaim(); setNotice(result ? `Claimed ${result}` : "No queued traces available"); } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to claim trace"); } finally { setClaiming(false); } }
+  return <main className="captured-collection captured-annotation-surface"><div className="captured-collection-summary"><div><strong>Human Annotation</strong><span> Review traces that need a human decision</span></div><div className="captured-inline-actions"><select aria-label="Annotation queue" value={queue} onChange={(event) => setQueue(event.target.value)}><option>Needs review</option><option>Assigned to me</option><option>Completed</option></select><button type="button" onClick={() => onReadOnly("Create annotation queue")}>New queue</button></div></div><div className="captured-review-banner"><strong>{records.length || 12} traces ready for review</strong><span>Claim the next trace, score it, and leave a decision note.</span><button type="button" disabled={claiming} onClick={() => void claimNext()}>{claiming ? "Claiming…" : "Claim next"}</button>{notice ? <small role="status">{notice}</small> : null}</div><div className="captured-table-scroll"><table><thead><tr><th>Trace</th><th>Queue</th><th>Status</th><th>Assignee</th><th>Last updated</th><th>Action</th></tr></thead><tbody>{(records.length ? records : [{ id: "review-1", name: "QA support response", status: "needs-review", environment: "production", timestamp: "5m ago" }]).map((record) => <tr key={record.id}><td><strong>{record.name}</strong><small>{record.id}</small></td><td>{queue}</td><td><span className="captured-status needs-review">Needs review</span></td><td>Unassigned</td><td>{record.timestamp}</td><td><button type="button" onClick={() => onReadOnly(`Review ${record.name}`)}>Open review</button></td></tr>)}</tbody></table></div></main>;
 }
 
 function AlertsSurface({ workspace, onReadOnly, onCreate }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void; onCreate?: (input: { name: string; metric: string; threshold: string }) => Promise<void> }) {
