@@ -465,7 +465,7 @@ export function DashboardSidebar({
             aria-label="Langfuse dashboard"
             className="text-white focus-visible:outline-1 focus-visible:outline-offset-4"
           >
-            <span className="font-sans text-[15px] font-semibold tracking-[-0.04em]">langfuse</span>
+            <span className="captured-reference-brand"><i aria-hidden="true" />langfuse</span>
           </Link>
         ) : null}
 
@@ -490,9 +490,15 @@ export function DashboardSidebar({
           </TooltipContent>
         </Tooltip>
       </div>
-      <div className="border-b border-white/10 p-3">
+      <div className={cn("border-b border-white/10 p-3", isSynthetic && "captured-sidebar-project") }>
         <ProjectSwitcher isCollapsed={!showExpandedContent} previewProjectName={previewProjectName} synthetic={isSynthetic} />
       </div>
+      {isSynthetic && showExpandedContent ? (
+        <div className="captured-sidebar-context border-b border-white/10">
+          <Link href="/playground" className="captured-sidebar-context-link is-demo">↗ <span>Use Demo App</span></Link>
+          <Link href="/cloud" className="captured-sidebar-context-link">⊞ <span>Your Langfuse Orgs</span></Link>
+        </div>
+      ) : null}
 
       <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4 scrollbar-hide">
         <button

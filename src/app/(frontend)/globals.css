@@ -765,3 +765,8 @@
     background: rgb(0 0 0 / 0.32);
   }
 }
+.tracify-cloud-shell:has(.captured-workspace) .tracify-shell-sidebar .border-l-white{border-left-color:#fff!important;color:#fff!important}
+.tracify-cloud-shell:has(.captured-workspace) .tracify-shell-sidebar .border-l-white{background:#1b1b1b!important}
+.tracify-cloud-shell:has(.captured-workspace) .captured-reference-brand{display:inline-flex;align-items:center;gap:4px;color:#f0f0f0;font:600 15px/1 var(--font-geist-sans),Arial,sans-serif;letter-spacing:-.04em}
+.tracify-cloud-shell:has(.captured-workspace) .captured-reference-brand i{display:block;width:14px;height:10px;background:linear-gradient(155deg,#f24b42 0 25%,#36a8e6 25% 48%,#f2cf3a 48% 70%,#3fc48b 70%);clip-path:polygon(0 50%,25% 0,52% 42%,78% 0,100% 50%,78% 100%,52% 58%,25% 100%)}
+.tracify-cloud-shell:has(.captured-workspace) .tracify-shell-sidebar a:hover,.tracify-cloud-shell:has(.captured-workspace) .tracify-shell-sidebar button:hover{color:#fff}

@@ -1,9 +1,11 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { defaultConsent, hasCurrentConsent, readConsent, writeConsent, type ConsentState } from "@/lib/consent";
 
 export function ConsentBanner() {
+  const pathname = usePathname();
   const [consent, setConsent] = useState<ConsentState>(defaultConsent);
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -14,6 +16,9 @@ export function ConsentBanner() {
     setVisible(!hasCurrentConsent());
   }, []);
   useEffect(() => { const reopen = () => { setConsent(readConsent()); setOpen(true); setVisible(true); }; window.addEventListener("tracify:open-consent", reopen); return () => window.removeEventListener("tracify:open-consent", reopen); }, []);
+  // The authenticated dashboard and public Sandbox are reference-captured
+  // surfaces; the marketing consent chrome is intentionally outside them.
+  if (pathname === "/playground" || pathname.startsWith("/playground/") || pathname === "/dashboard" || pathname.startsWith("/dashboard/")) return null;
   if (!visible) return null;
   function save(analytics: boolean, marketing = false) { const next = writeConsent({ analytics, marketing }); setConsent(next); setVisible(false); setOpen(false); }
   return <aside role="dialog" aria-modal="false" aria-labelledby="consent-title" className="fixed inset-x-3 bottom-3 z-50 max-h-[calc(100vh-1.5rem)] overflow-auto border border-black bg-[#f4d44d] p-5 text-black shadow-[8px_8px_0_#000] md:inset-x-auto md:right-6 md:w-[440px]">

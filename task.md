@@ -1589,10 +1589,10 @@ Current verification gap: completing a valid provider-backed sign-in still requi
 78. [x] Replace the dashboard presentation layer with the captured reference shell while preserving existing functionality.
 
 79. [in progress] Migrate every dashboard route to the shared reference shell and canonical captured surface mapping.
-80. [pending] Complete live/Sandbox adapter actions and run the six-viewport zero-pixel route matrix.
+80. [in progress] Complete live/Sandbox adapter actions and run the six-viewport zero-pixel route matrix; the paired screenshot harness now includes all 14 primary Sandbox surfaces.
 81. [in progress] Continue replacing legacy project route components with live captured-workspace adapters.
 82. [in progress] Migrate remaining search, comparison, administration, settings, and detail routes to canonical captured surfaces.
 83. [completed] Canonicalize legacy trace/search/compare/run routes to the captured Tracing family.
 84. [in progress] Continue migrating project settings, administration, and create/edit routes to captured surfaces.
 85. [in progress] Remove remaining dashboard-visible Tracify branding and yellow accents from legacy fallbacks and migrated shared surfaces.
-86. [in progress] Implement captured control/detail density and compare local/reference screenshots at all six required viewport sizes.
+86. [in progress] Implement captured control/detail density and compare local/reference screenshots for all 14 primary surfaces at all six required viewport sizes.

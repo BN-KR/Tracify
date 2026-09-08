@@ -187,7 +187,7 @@ export function CapturedWorkspace({
 
       <div className="captured-workspace-toolbar">
         <h1>{SURFACE_LABELS[surface]}</h1>
-        <label className="captured-control">
+        {surface !== "tracing" ? <><label className="captured-control">
           <span>Env</span>
           <select aria-label="Environment" value={environment} onChange={(event) => { const value = event.target.value; setEnvironment(value); updateRouteState("environment", value); }}>
             {workspace.environments.map((option) => <option key={option} value={option}>{option === "all" ? "all environments" : option}</option>)}
@@ -196,7 +196,7 @@ export function CapturedWorkspace({
         </label>
         <button type="button" className="captured-control" aria-expanded={filtersOpen} onClick={() => setFiltersOpen((current) => !current)}>
           <Filter /> Filters <ChevronDown />
-        </button>
+        </button></> : null}
         <div className="captured-toolbar-spacer" />
         {surface === "home" ? (
           <>
@@ -210,6 +210,13 @@ export function CapturedWorkspace({
           </button>
         )}
       </div>
+
+      {surface === "tracing" ? (
+        <div className="captured-tracing-query">
+          <label aria-label="Trace query"><span>name: (image-generator OR sentiment-classifier OR handle-chatbot-message OR voice-conversation)</span><input value={query} onChange={(event) => { const value = event.target.value; setQuery(value); updateRouteState("q", value); }} placeholder="Search traces" /></label>
+          <button type="button" aria-label="Ask AI">✣ Ask AI</button>
+        </div>
+      ) : null}
 
       {filtersOpen ? (
         <div className="captured-filter-panel" role="dialog" aria-label="Dashboard filters">

@@ -82,6 +82,7 @@ teams-bot/*-err.log
 /graphify-out/
 
 # Playwright local test artifacts
+artifacts/reference-parity/
 /test-results/
 /playwright-report/
 
