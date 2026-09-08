@@ -318,8 +318,18 @@ function HomeSurface({ workspace, environment }: { workspace: DashboardWorkspace
           {traces.slice(0, 5).map((trace) => <div key={trace.id}><span className={`captured-status-dot ${trace.status.toLowerCase()}`} /><span>{trace.name}</span><small>{trace.model}</small><strong>{trace.cost}</strong></div>)}
         </div>
       </section>
+      <section className="captured-panel captured-home-wide-chart"><PanelHeading title="Top 20 Use Cases (Observation) by Cost" subtitle="Aggregated model cost by observation name" /><HorizontalBars labels={["llm_request", "agent_step", "tool_request", "retrieval", "voice_response"]} /></section>
+      <section className="captured-panel captured-home-wide-chart"><PanelHeading title="Top 20 Use Cases (Trace) by Cost" subtitle="Aggregated model cost by trace name" /><HorizontalBars labels={traces.slice(0, 5).map((trace) => trace.name)} /></section>
+      <section className="captured-panel captured-environment-chart"><PanelHeading title="Cost by Environment" subtitle="Total cost broken down by trace environment" /><div className="captured-donut"><span>$1.239228</span><small>Total</small></div></section>
+      <section className="captured-panel captured-home-wide-chart"><PanelHeading title="P95 Cost per Trace" subtitle="95th percentile of cost for each trace" /><LineChart label="$0.12" /></section>
+      <section className="captured-panel captured-home-wide-chart"><PanelHeading title="P95 Output Cost per Observation" subtitle="95th percentile of output cost for each observation" /><LineChart label="$0.006" /></section>
+      <section className="captured-panel captured-home-wide-chart"><PanelHeading title="P95 Input Cost per Observation" subtitle="95th percentile of input cost for each observation" /><LineChart label="$0.028" /></section>
     </main>
   );
+}
+
+function HorizontalBars({ labels }: { labels: string[] }) {
+  return <div className="captured-horizontal-bars">{labels.map((label, index) => <div key={label}><span style={{ width: `${86 - index * 13}%` }} /><small>{label}</small><strong>${(1.4 / (index + 2)).toFixed(2)}</strong></div>)}</div>;
 }
 
 function MetricPanel({ title, subtitle, value }: { title: string; subtitle: string; value: string }) {

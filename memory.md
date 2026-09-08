@@ -13,6 +13,7 @@
 - Added captured-style pagination controls to generic collection surfaces, including a working rows-per-page selector for Users and Experiments-style tables.
 - Restarted the stale local Next dev server and visually verified `/playground/tracing` now renders the intended captured tracing surface: preset controls, table/chart toggle, filter rail, columns dropdown, dense trace table, and trace links are all present in the browser DOM.
 - Corrected generic collection pagination so the rows-per-page selector now slices rendered rows and reports the visible/total counts; TypeScript, focused ESLint, and the 9-test account-access Playwright contract were rerun.
+- Expanded the populated Tracify Home grid to match the localhost:4173 reference composition: cost, top users, observation/trace use cases, environment cost, and three P95 cost panels; browser DOM verification confirms all widgets render.
 - TypeScript and focused ESLint pass for the changed workspace component. Remaining parity work is to deepen the other captured templates and connect the same interactions to authenticated Build data.
 
 ## 2026-09-08 captured Tracify dashboard implementation
