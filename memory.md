@@ -7,6 +7,7 @@
 - Production build passes after the parity additions: Next.js compiled, TypeScript completed, and all 211 routes generated. The branch still contains only intentional tracked parity edits; unrelated scratch directories remain unstaged.
 - Added dedicated Prompt Management and Evaluators surfaces with prompt text/chat tabs, prompt selection/editor controls, Playground handoff, evaluator filtering, status/run columns, and create/edit action boundaries.
 - Added captured-style Datasets, Human Annotation, and Alerts surfaces with search/queue/status controls, review and create actions, plus real local Settings tab switching instead of forcing every tab through a modal.
+- Warmed and verified the local Sandbox route matrix: `/playground` and all primary/nested parity routes returned HTTP 200, including session detail; initial compile latency was isolated from subsequent route behavior.
 - TypeScript and focused ESLint pass for the changed workspace component. Remaining parity work is to deepen the other captured templates and connect the same interactions to authenticated Build data.
 
 ## 2026-09-08 captured Tracify dashboard implementation

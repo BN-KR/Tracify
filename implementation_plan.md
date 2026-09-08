@@ -10,7 +10,8 @@
 - [completed] Re-run the production build after the parity additions; compilation, TypeScript, and generation of all 211 routes passed.
 - [completed] Add Prompt Management and Evaluators captured-depth surfaces with editor tabs, prompt selection, evaluator filters, run/status columns, and action boundaries.
 - [completed] Add Datasets, Human Annotation, Alerts, and Settings captured-depth surfaces with search, queue/status filters, review actions, alert cards, and functional settings tabs.
-- [pending] Add dedicated captured-depth templates for dashboards, prompts, datasets, evaluators, scores, annotation queues, alerts, and settings; then wire the equivalent authenticated Build state.
+- [completed] Warm the local Sandbox route matrix and verify HTTP 200 for primary surfaces and nested session detail; first-request compilation latency is isolated from subsequent route behavior.
+- [pending] Wire the captured-depth Sandbox controls to the equivalent authenticated Build state and verify nested detail routes end to end.
 
 Implementation contract:
 
