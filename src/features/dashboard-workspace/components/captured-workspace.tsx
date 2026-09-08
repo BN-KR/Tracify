@@ -23,6 +23,7 @@ import type {
 const SURFACE_LABELS: Record<WorkspaceSurface, string> = {
   home: "Home",
   dashboards: "Dashboards",
+  costs: "Costs",
   tracing: "Tracing",
   sessions: "Sessions",
   users: "Users",
@@ -140,6 +141,8 @@ export function CapturedWorkspace({
 
       {surface === "home" ? (
         <HomeSurface workspace={workspace} environment={environment} />
+      ) : surface === "costs" ? (
+        <CostsSurface workspace={workspace} environment={environment} />
       ) : surface === "tracing" ? (
         <TracingSurface workspace={workspace} basePath={basePath} query={query} environment={environment} onReadOnly={setReadOnlyAction} />
       ) : surface === "sessions" && recordId ? (
@@ -326,6 +329,19 @@ function HomeSurface({ workspace, environment }: { workspace: DashboardWorkspace
       <section className="captured-panel captured-home-wide-chart"><PanelHeading title="P95 Input Cost per Observation" subtitle="95th percentile of input cost for each observation" /><LineChart label="$0.028" /></section>
     </main>
   );
+}
+
+function CostsSurface({ workspace, environment }: { workspace: DashboardWorkspace; environment: string }) {
+  const traces = workspace.collections.tracing.records.filter((record) => environment === "all" || record.environment === environment);
+  const total = traces.reduce((sum, record) => sum + Number((record.cost ?? "$0").replace("$", "")), 0);
+  return <main className="captured-home-grid">
+    <MetricPanel title="Total costs" subtitle="Total cost across the selected period" value={`$${total.toFixed(5)}`} />
+    <MetricPanel title="Cost per trace" subtitle="Average cost for visible traces" value={`$${(traces.length ? total / traces.length : 0).toFixed(5)}`} />
+    <section className="captured-panel captured-cost-chart"><PanelHeading title="Cost over time" subtitle="Total cost across all use cases" /><LineChart label={`$${total.toFixed(5)} total`} /></section>
+    <section className="captured-panel captured-users-cost"><PanelHeading title="Top 20 Users by Cost" subtitle="Aggregated model cost by trace.userId" /><div className="captured-user-bars">{traces.slice(0, 6).map((record, index) => <div key={record.id}><span style={{ width: `${94 - index * 11}%` }} /><button type="button">{record.userId ?? "anonymous"}</button><strong>{record.cost ?? "$0"}</strong></div>)}</div></section>
+    <section className="captured-panel captured-home-wide-chart"><PanelHeading title="Cost by Environment" subtitle="Total cost broken down by trace environment" /><HorizontalBars labels={Array.from(new Set(traces.map((record) => record.environment)))} /></section>
+    <section className="captured-panel captured-home-wide-chart"><PanelHeading title="P95 Cost per Trace" subtitle="95th percentile of cost for each trace" /><LineChart label={traces.length ? traces[Math.floor(traces.length * .95)]?.cost ?? "$0" : "$0"} /></section>
+  </main>;
 }
 
 function HorizontalBars({ labels }: { labels: string[] }) {

@@ -53,6 +53,7 @@ export const sandboxWorkspace: DashboardWorkspace = {
         { id: "latency-watch", name: "Latency Watch", status: "Draft", environment: "staging", timestamp: "Updated yesterday" },
       ],
     },
+    costs: { description: "Review model and trace cost across environments.", records: traceRecords },
     tracing: { description: "Inspect every trace and observation emitted by instrumented agents.", records: traceRecords },
     sessions: {
       description: "Group related traces into complete user and agent conversations.",

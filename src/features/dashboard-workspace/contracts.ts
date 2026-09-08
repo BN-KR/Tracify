@@ -5,6 +5,7 @@ export type WorkspaceRegion = "eu" | "us";
 export type WorkspaceSurface =
   | "home"
   | "dashboards"
+  | "costs"
   | "tracing"
   | "sessions"
   | "users"

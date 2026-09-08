@@ -7,7 +7,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
 
-export function LiveCapturedHome({ projectId }: { projectId: string }) {
+export function LiveCapturedHome({ projectId, surface = "home" }: { projectId: string; surface?: "home" | "costs" }) {
   const [startedAtAfter] = useState(() => new Date(Date.now() - 30 * 86400000).toISOString());
   const project = useQuery(api.projects.getProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const runs = useQuery(api.agentRuns.getRecentRunsByProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
@@ -39,5 +39,5 @@ export function LiveCapturedHome({ projectId }: { projectId: string }) {
     collections: { ...sandboxWorkspace.collections, tracing: { description: "Recent traces from this Tracify project.", records } },
     metrics: { traces: summary.totals.totalRuns, observations: summary.totals.totalSpans, totalCost: summary.totals.totalCostUsd, scores: sandboxWorkspace.metrics.scores },
   };
-  return <CapturedWorkspace workspace={workspace} segments={["home"]} />;
+  return <CapturedWorkspace workspace={workspace} segments={[surface]} />;
 }
