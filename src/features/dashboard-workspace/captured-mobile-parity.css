@@ -30,3 +30,48 @@
     min-height: 360px;
   }
 }
+
+.captured-tracing-filter-menu {
+  display: grid;
+  gap: 10px;
+  margin: 8px;
+  padding: 10px;
+  border: 1px solid #2b2b2b;
+  background: #141414;
+}
+
+.captured-tracing-filter-menu label {
+  display: grid;
+  gap: 5px;
+  color: #858585;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.captured-tracing-filter-menu input {
+  min-width: 0;
+  border: 1px solid #3a3a3a;
+  background: #101010;
+  color: #ddd;
+  padding: 8px;
+  text-transform: none;
+}
+
+.captured-tracing-filter-menu > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.captured-tracing-filter-menu button {
+  border: 1px solid #3a3a3a;
+  background: transparent;
+  color: #aaa;
+  padding: 6px 8px;
+}
+
+.captured-tracing-filter-menu button:hover,
+.captured-tracing-filter-menu button.is-active {
+  border-color: #eee;
+  color: #fff;
+}
