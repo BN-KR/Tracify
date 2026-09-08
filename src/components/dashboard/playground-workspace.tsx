@@ -1,119 +1,66 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Activity, ArrowRight, BarChart3, CheckCircle2, CircleAlert, Filter, Gauge, RotateCcw, Sparkles, X } from "lucide-react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { DashboardTopbar } from "./dashboard-topbar";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Activity, ArrowRight, BarChart3, CheckCircle2, ChevronDown, CircleAlert, Filter, Gauge, GitCompare, Search, Sparkles, X } from "lucide-react";
 import { PLAYGROUND_DEMO_USER_ID } from "@/lib/playground-demo";
-import { ConvexAuthState } from "@/components/auth/convex-auth-state";
-import { useConvexAuthReadiness } from "@/hooks/use-convex-auth-readiness";
 
 type Scenario = "healthy" | "latency" | "failures";
+type ViewId = "home" | "dashboards" | "tracing" | "sessions" | "users" | "search" | "costs" | "reports" | "compare" | "investigate" | "prompts" | "evaluation" | "scores" | "evaluators" | "annotation" | "datasets" | "experiments" | "playground" | "resilience" | "control" | "alerts" | "automations" | "operations" | "integrations" | "settings" | "members" | "manage" | "api-keys" | "billing" | "widgets" | "upgrade" | "quickstart";
+type Run = readonly [string, string, string, string, string, string];
 
+const viewLabels: Record<ViewId, string> = { home: "Home", dashboards: "Dashboards", tracing: "Tracing", sessions: "Sessions", users: "Users", search: "Search", costs: "Costs", reports: "Reports", compare: "Trace Compare", investigate: "Investigation", prompts: "Prompt Management", evaluation: "Evaluation", scores: "Scores", evaluators: "Evaluators", annotation: "Human Annotation", datasets: "Datasets", experiments: "Experiments", playground: "Playground", resilience: "Resilience", control: "Runtime Policy", alerts: "Alerts", automations: "Automations", operations: "Operations", integrations: "Integrations", settings: "Settings", members: "Members", manage: "Manage", "api-keys": "API Keys", billing: "Billing", widgets: "Widget Library", upgrade: "Upgrade Plan", quickstart: "Quickstart" };
 const scenarios: Record<Scenario, { label: string; description: string; stats: [string, string, string][] }> = {
   healthy: { label: "Healthy production", description: "A stable support agent with a clean release signal.", stats: [["Runs", "12,842", "+18.4%"], ["Failure rate", "0.8%", "-0.4%"], ["P95 latency", "1.24s", "-12%"]] },
   latency: { label: "Latency regression", description: "A release has made retrieval and model calls noticeably slower.", stats: [["Runs", "12,842", "+18.4%"], ["Failure rate", "1.9%", "+1.1%"], ["P95 latency", "4.82s", "+288%"]] },
   failures: { label: "Tool-call failures", description: "A provider timeout is causing support-agent runs to fail open.", stats: [["Runs", "12,842", "+18.4%"], ["Failure rate", "8.6%", "+7.8%"], ["P95 latency", "2.11s", "+54%"]] },
 };
-
-const runs = [
-  ["run_support_8f2c", "Refund status investigation", "completed", "gpt-4o-mini", "1.24s", "$0.018"],
-  ["run_research_72ab", "Policy retrieval with citations", "completed", "gpt-4o", "2.08s", "$0.041"],
-  ["run_support_19de", "Order lookup and escalation", "failed", "gpt-4o-mini", "4.82s", "$0.009"],
-  ["run_agent_0c91", "Account context refresh", "running", "gpt-4o-mini", "0.82s", "$0.006"],
-];
-
+const runs: Run[] = [["run_support_8f2c", "Refund status investigation", "completed", "gpt-4o-mini", "1.24s", "$0.018"], ["run_research_72ab", "Policy retrieval with citations", "completed", "gpt-4o", "2.08s", "$0.041"], ["run_support_19de", "Order lookup and escalation", "failed", "gpt-4o-mini", "4.82s", "$0.009"], ["run_agent_0c91", "Account context refresh", "running", "gpt-4o-mini", "0.82s", "$0.006"]];
+const validViews = new Set(Object.keys(viewLabels));
 const PLAYGROUND_WORKSPACE_KEY = "tracify.playground.workspace";
 
-type PlaygroundWorkspaceState = {
-  scenarioId: Scenario;
-  dismissedAlertIds: string[];
-};
-
 export function PlaygroundWorkspace() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
   const demoUserId = searchParams.get("userId") || PLAYGROUND_DEMO_USER_ID;
-  const auth = useConvexAuthReadiness();
-  const isAuthenticated = auth.isAuthenticated;
+  const requestedView = searchParams.get("view") || "home";
+  const view = (validViews.has(requestedView) ? requestedView : "home") as ViewId;
   const [scenario, setScenario] = useState<Scenario>("healthy");
   const [dismissed, setDismissed] = useState(false);
-  const [filter, setFilter] = useState<"all" | "failed">("all");
+  const [range, setRange] = useState("7d");
+  const [environment, setEnvironment] = useState("all");
+  const [runFilter, setRunFilter] = useState<"all" | "failed">("all");
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
 
-  useEffect(() => {
-    // The playground is deliberately simulated, so its controls should remain useful
-    // even when the regional Convex deployment does not include product telemetry data.
-    const hydrate = window.setTimeout(() => {
-      try {
-        const stored = window.localStorage.getItem(PLAYGROUND_WORKSPACE_KEY);
-        if (!stored) return;
-        const parsed = JSON.parse(stored) as Partial<PlaygroundWorkspaceState>;
-        if (parsed.scenarioId && parsed.scenarioId in scenarios) {
-          setScenario(parsed.scenarioId);
-        }
-        setDismissed(parsed.dismissedAlertIds?.includes("latency-alert") ?? false);
-      } catch {
-        // A blocked or malformed localStorage entry should not prevent the simulator from loading.
-      }
-    }, 0);
-    return () => window.clearTimeout(hydrate);
-  }, []);
-
-  function persistWorkspace(nextScenario: Scenario, nextDismissed: boolean) {
-    try {
-      window.localStorage.setItem(PLAYGROUND_WORKSPACE_KEY, JSON.stringify({
-        scenarioId: nextScenario,
-        dismissedAlertIds: nextDismissed ? ["latency-alert"] : [],
-      } satisfies PlaygroundWorkspaceState));
-    } catch {
-      // Persistence is best effort; the simulator remains fully usable in private browsing.
-    }
-  }
-
-  function changeScenario(next: Scenario) {
-    setScenario(next);
-    persistWorkspace(next, dismissed);
-  }
-
-  function dismissAlert() {
-    setDismissed(true);
-    persistWorkspace(scenario, true);
-  }
-
+  // Restore the local simulator state once after hydration; localStorage is the
+  // only external system this public, account-free workspace intentionally uses.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { try { const stored = window.localStorage.getItem(PLAYGROUND_WORKSPACE_KEY); if (!stored) return; const parsed = JSON.parse(stored) as { scenarioId?: Scenario; dismissed?: boolean }; if (parsed.scenarioId && parsed.scenarioId in scenarios) setScenario(parsed.scenarioId); setDismissed(Boolean(parsed.dismissed)); } catch { /* private browsing is still supported */ } }, []);
+  function persist(nextScenario: Scenario, nextDismissed: boolean) { try { window.localStorage.setItem(PLAYGROUND_WORKSPACE_KEY, JSON.stringify({ scenarioId: nextScenario, dismissed: nextDismissed })); } catch { /* best effort */ } }
+  function changeView(nextView: ViewId) { startTransition(() => router.push(`${pathname}?view=${nextView}&userId=${encodeURIComponent(demoUserId)}`)); }
+  function changeScenario(nextScenario: Scenario) { setScenario(nextScenario); setDismissed(false); persist(nextScenario, false); }
   const current = scenarios[scenario];
-  const visibleRuns = useMemo(() => filter === "failed" ? runs.filter((run) => run[2] === "failed") : runs, [filter]);
+  const visibleRuns = useMemo(() => runFilter === "failed" ? runs.filter((run) => run[2] === "failed") : runs, [runFilter]);
 
-  useEffect(() => {
-    if (auth.status === "unauthenticated") window.location.assign("/sign-in?redirect_url=%2Fplayground");
-  }, [auth.status, isAuthenticated]);
-
-  if (auth.status === "error") return <ConvexAuthState mode="error" redirectPath="/playground" />;
-  if (auth.status === "loading" || !isAuthenticated) return <div className="p-6 font-mono text-sm text-black/55" role="status">Preparing playground access…</div>;
-
-  return <div className="flex flex-col gap-6">
-    <DashboardTopbar title="Explore / Playground" description="A simulated workspace with realistic agent telemetry." />
-    <div className="px-6 pb-12">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border border-black bg-black p-5 text-white">
-        <div className="flex items-start gap-3"><Sparkles className="mt-0.5 size-5 text-[#f4d44d]" /><div><p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#f4d44d]">Simulated workspace · {demoUserId}</p><p className="mt-2 max-w-2xl text-sm leading-6 text-white/60">Everything here is safe to explore. No real project, region, API key, or telemetry is involved.</p></div></div>
-        <Link href="/cloud?next=/onboarding" className="inline-flex items-center gap-2 bg-[#f4d44d] px-4 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-black">Build a real project <ArrowRight className="size-4" /></Link>
-      </div>
-      <div className="grid gap-4 border-y border-black py-5 md:grid-cols-3">
-        {Object.entries(scenarios).map(([id, item]) => <button key={id} type="button" onClick={() => void changeScenario(id as Scenario)} aria-pressed={scenario === id} className={`border p-4 text-left ${scenario === id ? "border-black bg-[#f4d44d]" : "border-black/15 bg-white hover:border-black"}`}><span className="font-mono text-[9px] uppercase tracking-[0.12em]">Scenario {id === "healthy" ? "01" : id === "latency" ? "02" : "03"}</span><span className="mt-3 block font-pixel text-2xl tracking-[-0.04em]">{item.label}</span><span className="mt-2 block text-xs leading-5 text-black/55">{item.description}</span></button>)}
-      </div>
-      <div className="mt-6 grid gap-4 md:grid-cols-3">{current.stats.map(([label, value, delta]) => <div key={label} className="border border-black/15 bg-white p-5"><div className="flex items-center justify-between text-black/45"><span className="font-mono text-[9px] uppercase tracking-[0.14em]">{label}</span><Gauge className="size-4" /></div><div className="mt-7 flex items-end justify-between"><span className="font-pixel text-4xl tracking-[-0.06em]">{value}</span><span className={`font-mono text-[10px] ${delta.startsWith("+") && label !== "Runs" ? "text-[#b42318]" : "text-[#20744a]"}`}>{delta}</span></div></div>)}</div>
-      {scenario !== "healthy" && !dismissed ? <div className="mt-6 flex items-start justify-between gap-4 border border-black bg-[#f4d44d] p-5"><div className="flex gap-3"><CircleAlert className="size-5" /><div><p className="font-mono text-[10px] uppercase tracking-[0.13em]">Active simulated alert</p><p className="mt-2 text-sm">{scenario === "latency" ? "P95 latency is above the 2 second release budget." : "Tool-call failures crossed the configured 5% threshold."}</p></div></div><button type="button" onClick={() => void dismissAlert()} aria-label="Dismiss simulated alert"><X className="size-4" /></button></div> : null}
-      <section className="mt-6 border border-black bg-white"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-black p-5"><div><p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/45">Recent runs</p><h2 className="mt-2 font-pixel text-3xl tracking-[-0.05em]">Inspect the operating record</h2></div><div className="flex gap-2"><button type="button" onClick={() => setFilter("all")} className={`inline-flex items-center gap-2 border px-3 py-2 font-mono text-[9px] uppercase tracking-[0.1em] ${filter === "all" ? "bg-black text-white" : ""}`}><Activity className="size-3.5" /> All</button><button type="button" onClick={() => setFilter("failed")} className={`inline-flex items-center gap-2 border px-3 py-2 font-mono text-[9px] uppercase tracking-[0.1em] ${filter === "failed" ? "bg-black text-white" : ""}`}><Filter className="size-3.5" /> Failures</button></div></div><div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left"><thead><tr className="border-b border-black/15 font-mono text-[9px] uppercase tracking-[0.12em] text-black/45"><th className="p-4">Trace</th><th className="p-4">Name</th><th className="p-4">Status</th><th className="p-4">Model</th><th className="p-4">Latency</th><th className="p-4">Cost</th><th className="p-4">Action</th></tr></thead><tbody>{visibleRuns.map((run) => <tr key={run[0]} className="border-b border-black/10 text-xs last:border-0 hover:bg-[#f3f2ed]"><td className="p-4 font-mono">{run[0]}</td><td className="p-4">{run[1]}</td><td className="p-4"><span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase"><span className={`size-1.5 ${run[2] === "failed" ? "bg-[#b42318]" : run[2] === "running" ? "bg-[#f4d44d]" : "bg-[#20744a]"}`} />{run[2]}</span></td><td className="p-4 font-mono text-black/55">{run[3]}</td><td className="p-4 font-mono">{run[4]}</td><td className="p-4 font-mono">{run[5]}</td><td className="p-4"><button type="button" onClick={() => setSelectedRunId(run[0])} className="font-mono text-[9px] uppercase tracking-[0.1em] underline underline-offset-4">Open trace</button></td></tr>)}</tbody></table></div>{selectedRunId ? <TraceDetail runId={selectedRunId} onClose={() => setSelectedRunId(null)} scenario={scenario} /> : null}</section>
-      <div className="mt-6 grid gap-4 md:grid-cols-3"><DemoLink icon={BarChart3} title="Cost analysis" body="Compare model spend and inspect the savings signal." /><DemoLink icon={CheckCircle2} title="Evaluation review" body="See how quality scores attach to production traces." /><DemoLink icon={RotateCcw} title="Trace timeline" body="Open the failure path and follow each decision." /></div>
-    </div>
+  return <div className="min-h-full bg-[#101010] text-white">
+    <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#151515] px-5 py-3 font-mono">
+      <div className="flex min-w-0 items-center gap-3 text-[11px] uppercase tracking-[0.12em] text-white/55"><Link href="/dashboard" className="text-white hover:text-[#f4d44d]">Explore</Link><span className="text-white/25">/</span><span className="truncate text-white">{viewLabels[view]}</span>{isPending ? <span role="status" className="text-[#f4d44d]">Loading view…</span> : null}</div>
+      <div className="flex flex-wrap items-center gap-2"><label className="sr-only" htmlFor="playground-range">Time range</label><select id="playground-range" aria-label="Dashboard time range" value={range} onChange={(event) => setRange(event.target.value)} className="h-8 border border-white/15 bg-[#202020] px-2 text-[10px] uppercase tracking-[0.08em] text-white outline-none focus:border-[#f4d44d]"><option value="1d">1d</option><option value="7d">7d</option><option value="30d">30d</option><option value="90d">90d</option></select><label className="sr-only" htmlFor="playground-environment">Environment</label><select id="playground-environment" aria-label="Environment" value={environment} onChange={(event) => setEnvironment(event.target.value)} className="h-8 border border-white/15 bg-[#202020] px-2 text-[10px] uppercase tracking-[0.08em] text-white outline-none focus:border-[#f4d44d]"><option value="all">All environments</option><option value="production">Production</option><option value="staging">Staging</option></select><Link href="/cloud?intent=build" className="inline-flex h-8 items-center gap-2 bg-[#f4d44d] px-3 text-[10px] uppercase tracking-[0.08em] text-black hover:bg-white">Build real project <ArrowRight className="size-3.5" /></Link></div>
+    </header>
+    <div className="border-b border-white/10 bg-[#1a1a1a] px-5 py-4 md:px-7"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[#f4d44d]">Synthetic Explore workspace</p><h1 className="mt-2 font-pixel text-4xl tracking-[-0.06em] text-white md:text-5xl">{viewLabels[view]}</h1></div><div className="flex items-center gap-3 text-right"><Sparkles className="size-5 text-[#f4d44d]" /><div><p className="font-mono text-[10px] uppercase tracking-[0.12em] text-white">Demo Project (view only)</p><p className="mt-1 font-mono text-[9px] text-white/40">{demoUserId} · {range} · {environment}</p></div></div></div></div>
+    {view === "home" ? <HomeView current={current} scenario={scenario} dismissed={dismissed} onScenario={changeScenario} onDismiss={() => { setDismissed(true); persist(scenario, true); }} /> : view === "tracing" ? <TracingView visibleRuns={visibleRuns as typeof runs} runFilter={runFilter} setRunFilter={setRunFilter} selectedRunId={selectedRunId} setSelectedRunId={setSelectedRunId} scenario={scenario} /> : <SimulatedView view={view} onNavigate={changeView} />}
   </div>;
 }
 
-function DemoLink({ icon: Icon, title, body }: { icon: typeof BarChart3; title: string; body: string }) {
-  return <div className="border border-black/15 bg-white p-5"><Icon className="size-5" /><p className="mt-8 font-pixel text-2xl tracking-[-0.04em]">{title}</p><p className="mt-2 text-sm leading-6 text-black/55">{body}</p><span className="mt-5 inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-black/45">Available in the simulator <ArrowRight className="size-3.5" /></span></div>;
+function HomeView({ current, scenario, dismissed, onScenario, onDismiss }: { current: (typeof scenarios)[Scenario]; scenario: Scenario; dismissed: boolean; onScenario: (scenario: Scenario) => void; onDismiss: () => void }) {
+  return <main className="space-y-5 px-5 py-6 md:px-7 md:py-7"><section className="flex flex-wrap items-start justify-between gap-4 border border-white/10 bg-[#181818] p-5"><div className="flex gap-3"><Sparkles className="mt-0.5 size-5 text-[#f4d44d]" /><div><p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#f4d44d]">Explore safely</p><p className="mt-2 max-w-2xl text-sm leading-6 text-white/55">This populated dashboard mirrors the operating shape of a real Tracify project. Its charts and traces are synthetic, so every control is safe to try.</p></div></div><Link href="/cloud?intent=build" className="inline-flex items-center gap-2 border border-white/20 px-3 py-2 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:border-[#f4d44d] hover:text-[#f4d44d]">Connect real data <ArrowRight className="size-3.5" /></Link></section><div className="grid gap-3 md:grid-cols-3">{Object.entries(scenarios).map(([id, item]) => <button key={id} type="button" onClick={() => onScenario(id as Scenario)} aria-pressed={scenario === id} className={`border p-4 text-left transition-colors ${scenario === id ? "border-[#f4d44d] bg-[#f4d44d] text-[#101010]" : "border-white/10 bg-[#181818] text-white hover:border-white/30"}`}><span className="font-mono text-[9px] uppercase tracking-[0.12em]">Scenario {id === "healthy" ? "01" : id === "latency" ? "02" : "03"}</span><span className="mt-3 block font-pixel text-2xl tracking-[-0.04em]">{item.label}</span><span className={`mt-2 block text-xs leading-5 ${scenario === id ? "text-[#101010]/60" : "text-white/50"}`}>{item.description}</span></button>)}</div><div className="grid gap-3 md:grid-cols-3">{current.stats.map(([label, value, delta]) => <div key={label} className="border border-white/10 bg-[#181818] p-5"><div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.14em] text-white/40"><span>{label}</span><Gauge className="size-4" /></div><div className="mt-7 flex items-end justify-between"><span className="font-pixel text-4xl tracking-[-0.06em] text-white">{value}</span><span className={`font-mono text-[10px] ${delta.startsWith("+") && label !== "Runs" ? "text-[#ff8a80]" : "text-[#74d59c]"}`}>{delta}</span></div></div>)}</div>{scenario !== "healthy" && !dismissed ? <div className="flex items-start justify-between gap-4 border border-[#f4d44d] bg-[#f4d44d] p-5 text-[#101010]"><div className="flex gap-3"><CircleAlert className="size-5" /><div><p className="font-mono text-[10px] uppercase tracking-[0.13em]">Active simulated alert</p><p className="mt-2 text-sm">{scenario === "latency" ? "P95 latency is above the 2 second release budget." : "Tool-call failures crossed the configured 5% threshold."}</p></div></div><button type="button" onClick={onDismiss} aria-label="Dismiss simulated alert"><X className="size-4" /></button></div> : null}<section className="grid gap-5 lg:grid-cols-[1.5fr_1fr]"><div className="border border-white/10 bg-[#181818] p-5"><div className="flex items-center justify-between"><div><p className="font-mono text-[9px] uppercase tracking-[0.14em] text-white/40">Model latency</p><h2 className="mt-2 font-pixel text-2xl tracking-[-0.04em]">Performance over time</h2></div><button type="button" className="inline-flex items-center gap-2 border border-white/15 px-3 py-2 font-mono text-[9px] uppercase tracking-[0.1em] text-white/60 hover:border-white/40 hover:text-white">P95 <ChevronDown className="size-3.5" /></button></div><Chart /></div><div className="border border-white/10 bg-[#181818] p-5"><p className="font-mono text-[9px] uppercase tracking-[0.14em] text-white/40">Run health</p><div className="mt-6 space-y-4">{[["Completed", "92%", "bg-[#74d59c]"], ["Running", "6%", "bg-[#f4d44d]"], ["Failed", scenario === "failures" ? "8.6%" : "0.8%", "bg-[#ff8a80]"]].map(([label, value, color]) => <div key={label}><div className="flex justify-between font-mono text-[10px] text-white/60"><span>{label}</span><span>{value}</span></div><div className="mt-2 h-2 bg-white/10"><div className={`h-full ${color}`} style={{ width: value }} /></div></div>)}</div></div></section><section className="border border-white/10 bg-[#181818] p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-mono text-[9px] uppercase tracking-[0.14em] text-white/40">Recent runs</p><h2 className="mt-2 font-pixel text-2xl tracking-[-0.04em]">Inspect the operating record</h2></div><Link href="/playground?view=tracing" className="inline-flex items-center gap-2 border border-white/15 px-3 py-2 font-mono text-[9px] uppercase tracking-[0.1em] text-white/70 hover:border-[#f4d44d] hover:text-[#f4d44d]">Open tracing <ArrowRight className="size-3.5" /></Link></div><div className="mt-5 grid gap-2 md:grid-cols-4">{runs.map((run) => <div key={run[0]} className="border border-white/10 bg-[#202020] p-3"><div className="flex items-center justify-between gap-2"><span className={`size-1.5 ${run[2] === "failed" ? "bg-[#ff8a80]" : run[2] === "running" ? "bg-[#f4d44d]" : "bg-[#74d59c]"}`} /><span className="font-mono text-[9px] text-white/40">{run[4]}</span></div><p className="mt-3 truncate text-xs text-white/75">{run[1]}</p><p className="mt-2 font-mono text-[9px] text-white/35">{run[0]}</p></div>)}</div></section></main>;
 }
 
-function TraceDetail({ runId, scenario, onClose }: { runId: string; scenario: Scenario; onClose: () => void }) {
-  const failed = scenario === "failures" || runId === "run_support_19de";
-  return <div className="border-t border-black bg-[#f3f2ed] p-5"><div className="flex items-center justify-between"><div><p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/45">Trace detail / simulated</p><p className="mt-2 font-mono text-sm text-black">{runId}</p></div><button type="button" onClick={onClose} aria-label="Close trace detail"><X className="size-4" /></button></div><div className="mt-5 grid gap-3 md:grid-cols-3"><div className="border border-black/15 bg-white p-4"><p className="font-mono text-[9px] uppercase text-black/45">agent.run</p><p className="mt-3 text-sm">{failed ? "Completed with a failed dependency" : "Completed successfully"}</p></div><div className="border border-black/15 bg-white p-4"><p className="font-mono text-[9px] uppercase text-black/45">model.response</p><p className="mt-3 text-sm">{failed ? "Fallback answer selected" : "Answer grounded with citations"}</p></div><div className="border border-black/15 bg-white p-4"><p className="font-mono text-[9px] uppercase text-black/45">tool.call</p><p className="mt-3 text-sm">{failed ? "order_status · timeout" : "order_status · 214ms"}</p></div></div><p className="mt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-black/45">This trace is simulated. Use Build to send real telemetry.</p></div>;
-}
+function Chart() { return <div className="relative mt-6 h-44 overflow-hidden border border-white/10 bg-[#202020]"><div className="absolute inset-0 opacity-30" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px)", backgroundSize: "25% 25%" }} /><svg viewBox="0 0 600 180" className="absolute inset-0 size-full" preserveAspectRatio="none" aria-label="Synthetic latency chart"><polyline fill="none" stroke="#f4d44d" strokeWidth="3" points="0,135 70,120 140,128 210,85 280,112 350,70 420,95 490,58 560,78 600,44" /></svg><div className="absolute bottom-3 left-3 font-mono text-[9px] uppercase tracking-[0.12em] text-white/35">Synthetic telemetry · no live data</div></div>; }
+
+function TracingView({ visibleRuns, runFilter, setRunFilter, selectedRunId, setSelectedRunId, scenario }: { visibleRuns: typeof runs; runFilter: "all" | "failed"; setRunFilter: (value: "all" | "failed") => void; selectedRunId: string | null; setSelectedRunId: (value: string | null) => void; scenario: Scenario }) { return <main className="px-5 py-6 md:px-7 md:py-7"><section className="border border-white/10 bg-[#181818]"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 p-5"><div><p className="font-mono text-[9px] uppercase tracking-[0.14em] text-white/40">Trace explorer</p><h2 className="mt-2 font-pixel text-3xl tracking-[-0.05em]">Recent traces</h2></div><div className="flex gap-2"><button type="button" onClick={() => setRunFilter("all")} aria-pressed={runFilter === "all"} className={`inline-flex items-center gap-2 border px-3 py-2 font-mono text-[9px] uppercase tracking-[0.1em] ${runFilter === "all" ? "border-[#f4d44d] bg-[#f4d44d] text-black" : "border-white/15 text-white/65"}`}><Activity className="size-3.5" /> All</button><button type="button" onClick={() => setRunFilter("failed")} aria-pressed={runFilter === "failed"} className={`inline-flex items-center gap-2 border px-3 py-2 font-mono text-[9px] uppercase tracking-[0.1em] ${runFilter === "failed" ? "border-[#f4d44d] bg-[#f4d44d] text-black" : "border-white/15 text-white/65"}`}><Filter className="size-3.5" /> Failures</button></div></div><div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left"><thead><tr className="border-b border-white/10 font-mono text-[9px] uppercase tracking-[0.12em] text-white/40"><th className="p-4">Trace</th><th className="p-4">Name</th><th className="p-4">Status</th><th className="p-4">Model</th><th className="p-4">Latency</th><th className="p-4">Cost</th><th className="p-4">Action</th></tr></thead><tbody>{visibleRuns.map((run) => <tr key={run[0]} className="border-b border-white/10 text-xs last:border-0 hover:bg-white/[0.03]"><td className="p-4 font-mono text-white/65">{run[0]}</td><td className="p-4 text-white/80">{run[1]}</td><td className="p-4"><span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase"><span className={`size-1.5 ${run[2] === "failed" ? "bg-[#ff8a80]" : run[2] === "running" ? "bg-[#f4d44d]" : "bg-[#74d59c]"}`} />{run[2]}</span></td><td className="p-4 font-mono text-white/45">{run[3]}</td><td className="p-4 font-mono">{run[4]}</td><td className="p-4 font-mono">{run[5]}</td><td className="p-4"><button type="button" onClick={() => setSelectedRunId(run[0])} className="font-mono text-[9px] uppercase tracking-[0.1em] text-[#f4d44d] underline underline-offset-4">Open trace</button></td></tr>)}</tbody></table></div>{selectedRunId ? <div className="border-t border-[#f4d44d] bg-[#202020] p-5"><div className="flex items-center justify-between"><div><p className="font-mono text-[9px] uppercase tracking-[0.14em] text-white/40">Trace detail / simulated</p><p className="mt-2 font-mono text-sm">{selectedRunId}</p></div><button type="button" onClick={() => setSelectedRunId(null)} aria-label="Close trace detail"><X className="size-4" /></button></div><div className="mt-5 grid gap-3 md:grid-cols-3">{[["agent.run", scenario === "failures" ? "Completed with a failed dependency" : "Completed successfully"], ["model.response", "Answer grounded with citations"], ["tool.call", scenario === "failures" ? "order_status · timeout" : "order_status · 214ms"]].map(([label, value]) => <div key={label} className="border border-white/10 bg-[#181818] p-4"><p className="font-mono text-[9px] uppercase text-white/40">{label}</p><p className="mt-3 text-sm text-white/75">{value}</p></div>)}</div></div> : null}</section></main>; }
+
+function SimulatedView({ view, onNavigate }: { view: ViewId; onNavigate: (view: ViewId) => void }) { const Icon = view === "costs" ? BarChart3 : view === "compare" ? GitCompare : view === "search" ? Search : CheckCircle2; return <main className="px-5 py-6 md:px-7 md:py-7"><section className="border border-white/10 bg-[#181818] p-6"><Icon className="size-6 text-[#f4d44d]" /><p className="mt-8 font-pixel text-3xl tracking-[-0.05em]">{viewLabels[view]} is ready to explore</p><p className="mt-3 max-w-2xl text-sm leading-6 text-white/50">This synthetic surface keeps the captured dashboard flow intact while leaving production data, account identity, and regional telemetry untouched. Build a real project when you want live controls.</p><div className="mt-7 grid gap-3 md:grid-cols-3">{["Overview", "Activity", "Configuration"].map((item) => <button key={item} type="button" className="border border-white/10 bg-[#202020] p-4 text-left hover:border-[#f4d44d]"><span className="font-mono text-[9px] uppercase tracking-[0.12em] text-white/40">{item}</span><span className="mt-5 block h-2 w-3/4 bg-[#303030]" /><span className="mt-3 block h-2 w-1/2 bg-[#303030]" /></button>)}</div><div className="mt-7 flex flex-wrap gap-3"><button type="button" onClick={() => onNavigate("home")} className="inline-flex items-center gap-2 border border-white/20 px-4 py-3 font-mono text-[9px] uppercase tracking-[0.12em] hover:border-[#f4d44d]">Back to Home <ArrowRight className="size-3.5" /></button><Link href="/cloud?intent=build" className="inline-flex items-center gap-2 bg-[#f4d44d] px-4 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-black hover:bg-white">Build real project <ArrowRight className="size-3.5" /></Link></div></section></main>; }

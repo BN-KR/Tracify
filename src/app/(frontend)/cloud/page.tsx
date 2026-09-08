@@ -41,11 +41,11 @@ export default function CloudRegionPage() {
               <Fact icon={Globe2} label="Closer access" />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Link href={`/cloud/region?next=${encodeURIComponent(`/playground?userId=${PLAYGROUND_DEMO_USER_ID}`)}&intent=explore`} className="group border border-black bg-[#f4d44d] p-6 hover:bg-black hover:text-white">
+              <Link href={`/playground?view=home&userId=${PLAYGROUND_DEMO_USER_ID}`} className="group border border-black bg-[#f4d44d] p-6 hover:bg-black hover:text-white">
                 <Sparkles className="size-7" />
                 <span className="mt-12 block font-pixel text-4xl leading-none tracking-[-0.055em]">Explore</span>
                 <span className="mt-4 block text-sm leading-6 text-black/65 group-hover:text-white/65">Open a private, populated playground. No region or real telemetry required.</span>
-                <span className="mt-8 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em]">Choose region <ArrowRight className="size-4" /></span>
+                <span className="mt-8 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em]">Open playground <ArrowRight className="size-4" /></span>
               </Link>
               <Link href="/cloud/region?next=%2Fsign-up&intent=build" className="group border border-black bg-white p-6 hover:bg-[#f4d44d]">
                 <Wrench className="size-7" />

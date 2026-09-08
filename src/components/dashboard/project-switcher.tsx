@@ -18,13 +18,13 @@ import {
 
 const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 
-export function ProjectSwitcher({ isCollapsed = false, previewProjectName }: { isCollapsed?: boolean; previewProjectName?: string }) {
+export function ProjectSwitcher({ isCollapsed = false, previewProjectName, synthetic = false }: { isCollapsed?: boolean; previewProjectName?: string; synthetic?: boolean }) {
   const router = useRouter();
   const params = useParams();
   const currentProjectId = params?.projectId as string | undefined;
   const [open, setOpen] = useState(false);
 
-  const projects = useQuery(api.projects.getProjectsByUserOrOrg) || [];
+  const projects = useQuery(api.projects.getProjectsByUserOrOrg, synthetic ? "skip" : undefined) || [];
 
   const selectedProject =
     projects.find((project) => project._id === currentProjectId) ??
@@ -73,7 +73,12 @@ export function ProjectSwitcher({ isCollapsed = false, previewProjectName }: { i
       >
         <DropdownMenuLabel>Projects</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {projects.length ? (
+        {synthetic ? (
+          <>
+            <DropdownMenuItem disabled>Demo Project · view only</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/cloud?intent=build")}>Build a real project</DropdownMenuItem>
+          </>
+        ) : projects.length ? (
           projects.map((project) => (
             <DropdownMenuItem
               key={project._id}
