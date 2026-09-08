@@ -76,6 +76,7 @@ export const sandboxWorkspace: DashboardWorkspace = {
       records: [
         { id: "prompt_support", name: "support-agent-system", status: "Production", environment: "production", timestamp: "Version 18", model: "gpt-5.6-luna" },
         { id: "prompt_triage", name: "incident-triage", status: "Staging", environment: "staging", timestamp: "Version 7", model: "gpt-5.4-mini" },
+        { id: "order-resolution", name: "order-resolution", status: "Draft", environment: "sandbox", timestamp: "yesterday", model: "gpt-5.6-luna" },
         { id: "prompt_research", name: "research-with-citations", status: "Production", environment: "production", timestamp: "Version 12", model: "gpt-5.6-sol" },
       ],
     },
