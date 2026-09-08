@@ -97,7 +97,7 @@ test.describe("account access contract", () => {
   test("captured Sandbox collection controls remain interactive", async ({ page }) => {
     await page.goto("/playground/prompts", { waitUntil: "domcontentloaded" });
     await page.locator(".captured-prompt-editor-toolbar button", { hasText: "Chat" }).click();
-    await expect(page.locator(".captured-prompt-editor-toolbar button", { hasText: "Chat" })).toHaveClass(/active/);
+    await expect(page.locator(".captured-prompt-editor-toolbar button", { hasText: "Chat" })).toHaveAttribute("aria-pressed", "true");
     await page.getByText("order-resolution", { exact: true }).click();
     await expect(page.getByRole("textbox", { name: "Prompt content" })).toHaveValue(/order-resolution/);
 
