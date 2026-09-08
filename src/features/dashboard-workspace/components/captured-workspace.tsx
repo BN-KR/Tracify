@@ -148,6 +148,10 @@ export function CapturedWorkspace({
         <SettingsSurface workspace={workspace} onReadOnly={setReadOnlyAction} />
       ) : surface === "playground" ? (
         <PromptPlaygroundSurface workspace={workspace} onReadOnly={setReadOnlyAction} />
+      ) : surface === "dashboards" ? (
+        <DashboardsSurface workspace={workspace} basePath={basePath} onReadOnly={setReadOnlyAction} />
+      ) : surface === "scores" ? (
+        <ScoresSurface workspace={workspace} />
       ) : (
         <CollectionSurface
           workspace={workspace}
@@ -176,6 +180,19 @@ export function CapturedWorkspace({
       ) : null}
     </div>
   );
+}
+
+function DashboardsSurface({ workspace, basePath, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; onReadOnly: (action: string) => void }) {
+  const [selected, setSelected] = useState("Tracify Cost Dashboard");
+  const [layout, setLayout] = useState("grid");
+  const dashboards = ["Tracify Cost Dashboard", "Agent Reliability Overview", "Production Quality"];
+  return <main className="captured-dashboard-editor"><header><div><span>Dashboards</span><h2>{selected}</h2></div><div className="captured-dashboard-editor-actions"><select aria-label="Select dashboard" value={selected} onChange={(event) => setSelected(event.target.value)}>{dashboards.map((dashboard) => <option key={dashboard}>{dashboard}</option>)}</select><button type="button" className={layout === "grid" ? "is-active" : ""} onClick={() => setLayout("grid")}>Grid</button><button type="button" className={layout === "list" ? "is-active" : ""} onClick={() => setLayout("list")}>List</button><button type="button" onClick={() => onReadOnly("Create dashboard")}>New dashboard</button></div></header><div className={`captured-dashboard-widgets ${layout}`}><MetricPanel title="Total cost" subtitle="All environments · Past 7 days" value={`$${workspace.metrics.totalCost.toFixed(5)}`} /><MetricPanel title="Traces" subtitle="Successful and failed traces" value={workspace.metrics.traces.toLocaleString()} /><section className="captured-panel captured-cost-chart"><PanelHeading title="Cost by model" subtitle="Compare spend across providers and models" /><LineChart label="Cost over time" /></section><section className="captured-panel captured-users-cost"><PanelHeading title="Top users by cost" subtitle="Ranked by total model cost" /><div className="captured-user-bars">{workspace.collections.users.records.slice(0, 5).map((user, index) => <div key={user.id}><span style={{ width: `${92 - index * 13}%` }} /><button type="button">{user.id}</button><strong>${(0.169297 - index * 0.01831).toFixed(5)}</strong></div>)}</div></section></div><footer><Link href={`${basePath}/dashboards`}>Dashboard home</Link><button type="button" onClick={() => onReadOnly("Save dashboard layout")}>Save layout</button></footer></main>;
+}
+
+function ScoresSurface({ workspace }: { workspace: DashboardWorkspace }) {
+  const [metric, setMetric] = useState("All scores");
+  const scores = workspace.collections.scores.records;
+  return <main className="captured-collection captured-scores-surface"><div className="captured-collection-summary"><div><strong>Scores</strong><span> Trace-linked quality and evaluation results</span></div><label>Metric <select aria-label="Score metric" value={metric} onChange={(event) => setMetric(event.target.value)}><option>All scores</option><option>groundedness</option><option>answer_relevance</option><option>policy_compliance</option></select></label></div><div className="captured-score-summary-grid"><MetricPanel title="Scores recorded" subtitle={metric} value={String(scores.length || workspace.metrics.scores)} /><MetricPanel title="Average score" subtitle="Selected metric" value="0.82" /><MetricPanel title="Pass rate" subtitle="Threshold ≥ 0.70" value="91%" /></div><div className="captured-table-scroll"><table><thead><tr><th>Score name</th><th>Value</th><th>Source trace</th><th>Evaluator</th><th>Created</th></tr></thead><tbody>{(scores.length ? scores : [{ id: "score-1", name: "groundedness", status: "passed", environment: "production", timestamp: "today", score: "0.92" }]).map((score) => <tr key={score.id}><td><strong>{score.name}</strong><small>{score.id}</small></td><td><span className="captured-status">{score.score ?? "0.82"}</span></td><td>QA support response</td><td>Tracify evaluator</td><td>{score.timestamp}</td></tr>)}</tbody></table></div></main>;
 }
 
 function TracingSurface({ workspace, basePath, query, environment, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; query: string; environment: string; onReadOnly: (action: string) => void }) {
