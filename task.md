@@ -1608,3 +1608,5 @@ Current verification gap: completing a valid provider-backed sign-in still requi
 88. [in progress] Follow-up correction: the Tracing Filters control is restored as a visible URL-backed menu and verified in the current six-viewport artifact; residual pixel-level parity work and external Vercel preview remain open.
 88. [in progress] Match the responsive Sessions filter-rail breakpoint: narrow tablet uses the reference icon-only rail, while desktop/tablet landscape and mobile retain their captured widths and behaviors.
 90. [in progress] Replace the generic Playground form with the captured message-builder surface and tune its desktop, tablet, and mobile geometry against page 030.
+91. [in progress] Finish the Sessions mobile edge/toolbar alignment and re-run the complete six-viewport matrix after each responsive adjustment.
+92. [in progress] Align Users tablet structure with the reference: dedicated controls only, four visible event columns, and narrow-tablet header offset.

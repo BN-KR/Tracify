@@ -88,15 +88,16 @@ test.describe("account access contract", () => {
     await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
     const consentButton = page.getByRole("button", { name: "Accept analytics" });
     if (await consentButton.isVisible()) await consentButton.click();
-    await page.getByRole("button", { name: "Filters" }).first().click();
-    await expect(page.getByRole("button", { name: "Filters" }).first()).toHaveAttribute("aria-expanded", "true");
+    const tracingFilters = page.locator(".captured-filter-rail").getByRole("button", { name: /^Filters/ });
+    await tracingFilters.click();
+    await expect(tracingFilters).toHaveAttribute("aria-expanded", "true");
     await page.getByRole("textbox", { name: "Search", exact: true }).fill("handle-chatbot-message");
     await expect(page).toHaveURL(/(?:\?|&)q=handle-chatbot-message/);
     await page.reload({ waitUntil: "domcontentloaded" });
     await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
-    await page.getByRole("button", { name: "Filters" }).first().click();
+    await tracingFilters.click();
     await expect(page.getByRole("textbox", { name: "Search", exact: true })).toHaveValue("handle-chatbot-message");
-    await page.getByRole("button", { name: "Filters" }).first().click();
+    await tracingFilters.click();
     await page.locator(".captured-tracing-actions").getByRole("button", { name: /Chart/ }).click();
     await expect(page).toHaveURL(/(?:\?|&)view=chart/);
     await page.reload({ waitUntil: "domcontentloaded" });
@@ -125,13 +126,13 @@ test.describe("account access contract", () => {
     await expect(page).toHaveURL(/\/playground\/playground$/);
     await expect(page.getByRole("heading", { name: "Playground" })).toBeVisible();
     await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
-    await page.getByRole("button", { name: "Run prompt" }).click();
+    await page.getByRole("button", { name: "Submit" }).click();
     await expect(page.getByText(/verified tool evidence/)).toBeVisible();
     if (await consentButton.isVisible()) {
       await consentButton.click();
       await expect(consentButton).toBeHidden();
     }
-    await page.getByRole("button", { name: "Save version" }).click();
+    await page.getByRole("button", { name: "Save as prompt" }).click();
     await expect(page.getByRole("dialog", { name: "This workspace is view only." })).toBeVisible();
   });
 
