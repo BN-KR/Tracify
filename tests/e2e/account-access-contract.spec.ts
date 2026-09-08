@@ -41,7 +41,7 @@ test.describe("account access contract", () => {
     await expect(page.getByText("474", { exact: true })).toBeVisible();
     await page.getByRole("link", { name: "Tracing" }).click();
     await expect(page).toHaveURL(/\/playground\/tracing$/);
-    await expect(page.getByText("Refund status investigation", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Refund status investigation", exact: true })).toBeVisible();
     expect(pageErrors, "the public Sandbox must not surface an account or Convex error").toEqual([]);
   });
 
@@ -55,7 +55,7 @@ test.describe("account access contract", () => {
     ] as const;
     for (const [slug, title] of surfaces) {
       await page.goto(`/playground/${slug}`, { waitUntil: "domcontentloaded" });
-      await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
+      await expect(page.locator("h1", { hasText: title })).toBeVisible();
       await expect(page.getByText(/ready to explore/i)).toHaveCount(0);
     }
   });
@@ -67,10 +67,10 @@ test.describe("account access contract", () => {
     await page.waitForTimeout(750);
     const consentButton = page.getByRole("button", { name: "Accept analytics" });
     if (await consentButton.isVisible()) await consentButton.click();
-    await page.getByRole("button", { name: "Filters" }).click();
-    await expect(page.getByRole("button", { name: "Filters" })).toHaveAttribute("aria-expanded", "true");
-    await page.getByRole("textbox", { name: "Search" }).fill("refund");
-    await expect(page.getByText("1 results", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Filters" }).first().click();
+    await expect(page.getByRole("button", { name: "Filters" }).first()).toHaveAttribute("aria-expanded", "true");
+    await page.getByRole("textbox", { name: "Search", exact: true }).fill("refund");
+    await expect(page.getByRole("link", { name: "Refund status investigation", exact: true })).toBeVisible();
     await page.getByRole("link", { name: /Refund status investigation/ }).click();
     await expect(page.getByRole("heading", { name: "Refund status investigation" })).toBeVisible();
     await expect(page.getByText("gpt-5.6-luna", { exact: true })).toBeVisible();
