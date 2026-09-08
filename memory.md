@@ -1891,3 +1891,11 @@
 - Verification after the change: focused ESLint passes, TypeScript passes, the production build compiles and generates 209 pages, and the account-access Playwright contract is 6/6 green. Full repository ESLint still has the previously documented unrelated baseline failures.
 - Added the non-secret EU `CONVEX_SITE_URL` to the Vercel Production environment after a preview-build diagnostic exposed that the generic site URL was absent from the cloud build context. The current main deployment `9vJY7VegtjorJdu8RypnkNe3BqSE` is Ready and owns `eu.cloud.tracify.tech`.
 - Live EU smoke verification after the merged deployment: Playground rendered without the stale `sandbox:getWorkspace` error; scenario selection changed metrics and alert state, failure filtering reduced the table to the failed run, trace detail opened, and alert dismissal removed the alert. No live browser errors were reported.
+
+## 2026-09-08 — Auth callback loop and return-path recovery
+
+- Root cause: `/auth/callback` redirected to `/sign-in` whenever Convex briefly reported unauthenticated, even when Better Auth already had a valid session. That transient JWT exchange state created the sign-in loop after regional OAuth handoff.
+- Fixed callback state handling to wait for Convex when a Better Auth session exists, and added unit coverage for session-pending, dual-authenticated, and genuinely unauthenticated states.
+- Playground auth redirects now preserve the complete `/playground` query, including `userId=usr_demo_7f3a9c21` and `intent=explore`, so the signed-in destination remains immersive and deterministic.
+- Updated Convex Better Auth host resolution for the regional proxy and set production `SITE_URL` to `https://eu.cloud.tracify.tech`. Production social callback probes resolve both GitHub and Google to the EU host; an email probe reaches the expected invalid-credentials response rather than an origin error.
+- Verification: focused lint, TypeScript, production build (209 routes), activation contract, auth/navigation unit tests, and regional contract all pass. Valid credential completion remains a user-session check.

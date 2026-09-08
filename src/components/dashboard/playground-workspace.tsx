@@ -34,6 +34,10 @@ type PlaygroundWorkspaceState = {
 export function PlaygroundWorkspace() {
   const searchParams = useSearchParams();
   const demoUserId = searchParams.get("userId") || PLAYGROUND_DEMO_USER_ID;
+  const returnParams = new URLSearchParams(searchParams.toString());
+  if (!returnParams.has("userId")) returnParams.set("userId", demoUserId);
+  if (!returnParams.has("intent")) returnParams.set("intent", "explore");
+  const returnPath = `/playground?${returnParams.toString()}`;
   const auth = useConvexAuthReadiness();
   const isAuthenticated = auth.isAuthenticated;
   const [scenario, setScenario] = useState<Scenario>("healthy");
@@ -85,10 +89,12 @@ export function PlaygroundWorkspace() {
   const visibleRuns = useMemo(() => filter === "failed" ? runs.filter((run) => run[2] === "failed") : runs, [filter]);
 
   useEffect(() => {
-    if (auth.status === "unauthenticated") window.location.assign("/sign-in?redirect_url=%2Fplayground");
-  }, [auth.status, isAuthenticated]);
+    if (auth.status === "unauthenticated") {
+      window.location.assign(`/sign-in?redirect_url=${encodeURIComponent(returnPath)}`);
+    }
+  }, [auth.status, isAuthenticated, returnPath]);
 
-  if (auth.status === "error") return <ConvexAuthState mode="error" redirectPath="/playground" />;
+  if (auth.status === "error") return <ConvexAuthState mode="error" redirectPath={returnPath} />;
   if (auth.status === "loading" || !isAuthenticated) return <div className="p-6 font-mono text-sm text-black/55" role="status">Preparing playground access…</div>;
 
   return <div className="flex flex-col gap-6">

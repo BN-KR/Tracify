@@ -16,9 +16,26 @@ export const authComponent = createClient<DataModel, typeof schema>(
 
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
   const database = authComponent.adapter(ctx);
+  const siteUrl = process.env.SITE_URL ?? "https://eu.cloud.tracify.tech";
   return {
   appName: "tracify",
-  baseURL: process.env.SITE_URL,
+  // Auth requests are proxied through the regional Next.js deployment. Resolve
+  // the public host per request so OAuth callbacks and host-only session cookies
+  // stay on the cloud origin the user selected instead of falling back to the
+  // marketing host stored in older Convex environments.
+  baseURL: {
+    allowedHosts: [
+      "eu.cloud.tracify.tech",
+      "www.tracify.tech",
+      "tracify.tech",
+      "tracifytech.vercel.app",
+      "*.tracify-tech.vercel.app",
+      "localhost:*",
+      "127.0.0.1:*",
+    ],
+    protocol: "auto",
+    fallback: siteUrl,
+  },
   secret: process.env.BETTER_AUTH_SECRET,
   database,
   emailAndPassword: {
@@ -42,11 +59,20 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     },
   },
   trustedOrigins: [
-    process.env.SITE_URL,
+    siteUrl,
+    "https://eu.cloud.tracify.tech",
+    "https://www.tracify.tech",
+    "https://tracify.tech",
+    "https://*.tracify-tech.vercel.app",
     "http://localhost:3000",
     "http://localhost:4000",
     "https://tracifytech.vercel.app",
   ].filter((origin): origin is string => Boolean(origin)),
+  advanced: {
+    // The Next.js auth handler overwrites these headers from the actual request
+    // URL before proxying to Convex, and allowedHosts rejects every unknown host.
+    trustedProxyHeaders: true,
+  },
   rateLimit: {
     enabled: true,
     storage: "database",

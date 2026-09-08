@@ -36,7 +36,7 @@ test.describe("account access contract", () => {
     const pageErrors: Error[] = [];
     page.on("pageerror", (error) => pageErrors.push(error));
     await page.goto("/playground?intent=explore", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/sign-in\?redirect_url=%2Fplayground$/, { timeout: 30_000 });
+    await expect(page).toHaveURL(/\/sign-in\?redirect_url=%2Fplayground%3Fintent%3Dexplore%26userId%3Dusr_demo_7f3a9c21$/, { timeout: 30_000 });
     expect(pageErrors, "the unauthenticated playground must not surface a Convex query error").toEqual([]);
   });
 
