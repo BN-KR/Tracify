@@ -143,6 +143,8 @@ export function CapturedWorkspace({
         <HomeSurface workspace={workspace} environment={environment} />
       ) : surface === "costs" ? (
         <CostsSurface workspace={workspace} environment={environment} />
+      ) : surface === "tracing" && recordId ? (
+        <RecordDetail record={workspace.collections.tracing.records.find((record) => record.id === recordId) ?? workspace.collections.tracing.records[0]} surface={surface} basePath={basePath} />
       ) : surface === "tracing" ? (
         <TracingSurface workspace={workspace} basePath={basePath} query={query} environment={environment} onReadOnly={setReadOnlyAction} />
       ) : surface === "sessions" && recordId ? (
