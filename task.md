@@ -11,6 +11,7 @@
 - [completed] Route supported captured Build actions into existing authenticated workflows while preserving Sandbox read-only behavior.
 - [completed] Sweep all 14 captured Sandbox surfaces at 390px for route success, page errors, and horizontal overflow.
 - [completed] Add and pass an HTTP contract for every unique internal link emitted by the 14 captured Sandbox surfaces.
+- [completed] Fix hydration readiness signaling and rerun the complete 10-test account-access contract (10/10 passed).
 - [completed] Create clean local implementation commits (`43e670a`, `45b5e25`, `b9f4444`, `55befa5`) without staging unrelated scratch files.
 - [completed] Push the implementation branch to PR #106; primary checks passed, with the EU Vercel preview still pending external deployment.
 - [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
