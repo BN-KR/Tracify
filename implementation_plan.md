@@ -1423,3 +1423,29 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 82. [completed] Decouple the deterministic Explore Playground simulator from the stale regional `sandbox` deployment while preserving scenario, filter, alert, and trace-detail interactions.
 83. [completed] Verify the corrected EU Vercel environment binding, production build, TypeScript, focused lint, and 6-case account-access browser contract.
 84. [completed] Add the missing EU Vercel Production `CONVEX_SITE_URL`, confirm the merged main deployment is Ready on `eu.cloud.tracify.tech`, and smoke-test the live Playground controls.
+
+## Explore/Build parity spec — 2026-09-08
+
+Objective: give first-time visitors a reliable Tracify Explore experience that visually follows the supplied populated dashboard capture while keeping production account data, authentication, and regional telemetry out of the demo path.
+
+Acceptance contract:
+
+1. Explore opens `/playground?view=home&userId=usr_demo_7f3a9c21` directly; no region selection, Clerk/Convex auth gate, stale project ID, personal dashboard, or Langfuse label is involved.
+2. The Explore shell is visibly branded Tracify, uses the dark cloud dashboard treatment, and uses gray placeholders/skeletons against the dark canvas. The captured populated Home/Tracing information architecture is the visual reference, not archived JavaScript.
+3. The logo always returns to `/dashboard` project selection. The synthetic project switcher clearly says `Demo Project (view only)` and offers a Build path.
+4. Every visible Explore sidebar item remains inside the simulator and changes the `view` state; Home, Tracing, filters, scenario cards, trace detail, time range, environment, and Build actions have observable behavior.
+5. Build remains a separate path: `/cloud/region` lists available regions, and selecting one shows `/cloud/connecting` with a visible `Connecting to … cloud` status before regional API redirect.
+6. Verification must pass TypeScript, focused ESLint, production build, and the account-access browser contract. Existing generated Convex changes and unrelated scratch files remain untouched.
+
+Implementation completed:
+
+- Added the `synthetic` dashboard-shell/sidebar/project-switcher mode and routed all simulator navigation through `view` query state.
+- Replaced the auth-dependent playground surface with populated synthetic Home, Tracing, and generic simulator surfaces, preserving safe localStorage scenario state.
+- Added the regional connecting handoff route and gray dark-dashboard loading treatment.
+- Updated `tests/e2e/account-access-contract.spec.ts` to encode the acceptance contract; all 8 tests pass locally.
+
+Production verification:
+
+- PR #99 merged as `7c3ee0f`; PR #100 merged as `312a4df`.
+- Marketing production deployment and EU production deployment for `312a4df` reached Ready. Live marketing Explore click reaches `https://eu.cloud.tracify.tech/playground?view=home&userId=usr_demo_7f3a9c21` and renders the populated synthetic Home.
+- Remaining deployment hygiene item: copy the existing production `CONVEX_SITE_URL` config into the EU Vercel Preview environment. The preview deployment for PR #100 fails at page-data collection with `CONVEX_SITE_URL is not set`; this does not affect the verified production deployment.

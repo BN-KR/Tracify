@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Database, Globe2, ShieldCheck, Sparkles, Wrench } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { PLAYGROUND_DEMO_USER_ID } from "@/lib/playground-demo";
+import { TRACIFY_REGIONS } from "@/lib/regions";
 
 export const metadata: Metadata = {
   title: "Explore or build with Tracify",
@@ -12,6 +13,9 @@ export const metadata: Metadata = {
 };
 
 export default function CloudRegionPage() {
+  const exploreHref = process.env.NODE_ENV === "production"
+    ? `${TRACIFY_REGIONS.eu.origin}/playground?view=home&userId=${PLAYGROUND_DEMO_USER_ID}`
+    : `/playground?view=home&userId=${PLAYGROUND_DEMO_USER_ID}`;
   return (
     <main className="min-h-screen bg-[#eceae3] text-black selection:bg-[#f4d44d]">
       <header className="flex h-[54px] items-center justify-between border-b border-black px-5 md:px-8">
@@ -41,11 +45,11 @@ export default function CloudRegionPage() {
               <Fact icon={Globe2} label="Closer access" />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Link href={`/cloud/region?next=${encodeURIComponent(`/playground?userId=${PLAYGROUND_DEMO_USER_ID}`)}&intent=explore`} className="group border border-black bg-[#f4d44d] p-6 hover:bg-black hover:text-white">
+              <Link href={exploreHref} className="group border border-black bg-[#f4d44d] p-6 hover:bg-black hover:text-white">
                 <Sparkles className="size-7" />
                 <span className="mt-12 block font-pixel text-4xl leading-none tracking-[-0.055em]">Explore</span>
                 <span className="mt-4 block text-sm leading-6 text-black/65 group-hover:text-white/65">Open a private, populated playground. No region or real telemetry required.</span>
-                <span className="mt-8 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em]">Choose region <ArrowRight className="size-4" /></span>
+                <span className="mt-8 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em]">Open playground <ArrowRight className="size-4" /></span>
               </Link>
               <Link href="/cloud/region?next=%2Fsign-up&intent=build" className="group border border-black bg-white p-6 hover:bg-[#f4d44d]">
                 <Wrench className="size-7" />
