@@ -163,6 +163,7 @@ export function CapturedWorkspace({
           >
             <PanelLeft />
           </button>
+          <span className="captured-mobile-logo" aria-hidden="true"><i /></span>
           <button type="button" className="captured-crumb" onClick={() => window.dispatchEvent(new Event("tracify:open-project-switcher"))}>
             {workspace.project.organizationName}<ChevronDown />
           </button>
@@ -234,7 +235,7 @@ export function CapturedWorkspace({
       ) : surface === "tracing" && recordId ? (
         <RecordDetail record={workspace.collections.tracing.records.find((record) => record.id === recordId) ?? workspace.collections.tracing.records[0]} surface={surface} basePath={basePath} />
       ) : surface === "tracing" ? (
-        <TracingSurface workspace={workspace} basePath={basePath} query={query} environment={environment} onReadOnly={handleAction} onQueryChange={(value) => { setQuery(value); updateRouteState("q", value); }} />
+        <TracingSurface workspace={workspace} basePath={basePath} query={query} environment={environment} onReadOnly={handleAction} />
       ) : surface === "sessions" && recordId ? (
         <SessionDetailSurface workspace={workspace} sessionId={recordId} basePath={basePath} onReadOnly={handleAction} onAnnotate={onSessionAnnotate} onAddToDataset={onSessionAddToDataset} />
       ) : surface === "settings" ? (
@@ -402,13 +403,12 @@ function AlertsSurface({ workspace, onReadOnly, onCreate, onStateChange }: { wor
   return <main className="captured-collection captured-alerts-surface"><div className="captured-collection-summary"><div><strong>Alerts</strong><span> Notify your team when quality or cost changes</span></div><div className="captured-inline-actions"><select aria-label="Alert status" value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="paused">Paused</option></select><button type="button" onClick={() => onReadOnly("Create alert")}>Add alert</button></div></div>{creating ? <form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); void save(); }}><h2>Create alert</h2><label>Name<input required placeholder="Production latency" value={name} onChange={(event) => setName(event.target.value)} /></label><label>Metric<select value={metric} onChange={(event) => setMetric(event.target.value)}><option value="latency">Latency</option><option value="cost">Cost</option><option value="score">Score</option></select></label><label>Threshold<input required type="number" step="any" placeholder="2" value={threshold} onChange={(event) => setThreshold(event.target.value)} /></label><div><button type="submit" disabled={saving}>{saving ? "Saving…" : "Save alert"}</button><button type="button" onClick={() => window.history.back()}>Cancel</button></div>{notice ? <p role="status">{notice}</p> : null}</form> : <><div className="captured-alert-cards">{records.map((record) => <article key={record.id}><div><span className={`captured-status ${record.status}`}>{record.status}</span><h3>{record.name}</h3><p>Threshold condition · production environment</p></div><div><button type="button" disabled={updating === record.id} onClick={() => void changeState(record.id, record.status === "resolved" ? "active" : "resolved")}>{updating === record.id ? "Updating…" : record.status === "resolved" ? "Reactivate" : "Resolve"}</button><button type="button" onClick={() => void changeState(record.id, "muted")}>Mute</button></div></article>)}</div>{notice ? <p role="status">{notice}</p> : null}{!records.length ? <div className="captured-empty">No alerts match this status.</div> : null}</>}</main>;
 }
 
-function TracingSurface({ workspace, basePath, query, environment, onReadOnly, onQueryChange }: { workspace: DashboardWorkspace; basePath: string; query: string; environment: string; onReadOnly: (action: string) => void; onQueryChange: (value: string) => void }) {
+function TracingSurface({ workspace, basePath, query, environment, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; query: string; environment: string; onReadOnly: (action: string) => void }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [view, setView] = useState<"table" | "chart">(() => searchParams.get("view") === "chart" ? "chart" : "table");
   const [preset, setPreset] = useState(() => searchParams.get("preset") ?? "all");
   const [page, setPage] = useState(() => Math.max(1, Number.parseInt(searchParams.get("page") ?? "1", 10) || 1));
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [columnsOpen, setColumnsOpen] = useState(false);
   const defaultColumns = ["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Metadata", "Status", "Latency (s)", "Cost ($)", "Time To First Token (s)", "Provided Model Name", "Prompt Name", "Environment", "Trace Tags", "SDK Name"];
   const [selectedColumns, setSelectedColumns] = useState(() => searchParams.get("columns")?.split(",").filter(Boolean) ?? defaultColumns);
@@ -443,11 +443,11 @@ function TracingSurface({ workspace, basePath, query, environment, onReadOnly, o
   };
   return <main className="captured-tracing">
     <div className="captured-tracing-actions">
-      {["all", "quality", "slow", "cost"].map((item) => item === "all" ? <button key={item} type="button" className={preset === item ? "is-active" : ""} aria-expanded={filtersOpen} onClick={() => setFiltersOpen((open) => !open)}>Filters</button> : <button key={item} type="button" className={preset === item ? "is-active" : ""} onClick={() => { setPreset(item); updateTracingState("preset", item); }}>{item[0].toUpperCase() + item.slice(1)}</button>)}
+      {["quality", "slow", "cost"].map((item) => <button key={item} type="button" className={preset === item ? "is-active" : ""} onClick={() => { setPreset(item); updateTracingState("preset", item); }}>{item[0].toUpperCase() + item.slice(1)}</button>)}
+      <button type="button" onClick={() => onReadOnly("Open trace views")}>My Views <span>0</span></button>
       <button type="button" className={view === "table" ? "is-active" : ""} onClick={() => { setView("table"); updateTracingState("view", "table"); }}>▦ Table</button><button type="button" className={view === "chart" ? "is-active" : ""} onClick={() => { setView("chart"); updateTracingState("view", "chart"); }}>▥ Chart</button>
       <div className="captured-tracing-columns"><button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)}>Columns {selectedColumns.length}/40 ▾</button>{columnsOpen ? <div className="captured-column-menu" role="menu">{columns.map((column) => <label key={column}><input type="checkbox" checked={selectedColumns.includes(column)} onChange={() => toggleColumn(column)} />{column}</label>)}</div> : null}</div>
     </div>
-    {filtersOpen ? <div className="captured-tracing-filter-menu" role="dialog" aria-label="Tracing filters"><label><span>Search traces</span><input aria-label="Search" value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="name, trace, model…" /></label><div><button type="button" className={preset === "all" ? "is-active" : ""} onClick={() => { setPreset("all"); updateTracingState("preset", "all"); }}>All traces</button><button type="button" onClick={() => { setPreset("quality"); updateTracingState("preset", "quality"); }}>Quality ≥ 0.8</button><button type="button" onClick={() => { setPreset("slow"); updateTracingState("preset", "slow"); }}>Slow ≥ 2s</button><button type="button" onClick={() => { setPreset("cost"); updateTracingState("preset", "cost"); }}>Cost ≥ $0.02</button></div></div> : null}
     <div className="captured-tracing-layout">
       <aside className="captured-filter-rail">
         <div className="captured-filter-rail-heading"><strong>Filters <span className="captured-filter-count">{preset === "all" ? "" : "1"}</span></strong><button type="button" onClick={() => setFilterSearch("")}>Clear</button></div>
