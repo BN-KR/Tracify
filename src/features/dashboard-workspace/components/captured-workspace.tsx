@@ -337,12 +337,13 @@ function LineChart({ label }: { label: string }) {
 function CollectionSurface({ workspace, surface, basePath, query, environment, recordId, onReadOnly }: { workspace: DashboardWorkspace; surface: Exclude<WorkspaceSurface, "home" | "settings" | "playground">; basePath: string; query: string; environment: string; recordId?: string; onReadOnly: (action: string) => void }) {
   const [pageSize, setPageSize] = useState("50");
   const collection = workspace.collections[surface];
-  const visible = collection.records.filter((record) => (environment === "all" || record.environment === environment) && (!query || `${record.id} ${record.name} ${record.status}`.toLowerCase().includes(query.toLowerCase())));
+  const filtered = collection.records.filter((record) => (environment === "all" || record.environment === environment) && (!query || `${record.id} ${record.name} ${record.status}`.toLowerCase().includes(query.toLowerCase())));
+  const visible = filtered.slice(0, Number(pageSize));
   const record = recordId ? collection.records.find((candidate) => candidate.id === recordId) : null;
   if (record) return <RecordDetail record={record} surface={surface} basePath={basePath} />;
   return (
     <main className="captured-collection">
-      <div className="captured-collection-summary"><span>{collection.description}</span><strong>{visible.length} results</strong></div>
+      <div className="captured-collection-summary"><span>{collection.description}</span><strong>{filtered.length} results</strong></div>
       <div className="captured-table-scroll">
         <table>
           <thead><tr><th>Name</th><th>Status</th><th>Environment</th><th>{surface === "scores" ? "Score" : "Model"}</th><th>Updated</th><th /></tr></thead>
@@ -357,7 +358,7 @@ function CollectionSurface({ workspace, surface, basePath, query, environment, r
         </table>
       </div>
       {!visible.length ? <div className="captured-empty">No records match the current filters.</div> : null}
-      <footer className="captured-table-footer"><span>{visible.length} results</span><label>Rows per page <select aria-label="Rows per page" value={pageSize} onChange={(event) => setPageSize(event.target.value)}><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label><span>Page 1</span></footer>
+      <footer className="captured-table-footer"><span>Showing {visible.length} of {filtered.length}</span><label>Rows per page <select aria-label="Rows per page" value={pageSize} onChange={(event) => setPageSize(event.target.value)}><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label><span>Page 1</span></footer>
     </main>
   );
 }

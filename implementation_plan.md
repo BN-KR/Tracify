@@ -15,6 +15,7 @@
 - [completed] Extend the browser contract for prompt, dataset, and settings interactions and verify it locally.
 - [completed] Add rows-per-page controls to the remaining generic collection tables so Users and Experiments retain the captured table affordances.
 - [completed] Restart the stale local dev process and verify the captured tracing surface in-browser after recompilation; the intended controls and dense table are rendered.
+- [completed] Make generic collection pagination functional and rerun TypeScript, focused ESLint, and the 9-test account-access browser contract.
 - [pending] Wire the captured-depth Sandbox controls to the equivalent authenticated Build state and verify nested detail routes end to end.
 
 Implementation contract:
