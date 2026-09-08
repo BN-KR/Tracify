@@ -1604,3 +1604,6 @@ Current verification gap: completing a valid provider-backed sign-in still requi
 84. [in progress] Continue migrating project settings, administration, and create/edit routes to captured surfaces.
 85. [in progress] Remove remaining dashboard-visible Tracify branding and yellow accents from legacy fallbacks and migrated shared surfaces.
 86. [in progress] Implement captured control/detail density and compare local/reference screenshots for all 14 primary surfaces at all six required viewport sizes.
+87. [in progress] Continue evidence-driven surface corrections: latest verified work aligns Tracing toolbar controls, removes the unreachable top filter popover, corrects the shared default environment label, neutralizes the captured dashboard marker, and refines mobile Sessions toolbar/surface offsets. Full six-viewport capture remains green; raw visual parity is still incomplete.
+88. [in progress] Follow-up correction: the Tracing Filters control is restored as a visible URL-backed menu and verified in the current six-viewport artifact; residual pixel-level parity work and external Vercel preview remain open.
+88. [in progress] Match the responsive Sessions filter-rail breakpoint: narrow tablet uses the reference icon-only rail, while desktop/tablet landscape and mobile retain their captured widths and behaviors.
