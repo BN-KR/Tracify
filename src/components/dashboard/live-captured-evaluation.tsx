@@ -11,6 +11,7 @@ type Section = "evaluators" | "datasets" | "scores";
 export function LiveCapturedEvaluation({ projectId, section }: { projectId: string; section: Section }) {
   const createEvaluator = useMutation(api.evaluators.create);
   const createDataset = useMutation(api.evaluation.createDataset);
+  const setEvaluatorActive = useMutation(api.evaluators.setActive);
   const project = useQuery(api.projects.getProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const evaluators = useQuery(api.evaluators.list, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const datasets = useQuery(api.evaluation.listDatasets, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
@@ -28,5 +29,8 @@ export function LiveCapturedEvaluation({ projectId, section }: { projectId: stri
   async function saveDataset(input: { name: string; description: string }) {
     await createDataset({ projectId: projectId as Id<"projects">, ...input });
   }
-  return <CapturedWorkspace workspace={workspace} segments={[section]} onEvaluatorCreate={section === "evaluators" ? saveEvaluator : undefined} onDatasetCreate={section === "datasets" ? saveDataset : undefined} />;
+  async function toggleEvaluator(input: { evaluatorId: string; active: boolean }) {
+    await setEvaluatorActive({ projectId: projectId as Id<"projects">, evaluatorId: input.evaluatorId as Id<"evaluators">, active: input.active });
+  }
+  return <CapturedWorkspace workspace={workspace} segments={[section]} onEvaluatorCreate={section === "evaluators" ? saveEvaluator : undefined} onDatasetCreate={section === "datasets" ? saveDataset : undefined} onEvaluatorToggle={section === "evaluators" ? toggleEvaluator : undefined} />;
 }
