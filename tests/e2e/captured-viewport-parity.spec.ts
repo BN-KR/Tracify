@@ -35,7 +35,12 @@ test.describe("captured Sandbox viewport parity", () => {
       await page.setViewportSize({ width, height });
       for (const [surfaceName, path] of surfaces) {
         await page.goto(path, { waitUntil: "domcontentloaded" });
-        await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+        // A fresh dev server may compile a newly visited surface on demand.
+        // Keep this assertion aligned with the suite's long per-viewport timeout
+        // instead of failing on a cold route compile.
+        await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", {
+          timeout: 30_000,
+        });
         await expect(page.locator(".captured-workspace")).toBeVisible();
         await expect(page.getByRole("link", { name: "Langfuse dashboard" })).toHaveCount(1);
         await expect(page.getByText("Demo Project (view only)", { exact: true }).first()).toBeVisible();
