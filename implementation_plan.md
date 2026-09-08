@@ -12,6 +12,7 @@
 - [completed] Add Datasets, Human Annotation, Alerts, and Settings captured-depth surfaces with search, queue/status filters, review actions, alert cards, and functional settings tabs.
 - [completed] Warm the local Sandbox route matrix and verify HTTP 200 for primary surfaces and nested session detail; first-request compilation latency is isolated from subsequent route behavior.
 - [completed] Re-run the account-access Playwright contract after warming the local app.
+- [completed] Extend the browser contract for prompt, dataset, and settings interactions and verify it locally.
 - [pending] Wire the captured-depth Sandbox controls to the equivalent authenticated Build state and verify nested detail routes end to end.
 
 Implementation contract:
