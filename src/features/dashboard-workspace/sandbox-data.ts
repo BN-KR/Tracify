@@ -54,6 +54,9 @@ const referenceSessionIds = [
 const referenceSessionTimestamps = [
   "2026-09-06 15:06:56", "2026-09-06 14:54:40", "2026-09-06 14:51:34", "2026-09-06 13:45:55", "2026-09-06 13:19:59", "2026-09-06 12:54:01", "2026-09-06 12:45:40", "2026-09-06 12:19:09", "2026-09-06 11:24:17", "2026-09-06 11:16:50", "2026-09-06 10:41:08", "2026-09-06 10:15:12", "2026-09-06 09:54:01", "2026-09-06 08:30:40", "2026-09-06 07:08:15", "2026-09-06 05:15:46", "2026-09-06 03:29:39", "2026-09-06 03:19:38", "2026-09-06 01:42:29", "2026-09-06 01:34:51",
 ] as const;
+const referenceUserIds = [
+  "u-9uoFaD8WPx__fMZiFed0o", "u-WjuT3-zVCVJJLoYoJZFOt", "u-Ags4oLut0yalDz4SZOUrD", "u-AEFA5RuNVc93iWUPqz4Om", "u-HbyabaX8tyzmPsELI8mQ_", "u-T9A6Ej6EiVAHUip8EiEmm", "u-HpisBGihuAHyE7lhL8AzR", "u-dTnjZeP9k5-3--qvO9e5w", "u-vAJizOgX9F9up2djjxnUn", "u-lREiLE76MX5k15oG81qbA", "u-8fQaUq4Ei3nyQvGTeLS7-", "u-j5QgPGHGNjMohOlo97pyj", "u-INslKAAqiciwJIsHLlxHW", "u-5RTt7dcg6appD6W-QaGb_", "u-zh7g3eEY926DZYSGP0zTV", "u-i-W8qw6LimkOQ2LNJZKyE", "u-rDmCcxNWfLdiiKLO474gO", "u-XzpG6DFsk_4Vqf3ApmMOv", "u-hqLy_X6u77lTTd8j8XzlK", "u-PlkTqZhcLn7XIO0a3jYxS", "u-OxSDdCcUTN92jbbR9vyRt", "u-sqr5wqqyXIGz6G6_LAk_h", "u-wNqjyRHzTrIcRxzXt6T4k", "u-IuCE6VxTUm90WGF5r4yTA", "u-AzcS7u7EBWOOKxWyo15BC", "u-wz-axhw9gTocNPpC_VN6x", "u-X_y-Auf2mluq2WJgLHWcz", "u-F0MfJ250838zTpIbDGs10",
+] as const;
 
 
 export const sandboxWorkspace: DashboardWorkspace = {
@@ -92,7 +95,7 @@ export const sandboxWorkspace: DashboardWorkspace = {
     },
     users: {
       description: "Understand activity, quality, latency, and cost for each end user.",
-      records: traceRecords.map((trace, index) => ({ ...trace, id: trace.userId ?? trace.id, name: ["Olivia Martin", "Noah Williams", "Emma Davis", "Liam Brown", "Ava Wilson", "Mia Moore"][index], status: index === 2 ? "Needs review" : "Active" })),
+      records: traceRecords.map((trace, index) => ({ ...trace, id: referenceUserIds[index] ?? trace.userId ?? trace.id, userId: referenceUserIds[index] ?? trace.userId, name: ["Olivia Martin", "Noah Williams", "Emma Davis", "Liam Brown", "Ava Wilson", "Mia Moore"][index], status: index === 2 ? "Needs review" : "Active" })),
     },
     alerts: {
       description: "Monitor quality, latency, cost, and failures against operational thresholds.",
