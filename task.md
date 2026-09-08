@@ -1610,3 +1610,4 @@ Current verification gap: completing a valid provider-backed sign-in still requi
 91. [in progress] Finish the Sessions mobile edge/toolbar alignment and re-run the complete six-viewport matrix after each responsive adjustment.
 93. [in progress] Align Users Sandbox identifiers, localized event timestamps, fixed column widths, and mobile overflow with the populated page 027 reference while preserving live data behavior.
 94. [in progress] Correct Tracing table column geometry after the leading selection column; verify Type icon, Start Time, Input, Output, and horizontal overflow across all six viewports.
+95. [in progress] Keep the accepted Tracing selector/icon correction and reject the measured vertical-spacing experiment; continue shell and content-density parity from the 28.40%/24.54% baseline.
