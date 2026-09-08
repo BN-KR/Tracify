@@ -13,6 +13,7 @@
 - [completed] Verify all 14 captured Sandbox surfaces at 390px: 14/14 returned 200, no horizontal overflow, and no page errors.
 - [completed] Add and pass a unique internal-link destination contract across all 14 captured Sandbox surfaces (1/1).
 - [completed] Commit the implementation and newly created live adapters cleanly (`43e670a`, `45b5e25`, `b9f4444`, `55befa5`); unrelated scratch/archive files remain excluded.
+- [completed] Push the implementation branch to PR #106; GitGuardian, activation, adapter, and primary Vercel checks passed. EU Vercel remained pending at handoff.
 - [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
 
 ## Captured Tracify dashboard implementation — 2026-09-08
@@ -1521,3 +1522,6 @@ Production verification:
 - Remaining project settings aliases now preserve their requested destination as `settings?tab=...`, so old bookmarks enter the shared captured settings shell.
 - Sandbox metadata and project labels no longer expose Tracify branding, and the captured interaction accent is violet rather than the old yellow token.
 - Browser review of the managed local Sandbox confirms the captured shell is live; legacy Prompt Management, Dashboard Create, Evaluation, and Evals entry points now canonicalize into captured route families. The next parity block is implementing the captured control/detail density and six-viewport screenshot comparison.
+- Tracing range, environment, and query filters now persist in the URL and are covered by a reload contract; continue extending URL-backed state to view, columns, pagination, and detail selections.
+- Tracing view mode, preset, and column selection now persist through URL parameters and are covered by the Sandbox browser contract; pagination and detail-selection persistence remain.
+- Tracing now slices results by URL-backed `page` state and exposes reference-style previous/next controls with disabled boundaries.

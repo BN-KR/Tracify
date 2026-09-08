@@ -12,6 +12,7 @@
 - Ran a 390px viewport sweep across all 14 captured Sandbox surfaces: every route returned 200, had no horizontal overflow, and reported no page errors. The existing route contract remains green; internal link HTTP probing should be added as a follow-up when the full navigation audit is expanded.
 - Added and passed the captured Sandbox internal-link contract (1/1): it collected links across all 14 surfaces and verified every unique internal destination returned below 400.
 - Committed the implementation as `43e670a`, `45b5e25`, `b9f4444`, and `55befa5` (expanded/mapped captured Tracing filters); unrelated scratch/archive files remain untracked and untouched.
+- Pushed branch `codex/build-captured-sessions` to origin; PR #106 now includes the implementation through commit `34e5882`. GitGuardian, activation, adapter, and the Tracify Vercel preview passed; the EU Vercel preview was still pending when polling stopped.
 
 ## 2026-09-08 hosted dashboard reference
 - Deployed the complete static dashboard capture as the isolated Vercel project `tracify-dashboard-reference`; it does not modify or share configuration with the production `tracify` or `tracify-cloud-eu` projects.
@@ -1995,3 +1996,6 @@
 - Canonicalized the remaining project settings aliases (LLM Connections, Model Definitions, MCP & CLI, Scores, Integrations, Notifications, Audit log, Batch Actions, and Exports) into URL-backed captured Settings tabs; TypeScript and diff checks pass.
 - Removed visible Sandbox metadata/project branding references and replaced the captured workspace accent token with the reference violet accent; remaining legacy component strings are outside the migrated captured surfaces and require continued route cleanup.
 - Browser review confirms the local Sandbox renders the captured dark shell and populated controls at the managed test server; compared with the authoritative 4173 Tracing tree, the remaining gap is control/detail density rather than shell access. Canonicalized legacy Prompt Management, Dashboard Create, Evaluation, and Evals entry points into captured route families; TypeScript and diff checks pass.
+- Tracing range, environment, and search query state now round-trip through URL parameters (`range`, `environment`, `q`); the account-access contract asserts the filtered Sandbox view survives reload. TypeScript and diff checks pass.
+- Tracing table/chart mode, quick-filter preset, and selected-column state now round-trip through URL parameters (`view`, `preset`, `columns`); the browser contract verifies chart mode and the 16/40 columns control survive reload.
+- Added URL-backed Tracing pagination with bounded previous/next controls and filtered-page slicing; TypeScript and diff checks pass.
