@@ -1,12 +1,25 @@
 import type { DashboardWorkspace } from "./contracts";
 
 const traces = [
-  ["trace_support_8f2c", "Refund status investigation", "Completed", "production", "18:42:16", "1.24s", "$0.018", "gpt-5.6-luna", "0.97", "usr_olivia", "session_checkout_104"],
-  ["trace_research_72ab", "Policy retrieval with citations", "Completed", "production", "18:38:02", "2.08s", "$0.041", "gpt-5.6-sol", "0.94", "usr_noah", "session_policy_882"],
-  ["trace_support_19de", "Order lookup and escalation", "Failed", "production", "18:31:44", "4.82s", "$0.009", "gpt-5.6-luna", "0.42", "usr_emma", "session_orders_551"],
-  ["trace_agent_0c91", "Account context refresh", "Running", "staging", "18:27:09", "0.82s", "$0.006", "gpt-5.4-mini", "0.88", "usr_liam", "session_account_020"],
-  ["trace_voice_88af", "Voice support handoff", "Completed", "production", "18:19:52", "3.10s", "$0.052", "gpt-5.6-luna", "0.91", "usr_ava", "session_voice_440"],
-  ["trace_triage_32dd", "Incident classification", "Completed", "staging", "18:12:33", "1.67s", "$0.014", "gpt-5.4-mini", "0.93", "usr_mia", "session_incident_148"],
+  ["trace_150656", "handle-chatbot-message", "Completed", "production", "2026-09-06 15:06:56", "6.61s", "—", "default", "0.97", "usr_olivia", "session_checkout_104"],
+  ["trace_145453", "handle-chatbot-message", "Completed", "production", "2026-09-06 14:54:53", "20.25s", "—", "default", "0.94", "usr_noah", "session_policy_882"],
+  ["trace_145440", "handle-chatbot-message", "Completed", "production", "2026-09-06 14:54:40", "4.16s", "—", "default", "0.92", "usr_emma", "session_orders_551"],
+  ["trace_145235", "handle-chatbot-message", "Completed", "production", "2026-09-06 14:52:35", "44.93s", "—", "default", "0.88", "usr_liam", "session_account_020"],
+  ["trace_145134", "handle-chatbot-message", "Completed", "production", "2026-09-06 14:51:34", "19.33s", "—", "default", "0.91", "usr_ava", "session_voice_440"],
+  ["trace_134555", "handle-chatbot-message", "Completed", "production", "2026-09-06 13:45:55", "20.06s", "—", "default", "0.93", "usr_mia", "session_incident_148"],
+  ["trace_132111", "handle-chatbot-message", "Completed", "production", "2026-09-06 13:21:11", "78s", "—", "default", "0.86", "usr_olivia", "session_support_111"],
+  ["trace_132045", "handle-chatbot-message", "Completed", "production", "2026-09-06 13:20:45", "15.64s", "—", "default", "0.84", "usr_noah", "session_support_045"],
+  ["trace_132011", "handle-chatbot-message", "Completed", "production", "2026-09-06 13:20:11", "4.85s", "—", "default", "0.82", "usr_emma", "session_support_011"],
+  ["trace_131959", "handle-chatbot-message", "Completed", "production", "2026-09-06 13:19:59", "7.30s", "—", "default", "0.80", "usr_liam", "session_support_959"],
+  ["trace_125932", "voice-conversation", "Completed", "production", "2026-09-06 12:59:32", "34.18s", "—", "default", "0.78", "usr_ava", "session_voice_932"],
+  ["trace_125401", "handle-chatbot-message", "Completed", "production", "2026-09-06 12:54:01", "24.78s", "—", "default", "0.76", "usr_mia", "session_support_401"],
+  ["trace_124540", "voice-conversation", "Completed", "production", "2026-09-06 12:45:40", "36.49s", "—", "default", "0.74", "usr_olivia", "session_voice_540"],
+  ["trace_121928", "handle-chatbot-message", "Completed", "production", "2026-09-06 12:19:28", "15.41s", "—", "default", "0.72", "usr_noah", "session_support_928"],
+  ["trace_121909", "handle-chatbot-message", "Completed", "production", "2026-09-06 12:19:09", "6.90s", "—", "default", "0.70", "usr_emma", "session_support_909"],
+  ["trace_111617", "handle-chatbot-message", "Completed", "production", "2026-09-06 11:16:50", "25.98s", "—", "default", "0.68", "usr_liam", "session_support_650"],
+  ["trace_104519", "image-generator", "Completed", "production", "2026-09-06 10:45:19", "10.72s", "$0.010", "gpt-image-1", "0.66", "usr_ava", "session_image_519"],
+  ["trace_104504", "sentiment-classifier", "Completed", "production", "2026-09-06 10:45:04", "2.13s", "—", "default", "0.64", "usr_mia", "session_sentiment_504"],
+  ["trace_104433", "handle-chatbot-message", "Completed", "production", "2026-09-06 10:44:33", "36.27s", "—", "default", "0.62", "usr_olivia", "session_support_433"],
 ] as const;
 
 const traceRecords = traces.map(([id, name, status, environment, timestamp, latency, cost, model, score, userId, sessionId]) => ({
@@ -22,8 +35,9 @@ const traceRecords = traces.map(([id, name, status, environment, timestamp, late
   userId,
   sessionId,
   input: `Investigate ${name.toLowerCase()} and return a grounded answer.`,
-  output: status === "Failed" ? "Tool request timed out before a verified answer was available." : "Completed with linked evidence and a verified final response.",
+  output: (status as string) === "Failed" ? "Tool request timed out before a verified answer was available." : "Completed with linked evidence and a verified final response.",
 }));
+
 
 export const sandboxWorkspace: DashboardWorkspace = {
   mode: "sandbox",
@@ -32,7 +46,7 @@ export const sandboxWorkspace: DashboardWorkspace = {
   dataSource: "tracify-sandbox",
   project: {
     id: "tracify-sandbox",
-    name: "Demo Project (view only)",
+    name: "langfuse-docs",
     organizationName: "Langfuse Demo",
   },
   metrics: {
@@ -57,7 +71,7 @@ export const sandboxWorkspace: DashboardWorkspace = {
     tracing: { description: "Inspect every trace and observation emitted by instrumented agents.", records: traceRecords },
     sessions: {
       description: "Group related traces into complete user and agent conversations.",
-      records: traceRecords.map((trace) => ({ ...trace, id: trace.sessionId ?? trace.id, name: trace.name.replace("investigation", "conversation"), status: trace.status === "Running" ? "Active" : "Complete" })),
+      records: traceRecords.map((trace) => ({ ...trace, id: trace.sessionId ?? trace.id, name: trace.name.replace("investigation", "conversation"), status: (trace.status as string) === "Running" ? "Active" : "Complete" })),
     },
     users: {
       description: "Understand activity, quality, latency, and cost for each end user.",
