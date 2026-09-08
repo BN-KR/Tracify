@@ -74,6 +74,12 @@
 }
 
 .captured-home-grid{padding-top:30px}
+@media (min-width:701px) and (max-width:1000px){
+  .captured-home-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:30px 28px 44px}
+  .captured-home-grid>.captured-metric,.captured-home-grid>.captured-model-chart,.captured-home-grid>.captured-cost-chart,.captured-home-grid>.captured-users-cost,.captured-home-grid>.captured-recent-traces,.captured-home-grid>.captured-home-wide-chart,.captured-home-grid>.captured-environment-chart{grid-column:span 2}
+  .captured-home-grid>.captured-metric{grid-column:span 1}
+  .captured-home-grid>.captured-model-chart{grid-row:auto;min-height:360px}
+}
 .captured-tracing-query{display:flex;align-items:center;gap:10px;margin:8px 8px 0;border:1px solid #2b2b2b;background:#111;padding:10px 10px}.captured-tracing-query label{display:flex;align-items:center;min-width:0;flex:1;color:#35e5a1;font-family:var(--font-mono),ui-monospace,monospace;font-size:10px}.captured-tracing-query label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.captured-tracing-query input{position:absolute;opacity:0;pointer-events:none}.captured-tracing-query button{flex:none;color:#999;font-size:11px}.captured-workspace:has(.captured-tracing-query)>.captured-workspace-toolbar{border-bottom:0}
 .captured-tracing-layout{grid-template-columns:153px minmax(0,1fr)}
 .captured-trace-table-wrap:before{content:"Count\\A 2";white-space:pre;display:block;height:102px;margin:0;border-bottom:1px solid #2b2b2b;background:linear-gradient(to bottom,transparent 0 75px,#252525 76px,transparent 77px),repeating-linear-gradient(to right,transparent 0 calc(12.5% - 1px),#222 calc(12.5% - 1px) 12.5%);color:#777;font-size:9px;line-height:18px;padding:7px 12px;box-sizing:border-box}.captured-trace-table-wrap:after{content:"";display:block;position:absolute;top:83px;left:14px;width:calc(100% - 28px);height:32px;background:linear-gradient(to right,transparent 0 12%,#8d4dcc 12% 13%,transparent 13% 31%,#8d4dcc 31% 32%,transparent 32% 48%,#8d4dcc 48% 49%,transparent 49% 67%,#8d4dcc 67% 68%,transparent 68% 83%,#8d4dcc 83% 84%,transparent 84%);pointer-events:none}.captured-trace-table-wrap{position:relative}
