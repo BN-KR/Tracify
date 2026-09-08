@@ -9,6 +9,7 @@ import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
 export function LiveCapturedAdmin({ projectId, section }: { projectId: string; section: "alerts" | "settings" }) {
   const createAlert = useMutation(api.alerts.create);
   const updateProject = useMutation(api.projects.updateProject);
+  const updateAlertState = useMutation(api.alerts.updateState);
   const project = useQuery(api.projects.getProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const alerts = useQuery(api.alerts.listByProject, section === "alerts" && projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   if (project === undefined || project === null || (section === "alerts" && alerts === undefined)) return <div className="captured-build-loading">Loading {section}…</div>;
@@ -20,5 +21,8 @@ export function LiveCapturedAdmin({ projectId, section }: { projectId: string; s
   async function saveSettings(input: { name: string }) {
     await updateProject({ projectId: projectId as Id<"projects">, name: input.name });
   }
-  return <CapturedWorkspace workspace={workspace} segments={[section]} onAlertCreate={section === "alerts" ? saveAlert : undefined} onProjectSettingsSave={section === "settings" ? saveSettings : undefined} />;
+  async function changeAlertState(input: { alertId: string; state: "active" | "resolved" | "muted" }) {
+    await updateAlertState({ alertId: input.alertId as Id<"alerts">, state: input.state });
+  }
+  return <CapturedWorkspace workspace={workspace} segments={[section]} onAlertCreate={section === "alerts" ? saveAlert : undefined} onAlertStateChange={section === "alerts" ? changeAlertState : undefined} onProjectSettingsSave={section === "settings" ? saveSettings : undefined} />;
 }

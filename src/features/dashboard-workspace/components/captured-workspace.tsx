@@ -81,6 +81,7 @@ export function CapturedWorkspace({
   onSessionAnnotate,
   onSessionAddToDataset,
   onEvaluatorToggle,
+  onAlertStateChange,
 }: {
   workspace: DashboardWorkspace;
   segments?: string[];
@@ -94,6 +95,7 @@ export function CapturedWorkspace({
   onSessionAnnotate?: (input: { sessionId: string }) => Promise<void>;
   onSessionAddToDataset?: (input: { sessionId: string; datasetId: string }) => Promise<void>;
   onEvaluatorToggle?: (input: { evaluatorId: string; active: boolean }) => Promise<void>;
+  onAlertStateChange?: (input: { alertId: string; state: "active" | "resolved" | "muted" }) => Promise<void>;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -233,7 +235,7 @@ export function CapturedWorkspace({
       ) : surface === "annotation-queues" ? (
         <AnnotationSurface workspace={workspace} onReadOnly={handleAction} onClaim={onAnnotationClaim} />
       ) : surface === "alerts" ? (
-        <AlertsSurface workspace={workspace} onReadOnly={handleAction} onCreate={onAlertCreate} />
+        <AlertsSurface workspace={workspace} onReadOnly={handleAction} onCreate={onAlertCreate} onStateChange={onAlertStateChange} />
       ) : (
         <CollectionSurface
           workspace={workspace}
@@ -352,18 +354,20 @@ function AnnotationSurface({ workspace, onReadOnly, onClaim }: { workspace: Dash
   return <main className="captured-collection captured-annotation-surface"><div className="captured-collection-summary"><div><strong>Human Annotation</strong><span> Review traces that need a human decision</span></div><div className="captured-inline-actions"><select aria-label="Annotation queue" value={queue} onChange={(event) => setQueue(event.target.value)}><option>Needs review</option><option>Assigned to me</option><option>Completed</option></select><button type="button" onClick={() => onReadOnly("Create annotation queue")}>New queue</button></div></div><div className="captured-review-banner"><strong>{records.length || 12} traces ready for review</strong><span>Claim the next trace, score it, and leave a decision note.</span><button type="button" disabled={claiming} onClick={() => void claimNext()}>{claiming ? "Claiming…" : "Claim next"}</button>{notice ? <small role="status">{notice}</small> : null}</div><div className="captured-table-scroll"><table><thead><tr><th>Trace</th><th>Queue</th><th>Status</th><th>Assignee</th><th>Last updated</th><th>Action</th></tr></thead><tbody>{(records.length ? records : [{ id: "review-1", name: "QA support response", status: "needs-review", environment: "production", timestamp: "5m ago" }]).map((record) => <tr key={record.id}><td><strong>{record.name}</strong><small>{record.id}</small></td><td>{queue}</td><td><span className="captured-status needs-review">Needs review</span></td><td>Unassigned</td><td>{record.timestamp}</td><td><button type="button" onClick={() => onReadOnly(`Review ${record.name}`)}>Open review</button></td></tr>)}</tbody></table></div></main>;
 }
 
-function AlertsSurface({ workspace, onReadOnly, onCreate }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void; onCreate?: (input: { name: string; metric: string; threshold: string }) => Promise<void> }) {
+function AlertsSurface({ workspace, onReadOnly, onCreate, onStateChange }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void; onCreate?: (input: { name: string; metric: string; threshold: string }) => Promise<void>; onStateChange?: (input: { alertId: string; state: "active" | "resolved" | "muted" }) => Promise<void> }) {
   const [status, setStatus] = useState("all");
   const [name, setName] = useState("");
   const [metric, setMetric] = useState("latency");
   const [threshold, setThreshold] = useState("");
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [updating, setUpdating] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const creating = searchParams.get("view") === "create";
   const records = workspace.collections.alerts.records.filter((record) => status === "all" || record.status === status);
   async function save() { if (!onCreate) { onReadOnly("Save alert"); return; } setSaving(true); setNotice(null); try { await onCreate({ name, metric, threshold }); setNotice("Alert created"); } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to create alert"); } finally { setSaving(false); } }
-  return <main className="captured-collection captured-alerts-surface"><div className="captured-collection-summary"><div><strong>Alerts</strong><span> Notify your team when quality or cost changes</span></div><div className="captured-inline-actions"><select aria-label="Alert status" value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="paused">Paused</option></select><button type="button" onClick={() => onReadOnly("Create alert")}>Add alert</button></div></div>{creating ? <form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); void save(); }}><h2>Create alert</h2><label>Name<input required placeholder="Production latency" value={name} onChange={(event) => setName(event.target.value)} /></label><label>Metric<select value={metric} onChange={(event) => setMetric(event.target.value)}><option value="latency">Latency</option><option value="cost">Cost</option><option value="score">Score</option></select></label><label>Threshold<input required type="number" step="any" placeholder="2" value={threshold} onChange={(event) => setThreshold(event.target.value)} /></label><div><button type="submit" disabled={saving}>{saving ? "Saving…" : "Save alert"}</button><button type="button" onClick={() => window.history.back()}>Cancel</button></div>{notice ? <p role="status">{notice}</p> : null}</form> : <><div className="captured-alert-cards">{records.map((record) => <article key={record.id}><div><span className={`captured-status ${record.status}`}>{record.status}</span><h3>{record.name}</h3><p>Threshold condition · production environment</p></div><button type="button" onClick={() => onReadOnly(`Edit ${record.name}`)}>•••</button></article>)}</div>{!records.length ? <div className="captured-empty">No alerts match this status.</div> : null}</>}</main>;
+  async function changeState(alertId: string, state: "active" | "resolved" | "muted") { if (!onStateChange) { onReadOnly(`Set alert ${state}`); return; } setUpdating(alertId); setNotice(null); try { await onStateChange({ alertId, state }); setNotice(`Alert ${state}`); } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to update alert"); } finally { setUpdating(null); } }
+  return <main className="captured-collection captured-alerts-surface"><div className="captured-collection-summary"><div><strong>Alerts</strong><span> Notify your team when quality or cost changes</span></div><div className="captured-inline-actions"><select aria-label="Alert status" value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="paused">Paused</option></select><button type="button" onClick={() => onReadOnly("Create alert")}>Add alert</button></div></div>{creating ? <form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); void save(); }}><h2>Create alert</h2><label>Name<input required placeholder="Production latency" value={name} onChange={(event) => setName(event.target.value)} /></label><label>Metric<select value={metric} onChange={(event) => setMetric(event.target.value)}><option value="latency">Latency</option><option value="cost">Cost</option><option value="score">Score</option></select></label><label>Threshold<input required type="number" step="any" placeholder="2" value={threshold} onChange={(event) => setThreshold(event.target.value)} /></label><div><button type="submit" disabled={saving}>{saving ? "Saving…" : "Save alert"}</button><button type="button" onClick={() => window.history.back()}>Cancel</button></div>{notice ? <p role="status">{notice}</p> : null}</form> : <><div className="captured-alert-cards">{records.map((record) => <article key={record.id}><div><span className={`captured-status ${record.status}`}>{record.status}</span><h3>{record.name}</h3><p>Threshold condition · production environment</p></div><div><button type="button" disabled={updating === record.id} onClick={() => void changeState(record.id, record.status === "resolved" ? "active" : "resolved")}>{updating === record.id ? "Updating…" : record.status === "resolved" ? "Reactivate" : "Resolve"}</button><button type="button" onClick={() => void changeState(record.id, "muted")}>Mute</button></div></article>)}</div>{notice ? <p role="status">{notice}</p> : null}{!records.length ? <div className="captured-empty">No alerts match this status.</div> : null}</>}</main>;
 }
 
 function TracingSurface({ workspace, basePath, query, environment, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; query: string; environment: string; onReadOnly: (action: string) => void }) {
