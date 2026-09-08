@@ -21,6 +21,8 @@
 - [pending owner] Supply provider-backed EU test-account credentials to exercise signed-in project creation, persisted mutations, invitation, checkout, and first-trace ingestion end to end. Public Sandbox behavior, regional routing, unauthenticated safety, auth callback state, and the production build are verified without those credentials.
 - [completed] Remove the invalid Tracing-level Create new action, add a read-only create-flow assertion on Datasets, and pass the targeted browser contract after the fix.
 - [completed] Re-run the production build after the final captured Tracing changes; all 211 routes compiled, type-checked, and generated successfully.
+- [completed] Fix captured Tracing filter search state/URL synchronization, align the interaction contract with the populated fixture, and add the dedicated mobile-aware Sessions surface.
+- [completed] Run a clean isolated production build for the final captured workspace commit; all 211 routes compiled, type-checked, and generated successfully.
 
 ## 2026-09-06 — Account access and onboarding flow
 

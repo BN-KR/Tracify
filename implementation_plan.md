@@ -18,6 +18,8 @@
 - [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
 - [completed] Remove the invalid Tracing-level Create new action and verify the read-only create boundary on Datasets; targeted account-access interaction test passes.
 - [completed] Re-run the final production build after the captured Tracing changes; all 211 routes compile and generate successfully.
+- [completed] Fix captured Tracing filter state/URL synchronization, align the browser contract with the populated fixture, and add the dedicated mobile-aware Sessions surface.
+- [completed] Run a clean isolated production build for the final captured workspace commit; all 211 routes compile, type-check, and generate successfully.
 
 ## Captured Tracify dashboard implementation — 2026-09-08
 
