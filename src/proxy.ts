@@ -12,6 +12,7 @@ const CLOUD_APP_PREFIXES = [
   "/pricing/checkout",
   "/auth/error",
   "/auth/callback",
+  "/cloud/mode",
 ];
 
 function isCloudAppPath(pathname: string) {
@@ -41,7 +42,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(`${pathname}${search}`, "https://www.tracify.tech"));
   }
 
-  if (deploymentKind === "marketing" && isCloudAppPath(pathname)) {
+  if (deploymentKind === "marketing" && isCloudAppPath(pathname) && !isLocalHost(request.nextUrl.hostname)) {
     const selector = new URL("/cloud", request.url);
     selector.searchParams.set("next", `${pathname}${search}`);
     return NextResponse.redirect(selector);

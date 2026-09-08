@@ -7,6 +7,7 @@
 - Included the existing regional Better Auth/Convex callback race fix from upstream so a valid Better Auth session waits for Convex readiness instead of bouncing back through sign-in.
 - Verification passed: TypeScript, focused ESLint, production build (211 pages), auth callback tests (6/6), browser route contract (7/7 before interaction expansion), direct capture comparison at 1280×720, and focused Sandbox interaction coverage. No source-product branding appears in the new UI.
 - Provider-backed authenticated mutation testing remains unavailable on this machine because no EU test-account credentials are configured; unauthenticated redirect safety and callback-state behavior are covered.
+- The first production probe caught `/cloud/mode` being treated as a marketing route on the EU deployment. Added it to the cloud-app allowlist while keeping `/cloud` on `www`, covered the production and localhost host matrix with four proxy tests, and re-ran the full browser/build gates before release.
 
 ## 2026-09-06 account access and onboarding flow
 - Implemented `src/lib/navigation-context.ts` with safe relative-path validation and Explore/Build intent parsing.
