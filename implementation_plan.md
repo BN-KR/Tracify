@@ -1442,3 +1442,9 @@ Implementation completed:
 - Replaced the auth-dependent playground surface with populated synthetic Home, Tracing, and generic simulator surfaces, preserving safe localStorage scenario state.
 - Added the regional connecting handoff route and gray dark-dashboard loading treatment.
 - Updated `tests/e2e/account-access-contract.spec.ts` to encode the acceptance contract; all 8 tests pass locally.
+
+Production verification:
+
+- PR #99 merged as `7c3ee0f`; PR #100 merged as `312a4df`.
+- Marketing production deployment and EU production deployment for `312a4df` reached Ready. Live marketing Explore click reaches `https://eu.cloud.tracify.tech/playground?view=home&userId=usr_demo_7f3a9c21` and renders the populated synthetic Home.
+- Remaining deployment hygiene item: copy the existing production `CONVEX_SITE_URL` config into the EU Vercel Preview environment. The preview deployment for PR #100 fails at page-data collection with `CONVEX_SITE_URL is not set`; this does not affect the verified production deployment.
