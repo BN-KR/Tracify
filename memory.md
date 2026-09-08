@@ -5,6 +5,7 @@
 - Added a populated Session detail surface with event input/output inspection, linked trace context, score rows, and the dataset action boundary.
 - Added dedicated populated Dashboards and Scores surfaces with dashboard selection, layout toggles, metric widgets, score metric filtering, and score summary/table views.
 - Production build passes after the parity additions: Next.js compiled, TypeScript completed, and all 211 routes generated. The branch still contains only intentional tracked parity edits; unrelated scratch directories remain unstaged.
+- Added dedicated Prompt Management and Evaluators surfaces with prompt text/chat tabs, prompt selection/editor controls, Playground handoff, evaluator filtering, status/run columns, and create/edit action boundaries.
 - TypeScript and focused ESLint pass for the changed workspace component. Remaining parity work is to deepen the other captured templates and connect the same interactions to authenticated Build data.
 
 ## 2026-09-08 captured Tracify dashboard implementation
