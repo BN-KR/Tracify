@@ -76,6 +76,7 @@ export function CapturedWorkspace({
   onDatasetCreate,
   onAlertCreate,
   onDashboardCreate,
+  onProjectSettingsSave,
 }: {
   workspace: DashboardWorkspace;
   segments?: string[];
@@ -84,6 +85,7 @@ export function CapturedWorkspace({
   onDatasetCreate?: (input: { name: string; description: string }) => Promise<void>;
   onAlertCreate?: (input: { name: string; metric: string; threshold: string }) => Promise<void>;
   onDashboardCreate?: (input: { name: string }) => Promise<void>;
+  onProjectSettingsSave?: (input: { name: string }) => Promise<void>;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -207,7 +209,7 @@ export function CapturedWorkspace({
       ) : surface === "sessions" && recordId ? (
         <SessionDetailSurface workspace={workspace} sessionId={recordId} basePath={basePath} onReadOnly={handleAction} />
       ) : surface === "settings" ? (
-        <SettingsSurface workspace={workspace} onReadOnly={handleAction} />
+        <SettingsSurface workspace={workspace} onReadOnly={handleAction} onSave={onProjectSettingsSave} />
       ) : surface === "playground" ? (
         <PromptPlaygroundSurface workspace={workspace} onReadOnly={handleAction} />
       ) : surface === "dashboards" ? (
@@ -544,13 +546,16 @@ function PromptPlaygroundSurface({ workspace, onReadOnly }: { workspace: Dashboa
   return <main className="captured-prompt-playground"><section><PanelHeading title="Prompt" subtitle="Test variables and model settings" /><textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} /><input value={question} onChange={(event) => setQuestion(event.target.value)} aria-label="Question variable" /><button type="button" onClick={() => setOutput(`Your order was located with verified tool evidence.\n\nModel: ${workspace.models[1]}\nEnvironment: sandbox`)}>Run prompt</button></section><section><PanelHeading title="Generation" subtitle="Deterministic Sandbox response" /><pre>{output}</pre><button type="button" onClick={() => onReadOnly("Save prompt version")}>Save version</button></section></main>;
 }
 
-function SettingsSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
+function SettingsSurface({ workspace, onReadOnly, onSave }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void; onSave?: (input: { name: string }) => Promise<void> }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const tabs = ["General", "Members", "API Keys", "LLM Connections", "Model Definitions", "MCP & CLI", "Scores", "Integrations", "Notifications", "Exports", "Batch Actions", "Audit log"];
   const requestedTab = searchParams.get("tab");
   const normalizedTab = requestedTab && tabs.includes(requestedTab) ? requestedTab : "General";
   const [tab, setTab] = useState(normalizedTab);
+  const [name, setName] = useState(workspace.project.name);
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   function selectTab(nextTab: string) {
     setTab(nextTab);
     const next = new URLSearchParams(searchParams.toString());
@@ -559,5 +564,6 @@ function SettingsSurface({ workspace, onReadOnly }: { workspace: DashboardWorksp
     const query = next.toString();
     window.history.replaceState(null, "", query ? `${pathname}?${query}` : pathname);
   }
-  return <main className="captured-settings"><nav>{tabs.map((item) => <button key={item} type="button" className={tab === item ? "active" : ""} onClick={() => selectTab(item)}>{item}</button>)}</nav><section><span>Project settings / {tab}</span><h2>{tab === "General" ? workspace.project.name : tab}</h2>{tab === "General" ? <><label>Project name<input value={workspace.project.name} readOnly /></label><label>Project ID<input value={workspace.project.id} readOnly /></label><div className="captured-settings-actions"><button type="button" onClick={() => onReadOnly("Save project settings")}>Save changes</button><button type="button" onClick={() => onReadOnly("Open LLM Connections")}>Open LLM Connections</button></div></> : <><p className="captured-settings-placeholder">{tab} controls are available in the live project workspace.</p><button type="button" onClick={() => onReadOnly(`Open ${tab}`)}>Open {tab}</button></>}</section></main>;
+  async function save() { if (!onSave) { onReadOnly("Save project settings"); return; } setSaving(true); setNotice(null); try { await onSave({ name }); setNotice("Settings saved"); } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to save settings"); } finally { setSaving(false); } }
+  return <main className="captured-settings"><nav>{tabs.map((item) => <button key={item} type="button" className={tab === item ? "active" : ""} onClick={() => selectTab(item)}>{item}</button>)}</nav><section><span>Project settings / {tab}</span><h2>{tab === "General" ? name : tab}</h2>{tab === "General" ? <><label>Project name<input value={name} onChange={(event) => setName(event.target.value)} /></label><label>Project ID<input value={workspace.project.id} readOnly /></label><div className="captured-settings-actions"><button type="button" disabled={saving} onClick={() => void save()}>{saving ? "Saving…" : "Save changes"}</button><button type="button" onClick={() => onReadOnly("Open LLM Connections")}>Open LLM Connections</button></div>{notice ? <p role="status">{notice}</p> : null}</> : <><p className="captured-settings-placeholder">{tab} controls are available in the live project workspace.</p><button type="button" onClick={() => onReadOnly(`Open ${tab}`)}>Open {tab}</button></>}</section></main>;
 }
