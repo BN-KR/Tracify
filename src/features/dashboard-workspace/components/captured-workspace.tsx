@@ -190,7 +190,7 @@ export function CapturedWorkspace({
 
       <div className="captured-workspace-toolbar">
         <h1>{SURFACE_LABELS[surface]}</h1>
-        {surface !== "tracing" && surface !== "sessions" ? <><label className="captured-control">
+        {surface === "playground" ? <div className="captured-playground-header-actions"><button type="button">⌕ Find</button><span>1 window</span><button type="button">▷ Run all <kbd>Ctrl ↵</kbd></button><button type="button">☷ Reset playground</button></div> : surface !== "tracing" && surface !== "sessions" ? <><label className="captured-control">
           <span>Env</span>
           <select aria-label="Environment" value={environment} onChange={(event) => { const value = event.target.value; setEnvironment(value); updateRouteState("environment", value); }}>
             {workspace.environments.map((option) => <option key={option} value={option}>{option === "all" ? "default" : option}</option>)}
@@ -207,7 +207,7 @@ export function CapturedWorkspace({
             <Link className="captured-icon-button" href={surfacePath(basePath, "dashboards")} aria-label="Edit this dashboard in Dashboards"><Pencil /></Link>
             {workspace.mode === "live" ? <Link className="captured-primary-action" href={`${basePath}/quickstart`}>Configure Tracing <ExternalLink /></Link> : null}
           </>
-        ) : surface === "tracing" || surface === "sessions" ? null : (
+        ) : surface === "tracing" || surface === "sessions" || surface === "playground" ? null : (
           <button type="button" className="captured-primary-action" onClick={() => workspace.readOnly ? setReadOnlyAction(`Create ${SURFACE_LABELS[surface]}`) : setReadOnlyAction(`Create ${SURFACE_LABELS[surface]}`)}>
             Create new
           </button>
@@ -614,7 +614,19 @@ function PromptPlaygroundSurface({ workspace, onReadOnly }: { workspace: Dashboa
   const [prompt, setPrompt] = useState("You are a support agent. Answer {{question}} using only verified context.");
   const [question, setQuestion] = useState("Where is my order?");
   const [output, setOutput] = useState("Run the prompt to inspect the model response.");
-  return <main className="captured-prompt-playground"><section><PanelHeading title="Prompt" subtitle="Test variables and model settings" /><textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} /><input value={question} onChange={(event) => setQuestion(event.target.value)} aria-label="Question variable" /><button type="button" onClick={() => setOutput(`Your order was located with verified tool evidence.\n\nModel: ${workspace.models[1]}\nEnvironment: sandbox`)}>Run prompt</button></section><section><PanelHeading title="Generation" subtitle="Deterministic Sandbox response" /><pre>{output}</pre><button type="button" onClick={() => onReadOnly("Save prompt version")}>Save version</button></section></main>;
+  return <main className="captured-reference-playground">
+    <div className="captured-playground-card">
+      <div className="captured-playground-model-row"><select aria-label="Model"><option>{workspace.models[1] ?? "anthropic: claude-sonnet-4-5-20250929"}</option></select><button type="button" aria-label="Model settings">☷</button><span /><button type="button" onClick={() => onReadOnly("Save as prompt")}>▣ Save as prompt</button><button type="button" onClick={() => onReadOnly("Open split window")}>＋ New split window</button></div>
+      <div className="captured-playground-tool-row"><button type="button">♧ Tools⌄</button><button type="button">{"{}"} Schema⌄</button><button type="button">ⓧ Variables⌄</button></div>
+      <div className="captured-playground-messages">
+        <div className="captured-playground-message"><span>⁙</span><strong>System</strong><textarea aria-label="System message" value={prompt} onChange={(event) => setPrompt(event.target.value)} /><button type="button" aria-label="Remove system message">⊖</button></div>
+        <div className="captured-playground-message"><span>⁙</span><strong>User</strong><input aria-label="User message" value={question} onChange={(event) => setQuestion(event.target.value)} /><button type="button" aria-label="Remove user message">⊖</button></div>
+      </div>
+      <div className="captured-playground-add-row"><button type="button">⊕ Message <span>⌄</span></button><button type="button">⊕ Placeholder</button></div>
+      <div className="captured-playground-output"><span>Output</span><pre>{output}</pre></div>
+      <div className="captured-playground-submit"><button type="button" onClick={() => setOutput(`Your order was located with verified tool evidence.\n\nModel: ${workspace.models[1] ?? "claude"}`)}>Submit</button><button type="button" aria-label="Playground settings">⚙</button></div>
+    </div>
+  </main>;
 }
 
 function SettingsSurface({ workspace, onReadOnly, onSave }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void; onSave?: (input: { name: string }) => Promise<void> }) {
