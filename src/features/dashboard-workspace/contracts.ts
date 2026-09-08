@@ -22,6 +22,7 @@ export type WorkspaceSurface =
 export type WorkspaceRecord = {
   id: string;
   name: string;
+  traceName?: string;
   status: string;
   environment: string;
   timestamp: string;
