@@ -72,7 +72,7 @@ test.describe("account access contract", () => {
     await page.getByRole("textbox", { name: "Search", exact: true }).fill("refund");
     await expect(page.getByRole("link", { name: "Refund status investigation", exact: true })).toBeVisible();
     await page.getByRole("link", { name: /Refund status investigation/ }).click();
-    await expect(page.getByRole("heading", { name: "Refund status investigation" })).toBeVisible();
+    await expect(page.locator("h2", { hasText: "Refund status investigation" })).toBeVisible();
     await expect(page.getByText("gpt-5.6-luna", { exact: true })).toBeVisible();
 
     await page.getByRole("button", { name: "Create new" }).click();
