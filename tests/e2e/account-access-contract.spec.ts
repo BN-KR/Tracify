@@ -15,7 +15,7 @@ test.describe("account access contract", () => {
     await page.getByRole("link", { name: /Open playground/i }).click();
     await expect(page).toHaveURL(/\/playground$/);
     await expect(page.getByRole("heading", { name: "Home" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Demo Project (view only)" }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: "langfuse-docs" }).first()).toBeVisible();
   });
 
   test("auth and recovery routes preserve usable forms", async ({ page }) => {
@@ -46,7 +46,7 @@ test.describe("account access contract", () => {
     });
     await page.getByRole("link", { name: "Tracing", exact: true }).click();
     await expect(page).toHaveURL(/\/playground\/tracing$/, { timeout: 30_000 });
-    await expect(page.getByRole("link", { name: "Refund status investigation", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "handle-chatbot-message", exact: true }).first()).toBeVisible();
     expect(pageErrors, "the public Sandbox must not surface an account or Convex error").toEqual([]);
   });
 
