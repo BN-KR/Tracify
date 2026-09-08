@@ -2,6 +2,23 @@
 
 ## Captured Tracify dashboard implementation — 2026-09-08
 
+### Current implementation slice
+
+- [completed] Add dense Tracing table/chart behavior with presets, environment/search filtering, selectable columns, filter-rail search, trace navigation, and empty-state pagination.
+- [completed] Add populated Session detail layout with chronological events, input/output views, linked traces, scores, and dataset action boundary.
+- [completed] Add populated Dashboards and Scores surfaces with selection/layout controls, metric widgets, score filtering, and score summaries.
+- [completed] Re-run the production build after the parity additions; compilation, TypeScript, and generation of all 211 routes passed.
+- [completed] Add Prompt Management and Evaluators captured-depth surfaces with editor tabs, prompt selection, evaluator filters, run/status columns, and action boundaries.
+- [completed] Add Datasets, Human Annotation, Alerts, and Settings captured-depth surfaces with search, queue/status filters, review actions, alert cards, and functional settings tabs.
+- [completed] Warm the local Sandbox route matrix and verify HTTP 200 for primary surfaces and nested session detail; first-request compilation latency is isolated from subsequent route behavior.
+- [completed] Re-run the account-access Playwright contract after warming the local app.
+- [completed] Extend the browser contract for prompt, dataset, and settings interactions and verify it locally.
+- [completed] Add rows-per-page controls to the remaining generic collection tables so Users and Experiments retain the captured table affordances.
+- [completed] Restart the stale local dev process and verify the captured tracing surface in-browser after recompilation; the intended controls and dense table are rendered.
+- [completed] Make generic collection pagination functional and rerun TypeScript, focused ESLint, and the 9-test account-access browser contract.
+- [completed] Match the populated Home grid to the localhost:4173 reference composition and verify the complete widget set in the local browser.
+- [pending] Wire the captured-depth Sandbox controls to the equivalent authenticated Build state and verify nested detail routes end to end.
+
 Implementation contract:
 
 1. Treat `C:\opencrawl\output\langfuse-capture` only as the supplied visual authority; the product, routes, fixtures, and visible labels remain Tracify-branded.

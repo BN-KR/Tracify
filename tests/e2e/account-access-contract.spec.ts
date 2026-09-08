@@ -94,6 +94,24 @@ test.describe("account access contract", () => {
     await expect(page.getByRole("dialog", { name: "This workspace is view only." })).toBeVisible();
   });
 
+  test("captured Sandbox collection controls remain interactive", async ({ page }) => {
+    await page.goto("/playground/prompts", { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Chat" }).click();
+    await expect(page.getByRole("button", { name: "Chat" })).toHaveClass(/active/);
+    await page.getByText("order-resolution", { exact: true }).click();
+    await expect(page.getByRole("textbox", { name: "Prompt content" })).toHaveValue(/order-resolution/);
+
+    await page.goto("/playground/datasets", { waitUntil: "domcontentloaded" });
+    await page.getByRole("textbox", { name: "Search datasets" }).fill("does-not-exist");
+    await expect(page.getByText("No datasets match your search.")).toBeVisible();
+
+    await page.goto("/playground/settings", { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "LLM Connections" }).click();
+    await expect(page.getByRole("heading", { name: "LLM Connections" })).toBeVisible();
+    await page.getByRole("button", { name: "Open LLM Connections" }).click();
+    await expect(page.getByRole("dialog", { name: /This workspace is view only|ready in your live project/ })).toBeVisible();
+  });
+
   test("project routes do not render invalid Convex IDs before authentication", async ({ page }) => {
     const pageErrors: Error[] = [];
     page.on("pageerror", (error) => pageErrors.push(error));

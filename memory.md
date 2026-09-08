@@ -1,5 +1,21 @@
 # Project Memory
 
+## 2026-09-08 captured dashboard parity follow-up
+- Added a capture-aligned Tracing surface with working table/chart toggle, preset filters, environment/search filtering, selectable columns, filter-rail search, trace links, and an empty-state footer.
+- Added a populated Session detail surface with event input/output inspection, linked trace context, score rows, and the dataset action boundary.
+- Added dedicated populated Dashboards and Scores surfaces with dashboard selection, layout toggles, metric widgets, score metric filtering, and score summary/table views.
+- Production build passes after the parity additions: Next.js compiled, TypeScript completed, and all 211 routes generated. The branch still contains only intentional tracked parity edits; unrelated scratch directories remain unstaged.
+- Added dedicated Prompt Management and Evaluators surfaces with prompt text/chat tabs, prompt selection/editor controls, Playground handoff, evaluator filtering, status/run columns, and create/edit action boundaries.
+- Added captured-style Datasets, Human Annotation, and Alerts surfaces with search/queue/status controls, review and create actions, plus real local Settings tab switching instead of forcing every tab through a modal.
+- Warmed and verified the local Sandbox route matrix: `/playground` and all primary/nested parity routes returned HTTP 200, including session detail; initial compile latency was isolated from subsequent route behavior.
+- Re-ran the Playwright account-access contract against the local app with one worker; the command completed successfully after the Sandbox route warm-up.
+- Extended the account-access contract to cover prompt Text/Chat switching and selection, dataset search empty state, Settings tab switching, and the read-only action boundary; the Playwright command still completes successfully with one worker.
+- Added captured-style pagination controls to generic collection surfaces, including a working rows-per-page selector for Users and Experiments-style tables.
+- Restarted the stale local Next dev server and visually verified `/playground/tracing` now renders the intended captured tracing surface: preset controls, table/chart toggle, filter rail, columns dropdown, dense trace table, and trace links are all present in the browser DOM.
+- Corrected generic collection pagination so the rows-per-page selector now slices rendered rows and reports the visible/total counts; TypeScript, focused ESLint, and the 9-test account-access Playwright contract were rerun.
+- Expanded the populated Tracify Home grid to match the localhost:4173 reference composition: cost, top users, observation/trace use cases, environment cost, and three P95 cost panels; browser DOM verification confirms all widgets render.
+- TypeScript and focused ESLint pass for the changed workspace component. Remaining parity work is to deepen the other captured templates and connect the same interactions to authenticated Build data.
+
 ## 2026-09-08 captured Tracify dashboard implementation
 - Replaced the generic demo simulator with one shared capture-derived Tracify workspace renderer and deterministic populated Sandbox data. `/playground` plus its nested primary routes now cover Home, Dashboards, Tracing, Sessions, Users, Alerts, Prompts, Playground, Scores, Evaluators, Human Annotation, Datasets, Experiments, Settings, and record details without account or project dependencies.
 - Kept Build and Sandbox distinct: Sandbox is public/read-only with explicit mutation boundaries; authenticated project routes retain their existing Convex/Tinybird-backed functionality, use the capture-style Home in both empty and populated states, and now share the capture-aligned primary sidebar taxonomy.
