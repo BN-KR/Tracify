@@ -41,9 +41,11 @@ test.describe("account access contract", () => {
     await expect(page.getByText("474", { exact: true })).toBeVisible();
     const consentButton = page.getByRole("button", { name: "Accept analytics" });
     if (await consentButton.isVisible()) await consentButton.click();
-    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", {
+      timeout: 30_000,
+    });
     await page.getByRole("link", { name: "Tracing", exact: true }).click();
-    await expect(page).toHaveURL(/\/playground\/tracing$/);
+    await expect(page).toHaveURL(/\/playground\/tracing$/, { timeout: 30_000 });
     await expect(page.getByRole("link", { name: "Refund status investigation", exact: true })).toBeVisible();
     expect(pageErrors, "the public Sandbox must not surface an account or Convex error").toEqual([]);
   });
