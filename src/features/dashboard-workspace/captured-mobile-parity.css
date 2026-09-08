@@ -1,0 +1,32 @@
+/* Preserve the captured Home composition on phone widths: the source keeps a
+   wide seven-track grid visible through the viewport instead of stacking it. */
+@media (max-width: 700px) {
+  .captured-home-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 157px);
+    gap: 16px;
+    padding: 28px;
+    overflow: visible;
+  }
+
+  .captured-home-grid > .captured-panel { margin-bottom: 0; }
+  .captured-home-grid > .captured-metric {
+    grid-column: span 2;
+    height: 212px;
+    min-height: 212px;
+  }
+  .captured-home-grid > .captured-model-chart {
+    grid-column: span 3;
+    grid-row: span 2;
+    min-height: 440px;
+  }
+  .captured-home-grid > .captured-cost-chart {
+    grid-column: span 4;
+    min-height: 330px;
+  }
+  .captured-home-grid > .captured-users-cost,
+  .captured-home-grid > .captured-recent-traces {
+    grid-column: span 3;
+    min-height: 360px;
+  }
+}
