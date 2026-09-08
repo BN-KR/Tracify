@@ -90,12 +90,12 @@ test.describe("account access contract", () => {
     if (await consentButton.isVisible()) await consentButton.click();
     await page.getByRole("button", { name: "Filters" }).first().click();
     await expect(page.getByRole("button", { name: "Filters" }).first()).toHaveAttribute("aria-expanded", "true");
-    await page.getByRole("textbox", { name: "Search", exact: true }).fill("refund");
-    await expect(page).toHaveURL(/(?:\?|&)q=refund/);
+    await page.getByRole("textbox", { name: "Search", exact: true }).fill("handle-chatbot-message");
+    await expect(page).toHaveURL(/(?:\?|&)q=handle-chatbot-message/);
     await page.reload({ waitUntil: "domcontentloaded" });
     await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
     await page.getByRole("button", { name: "Filters" }).first().click();
-    await expect(page.getByRole("textbox", { name: "Search", exact: true })).toHaveValue("refund");
+    await expect(page.getByRole("textbox", { name: "Search", exact: true })).toHaveValue("handle-chatbot-message");
     await page.getByRole("button", { name: "Filters" }).first().click();
     await page.locator(".captured-tracing-actions").getByRole("button", { name: /Chart/ }).click();
     await expect(page).toHaveURL(/(?:\?|&)view=chart/);
@@ -105,10 +105,10 @@ test.describe("account access contract", () => {
     await page.getByRole("button", { name: /Columns 16\/40/ }).click();
     await expect(page.getByRole("button", { name: /Columns 16\/40/ })).toHaveAttribute("aria-expanded", "true");
     await page.locator(".captured-tracing-actions").getByRole("button", { name: /Table/ }).click();
-    await expect(page.getByRole("link", { name: "Refund status investigation", exact: true })).toBeVisible();
-    await page.getByRole("link", { name: /Refund status investigation/ }).click();
-    await expect(page.locator("h2", { hasText: "Refund status investigation" })).toBeVisible();
-    await expect(page.getByText("gpt-5.6-luna", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "handle-chatbot-message", exact: true }).first()).toBeVisible();
+    await page.getByRole("link", { name: "handle-chatbot-message", exact: true }).first().click();
+    await expect(page.locator("h2", { hasText: "handle-chatbot-message" })).toBeVisible();
+    await expect(page.getByText("default", { exact: true })).toBeVisible();
 
     await page.getByRole("link", { name: /Back to Tracing/ }).click();
     await expect(page.getByRole("heading", { name: "Tracing" })).toBeVisible();
