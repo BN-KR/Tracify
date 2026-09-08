@@ -17,6 +17,7 @@
 - [completed] Restart the stale local dev process and verify the captured tracing surface in-browser after recompilation; the intended controls and dense table are rendered.
 - [completed] Make generic collection pagination functional and rerun TypeScript, focused ESLint, and the 9-test account-access browser contract.
 - [completed] Match the populated Home grid to the localhost:4173 reference composition and verify the complete widget set in the local browser.
+- [completed] Migrate authenticated Build Tracing to the captured renderer through a real Convex project/run adapter with loading and empty states.
 - [pending] Wire the captured-depth Sandbox controls to the equivalent authenticated Build state and verify nested detail routes end to end.
 
 Implementation contract:

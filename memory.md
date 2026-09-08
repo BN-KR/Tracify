@@ -14,6 +14,7 @@
 - Restarted the stale local Next dev server and visually verified `/playground/tracing` now renders the intended captured tracing surface: preset controls, table/chart toggle, filter rail, columns dropdown, dense trace table, and trace links are all present in the browser DOM.
 - Corrected generic collection pagination so the rows-per-page selector now slices rendered rows and reports the visible/total counts; TypeScript, focused ESLint, and the 9-test account-access Playwright contract were rerun.
 - Expanded the populated Tracify Home grid to match the localhost:4173 reference composition: cost, top users, observation/trace use cases, environment cost, and three P95 cost panels; browser DOM verification confirms all widgets render.
+- Added the first authenticated Build parity adapter: the project Tracing route now queries the real Convex project and paginated agent runs, normalizes them into the captured tracing renderer, and preserves live project identity without using Sandbox trace fixtures.
 - TypeScript and focused ESLint pass for the changed workspace component. Remaining parity work is to deepen the other captured templates and connect the same interactions to authenticated Build data.
 
 ## 2026-09-08 captured Tracify dashboard implementation
