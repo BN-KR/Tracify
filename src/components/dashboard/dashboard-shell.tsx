@@ -21,6 +21,7 @@ export function DashboardShell({
   previewProjectId,
   previewProjectName,
   dashboardTheme,
+  synthetic = false,
 }: {
   children: React.ReactNode;
   canAccessContent: boolean;
@@ -28,13 +29,14 @@ export function DashboardShell({
   previewProjectId?: string;
   previewProjectName?: string;
   dashboardTheme?: DashboardTheme;
+  synthetic?: boolean;
 }) {
   const router = useRouter();
   const params = useParams();
   const pathname = usePathname();
   const projectId = params?.projectId as string | undefined;
-  const isDashboardRoute = preview || pathname === "/dashboard" || pathname.startsWith("/dashboard/");
-  const isTracifyOverview = preview || Boolean(projectId && pathname === `/dashboard/${projectId}`);
+  const isDashboardRoute = synthetic || preview || pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const isTracifyOverview = synthetic || preview || Boolean(projectId && pathname === `/dashboard/${projectId}`);
   const [activeTheme] = useState<DashboardTheme>(() => {
     if (dashboardTheme) return dashboardTheme;
     if (typeof window !== "undefined") {
@@ -86,6 +88,7 @@ export function DashboardShell({
         onCollapsedChange={updateCollapsed}
         projectIdOverride={previewProjectId}
         previewProjectName={previewProjectName}
+        synthetic={synthetic}
       />
       <div
         className={`flex min-h-svh min-w-0 flex-1 flex-col transition-[padding] duration-150 motion-reduce:transition-none ${isDashboardRoute ? "bg-[#101010]" : "bg-[#eceae3]"}`}

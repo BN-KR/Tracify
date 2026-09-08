@@ -7,14 +7,14 @@ test.describe("account access contract", () => {
     await expect(page.getByText("Explore", { exact: true })).toBeVisible();
     await expect(page.getByText("Build", { exact: true })).toBeVisible();
 
-    const explore = page.getByRole("link", { name: /Choose region/i }).first();
-    await expect(explore).toHaveAttribute("href", /intent=explore/);
-    await expect(explore).toHaveAttribute("href", /userId%3Dusr_demo_7f3a9c21/);
+    const explore = page.getByRole("link", { name: /Open playground/i });
+    await expect(explore).toHaveAttribute("href", /playground\?view=home/);
+    await expect(explore).toHaveAttribute("href", /userId=usr_demo_7f3a9c21/);
     await expect(page.locator('a[href*="intent=build"]').first()).toBeVisible();
     await explore.click();
-    await expect(page.getByRole("heading", { name: "Choose your region." })).toBeVisible();
-    await expect(page.getByText("Europe", { exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Europe/ })).toHaveAttribute("href", /userId%3Dusr_demo_7f3a9c21/);
+    await expect(page.getByRole("heading", { name: "Home" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Demo Project (view only)" })).toBeVisible();
+    await expect(page).toHaveURL(/\/playground\?view=home&userId=usr_demo_7f3a9c21/);
   });
 
   test("auth and recovery routes preserve usable forms", async ({ page }) => {
@@ -32,12 +32,41 @@ test.describe("account access contract", () => {
     await expect(page.getByText("This invitation link is incomplete.")).toBeVisible();
   });
 
-  test("account-scoped playground exits cleanly when the session is absent", async ({ page }) => {
+  test("Explore is public, populated, and isolated from account-scoped projects", async ({ page }) => {
     const pageErrors: Error[] = [];
     page.on("pageerror", (error) => pageErrors.push(error));
-    await page.goto("/playground?intent=explore", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/sign-in\?redirect_url=%2Fplayground$/, { timeout: 30_000 });
-    expect(pageErrors, "the unauthenticated playground must not surface a Convex query error").toEqual([]);
+    await page.goto("/playground?view=home&userId=usr_demo_7f3a9c21", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Home" })).toBeVisible();
+    await expect(page.getByText("Performance over time")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Tracify dashboard" })).toHaveAttribute("href", "/dashboard");
+    await expect(page.locator("body")).not.toContainText("Dashboard unavailable");
+    await expect(page.locator("body")).not.toContainText("Langfuse");
+    expect(pageErrors, "the public synthetic playground must not surface a Convex query error").toEqual([]);
+  });
+
+  test("Explore navigation and controls stay inside the synthetic workspace", async ({ page }) => {
+    await page.goto("/playground?view=home", { waitUntil: "domcontentloaded" });
+    await page.getByRole("link", { name: "Tracing", exact: true }).click();
+    await expect(page).toHaveURL(/\/playground\?view=tracing/);
+    await expect(page.getByRole("heading", { name: "Recent traces" })).toBeVisible();
+    await page.getByRole("button", { name: "Failures" }).click();
+    await expect(page.getByText("run_support_19de")).toBeVisible();
+    await expect(page.getByText("run_support_8f2c")).not.toBeVisible();
+    await page.getByRole("button", { name: "Open trace" }).click();
+    await expect(page.getByText("Trace detail / simulated")).toBeVisible();
+    await page.getByRole("button", { name: "Close trace detail" }).click();
+    await expect(page.getByText("Trace detail / simulated")).not.toBeVisible();
+    await page.getByRole("link", { name: "Costs" }).click();
+    await expect(page).toHaveURL(/\/playground\?view=costs/);
+    await expect(page.getByText("Costs is ready to explore")).toBeVisible();
+  });
+
+  test("Build keeps region selection and shows a handoff state", async ({ page }) => {
+    await page.goto("/cloud/region?next=%2Fsign-up&intent=build", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Choose your region." })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Europe/ })).toBeVisible();
+    await page.goto("/cloud/connecting?region=eu&next=%2Fsign-up&intent=build", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("status")).toContainText("Connecting to Europe cloud");
   });
 
   test("project routes do not render invalid Convex IDs before authentication", async ({ page }) => {

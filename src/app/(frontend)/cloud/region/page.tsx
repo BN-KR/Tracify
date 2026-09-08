@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Globe2, ShieldCheck } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { getAvailableRegions } from "@/lib/regions";
+import { RegionOptions } from "@/components/cloud/region-options";
 
 export const metadata: Metadata = {
   title: "Choose your Tracify region",
@@ -29,7 +30,7 @@ export default async function CloudRegionStep({ searchParams }: { searchParams: 
         </aside>
         <section className="flex items-center px-5 py-10 sm:px-8 md:px-12 lg:px-16"><div className="w-full max-w-3xl">
           <div className="mb-7 grid gap-4 border-y border-black py-5 sm:grid-cols-2"><Fact icon={ShieldCheck} label="Regional boundary" /><Fact icon={Globe2} label={intent === "explore" ? "Explore access" : "Build destination"} /></div>
-          <div className="border border-black bg-white">{regions.map((region) => <Link key={region.id} href={`/api/region/select?region=${region.id}&next=${encodeURIComponent(next)}&intent=${intent}`} className="group grid min-h-32 grid-cols-[64px_1fr_auto] items-center gap-4 border-b border-black p-5 last:border-b-0 hover:bg-[#f4d44d] sm:grid-cols-[80px_1fr_auto] sm:p-7"><span className="text-3xl" aria-hidden="true">{region.flag}</span><span><span className="block font-pixel text-4xl leading-none tracking-[-0.055em]">{region.name}</span><span className="mt-3 block font-mono text-[9px] uppercase tracking-[0.1em] text-black/50">{region.hostname} · {region.location} · {region.infrastructure}</span></span><ArrowRight className="size-5 transition-transform group-hover:translate-x-1" /></Link>)}</div>
+          <RegionOptions regions={regions} next={next} intent={intent} />
           <Link href="/cloud" className="mt-6 inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-black/55 hover:text-black"><ArrowLeft className="size-4" /> Back to path</Link>
           {process.env.NODE_ENV !== "production" ? <Link href={`/api/region/select?region=eu&next=${encodeURIComponent("/tracify-preview")}&intent=explore`} className="mt-3 inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-black/55 hover:text-black"><span>Preview dashboard after EU region</span><ArrowRight className="size-4" /></Link> : null}
         </div></section>

@@ -27,7 +27,7 @@ import { useEffect, useMemo, useState, type ComponentType } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProjectSwitcher } from "@/components/dashboard/project-switcher";
-import { usePathname, useParams } from "next/navigation";
+import { usePathname, useParams, useSearchParams } from "next/navigation";
 
 import {
   Tooltip,
@@ -60,9 +60,14 @@ const COLLAPSED_WIDTH = 48;
 // Matches the captured dashboard shell's 11.5rem expanded sidebar.
 const EXPANDED_WIDTH = 184;
 
-function isActivePath(pathname: string, href: string, projectId: string, isPreview = false) {
+function isActivePath(pathname: string, href: string, projectId: string, isPreview = false, currentSearch = "") {
   if (href.startsWith("http")) return false;
   const hrefPath = href.split("?")[0];
+  if (hrefPath === "/playground") {
+    const requestedView = new URLSearchParams(href.split("?")[1] ?? "").get("view") ?? "home";
+    const activeView = new URLSearchParams(currentSearch).get("view") ?? "home";
+    return pathname === "/playground" && requestedView === activeView;
+  }
   if (hrefPath === `/dashboard/${projectId}`) {
     return pathname === "/dashboard" || pathname === hrefPath || (isPreview && pathname.startsWith("/tracify-preview"));
   }
@@ -75,17 +80,22 @@ export function DashboardSidebar({
   onCollapsedChange,
   projectIdOverride,
   previewProjectName,
+  synthetic = false,
 }: {
   canAccessContent: boolean;
   isCollapsed: boolean;
   onCollapsedChange: (next: boolean) => void;
   projectIdOverride?: string;
   previewProjectName?: string;
+  synthetic?: boolean;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const params = useParams();
   const projectId = projectIdOverride || (params?.projectId as string) || "";
-  const projectDashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
+  const isSynthetic = synthetic && pathname.startsWith("/playground");
+  const syntheticHref = (view: string) => `/playground?view=${view}`;
+  const projectDashboardHref = isSynthetic ? "/dashboard" : projectId ? `/dashboard/${projectId}` : "/dashboard";
   const region = getTracifyRegion();
   const dynamicGroups = useMemo<NavGroup[]>(() => [
     {
@@ -95,32 +105,32 @@ export function DashboardSidebar({
         {
           title: "Home",
           icon: LayoutDashboard,
-          href: projectDashboardHref,
+          href: isSynthetic ? syntheticHref("home") : projectDashboardHref,
         },
         {
           title: "Dashboards",
           icon: LayoutDashboard,
-          href: projectId ? `/dashboard/${projectId}/dashboards` : "/dashboard/dashboards",
+          href: isSynthetic ? syntheticHref("dashboards") : projectId ? `/dashboard/${projectId}/dashboards` : "/dashboard/dashboards",
         },
         {
           title: "Tracing",
           icon: Activity,
-          href: projectId ? `/dashboard/${projectId}/tracing` : "/dashboard/runs",
+          href: isSynthetic ? syntheticHref("tracing") : projectId ? `/dashboard/${projectId}/tracing` : "/dashboard/runs",
         },
         {
           title: "Sessions",
           icon: Activity,
-          href: projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions",
+          href: isSynthetic ? syntheticHref("sessions") : projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions",
         },
         {
           title: "Users",
           icon: Users,
-          href: projectId ? `/dashboard/${projectId}/users` : "/dashboard/users",
+          href: isSynthetic ? syntheticHref("users") : projectId ? `/dashboard/${projectId}/users` : "/dashboard/users",
         },
         {
           title: "Search",
           icon: Search,
-          href: projectId ? `/dashboard/${projectId}/search` : "/dashboard/search",
+          href: isSynthetic ? syntheticHref("search") : projectId ? `/dashboard/${projectId}/search` : "/dashboard/search",
         },
       ],
     },
@@ -131,22 +141,22 @@ export function DashboardSidebar({
         {
           title: "Costs",
           icon: BarChart3,
-          href: projectId ? `/dashboard/${projectId}/costs` : "/dashboard/costs",
+          href: isSynthetic ? syntheticHref("costs") : projectId ? `/dashboard/${projectId}/costs` : "/dashboard/costs",
         },
         {
           title: "Reports",
           icon: FileText,
-          href: projectId ? `/dashboard/${projectId}/reports` : "/dashboard/reports",
+          href: isSynthetic ? syntheticHref("reports") : projectId ? `/dashboard/${projectId}/reports` : "/dashboard/reports",
         },
         {
           title: "Trace Compare",
           icon: GitCompare,
-          href: projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare",
+          href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare",
         },
         {
           title: "Investigation",
           icon: Search,
-          href: projectId ? `/dashboard/${projectId}/investigate` : "/dashboard/investigate",
+          href: isSynthetic ? syntheticHref("investigate") : projectId ? `/dashboard/${projectId}/investigate` : "/dashboard/investigate",
         },
       ],
     },
@@ -157,47 +167,47 @@ export function DashboardSidebar({
         {
           title: "Prompt Management",
           icon: MessageSquareText,
-          href: projectId ? "/dashboard/" + projectId + "/prompt-management" : "/dashboard/prompts",
+          href: isSynthetic ? syntheticHref("prompts") : projectId ? "/dashboard/" + projectId + "/prompt-management" : "/dashboard/prompts",
         },
         {
           title: "Evaluation",
           icon: FlaskConical,
-          href: projectId ? "/dashboard/" + projectId + "/evaluation" : "/dashboard/evaluation",
+          href: isSynthetic ? syntheticHref("evaluation") : projectId ? "/dashboard/" + projectId + "/evaluation" : "/dashboard/evaluation",
         },
         {
           title: "Scores",
           icon: BarChart3,
-          href: projectId ? `/dashboard/${projectId}/scores` : "/dashboard/evaluation",
+          href: isSynthetic ? syntheticHref("scores") : projectId ? `/dashboard/${projectId}/scores` : "/dashboard/evaluation",
         },
         {
           title: "Evaluators",
           icon: FlaskConical,
-          href: projectId ? `/dashboard/${projectId}/evaluators` : "/dashboard/evaluation",
+          href: isSynthetic ? syntheticHref("evaluators") : projectId ? `/dashboard/${projectId}/evaluators` : "/dashboard/evaluation",
         },
         {
           title: "Human Annotation",
           icon: MessageSquareText,
-          href: projectId ? `/dashboard/${projectId}/human-annotation` : "/dashboard/evaluation",
+          href: isSynthetic ? syntheticHref("annotation") : projectId ? `/dashboard/${projectId}/human-annotation` : "/dashboard/evaluation",
         },
         {
           title: "Datasets",
           icon: Database,
-          href: projectId ? "/dashboard/" + projectId + "/datasets" : "/dashboard/datasets",
+          href: isSynthetic ? syntheticHref("datasets") : projectId ? "/dashboard/" + projectId + "/datasets" : "/dashboard/datasets",
         },
         {
           title: "Experiments",
           icon: GitCompare,
-          href: projectId ? "/dashboard/" + projectId + "/experiments" : "/dashboard/experiments",
+          href: isSynthetic ? syntheticHref("experiments") : projectId ? "/dashboard/" + projectId + "/experiments" : "/dashboard/experiments",
         },
         {
           title: "Playground",
           icon: PlaygroundIcon,
-          href: projectId ? "/dashboard/" + projectId + "/playground" : "/dashboard/playground",
+          href: isSynthetic ? syntheticHref("playground") : projectId ? "/dashboard/" + projectId + "/playground" : "/dashboard/playground",
         },
         {
           title: "Resilience",
           icon: Zap,
-          href: projectId ? "/dashboard/" + projectId + "/resilience" : "/dashboard/resilience",
+          href: isSynthetic ? syntheticHref("resilience") : projectId ? "/dashboard/" + projectId + "/resilience" : "/dashboard/resilience",
         },
       ],
     },
@@ -208,27 +218,27 @@ export function DashboardSidebar({
         {
           title: "Runtime Policy",
           icon: ShieldCheck,
-          href: projectId ? `/dashboard/${projectId}/control` : "/dashboard/control",
+          href: isSynthetic ? syntheticHref("control") : projectId ? `/dashboard/${projectId}/control` : "/dashboard/control",
         },
         {
           title: "Alerts",
           icon: Activity,
-          href: projectId ? `/dashboard/${projectId}/alerts` : "/dashboard/alerts",
+          href: isSynthetic ? syntheticHref("alerts") : projectId ? `/dashboard/${projectId}/alerts` : "/dashboard/alerts",
         },
         {
           title: "Automations",
           icon: Zap,
-          href: projectId ? `/dashboard/${projectId}/automations` : "/dashboard/automations",
+          href: isSynthetic ? syntheticHref("automations") : projectId ? `/dashboard/${projectId}/automations` : "/dashboard/automations",
         },
         {
           title: "Operations",
           icon: Globe2,
-          href: projectId ? `/dashboard/${projectId}/operations` : "/dashboard/operations",
+          href: isSynthetic ? syntheticHref("operations") : projectId ? `/dashboard/${projectId}/operations` : "/dashboard/operations",
         },
         {
           title: "Integrations",
           icon: Terminal,
-          href: projectId ? `/dashboard/${projectId}/settings/integrations` : "/integrations",
+          href: isSynthetic ? syntheticHref("integrations") : projectId ? `/dashboard/${projectId}/settings/integrations` : "/integrations",
         },
       ],
     },
@@ -239,37 +249,37 @@ export function DashboardSidebar({
         {
           title: "Settings",
           icon: Settings2,
-          href: projectId ? `/dashboard/${projectId}/settings` : "/dashboard/settings",
+          href: isSynthetic ? syntheticHref("settings") : projectId ? `/dashboard/${projectId}/settings` : "/dashboard/settings",
         },
         {
           title: "Members",
           icon: Activity,
-          href: projectId ? `/dashboard/${projectId}/settings?tab=members` : "/dashboard/members",
+          href: isSynthetic ? syntheticHref("members") : projectId ? `/dashboard/${projectId}/settings?tab=members` : "/dashboard/members",
         },
         {
           title: "Manage",
           icon: SlidersHorizontal,
-          href: projectId ? `/dashboard/${projectId}/manage` : "/dashboard/manage",
+          href: isSynthetic ? syntheticHref("manage") : projectId ? `/dashboard/${projectId}/manage` : "/dashboard/manage",
         },
         {
           title: "API Keys",
           icon: Terminal,
-          href: projectId ? `/dashboard/${projectId}/api-keys` : "/dashboard/api-keys",
+          href: isSynthetic ? syntheticHref("api-keys") : projectId ? `/dashboard/${projectId}/api-keys` : "/dashboard/api-keys",
         },
         {
           title: "Billing",
           icon: FileText,
-          href: projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing",
+          href: isSynthetic ? syntheticHref("billing") : projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing",
         },
         {
           title: "Widget library",
           icon: Settings2,
-          href: projectId ? `/dashboard/${projectId}/widgets` : "/dashboard/widgets",
+          href: isSynthetic ? syntheticHref("widgets") : projectId ? `/dashboard/${projectId}/widgets` : "/dashboard/widgets",
         },
         {
           title: "Upgrade Plan",
           icon: Zap,
-          href: projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing",
+          href: isSynthetic ? syntheticHref("upgrade") : projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing",
         },
       ],
     },
@@ -280,7 +290,7 @@ export function DashboardSidebar({
         {
           title: "Quickstart",
           icon: Terminal,
-          href: projectId ? `/dashboard/${projectId}/quickstart` : "/dashboard/quickstart",
+          href: isSynthetic ? syntheticHref("quickstart") : projectId ? `/dashboard/${projectId}/quickstart` : "/dashboard/quickstart",
         },
         {
           title: "Docs",
@@ -307,7 +317,7 @@ export function DashboardSidebar({
           : []),
       ],
     },
-  ], [canAccessContent, projectDashboardHref, projectId]);
+  ], [canAccessContent, isSynthetic, projectDashboardHref, projectId]);
 
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
     if (typeof window === "undefined") {
@@ -414,7 +424,7 @@ export function DashboardSidebar({
         </Tooltip>
       </div>
       <div className="border-b border-black/15 p-3">
-        <ProjectSwitcher isCollapsed={!showExpandedContent} previewProjectName={previewProjectName} />
+        <ProjectSwitcher isCollapsed={!showExpandedContent} previewProjectName={previewProjectName} synthetic={isSynthetic} />
       </div>
 
       <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4 scrollbar-hide">
@@ -437,6 +447,7 @@ export function DashboardSidebar({
             showExpandedContent={showExpandedContent}
             isOpen={openGroups[group.id]}
             pathname={pathname}
+            currentSearch={searchParams.toString()}
             projectId={projectId}
             isPreview={Boolean(projectIdOverride)}
             onToggle={() => toggleGroup(group.id)}
@@ -449,7 +460,7 @@ export function DashboardSidebar({
       </nav>
 
       <Link
-        href="https://www.tracify.tech/cloud?next=/dashboard"
+        href={isSynthetic ? "/cloud/region?next=%2Fplayground%3Fview%3Dhome&intent=explore" : "/cloud?next=/dashboard"}
         className={cn("flex min-h-12 items-center border-t border-black/15 px-4 text-black/55 hover:bg-[#f3f2ed] hover:text-black", showExpandedContent ? "gap-3" : "justify-center")}
         aria-label={`${region.name} cloud region. Open region directory`}
       >
@@ -466,6 +477,7 @@ function SidebarGroup({
   showExpandedContent,
   isOpen,
   pathname,
+  currentSearch,
   projectId,
   isPreview,
   onToggle,
@@ -475,13 +487,14 @@ function SidebarGroup({
   showExpandedContent: boolean;
   isOpen: boolean;
   pathname: string;
+  currentSearch: string;
   projectId: string;
   isPreview: boolean;
   onToggle: () => void;
   onNavClick: (href: string) => void;
 }) {
   const hasActiveItem = group.items.some((item) =>
-    isActivePath(pathname, item.href, projectId, isPreview),
+    isActivePath(pathname, item.href, projectId, isPreview, currentSearch),
   );
   const isVisuallyOpen = isOpen || hasActiveItem;
   const visibleItems = useMemo(
@@ -518,7 +531,7 @@ function SidebarGroup({
               key={item.title}
               item={item}
               showExpandedContent={showExpandedContent}
-              isActive={isActivePath(pathname, item.href, projectId, isPreview)}
+              isActive={isActivePath(pathname, item.href, projectId, isPreview, currentSearch)}
               onNavClick={() => onNavClick(item.href)}
             />
           ))}
