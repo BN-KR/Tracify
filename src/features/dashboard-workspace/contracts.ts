@@ -5,6 +5,7 @@ export type WorkspaceRegion = "eu" | "us";
 export type WorkspaceSurface =
   | "home"
   | "dashboards"
+  | "costs"
   | "tracing"
   | "sessions"
   | "users"
@@ -21,6 +22,7 @@ export type WorkspaceSurface =
 export type WorkspaceRecord = {
   id: string;
   name: string;
+  traceName?: string;
   status: string;
   environment: string;
   timestamp: string;

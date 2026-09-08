@@ -1,6 +1,10 @@
 // This file is loaded by the standalone Playwright test runner, not by the Next.js app build.
 import { defineConfig, devices } from "@playwright/test";
 
+const playwrightPort = process.env.PLAYWRIGHT_PORT ?? "3100";
+const playwrightBaseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${playwrightPort}`;
+const playwrightProduction = process.env.PLAYWRIGHT_PRODUCTION === "1";
+
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
@@ -8,7 +12,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000",
+    baseURL: playwrightBaseURL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -19,10 +23,14 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: {
-    command: `${process.execPath} node_modules/next/dist/bin/next dev --webpack`,
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  ...(process.env.PLAYWRIGHT_BASE_URL ? {} : {
+    webServer: {
+      command: playwrightProduction
+        ? `${process.execPath} scripts/playwright-server.mjs`
+        : `${process.execPath} node_modules/next/dist/bin/next dev --webpack -p ${playwrightPort}`,
+      url: playwrightBaseURL,
+      reuseExistingServer: false,
+      timeout: 120_000,
+    },
+  }),
 });

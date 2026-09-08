@@ -1,8 +1,32 @@
 # 2026-09-02 — First-customer execution
 
+## 2026-09-08 — Site linking and mobile hardening
+
+- [completed] Add mobile dashboard sidebar open/close behavior and responsive backdrop.
+- [completed] Route email auth through the readiness callback and redirect unauthenticated dashboard entry safely.
+- [completed] Isolate Playwright from stale port-3000 dev servers.
+- [completed] Resolve the Settings hydration race under the privacy-consent overlay and rerun the full 9-test contract (9/9 passed).
+- [completed] Re-run the full account-access contract and public smoke suite after final hydration/build changes (12/12 passed).
+- [completed] Run the content and public internal-link integrity suite (27/27 passed).
+- [completed] Route supported captured Build actions into existing authenticated workflows while preserving Sandbox read-only behavior.
+- [completed] Sweep all 14 captured Sandbox surfaces at 390px for route success, page errors, and horizontal overflow.
+- [completed] Add and pass an HTTP contract for every unique internal link emitted by the 14 captured Sandbox surfaces.
+- [completed] Fix hydration readiness signaling and rerun the complete 10-test account-access contract (10/10 passed).
+- [completed] Create clean local implementation commits (`43e670a`, `45b5e25`, `b9f4444`, `55befa5`) without staging unrelated scratch files.
+- [completed] Push the implementation branch to PR #106; primary checks passed, with the EU Vercel preview still pending external deployment.
+- [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
+
 ## 2026-09-08 — Captured Tracify dashboard follow-up
 
 - [pending owner] Supply provider-backed EU test-account credentials to exercise signed-in project creation, persisted mutations, invitation, checkout, and first-trace ingestion end to end. Public Sandbox behavior, regional routing, unauthenticated safety, auth callback state, and the production build are verified without those credentials.
+- [completed] Remove the invalid Tracing-level Create new action, add a read-only create-flow assertion on Datasets, and pass the targeted browser contract after the fix.
+- [completed] Re-run the production build after the final captured Tracing changes; all 211 routes compiled, type-checked, and generated successfully.
+- [completed] Fix captured Tracing filter search state/URL synchronization, align the interaction contract with the populated fixture, and add the dedicated mobile-aware Sessions surface.
+- [completed] Run a clean isolated production build for the final captured workspace commit; all 211 routes compiled, type-checked, and generated successfully.
+- [completed] Resolve the local E2E environment mismatch by using an isolated EU-configured production build, align assertions with the populated captured fixture, and pass the complete 10-test account-access contract.
+- [completed] Run the complete 14-surface captured viewport matrix at six desktop/tablet/mobile sizes against the isolated EU production build; all six viewport runs passed.
+- [completed] Replace generic captured trace input/output filler with the extracted reference-style visible values so the populated Tracing table retains the reference’s data density and content shape.
+- [completed] Rebuild and re-run the targeted Tracing interaction contract after the reference-content update; build and targeted browser check pass.
 
 ## 2026-09-06 — Account access and onboarding flow
 
@@ -1466,6 +1490,8 @@ Follow-ups still open:
 
 # Langfuse clone surface — 2026-09-06
 
+Latest parity pass: visible captured-workspace branding and accent cleanup completed on 2026-09-08. The static reference is now available at `https://tracify-dashboard-reference.vercel.app/pages/023.html`; implementation viewport comparison remains pending until the local app server is available.
+
 1. [completed] Inspect the supplied Langfuse demo trace and empty-project states.
 2. [completed] Add local `/langfuse` routes for demo traces and empty project onboarding.
 3. [completed] Add working search, filter toggle, chart/table toggle, sidebar collapse, and seeded trace rows.
@@ -1568,4 +1594,20 @@ Current verification gap: completing a valid provider-backed sign-in still requi
 75. Verify authenticated editor actions end-to-end against a real project session.
 76. Verify the production build artifact and regional runtime URLs after the final editor mutations.
 77. Preserve final handoff links and document the remaining backend expansion points.
-78. [x] Add reversible Tracify-branded dashboard presentation layer with legacy/v2 preview controls while preserving existing functionality.
+78. [x] Replace the dashboard presentation layer with the captured reference shell while preserving existing functionality.
+
+79. [in progress] Migrate every dashboard route to the shared reference shell and canonical captured surface mapping.
+80. [in progress] Complete live/Sandbox adapter actions and run the six-viewport zero-pixel route matrix; the paired screenshot harness now includes all 14 primary Sandbox surfaces.
+81. [in progress] Continue replacing legacy project route components with live captured-workspace adapters.
+82. [in progress] Migrate remaining search, comparison, administration, settings, and detail routes to canonical captured surfaces.
+83. [completed] Canonicalize legacy trace/search/compare/run routes to the captured Tracing family.
+84. [in progress] Continue migrating project settings, administration, and create/edit routes to captured surfaces.
+85. [in progress] Remove remaining dashboard-visible Tracify branding and yellow accents from legacy fallbacks and migrated shared surfaces.
+86. [in progress] Implement captured control/detail density and compare local/reference screenshots for all 14 primary surfaces at all six required viewport sizes.
+87. [in progress] Continue evidence-driven surface corrections: latest verified work aligns Tracing toolbar controls, removes the unreachable top filter popover, corrects the shared default environment label, neutralizes the captured dashboard marker, and refines mobile Sessions toolbar/surface offsets. Full six-viewport capture remains green; raw visual parity is still incomplete.
+88. [in progress] Follow-up correction: the Tracing Filters control is restored as a visible URL-backed menu and verified in the current six-viewport artifact; residual pixel-level parity work and external Vercel preview remain open.
+88. [in progress] Match the responsive Sessions filter-rail breakpoint: narrow tablet uses the reference icon-only rail, while desktop/tablet landscape and mobile retain their captured widths and behaviors.
+91. [in progress] Finish the Sessions mobile edge/toolbar alignment and re-run the complete six-viewport matrix after each responsive adjustment.
+93. [in progress] Align Users Sandbox identifiers, localized event timestamps, fixed column widths, and mobile overflow with the populated page 027 reference while preserving live data behavior.
+94. [in progress] Correct Tracing table column geometry after the leading selection column; verify Type icon, Start Time, Input, Output, and horizontal overflow across all six viewports.
+95. [in progress] Keep the accepted Tracing selector/icon correction and reject the measured vertical-spacing experiment; continue shell and content-density parity from the 28.40%/24.54% baseline.

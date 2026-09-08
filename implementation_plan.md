@@ -1,5 +1,30 @@
 # Langfuse parity-plus product epic — 2026-09-03
 
+## Captured dashboard integration hardening — 2026-09-08
+
+- [completed] Make the shared dashboard shell usable on mobile with an overlay sidebar, backdrop dismissal, and close-on-navigation behavior.
+- [completed] Make `/dashboard` auth-safe and route email sign-in through the same callback readiness state machine as OAuth.
+- [completed] Make Playwright use an isolated managed port so verification cannot silently exercise a stale server.
+- [completed] Preserve captured visual structure while making Settings tabs deep-linkable and action controls reachable during navigation transitions.
+- [completed] Remove the Settings hydration/consent interaction flake, remove the shell hydration mismatch, and rerun the complete 9-test route and interaction contract (9/9 passed, including mobile/keyboard coverage).
+- [completed] Re-run the public smoke suite after the final build changes (3/3 passed: product surfaces, consent persistence, and safe sign-in routing).
+- [completed] Run the content/public internal-link integrity suite (27/27 passed).
+- [completed] Route supported captured Build actions into existing authenticated workflows; retain modal boundaries only for unsupported operations and all Sandbox writes.
+- [completed] Verify all 14 captured Sandbox surfaces at 390px: 14/14 returned 200, no horizontal overflow, and no page errors.
+- [completed] Add and pass a unique internal-link destination contract across all 14 captured Sandbox surfaces (1/1).
+- [completed] Fix the captured workspace hydration marker and verify the complete 10-test account-access contract (10/10 passed), including consent-safe navigation and persisted tracing controls.
+- [completed] Commit the implementation and newly created live adapters cleanly (`43e670a`, `45b5e25`, `b9f4444`, `55befa5`); unrelated scratch/archive files remain excluded.
+- [completed] Push the implementation branch to PR #106; GitGuardian, activation, adapter, and primary Vercel checks passed. EU Vercel remained pending at handoff.
+- [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
+- [completed] Remove the invalid Tracing-level Create new action and verify the read-only create boundary on Datasets; targeted account-access interaction test passes.
+- [completed] Re-run the final production build after the captured Tracing changes; all 211 routes compile and generate successfully.
+- [completed] Fix captured Tracing filter state/URL synchronization, align the browser contract with the populated fixture, and add the dedicated mobile-aware Sessions surface.
+- [completed] Run a clean isolated production build for the final captured workspace commit; all 211 routes compile, type-check, and generate successfully.
+- [completed] Run the complete 10-test account-access contract against an isolated EU-configured production build; all route, link, filter, detail, read-only, auth-safety, and mobile/keyboard checks pass.
+- [completed] Run the 14-surface captured viewport matrix at six desktop, tablet, and mobile sizes; all six responsive runs pass against the isolated EU production build.
+- [completed] Align populated Sandbox trace input/output values with the captured reference’s visible content while retaining deterministic read-only behavior.
+- [completed] Rebuild and verify the updated populated Tracing surface after the reference-content change; production build and targeted interaction check pass.
+
 ## Captured Tracify dashboard implementation — 2026-09-08
 
 ### Current implementation slice
@@ -1354,6 +1379,8 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 
 # Langfuse clone surface — 2026-09-06
 
+Latest parity pass (2026-09-08): corrected visible captured-workspace labels and scoped accent styling to match the reference product. The complete static reference is hosted separately at `https://tracify-dashboard-reference.vercel.app`, with the populated baseline at `/pages/023.html`; focused TypeScript and ESLint passed, while implementation screenshot comparison is pending local server availability.
+
 - Implemented the first local parity slice for the requested demo and empty-project views.
 - Follow-up scope: add authenticated data wiring and expand remaining project modules only if the user wants a full product-surface parity pass.
 
@@ -1456,6 +1483,17 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 83. [completed] Verify the corrected EU Vercel environment binding, production build, TypeScript, focused lint, and 6-case account-access browser contract.
 84. [completed] Add the missing EU Vercel Production `CONVEX_SITE_URL`, confirm the merged main deployment is Ready on `eu.cloud.tracify.tech`, and smoke-test the live Playground controls.
 
+85. [completed] Migrate authenticated Build Sessions list and detail routes to the captured localhost:4173 workspace renderer with live Convex records.
+86. [completed] Migrate authenticated Build Costs to a first-class captured surface backed by live project trace costs.
+87. [completed] Migrate authenticated Build Prompt Management presentation to the captured prompt collection using live prompt/version data.
+88. [completed] Wire captured prompt editor actions to the existing prompt mutations; create, rename, and version-save actions now persist through Convex.
+89. [completed] Migrate authenticated Evaluators, Datasets, and Scores presentations to the captured renderer with live Convex records.
+90. [completed] Restore captured prompt/evaluation action wiring and migrate Alerts and Settings while preserving existing mutations.
+91. [completed] Migrate authenticated Alerts and Settings presentation to the captured renderer with live project data.
+92. [in progress] Restore action wiring for captured evaluation/admin controls and run the full authenticated route/interactions verification matrix; prompt, evaluator, dataset, alert, dashboard, settings, annotation, and session actions are now connected.
+93. [completed] Fix captured tracing record links to render detail views and verify the filter/detail/read-only interaction path.
+94. [next] Run the complete account-access contract and final Build route/button audit after the latest parity changes.
+
 ## Explore/Build parity spec — 2026-09-08
 
 Objective: give first-time visitors a reliable Tracify Explore experience that visually follows the supplied populated dashboard capture while keeping production account data, authentication, and regional telemetry out of the demo path.
@@ -1481,3 +1519,60 @@ Production verification:
 - PR #99 merged as `7c3ee0f`; PR #100 merged as `312a4df`.
 - Marketing production deployment and EU production deployment for `312a4df` reached Ready. Live marketing Explore click reaches `https://eu.cloud.tracify.tech/playground?view=home&userId=usr_demo_7f3a9c21` and renders the populated synthetic Home.
 - Remaining deployment hygiene item: copy the existing production `CONVEX_SITE_URL` config into the EU Vercel Preview environment. The preview deployment for PR #100 fails at page-data collection with `CONVEX_SITE_URL is not set`; this does not affect the verified production deployment.
+
+## 2026-09-08 — Exact captured dashboard parity continuation
+
+- Shared shell migration started: dashboard content is full-bleed, the sidebar uses the captured dark/reference treatment, and general dashboard access no longer depends on the restricted library allowlist.
+- Remaining implementation is route-complete surface migration, live/Sandbox action adapters, deterministic visual baselines, and complete six-viewport zero-pixel verification.
+- Users list/detail and Experiments now use live captured-workspace adapters; continue the same migration for remaining legacy routes before visual signoff.
+- Human Annotation now uses live Convex annotations through the captured renderer, and legacy Operations redirects to captured Sessions.
+- Legacy Search, Compare, Traces, and Runs entry points now canonicalize to the captured Tracing list/detail family with query preservation.
+- Project Settings/API Keys now canonicalizes to the captured Settings surface with URL-backed tab state.
+- Remaining project settings aliases now preserve their requested destination as `settings?tab=...`, so old bookmarks enter the shared captured settings shell.
+- Sandbox metadata and project labels no longer expose Tracify branding, and the captured interaction accent is violet rather than the old yellow token.
+- Browser review of the managed local Sandbox confirms the captured shell is live; legacy Prompt Management, Dashboard Create, Evaluation, and Evals entry points now canonicalize into captured route families. The next parity block is implementing the captured control/detail density and six-viewport screenshot comparison.
+- Tracing range, environment, and query filters now persist in the URL and are covered by a reload contract; continue extending URL-backed state to view, columns, pagination, and detail selections.
+- Tracing view mode, preset, and column selection now persist through URL parameters and are covered by the Sandbox browser contract; pagination and detail-selection persistence remain.
+- Tracing now slices results by URL-backed `page` state and exposes reference-style previous/next controls with disabled boundaries.
+- Project Alerts creation now enters the captured Alerts surface through `?view=create` with a responsive reference-styled form; live mutation wiring and remaining create/edit surfaces continue.
+- Prompt creation now renders inside the captured Prompts surface through `?view=create` with reference-styled fields and action handling.
+- Project Dashboard detail pages now render through the live captured dashboard adapter and preserve the selected dashboard ID for future detail/editor state.
+- The captured Dashboard editor now resolves the selected detail ID to its live record and initializes the displayed dashboard accordingly.
+- Dashboard selection and Grid/List layout are now URL-backed in the captured editor for reload/share parity.
+- Added the first repeatable six-viewport parity harness for all public captured Sandbox surfaces; it records full-page artifacts and asserts reference shell labels with no captured-workspace Tracify text.
+- Playwright test discovery confirms all six viewport cases are registered; targeted ESLint passes for the changed application/test files, with captured CSS excluded by the repository ESLint configuration.
+- Expanded the paired reference screenshot harness from two representative surfaces to all 14 primary captured Sandbox surfaces. Each surface is paired with a populated 4173 archive page and exercised through the existing six viewport profiles; a clean full artifact run and pixel-diff review remain required.
+- Corrected the paired fixture mapping to use the populated 4173 captures (Home 023, Dashboards 024, Tracing 025, Sessions 026, Users 027, Alerts 028, Prompts 029, Playground 030, Scores 031, Evaluators 032, Annotation 033, Datasets 034, Experiments 035, Settings 036). The rebuilt production artifact now passes the complete desktop-wide 14-surface capture run; six-viewport diff review remains required.
+- Stabilized the screenshot suite by disabling trace/video recording for the long-lived paired pages and using an explicit 180-second viewport-test timeout. All six viewport cases now pass individually against the rebuilt production artifact for the full 14-surface set; screenshot diff analysis and page/state corrections remain required.
+- Added a deterministic parity comparator that validates all 14×6 screenshot dimensions, produces thresholded visual diff images, and writes a machine-readable summary. Initial complete evidence shows the capture pipeline is healthy; remaining mismatch is primarily structural/content-density and must be corrected surface by surface.
+- Corrected the first shared-shell geometry mismatch found through diff inspection: Sandbox now has the reference project context rows and a captured-only compact project selector wrapper, preserving Build behavior while aligning the downstream navigation baseline.
+- Measured the shell correction against a fresh production artifact: Home desktop-wide mismatch decreased from 21.57% to 20.62%, confirming the change improved parity; Tracing was unchanged and is now the next focused surface.
+- Implemented the first Tracing-specific structural correction from the paired capture: a reference-style query strip now sits between the title toolbar and tracing controls, while generic toolbar controls are omitted on Tracing. URL-backed query behavior remains intact; rebuild and visual diff remeasurement are next.
+- Measured and corrected the next Tracing structural mismatch: the desktop/tablet filter rail now uses the reference 153px width instead of the prior 260px width, shifting the results region into the correct baseline while preserving mobile stacking.
+- Revalidated the Tracing rail against a fresh production artifact: the full desktop-wide suite passes, while Tracing mismatch remains approximately 26.44%, so the next Tracing pass must reproduce internal filter groups, chart strip, table density, and populated data layout.
+- Added the missing Tracing table-mode count strip as a captured-only visual layer with reference-style grid/event bars; table interactions remain unchanged and the next step is fresh production screenshot measurement.
+- Runtime evidence: all six viewport cases (1440x900, 1280x800, 1024x768, 768x1024, 390x844, and 375x812) passed all 14 Sandbox surfaces, including hydration, reference-shell, no-Tracify-text assertions, and screenshot capture.
+- Latest verification: the EU-configured isolated production artifact builds all 211 routes; the account-access contract passes 10/10; the six-viewport captured matrix passes 6/6 across the 14 captured Sandbox surfaces. Sessions controls and Tracing Ask AI now have observable behavior, and captured trace names use the reference fixture values.
+- Sessions was further aligned to the supplied reference structure: its dedicated filter rail and eight-column table are now present at desktop, tablet, and mobile widths, while generic environment/create controls are omitted from that route. Paired captures pass for the updated surface; pixel-level comparison still identifies residual shell/content differences.
+- The Tracing table now includes the captured leading selection column, and Sessions desktop action spacing is closer to the reference baseline. The latest isolated EU build compiled all 211 routes and the six-viewport route matrix passed across all 14 Sandbox surfaces.
+- The shared narrow-screen shell now includes the captured logo/breadcrumb row, separate range/assistant controls, and Home toolbar wrapping. This source change is lint/type safe; a fresh production artifact and six-viewport run remain required before accepting the visual effect.
+- Shared mobile shell is now verified on a fresh EU-configured production artifact: all 211 routes compiled and all six required viewport profiles passed across the 14 captured Sandbox surfaces.
+- Restored the captured Tracing Filters control as a real URL-backed menu; the fresh artifact and full account-access contract now pass again at 10/10. Continue the visual parity audit and deployment verification before completion.
+- Completed another captured-control audit: prompt view/reference actions and Annotation columns/table-view controls no longer silently do nothing. The latest build and full account-access contract pass; exact visual parity and external preview deployment remain open.
+- Latest parity pass: the Tracing toolbar now matches the reference control order (Quality, Slow, Cost, My Views, Table, Chart, Columns) while filtering remains in the left rail; the full six-viewport matrix passes and Tracing mismatch improved to 27.89% desktop-wide and 22.60% mobile-narrow. The shared environment label now displays `default`, the captured dashboard marker no longer uses the yellow accent, and mobile Sessions toolbar offsets were refined from screenshot geometry. Clean EU-configured production builds and focused mobile Sessions tests pass; remaining route/state parity work is still open.
+- Responsive Sessions follow-up: tablet portrait required a separate 60px icon-only filter rail breakpoint at 701–800px. The correction passed the tablet landscape/portrait capture tests and reduced portrait Sessions mismatch to 23.45%; the landscape result remains 26.01% with the wider reference rail.
+- Playground follow-up: page 030 required a structural replacement rather than CSS-only tuning. The captured Playground now uses model/actions, Tools/Schema/Variables, System/User message rows, Message/Placeholder actions, Output, and Submit; generic shared Env/Filters/Create controls are suppressed. Focused mobile tests pass and the new surface measures 20.43%/20.22% mismatch on standard/narrow mobile, with desktop/tablet fine-tuning remaining.
+- Final current-artifact verification: the isolated EU-configured `.next-filter-fix` build compiles all 211 routes; the targeted Tracing interaction contract passes, the full account-access contract passes 10/10, and the complete six-viewport captured matrix passes 6/6 across all 14 Sandbox surfaces after restoring the URL-backed Tracing Filters menu. Raw screenshot comparison still reports residual structural/content mismatch, so pixel-perfect parity is not complete.
+- Sessions mobile offset experiment: a `-15px` surface offset with independently widened search/actions regressed the fresh paired comparator to 29.18% at 390x844 and 26.83% at 375x812. Reverted to the prior `-30px` surface-only offset, whose fresh paired run measured 26.68% and 26.28%; mobile route assertions remained green in both runs.
+- Playground mobile fidelity pass: aligned the captured Playground toolbar/card geometry, fixed the mobile model-control sizing, constrained message/add rows to the reference inner width, and brought the output/submit block back inside the viewport. Fresh paired screenshots improved Playground mismatch to 11.41% at 390x844 and 11.62% at 375x812; the complete six-viewport route matrix passed 6/6 across all 14 Sandbox surfaces against the same EU-configured build.
+- Tracing toolbar fidelity pass: desktop now keeps the URL-backed Filters action in the captured left rail and removes the extra top-row Filters control; the account contract was updated to exercise the rail control. Focused lint, the complete account-access contract (10/10), and desktop paired capture pass. Raw desktop-wide Tracing mismatch is effectively unchanged at 27.89%, so remaining differences are still table density/content and shell geometry.
+- Users tablet structure pass: applied the extracted reference user IDs, kept four visible event columns, and added the 701–800px captured control grid so search/environment share the first row and Filters occupies the second row. The EU-configured build compiles all 211 routes and the complete six-viewport route matrix passes 6/6; fresh tablet paired capture passes, with raw mismatch remaining sensitive to timestamp/content differences.
+- Sessions mobile control-row pass: retained the captured `-30px` surface offset and shifted only the search/actions row by `-22px`, matching the reference’s left alignment without moving the table/rail. Fresh paired mobile captures pass; standard mismatch improved to 26.68%, while narrow mismatch is noisier at 27.49%, so no further speculative offset was layered on.
+- Deployment verification: the branch head `b93d2165` now has Ready Vercel previews for both surfaces: marketing `https://tracify-kyi83g6vf-tracify-tech.vercel.app` and EU cloud `https://tracify-cloud-mvhgikvf1-tracify-tech.vercel.app`. GitHub reports both Vercel checks and the activation/adapter checks as passing.
+- Sessions mobile follow-up: corrected the independently measured toolbar and content-edge offsets after a fresh screenshot audit. The full six-viewport matrix remains green, with the current mobile Sessions artifact measuring 26.97% standard and 26.57% narrow; fine table density, shell typography, and dynamic reference data differences remain open.
+- Users tablet follow-up: removed shared Env/Filters/Create controls from the dedicated Users surface, added the reference Last Event column, and aligned the narrow-tablet toolbar 24px lower. Tablet-focused tests and the complete six-viewport matrix pass; Users mismatch is 20.89% at 1024x768 and 22.30% at 768x1024, so row data/typography still need tuning.
+- Users fixture follow-up: page 027 `u-*` identifiers are now used by Sandbox Users rows, event timestamps render in the captured localized format, and fixed widths preserve the four-column layout. The final mobile edge override is ordered after the fixed-table rules. TypeScript/build/focused tests/full six-viewport matrix pass; remaining Users mismatch is predominantly text clipping, font metrics, and exact reference row content.
+- Tracing table follow-up: corrected the width selectors to account for the leading selection column and replaced the textual generation cell with an accessible reference-style icon. Desktop pair tests pass on the rebuilt artifact; Tracing remains a high-difference surface at 28.40% desktop-wide and 24.54% desktop-compact and still requires shell/content-density tuning.
+- Tracing spacing audit: a 5px chart-strip reduction plus altered header/body padding was measured and rejected because it worsened both desktop comparisons. Those rules were removed; the current EU-configured artifact is verified at the prior 28.40%/24.54% baseline with the accepted width/icon correction intact.
+- Rebuilt verification after the rejected spacing experiment: desktop-wide and desktop-compact Tracing pair tests pass on the restored source, retaining the 28.40%/24.54% measurements.
+- Users mobile edge pass: fresh paired captures showed the page title, controls, and table consistently 7px too far right; the final mobile surface offset is now `-36px`. Both mobile captures pass, with mismatch at 26.51% standard and 26.13% narrow; this is retained without further offset stacking.

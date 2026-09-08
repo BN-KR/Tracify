@@ -1,25 +1,14 @@
-import { ProjectSettings } from "@/components/dashboard/project-settings";
-import { ProjectMembers } from "@/components/dashboard/project-members";
-import { ApiKeysManager } from "@/components/dashboard/api-keys-manager";
-import { ProjectManagement } from "@/components/dashboard/project-management";
-import { ProjectOrchestration } from "@/components/dashboard/project-orchestration";
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Link from "next/link";
+import { LiveCapturedAdmin } from "@/components/dashboard/live-captured-admin";
 
 export default async function SettingsPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ projectId: string }>;
-  searchParams: Promise<{ tab?: string }>;
 }) {
   const { projectId } = await params;
-  const { tab } = await searchParams;
-  const allowedTabs = ["general", "members", "api-keys", "management", "orchestration"] as const;
-  const defaultTab = tab && allowedTabs.includes(tab as (typeof allowedTabs)[number]) ? tab : "general";
 
-  return (
+  return <LiveCapturedAdmin projectId={projectId} section="settings" />;
+  /*
     <div className="flex flex-col gap-6">
       <DashboardTopbar
         title="Project Settings"
@@ -91,6 +80,5 @@ export default async function SettingsPage({
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
+    </div> */
 }

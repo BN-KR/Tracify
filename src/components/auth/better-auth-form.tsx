@@ -35,9 +35,9 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       if (mode === "sign-up") {
         await fetch("/api/lifecycle/welcome", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email.trim(), name: name.trim() }) }).catch(() => undefined);
       }
-      const destination = new URL(callbackPath, window.location.origin);
-      if (intent) destination.searchParams.set("intent", intent);
-      window.location.assign(`${destination.pathname}${destination.search}${destination.hash}`);
+      const callback = new URL(callbackPath, window.location.origin);
+      if (intent) callback.searchParams.set("intent", intent);
+      window.location.assign(`/auth/callback?redirect_url=${encodeURIComponent(`${callback.pathname}${callback.search}${callback.hash}`)}`);
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Authentication failed.");
     } finally {

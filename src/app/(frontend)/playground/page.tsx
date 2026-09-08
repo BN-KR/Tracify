@@ -4,8 +4,8 @@ import { CapturedWorkspace } from "@/features/dashboard-workspace/components/cap
 import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
 
 export const metadata: Metadata = {
-  title: "Explore the Tracify Sandbox",
-  description: "A populated, read-only Tracify agent observability workspace.",
+  title: "Explore the Sandbox",
+  description: "A populated, read-only agent observability workspace.",
   robots: { index: false, follow: false },
 };
 

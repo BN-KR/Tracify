@@ -1,7 +1,10 @@
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
-import { TraceCompare } from "@/components/dashboard/trace-compare";
+import { redirect } from "next/navigation";
 
-export default async function ComparePage({ params }: { params: Promise<{ projectId: string }> }) {
+export default async function ComparePage({ params, searchParams }: { params: Promise<{ projectId: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { projectId } = await params;
-  return <div className="flex flex-col gap-6"><DashboardTopbar title="Trace Compare" description="Find the meaningful difference between two agent runs." /><div className="px-6 pb-10"><TraceCompare projectId={projectId} /></div></div>;
+  const query = await searchParams;
+  const suffix = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) if (value !== undefined) suffix.set(key, Array.isArray(value) ? value[0] : value);
+  suffix.set("mode", "compare");
+  redirect(`/dashboard/${projectId}/tracing?${suffix}`);
 }

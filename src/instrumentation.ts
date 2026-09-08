@@ -3,6 +3,11 @@ import { parseTracifyRegion, TRACIFY_REGIONS } from "@/lib/regions";
 export function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 
+  // The managed local Playwright server runs the production bundle against the
+  // local test origin. Keep the real cloud validation intact while allowing the
+  // repository-owned test launcher to provide its isolated fixture environment.
+  if (process.env.PLAYWRIGHT_LOCAL_SERVER === "1") return;
+
   const deploymentKind = process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND ?? "marketing";
   if (deploymentKind !== "cloud") return;
 

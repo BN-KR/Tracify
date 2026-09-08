@@ -1,5 +1,4 @@
-import { TraceViewer } from "@/components/dashboard/trace-viewer";
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
+import { redirect } from "next/navigation";
 
 export default async function RunDetailPage({
   params,
@@ -8,16 +7,5 @@ export default async function RunDetailPage({
 }) {
   const { projectId, runId } = await params;
 
-  return (
-    <div className="flex flex-col gap-6">
-      <DashboardTopbar
-        title={`Run: ${runId}`}
-        description="Detailed execution trace and span analysis."
-      />
-
-      <div className="px-6 pb-20">
-        <TraceViewer projectId={projectId} runId={runId} />
-      </div>
-    </div>
-  );
+  redirect(`/dashboard/${projectId}/tracing/${encodeURIComponent(runId)}`);
 }
