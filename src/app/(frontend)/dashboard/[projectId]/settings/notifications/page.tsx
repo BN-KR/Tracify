@@ -1,6 +1,6 @@
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
-import { NotificationPreferences } from "@/components/dashboard/notification-preferences";
+import { redirect } from "next/navigation";
 
-export default async function ProjectNotificationsPage() {
-  return <div className="flex flex-col gap-6"><DashboardTopbar title="Notifications" description="Choose which Tracify updates reach your workspace." /><div className="px-6 pb-10"><NotificationPreferences /></div></div>;
+export default async function ProjectNotificationsPage({ params }: { params: Promise<{ projectId: string }> }) {
+  const { projectId } = await params;
+  redirect(`/dashboard/${projectId}/settings?tab=Notifications`);
 }

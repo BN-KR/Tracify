@@ -1,7 +1,9 @@
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
-import { TraceSearch } from "@/components/dashboard/trace-search";
+import { redirect } from "next/navigation";
 
-export default async function SearchPage({ params }: { params: Promise<{ projectId: string }> }) {
+export default async function SearchPage({ params, searchParams }: { params: Promise<{ projectId: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { projectId } = await params;
-  return <div className="flex flex-col gap-6"><DashboardTopbar title="Trace search" description="Find runs across sessions, users, environments, releases, cost, latency, and errors." /><div className="px-6 pb-10"><TraceSearch projectId={projectId} /></div></div>;
+  const query = await searchParams;
+  const suffix = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) if (value !== undefined) suffix.set(key, Array.isArray(value) ? value[0] : value);
+  redirect(`/dashboard/${projectId}/tracing${suffix.toString() ? `?${suffix}` : ""}`);
 }

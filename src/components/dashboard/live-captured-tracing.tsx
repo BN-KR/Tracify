@@ -7,7 +7,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
 
-export function LiveCapturedTracing({ projectId }: { projectId: string }) {
+export function LiveCapturedTracing({ projectId, runId }: { projectId: string; runId?: string }) {
   const [startedAtAfter] = useState(() => new Date(Date.now() - 30 * 86400000).toISOString());
   const project = useQuery(api.projects.getProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const runs = usePaginatedQuery(
@@ -17,7 +17,7 @@ export function LiveCapturedTracing({ projectId }: { projectId: string }) {
   );
 
   if (project === undefined || project === null || runs.status === "LoadingFirstPage") {
-    return <div className="captured-build-loading">Loading Tracify traces…</div>;
+    return <div className="captured-build-loading">Loading traces…</div>;
   }
 
   const records = runs.results.map((run) => ({
@@ -45,5 +45,5 @@ export function LiveCapturedTracing({ projectId }: { projectId: string }) {
     metrics: { ...sandboxWorkspace.metrics, traces: records.length, observations: records.length },
   };
 
-  return <CapturedWorkspace workspace={workspace} segments={["tracing"]} />;
+  return <CapturedWorkspace workspace={workspace} segments={runId ? ["tracing", runId] : ["tracing"]} />;
 }

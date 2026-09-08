@@ -744,3 +744,23 @@
 }
 .tracify-shell[data-dashboard-theme="tracify-v2"]{--tracify-brand:#f4d44d}.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-shell-sidebar .border-l-white{border-left-color:#f4d44d!important;color:#f4d44d!important}.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-shell-sidebar a:hover,.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-shell-sidebar button:hover{background:#242116;color:#fff}.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-shell-sidebar .tracify-shell-sidebar-brand{color:#f4d44d}.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-dashboard-topbar{box-shadow:inset 0 -1px 0 #f4d44d33}.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-overview{--tracify-accent:#f4d44d}.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-overview button:hover,.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-overview [role="button"]:hover{border-color:#f4d44d}.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-overview input:focus,.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-overview select:focus,.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-overview textarea:focus{border-color:#f4d44d;outline-color:#f4d44d}.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-overview [class*="#8f7cff"],.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-overview [class*="#a084ff"]{color:#f4d44d!important;border-color:#f4d44d!important}.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-overview [class*="bg-[#8f7cff]"],.tracify-shell[data-dashboard-theme="tracify-v2"] .tracify-overview [class*="bg-[#a084ff]"]{background:#f4d44d!important;color:#111!important}
 .tracify-cloud-shell[data-dashboard-theme="tracify-v2"] .tracify-shell-sidebar .border-l-white{border-left-color:#f4d44d!important;color:#f4d44d!important}.tracify-cloud-shell[data-dashboard-theme="tracify-v2"] .tracify-shell-sidebar a:hover,.tracify-cloud-shell[data-dashboard-theme="tracify-v2"] .tracify-shell-sidebar button:hover{background:#242116;color:#fff}.tracify-cloud-shell[data-dashboard-theme="tracify-v2"] .tracify-shell-sidebar .tracify-shell-sidebar-brand{color:#f4d44d}.tracify-cloud-shell[data-dashboard-theme="tracify-v2"] .tracify-dashboard-topbar{box-shadow:inset 0 -1px 0 #f4d44d33}.tracify-cloud-shell[data-dashboard-theme="tracify-v2"] .tracify-dashboard-topbar button:hover,.tracify-cloud-shell[data-dashboard-theme="tracify-v2"] .tracify-dashboard-topbar a:hover{border-color:#f4d44d;color:#f4d44d}
+
+@media (max-width: 700px) {
+  .tracify-shell-sidebar {
+    width: 280px !important;
+    transform: translateX(-100%);
+    box-shadow: 12px 0 28px rgb(0 0 0 / 0.18);
+  }
+
+  .tracify-shell-sidebar.is-mobile-open {
+    transform: translateX(0);
+  }
+
+  .tracify-shell-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    border: 0;
+    background: rgb(0 0 0 / 0.32);
+  }
+}

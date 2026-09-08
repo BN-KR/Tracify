@@ -1,5 +1,27 @@
 # Project Memory
 
+## 2026-09-08 site linking and mobile hardening
+- Added responsive shell behavior for dashboard and Sandbox: mobile sidebar slides over content with backdrop, closes after navigation, and the existing shell toggle opens/closes it below 700px.
+- Routed email authentication through `/auth/callback` so email and OAuth share the same Better Auth/Convex readiness path; unauthenticated `/dashboard` now redirects to sign-in with its destination preserved.
+- Isolated Playwright’s managed server to port 3100 with stale-server reuse disabled; TypeScript and focused ESLint pass.
+- Made captured Settings tabs URL-addressable and kept their click state stable; direct browser validation reaches LLM Connections and opens the Sandbox boundary dialog. Added an explicit hydration marker to make browser interactions deterministic and removed the shell's server/client theme-class mismatch.
+- Final verification on the current tree: `pnpm build` passed (211 routes), TypeScript, focused ESLint, and `git diff --check` passed; the complete account-access contract passed 9/9 including Sandbox routing/interactions and mobile/keyboard coverage. Remaining verification is provider-backed signed-in cloud behavior, which requires EU test credentials.
+- Re-ran the complete account-access contract after hydration hardening: 9/9 passed. Public product smoke also passed 3/3, including consent persistence and safe sign-in routing.
+- Content/link integrity suite also passes 27/27 (`pnpm test:content`), including public internal-link validation and canonical docs/blog route inputs.
+- Replaced generic captured Build action modals with navigation into existing authenticated workflows for dashboard/alert/evaluator/dataset creation, LLM connections, and project settings; Sandbox retains explicit read-only boundaries. TypeScript, focused ESLint, and diff checks pass after this wiring.
+- Ran a 390px viewport sweep across all 14 captured Sandbox surfaces: every route returned 200, had no horizontal overflow, and reported no page errors. The existing route contract remains green; internal link HTTP probing should be added as a follow-up when the full navigation audit is expanded.
+- Added and passed the captured Sandbox internal-link contract (1/1): it collected links across all 14 surfaces and verified every unique internal destination returned below 400.
+
+## 2026-09-08 hosted dashboard reference
+- Deployed the complete static dashboard capture as the isolated Vercel project `tracify-dashboard-reference`; it does not modify or share configuration with the production `tracify` or `tracify-cloud-eu` projects.
+- Stable reference index: `https://tracify-dashboard-reference.vercel.app`; populated dashboard: `/pages/023.html`; empty-project dashboard: `/pages/empty-home.html`.
+- Vercel reported deployment `dpl_AZwXrhFh5v84UwmSMwG7K2HZCqTS` Ready, and the populated page was opened successfully with its local CSS, assets, and rewritten snapshot navigation.
+
+## 2026-09-08 exact captured branding pass
+- Updated captured dashboard copy to the reference presentation: `Demo Project (view only)`, `Langfuse Demo`, `Home`, `Cost Dashboard`, and neutral evaluator labels.
+- Scoped the reproduced workspace interaction accent to violet and removed Tracify from visible Build loading messages; internal route/event/data-source identifiers remain unchanged.
+- TypeScript and focused ESLint were run with the bundled runtime. Browser verification remains blocked because port 3000 was not running and shell startup was rejected.
+
 ## 2026-09-08 captured dashboard parity follow-up
 - Added a capture-aligned Tracing surface with working table/chart toggle, preset filters, environment/search filtering, selectable columns, filter-rail search, trace links, and an empty-state footer.
 - Added a populated Session detail surface with event input/output inspection, linked trace context, score rows, and the dataset action boundary.
@@ -1960,3 +1982,15 @@
 - Playground auth redirects now preserve the complete `/playground` query, including `userId=usr_demo_7f3a9c21` and `intent=explore`, so the signed-in destination remains immersive and deterministic.
 - Updated Convex Better Auth host resolution for the regional proxy and set production `SITE_URL` to `https://eu.cloud.tracify.tech`. Production social callback probes resolve both GitHub and Google to the EU host; an email probe reaches the expected invalid-credentials response rather than an origin error.
 - Verification: focused lint, TypeScript, production build (209 routes), activation contract, auth/navigation unit tests, and regional contract all pass. Valid credential completion remains a user-session check.
+
+## 2026-09-08 — Reference shell migration
+
+- Began the full parity implementation by changing the shared dashboard shell to the captured dark/full-bleed presentation, replacing visible Tracify sidebar branding with the reference logo treatment, and removing the general dashboard layout’s restricted library allowlist.
+- Updated the Sandbox access contract to use the reference project label. Route-by-route migration and six-viewport zero-pixel verification remain active work.
+- Migrated authenticated Users list/detail and Experiments routes to live captured-workspace adapters backed by Convex sessions and experiments; TypeScript passes.
+- Migrated Human Annotation to a live Convex-backed captured adapter and canonicalized the legacy Operations route to captured Sessions; TypeScript passes.
+- Canonicalized legacy project Search, Compare, Traces, and Runs routes into captured Tracing/list-detail routes with query preservation; TypeScript passes.
+- Canonicalized project Settings/API Keys to the captured Settings route with URL-backed `API Keys` tab state; TypeScript and diff checks pass.
+- Canonicalized the remaining project settings aliases (LLM Connections, Model Definitions, MCP & CLI, Scores, Integrations, Notifications, Audit log, Batch Actions, and Exports) into URL-backed captured Settings tabs; TypeScript and diff checks pass.
+- Removed visible Sandbox metadata/project branding references and replaced the captured workspace accent token with the reference violet accent; remaining legacy component strings are outside the migrated captured surfaces and require continued route cleanup.
+- Browser review confirms the local Sandbox renders the captured dark shell and populated controls at the managed test server; compared with the authoritative 4173 Tracing tree, the remaining gap is control/detail density rather than shell access. Canonicalized legacy Prompt Management, Dashboard Create, Evaluation, and Evals entry points into captured route families; TypeScript and diff checks pass.

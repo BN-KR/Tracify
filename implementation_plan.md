@@ -1,5 +1,19 @@
 # Langfuse parity-plus product epic — 2026-09-03
 
+## Captured dashboard integration hardening — 2026-09-08
+
+- [completed] Make the shared dashboard shell usable on mobile with an overlay sidebar, backdrop dismissal, and close-on-navigation behavior.
+- [completed] Make `/dashboard` auth-safe and route email sign-in through the same callback readiness state machine as OAuth.
+- [completed] Make Playwright use an isolated managed port so verification cannot silently exercise a stale server.
+- [completed] Preserve captured visual structure while making Settings tabs deep-linkable and action controls reachable during navigation transitions.
+- [completed] Remove the Settings hydration/consent interaction flake, remove the shell hydration mismatch, and rerun the complete 9-test route and interaction contract (9/9 passed, including mobile/keyboard coverage).
+- [completed] Re-run the public smoke suite after the final build changes (3/3 passed: product surfaces, consent persistence, and safe sign-in routing).
+- [completed] Run the content/public internal-link integrity suite (27/27 passed).
+- [completed] Route supported captured Build actions into existing authenticated workflows; retain modal boundaries only for unsupported operations and all Sandbox writes.
+- [completed] Verify all 14 captured Sandbox surfaces at 390px: 14/14 returned 200, no horizontal overflow, and no page errors.
+- [completed] Add and pass a unique internal-link destination contract across all 14 captured Sandbox surfaces (1/1).
+- [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
+
 ## Captured Tracify dashboard implementation — 2026-09-08
 
 ### Current implementation slice
@@ -1354,6 +1368,8 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 
 # Langfuse clone surface — 2026-09-06
 
+Latest parity pass (2026-09-08): corrected visible captured-workspace labels and scoped accent styling to match the reference product. The complete static reference is hosted separately at `https://tracify-dashboard-reference.vercel.app`, with the populated baseline at `/pages/023.html`; focused TypeScript and ESLint passed, while implementation screenshot comparison is pending local server availability.
+
 - Implemented the first local parity slice for the requested demo and empty-project views.
 - Follow-up scope: add authenticated data wiring and expand remaining project modules only if the user wants a full product-surface parity pass.
 
@@ -1492,3 +1508,15 @@ Production verification:
 - PR #99 merged as `7c3ee0f`; PR #100 merged as `312a4df`.
 - Marketing production deployment and EU production deployment for `312a4df` reached Ready. Live marketing Explore click reaches `https://eu.cloud.tracify.tech/playground?view=home&userId=usr_demo_7f3a9c21` and renders the populated synthetic Home.
 - Remaining deployment hygiene item: copy the existing production `CONVEX_SITE_URL` config into the EU Vercel Preview environment. The preview deployment for PR #100 fails at page-data collection with `CONVEX_SITE_URL is not set`; this does not affect the verified production deployment.
+
+## 2026-09-08 — Exact captured dashboard parity continuation
+
+- Shared shell migration started: dashboard content is full-bleed, the sidebar uses the captured dark/reference treatment, and general dashboard access no longer depends on the restricted library allowlist.
+- Remaining implementation is route-complete surface migration, live/Sandbox action adapters, deterministic visual baselines, and complete six-viewport zero-pixel verification.
+- Users list/detail and Experiments now use live captured-workspace adapters; continue the same migration for remaining legacy routes before visual signoff.
+- Human Annotation now uses live Convex annotations through the captured renderer, and legacy Operations redirects to captured Sessions.
+- Legacy Search, Compare, Traces, and Runs entry points now canonicalize to the captured Tracing list/detail family with query preservation.
+- Project Settings/API Keys now canonicalizes to the captured Settings surface with URL-backed tab state.
+- Remaining project settings aliases now preserve their requested destination as `settings?tab=...`, so old bookmarks enter the shared captured settings shell.
+- Sandbox metadata and project labels no longer expose Tracify branding, and the captured interaction accent is violet rather than the old yellow token.
+- Browser review of the managed local Sandbox confirms the captured shell is live; legacy Prompt Management, Dashboard Create, Evaluation, and Evals entry points now canonicalize into captured route families. The next parity block is implementing the captured control/detail density and six-viewport screenshot comparison.

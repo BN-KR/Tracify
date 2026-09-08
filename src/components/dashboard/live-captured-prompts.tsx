@@ -9,7 +9,7 @@ import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
 export function LiveCapturedPrompts({ projectId }: { projectId: string }) {
   const project = useQuery(api.projects.getProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const prompts = useQuery(api.prompts.list, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
-  if (project === undefined || project === null || prompts === undefined) return <div className="captured-build-loading">Loading Tracify prompts…</div>;
+  if (project === undefined || project === null || prompts === undefined) return <div className="captured-build-loading">Loading prompts…</div>;
   const records = prompts.map((prompt) => {
     const version = prompt.versions[0];
     return { id: prompt._id, name: prompt.name, status: version?.labels.includes("production") ? "Production" : "Draft", environment: "all", timestamp: new Date(prompt.updatedAt).toLocaleDateString(), model: version?.model ?? "—", input: version?.content ?? "" };

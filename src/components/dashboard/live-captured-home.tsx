@@ -12,7 +12,7 @@ export function LiveCapturedHome({ projectId, surface = "home" }: { projectId: s
   const project = useQuery(api.projects.getProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const runs = useQuery(api.agentRuns.getRecentRunsByProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const summary = useQuery(api.projects.getProjectManagementSummary, projectId ? { projectId: projectId as Id<"projects">, days: 30 } : "skip");
-  if (project === undefined || project === null || runs === undefined || summary === undefined || summary === null) return <div className="captured-build-loading">Loading Tracify dashboard…</div>;
+  if (project === undefined || project === null || runs === undefined || summary === undefined || summary === null) return <div className="captured-build-loading">Loading dashboard…</div>;
 
   const recent = runs.filter((run) => run.startedAt >= startedAtAfter);
   const records = recent.map((run) => ({

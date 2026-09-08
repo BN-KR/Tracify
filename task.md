@@ -1,5 +1,18 @@
 # 2026-09-02 — First-customer execution
 
+## 2026-09-08 — Site linking and mobile hardening
+
+- [completed] Add mobile dashboard sidebar open/close behavior and responsive backdrop.
+- [completed] Route email auth through the readiness callback and redirect unauthenticated dashboard entry safely.
+- [completed] Isolate Playwright from stale port-3000 dev servers.
+- [completed] Resolve the Settings hydration race under the privacy-consent overlay and rerun the full 9-test contract (9/9 passed).
+- [completed] Re-run the full account-access contract and public smoke suite after final hydration/build changes (12/12 passed).
+- [completed] Run the content and public internal-link integrity suite (27/27 passed).
+- [completed] Route supported captured Build actions into existing authenticated workflows while preserving Sandbox read-only behavior.
+- [completed] Sweep all 14 captured Sandbox surfaces at 390px for route success, page errors, and horizontal overflow.
+- [completed] Add and pass an HTTP contract for every unique internal link emitted by the 14 captured Sandbox surfaces.
+- [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
+
 ## 2026-09-08 — Captured Tracify dashboard follow-up
 
 - [pending owner] Supply provider-backed EU test-account credentials to exercise signed-in project creation, persisted mutations, invitation, checkout, and first-trace ingestion end to end. Public Sandbox behavior, regional routing, unauthenticated safety, auth callback state, and the production build are verified without those credentials.
@@ -1466,6 +1479,8 @@ Follow-ups still open:
 
 # Langfuse clone surface — 2026-09-06
 
+Latest parity pass: visible captured-workspace branding and accent cleanup completed on 2026-09-08. The static reference is now available at `https://tracify-dashboard-reference.vercel.app/pages/023.html`; implementation viewport comparison remains pending until the local app server is available.
+
 1. [completed] Inspect the supplied Langfuse demo trace and empty-project states.
 2. [completed] Add local `/langfuse` routes for demo traces and empty project onboarding.
 3. [completed] Add working search, filter toggle, chart/table toggle, sidebar collapse, and seeded trace rows.
@@ -1568,4 +1583,13 @@ Current verification gap: completing a valid provider-backed sign-in still requi
 75. Verify authenticated editor actions end-to-end against a real project session.
 76. Verify the production build artifact and regional runtime URLs after the final editor mutations.
 77. Preserve final handoff links and document the remaining backend expansion points.
-78. [x] Add reversible Tracify-branded dashboard presentation layer with legacy/v2 preview controls while preserving existing functionality.
+78. [x] Replace the dashboard presentation layer with the captured reference shell while preserving existing functionality.
+
+79. [in progress] Migrate every dashboard route to the shared reference shell and canonical captured surface mapping.
+80. [pending] Complete live/Sandbox adapter actions and run the six-viewport zero-pixel route matrix.
+81. [in progress] Continue replacing legacy project route components with live captured-workspace adapters.
+82. [in progress] Migrate remaining search, comparison, administration, settings, and detail routes to canonical captured surfaces.
+83. [completed] Canonicalize legacy trace/search/compare/run routes to the captured Tracing family.
+84. [in progress] Continue migrating project settings, administration, and create/edit routes to captured surfaces.
+85. [in progress] Remove remaining dashboard-visible Tracify branding and yellow accents from legacy fallbacks and migrated shared surfaces.
+86. [in progress] Implement captured control/detail density and compare local/reference screenshots at all six required viewport sizes.

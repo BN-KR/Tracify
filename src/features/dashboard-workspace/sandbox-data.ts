@@ -32,8 +32,8 @@ export const sandboxWorkspace: DashboardWorkspace = {
   dataSource: "tracify-sandbox",
   project: {
     id: "tracify-sandbox",
-    name: "Tracify Demo (view only)",
-    organizationName: "Tracify Demo",
+    name: "Demo Project (view only)",
+    organizationName: "Langfuse Demo",
   },
   metrics: {
     traces: 41,
@@ -47,7 +47,7 @@ export const sandboxWorkspace: DashboardWorkspace = {
     dashboards: {
       description: "Reusable views for cost, quality, latency, and trace volume.",
       records: [
-        { id: "tracify-home", name: "Tracify Home", status: "Default", environment: "all", timestamp: "Updated today" },
+        { id: "tracify-home", name: "Home", status: "Default", environment: "all", timestamp: "Updated today" },
         { id: "cost-overview", name: "Cost Overview", status: "Published", environment: "production", timestamp: "Updated 12 min ago" },
         { id: "release-quality", name: "Release Quality", status: "Published", environment: "production", timestamp: "Updated 34 min ago" },
         { id: "latency-watch", name: "Latency Watch", status: "Draft", environment: "staging", timestamp: "Updated yesterday" },

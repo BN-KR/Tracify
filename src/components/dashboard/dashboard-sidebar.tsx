@@ -35,7 +35,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { BrandLogo } from "@/components/brand-logo";
 import { getTracifyRegion } from "@/lib/regions";
 
 type GroupId = "primary" | "observe" | "analyze" | "improve" | "operate" | "manage" | "resources";
@@ -80,7 +79,10 @@ export function DashboardSidebar({
   onCollapsedChange,
   projectIdOverride,
   previewProjectName,
-  synthetic = false,
+    synthetic = false,
+    isMobileOpen = false,
+    onMobileClose,
+    onMobileToggle,
 }: {
   canAccessContent: boolean;
   isCollapsed: boolean;
@@ -88,6 +90,9 @@ export function DashboardSidebar({
   projectIdOverride?: string;
   previewProjectName?: string;
   synthetic?: boolean;
+    isMobileOpen?: boolean;
+    onMobileClose?: () => void;
+    onMobileToggle?: () => void;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -402,11 +407,17 @@ export function DashboardSidebar({
     onCollapsedChange(!isCollapsed);
   }
 
-  useEffect(() => {
-    function onShellToggle() { onCollapsedChange(!isCollapsed); }
+    useEffect(() => {
+      function onShellToggle() {
+        if (window.matchMedia("(max-width: 700px)").matches) {
+          onMobileToggle?.();
+          return;
+        }
+        onCollapsedChange(!isCollapsed);
+      }
     window.addEventListener("tracify:toggle-sidebar", onShellToggle);
     return () => window.removeEventListener("tracify:toggle-sidebar", onShellToggle);
-  }, [isCollapsed, onCollapsedChange]);
+    }, [isCollapsed, onCollapsedChange, onMobileToggle]);
 
   function expandSidebar(groupId?: GroupId) {
     if (groupId) {
@@ -437,23 +448,24 @@ export function DashboardSidebar({
   return (
     <aside
       className={cn(
-        "tracify-shell-sidebar fixed inset-y-0 left-0 z-30 flex flex-col border-r border-black/15 bg-white transition-[width] duration-150 ease-out motion-reduce:transition-none",
+        "tracify-shell-sidebar fixed inset-y-0 left-0 z-30 flex flex-col border-r border-white/10 bg-[#0f0f0f] text-white transition-[width,transform] duration-150 ease-out motion-reduce:transition-none",
+        isMobileOpen && "is-mobile-open",
       )}
       style={{ width: visualWidth }}
     >
       <div
         className={cn(
-          "flex h-11 items-center border-b border-black/15",
+          "flex h-11 items-center border-b border-white/10",
           showExpandedContent ? "justify-between px-4" : "justify-center px-0",
         )}
       >
         {showExpandedContent ? (
           <Link
             href={projectDashboardHref}
-            aria-label="Tracify dashboard"
-            className="text-black focus-visible:outline-1 focus-visible:outline-offset-4"
+            aria-label="Langfuse dashboard"
+            className="text-white focus-visible:outline-1 focus-visible:outline-offset-4"
           >
-            <BrandLogo className="text-lg" highlighted={false} />
+            <span className="font-sans text-[15px] font-semibold tracking-[-0.04em]">langfuse</span>
           </Link>
         ) : null}
 
@@ -464,7 +476,7 @@ export function DashboardSidebar({
                 variant="ghost"
                 aria-label={collapseLabel}
                 onClick={toggleCollapsed}
-                className="size-7"
+            className="size-7 text-white/70 hover:bg-white/10 hover:text-white"
               >
                 <CollapseIcon className="size-4" />
               </Button>
@@ -472,13 +484,13 @@ export function DashboardSidebar({
           />
           <TooltipContent
             side="right"
-            className="rounded-none border border-black/15 bg-white font-mono text-xs text-black/70 shadow-none"
+            className="rounded-none border border-white/15 bg-[#171717] font-mono text-xs text-white/70 shadow-none"
           >
             {collapseLabel} · Ctrl+\
           </TooltipContent>
         </Tooltip>
       </div>
-      <div className="border-b border-black/15 p-3">
+      <div className="border-b border-white/10 p-3">
         <ProjectSwitcher isCollapsed={!showExpandedContent} previewProjectName={previewProjectName} synthetic={isSynthetic} />
       </div>
 
@@ -488,12 +500,12 @@ export function DashboardSidebar({
           aria-label="Go to"
           onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}
           className={cn(
-            "mb-4 flex h-8 w-full items-center gap-2 border border-transparent px-2 text-left font-mono text-[12px] text-black/70 transition-colors hover:border-black/15 hover:bg-[#f3f2ed] hover:text-black",
+            "mb-4 flex h-8 w-full items-center gap-2 border border-transparent px-2 text-left font-mono text-[12px] text-white/70 transition-colors hover:border-white/15 hover:bg-white/10 hover:text-white",
             !showExpandedContent && "justify-center px-0",
           )}
         >
           <Search className="size-4 shrink-0" />
-          {showExpandedContent ? <><span className="truncate">Go to...</span><kbd className="ml-auto border border-black/15 px-1.5 py-0.5 text-[9px] leading-none text-black/50">Ctrl K</kbd></> : null}
+          {showExpandedContent ? <><span className="truncate">Go to...</span><kbd className="ml-auto border border-white/15 px-1.5 py-0.5 text-[9px] leading-none text-white/50">Ctrl K</kbd></> : null}
         </button>
         {dynamicGroups.map((group) => (
           <SidebarGroup
@@ -509,6 +521,7 @@ export function DashboardSidebar({
             onNavClick={(href) => {
               const navGroup = dynamicGroups.find((group) => group.items.some((item) => item.href === href));
               expandSidebar(navGroup?.id);
+              onMobileClose?.();
             }}
           />
         ))}
@@ -516,7 +529,7 @@ export function DashboardSidebar({
 
       <Link
         href={isSynthetic ? "/cloud" : "/cloud"}
-        className={cn("flex min-h-12 items-center border-t border-black/15 px-4 text-black/55 hover:bg-[#f3f2ed] hover:text-black", showExpandedContent ? "gap-3" : "justify-center")}
+        className={cn("flex min-h-12 items-center border-t border-white/10 px-4 text-white/55 hover:bg-white/10 hover:text-white", showExpandedContent ? "gap-3" : "justify-center")}
         aria-label={`${region.name} cloud region. Open region directory`}
       >
         <Globe2 className="size-4 shrink-0" />
@@ -563,7 +576,7 @@ function SidebarGroup({
         <button
           type="button"
           onClick={onToggle}
-          className="mb-2 flex h-7 w-full items-center justify-between px-2 text-left font-mono text-[11px] uppercase tracking-wide text-black/55 outline-none transition-colors hover:text-black/60 focus-visible:outline focus-visible:outline-1 focus-visible:outline-black/55"
+          className="mb-2 flex h-7 w-full items-center justify-between px-2 text-left font-mono text-[11px] uppercase tracking-wide text-white/40 outline-none transition-colors hover:text-white/70 focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55"
         >
           <span>{group.label}</span>
           <ChevronDown
@@ -609,9 +622,9 @@ function NavLink({
 }) {
   const Icon = item.icon;
   const className = cn(
-    "flex h-9 items-center border-l-2 border-transparent px-2 font-mono text-[13px] font-normal text-black/55 outline-none transition-colors hover:bg-[#f3f2ed] hover:text-black/70 focus-visible:outline focus-visible:outline-1 focus-visible:outline-black/55",
+    "flex h-9 items-center border-l-2 border-transparent px-2 font-mono text-[13px] font-normal text-white/55 outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55",
     showExpandedContent ? "gap-2" : "justify-center",
-    isActive && "border-l-white text-black hover:bg-[#f3f2ed]",
+    isActive && "border-l-white bg-white/10 text-white hover:bg-white/10",
   );
   const link = (
     <Link
@@ -634,7 +647,7 @@ function NavLink({
       <TooltipTrigger render={link} />
       <TooltipContent
         side="right"
-        className="rounded-none border border-black/15 bg-white font-mono text-xs text-black/70 shadow-none"
+          className="rounded-none border border-white/15 bg-[#171717] font-mono text-xs text-white/70 shadow-none"
       >
         {item.title}
       </TooltipContent>

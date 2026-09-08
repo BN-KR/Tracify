@@ -1,3 +1,2 @@
-import { ReviewQueue } from "@/components/dashboard/review-queue";
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
-export default async function AnnotationQueuesPage({ params }: { params: Promise<{ projectId: string }> }) { const { projectId } = await params; return <div><DashboardTopbar title="Human Annotation" description="Review production traces and capture labels for evaluation evidence." /><div className="p-6"><ReviewQueue projectId={projectId} /></div></div>; }
+import { LiveCapturedAnnotations } from "@/components/dashboard/live-captured-annotations";
+export default async function AnnotationQueuesPage({ params }: { params: Promise<{ projectId: string }> }) { const { projectId } = await params; return <LiveCapturedAnnotations projectId={projectId} />; }

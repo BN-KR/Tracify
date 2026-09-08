@@ -17,7 +17,7 @@ export function LiveCapturedSessions({ projectId, sessionId }: { projectId: stri
   const runs = useQuery(api.sessions.getRecentRuns, sessionId ? { projectId: projectId as Id<"projects">, sessionId } : "skip");
 
   if (project === undefined || project === null || sessions === undefined || (sessionId && (selected === undefined || runs === undefined))) {
-    return <div className="captured-build-loading">Loading Tracify sessions…</div>;
+    return <div className="captured-build-loading">Loading sessions…</div>;
   }
 
   const sessionRecords = sessions.map((session) => ({

@@ -13,7 +13,7 @@ export function LiveCapturedEvaluation({ projectId, section }: { projectId: stri
   const evaluators = useQuery(api.evaluators.list, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const datasets = useQuery(api.evaluation.listDatasets, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const scores = useQuery(api.evaluation.listScores, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
-  if (project === undefined || project === null || evaluators === undefined || datasets === undefined || scores === undefined) return <div className="captured-build-loading">Loading Tracify evaluation data…</div>;
+  if (project === undefined || project === null || evaluators === undefined || datasets === undefined || scores === undefined) return <div className="captured-build-loading">Loading evaluation data…</div>;
   const records = {
     evaluators: evaluators.map((item) => ({ id: item._id, name: item.name, status: item.active ? "Enabled" : "Disabled", environment: "all", timestamp: new Date(item.updatedAt).toLocaleDateString(), model: item.type })),
     datasets: datasets.map((item) => ({ id: item._id, name: item.name, status: "Available", environment: item.access, timestamp: new Date(item.updatedAt).toLocaleDateString(), model: `${item.items.length} items` })),

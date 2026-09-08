@@ -22,6 +22,10 @@ export function DashboardHomeRouter() {
   );
 
   useEffect(() => {
+    if (auth.status === "unauthenticated") {
+      router.replace(`/sign-in?redirect_url=${encodeURIComponent("/dashboard")}`);
+      return;
+    }
     if (!projects?.length) return;
 
     const storedProjectId = window.localStorage.getItem(LAST_PROJECT_STORAGE_KEY);
@@ -31,7 +35,7 @@ export function DashboardHomeRouter() {
 
     window.localStorage.setItem(LAST_PROJECT_STORAGE_KEY, project._id);
     router.replace(`/dashboard/${project._id}`);
-  }, [projects, router]);
+  }, [auth.status, projects, router]);
 
   if (auth.status === "error") {
     return <ConvexAuthState mode="error" redirectPath="/dashboard" />;
@@ -49,6 +53,10 @@ export function DashboardHomeRouter() {
         </div>
       </div>
     );
+  }
+
+  if (auth.status === "unauthenticated") {
+    return <ConvexAuthState mode="loading" />;
   }
 
   if (projects?.length) {
