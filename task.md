@@ -26,6 +26,7 @@
 - [completed] Resolve the local E2E environment mismatch by using an isolated EU-configured production build, align assertions with the populated captured fixture, and pass the complete 10-test account-access contract.
 - [completed] Run the complete 14-surface captured viewport matrix at six desktop/tablet/mobile sizes against the isolated EU production build; all six viewport runs passed.
 - [completed] Replace generic captured trace input/output filler with the extracted reference-style visible values so the populated Tracing table retains the reference’s data density and content shape.
+- [completed] Rebuild and re-run the targeted Tracing interaction contract after the reference-content update; build and targeted browser check pass.
 
 ## 2026-09-06 — Account access and onboarding flow
 

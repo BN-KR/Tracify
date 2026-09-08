@@ -23,6 +23,7 @@
 - [completed] Run the complete 10-test account-access contract against an isolated EU-configured production build; all route, link, filter, detail, read-only, auth-safety, and mobile/keyboard checks pass.
 - [completed] Run the 14-surface captured viewport matrix at six desktop, tablet, and mobile sizes; all six responsive runs pass against the isolated EU production build.
 - [completed] Align populated Sandbox trace input/output values with the captured reference’s visible content while retaining deterministic read-only behavior.
+- [completed] Rebuild and verify the updated populated Tracing surface after the reference-content change; production build and targeted interaction check pass.
 
 ## Captured Tracify dashboard implementation — 2026-09-08
 
