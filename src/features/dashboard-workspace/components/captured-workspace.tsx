@@ -71,9 +71,11 @@ function getServerHydrationSnapshot() {
 export function CapturedWorkspace({
   workspace,
   segments = [],
+  onPromptSave,
 }: {
   workspace: DashboardWorkspace;
   segments?: string[];
+  onPromptSave?: (input: { promptId?: string; name: string; type: "text" | "chat"; content: string }) => Promise<void>;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -103,6 +105,7 @@ export function CapturedWorkspace({
         ["Create alert", `${basePath}/alerts/new`],
         ["Create evaluator", `${basePath}/evaluation/evaluators`],
         ["Create dataset", `${basePath}/evaluation/datasets`],
+        ["Create prompt", `${basePath}/prompts?view=create`],
         ["Open LLM Connections", `${basePath}/settings/llm-connections`],
         ["Open LLM Connections", `${basePath}/settings/llm-connections`],
         ["Save project settings", `${basePath}/settings`],
@@ -204,7 +207,7 @@ export function CapturedWorkspace({
       ) : surface === "scores" ? (
         <ScoresSurface workspace={workspace} />
       ) : surface === "prompts" ? (
-        <PromptsSurface workspace={workspace} basePath={basePath} onReadOnly={handleAction} />
+        <PromptsSurface workspace={workspace} basePath={basePath} onReadOnly={handleAction} onPromptSave={onPromptSave} />
       ) : surface === "evaluators" ? (
         <EvaluatorsSurface workspace={workspace} onReadOnly={handleAction} />
       ) : surface === "datasets" ? (
@@ -265,14 +268,28 @@ function ScoresSurface({ workspace }: { workspace: DashboardWorkspace }) {
   return <main className="captured-collection captured-scores-surface"><div className="captured-collection-summary"><div><strong>Scores</strong><span> Trace-linked quality and evaluation results</span></div><label>Metric <select aria-label="Score metric" value={metric} onChange={(event) => setMetric(event.target.value)}><option>All scores</option><option>groundedness</option><option>answer_relevance</option><option>policy_compliance</option></select></label></div><div className="captured-score-summary-grid"><MetricPanel title="Scores recorded" subtitle={metric} value={String(scores.length || workspace.metrics.scores)} /><MetricPanel title="Average score" subtitle="Selected metric" value="0.82" /><MetricPanel title="Pass rate" subtitle="Threshold ≥ 0.70" value="91%" /></div><div className="captured-table-scroll"><table><thead><tr><th>Score name</th><th>Value</th><th>Source trace</th><th>Evaluator</th><th>Created</th></tr></thead><tbody>{(scores.length ? scores : [{ id: "score-1", name: "groundedness", status: "passed", environment: "production", timestamp: "today", score: "0.92" }]).map((score) => <tr key={score.id}><td><strong>{score.name}</strong><small>{score.id}</small></td><td><span className="captured-status">{score.score ?? "0.82"}</span></td><td>QA support response</td><td>Quality evaluator</td><td>{score.timestamp}</td></tr>)}</tbody></table></div></main>;
 }
 
-function PromptsSurface({ workspace, basePath, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; onReadOnly: (action: string) => void }) {
+function PromptsSurface({ workspace, basePath, onReadOnly, onPromptSave }: { workspace: DashboardWorkspace; basePath: string; onReadOnly: (action: string) => void; onPromptSave?: (input: { promptId?: string; name: string; type: "text" | "chat"; content: string }) => Promise<void> }) {
   const [tab, setTab] = useState<"text" | "chat">("text");
   const [draft, setDraft] = useState("You are a reliable support agent. Use verified context only.\n\n{{question}}");
+  const [name, setName] = useState("support-agent");
+  const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>();
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const creating = searchParams.get("view") === "create";
   const prompts = workspace.collections.prompts.records;
-  if (creating) return <main className="captured-prompt-management"><header><div><span>Prompt Management</span><h2>Create prompt</h2></div><Link href={`${basePath}/prompts`}>Cancel</Link></header><form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); onReadOnly("Save prompt version"); }}><label>Prompt name<input required placeholder="support-agent" /></label><label>Prompt type<select defaultValue="text"><option value="text">Text</option><option value="chat">Chat</option></select></label><label>Prompt content<textarea required aria-label="Prompt content" value={draft} onChange={(event) => setDraft(event.target.value)} /></label><label>Commit message<input placeholder="Initial prompt version" /></label><button type="submit">Save version</button></form></main>;
-  return <main className="captured-prompt-management"><header><div><span>Prompt Management</span><h2>Prompts</h2></div><button type="button" onClick={() => onReadOnly("Create prompt")}>Create prompt</button></header><div className="captured-prompt-management-grid"><section className="captured-prompt-list"><div className="captured-collection-summary"><span>{prompts.length || 3} prompts</span><button type="button">My views ▾</button></div>{(prompts.length ? prompts : [{ id: "support-agent", name: "support-agent", status: "production", environment: "all", timestamp: "2h ago" }, { id: "order-resolution", name: "order-resolution", status: "draft", environment: "sandbox", timestamp: "yesterday" }]).map((prompt) => <button type="button" className="captured-prompt-list-row" key={prompt.id} onClick={() => setDraft(`You are the ${prompt.name} agent.\n\n{{input}}`)}><strong>{prompt.name}</strong><small>{prompt.status} · updated {prompt.timestamp}</small></button>)}</section><section className="captured-prompt-editor"><div className="captured-prompt-editor-toolbar"><button type="button" aria-pressed={tab === "text"} className={tab === "text" ? "active" : ""} onClick={() => setTab("text")}>Text</button><button type="button" aria-pressed={tab === "chat"} className={tab === "chat" ? "active" : ""} onClick={() => setTab("chat")}>Chat</button><button type="button">Add prompt reference</button></div><label>Prompt name<input defaultValue="support-agent" /></label><textarea aria-label="Prompt content" value={draft} onChange={(event) => setDraft(event.target.value)} /><label>Commit message<textarea aria-label="Commit message" placeholder="Describe this prompt version" /></label><div><button type="button" onClick={() => onReadOnly("Save prompt version")}>Save version</button><Link href={`${basePath}/playground`}>Test in Playground ↗</Link></div></section></div></main>;
+  async function savePrompt() {
+    if (!onPromptSave) { onReadOnly("Save prompt version"); return; }
+    setSaving(true); setNotice(null);
+    try {
+      await onPromptSave({ promptId: selectedPromptId, name: name.trim(), type: tab, content: draft });
+      setNotice("Prompt version saved");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Unable to save prompt");
+    } finally { setSaving(false); }
+  }
+  if (creating) return <main className="captured-prompt-management"><header><div><span>Prompt Management</span><h2>Create prompt</h2></div><Link href={`${basePath}/prompts`}>Cancel</Link></header><form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); void savePrompt(); }}><label>Prompt name<input required placeholder="support-agent" value={name} onChange={(event) => setName(event.target.value)} /></label><label>Prompt type<select value={tab} onChange={(event) => setTab(event.target.value as "text" | "chat")}><option value="text">Text</option><option value="chat">Chat</option></select></label><label>Prompt content<textarea required aria-label="Prompt content" value={draft} onChange={(event) => setDraft(event.target.value)} /></label><label>Commit message<input placeholder="Initial prompt version" /></label><button type="submit" disabled={saving}>{saving ? "Saving…" : "Save version"}</button>{notice ? <p role="status">{notice}</p> : null}</form></main>;
+  return <main className="captured-prompt-management"><header><div><span>Prompt Management</span><h2>Prompts</h2></div><button type="button" onClick={() => onReadOnly("Create prompt")}>Create prompt</button></header><div className="captured-prompt-management-grid"><section className="captured-prompt-list"><div className="captured-collection-summary"><span>{prompts.length || 3} prompts</span><button type="button">My views ▾</button></div>{(prompts.length ? prompts : [{ id: "support-agent", name: "support-agent", status: "production", environment: "all", timestamp: "2h ago" }, { id: "order-resolution", name: "order-resolution", status: "draft", environment: "sandbox", timestamp: "yesterday" }]).map((prompt) => <button type="button" className="captured-prompt-list-row" key={prompt.id} onClick={() => { setSelectedPromptId(prompt.id); setName(prompt.name); setDraft(prompt.input ?? `You are the ${prompt.name} agent.\n\n{{input}}`); }}><strong>{prompt.name}</strong><small>{prompt.status} · updated {prompt.timestamp}</small></button>)}</section><section className="captured-prompt-editor"><div className="captured-prompt-editor-toolbar"><button type="button" aria-pressed={tab === "text"} className={tab === "text" ? "active" : ""} onClick={() => setTab("text")}>Text</button><button type="button" aria-pressed={tab === "chat"} className={tab === "chat" ? "active" : ""} onClick={() => setTab("chat")}>Chat</button><button type="button">Add prompt reference</button></div><label>Prompt name<input value={name} onChange={(event) => setName(event.target.value)} /></label><textarea aria-label="Prompt content" value={draft} onChange={(event) => setDraft(event.target.value)} /><label>Commit message<textarea aria-label="Commit message" placeholder="Describe this prompt version" /></label><div><button type="button" disabled={saving} onClick={() => void savePrompt()}>{saving ? "Saving…" : "Save version"}</button><Link href={`${basePath}/playground`}>Test in Playground ↗</Link></div>{notice ? <p role="status">{notice}</p> : null}</section></div></main>;
 }
 
 function EvaluatorsSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {

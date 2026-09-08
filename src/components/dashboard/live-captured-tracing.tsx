@@ -38,7 +38,7 @@ export function LiveCapturedTracing({ projectId, runId }: { projectId: string; r
     mode: "live" as const,
     readOnly: false,
     dataSource: "tracify-live" as const,
-    project: { id: projectId, name: project.name, organizationName: "Tracify workspace" },
+    project: { id: projectId, name: project.name, organizationName: "Workspace" },
     environments,
     models: models.length ? models : sandboxWorkspace.models,
     collections: { ...sandboxWorkspace.collections, tracing: { description: "Inspect every trace and observation emitted by instrumented agents.", records } },

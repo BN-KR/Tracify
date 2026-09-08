@@ -48,7 +48,7 @@ export function LiveCapturedSessions({ projectId, sessionId }: { projectId: stri
     mode: "live" as const,
     readOnly: false,
     dataSource: "tracify-live" as const,
-    project: { id: projectId, name: project.name, organizationName: "Tracify workspace" },
+    project: { id: projectId, name: project.name, organizationName: "Workspace" },
     environments,
     models: Array.from(new Set(traceRecords.map((record) => record.model).filter((model): model is string => Boolean(model)))),
     collections: {
