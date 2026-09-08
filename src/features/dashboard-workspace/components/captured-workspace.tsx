@@ -72,10 +72,16 @@ export function CapturedWorkspace({
   workspace,
   segments = [],
   onPromptSave,
+  onEvaluatorCreate,
+  onDatasetCreate,
+  onAlertCreate,
 }: {
   workspace: DashboardWorkspace;
   segments?: string[];
   onPromptSave?: (input: { promptId?: string; name: string; type: "text" | "chat"; content: string }) => Promise<void>;
+  onEvaluatorCreate?: (input: { name: string; type: "code" | "llm_judge"; criteria: string }) => Promise<void>;
+  onDatasetCreate?: (input: { name: string; description: string }) => Promise<void>;
+  onAlertCreate?: (input: { name: string; metric: string; threshold: string }) => Promise<void>;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -103,8 +109,8 @@ export function CapturedWorkspace({
       const liveRoutes: Array<[string, string]> = [
         ["Create dashboard", `${basePath}/dashboards/new`],
         ["Create alert", `${basePath}/alerts/new`],
-        ["Create evaluator", `${basePath}/evaluation/evaluators`],
-        ["Create dataset", `${basePath}/evaluation/datasets`],
+        ["Create evaluator", `${basePath}/evaluation/evaluators?view=create`],
+        ["Create dataset", `${basePath}/evaluation/datasets?view=create`],
         ["Create prompt", `${basePath}/prompts?view=create`],
         ["Open LLM Connections", `${basePath}/settings/llm-connections`],
         ["Open LLM Connections", `${basePath}/settings/llm-connections`],
@@ -209,13 +215,13 @@ export function CapturedWorkspace({
       ) : surface === "prompts" ? (
         <PromptsSurface workspace={workspace} basePath={basePath} onReadOnly={handleAction} onPromptSave={onPromptSave} />
       ) : surface === "evaluators" ? (
-        <EvaluatorsSurface workspace={workspace} onReadOnly={handleAction} />
+        <EvaluatorsSurface workspace={workspace} onReadOnly={handleAction} onCreate={onEvaluatorCreate} />
       ) : surface === "datasets" ? (
-        <DatasetsSurface workspace={workspace} onReadOnly={handleAction} />
+        <DatasetsSurface workspace={workspace} onReadOnly={handleAction} onCreate={onDatasetCreate} />
       ) : surface === "annotation-queues" ? (
         <AnnotationSurface workspace={workspace} onReadOnly={handleAction} />
       ) : surface === "alerts" ? (
-        <AlertsSurface workspace={workspace} onReadOnly={handleAction} />
+        <AlertsSurface workspace={workspace} onReadOnly={handleAction} onCreate={onAlertCreate} />
       ) : (
         <CollectionSurface
           workspace={workspace}
@@ -292,15 +298,29 @@ function PromptsSurface({ workspace, basePath, onReadOnly, onPromptSave }: { wor
   return <main className="captured-prompt-management"><header><div><span>Prompt Management</span><h2>Prompts</h2></div><button type="button" onClick={() => onReadOnly("Create prompt")}>Create prompt</button></header><div className="captured-prompt-management-grid"><section className="captured-prompt-list"><div className="captured-collection-summary"><span>{prompts.length || 3} prompts</span><button type="button">My views ▾</button></div>{(prompts.length ? prompts : [{ id: "support-agent", name: "support-agent", status: "production", environment: "all", timestamp: "2h ago" }, { id: "order-resolution", name: "order-resolution", status: "draft", environment: "sandbox", timestamp: "yesterday" }]).map((prompt) => <button type="button" className="captured-prompt-list-row" key={prompt.id} onClick={() => { setSelectedPromptId(prompt.id); setName(prompt.name); setDraft(prompt.input ?? `You are the ${prompt.name} agent.\n\n{{input}}`); }}><strong>{prompt.name}</strong><small>{prompt.status} · updated {prompt.timestamp}</small></button>)}</section><section className="captured-prompt-editor"><div className="captured-prompt-editor-toolbar"><button type="button" aria-pressed={tab === "text"} className={tab === "text" ? "active" : ""} onClick={() => setTab("text")}>Text</button><button type="button" aria-pressed={tab === "chat"} className={tab === "chat" ? "active" : ""} onClick={() => setTab("chat")}>Chat</button><button type="button">Add prompt reference</button></div><label>Prompt name<input value={name} onChange={(event) => setName(event.target.value)} /></label><textarea aria-label="Prompt content" value={draft} onChange={(event) => setDraft(event.target.value)} /><label>Commit message<textarea aria-label="Commit message" placeholder="Describe this prompt version" /></label><div><button type="button" disabled={saving} onClick={() => void savePrompt()}>{saving ? "Saving…" : "Save version"}</button><Link href={`${basePath}/playground`}>Test in Playground ↗</Link></div>{notice ? <p role="status">{notice}</p> : null}</section></div></main>;
 }
 
-function EvaluatorsSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
+function EvaluatorsSurface({ workspace, onReadOnly, onCreate }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void; onCreate?: (input: { name: string; type: "code" | "llm_judge"; criteria: string }) => Promise<void> }) {
   const [enabledOnly, setEnabledOnly] = useState(false);
+  const [name, setName] = useState("");
+  const [criteria, setCriteria] = useState("");
+  const [notice, setNotice] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const creating = useSearchParams().get("view") === "create";
   const records = workspace.collections.evaluators.records.filter((record) => !enabledOnly || record.status === "active" || record.status === "enabled");
+  async function save() { if (!onCreate) { onReadOnly("Create evaluator"); return; } setSaving(true); setNotice(null); try { await onCreate({ name, type: "llm_judge", criteria }); setNotice("Evaluator created"); } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to create evaluator"); } finally { setSaving(false); } }
+  if (creating) return <main className="captured-collection captured-evaluators-surface"><header><div><span>Evaluation</span><h2>Create evaluator</h2></div><Link href={workspace.mode === "live" ? `/dashboard/${workspace.project.id}/evaluators` : "/playground/evaluators"}>Cancel</Link></header><form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); void save(); }}><label>Name<input required value={name} onChange={(event) => setName(event.target.value)} placeholder="Answer quality" /></label><label>Type<select defaultValue="llm_judge"><option value="llm_judge">LLM as a judge</option><option value="code">Code evaluator</option></select></label><label>Criteria<textarea required value={criteria} onChange={(event) => setCriteria(event.target.value)} placeholder="Check that the answer is grounded in verified context." /></label><button type="submit" disabled={saving}>{saving ? "Saving…" : "Create evaluator"}</button>{notice ? <p role="status">{notice}</p> : null}</form></main>;
   return <main className="captured-collection captured-evaluators-surface"><div className="captured-collection-summary"><div><strong>Evaluators</strong><span> Reusable quality checks for traces</span></div><div className="captured-evaluator-actions"><button type="button" onClick={() => setEnabledOnly((value) => !value)}>{enabledOnly ? "All evaluators" : "Enabled only"}</button><button type="button" onClick={() => onReadOnly("Create evaluator")}>New evaluator</button></div></div><div className="captured-table-scroll"><table><thead><tr><th>Name</th><th>Status</th><th>Last 5 runs</th><th>Type</th><th>Total cost (7d)</th><th>Model</th><th>Updated</th><th /></tr></thead><tbody>{records.map((record) => <tr key={record.id}><td><Link href={`/playground/evaluators/${encodeURIComponent(record.id)}`}><strong>{record.name}</strong><small>{record.id}</small></Link></td><td><span className={`captured-status ${record.status}`}>{record.status}</span></td><td>✓ ✓ ✓ — ✓</td><td>LLM as a judge</td><td>{record.cost ?? "$0.0042"}</td><td>{record.model ?? workspace.models[1]}</td><td>{record.timestamp}</td><td><button type="button" onClick={() => onReadOnly(`Edit ${record.name}`)}>•••</button></td></tr>)}</tbody></table>{!records.length ? <div className="captured-empty">No evaluators match the current filter.</div> : null}</div></main>;
 }
 
-function DatasetsSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
+function DatasetsSurface({ workspace, onReadOnly, onCreate }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void; onCreate?: (input: { name: string; description: string }) => Promise<void> }) {
   const [search, setSearch] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [notice, setNotice] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const creating = useSearchParams().get("view") === "create";
   const records = workspace.collections.datasets.records.filter((record) => `${record.name} ${record.id}`.toLowerCase().includes(search.toLowerCase()));
+  async function save() { if (!onCreate) { onReadOnly("Create dataset"); return; } setSaving(true); setNotice(null); try { await onCreate({ name, description }); setNotice("Dataset created"); } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to create dataset"); } finally { setSaving(false); } }
+  if (creating) return <main className="captured-collection captured-datasets-surface"><header><div><span>Evaluation</span><h2>Create dataset</h2></div><Link href={workspace.mode === "live" ? `/dashboard/${workspace.project.id}/datasets` : "/playground/datasets"}>Cancel</Link></header><form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); void save(); }}><label>Name<input required value={name} onChange={(event) => setName(event.target.value)} placeholder="Support regression set" /></label><label>Description<textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Cases used for repeatable support evaluation." /></label><button type="submit" disabled={saving}>{saving ? "Saving…" : "Create dataset"}</button>{notice ? <p role="status">{notice}</p> : null}</form></main>;
   return <main className="captured-collection captured-datasets-surface"><div className="captured-collection-summary"><div><strong>Datasets</strong><span> Curated evidence sets for repeatable evaluation</span></div><div className="captured-inline-actions"><input aria-label="Search datasets" placeholder="Search datasets" value={search} onChange={(event) => setSearch(event.target.value)} /><button type="button" onClick={() => onReadOnly("Create dataset")}>New dataset</button></div></div><div className="captured-table-scroll"><table><thead><tr><th>Name</th><th>Description</th><th>Items</th><th>Experiments</th><th>Created</th><th>Last run</th><th>Input schema</th><th>Expected output</th><th>Actions</th></tr></thead><tbody>{records.map((record) => <tr key={record.id}><td><Link href={`/playground/datasets/${encodeURIComponent(record.id)}`}><strong>{record.name}</strong><small>{record.id}</small></Link></td><td>Regression evidence set</td><td>24</td><td>3</td><td>{record.timestamp}</td><td>Today</td><td>JSON</td><td>JSON</td><td><button type="button" onClick={() => onReadOnly(`Manage ${record.name}`)}>•••</button></td></tr>)}</tbody></table>{!records.length ? <div className="captured-empty">No datasets match your search.</div> : null}</div></main>;
 }
 
@@ -310,12 +330,18 @@ function AnnotationSurface({ workspace, onReadOnly }: { workspace: DashboardWork
   return <main className="captured-collection captured-annotation-surface"><div className="captured-collection-summary"><div><strong>Human Annotation</strong><span> Review traces that need a human decision</span></div><div className="captured-inline-actions"><select aria-label="Annotation queue" value={queue} onChange={(event) => setQueue(event.target.value)}><option>Needs review</option><option>Assigned to me</option><option>Completed</option></select><button type="button" onClick={() => onReadOnly("Create annotation queue")}>New queue</button></div></div><div className="captured-review-banner"><strong>{records.length || 12} traces ready for review</strong><span>Claim the next trace, score it, and leave a decision note.</span><button type="button" onClick={() => onReadOnly("Claim next trace")}>Claim next</button></div><div className="captured-table-scroll"><table><thead><tr><th>Trace</th><th>Queue</th><th>Status</th><th>Assignee</th><th>Last updated</th><th>Action</th></tr></thead><tbody>{(records.length ? records : [{ id: "review-1", name: "QA support response", status: "needs-review", environment: "production", timestamp: "5m ago" }]).map((record) => <tr key={record.id}><td><strong>{record.name}</strong><small>{record.id}</small></td><td>{queue}</td><td><span className="captured-status needs-review">Needs review</span></td><td>Unassigned</td><td>{record.timestamp}</td><td><button type="button" onClick={() => onReadOnly(`Review ${record.name}`)}>Open review</button></td></tr>)}</tbody></table></div></main>;
 }
 
-function AlertsSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
+function AlertsSurface({ workspace, onReadOnly, onCreate }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void; onCreate?: (input: { name: string; metric: string; threshold: string }) => Promise<void> }) {
   const [status, setStatus] = useState("all");
+  const [name, setName] = useState("");
+  const [metric, setMetric] = useState("latency");
+  const [threshold, setThreshold] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const creating = searchParams.get("view") === "create";
   const records = workspace.collections.alerts.records.filter((record) => status === "all" || record.status === status);
-  return <main className="captured-collection captured-alerts-surface"><div className="captured-collection-summary"><div><strong>Alerts</strong><span> Notify your team when quality or cost changes</span></div><div className="captured-inline-actions"><select aria-label="Alert status" value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="paused">Paused</option></select><button type="button" onClick={() => onReadOnly("Create alert")}>Add alert</button></div></div>{creating ? <form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); onReadOnly("Save alert"); }}><h2>Create alert</h2><label>Name<input required placeholder="Production latency" /></label><label>Metric<select defaultValue="latency"><option value="latency">Latency</option><option value="cost">Cost</option><option value="score">Score</option></select></label><label>Threshold<input required type="number" step="any" placeholder="2" /></label><div><button type="submit">Save alert</button><button type="button" onClick={() => window.history.back()}>Cancel</button></div></form> : <><div className="captured-alert-cards">{records.map((record) => <article key={record.id}><div><span className={`captured-status ${record.status}`}>{record.status}</span><h3>{record.name}</h3><p>Threshold condition · production environment</p></div><button type="button" onClick={() => onReadOnly(`Edit ${record.name}`)}>•••</button></article>)}</div>{!records.length ? <div className="captured-empty">No alerts match this status.</div> : null}</>}</main>;
+  async function save() { if (!onCreate) { onReadOnly("Save alert"); return; } setSaving(true); setNotice(null); try { await onCreate({ name, metric, threshold }); setNotice("Alert created"); } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to create alert"); } finally { setSaving(false); } }
+  return <main className="captured-collection captured-alerts-surface"><div className="captured-collection-summary"><div><strong>Alerts</strong><span> Notify your team when quality or cost changes</span></div><div className="captured-inline-actions"><select aria-label="Alert status" value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="paused">Paused</option></select><button type="button" onClick={() => onReadOnly("Create alert")}>Add alert</button></div></div>{creating ? <form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); void save(); }}><h2>Create alert</h2><label>Name<input required placeholder="Production latency" value={name} onChange={(event) => setName(event.target.value)} /></label><label>Metric<select value={metric} onChange={(event) => setMetric(event.target.value)}><option value="latency">Latency</option><option value="cost">Cost</option><option value="score">Score</option></select></label><label>Threshold<input required type="number" step="any" placeholder="2" value={threshold} onChange={(event) => setThreshold(event.target.value)} /></label><div><button type="submit" disabled={saving}>{saving ? "Saving…" : "Save alert"}</button><button type="button" onClick={() => window.history.back()}>Cancel</button></div>{notice ? <p role="status">{notice}</p> : null}</form> : <><div className="captured-alert-cards">{records.map((record) => <article key={record.id}><div><span className={`captured-status ${record.status}`}>{record.status}</span><h3>{record.name}</h3><p>Threshold condition · production environment</p></div><button type="button" onClick={() => onReadOnly(`Edit ${record.name}`)}>•••</button></article>)}</div>{!records.length ? <div className="captured-empty">No alerts match this status.</div> : null}</>}</main>;
 }
 
 function TracingSurface({ workspace, basePath, query, environment, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; query: string; environment: string; onReadOnly: (action: string) => void }) {
