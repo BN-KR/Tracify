@@ -1,7 +1,6 @@
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
-import { EvaluationEngineDashboard } from "@/components/dashboard/evaluation-engine-dashboard";
+import { LiveCapturedEvaluation } from "@/components/dashboard/live-captured-evaluation";
 
 export default async function EvaluatorsRoute({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
-  return <div><DashboardTopbar title="Evaluators" description="Define deterministic checks, LLM judges, and guardrail detectors." /><div className="p-6"><EvaluationEngineDashboard projectId={projectId} section="evaluators" /></div></div>;
+  return <LiveCapturedEvaluation projectId={projectId} section="evaluators" />;
 }

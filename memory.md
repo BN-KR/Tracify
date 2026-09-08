@@ -1936,6 +1936,12 @@
 - Prompt names, production/draft state, update dates, models, and content now feed the captured view; the existing prompt mutations remain available in the underlying product contract for follow-up wiring of editor actions.
 - Focused ESLint and TypeScript pass.
 
+## 2026-09-08 — Build captured Evaluation migration
+
+- Added one live Evaluation adapter for authenticated Evaluators, Datasets, and Scores routes.
+- These routes now render through the captured collection/table system while sourcing evaluator state, dataset access/item counts, score values, and timestamps from Convex.
+- Focused ESLint and TypeScript pass; action wiring for the captured collection controls remains the next parity step.
+
 ## 2026-09-08 — Auth callback loop and return-path recovery
 
 - Root cause: `/auth/callback` redirected to `/sign-in` whenever Convex briefly reported unauthenticated, even when Better Auth already had a valid session. That transient JWT exchange state created the sign-in loop after regional OAuth handoff.

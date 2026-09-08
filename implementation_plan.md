@@ -1460,6 +1460,8 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 86. [completed] Migrate authenticated Build Costs to a first-class captured surface backed by live project trace costs.
 87. [completed] Migrate authenticated Build Prompt Management presentation to the captured prompt collection using live prompt/version data.
 88. [next] Wire captured prompt editor actions to the existing prompt mutations, then migrate evaluations, datasets, scores, alerts, and settings.
+89. [completed] Migrate authenticated Evaluators, Datasets, and Scores presentations to the captured renderer with live Convex records.
+90. [next] Restore captured prompt/evaluation action wiring and migrate Alerts and Settings while preserving existing mutations.
 
 ## Explore/Build parity spec — 2026-09-08
 
