@@ -78,6 +78,7 @@ export function CapturedWorkspace({
   onDashboardCreate,
   onProjectSettingsSave,
   onAnnotationClaim,
+  onSessionAnnotate,
 }: {
   workspace: DashboardWorkspace;
   segments?: string[];
@@ -88,6 +89,7 @@ export function CapturedWorkspace({
   onDashboardCreate?: (input: { name: string }) => Promise<void>;
   onProjectSettingsSave?: (input: { name: string }) => Promise<void>;
   onAnnotationClaim?: () => Promise<string | null>;
+  onSessionAnnotate?: (input: { sessionId: string }) => Promise<void>;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -209,7 +211,7 @@ export function CapturedWorkspace({
       ) : surface === "tracing" ? (
         <TracingSurface workspace={workspace} basePath={basePath} query={query} environment={environment} onReadOnly={handleAction} />
       ) : surface === "sessions" && recordId ? (
-        <SessionDetailSurface workspace={workspace} sessionId={recordId} basePath={basePath} onReadOnly={handleAction} />
+        <SessionDetailSurface workspace={workspace} sessionId={recordId} basePath={basePath} onReadOnly={handleAction} onAnnotate={onSessionAnnotate} />
       ) : surface === "settings" ? (
         <SettingsSurface workspace={workspace} onReadOnly={handleAction} onSave={onProjectSettingsSave} />
       ) : surface === "playground" ? (
@@ -435,10 +437,13 @@ function renderTraceCell(column: string, record: WorkspaceRecord, basePath: stri
   }
 }
 
-function SessionDetailSurface({ workspace, sessionId, basePath, onReadOnly }: { workspace: DashboardWorkspace; sessionId: string; basePath: string; onReadOnly: (action: string) => void }) {
+function SessionDetailSurface({ workspace, sessionId, basePath, onReadOnly, onAnnotate }: { workspace: DashboardWorkspace; sessionId: string; basePath: string; onReadOnly: (action: string) => void; onAnnotate?: (input: { sessionId: string }) => Promise<void> }) {
   const session = workspace.collections.sessions.records.find((record) => record.id === sessionId) ?? workspace.collections.sessions.records[0];
   const events = workspace.collections.tracing.records.filter((record) => record.sessionId === session?.sessionId).slice(0, 4);
-  return <main className="captured-session-detail"><div className="captured-session-heading"><a href={`${basePath}/sessions`}>‹ Sessions</a><strong>Session {session?.id}</strong><span>Total traces: {events.length || 2}</span><span>Total cost: {session?.cost ?? "$0.038008"}</span><button type="button" onClick={() => onReadOnly("Annotate session")}>Annotate</button></div><div className="captured-session-columns"><section className="captured-session-events">{(events.length ? events : [session]).map((event, index) => <article key={event?.id ?? index}><small>{event?.name ?? "generation"} · {event?.timestamp ?? "today"}</small><h3>Formatted <span>JSON</span></h3><label>Input</label><pre>{event?.input ?? "What is the status of my request?"}</pre><label>Output</label><pre className="captured-output">{event?.output ?? "Completed with linked evidence and a verified final response."}</pre></article>)}</section><aside className="captured-session-scores"><div className="captured-linked-trace">▤ QA support response <small>Open trace ↗</small></div>{["groundedness", "answer_relevance", "policy_compliance", "tool_result_used"].map((score, index) => <div key={score} className="captured-score-row"><span>{score}</span><strong>{index === 1 ? "0.70" : index === 2 ? "true" : "false"}</strong><small>◯</small></div>)}<button type="button" onClick={() => onReadOnly("Add session to dataset")}>＋ Add to datasets</button></aside></div></main>;
+  const [annotating, setAnnotating] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  async function annotate() { if (!onAnnotate) { onReadOnly("Annotate session"); return; } setAnnotating(true); setNotice(null); try { await onAnnotate({ sessionId }); setNotice("Session added to annotation queue"); } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to annotate session"); } finally { setAnnotating(false); } }
+  return <main className="captured-session-detail"><div className="captured-session-heading"><a href={`${basePath}/sessions`}>‹ Sessions</a><strong>Session {session?.id}</strong><span>Total traces: {events.length || 2}</span><span>Total cost: {session?.cost ?? "$0.038008"}</span><button type="button" disabled={annotating} onClick={() => void annotate()}>{annotating ? "Annotating…" : "Annotate"}</button>{notice ? <small role="status">{notice}</small> : null}</div><div className="captured-session-columns"><section className="captured-session-events">{(events.length ? events : [session]).map((event, index) => <article key={event?.id ?? index}><small>{event?.name ?? "generation"} · {event?.timestamp ?? "today"}</small><h3>Formatted <span>JSON</span></h3><label>Input</label><pre>{event?.input ?? "What is the status of my request?"}</pre><label>Output</label><pre className="captured-output">{event?.output ?? "Completed with linked evidence and a verified final response."}</pre></article>)}</section><aside className="captured-session-scores"><div className="captured-linked-trace">▤ QA support response <small>Open trace ↗</small></div>{["groundedness", "answer_relevance", "policy_compliance", "tool_result_used"].map((score, index) => <div key={score} className="captured-score-row"><span>{score}</span><strong>{index === 1 ? "0.70" : index === 2 ? "true" : "false"}</strong><small>◯</small></div>)}<button type="button" onClick={() => onReadOnly("Add session to dataset")}>＋ Add to datasets</button></aside></div></main>;
 }
 
 function HomeSurface({ workspace, environment }: { workspace: DashboardWorkspace; environment: string }) {

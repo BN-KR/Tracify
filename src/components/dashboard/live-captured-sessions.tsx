@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
@@ -11,6 +11,7 @@ function formatTime(value: string) {
 }
 
 export function LiveCapturedSessions({ projectId, sessionId }: { projectId: string; sessionId?: string }) {
+  const createAnnotation = useMutation(api.annotations.create);
   const project = useQuery(api.projects.getProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const sessions = useQuery(api.sessions.listByProject, projectId ? { projectId: projectId as Id<"projects">, limit: 100 } : "skip");
   const selected = useQuery(api.sessions.getBySessionId, sessionId ? { projectId: projectId as Id<"projects">, sessionId } : "skip");
@@ -59,5 +60,8 @@ export function LiveCapturedSessions({ projectId, sessionId }: { projectId: stri
     metrics: { ...sandboxWorkspace.metrics, traces: traceRecords.length, observations: traceRecords.length },
   };
 
-  return <CapturedWorkspace workspace={workspace} segments={sessionId ? ["sessions", sessionId] : ["sessions"]} />;
+  async function annotateSession(input: { sessionId: string }) {
+    await createAnnotation({ projectId: projectId as Id<"projects">, traceId: input.sessionId, label: "session-review", notes: "Review session traces and outputs." });
+  }
+  return <CapturedWorkspace workspace={workspace} segments={sessionId ? ["sessions", sessionId] : ["sessions"]} onSessionAnnotate={annotateSession} />;
 }
