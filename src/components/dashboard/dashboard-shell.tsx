@@ -53,6 +53,14 @@ export function DashboardShell({
     );
   });
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 700px)");
+    const update = () => setIsMobileViewport(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
   function updateCollapsed(next: boolean) {
     setIsCollapsed(next);
     window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(next));
@@ -96,7 +104,7 @@ export function DashboardShell({
       {isMobileOpen ? <button type="button" aria-label="Close sidebar" className="tracify-shell-sidebar-backdrop" onClick={() => setIsMobileOpen(false)} /> : null}
       <div
         className={`flex min-h-svh min-w-0 flex-1 flex-col transition-[padding] duration-150 motion-reduce:transition-none ${isDashboardRoute ? "bg-[#101010]" : "bg-[#eceae3]"}`}
-        style={{ paddingLeft: layoutSidebarWidth }}
+        style={{ paddingLeft: isMobileViewport ? 0 : layoutSidebarWidth }}
       >
         <main className={`h-svh pb-0 overflow-y-auto scrollbar-hide ${isDashboardRoute ? "bg-[#101010] p-0" : "bg-[#eceae3] p-4 lg:p-6"}`}>
           {children}
