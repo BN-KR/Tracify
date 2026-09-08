@@ -75,6 +75,7 @@ export function CapturedWorkspace({
   onEvaluatorCreate,
   onDatasetCreate,
   onAlertCreate,
+  onDashboardCreate,
 }: {
   workspace: DashboardWorkspace;
   segments?: string[];
@@ -82,6 +83,7 @@ export function CapturedWorkspace({
   onEvaluatorCreate?: (input: { name: string; type: "code" | "llm_judge"; criteria: string }) => Promise<void>;
   onDatasetCreate?: (input: { name: string; description: string }) => Promise<void>;
   onAlertCreate?: (input: { name: string; metric: string; threshold: string }) => Promise<void>;
+  onDashboardCreate?: (input: { name: string }) => Promise<void>;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -209,7 +211,7 @@ export function CapturedWorkspace({
       ) : surface === "playground" ? (
         <PromptPlaygroundSurface workspace={workspace} onReadOnly={handleAction} />
       ) : surface === "dashboards" ? (
-        <DashboardsSurface workspace={workspace} basePath={basePath} dashboardId={recordId} onReadOnly={handleAction} />
+        <DashboardsSurface workspace={workspace} basePath={basePath} dashboardId={recordId} onReadOnly={handleAction} onCreate={onDashboardCreate} />
       ) : surface === "scores" ? (
         <ScoresSurface workspace={workspace} />
       ) : surface === "prompts" ? (
@@ -252,12 +254,16 @@ export function CapturedWorkspace({
   );
 }
 
-function DashboardsSurface({ workspace, basePath, dashboardId, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; dashboardId?: string; onReadOnly: (action: string) => void }) {
+function DashboardsSurface({ workspace, basePath, dashboardId, onReadOnly, onCreate }: { workspace: DashboardWorkspace; basePath: string; dashboardId?: string; onReadOnly: (action: string) => void; onCreate?: (input: { name: string }) => Promise<void> }) {
   const dashboardRecord = dashboardId ? workspace.collections.dashboards.records.find((record) => record.id === dashboardId) : undefined;
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selected, setSelected] = useState(() => searchParams.get("dashboard") ?? dashboardRecord?.name ?? "Cost Dashboard");
   const [layout, setLayout] = useState(() => searchParams.get("layout") === "list" ? "list" : "grid");
+  const [name, setName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const creating = searchParams.get("view") === "create";
   const dashboards = Array.from(new Set([...(workspace.collections.dashboards.records.map((record) => record.name)), "Cost Dashboard", "Agent Reliability Overview", "Production Quality"]));
   useEffect(() => {
     const next = new URLSearchParams(searchParams.toString());
@@ -265,6 +271,8 @@ function DashboardsSurface({ workspace, basePath, dashboardId, onReadOnly }: { w
     if (layout === "grid") next.delete("layout"); else next.set("layout", layout);
     router.replace(`?${next.toString()}`, { scroll: false });
   }, [layout, router, searchParams, selected]);
+  async function save() { if (!onCreate) { onReadOnly("Create dashboard"); return; } setSaving(true); setNotice(null); try { await onCreate({ name }); setNotice("Dashboard created"); } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to create dashboard"); } finally { setSaving(false); } }
+  if (creating) return <main className="captured-dashboard-editor"><header><div><span>Dashboards</span><h2>New dashboard</h2></div><Link href={`${basePath}/dashboards`}>Cancel</Link></header><form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); void save(); }}><label>Dashboard name<input required value={name} onChange={(event) => setName(event.target.value)} placeholder="Agent reliability" /></label><button type="submit" disabled={saving}>{saving ? "Saving…" : "Create dashboard"}</button>{notice ? <p role="status">{notice}</p> : null}</form></main>;
   return <main className="captured-dashboard-editor"><header><div><span>Dashboards</span><h2>{selected}</h2></div><div className="captured-dashboard-editor-actions"><select aria-label="Select dashboard" value={selected} onChange={(event) => setSelected(event.target.value)}>{dashboards.map((dashboard) => <option key={dashboard}>{dashboard}</option>)}</select><button type="button" className={layout === "grid" ? "is-active" : ""} onClick={() => setLayout("grid")}>Grid</button><button type="button" className={layout === "list" ? "is-active" : ""} onClick={() => setLayout("list")}>List</button><button type="button" onClick={() => onReadOnly("Create dashboard")}>New dashboard</button></div></header><div className={`captured-dashboard-widgets ${layout}`}><MetricPanel title="Total cost" subtitle="All environments · Past 7 days" value={`$${workspace.metrics.totalCost.toFixed(5)}`} /><MetricPanel title="Traces" subtitle="Successful and failed traces" value={workspace.metrics.traces.toLocaleString()} /><section className="captured-panel captured-cost-chart"><PanelHeading title="Cost by model" subtitle="Compare spend across providers and models" /><LineChart label="Cost over time" /></section><section className="captured-panel captured-users-cost"><PanelHeading title="Top users by cost" subtitle="Ranked by total model cost" /><div className="captured-user-bars">{workspace.collections.users.records.slice(0, 5).map((user, index) => <div key={user.id}><span style={{ width: `${92 - index * 13}%` }} /><button type="button">{user.id}</button><strong>${(0.169297 - index * 0.01831).toFixed(5)}</strong></div>)}</div></section></div><footer><Link href={`${basePath}/dashboards`}>Dashboard home</Link><button type="button" onClick={() => onReadOnly("Save dashboard layout")}>Save layout</button></footer></main>;
 }
 
