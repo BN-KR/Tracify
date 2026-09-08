@@ -13,6 +13,7 @@
 - [completed] Warm the local Sandbox route matrix and verify HTTP 200 for primary surfaces and nested session detail; first-request compilation latency is isolated from subsequent route behavior.
 - [completed] Re-run the account-access Playwright contract after warming the local app.
 - [completed] Extend the browser contract for prompt, dataset, and settings interactions and verify it locally.
+- [completed] Add rows-per-page controls to the remaining generic collection tables so Users and Experiments retain the captured table affordances.
 - [pending] Wire the captured-depth Sandbox controls to the equivalent authenticated Build state and verify nested detail routes end to end.
 
 Implementation contract:

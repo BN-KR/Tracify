@@ -10,6 +10,7 @@
 - Warmed and verified the local Sandbox route matrix: `/playground` and all primary/nested parity routes returned HTTP 200, including session detail; initial compile latency was isolated from subsequent route behavior.
 - Re-ran the Playwright account-access contract against the local app with one worker; the command completed successfully after the Sandbox route warm-up.
 - Extended the account-access contract to cover prompt Text/Chat switching and selection, dataset search empty state, Settings tab switching, and the read-only action boundary; the Playwright command still completes successfully with one worker.
+- Added captured-style pagination controls to generic collection surfaces, including a working rows-per-page selector for Users and Experiments-style tables.
 - TypeScript and focused ESLint pass for the changed workspace component. Remaining parity work is to deepen the other captured templates and connect the same interactions to authenticated Build data.
 
 ## 2026-09-08 captured Tracify dashboard implementation
