@@ -12,6 +12,7 @@
 - [completed] Route supported captured Build actions into existing authenticated workflows; retain modal boundaries only for unsupported operations and all Sandbox writes.
 - [completed] Verify all 14 captured Sandbox surfaces at 390px: 14/14 returned 200, no horizontal overflow, and no page errors.
 - [completed] Add and pass a unique internal-link destination contract across all 14 captured Sandbox surfaces (1/1).
+- [completed] Commit the implementation and newly created live adapters cleanly (`43e670a`, `45b5e25`); unrelated scratch/archive files remain excluded.
 - [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
 
 ## Captured Tracify dashboard implementation — 2026-09-08

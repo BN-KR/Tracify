@@ -11,6 +11,7 @@
 - [completed] Route supported captured Build actions into existing authenticated workflows while preserving Sandbox read-only behavior.
 - [completed] Sweep all 14 captured Sandbox surfaces at 390px for route success, page errors, and horizontal overflow.
 - [completed] Add and pass an HTTP contract for every unique internal link emitted by the 14 captured Sandbox surfaces.
+- [completed] Create clean local implementation commits (`43e670a`, `45b5e25`) without staging unrelated scratch files.
 - [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
 
 ## 2026-09-08 — Captured Tracify dashboard follow-up
