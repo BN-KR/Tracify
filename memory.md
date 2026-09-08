@@ -11,6 +11,7 @@
 - Re-ran the Playwright account-access contract against the local app with one worker; the command completed successfully after the Sandbox route warm-up.
 - Extended the account-access contract to cover prompt Text/Chat switching and selection, dataset search empty state, Settings tab switching, and the read-only action boundary; the Playwright command still completes successfully with one worker.
 - Added captured-style pagination controls to generic collection surfaces, including a working rows-per-page selector for Users and Experiments-style tables.
+- Restarted the stale local Next dev server and visually verified `/playground/tracing` now renders the intended captured tracing surface: preset controls, table/chart toggle, filter rail, columns dropdown, dense trace table, and trace links are all present in the browser DOM.
 - TypeScript and focused ESLint pass for the changed workspace component. Remaining parity work is to deepen the other captured templates and connect the same interactions to authenticated Build data.
 
 ## 2026-09-08 captured Tracify dashboard implementation
