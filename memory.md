@@ -2015,3 +2015,4 @@
 - Live prompt management now uses the captured editor for authenticated projects while persisting through the existing Convex prompt mutations: create, rename, and new-version saves are connected; Sandbox remains read-only.
 - Production build verification after the live prompt wiring completed successfully with 211 routes. The repository-owned production Playwright launcher is required by the test configuration and remains an in-scope tracked artifact.
 - Live captured Evaluators, Datasets, Alerts, and Dashboards now render persistence-backed create forms. Their adapters call the existing typed Convex create mutations; Sandbox continues to route writes to its read-only boundary.
+- Live Human Annotation now wires the captured Claim next action through the authenticated reviewer identity and `annotations.assignNext`, with explicit claimed, empty-queue, and error feedback.
