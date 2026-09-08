@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   Bot,
   ChevronDown,
@@ -55,6 +55,19 @@ function surfacePath(basePath: string, surface: WorkspaceSurface) {
   return surface === "home" ? basePath : `${basePath}/${surface}`;
 }
 
+function subscribeToHydration(callback: () => void) {
+  const timer = window.setTimeout(callback, 0);
+  return () => window.clearTimeout(timer);
+}
+
+function getHydrationSnapshot() {
+  return true;
+}
+
+function getServerHydrationSnapshot() {
+  return false;
+}
+
 export function CapturedWorkspace({
   workspace,
   segments = [],
@@ -65,9 +78,9 @@ export function CapturedWorkspace({
   const router = useRouter();
   const searchParams = useSearchParams();
   const hydrated = useSyncExternalStore(
-    () => () => undefined,
-    () => true,
-    () => false,
+    subscribeToHydration,
+    getHydrationSnapshot,
+    getServerHydrationSnapshot,
   );
   const surface = parseSurface(segments);
   const recordId = segments[1];
@@ -187,7 +200,7 @@ export function CapturedWorkspace({
       ) : surface === "playground" ? (
         <PromptPlaygroundSurface workspace={workspace} onReadOnly={handleAction} />
       ) : surface === "dashboards" ? (
-        <DashboardsSurface workspace={workspace} basePath={basePath} onReadOnly={handleAction} />
+        <DashboardsSurface workspace={workspace} basePath={basePath} dashboardId={recordId} onReadOnly={handleAction} />
       ) : surface === "scores" ? (
         <ScoresSurface workspace={workspace} />
       ) : surface === "prompts" ? (
@@ -230,10 +243,19 @@ export function CapturedWorkspace({
   );
 }
 
-function DashboardsSurface({ workspace, basePath, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; onReadOnly: (action: string) => void }) {
-  const [selected, setSelected] = useState("Cost Dashboard");
-  const [layout, setLayout] = useState("grid");
-  const dashboards = ["Cost Dashboard", "Agent Reliability Overview", "Production Quality"];
+function DashboardsSurface({ workspace, basePath, dashboardId, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; dashboardId?: string; onReadOnly: (action: string) => void }) {
+  const dashboardRecord = dashboardId ? workspace.collections.dashboards.records.find((record) => record.id === dashboardId) : undefined;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [selected, setSelected] = useState(() => searchParams.get("dashboard") ?? dashboardRecord?.name ?? "Cost Dashboard");
+  const [layout, setLayout] = useState(() => searchParams.get("layout") === "list" ? "list" : "grid");
+  const dashboards = Array.from(new Set([...(workspace.collections.dashboards.records.map((record) => record.name)), "Cost Dashboard", "Agent Reliability Overview", "Production Quality"]));
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams.toString());
+    if (selected) next.set("dashboard", selected);
+    if (layout === "grid") next.delete("layout"); else next.set("layout", layout);
+    router.replace(`?${next.toString()}`, { scroll: false });
+  }, [layout, router, searchParams, selected]);
   return <main className="captured-dashboard-editor"><header><div><span>Dashboards</span><h2>{selected}</h2></div><div className="captured-dashboard-editor-actions"><select aria-label="Select dashboard" value={selected} onChange={(event) => setSelected(event.target.value)}>{dashboards.map((dashboard) => <option key={dashboard}>{dashboard}</option>)}</select><button type="button" className={layout === "grid" ? "is-active" : ""} onClick={() => setLayout("grid")}>Grid</button><button type="button" className={layout === "list" ? "is-active" : ""} onClick={() => setLayout("list")}>List</button><button type="button" onClick={() => onReadOnly("Create dashboard")}>New dashboard</button></div></header><div className={`captured-dashboard-widgets ${layout}`}><MetricPanel title="Total cost" subtitle="All environments · Past 7 days" value={`$${workspace.metrics.totalCost.toFixed(5)}`} /><MetricPanel title="Traces" subtitle="Successful and failed traces" value={workspace.metrics.traces.toLocaleString()} /><section className="captured-panel captured-cost-chart"><PanelHeading title="Cost by model" subtitle="Compare spend across providers and models" /><LineChart label="Cost over time" /></section><section className="captured-panel captured-users-cost"><PanelHeading title="Top users by cost" subtitle="Ranked by total model cost" /><div className="captured-user-bars">{workspace.collections.users.records.slice(0, 5).map((user, index) => <div key={user.id}><span style={{ width: `${92 - index * 13}%` }} /><button type="button">{user.id}</button><strong>${(0.169297 - index * 0.01831).toFixed(5)}</strong></div>)}</div></section></div><footer><Link href={`${basePath}/dashboards`}>Dashboard home</Link><button type="button" onClick={() => onReadOnly("Save dashboard layout")}>Save layout</button></footer></main>;
 }
 
@@ -246,7 +268,10 @@ function ScoresSurface({ workspace }: { workspace: DashboardWorkspace }) {
 function PromptsSurface({ workspace, basePath, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; onReadOnly: (action: string) => void }) {
   const [tab, setTab] = useState<"text" | "chat">("text");
   const [draft, setDraft] = useState("You are a reliable support agent. Use verified context only.\n\n{{question}}");
+  const searchParams = useSearchParams();
+  const creating = searchParams.get("view") === "create";
   const prompts = workspace.collections.prompts.records;
+  if (creating) return <main className="captured-prompt-management"><header><div><span>Prompt Management</span><h2>Create prompt</h2></div><Link href={`${basePath}/prompts`}>Cancel</Link></header><form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); onReadOnly("Save prompt version"); }}><label>Prompt name<input required placeholder="support-agent" /></label><label>Prompt type<select defaultValue="text"><option value="text">Text</option><option value="chat">Chat</option></select></label><label>Prompt content<textarea required aria-label="Prompt content" value={draft} onChange={(event) => setDraft(event.target.value)} /></label><label>Commit message<input placeholder="Initial prompt version" /></label><button type="submit">Save version</button></form></main>;
   return <main className="captured-prompt-management"><header><div><span>Prompt Management</span><h2>Prompts</h2></div><button type="button" onClick={() => onReadOnly("Create prompt")}>Create prompt</button></header><div className="captured-prompt-management-grid"><section className="captured-prompt-list"><div className="captured-collection-summary"><span>{prompts.length || 3} prompts</span><button type="button">My views ▾</button></div>{(prompts.length ? prompts : [{ id: "support-agent", name: "support-agent", status: "production", environment: "all", timestamp: "2h ago" }, { id: "order-resolution", name: "order-resolution", status: "draft", environment: "sandbox", timestamp: "yesterday" }]).map((prompt) => <button type="button" className="captured-prompt-list-row" key={prompt.id} onClick={() => setDraft(`You are the ${prompt.name} agent.\n\n{{input}}`)}><strong>{prompt.name}</strong><small>{prompt.status} · updated {prompt.timestamp}</small></button>)}</section><section className="captured-prompt-editor"><div className="captured-prompt-editor-toolbar"><button type="button" aria-pressed={tab === "text"} className={tab === "text" ? "active" : ""} onClick={() => setTab("text")}>Text</button><button type="button" aria-pressed={tab === "chat"} className={tab === "chat" ? "active" : ""} onClick={() => setTab("chat")}>Chat</button><button type="button">Add prompt reference</button></div><label>Prompt name<input defaultValue="support-agent" /></label><textarea aria-label="Prompt content" value={draft} onChange={(event) => setDraft(event.target.value)} /><label>Commit message<textarea aria-label="Commit message" placeholder="Describe this prompt version" /></label><div><button type="button" onClick={() => onReadOnly("Save prompt version")}>Save version</button><Link href={`${basePath}/playground`}>Test in Playground ↗</Link></div></section></div></main>;
 }
 
@@ -270,8 +295,10 @@ function AnnotationSurface({ workspace, onReadOnly }: { workspace: DashboardWork
 
 function AlertsSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
   const [status, setStatus] = useState("all");
+  const searchParams = useSearchParams();
+  const creating = searchParams.get("view") === "create";
   const records = workspace.collections.alerts.records.filter((record) => status === "all" || record.status === status);
-  return <main className="captured-collection captured-alerts-surface"><div className="captured-collection-summary"><div><strong>Alerts</strong><span> Notify your team when quality or cost changes</span></div><div className="captured-inline-actions"><select aria-label="Alert status" value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="paused">Paused</option></select><button type="button" onClick={() => onReadOnly("Create alert")}>Add alert</button></div></div><div className="captured-alert-cards">{records.map((record) => <article key={record.id}><div><span className={`captured-status ${record.status}`}>{record.status}</span><h3>{record.name}</h3><p>Threshold condition · production environment</p></div><button type="button" onClick={() => onReadOnly(`Edit ${record.name}`)}>•••</button></article>)}</div>{!records.length ? <div className="captured-empty">No alerts match this status.</div> : null}</main>;
+  return <main className="captured-collection captured-alerts-surface"><div className="captured-collection-summary"><div><strong>Alerts</strong><span> Notify your team when quality or cost changes</span></div><div className="captured-inline-actions"><select aria-label="Alert status" value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All statuses</option><option value="active">Active</option><option value="paused">Paused</option></select><button type="button" onClick={() => onReadOnly("Create alert")}>Add alert</button></div></div>{creating ? <form className="captured-editor-form" onSubmit={(event) => { event.preventDefault(); onReadOnly("Save alert"); }}><h2>Create alert</h2><label>Name<input required placeholder="Production latency" /></label><label>Metric<select defaultValue="latency"><option value="latency">Latency</option><option value="cost">Cost</option><option value="score">Score</option></select></label><label>Threshold<input required type="number" step="any" placeholder="2" /></label><div><button type="submit">Save alert</button><button type="button" onClick={() => window.history.back()}>Cancel</button></div></form> : <><div className="captured-alert-cards">{records.map((record) => <article key={record.id}><div><span className={`captured-status ${record.status}`}>{record.status}</span><h3>{record.name}</h3><p>Threshold condition · production environment</p></div><button type="button" onClick={() => onReadOnly(`Edit ${record.name}`)}>•••</button></article>)}</div>{!records.length ? <div className="captured-empty">No alerts match this status.</div> : null}</>}</main>;
 }
 
 function TracingSurface({ workspace, basePath, query, environment, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; query: string; environment: string; onReadOnly: (action: string) => void }) {

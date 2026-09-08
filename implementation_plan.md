@@ -12,6 +12,7 @@
 - [completed] Route supported captured Build actions into existing authenticated workflows; retain modal boundaries only for unsupported operations and all Sandbox writes.
 - [completed] Verify all 14 captured Sandbox surfaces at 390px: 14/14 returned 200, no horizontal overflow, and no page errors.
 - [completed] Add and pass a unique internal-link destination contract across all 14 captured Sandbox surfaces (1/1).
+- [completed] Fix the captured workspace hydration marker and verify the complete 10-test account-access contract (10/10 passed), including consent-safe navigation and persisted tracing controls.
 - [completed] Commit the implementation and newly created live adapters cleanly (`43e670a`, `45b5e25`, `b9f4444`, `55befa5`); unrelated scratch/archive files remain excluded.
 - [completed] Push the implementation branch to PR #106; GitGuardian, activation, adapter, and primary Vercel checks passed. EU Vercel remained pending at handoff.
 - [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
@@ -1525,3 +1526,10 @@ Production verification:
 - Tracing range, environment, and query filters now persist in the URL and are covered by a reload contract; continue extending URL-backed state to view, columns, pagination, and detail selections.
 - Tracing view mode, preset, and column selection now persist through URL parameters and are covered by the Sandbox browser contract; pagination and detail-selection persistence remain.
 - Tracing now slices results by URL-backed `page` state and exposes reference-style previous/next controls with disabled boundaries.
+- Project Alerts creation now enters the captured Alerts surface through `?view=create` with a responsive reference-styled form; live mutation wiring and remaining create/edit surfaces continue.
+- Prompt creation now renders inside the captured Prompts surface through `?view=create` with reference-styled fields and action handling.
+- Project Dashboard detail pages now render through the live captured dashboard adapter and preserve the selected dashboard ID for future detail/editor state.
+- The captured Dashboard editor now resolves the selected detail ID to its live record and initializes the displayed dashboard accordingly.
+- Dashboard selection and Grid/List layout are now URL-backed in the captured editor for reload/share parity.
+- Added the first repeatable six-viewport parity harness for all public captured Sandbox surfaces; it records full-page artifacts and asserts reference shell labels with no captured-workspace Tracify text.
+- Playwright test discovery confirms all six viewport cases are registered; targeted ESLint passes for the changed application/test files, with captured CSS excluded by the repository ESLint configuration.

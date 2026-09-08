@@ -11,6 +11,7 @@
 - Replaced generic captured Build action modals with navigation into existing authenticated workflows for dashboard/alert/evaluator/dataset creation, LLM connections, and project settings; Sandbox retains explicit read-only boundaries. TypeScript, focused ESLint, and diff checks pass after this wiring.
 - Ran a 390px viewport sweep across all 14 captured Sandbox surfaces: every route returned 200, had no horizontal overflow, and reported no page errors. The existing route contract remains green; internal link HTTP probing should be added as a follow-up when the full navigation audit is expanded.
 - Added and passed the captured Sandbox internal-link contract (1/1): it collected links across all 14 surfaces and verified every unique internal destination returned below 400.
+- Fixed the captured workspace hydration readiness marker so client hydration reliably transitions to ready without a synchronous-effect lint violation; the complete account-access contract now passes 10/10, including consent-safe Sandbox navigation, URL-persisted tracing controls, internal-link probing, and mobile/keyboard coverage.
 - Committed the implementation as `43e670a`, `45b5e25`, `b9f4444`, and `55befa5` (expanded/mapped captured Tracing filters); unrelated scratch/archive files remain untracked and untouched.
 - Pushed branch `codex/build-captured-sessions` to origin; PR #106 now includes the implementation through commit `34e5882`. GitGuardian, activation, adapter, and the Tracify Vercel preview passed; the EU Vercel preview was still pending when polling stopped.
 
@@ -1999,3 +2000,10 @@
 - Tracing range, environment, and search query state now round-trip through URL parameters (`range`, `environment`, `q`); the account-access contract asserts the filtered Sandbox view survives reload. TypeScript and diff checks pass.
 - Tracing table/chart mode, quick-filter preset, and selected-column state now round-trip through URL parameters (`view`, `preset`, `columns`); the browser contract verifies chart mode and the 16/40 columns control survive reload.
 - Added URL-backed Tracing pagination with bounded previous/next controls and filtered-page slicing; TypeScript and diff checks pass.
+- Migrated project Alerts creation into the captured Alerts surface using `alerts?view=create`, added a reference-styled form with Sandbox/read-only action handling, and added responsive editor styling. Next route types regenerated with `next typegen`; TypeScript and diff checks pass.
+- Added the captured Prompt creation state for `/prompts?view=create`, including name, type, content, commit message, save, and cancel controls; TypeScript and diff checks pass.
+- Migrated project Dashboard detail routes to `LiveCapturedDashboards`, preserving the dashboard ID in captured route segments and removing the legacy Tracify overview renderer; route type generation, TypeScript, and diff checks pass.
+- Dashboard detail IDs now resolve to the corresponding live dashboard record and initialize the captured editor with that dashboard selected; available live dashboard names are included in the selector.
+- Captured Dashboard list/detail state now persists selected dashboard and Grid/List layout in URL parameters (`dashboard`, `layout`); Next route types, TypeScript, and diff checks pass.
+- Added `tests/e2e/captured-viewport-parity.spec.ts`, a six-viewport Sandbox matrix covering all captured surfaces, shell/branding assertions, and full-page screenshot artifacts; route type generation and TypeScript pass.
+- Six viewport tests enumerate successfully with Playwright; targeted ESLint passes for changed TypeScript/TSX files (CSS is intentionally ignored by ESLint configuration).

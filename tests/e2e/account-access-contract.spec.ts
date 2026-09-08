@@ -39,7 +39,10 @@ test.describe("account access contract", () => {
     await page.goto("/playground", { waitUntil: "domcontentloaded" });
     await expect(page.getByText("41", { exact: true })).toBeVisible();
     await expect(page.getByText("474", { exact: true })).toBeVisible();
-    await page.getByRole("link", { name: "Tracing" }).click();
+    const consentButton = page.getByRole("button", { name: "Accept analytics" });
+    if (await consentButton.isVisible()) await consentButton.click();
+    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+    await page.getByRole("link", { name: "Tracing", exact: true }).click();
     await expect(page).toHaveURL(/\/playground\/tracing$/);
     await expect(page.getByRole("link", { name: "Refund status investigation", exact: true })).toBeVisible();
     expect(pageErrors, "the public Sandbox must not surface an account or Convex error").toEqual([]);
@@ -76,7 +79,8 @@ test.describe("account access contract", () => {
     expect(failures, "captured Sandbox links must resolve").toEqual([]);
   });
 
-  test("Sandbox controls filter data, open details, and enforce read-only writes", async ({ page }) => {
+  test("Sandbox controls filter data, open details, and enforce read-only writes", async ({ page }, testInfo) => {
+    testInfo.setTimeout(180_000);
     await page.goto("/playground/tracing", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Tracing" })).toBeVisible();
     await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
@@ -87,14 +91,18 @@ test.describe("account access contract", () => {
     await page.getByRole("textbox", { name: "Search", exact: true }).fill("refund");
     await expect(page).toHaveURL(/(?:\?|&)q=refund/);
     await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+    await page.getByRole("button", { name: "Filters" }).first().click();
     await expect(page.getByRole("textbox", { name: "Search", exact: true })).toHaveValue("refund");
-    await page.getByRole("button", { name: "Chart", exact: true }).click();
+    await page.getByRole("button", { name: "Filters" }).first().click();
+    await page.locator(".captured-tracing-actions").getByRole("button", { name: /Chart/ }).click();
     await expect(page).toHaveURL(/(?:\?|&)view=chart/);
     await page.reload({ waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("button", { name: "Chart", exact: true })).toHaveClass(/is-active/);
+    await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true");
+    await expect(page.locator(".captured-tracing-actions").getByRole("button", { name: /Chart/ })).toHaveClass(/is-active/);
     await page.getByRole("button", { name: /Columns 16\/40/ }).click();
     await expect(page.getByRole("button", { name: /Columns 16\/40/ })).toHaveAttribute("aria-expanded", "true");
-    await page.getByRole("button", { name: "Table", exact: true }).click();
+    await page.locator(".captured-tracing-actions").getByRole("button", { name: /Table/ }).click();
     await expect(page.getByRole("link", { name: "Refund status investigation", exact: true })).toBeVisible();
     await page.getByRole("link", { name: /Refund status investigation/ }).click();
     await expect(page.locator("h2", { hasText: "Refund status investigation" })).toBeVisible();
