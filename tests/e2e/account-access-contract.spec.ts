@@ -96,8 +96,8 @@ test.describe("account access contract", () => {
 
   test("captured Sandbox collection controls remain interactive", async ({ page }) => {
     await page.goto("/playground/prompts", { waitUntil: "domcontentloaded" });
-    await page.getByRole("button", { name: "Chat" }).click();
-    await expect(page.getByRole("button", { name: "Chat" })).toHaveClass(/active/);
+    await page.locator(".captured-prompt-editor-toolbar button", { hasText: "Chat" }).click();
+    await expect(page.locator(".captured-prompt-editor-toolbar button", { hasText: "Chat" })).toHaveClass(/active/);
     await page.getByText("order-resolution", { exact: true }).click();
     await expect(page.getByRole("textbox", { name: "Prompt content" })).toHaveValue(/order-resolution/);
 
@@ -106,8 +106,8 @@ test.describe("account access contract", () => {
     await expect(page.locator(".captured-datasets-surface input[aria-label='Search datasets']")).toHaveValue("does-not-exist");
 
     await page.goto("/playground/settings", { waitUntil: "domcontentloaded" });
-    await page.getByRole("button", { name: "LLM Connections" }).click();
-    await expect(page.getByRole("heading", { name: "LLM Connections" })).toBeVisible();
+    await page.locator(".captured-settings nav button", { hasText: "LLM Connections" }).click();
+    await expect(page.getByText("Project settings / LLM Connections", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Open LLM Connections" }).click();
     await expect(page.getByRole("dialog", { name: /This workspace is view only|ready in your live project/ })).toBeVisible();
   });
