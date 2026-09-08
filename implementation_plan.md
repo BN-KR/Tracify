@@ -1475,14 +1475,14 @@ Latest parity pass (2026-09-08): corrected visible captured-workspace labels and
 83. [completed] Verify the corrected EU Vercel environment binding, production build, TypeScript, focused lint, and 6-case account-access browser contract.
 84. [completed] Add the missing EU Vercel Production `CONVEX_SITE_URL`, confirm the merged main deployment is Ready on `eu.cloud.tracify.tech`, and smoke-test the live Playground controls.
 
-85. [in progress] Migrate authenticated Build Sessions list and detail routes to the captured localhost:4173 workspace renderer with live Convex records.
+85. [completed] Migrate authenticated Build Sessions list and detail routes to the captured localhost:4173 workspace renderer with live Convex records.
 86. [completed] Migrate authenticated Build Costs to a first-class captured surface backed by live project trace costs.
 87. [completed] Migrate authenticated Build Prompt Management presentation to the captured prompt collection using live prompt/version data.
 88. [completed] Wire captured prompt editor actions to the existing prompt mutations; create, rename, and version-save actions now persist through Convex.
 89. [completed] Migrate authenticated Evaluators, Datasets, and Scores presentations to the captured renderer with live Convex records.
-90. [next] Restore captured prompt/evaluation action wiring and migrate Alerts and Settings while preserving existing mutations.
+90. [completed] Restore captured prompt/evaluation action wiring and migrate Alerts and Settings while preserving existing mutations.
 91. [completed] Migrate authenticated Alerts and Settings presentation to the captured renderer with live project data.
-92. [in progress] Restore action wiring for captured evaluation/admin controls and run the full authenticated route/interactions verification matrix; prompt actions are complete.
+92. [in progress] Restore action wiring for captured evaluation/admin controls and run the full authenticated route/interactions verification matrix; prompt, evaluator, dataset, alert, dashboard, settings, annotation, and session actions are now connected.
 93. [completed] Fix captured tracing record links to render detail views and verify the filter/detail/read-only interaction path.
 94. [next] Run the complete account-access contract and final Build route/button audit after the latest parity changes.
 
