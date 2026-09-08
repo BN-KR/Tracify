@@ -2,6 +2,12 @@
 
 ## Captured Tracify dashboard implementation — 2026-09-08
 
+### Current implementation slice
+
+- [completed] Add dense Tracing table/chart behavior with presets, environment/search filtering, selectable columns, filter-rail search, trace navigation, and empty-state pagination.
+- [completed] Add populated Session detail layout with chronological events, input/output views, linked traces, scores, and dataset action boundary.
+- [pending] Add dedicated captured-depth templates for dashboards, prompts, datasets, evaluators, scores, annotation queues, alerts, and settings; then wire the equivalent authenticated Build state.
+
 Implementation contract:
 
 1. Treat `C:\opencrawl\output\langfuse-capture` only as the supplied visual authority; the product, routes, fixtures, and visible labels remain Tracify-branded.

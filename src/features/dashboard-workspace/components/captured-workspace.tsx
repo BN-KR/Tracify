@@ -140,6 +140,10 @@ export function CapturedWorkspace({
 
       {surface === "home" ? (
         <HomeSurface workspace={workspace} environment={environment} />
+      ) : surface === "tracing" ? (
+        <TracingSurface workspace={workspace} basePath={basePath} query={query} environment={environment} onReadOnly={setReadOnlyAction} />
+      ) : surface === "sessions" && recordId ? (
+        <SessionDetailSurface workspace={workspace} sessionId={recordId} basePath={basePath} onReadOnly={setReadOnlyAction} />
       ) : surface === "settings" ? (
         <SettingsSurface workspace={workspace} onReadOnly={setReadOnlyAction} />
       ) : surface === "playground" ? (
@@ -172,6 +176,59 @@ export function CapturedWorkspace({
       ) : null}
     </div>
   );
+}
+
+function TracingSurface({ workspace, basePath, query, environment, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; query: string; environment: string; onReadOnly: (action: string) => void }) {
+  const [view, setView] = useState<"table" | "chart">("table");
+  const [preset, setPreset] = useState("all");
+  const [columnsOpen, setColumnsOpen] = useState(false);
+  const [selectedColumns, setSelectedColumns] = useState(["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Status", "Latency", "Cost"]);
+  const [filterSearch, setFilterSearch] = useState("");
+  const columns = ["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Metadata", "Status", "Latency", "Cost", "Model", "Environment"];
+  const filterNames = ["Name", "Is Root Observation", "Type", "Environment", "Trace Name", "Session ID", "User ID", "Status", "Model", "Latency", "Cost"];
+  const records = workspace.collections.tracing.records.filter((record) => {
+    const matchesEnvironment = environment === "all" || record.environment === environment;
+    const haystack = `${record.id} ${record.name} ${record.model} ${record.status}`.toLowerCase();
+    const matchesQuery = !query || haystack.includes(query.toLowerCase());
+    const matchesPreset = preset === "all" || (preset === "quality" ? Number(record.score ?? 0) >= 0.8 : preset === "slow" ? Number.parseFloat(record.latency ?? "0") >= 2 : Number.parseFloat(record.cost?.replace("$", "") ?? "0") >= 0.02);
+    return matchesEnvironment && matchesQuery && matchesPreset;
+  });
+  const toggleColumn = (column: string) => setSelectedColumns((current) => current.includes(column) ? current.filter((item) => item !== column) : [...current, column]);
+  return <main className="captured-tracing">
+    <div className="captured-tracing-actions">
+      {(["all", "quality", "slow", "cost"] as const).map((item) => <button key={item} type="button" className={preset === item ? "is-active" : ""} onClick={() => setPreset(item)}>{item === "all" ? "Filters" : item[0].toUpperCase() + item.slice(1)}</button>)}
+      <button type="button" className={view === "table" ? "is-active" : ""} onClick={() => setView("table")}>▦ Table</button><button type="button" className={view === "chart" ? "is-active" : ""} onClick={() => setView("chart")}>▥ Chart</button>
+      <div className="captured-tracing-columns"><button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)}>Columns {selectedColumns.length}/16 ▾</button>{columnsOpen ? <div className="captured-column-menu" role="menu">{columns.map((column) => <label key={column}><input type="checkbox" checked={selectedColumns.includes(column)} onChange={() => toggleColumn(column)} />{column}</label>)}</div> : null}</div>
+    </div>
+    <div className="captured-tracing-layout">
+      <aside className="captured-filter-rail"><div className="captured-filter-rail-heading"><strong>Filters</strong><button type="button" onClick={() => setFilterSearch("")}>Clear</button></div><label>Search filters<input value={filterSearch} onChange={(event) => setFilterSearch(event.target.value)} placeholder="Search filters" aria-label="Search filters" /></label>{filterNames.filter((name) => name.toLowerCase().includes(filterSearch.toLowerCase())).map((name) => <button className="captured-filter-row" type="button" key={name} onClick={() => name === "Environment" ? undefined : onReadOnly(`Open ${name} filter`)}><span>{name}</span><span>⌄</span></button>)}</aside>
+      <section className="captured-tracing-results">{view === "chart" ? <div className="captured-trace-chart"><span>Count per bucket</span><div>{records.map((record, index) => <i key={record.id} style={{ height: `${28 + ((index * 19) % 65)}%` }} title={record.name} />)}</div></div> : <div className="captured-trace-table-wrap"><table><thead><tr>{selectedColumns.map((column) => <th key={column}>{column}</th>)}</tr></thead><tbody>{records.map((record) => <tr key={record.id}>{selectedColumns.map((column) => <td key={column}>{renderTraceCell(column, record, basePath)}</td>)}</tr>)}</tbody></table>{records.length === 0 ? <div className="captured-empty">No traces match the current filters.</div> : null}<footer className="captured-table-footer">Total {records.length} · Rows per page 50 · Page 1</footer></div>}</section>
+    </div>
+  </main>;
+}
+
+function renderTraceCell(column: string, record: WorkspaceRecord, basePath: string) {
+  switch (column) {
+    case "Start Time": return record.timestamp;
+    case "Type": return "generation";
+    case "Name": return <Link href={`${basePath}/tracing/${encodeURIComponent(record.id)}`}>{record.name}</Link>;
+    case "Trace Name": return record.name;
+    case "Input": return record.input ?? "—";
+    case "Output": return record.output ?? "—";
+    case "Metadata": return "{ }";
+    case "Status": return record.status;
+    case "Latency": return record.latency ?? "—";
+    case "Cost": return record.cost ?? "—";
+    case "Model": return record.model ?? "—";
+    case "Environment": return record.environment ?? "—";
+    default: return "—";
+  }
+}
+
+function SessionDetailSurface({ workspace, sessionId, basePath, onReadOnly }: { workspace: DashboardWorkspace; sessionId: string; basePath: string; onReadOnly: (action: string) => void }) {
+  const session = workspace.collections.sessions.records.find((record) => record.id === sessionId) ?? workspace.collections.sessions.records[0];
+  const events = workspace.collections.tracing.records.filter((record) => record.sessionId === session?.sessionId).slice(0, 4);
+  return <main className="captured-session-detail"><div className="captured-session-heading"><a href={`${basePath}/sessions`}>‹ Sessions</a><strong>Session {session?.id}</strong><span>Total traces: {events.length || 2}</span><span>Total cost: {session?.cost ?? "$0.038008"}</span><button type="button" onClick={() => onReadOnly("Annotate session")}>Annotate</button></div><div className="captured-session-columns"><section className="captured-session-events">{(events.length ? events : [session]).map((event, index) => <article key={event?.id ?? index}><small>{event?.name ?? "generation"} · {event?.timestamp ?? "today"}</small><h3>Formatted <span>JSON</span></h3><label>Input</label><pre>{event?.input ?? "What is the status of my request?"}</pre><label>Output</label><pre className="captured-output">{event?.output ?? "Completed with linked evidence and a verified final response."}</pre></article>)}</section><aside className="captured-session-scores"><div className="captured-linked-trace">▤ QA support response <small>Open trace ↗</small></div>{["groundedness", "answer_relevance", "policy_compliance", "tool_result_used"].map((score, index) => <div key={score} className="captured-score-row"><span>{score}</span><strong>{index === 1 ? "0.70" : index === 2 ? "true" : "false"}</strong><small>◯</small></div>)}<button type="button" onClick={() => onReadOnly("Add session to dataset")}>＋ Add to datasets</button></aside></div></main>;
 }
 
 function HomeSurface({ workspace, environment }: { workspace: DashboardWorkspace; environment: string }) {

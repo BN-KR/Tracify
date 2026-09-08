@@ -1,5 +1,10 @@
 # Project Memory
 
+## 2026-09-08 captured dashboard parity follow-up
+- Added a capture-aligned Tracing surface with working table/chart toggle, preset filters, environment/search filtering, selectable columns, filter-rail search, trace links, and an empty-state footer.
+- Added a populated Session detail surface with event input/output inspection, linked trace context, score rows, and the dataset action boundary.
+- TypeScript and focused ESLint pass for the changed workspace component. Remaining parity work is to deepen the other captured templates and connect the same interactions to authenticated Build data.
+
 ## 2026-09-08 captured Tracify dashboard implementation
 - Replaced the generic demo simulator with one shared capture-derived Tracify workspace renderer and deterministic populated Sandbox data. `/playground` plus its nested primary routes now cover Home, Dashboards, Tracing, Sessions, Users, Alerts, Prompts, Playground, Scores, Evaluators, Human Annotation, Datasets, Experiments, Settings, and record details without account or project dependencies.
 - Kept Build and Sandbox distinct: Sandbox is public/read-only with explicit mutation boundaries; authenticated project routes retain their existing Convex/Tinybird-backed functionality, use the capture-style Home in both empty and populated states, and now share the capture-aligned primary sidebar taxonomy.
