@@ -287,7 +287,7 @@ function TracingSurface({ workspace, basePath, query, environment, onReadOnly }:
     <div className="captured-tracing-actions">
       {(["all", "quality", "slow", "cost"] as const).map((item) => <button key={item} type="button" className={preset === item ? "is-active" : ""} onClick={() => setPreset(item)}>{item === "all" ? "Filters" : item[0].toUpperCase() + item.slice(1)}</button>)}
       <button type="button" className={view === "table" ? "is-active" : ""} onClick={() => setView("table")}>▦ Table</button><button type="button" className={view === "chart" ? "is-active" : ""} onClick={() => setView("chart")}>▥ Chart</button>
-      <div className="captured-tracing-columns"><button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)}>Columns {selectedColumns.length}/16 ▾</button>{columnsOpen ? <div className="captured-column-menu" role="menu">{columns.map((column) => <label key={column}><input type="checkbox" checked={selectedColumns.includes(column)} onChange={() => toggleColumn(column)} />{column}</label>)}</div> : null}</div>
+      <div className="captured-tracing-columns"><button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)}>Columns {selectedColumns.length}/40 ▾</button>{columnsOpen ? <div className="captured-column-menu" role="menu">{columns.map((column) => <label key={column}><input type="checkbox" checked={selectedColumns.includes(column)} onChange={() => toggleColumn(column)} />{column}</label>)}</div> : null}</div>
     </div>
     <div className="captured-tracing-layout">
       <aside className="captured-filter-rail"><div className="captured-filter-rail-heading"><strong>Filters</strong><button type="button" onClick={() => setFilterSearch("")}>Clear</button></div><label>Search filters<input value={filterSearch} onChange={(event) => setFilterSearch(event.target.value)} placeholder="Search filters" aria-label="Search filters" /></label>{filterNames.filter((name) => name.toLowerCase().includes(filterSearch.toLowerCase())).map((name) => <button className="captured-filter-row" type="button" key={name} onClick={() => name === "Environment" ? undefined : onReadOnly(`Open ${name} filter`)}><span>{name}</span><span>⌄</span></button>)}</aside>
@@ -307,9 +307,16 @@ function renderTraceCell(column: string, record: WorkspaceRecord, basePath: stri
     case "Metadata": return "{ }";
     case "Status": return record.status;
     case "Latency": return record.latency ?? "—";
+    case "Latency (s)": return record.latency ?? "—";
     case "Cost": return record.cost ?? "—";
-    case "Model": return record.model ?? "—";
+    case "Cost ($)": return record.cost ?? "—";
+    case "Provided Model Name": return record.model ?? "—";
+    case "Prompt Name": return "default";
     case "Environment": return record.environment ?? "—";
+    case "Trace Tags": return "—";
+    case "SDK Name": return "opentelemetry";
+    case "SDK Version": return "—";
+    case "Model": return record.model ?? "—";
     default: return "—";
   }
 }
