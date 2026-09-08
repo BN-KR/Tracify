@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const playwrightPort = process.env.PLAYWRIGHT_PORT ?? "3100";
 const playwrightBaseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${playwrightPort}`;
+const playwrightProduction = process.env.PLAYWRIGHT_PRODUCTION === "1";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -24,7 +25,9 @@ export default defineConfig({
   ],
   ...(process.env.PLAYWRIGHT_BASE_URL ? {} : {
     webServer: {
-      command: `${process.execPath} node_modules/next/dist/bin/next dev --webpack -p ${playwrightPort}`,
+      command: playwrightProduction
+        ? `${process.execPath} scripts/playwright-server.mjs`
+        : `${process.execPath} node_modules/next/dist/bin/next dev --webpack -p ${playwrightPort}`,
       url: playwrightBaseURL,
       reuseExistingServer: false,
       timeout: 120_000,

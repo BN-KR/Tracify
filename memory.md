@@ -2007,3 +2007,4 @@
 - Captured Dashboard list/detail state now persists selected dashboard and Grid/List layout in URL parameters (`dashboard`, `layout`); Next route types, TypeScript, and diff checks pass.
 - Added `tests/e2e/captured-viewport-parity.spec.ts`, a six-viewport Sandbox matrix covering all captured surfaces, shell/branding assertions, and full-page screenshot artifacts; route type generation and TypeScript pass.
 - Six viewport tests enumerate successfully with Playwright; targeted ESLint passes for changed TypeScript/TSX files (CSS is intentionally ignored by ESLint configuration).
+- Runtime evidence: the complete six-viewport matrix passed across all 14 public Sandbox surfaces and produced full-page screenshots in Playwright output; the harness now covers 1440x900, 1280x800, 1024x768, 768x1024, 390x844, and 375x812.

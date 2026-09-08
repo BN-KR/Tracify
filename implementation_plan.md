@@ -1533,3 +1533,4 @@ Production verification:
 - Dashboard selection and Grid/List layout are now URL-backed in the captured editor for reload/share parity.
 - Added the first repeatable six-viewport parity harness for all public captured Sandbox surfaces; it records full-page artifacts and asserts reference shell labels with no captured-workspace Tracify text.
 - Playwright test discovery confirms all six viewport cases are registered; targeted ESLint passes for the changed application/test files, with captured CSS excluded by the repository ESLint configuration.
+- Runtime evidence: all six viewport cases (1440x900, 1280x800, 1024x768, 768x1024, 390x844, and 375x812) passed all 14 Sandbox surfaces, including hydration, reference-shell, no-Tracify-text assertions, and screenshot capture.
