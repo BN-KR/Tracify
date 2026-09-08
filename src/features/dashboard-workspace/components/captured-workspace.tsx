@@ -271,10 +271,10 @@ function TracingSurface({ workspace, basePath, query, environment, onReadOnly }:
   const [view, setView] = useState<"table" | "chart">("table");
   const [preset, setPreset] = useState("all");
   const [columnsOpen, setColumnsOpen] = useState(false);
-  const [selectedColumns, setSelectedColumns] = useState(["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Status", "Latency", "Cost"]);
+  const [selectedColumns, setSelectedColumns] = useState(["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Metadata", "Status", "Latency (s)", "Cost ($)", "Time To First Token (s)", "Provided Model Name", "Prompt Name", "Environment", "Trace Tags", "SDK Name"]);
   const [filterSearch, setFilterSearch] = useState("");
-  const columns = ["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Metadata", "Status", "Latency", "Cost", "Model", "Environment"];
-  const filterNames = ["Name", "Is Root Observation", "Type", "Environment", "Trace Name", "Session ID", "User ID", "Status", "Model", "Latency", "Cost"];
+  const columns = ["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Metadata", "Status", "Latency (s)", "Cost ($)", "Time To First Token (s)", "Provided Model Name", "Prompt Name", "Model ID", "Environment", "Trace Tags", "SDK Name", "SDK Version", "Ingestion Source", "Input Tokens", "Output Tokens", "Total Tokens", "Input Cost ($)", "Output Cost ($)", "Tool Calls", "Categorical Scores", "Boolean Scores", "Comment Count", "Comment Content"];
+  const filterNames = ["Name", "Is Root Observation", "Type", "Environment", "Trace Name", "Metadata", "Trace Tags", "Session ID", "User ID", "Trace ID", "Status", "Provided Model Name", "Prompt Name", "Latency (s)", "Numeric Scores", "Model ID", "Version", "Release", "Status Message", "API Key", "SDK Name", "SDK Version", "Ingestion Source", "Experiment Dataset ID", "Experiment ID", "Experiment Name", "Time To First Token (s)", "Input Tokens", "Cached Input Tokens", "Output Tokens", "Total Tokens", "Input Cost ($)", "Cached Input Cost ($)", "Output Cost ($)", "Cost ($)", "Tool Names (Available)", "Tool Names (Called)", "Available Tools", "Tool Calls", "Categorical Scores", "Boolean Scores", "Comment Count", "Comment Content"];
   const records = workspace.collections.tracing.records.filter((record) => {
     const matchesEnvironment = environment === "all" || record.environment === environment;
     const haystack = `${record.id} ${record.name} ${record.model} ${record.status}`.toLowerCase();
