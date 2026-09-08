@@ -11,7 +11,7 @@
 - Replaced generic captured Build action modals with navigation into existing authenticated workflows for dashboard/alert/evaluator/dataset creation, LLM connections, and project settings; Sandbox retains explicit read-only boundaries. TypeScript, focused ESLint, and diff checks pass after this wiring.
 - Ran a 390px viewport sweep across all 14 captured Sandbox surfaces: every route returned 200, had no horizontal overflow, and reported no page errors. The existing route contract remains green; internal link HTTP probing should be added as a follow-up when the full navigation audit is expanded.
 - Added and passed the captured Sandbox internal-link contract (1/1): it collected links across all 14 surfaces and verified every unique internal destination returned below 400.
-- Committed the implementation as `43e670a`, `45b5e25`, and `b9f4444` (expanded captured Tracing filters); unrelated scratch/archive files remain untracked and untouched.
+- Committed the implementation as `43e670a`, `45b5e25`, `b9f4444`, and `55befa5` (expanded/mapped captured Tracing filters); unrelated scratch/archive files remain untracked and untouched.
 
 ## 2026-09-08 hosted dashboard reference
 - Deployed the complete static dashboard capture as the isolated Vercel project `tracify-dashboard-reference`; it does not modify or share configuration with the production `tracify` or `tracify-cloud-eu` projects.
