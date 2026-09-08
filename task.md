@@ -1,5 +1,9 @@
 # 2026-09-02 — First-customer execution
 
+## 2026-09-08 — Captured Tracify dashboard follow-up
+
+- [pending owner] Supply provider-backed EU test-account credentials to exercise signed-in project creation, persisted mutations, invitation, checkout, and first-trace ingestion end to end. Public Sandbox behavior, regional routing, unauthenticated safety, auth callback state, and the production build are verified without those credentials.
+
 ## 2026-09-06 — Account access and onboarding flow
 
 Current verification gap: provider-backed authenticated journeys still require a real EU account/session with a project. The unauthenticated route safety, local EU-backed coverage, production auth endpoints, corrected EU Convex browser binding, current Vercel Production deployment, and deterministic Playground interactions are verified. The regional Convex deployment still needs its missing `sandbox` functions deployed before any future backend-backed Playground persistence is reintroduced. The failed PR Preview build also showed that `CONVEX_SITE_URL` is not currently configured for generic Preview branches; Production is configured and live.

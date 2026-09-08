@@ -1,20 +1,21 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("account access contract", () => {
+  test.describe.configure({ mode: "serial", timeout: 60_000 });
+
   test("public entry points expose the complete unauthenticated path", async ({ page }) => {
     await page.goto("/cloud", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: "Choose your path." })).toBeVisible();
-    await expect(page.getByText("Explore", { exact: true })).toBeVisible();
-    await expect(page.getByText("Build", { exact: true })).toBeVisible();
-
-    const explore = page.getByRole("link", { name: /Choose region/i }).first();
-    await expect(explore).toHaveAttribute("href", /intent=explore/);
-    await expect(explore).toHaveAttribute("href", /userId%3Dusr_demo_7f3a9c21/);
-    await expect(page.locator('a[href*="intent=build"]').first()).toBeVisible();
-    await explore.click();
     await expect(page.getByRole("heading", { name: "Choose your region." })).toBeVisible();
     await expect(page.getByText("Europe", { exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Europe/ })).toHaveAttribute("href", /userId%3Dusr_demo_7f3a9c21/);
+
+    await page.goto("/cloud/mode", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Choose your path." })).toBeVisible();
+    await expect(page.getByText("Sandbox", { exact: true })).toBeVisible();
+    await expect(page.getByText("Build", { exact: true })).toBeVisible();
+    await page.getByRole("link", { name: /Open playground/i }).click();
+    await expect(page).toHaveURL(/\/playground$/);
+    await expect(page.getByRole("heading", { name: "Home" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Tracify Demo (view only)" }).first()).toBeVisible();
   });
 
   test("auth and recovery routes preserve usable forms", async ({ page }) => {
@@ -32,12 +33,65 @@ test.describe("account access contract", () => {
     await expect(page.getByText("This invitation link is incomplete.")).toBeVisible();
   });
 
-  test("account-scoped playground exits cleanly when the session is absent", async ({ page }) => {
+  test("Sandbox is public, populated, and isolated from account projects", async ({ page }) => {
     const pageErrors: Error[] = [];
     page.on("pageerror", (error) => pageErrors.push(error));
-    await page.goto("/playground?intent=explore", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/sign-in\?redirect_url=%2Fplayground%3Fintent%3Dexplore%26userId%3Dusr_demo_7f3a9c21$/, { timeout: 30_000 });
-    expect(pageErrors, "the unauthenticated playground must not surface a Convex query error").toEqual([]);
+    await page.goto("/playground", { waitUntil: "domcontentloaded" });
+    await expect(page.getByText("41", { exact: true })).toBeVisible();
+    await expect(page.getByText("474", { exact: true })).toBeVisible();
+    await page.getByRole("link", { name: "Tracing" }).click();
+    await expect(page).toHaveURL(/\/playground\/tracing$/);
+    await expect(page.getByText("Refund status investigation", { exact: true })).toBeVisible();
+    expect(pageErrors, "the public Sandbox must not surface an account or Convex error").toEqual([]);
+  });
+
+  test("all captured primary Sandbox surfaces have distinct functional routes", async ({ page }) => {
+    const surfaces = [
+      ["dashboards", "Dashboards"], ["tracing", "Tracing"], ["sessions", "Sessions"],
+      ["users", "Users"], ["alerts", "Alerts"], ["prompts", "Prompts"],
+      ["playground", "Playground"], ["scores", "Scores"], ["evaluators", "Evaluators"],
+      ["annotation-queues", "Human Annotation"], ["datasets", "Datasets"],
+      ["experiments", "Experiments"], ["settings", "Settings"],
+    ] as const;
+    for (const [slug, title] of surfaces) {
+      await page.goto(`/playground/${slug}`, { waitUntil: "domcontentloaded" });
+      await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
+      await expect(page.getByText(/ready to explore/i)).toHaveCount(0);
+    }
+  });
+
+  test("Sandbox controls filter data, open details, and enforce read-only writes", async ({ page }) => {
+    await page.goto("/playground/tracing", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Tracing" })).toBeVisible();
+    // The local Next dev server can paint server HTML before client handlers hydrate.
+    await page.waitForTimeout(750);
+    const consentButton = page.getByRole("button", { name: "Accept analytics" });
+    if (await consentButton.isVisible()) await consentButton.click();
+    await page.getByRole("button", { name: "Filters" }).click();
+    await expect(page.getByRole("button", { name: "Filters" })).toHaveAttribute("aria-expanded", "true");
+    await page.getByRole("textbox", { name: "Search" }).fill("refund");
+    await expect(page.getByText("1 results", { exact: true })).toBeVisible();
+    await page.getByRole("link", { name: /Refund status investigation/ }).click();
+    await expect(page.getByRole("heading", { name: "Refund status investigation" })).toBeVisible();
+    await expect(page.getByText("gpt-5.6-luna", { exact: true })).toBeVisible();
+
+    await page.getByRole("button", { name: "Create new" }).click();
+    await expect(page.getByRole("dialog", { name: "This workspace is view only." })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Build a real project" })).toHaveAttribute("href", "/cloud");
+    await page.getByRole("button", { name: "Close" }).last().click();
+    await expect(page.getByRole("dialog", { name: "This workspace is view only." })).toHaveCount(0);
+
+    await page.getByRole("link", { name: "Playground", exact: true }).click();
+    await expect(page).toHaveURL(/\/playground\/playground$/);
+    await expect(page.getByRole("heading", { name: "Playground" })).toBeVisible();
+    await page.getByRole("button", { name: "Run prompt" }).click();
+    await expect(page.getByText(/verified tool evidence/)).toBeVisible();
+    if (await consentButton.isVisible()) {
+      await consentButton.click();
+      await expect(consentButton).toBeHidden();
+    }
+    await page.getByRole("button", { name: "Save version" }).click();
+    await expect(page.getByRole("dialog", { name: "This workspace is view only." })).toBeVisible();
   });
 
   test("project routes do not render invalid Convex IDs before authentication", async ({ page }) => {
@@ -51,7 +105,7 @@ test.describe("account access contract", () => {
   test("cloud entry remains usable on mobile and by keyboard", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/cloud", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: "Choose your path." })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Choose your region." })).toBeVisible();
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
     await expect(page.locator(":focus")).toBeVisible();

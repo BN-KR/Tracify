@@ -1,0 +1,263 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import {
+  Bot,
+  ChevronDown,
+  Copy,
+  ExternalLink,
+  Filter,
+  PanelLeft,
+  Pencil,
+  Search,
+  X,
+} from "lucide-react";
+
+import type {
+  DashboardWorkspace,
+  WorkspaceRecord,
+  WorkspaceSurface,
+} from "../contracts";
+
+const SURFACE_LABELS: Record<WorkspaceSurface, string> = {
+  home: "Home",
+  dashboards: "Dashboards",
+  tracing: "Tracing",
+  sessions: "Sessions",
+  users: "Users",
+  alerts: "Alerts",
+  prompts: "Prompts",
+  playground: "Playground",
+  scores: "Scores",
+  evaluators: "Evaluators",
+  "annotation-queues": "Human Annotation",
+  datasets: "Datasets",
+  experiments: "Experiments",
+  settings: "Settings",
+};
+
+const SURFACE_ALIASES: Record<string, WorkspaceSurface> = {
+  traces: "tracing",
+  evals: "evaluators",
+  "human-annotation": "annotation-queues",
+};
+
+function parseSurface(segments: string[]): WorkspaceSurface {
+  const requested = segments[0] || "home";
+  if (requested in SURFACE_ALIASES) return SURFACE_ALIASES[requested];
+  return requested in SURFACE_LABELS ? (requested as WorkspaceSurface) : "home";
+}
+
+function surfacePath(basePath: string, surface: WorkspaceSurface) {
+  return surface === "home" ? basePath : `${basePath}/${surface}`;
+}
+
+export function CapturedWorkspace({
+  workspace,
+  segments = [],
+}: {
+  workspace: DashboardWorkspace;
+  segments?: string[];
+}) {
+  const surface = parseSurface(segments);
+  const recordId = segments[1];
+  const basePath = workspace.mode === "sandbox" ? "/playground" : `/dashboard/${workspace.project.id}`;
+  const [range, setRange] = useState("1d");
+  const [environment, setEnvironment] = useState("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [readOnlyAction, setReadOnlyAction] = useState<string | null>(null);
+
+  return (
+    <div className="captured-workspace" data-workspace-mode={workspace.mode}>
+      <header className="captured-workspace-header">
+        <div className="captured-workspace-breadcrumbs">
+          <button
+            type="button"
+            className="captured-icon-button"
+            aria-label="Toggle sidebar"
+            onClick={() => window.dispatchEvent(new Event("tracify:toggle-sidebar"))}
+          >
+            <PanelLeft />
+          </button>
+          <button type="button" className="captured-crumb" onClick={() => window.dispatchEvent(new Event("tracify:open-project-switcher"))}>
+            {workspace.project.organizationName}<ChevronDown />
+          </button>
+          <span>/</span>
+          <button type="button" className="captured-crumb" onClick={() => window.dispatchEvent(new Event("tracify:open-project-switcher"))}>
+            {workspace.project.name}<ChevronDown />
+          </button>
+        </div>
+        <div className="captured-workspace-header-actions">
+          <label className="captured-range">
+            <select aria-label="Dashboard time range" value={range} onChange={(event) => setRange(event.target.value)}>
+              <option value="1d">1d</option>
+              <option value="7d">7d</option>
+              <option value="30d">30d</option>
+              <option value="90d">90d</option>
+            </select>
+            <span>{range === "1d" ? "Past 1 day" : `Past ${range.slice(0, -1)} days`}</span><ChevronDown />
+          </label>
+          <button type="button" className="captured-assistant" onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}>
+            <Bot /> Assistant <kbd>Ctrl I</kbd>
+          </button>
+        </div>
+      </header>
+
+      <div className="captured-workspace-toolbar">
+        <h1>{SURFACE_LABELS[surface]}</h1>
+        <label className="captured-control">
+          <span>Env</span>
+          <select aria-label="Environment" value={environment} onChange={(event) => setEnvironment(event.target.value)}>
+            {workspace.environments.map((option) => <option key={option} value={option}>{option === "all" ? "all environments" : option}</option>)}
+          </select>
+          <ChevronDown />
+        </label>
+        <button type="button" className="captured-control" aria-expanded={filtersOpen} onClick={() => setFiltersOpen((current) => !current)}>
+          <Filter /> Filters <ChevronDown />
+        </button>
+        <div className="captured-toolbar-spacer" />
+        {surface === "home" ? (
+          <>
+            <span className="captured-dashboard-name"><span className="captured-mark" />Tracify Cost Dashboard</span>
+            <Link className="captured-icon-button" href={surfacePath(basePath, "dashboards")} aria-label="Edit this dashboard in Dashboards"><Pencil /></Link>
+            {workspace.mode === "live" ? <Link className="captured-primary-action" href={`${basePath}/quickstart`}>Configure Tracing <ExternalLink /></Link> : null}
+          </>
+        ) : (
+          <button type="button" className="captured-primary-action" onClick={() => workspace.readOnly ? setReadOnlyAction(`Create ${SURFACE_LABELS[surface]}`) : setReadOnlyAction(`Create ${SURFACE_LABELS[surface]}`)}>
+            Create new
+          </button>
+        )}
+      </div>
+
+      {filtersOpen ? (
+        <div className="captured-filter-panel" role="dialog" aria-label="Dashboard filters">
+          <label><Search /> Search<input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Filter ${SURFACE_LABELS[surface].toLowerCase()}`} /></label>
+          <button type="button" onClick={() => { setQuery(""); setEnvironment("all"); }}>Clear all</button>
+        </div>
+      ) : null}
+
+      {surface === "home" ? (
+        <HomeSurface workspace={workspace} environment={environment} />
+      ) : surface === "settings" ? (
+        <SettingsSurface workspace={workspace} onReadOnly={setReadOnlyAction} />
+      ) : surface === "playground" ? (
+        <PromptPlaygroundSurface workspace={workspace} onReadOnly={setReadOnlyAction} />
+      ) : (
+        <CollectionSurface
+          workspace={workspace}
+          surface={surface}
+          basePath={basePath}
+          query={query}
+          environment={environment}
+          recordId={recordId}
+          onReadOnly={setReadOnlyAction}
+        />
+      )}
+
+      {readOnlyAction ? (
+        <div className="captured-modal-backdrop" role="presentation">
+          <section className="captured-modal" role="dialog" aria-modal="true" aria-labelledby="captured-modal-title">
+            <button type="button" className="captured-modal-close" aria-label="Close" onClick={() => setReadOnlyAction(null)}><X /></button>
+            <span>Sandbox boundary</span>
+            <h2 id="captured-modal-title">{workspace.readOnly ? "This workspace is view only." : `${readOnlyAction} is ready in your live project.`}</h2>
+            <p>{workspace.readOnly ? "Explore filters, records, dashboards, and prompt inputs safely. Build a real project to save changes, credentials, alerts, or evaluations." : "Use the corresponding live project workflow to save this change."}</p>
+            <div>
+              {workspace.readOnly ? <Link href="/cloud">Build a real project</Link> : null}
+              <button type="button" onClick={() => setReadOnlyAction(null)}>Close</button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function HomeSurface({ workspace, environment }: { workspace: DashboardWorkspace; environment: string }) {
+  const traces = workspace.collections.tracing.records.filter((record) => environment === "all" || record.environment === environment);
+  const users = workspace.collections.users.records;
+  return (
+    <main className="captured-home-grid">
+      <MetricPanel title="Total Count Traces" subtitle="Shows the count of Traces" value={workspace.metrics.traces.toLocaleString()} />
+      <MetricPanel title="Total Count Observations" subtitle="Shows the count of Observations" value={workspace.metrics.observations.toLocaleString()} />
+      <section className="captured-panel captured-model-chart">
+        <PanelHeading title="Cost by Model Name" subtitle="Total cost broken down by model name" />
+        <div className="captured-bars" aria-label="Cost by model chart">
+          {[86, 4, 2, 1].map((height, index) => <span key={workspace.models[index + 1] ?? index} style={{ height: `${height}%` }}><small>{workspace.models[index + 1] ?? "tools"}</small></span>)}
+        </div>
+      </section>
+      <section className="captured-panel captured-cost-chart">
+        <PanelHeading title="Total costs" subtitle="Total cost across all use cases" />
+        <LineChart label={`$${workspace.metrics.totalCost.toFixed(5)} total`} />
+      </section>
+      <section className="captured-panel captured-users-cost">
+        <PanelHeading title="Top Users by Cost" subtitle="Aggregated model cost by trace.userId" />
+        <div className="captured-user-bars">
+          {users.slice(0, 6).map((user, index) => <div key={user.id}><span style={{ width: `${94 - index * 11}%` }} /><button type="button" onClick={() => void navigator.clipboard?.writeText(user.id)}>{user.id}<Copy /></button><strong>${(0.169297 - index * 0.01831).toFixed(6)}</strong></div>)}
+        </div>
+      </section>
+      <section className="captured-panel captured-recent-traces">
+        <PanelHeading title="Recent traces" subtitle={`${traces.length} visible records · ${environment === "all" ? "all environments" : environment}`} />
+        <div className="captured-compact-table">
+          {traces.slice(0, 5).map((trace) => <div key={trace.id}><span className={`captured-status-dot ${trace.status.toLowerCase()}`} /><span>{trace.name}</span><small>{trace.model}</small><strong>{trace.cost}</strong></div>)}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function MetricPanel({ title, subtitle, value }: { title: string; subtitle: string; value: string }) {
+  return <section className="captured-panel captured-metric"><PanelHeading title={title} subtitle={subtitle} /><strong>{value}</strong></section>;
+}
+
+function PanelHeading({ title, subtitle }: { title: string; subtitle: string }) {
+  return <header className="captured-panel-heading"><h2>{title}</h2><p>{subtitle}</p></header>;
+}
+
+function LineChart({ label }: { label: string }) {
+  return <div className="captured-line-chart"><span className="captured-chart-label">{label}</span><svg viewBox="0 0 760 230" preserveAspectRatio="none" aria-label="Total cost over time"><polyline points="0,210 45,205 90,170 135,218 180,176 225,165 270,172 315,115 360,148 405,120 450,154 495,96 540,132 585,118 630,36 675,104 720,78 760,18" /></svg></div>;
+}
+
+function CollectionSurface({ workspace, surface, basePath, query, environment, recordId, onReadOnly }: { workspace: DashboardWorkspace; surface: Exclude<WorkspaceSurface, "home" | "settings" | "playground">; basePath: string; query: string; environment: string; recordId?: string; onReadOnly: (action: string) => void }) {
+  const collection = workspace.collections[surface];
+  const visible = collection.records.filter((record) => (environment === "all" || record.environment === environment) && (!query || `${record.id} ${record.name} ${record.status}`.toLowerCase().includes(query.toLowerCase())));
+  const record = recordId ? collection.records.find((candidate) => candidate.id === recordId) : null;
+  if (record) return <RecordDetail record={record} surface={surface} basePath={basePath} />;
+  return (
+    <main className="captured-collection">
+      <div className="captured-collection-summary"><span>{collection.description}</span><strong>{visible.length} results</strong></div>
+      <div className="captured-table-scroll">
+        <table>
+          <thead><tr><th>Name</th><th>Status</th><th>Environment</th><th>{surface === "scores" ? "Score" : "Model"}</th><th>Updated</th><th /></tr></thead>
+          <tbody>{visible.map((record) => <tr key={record.id}>
+            <td><Link href={`${surfacePath(basePath, surface)}/${encodeURIComponent(record.id)}`}><strong>{record.name}</strong><small>{record.id}</small></Link></td>
+            <td><span className={`captured-status ${record.status.toLowerCase().replaceAll(" ", "-")}`}>{record.status}</span></td>
+            <td>{record.environment}</td>
+            <td>{surface === "scores" ? record.score : record.model ?? "—"}</td>
+            <td>{record.timestamp}</td>
+            <td><button type="button" onClick={() => workspace.readOnly ? onReadOnly(`Edit ${record.name}`) : onReadOnly(`Edit ${record.name}`)}>•••</button></td>
+          </tr>)}</tbody>
+        </table>
+      </div>
+      {!visible.length ? <div className="captured-empty">No records match the current filters.</div> : null}
+    </main>
+  );
+}
+
+function RecordDetail({ record, surface, basePath }: { record: WorkspaceRecord; surface: WorkspaceSurface; basePath: string }) {
+  return <main className="captured-detail"><Link href={surfacePath(basePath, surface)}>← Back to {SURFACE_LABELS[surface]}</Link><section><span>{surface} / {record.id}</span><h2>{record.name}</h2><div className="captured-detail-grid"><Detail label="Status" value={record.status} /><Detail label="Environment" value={record.environment} /><Detail label="Model" value={record.model ?? "Not applicable"} /><Detail label="Latency" value={record.latency ?? "—"} /><Detail label="Cost" value={record.cost ?? "—"} /><Detail label="Score" value={record.score ?? "—"} /></div><div className="captured-io"><article><span>Input</span><pre>{record.input ?? `Open ${record.name}`}</pre></article><article><span>Output</span><pre>{record.output ?? "This deterministic Sandbox record is connected to the selected Tracify surface."}</pre></article></div></section></main>;
+}
+
+function Detail({ label, value }: { label: string; value: string }) { return <div><span>{label}</span><strong>{value}</strong></div>; }
+
+function PromptPlaygroundSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
+  const [prompt, setPrompt] = useState("You are a support agent. Answer {{question}} using only verified context.");
+  const [question, setQuestion] = useState("Where is my order?");
+  const [output, setOutput] = useState("Run the prompt to inspect the model response.");
+  return <main className="captured-prompt-playground"><section><PanelHeading title="Prompt" subtitle="Test variables and model settings" /><textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} /><input value={question} onChange={(event) => setQuestion(event.target.value)} aria-label="Question variable" /><button type="button" onClick={() => setOutput(`Your order was located with verified tool evidence.\n\nModel: ${workspace.models[1]}\nEnvironment: sandbox`)}>Run prompt</button></section><section><PanelHeading title="Generation" subtitle="Deterministic Sandbox response" /><pre>{output}</pre><button type="button" onClick={() => onReadOnly("Save prompt version")}>Save version</button></section></main>;
+}
+
+function SettingsSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
+  return <main className="captured-settings"><nav>{["General", "Members", "API Keys", "LLM Connections", "Scores", "Integrations", "Audit log"].map((item, index) => <button key={item} type="button" className={index === 0 ? "active" : ""} onClick={() => index === 0 ? undefined : onReadOnly(`Open ${item}`)}>{item}</button>)}</nav><section><span>Project settings</span><h2>{workspace.project.name}</h2><label>Project name<input value={workspace.project.name} readOnly /></label><label>Project ID<input value={workspace.project.id} readOnly /></label><button type="button" onClick={() => onReadOnly("Save project settings")}>Save changes</button></section></main>;
+}

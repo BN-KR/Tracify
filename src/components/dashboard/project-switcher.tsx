@@ -75,8 +75,8 @@ export function ProjectSwitcher({ isCollapsed = false, previewProjectName, synth
         <DropdownMenuSeparator />
         {synthetic ? (
           <>
-            <DropdownMenuItem disabled>Demo Project · view only</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/cloud?intent=build")}>Build a real project</DropdownMenuItem>
+            <DropdownMenuItem disabled>Tracify Demo · view only</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/cloud")}>Build a real project</DropdownMenuItem>
           </>
         ) : projects.length ? (
           projects.map((project) => (

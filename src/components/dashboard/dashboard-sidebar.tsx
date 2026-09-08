@@ -23,7 +23,7 @@ import {
   Zap,
   Users,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type ComponentType } from "react";
+import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProjectSwitcher } from "@/components/dashboard/project-switcher";
@@ -38,7 +38,7 @@ import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand-logo";
 import { getTracifyRegion } from "@/lib/regions";
 
-type GroupId = "observe" | "analyze" | "improve" | "operate" | "manage" | "resources";
+type GroupId = "primary" | "observe" | "analyze" | "improve" | "operate" | "manage" | "resources";
 
 type NavItem = {
   title: string;
@@ -94,10 +94,63 @@ export function DashboardSidebar({
   const params = useParams();
   const projectId = projectIdOverride || (params?.projectId as string) || "";
   const isSynthetic = synthetic && pathname.startsWith("/playground");
-  const syntheticHref = (view: string) => `/playground?view=${view}`;
+  const syntheticHref = (view: string) => view === "home" ? "/playground" : `/playground/${view}`;
   const projectDashboardHref = isSynthetic ? "/dashboard" : projectId ? `/dashboard/${projectId}` : "/dashboard";
+  const workspaceHref = useCallback((view: string, liveView = view) =>
+    isSynthetic ? (view === "home" ? "/playground" : `/playground/${view}`) : liveView === "home" ? projectDashboardHref : `${projectDashboardHref}/${liveView}`,
+  [isSynthetic, projectDashboardHref]);
   const region = getTracifyRegion();
-  const dynamicGroups = useMemo<NavGroup[]>(() => [
+  const dynamicGroups = useMemo<NavGroup[]>(() => {
+    if (isSynthetic || projectId) {
+      return [
+        {
+          id: "primary",
+          label: "",
+          items: [
+            { title: "Home", icon: LayoutDashboard, href: workspaceHref("home") },
+            { title: "Dashboards", icon: LayoutDashboard, href: workspaceHref("dashboards") },
+          ],
+        },
+        {
+          id: "observe",
+          label: "Observability",
+          items: [
+            { title: "Tracing", icon: Activity, href: workspaceHref("tracing") },
+            { title: "Sessions", icon: Activity, href: workspaceHref("sessions") },
+            { title: "Users", icon: Users, href: workspaceHref("users") },
+            { title: "Alerts", icon: Activity, href: workspaceHref("alerts") },
+          ],
+        },
+        {
+          id: "improve",
+          label: "Prompt Management",
+          items: [
+            { title: "Prompts", icon: MessageSquareText, href: workspaceHref("prompts") },
+            { title: "Playground", icon: PlaygroundIcon, href: workspaceHref("playground") },
+          ],
+        },
+        {
+          id: "analyze",
+          label: "Evaluation",
+          items: [
+            { title: "Scores", icon: BarChart3, href: workspaceHref("scores") },
+            { title: "Evaluators", icon: FlaskConical, href: workspaceHref("evaluators") },
+            { title: "Human Annotation", icon: MessageSquareText, href: workspaceHref("annotation-queues", "human-annotation") },
+            { title: "Datasets", icon: Database, href: workspaceHref("datasets") },
+            { title: "Experiments", icon: FlaskConical, href: workspaceHref("experiments") },
+          ],
+        },
+        {
+          id: "manage",
+          label: "",
+          items: [
+            { title: "Upgrade Plan", icon: Zap, href: isSynthetic ? "/cloud" : workspaceHref("billing") },
+            { title: "Settings", icon: Settings2, href: workspaceHref("settings") },
+          ],
+        },
+      ];
+    }
+    return [
     {
       id: "observe",
       label: "Observe",
@@ -317,14 +370,16 @@ export function DashboardSidebar({
           : []),
       ],
     },
-  ], [canAccessContent, isSynthetic, projectDashboardHref, projectId]);
+    ];
+  }, [canAccessContent, isSynthetic, projectDashboardHref, projectId, workspaceHref]);
 
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
     if (typeof window === "undefined") {
-      return { observe: true, analyze: true, improve: true, operate: true, manage: true, resources: true };
+      return { primary: true, observe: true, analyze: true, improve: true, operate: true, manage: true, resources: true };
     }
     const stored = window.localStorage.getItem(GROUP_STORAGE_KEY);
     const defaults: Record<GroupId, boolean> = {
+      primary: true,
       observe: true,
       analyze: true,
       improve: true,
@@ -460,7 +515,7 @@ export function DashboardSidebar({
       </nav>
 
       <Link
-        href={isSynthetic ? "/cloud/region?next=%2Fplayground%3Fview%3Dhome&intent=explore" : "/cloud?next=/dashboard"}
+        href={isSynthetic ? "/cloud" : "/cloud"}
         className={cn("flex min-h-12 items-center border-t border-black/15 px-4 text-black/55 hover:bg-[#f3f2ed] hover:text-black", showExpandedContent ? "gap-3" : "justify-center")}
         aria-label={`${region.name} cloud region. Open region directory`}
       >

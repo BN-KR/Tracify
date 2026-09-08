@@ -36,14 +36,14 @@ export function DashboardShell({
   const pathname = usePathname();
   const projectId = params?.projectId as string | undefined;
   const isDashboardRoute = synthetic || preview || pathname === "/dashboard" || pathname.startsWith("/dashboard/");
-  const isTracifyOverview = synthetic || preview || Boolean(projectId && pathname === `/dashboard/${projectId}`);
+  const isTracifyOverview = synthetic || preview || Boolean(projectId);
   const [activeTheme] = useState<DashboardTheme>(() => {
     if (dashboardTheme) return dashboardTheme;
     if (typeof window !== "undefined") {
       const requestedTheme = new URLSearchParams(window.location.search).get("ui");
       if (requestedTheme === "legacy" || requestedTheme === "tracify-v2") return requestedTheme;
     }
-    return process.env.NEXT_PUBLIC_TRACIFY_DASHBOARD_V2 === "true" ? "tracify-v2" : "legacy";
+    return process.env.NEXT_PUBLIC_TRACIFY_DASHBOARD_V2 === "false" ? "legacy" : "tracify-v2";
   });
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
