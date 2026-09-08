@@ -204,7 +204,7 @@ export function CapturedWorkspace({
             <Link className="captured-icon-button" href={surfacePath(basePath, "dashboards")} aria-label="Edit this dashboard in Dashboards"><Pencil /></Link>
             {workspace.mode === "live" ? <Link className="captured-primary-action" href={`${basePath}/quickstart`}>Configure Tracing <ExternalLink /></Link> : null}
           </>
-        ) : (
+        ) : surface === "tracing" ? null : (
           <button type="button" className="captured-primary-action" onClick={() => workspace.readOnly ? setReadOnlyAction(`Create ${SURFACE_LABELS[surface]}`) : setReadOnlyAction(`Create ${SURFACE_LABELS[surface]}`)}>
             Create new
           </button>

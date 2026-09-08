@@ -110,6 +110,11 @@ test.describe("account access contract", () => {
     await expect(page.locator("h2", { hasText: "Refund status investigation" })).toBeVisible();
     await expect(page.getByText("gpt-5.6-luna", { exact: true })).toBeVisible();
 
+    await page.getByRole("link", { name: /Back to Tracing/ }).click();
+    await expect(page.getByRole("heading", { name: "Tracing" })).toBeVisible();
+    await page.getByRole("link", { name: "Datasets", exact: true }).click();
+    await expect(page).toHaveURL(/\/playground\/datasets$/);
+    await expect(page.getByRole("heading", { name: "Datasets" })).toBeVisible();
     await page.getByRole("button", { name: "Create new" }).click();
     await expect(page.getByRole("dialog", { name: "This workspace is view only." })).toBeVisible();
     await expect(page.getByRole("link", { name: "Build a real project" })).toHaveAttribute("href", "/cloud");
