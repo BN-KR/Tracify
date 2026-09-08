@@ -1609,3 +1609,4 @@ Current verification gap: completing a valid provider-backed sign-in still requi
 88. [in progress] Match the responsive Sessions filter-rail breakpoint: narrow tablet uses the reference icon-only rail, while desktop/tablet landscape and mobile retain their captured widths and behaviors.
 91. [in progress] Finish the Sessions mobile edge/toolbar alignment and re-run the complete six-viewport matrix after each responsive adjustment.
 93. [in progress] Align Users Sandbox identifiers, localized event timestamps, fixed column widths, and mobile overflow with the populated page 027 reference while preserving live data behavior.
+94. [in progress] Correct Tracing table column geometry after the leading selection column; verify Type icon, Start Time, Input, Output, and horizontal overflow across all six viewports.

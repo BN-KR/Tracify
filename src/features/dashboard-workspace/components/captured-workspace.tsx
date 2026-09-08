@@ -473,7 +473,7 @@ function TracingSurface({ workspace, basePath, query, environment, onReadOnly }:
 function renderTraceCell(column: string, record: WorkspaceRecord, basePath: string) {
   switch (column) {
     case "Start Time": return record.timestamp;
-    case "Type": return "generation";
+    case "Type": return <span className="captured-trace-type-icon" aria-label="generation">✣</span>;
     case "Name": return <Link href={`${basePath}/tracing/${encodeURIComponent(record.id)}`}>{record.name}</Link>;
     case "Trace Name": return record.traceName ?? record.name;
     case "Input": return record.input ?? "—";
