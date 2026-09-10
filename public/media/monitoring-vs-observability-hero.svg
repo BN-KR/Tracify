@@ -1,0 +1,46 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="mvoHeroTitle mvoHeroDesc">
+  <title id="mvoHeroTitle">A single dashboard gauge next to a branching trace tree, showing the gap between monitoring and observability</title>
+  <desc id="mvoHeroDesc">A black canvas is split in two. On the left, a cream gauge panel labeled MONITORING shows one needle and the words KNOWN QUESTIONS. On the right, an acid-yellow panel labeled OBSERVABILITY shows a branching tree of spans with the words NEW QUESTIONS, representing the difference between watching a fixed set of dashboards and being able to ask arbitrary questions of recorded system state.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="70" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">WATCHING VS. EXPLAINING</text>
+
+  <g transform="translate(120,160)">
+    <rect x="0" y="0" width="620" height="620" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+    <text x="30" y="50" fill="#f6f1e6" font-family="monospace" font-size="22" font-weight="700">MONITORING</text>
+    <text x="30" y="82" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.7">known questions, fixed dashboards</text>
+
+    <circle cx="310" cy="340" r="150" fill="none" stroke="#f6f1e6" stroke-width="4"/>
+    <line x1="310" y1="340" x2="310" y2="210" stroke="#f4d44d" stroke-width="6"/>
+    <line x1="310" y1="340" x2="420" y2="380" stroke="#f6f1e6" stroke-width="4"/>
+    <circle cx="310" cy="340" r="10" fill="#f4d44d"/>
+    <text x="310" y="540" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="16" opacity="0.75">error rate · latency p95 · uptime</text>
+    <text x="310" y="570" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.5">tells you THAT something is wrong</text>
+  </g>
+
+  <g transform="translate(860,160)">
+    <rect x="0" y="0" width="620" height="620" fill="#f4d44d"/>
+    <text x="30" y="50" fill="#0a0a0a" font-family="monospace" font-size="22" font-weight="700">OBSERVABILITY</text>
+    <text x="30" y="82" fill="#0a0a0a" font-family="monospace" font-size="14" opacity="0.75">new questions, ad-hoc exploration</text>
+
+    <g stroke="#0a0a0a" stroke-width="4" fill="none">
+      <line x1="310" y1="150" x2="310" y2="230"/>
+      <line x1="310" y1="230" x2="180" y2="320"/>
+      <line x1="310" y1="230" x2="310" y2="320"/>
+      <line x1="310" y1="230" x2="440" y2="320"/>
+      <line x1="180" y1="320" x2="120" y2="410"/>
+      <line x1="180" y1="320" x2="220" y2="410"/>
+      <line x1="440" y1="320" x2="400" y2="410"/>
+      <line x1="440" y1="320" x2="480" y2="410"/>
+    </g>
+    <circle cx="310" cy="150" r="10" fill="#0a0a0a"/>
+    <circle cx="180" cy="320" r="8" fill="#0a0a0a"/>
+    <circle cx="310" cy="320" r="8" fill="#0a0a0a"/>
+    <circle cx="440" cy="320" r="8" fill="#0a0a0a"/>
+    <circle cx="120" cy="410" r="6" fill="#0a0a0a"/>
+    <circle cx="220" cy="410" r="6" fill="#0a0a0a"/>
+    <circle cx="400" cy="410" r="6" fill="#0a0a0a"/>
+    <circle cx="480" cy="410" r="6" fill="#0a0a0a"/>
+    <text x="310" y="540" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="16" opacity="0.85">every span, tool call, and decision recorded</text>
+    <text x="310" y="570" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="14" opacity="0.6">tells you WHY it went wrong</text>
+  </g>
+</svg>

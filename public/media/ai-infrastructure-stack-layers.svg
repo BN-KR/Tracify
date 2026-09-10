@@ -1,0 +1,43 @@
+<svg viewBox="0 0 1600 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="layersTitle layersDesc">
+  <title id="layersTitle">A two-column grid pairing each infrastructure layer with the one question it answers</title>
+  <desc id="layersDesc">A black canvas shows a two-column grid of eight rows. The left column names a layer — data pipelines, vector store, model serving, orchestration, guardrails, evaluation, observability, deployment — and the right column states the one question that layer answers, such as guardrails answering "was this allowed" and evaluation answering "was this good."</desc>
+  <rect width="1600" height="700" fill="#0a0a0a"/>
+  <text x="90" y="70" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1.5">ONE QUESTION PER LAYER</text>
+
+  <g font-family="monospace" font-size="14" fill="#f6f1e6">
+    <line x1="90" y1="100" x2="1510" y2="100" stroke="#f6f1e6" stroke-opacity="0.25"/>
+
+    <text x="90" y="140" fill="#f4d44d">DATA PIPELINES</text>
+    <text x="560" y="140" opacity="0.85">Is the data current and traceable?</text>
+    <line x1="90" y1="156" x2="1510" y2="156" stroke="#f6f1e6" stroke-opacity="0.15"/>
+
+    <text x="90" y="190" fill="#f4d44d">VECTOR STORE</text>
+    <text x="560" y="190" opacity="0.85">What context is relevant to this query?</text>
+    <line x1="90" y1="206" x2="1510" y2="206" stroke="#f6f1e6" stroke-opacity="0.15"/>
+
+    <text x="90" y="240" fill="#f4d44d">MODEL SERVING</text>
+    <text x="560" y="240" opacity="0.85">What tokens come back, and how fast?</text>
+    <line x1="90" y1="256" x2="1510" y2="256" stroke="#f6f1e6" stroke-opacity="0.15"/>
+
+    <text x="90" y="290" fill="#f4d44d">ORCHESTRATION</text>
+    <text x="560" y="290" opacity="0.85">What happens next, and in what order?</text>
+    <line x1="90" y1="306" x2="1510" y2="306" stroke="#f6f1e6" stroke-opacity="0.15"/>
+
+    <text x="90" y="340" fill="#f4d44d">GUARDRAILS</text>
+    <text x="560" y="340" opacity="0.85">Was this allowed?</text>
+    <line x1="90" y1="356" x2="1510" y2="356" stroke="#f6f1e6" stroke-opacity="0.15"/>
+
+    <text x="90" y="390" fill="#f4d44d">EVALUATION</text>
+    <text x="560" y="390" opacity="0.85">Was this good?</text>
+    <line x1="90" y1="406" x2="1510" y2="406" stroke="#f6f1e6" stroke-opacity="0.15"/>
+
+    <text x="90" y="440" fill="#f4d44d">OBSERVABILITY</text>
+    <text x="560" y="440" opacity="0.85">What actually happened, end to end?</text>
+    <line x1="90" y1="456" x2="1510" y2="456" stroke="#f6f1e6" stroke-opacity="0.15"/>
+
+    <text x="90" y="490" fill="#f4d44d">DEPLOYMENT</text>
+    <text x="560" y="490" opacity="0.85">What shipped, and can it be reverted together?</text>
+  </g>
+
+  <text x="90" y="620" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">no layer answers another layer's question</text>
+</svg>

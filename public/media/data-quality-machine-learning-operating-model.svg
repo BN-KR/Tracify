@@ -1,0 +1,51 @@
+<svg viewBox="0 0 1600 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dqomTitle dqomDesc">
+  <title id="dqomTitle">The Capture, Measure, Compare, Gate operating model as four connected stages</title>
+  <desc id="dqomDesc">A black canvas shows four connected boxes in a horizontal chain labeled Capture, Measure, Compare, and Gate, each with a one-line description underneath, and an arrow looping from Gate back to Capture to show the model runs continuously rather than once.</desc>
+  <rect width="1600" height="700" fill="#0a0a0a"/>
+  <text x="100" y="80" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="2">THE OPERATING MODEL</text>
+
+  <g font-family="monospace" font-size="15">
+    <g>
+      <rect x="100" y="220" width="300" height="140" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+      <text x="130" y="270" fill="#f4d44d" font-size="20" font-weight="bold">1. Capture</text>
+      <text x="130" y="300" fill="#f6f1e6" opacity="0.7" font-size="13">record the input, label,</text>
+      <text x="130" y="320" fill="#f6f1e6" opacity="0.7" font-size="13">and source of every row</text>
+    </g>
+
+    <g>
+      <rect x="480" y="220" width="300" height="140" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+      <text x="510" y="270" fill="#f4d44d" font-size="20" font-weight="bold">2. Measure</text>
+      <text x="510" y="300" fill="#f6f1e6" opacity="0.7" font-size="13">score noise, drift, leakage,</text>
+      <text x="510" y="320" fill="#f6f1e6" opacity="0.7" font-size="13">imbalance, and staleness</text>
+    </g>
+
+    <g>
+      <rect x="860" y="220" width="300" height="140" fill="none" stroke="#f6f1e6" stroke-width="2"/>
+      <text x="890" y="270" fill="#f4d44d" font-size="20" font-weight="bold">3. Compare</text>
+      <text x="890" y="300" fill="#f6f1e6" opacity="0.7" font-size="13">check against a baseline,</text>
+      <text x="890" y="320" fill="#f6f1e6" opacity="0.7" font-size="13">not a fixed threshold alone</text>
+    </g>
+
+    <g>
+      <rect x="1240" y="220" width="260" height="140" fill="#f4d44d" fill-opacity="0.1" stroke="#f4d44d" stroke-width="2"/>
+      <text x="1270" y="270" fill="#f4d44d" font-size="20" font-weight="bold">4. Gate</text>
+      <text x="1270" y="300" fill="#f6f1e6" opacity="0.8" font-size="13">block, warn, or pass the</text>
+      <text x="1270" y="320" fill="#f6f1e6" opacity="0.8" font-size="13">dataset or the release</text>
+    </g>
+
+    <!-- arrows between boxes -->
+    <g stroke="#f6f1e6" stroke-opacity="0.6" stroke-width="2" fill="none">
+      <line x1="400" y1="290" x2="475" y2="290"/>
+      <polygon points="475,290 462,283 462,297" fill="#f6f1e6" fill-opacity="0.6"/>
+      <line x1="780" y1="290" x2="855" y2="290"/>
+      <polygon points="855,290 842,283 842,297" fill="#f6f1e6" fill-opacity="0.6"/>
+      <line x1="1160" y1="290" x2="1235" y2="290"/>
+      <polygon points="1235,290 1222,283 1222,297" fill="#f6f1e6" fill-opacity="0.6"/>
+    </g>
+
+    <!-- loop back -->
+    <path d="M 1370 360 L 1370 500 L 250 500 L 250 365" fill="none" stroke="#f4d44d" stroke-width="2" stroke-dasharray="6 6"/>
+    <polygon points="250,365 243,378 257,378" fill="#f4d44d"/>
+    <text x="600" y="530" fill="#f4d44d" font-size="13" opacity="0.85">runs every dataset update and every eval cycle, not once at project start</text>
+  </g>
+</svg>

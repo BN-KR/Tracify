@@ -1,0 +1,39 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="aisTitle aisDesc">
+  <title id="aisTitle">Eight stacked layers forming one AI infrastructure path from data to a served answer</title>
+  <desc id="aisDesc">A black canvas shows eight horizontal bands stacked vertically, labeled data pipelines, vector store, model serving, orchestration, guardrails, evaluation, observability, and deployment, with a single dashed line running top to bottom through all eight to represent one request's path, and a small yellow marker at the bottom labeled RESPONSE.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI INFRASTRUCTURE STACK</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">eight layers, one request</text>
+
+  <g font-family="monospace" font-size="14" fill="#f6f1e6">
+    <rect x="420" y="160" width="760" height="72" fill="none" stroke="#f6f1e6" stroke-opacity="0.25"/>
+    <text x="440" y="202" opacity="0.75">DATA PIPELINES</text>
+
+    <rect x="420" y="244" width="760" height="72" fill="none" stroke="#f6f1e6" stroke-opacity="0.3"/>
+    <text x="440" y="286" opacity="0.75">VECTOR STORE / RETRIEVAL</text>
+
+    <rect x="420" y="328" width="760" height="72" fill="none" stroke="#f6f1e6" stroke-opacity="0.35"/>
+    <text x="440" y="370" opacity="0.8">MODEL SERVING</text>
+
+    <rect x="420" y="412" width="760" height="72" fill="none" stroke="#f6f1e6" stroke-opacity="0.4"/>
+    <text x="440" y="454" opacity="0.8">ORCHESTRATION</text>
+
+    <rect x="420" y="496" width="760" height="72" fill="none" stroke="#f6f1e6" stroke-opacity="0.45"/>
+    <text x="440" y="538" opacity="0.85">GUARDRAILS</text>
+
+    <rect x="420" y="580" width="760" height="72" fill="none" stroke="#f6f1e6" stroke-opacity="0.5"/>
+    <text x="440" y="622" opacity="0.85">EVALUATION</text>
+
+    <rect x="420" y="664" width="760" height="72" fill="none" stroke="#f4d44d" stroke-opacity="0.85"/>
+    <text x="440" y="706" fill="#f4d44d">OBSERVABILITY</text>
+
+    <rect x="420" y="748" width="760" height="72" fill="none" stroke="#f6f1e6" stroke-opacity="0.6"/>
+    <text x="440" y="790" opacity="0.9">DEPLOYMENT / SCALING</text>
+  </g>
+
+  <line x1="800" y1="160" x2="800" y2="820" stroke="#f4d44d" stroke-width="2" stroke-dasharray="4 6"/>
+  <rect x="765" y="820" width="70" height="34" fill="#f4d44d"/>
+  <text x="800" y="843" fill="#0a0a0a" text-anchor="middle" font-family="monospace" font-size="12" font-weight="bold">RESPONSE</text>
+
+  <text x="100" y="860" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">one request touches every layer at least once</text>
+</svg>

@@ -1,0 +1,32 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="obsMlopsTitle obsMlopsDesc">
+  <title id="obsMlopsTitle">Two disciplines sharing one model lifecycle spine</title>
+  <desc id="obsMlopsDesc">A black canvas shows a horizontal lifecycle spine running from data through training, deployment, and production. A lower band labeled MLOPS covers data, training, and deployment stages. An upper band labeled AI OBSERVABILITY covers the production stage and reaches back over deployment, with a shared overlap zone marked where the two bands cross above deployment.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">AI OBSERVABILITY VS MLOPS</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">one lifecycle, two disciplines</text>
+
+  <line x1="140" y1="450" x2="1460" y2="450" stroke="#f6f1e6" stroke-width="2" stroke-opacity="0.35"/>
+  <g font-family="monospace" font-size="13" fill="#f6f1e6" opacity="0.6">
+    <text x="140" y="440">data</text>
+    <text x="470" y="440">training</text>
+    <text x="830" y="440">deployment</text>
+    <text x="1230" y="440">production</text>
+  </g>
+  <circle cx="170" cy="450" r="7" fill="#f6f1e6"/>
+  <circle cx="520" cy="450" r="7" fill="#f6f1e6"/>
+  <circle cx="900" cy="450" r="7" fill="#f6f1e6"/>
+  <circle cx="1300" cy="450" r="7" fill="#f6f1e6"/>
+
+  <rect x="140" y="520" width="900" height="200" fill="#f6f1e6" fill-opacity="0.08" stroke="#f6f1e6" stroke-opacity="0.5" stroke-width="2"/>
+  <text x="170" y="565" fill="#f6f1e6" font-family="monospace" font-size="16" opacity="0.9">MLOPS</text>
+  <text x="170" y="591" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.55">data pipelines · training · registry · deployment</text>
+
+  <rect x="760" y="190" width="700" height="200" fill="#f4d44d" fill-opacity="0.1" stroke="#f4d44d" stroke-width="2"/>
+  <text x="790" y="235" fill="#f4d44d" font-family="monospace" font-size="16" font-weight="bold">AI OBSERVABILITY</text>
+  <text x="790" y="261" fill="#f4d44d" font-family="monospace" font-size="13" opacity="0.8">traces · evals · drift · production correctness</text>
+
+  <rect x="760" y="520" width="280" height="200" fill="#f4d44d" fill-opacity="0.16" stroke="#f4d44d" stroke-width="2" stroke-dasharray="4 6"/>
+  <text x="785" y="740" fill="#f4d44d" font-family="monospace" font-size="12" opacity="0.85">shared overlap: deploy-time evals</text>
+
+  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">MLOps ships the model; AI observability tells you what it actually did once it was live</text>
+</svg>

@@ -1,0 +1,36 @@
+<svg viewBox="0 0 1600 820" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="eaatBvbTitle eaatBvbDesc">
+  <title id="eaatBvbTitle">A two-axis map plotting four agent workloads by differentiation and data sensitivity to decide build, buy, or wrap</title>
+  <desc id="eaatBvbDesc">An illustration of a quadrant chart with differentiation to the reader increasing on the vertical axis and data sensitivity increasing on the horizontal axis. Four workload dots are placed on the map: an internal support triage bot sits low on both axes and is labeled buy, a regulated claims reviewer sits high on sensitivity and is labeled build with strict controls, a marketing copy assistant sits low on both and is labeled wrap an existing tool, and a proprietary pricing agent sits high on differentiation and is labeled build. A note states that the axis position, not internal enthusiasm, should decide the column.</desc>
+  <rect width="1600" height="820" fill="#0a0a0a"/>
+  <text x="90" y="60" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">BUILD, BUY, OR WRAP</text>
+  <text x="90" y="88" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">plot the workload before the team plots its enthusiasm</text>
+
+  <!-- axes -->
+  <line x1="260" y1="120" x2="260" y2="680" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="1.5"/>
+  <line x1="260" y1="680" x2="1420" y2="680" stroke="#f6f1e6" stroke-opacity="0.4" stroke-width="1.5"/>
+  <text x="230" y="110" text-anchor="end" fill="#f6f1e6" font-family="monospace" font-size="12" opacity="0.7">high differentiation</text>
+  <text x="230" y="695" text-anchor="end" fill="#f6f1e6" font-family="monospace" font-size="12" opacity="0.7">low</text>
+  <text x="1420" y="705" text-anchor="end" fill="#f6f1e6" font-family="monospace" font-size="12" opacity="0.7">high data sensitivity</text>
+  <text x="270" y="705" fill="#f6f1e6" font-family="monospace" font-size="12" opacity="0.7">low</text>
+
+  <!-- quadrant labels -->
+  <text x="330" y="640" fill="#f6f1e6" font-family="monospace" font-size="12" opacity="0.5">BUY / OFF-THE-SHELF</text>
+  <text x="1000" y="640" fill="#f6f1e6" font-family="monospace" font-size="12" opacity="0.5">BUY, VET DATA PATH</text>
+  <text x="330" y="180" fill="#f6f1e6" font-family="monospace" font-size="12" opacity="0.5">BUILD OR WRAP</text>
+  <text x="1000" y="180" fill="#f6f1e6" font-family="monospace" font-size="12" opacity="0.5">BUILD, STRICT CONTROLS</text>
+
+  <!-- dots -->
+  <circle cx="420" cy="600" r="14" fill="#7fbf7f"/>
+  <text x="420" y="565" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="11">support triage &#183; buy</text>
+
+  <circle cx="1180" cy="230" r="14" fill="#e2694f"/>
+  <text x="1180" y="200" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="11">claims reviewer &#183; build, strict controls</text>
+
+  <circle cx="500" cy="530" r="14" fill="#8fb8ff"/>
+  <text x="500" y="500" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="11">marketing copy &#183; wrap existing tool</text>
+
+  <circle cx="700" cy="220" r="14" fill="#f4d44d"/>
+  <text x="700" y="190" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="11">pricing agent &#183; build</text>
+
+  <text x="1500" y="775" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45" text-anchor="end">position on the map decides the column, not team preference</text>
+</svg>

@@ -1,0 +1,26 @@
+<svg viewBox="0 0 1600 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dqseTitle dqseDesc">
+  <title id="dqseTitle">A stale eval set showing high pass rate on old cases and a hidden failure on new production traffic</title>
+  <desc id="dqseDesc">A black canvas shows two panels side by side. The left panel, labeled eval set, last updated eight months ago, shows a bar at 96 percent pass rate. The right panel, labeled current production traffic, shows a much lower bar at 71 percent pass rate on a sample of recent runs, illustrating that a static eval set can report a stable score while real production quality has already dropped.</desc>
+  <rect width="1600" height="800" fill="#0a0a0a"/>
+  <text x="100" y="80" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="2">A STALE EVAL SET IN ONE CHART</text>
+
+  <g font-family="monospace" font-size="14">
+    <!-- left panel -->
+    <text x="140" y="150" fill="#f6f1e6" opacity="0.6">EVAL SET · last updated 8 months ago</text>
+    <rect x="140" y="180" width="560" height="420" fill="none" stroke="#f6f1e6" stroke-opacity="0.35"/>
+    <rect x="200" y="220" width="120" height="340" fill="#f6f1e6" fill-opacity="0.15" stroke="#f6f1e6"/>
+    <rect x="200" y="235" width="120" height="325" fill="#f6f1e6" fill-opacity="0.55"/>
+    <text x="180" y="600" fill="#f6f1e6" font-size="26" font-weight="bold">96%</text>
+    <text x="180" y="628" fill="#f6f1e6" opacity="0.6" font-size="13">pass rate on 200 fixed cases</text>
+
+    <!-- right panel -->
+    <text x="900" y="150" fill="#f4d44d" opacity="0.9">PRODUCTION SAMPLE · last 7 days</text>
+    <rect x="900" y="180" width="560" height="420" fill="none" stroke="#f4d44d" stroke-opacity="0.5"/>
+    <rect x="960" y="220" width="120" height="340" fill="#f4d44d" fill-opacity="0.12" stroke="#f4d44d"/>
+    <rect x="960" y="330" width="120" height="230" fill="#f4d44d" fill-opacity="0.75"/>
+    <text x="940" y="600" fill="#f4d44d" font-size="26" font-weight="bold">71%</text>
+    <text x="940" y="628" fill="#f4d44d" opacity="0.85" font-size="13">pass rate on a fresh labeled sample</text>
+  </g>
+
+  <text x="140" y="700" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.5">the eval set never failed. it just stopped asking questions users actually ask now.</text>
+</svg>

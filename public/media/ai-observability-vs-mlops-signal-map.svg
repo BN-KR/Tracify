@@ -1,0 +1,36 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="obsMlopsSignalTitle obsMlopsSignalDesc">
+  <title id="obsMlopsSignalTitle">Signal map showing which discipline instruments which question</title>
+  <desc id="obsMlopsSignalDesc">A black canvas lists six production questions as rows, each row marked with a filled square under an MLOps column, an AI observability column, or both, showing that questions about deployment health and rollback sit under MLOps, questions about output correctness and drift sit under AI observability, and questions about whether a new model version is safe to promote sit under both.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="100" y="90" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">WHO ANSWERS WHICH QUESTION</text>
+  <text x="100" y="122" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">six production questions, mapped to the discipline that instruments them</text>
+
+  <g font-family="monospace" font-size="14" fill="#f6f1e6" opacity="0.75">
+    <text x="140" y="185">question</text>
+    <text x="1060" y="185">MLOps</text>
+    <text x="1300" y="185">AI observability</text>
+  </g>
+  <line x1="140" y1="200" x2="1460" y2="200" stroke="#f6f1e6" stroke-opacity="0.3"/>
+
+  <g font-family="monospace" font-size="13" fill="#f6f1e6" opacity="0.85">
+    <text x="140" y="250">is the deployed artifact the version I approved?</text>
+    <text x="140" y="300">did the rollout stay within its resource budget?</text>
+    <text x="140" y="350">is this response actually correct for this user?</text>
+    <text x="140" y="400">has the input distribution drifted since training?</text>
+    <text x="140" y="450">can I roll back to the previous version safely?</text>
+    <text x="140" y="500">is this new version safe to promote to 100%?</text>
+  </g>
+
+  <g fill="#f4d44d">
+    <rect x="1080" y="235" width="18" height="18"/>
+    <rect x="1080" y="285" width="18" height="18"/>
+    <rect x="1080" y="435" width="18" height="18"/>
+    <rect x="1080" y="485" width="18" height="18"/>
+
+    <rect x="1330" y="335" width="18" height="18"/>
+    <rect x="1330" y="385" width="18" height="18"/>
+    <rect x="1330" y="485" width="18" height="18"/>
+  </g>
+
+  <text x="100" y="850" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">only the promotion question is genuinely shared ground between the two disciplines</text>
+</svg>

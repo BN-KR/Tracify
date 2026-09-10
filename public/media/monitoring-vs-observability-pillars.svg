@@ -1,0 +1,34 @@
+<svg viewBox="0 0 1600 760" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="mvoPillarsTitle mvoPillarsDesc">
+  <title id="mvoPillarsTitle">Six columns showing the pillars of observability for agentic AI systems built on top of three classic pillars</title>
+  <desc id="mvoPillarsDesc">A black canvas shows six vertical cream and yellow columns of different heights standing on a baseline labeled OBSERVABLE SYSTEM. The first three columns are logs, metrics, and traces, the classic software pillars. The next three columns are evals, cost, and tool calls, the pillars specific to agentic AI systems, shown taller to indicate they carry more of the diagnostic weight for non-deterministic behavior.</desc>
+  <rect width="1600" height="760" fill="#0a0a0a"/>
+  <text x="800" y="70" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">SIX PILLARS, ONE FLOOR</text>
+
+  <line x1="120" y1="650" x2="1480" y2="650" stroke="#f6f1e6" stroke-width="3"/>
+  <text x="800" y="700" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="16" opacity="0.6">OBSERVABLE AGENT SYSTEM</text>
+
+  <!-- classic pillars -->
+  <g font-family="monospace">
+    <rect x="150" y="440" width="160" height="210" fill="none" stroke="#f6f1e6" stroke-width="3"/>
+    <text x="230" y="420" text-anchor="middle" fill="#f6f1e6" font-size="16" font-weight="700">LOGS</text>
+
+    <rect x="360" y="380" width="160" height="270" fill="none" stroke="#f6f1e6" stroke-width="3"/>
+    <text x="440" y="360" text-anchor="middle" fill="#f6f1e6" font-size="16" font-weight="700">METRICS</text>
+
+    <rect x="570" y="320" width="160" height="330" fill="none" stroke="#f6f1e6" stroke-width="3"/>
+    <text x="650" y="300" text-anchor="middle" fill="#f6f1e6" font-size="16" font-weight="700">TRACES</text>
+
+    <!-- agentic pillars -->
+    <rect x="850" y="230" width="160" height="420" fill="#f4d44d"/>
+    <text x="930" y="210" text-anchor="middle" fill="#f4d44d" font-size="16" font-weight="700">EVALS</text>
+
+    <rect x="1060" y="180" width="160" height="470" fill="#f4d44d"/>
+    <text x="1140" y="160" text-anchor="middle" fill="#f4d44d" font-size="16" font-weight="700">COST</text>
+
+    <rect x="1270" y="150" width="160" height="500" fill="#f4d44d"/>
+    <text x="1350" y="130" text-anchor="middle" fill="#f4d44d" font-size="16" font-weight="700">TOOL CALLS</text>
+  </g>
+
+  <text x="440" y="740" text-anchor="middle" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.55">classic software pillars</text>
+  <text x="1140" y="740" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="14" opacity="0.75">pillars agentic systems add</text>
+</svg>
