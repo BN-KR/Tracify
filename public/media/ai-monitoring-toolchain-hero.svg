@@ -1,0 +1,44 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="chainHeroTitle chainHeroDesc">
+  <title id="chainHeroTitle">A vertical signal chain running from raw telemetry down through five monitoring layers to an owned action</title>
+  <desc id="chainHeroDesc">A black canvas shows a thin vertical line descending through five cream-colored stage blocks labeled CAPTURE, SCORE, PRICE, WATCH, and ROUTE, each annotated in acid yellow with the question that stage answers, ending in a small routed-action marker.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="800" y="66" text-anchor="middle" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">THE MONITORING SIGNAL CHAIN</text>
+
+  <line x1="800" y1="110" x2="800" y2="830" stroke="#3a3a3a" stroke-width="2"/>
+
+  <g font-family="monospace">
+    <g>
+      <circle cx="800" cy="160" r="10" fill="#f4d44d"/>
+      <rect x="540" y="130" width="260" height="60" fill="#f6f1e6"/>
+      <text x="670" y="167" text-anchor="middle" fill="#0a0a0a" font-size="18" font-weight="700">CAPTURE</text>
+      <text x="1080" y="167" text-anchor="middle" fill="#f4d44d" font-size="14">what happened?</text>
+    </g>
+    <g>
+      <circle cx="800" cy="300" r="10" fill="#f4d44d"/>
+      <rect x="540" y="270" width="260" height="60" fill="#f6f1e6"/>
+      <text x="670" y="307" text-anchor="middle" fill="#0a0a0a" font-size="18" font-weight="700">SCORE</text>
+      <text x="1080" y="307" text-anchor="middle" fill="#f4d44d" font-size="14">was it good?</text>
+    </g>
+    <g>
+      <circle cx="800" cy="440" r="10" fill="#f4d44d"/>
+      <rect x="540" y="410" width="260" height="60" fill="#f6f1e6"/>
+      <text x="670" y="447" text-anchor="middle" fill="#0a0a0a" font-size="18" font-weight="700">PRICE</text>
+      <text x="1080" y="447" text-anchor="middle" fill="#f4d44d" font-size="14">what did it cost?</text>
+    </g>
+    <g>
+      <circle cx="800" cy="580" r="10" fill="#f4d44d"/>
+      <rect x="540" y="550" width="260" height="60" fill="#f6f1e6"/>
+      <text x="670" y="587" text-anchor="middle" fill="#0a0a0a" font-size="18" font-weight="700">WATCH</text>
+      <text x="1080" y="587" text-anchor="middle" fill="#f4d44d" font-size="14">did it cross a line?</text>
+    </g>
+    <g>
+      <circle cx="800" cy="720" r="10" fill="#f4d44d"/>
+      <rect x="540" y="690" width="260" height="60" fill="#f6f1e6"/>
+      <text x="670" y="727" text-anchor="middle" fill="#0a0a0a" font-size="18" font-weight="700">ROUTE</text>
+      <text x="1080" y="727" text-anchor="middle" fill="#f4d44d" font-size="14">who acts on it?</text>
+    </g>
+  </g>
+
+  <rect x="700" y="800" width="200" height="46" fill="#f4d44d"/>
+  <text x="800" y="829" text-anchor="middle" fill="#0a0a0a" font-family="monospace" font-size="16" font-weight="700">OWNED ACTION</text>
+</svg>

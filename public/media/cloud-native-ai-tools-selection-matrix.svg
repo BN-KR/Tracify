@@ -1,0 +1,23 @@
+<svg viewBox="0 0 1000 520" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1000" height="520" fill="#000000"/>
+  <text x="40" y="48" fill="#FFFFFF" font-family="monospace" font-size="22">Managed vs. self-hosted: what moves the answer</text>
+  <line x1="40" y1="80" x2="960" y2="80" stroke="#FFFFFF" stroke-width="1" opacity="0.4"/>
+  <line x1="500" y1="80" x2="500" y2="480" stroke="#FFFFFF" stroke-width="1" opacity="0.4"/>
+  <line x1="40" y1="280" x2="960" y2="280" stroke="#FFFFFF" stroke-width="1" opacity="0.4"/>
+  <text x="60" y="110" fill="#FFFFFF" font-family="monospace" font-size="16">Low data-residency risk</text>
+  <text x="60" y="135" fill="#FFFFFF" font-family="monospace" font-size="16">Small platform team</text>
+  <text x="60" y="160" fill="#FFFFFF" font-family="monospace" font-size="16">Spiky, unpredictable load</text>
+  <text x="60" y="185" fill="#FFFFFF" font-family="monospace" font-size="16">→ favors MANAGED</text>
+  <text x="520" y="110" fill="#FFFFFF" font-family="monospace" font-size="16">Strict residency or audit rules</text>
+  <text x="520" y="135" fill="#FFFFFF" font-family="monospace" font-size="16">Dedicated infra team exists</text>
+  <text x="520" y="160" fill="#FFFFFF" font-family="monospace" font-size="16">Steady, high-volume load</text>
+  <text x="520" y="185" fill="#FFFFFF" font-family="monospace" font-size="16">→ favors SELF-HOSTED</text>
+  <text x="60" y="310" fill="#FFFFFF" font-family="monospace" font-size="16">Fast iteration on model choice</text>
+  <text x="60" y="335" fill="#FFFFFF" font-family="monospace" font-size="16">Cost sensitivity at low volume</text>
+  <text x="60" y="360" fill="#FFFFFF" font-family="monospace" font-size="16">→ favors MANAGED</text>
+  <text x="520" y="310" fill="#FFFFFF" font-family="monospace" font-size="16">Custom scheduling or hardware</text>
+  <text x="520" y="335" fill="#FFFFFF" font-family="monospace" font-size="16">Cost sensitivity at scale</text>
+  <text x="520" y="360" fill="#FFFFFF" font-family="monospace" font-size="16">→ favors SELF-HOSTED</text>
+  <rect x="40" y="420" width="920" height="60" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+  <text x="60" y="456" fill="#FFFFFF" font-family="monospace" font-size="16">Most production teams run a mix, not a single answer, per workload</text>
+</svg>

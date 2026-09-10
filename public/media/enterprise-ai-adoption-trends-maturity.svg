@@ -1,0 +1,36 @@
+<svg viewBox="0 0 1600 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="eaatMaturityTitle eaatMaturityDesc">
+  <title id="eaatMaturityTitle">A four-step maturity ladder from scattered pilots to a governed agent platform, with the evidence required to climb each step</title>
+  <desc id="eaatMaturityDesc">An illustration of four ascending platforms labeled scattered pilots, tracked pilots, governed rollout, and platform with reuse. Each step lists the evidence needed to move up: an inventory, a shared logging standard, a policy gate with named owners, and a chargeback model. A dashed line marks where most organizations currently sit, on the second step, with a note that skipping directly to platform without evidence tends to produce ungoverned sprawl later.</desc>
+  <rect width="1600" height="800" fill="#0a0a0a"/>
+  <text x="90" y="60" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="2">ADOPTION MATURITY LADDER</text>
+  <text x="90" y="88" fill="#f6f1e6" font-family="monospace" font-size="14" opacity="0.6">what evidence unlocks the next step, not just what step feels senior</text>
+
+  <!-- steps -->
+  <g font-family="monospace">
+    <rect x="130" y="620" width="260" height="80" fill="#3a2a1a" stroke="#f6f1e6" stroke-opacity="0.3" stroke-width="1.5"/>
+    <text x="260" y="655" text-anchor="middle" fill="#f6f1e6" font-size="13" font-weight="bold">SCATTERED PILOTS</text>
+    <text x="260" y="678" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.65">no inventory of what is live</text>
+
+    <rect x="450" y="520" width="260" height="180" fill="#3a3320" stroke="#f6f1e6" stroke-opacity="0.3" stroke-width="1.5"/>
+    <text x="580" y="555" text-anchor="middle" fill="#f6f1e6" font-size="13" font-weight="bold">TRACKED PILOTS</text>
+    <text x="580" y="578" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.65">inventory + shared trace format</text>
+    <text x="580" y="598" text-anchor="middle" fill="#f4d44d" font-size="10" font-weight="bold">&#9650; most orgs sit here</text>
+
+    <rect x="770" y="400" width="260" height="300" fill="#123322" stroke="#7fbf7f" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="900" y="435" text-anchor="middle" fill="#f6f1e6" font-size="13" font-weight="bold">GOVERNED ROLLOUT</text>
+    <text x="900" y="458" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.65">policy gate, named owners</text>
+    <text x="900" y="478" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.65">incident + rollback runbook</text>
+
+    <rect x="1090" y="260" width="260" height="440" fill="#0f2a44" stroke="#8fb8ff" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="1220" y="295" text-anchor="middle" fill="#f6f1e6" font-size="13" font-weight="bold">PLATFORM + REUSE</text>
+    <text x="1220" y="318" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.65">chargeback model</text>
+    <text x="1220" y="338" text-anchor="middle" fill="#f6f1e6" font-size="10" opacity="0.65">shared eval + guardrail library</text>
+  </g>
+
+  <!-- dashed skip warning -->
+  <path d="M400 640 C 700 500, 1000 340, 1210 270" fill="none" stroke="#e2694f" stroke-width="2" stroke-dasharray="4,6"/>
+  <text x="700" y="470" fill="#e2694f" font-family="monospace" font-size="12" font-weight="bold">skipping steps without evidence</text>
+  <text x="700" y="490" fill="#e2694f" font-family="monospace" font-size="12" font-weight="bold">tends to produce sprawl, not scale</text>
+
+  <text x="1500" y="760" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45" text-anchor="end">climb with evidence, not with calendar time</text>
+</svg>

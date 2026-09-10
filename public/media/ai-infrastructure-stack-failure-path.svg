@@ -1,0 +1,34 @@
+<svg viewBox="0 0 1600 760" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="failTitle failDesc">
+  <title id="failTitle">One request tracked through the stack showing where a failure was caught</title>
+  <desc id="failDesc">A black canvas shows a horizontal timeline of six stack layers a single request passes through: retrieval, model call, tool call, guardrail check, evaluation score, and observability record. A red marker sits on the tool call step to show where a timeout occurred, with an arrow showing the retry path back through orchestration.</desc>
+  <rect width="1600" height="760" fill="#0a0a0a"/>
+  <text x="90" y="80" fill="#f4d44d" font-family="monospace" font-size="18" letter-spacing="1.5">ONE REQUEST, ONE FAILURE, ONE RECOVERY</text>
+
+  <g font-family="monospace" font-size="12" fill="#f6f1e6">
+    <line x1="120" y1="360" x2="1480" y2="360" stroke="#f6f1e6" stroke-opacity="0.3"/>
+
+    <circle cx="200" cy="360" r="10" fill="#f6f1e6" fill-opacity="0.6"/>
+    <text x="200" y="400" text-anchor="middle" opacity="0.75">RETRIEVAL</text>
+
+    <circle cx="440" cy="360" r="10" fill="#f6f1e6" fill-opacity="0.6"/>
+    <text x="440" y="400" text-anchor="middle" opacity="0.75">MODEL CALL</text>
+
+    <circle cx="680" cy="360" r="14" fill="#e2543a"/>
+    <text x="680" y="330" text-anchor="middle" fill="#e2543a">TOOL CALL — TIMEOUT</text>
+    <text x="680" y="400" text-anchor="middle" opacity="0.75">TOOL CALL</text>
+
+    <circle cx="920" cy="360" r="10" fill="#f6f1e6" fill-opacity="0.6"/>
+    <text x="920" y="400" text-anchor="middle" opacity="0.75">GUARDRAIL CHECK</text>
+
+    <circle cx="1160" cy="360" r="10" fill="#f6f1e6" fill-opacity="0.6"/>
+    <text x="1160" y="400" text-anchor="middle" opacity="0.75">EVAL SCORE</text>
+
+    <circle cx="1400" cy="360" r="10" fill="#f4d44d"/>
+    <text x="1400" y="400" text-anchor="middle" fill="#f4d44d">OBSERVABILITY RECORD</text>
+
+    <path d="M 680 346 C 680 250, 440 250, 440 346" fill="none" stroke="#f4d44d" stroke-width="2" stroke-dasharray="4 6"/>
+    <text x="560" y="240" text-anchor="middle" fill="#f4d44d" font-size="12">retry routed by orchestration</text>
+  </g>
+
+  <text x="90" y="600" fill="#f6f1e6" font-family="monospace" font-size="13" opacity="0.45">the trace shows the timeout, the retry, and the eventual score in one continuous record</text>
+</svg>
