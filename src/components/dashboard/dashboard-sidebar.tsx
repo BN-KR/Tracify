@@ -121,6 +121,7 @@ export function DashboardSidebar({
           label: "Observability",
           items: [
             { title: "Tracing", icon: Activity, href: workspaceHref("tracing") },
+            { title: "Explore", icon: Zap, href: workspaceHref("explore") },
             { title: "Sessions", icon: Activity, href: workspaceHref("sessions") },
             { title: "Users", icon: Users, href: workspaceHref("users") },
             { title: "Alerts", icon: Activity, href: workspaceHref("alerts") },
