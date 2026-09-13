@@ -154,6 +154,53 @@
 @media(max-width:700px) { .tracify-connection-form { display:flex; flex-direction:column; } }
 @media (max-width:700px) { .tracify-module-heading { flex-direction:column; } .tracify-users-row { grid-template-columns:1.5fr 1fr 1fr; } .tracify-users-row span:last-child { display:none; } }
 
+/* ── Jasper-inspired marketing theme (scoped, does not touch dashboard) ──
+   Applied via the `.marketing-jasper` wrapper in site-chrome.tsx. Only the
+   public marketing site (/, /pricing, /product/[feature], nav & footer)
+   should ever carry this class. Dashboard, onboarding, billing, and auth
+   keep the editorial monochrome tokens defined above untouched. */
+.marketing-jasper {
+  --mkt-navy: #00063d;
+  --mkt-navy-soft: #0b1054;
+  --mkt-accent: #fa4028;
+  --mkt-accent-soft: #ffe1d8;
+  --mkt-gray: #5e5d5f;
+  --mkt-bg: #ffffff;
+  --mkt-bg-alt: #f6f5fb;
+
+  --mkt-radius-sm: 0.5rem;
+  --mkt-radius-md: 1rem;
+  --mkt-radius-lg: 1.5rem;
+  --mkt-radius-xl: 2rem;
+  --mkt-radius-pill: 999px;
+}
+
+/* Round corners on interactive/decorative surfaces across the marketing
+   pages without hand-editing every literal Tailwind class. Elements with
+   no visible background/border are unaffected — this only rounds boxes
+   that already paint a fill or a border. */
+.marketing-jasper a[class*="bg-"],
+.marketing-jasper button[class*="bg-"],
+.marketing-jasper div[class*="bg-"] {
+  border-radius: var(--mkt-radius-md);
+}
+
+.marketing-jasper nav,
+.marketing-jasper header,
+.marketing-jasper form,
+.marketing-jasper input,
+.marketing-jasper select,
+.marketing-jasper img,
+.marketing-jasper svg {
+  border-radius: 0;
+}
+
+.marketing-jasper a[class*="rounded-full"],
+.marketing-jasper button[class*="rounded-full"],
+.marketing-jasper span[class*="rounded-full"] {
+  border-radius: var(--mkt-radius-pill) !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
