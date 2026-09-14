@@ -59,7 +59,7 @@ function TextLink({
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-2 border-b border-black pb-1 font-mono text-[9px] uppercase tracking-[0.12em] hover:border-[#FA4028] hover:text-black/70"
+      className="inline-flex items-center gap-2 border-b border-black pb-1 font-mono text-[9px] uppercase tracking-[0.12em] hover:border-[#f4d44d] hover:text-black/70"
     >
       {children} <ArrowUpRight className="size-3" />
     </Link>
@@ -78,10 +78,10 @@ export function NavigationSystemExplorations({
   return (
     <section
       aria-label="Future 19 navigation visual system explorations"
-      className={`border-t border-white/15 bg-[#00063D] ${showSectionLabels ? "" : "future19-public-page"}`}
+      className={`border-t border-white/15 bg-black ${showSectionLabels ? "" : "future19-public-page"}`}
     >
       {showIntroduction ? (
-        <div className="bg-[#FFFFFF] px-6 py-20 text-black md:px-10">
+        <div className="bg-[#eceae3] px-6 py-20 text-black md:px-10">
           <div className="mx-auto max-w-[1240px]">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/70">
               New exploration set / one visual system
@@ -100,7 +100,7 @@ export function NavigationSystemExplorations({
 
       <section
         id="navsys-hero-split"
-        className="bg-[#FFFFFF] px-6 py-24 text-black md:px-10 md:py-32"
+        className="bg-[#eceae3] px-6 py-24 text-black md:px-10 md:py-32"
       >
         <div className="mx-auto max-w-[1240px]">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/50">
@@ -108,10 +108,10 @@ export function NavigationSystemExplorations({
           </p>
           <div className="mt-10 grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-[#FFF9E0] px-4 py-1.5 text-[13px] font-medium text-[#7A5B00]">
-                <Radio className="size-3.5 text-[#E8B800]" /> The run explains the release
+              <span className="inline-flex items-center gap-2 bg-black px-3.5 py-1.5 text-[13px] font-medium text-white">
+                <Radio className="size-3.5 text-[#f4d44d]" /> The run explains the release
               </span>
-              <h1 className="mt-8 max-w-[620px] font-sans text-[56px] font-semibold normal-case leading-[1.04] tracking-[-0.02em] text-[#00063D] md:text-[68px]">
+              <h1 className="mt-8 max-w-[620px] font-sans text-[56px] font-semibold normal-case leading-[1.04] tracking-[-0.02em] text-black md:text-[68px]">
                 See why it failed. Ship with proof.
               </h1>
               <p className="mt-6 max-w-lg text-lg leading-8 text-black/60 md:text-xl">
@@ -121,13 +121,13 @@ export function NavigationSystemExplorations({
               <div className="mt-9 flex flex-wrap gap-4">
                 <Link
                   href="/sign-up"
-                  className="inline-flex h-13 items-center gap-2 bg-[#00063D] px-7 text-[15px] font-medium text-white transition-colors hover:bg-[#FA4028]"
+                  className="inline-flex h-13 items-center gap-2 bg-black px-7 text-[15px] font-medium text-white transition-colors hover:bg-[#f4d44d] hover:text-black"
                 >
                   Start tracing <ArrowRight className="size-4" />
                 </Link>
                 <Link
                   href="/demo"
-                  className="inline-flex h-13 items-center border border-black/15 px-7 text-[15px] font-medium text-black/80 transition-colors hover:border-black/30 hover:bg-[#F2F2F3]"
+                  className="inline-flex h-13 items-center border border-black/20 px-7 text-[15px] font-medium text-black/80 transition-colors hover:border-black/35 hover:bg-white"
                 >
                   Open sample run
                 </Link>
@@ -138,7 +138,7 @@ export function NavigationSystemExplorations({
         </div>
       </section>
 
-      <section id="navsys-proof-band" className="bg-[#FFFFFF] py-20 text-black">
+      <section id="navsys-proof-band" className="bg-[#eceae3] py-20 text-black">
         <div className="mx-auto max-w-[1240px] px-6 md:px-10">
           <StudyLabel number="02" title="verified proof strip" />
           <div className="mt-10 flex flex-col justify-between gap-8 md:flex-row md:items-end">
@@ -159,7 +159,7 @@ export function NavigationSystemExplorations({
             ].map(([number, title, body], index) => (
               <div
                 key={title}
-                className={`min-h-44 border-b border-black/15 p-6 sm:border-b-0 sm:border-r last:border-r-0 ${index === 1 ? "bg-[#FFF133]" : "bg-white"}`}
+                className={`min-h-44 border-b border-black/15 p-6 sm:border-b-0 sm:border-r last:border-r-0 ${index === 1 ? "bg-[#f4d44d]" : "bg-white"}`}
               >
                 <span className="font-mono text-[9px] text-black/60">{number}</span>
                 <h4 className="mt-8 font-pixel text-3xl tracking-[-0.06em]">{title}</h4>
@@ -175,7 +175,7 @@ export function NavigationSystemExplorations({
           {integrationMarks.map(({ name, className }) => (
             <div
               key={name}
-              className="flex min-h-28 items-center justify-center gap-2 border-r border-black/15 bg-white px-4 text-xl last:border-r-0 hover:bg-[#CEEBFF]"
+              className="flex min-h-28 items-center justify-center gap-2 border-r border-black/15 bg-white px-4 text-xl last:border-r-0 hover:bg-[#f4d44d]"
             >
               <ThirdPartyLogo brand={name} className="size-5 shrink-0 object-contain" />
               <span className={className}>{name}</span>
@@ -186,7 +186,7 @@ export function NavigationSystemExplorations({
 
       <section
         id="navsys-lifecycle-map"
-        className="bg-[#FFFFFF] px-6 py-20 text-black md:px-10"
+        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
       >
         <div className="mx-auto max-w-[1240px]">
           <StudyLabel number="03" title="observe / evaluate / release" />
@@ -200,7 +200,7 @@ export function NavigationSystemExplorations({
               ].map(([number, title, body], index) => (
                 <div
                   key={title as string}
-                  className={`min-h-72 border-b border-r border-black/15 p-6 md:border-b-0 ${index === 2 ? "bg-[#96FF6F]" : ""}`}
+                  className={`min-h-72 border-b border-r border-black/15 p-6 md:border-b-0 ${index === 2 ? "bg-[#f4d44d]" : ""}`}
                 >
                   <span className="font-mono text-[9px] text-black/70">
                     {number}
@@ -212,13 +212,13 @@ export function NavigationSystemExplorations({
                 </div>
               ))}
             </div>
-            <div className="flex items-center justify-between border-t border-black/15 bg-[#00063D] p-5 text-white">
+            <div className="flex items-center justify-between border-t border-black/15 bg-black p-5 text-white">
               <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-white/62">
                 A continuous production feedback loop
               </span>
               <Link
                 href="/product/lifecycle"
-                className="inline-flex items-center gap-2 border-b border-[#FFF133] pb-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#FFF133] hover:text-white"
+                className="inline-flex items-center gap-2 border-b border-[#f4d44d] pb-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#f4d44d] hover:text-white"
               >
                 Explore lifecycle <ArrowUpRight className="size-3" />
               </Link>
@@ -248,7 +248,7 @@ export function NavigationSystemExplorations({
                 <Link
                   key={title}
                   href={href}
-                  className={`group border-b border-r border-black/15 p-5 last:border-r-0 ${index === 0 ? "bg-[#00063D] text-white" : "bg-white hover:bg-[#FFB3DE]"}`}
+                  className={`group border-b border-r border-black/15 p-5 last:border-r-0 ${index === 0 ? "bg-black text-white" : "bg-white hover:bg-[#f4d44d]"}`}
                 >
                   <span className="font-mono text-[8px] uppercase opacity-45">0{index + 1}</span>
                   <h4 className="mt-8 font-pixel text-4xl tracking-[-0.06em]">{title}</h4>
@@ -263,7 +263,7 @@ export function NavigationSystemExplorations({
 
       <section
         id="navsys-trace-report"
-        className="bg-[#FFFFFF] px-6 py-20 text-black md:px-10"
+        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
       >
         <div className="mx-auto max-w-[1240px]">
           <StudyLabel number="04" title="observe / decision trail" />
@@ -283,9 +283,9 @@ export function NavigationSystemExplorations({
                 <TextLink href="/demo">Inspect sample trace</TextLink>
               </div>
             </div>
-            <div className="bg-[#00063D] p-6 text-white md:p-8">
-              <div className="border-l-2 border-[#FF80C8] pl-5">
-                <p className="font-mono text-[8px] uppercase text-[#FF80C8]">
+            <div className="bg-black p-6 text-white md:p-8">
+              <div className="border-l-2 border-[#f4d44d] pl-5">
+                <p className="font-mono text-[8px] uppercase text-[#f4d44d]">
                   Root cause
                 </p>
                 <h4 className="mt-3 text-2xl tracking-[-0.04em]">
@@ -301,7 +301,7 @@ export function NavigationSystemExplorations({
                 ].map(([time, type, event], index) => (
                   <div
                     key={time}
-                    className={`grid grid-cols-[105px_70px_1fr] gap-3 p-4 font-mono text-[9px] ${index === 2 ? "bg-[#FF80C8] text-black" : "bg-[#00063D] text-white/72"}`}
+                    className={`grid grid-cols-[105px_70px_1fr] gap-3 p-4 font-mono text-[9px] ${index === 2 ? "bg-[#f4d44d] text-black" : "bg-[#090909] text-white/72"}`}
                   >
                     <span>{time}</span>
                     <span className="uppercase opacity-55">{type}</span>
@@ -314,7 +314,7 @@ export function NavigationSystemExplorations({
         </div>
         <div className="mt-12 border-t border-black/15 pt-12">
           <StudyLabel number="05" title="evaluate / release decision" />
-          <div className="mt-10 grid gap-px bg-[#00063D]/15 lg:grid-cols-[1fr_0.42fr]">
+          <div className="mt-10 grid gap-px bg-black/15 lg:grid-cols-[1fr_0.42fr]">
             <div className="bg-white p-7 md:p-10">
               <div className="flex flex-col justify-between gap-6 border-b border-black/15 pb-7 sm:flex-row sm:items-end">
                 <div>
@@ -325,7 +325,7 @@ export function NavigationSystemExplorations({
                     Release 2.4 wins.
                   </h3>
                 </div>
-                <span className="bg-[#96FF6F] px-4 py-2 font-mono text-[8px] uppercase">
+                <span className="bg-[#f4d44d] px-4 py-2 font-mono text-[8px] uppercase">
                   Safe to promote
                 </span>
               </div>
@@ -348,7 +348,7 @@ export function NavigationSystemExplorations({
                     ].map((row, index) => (
                       <tr
                         key={row[0]}
-                        className={`border-t border-black/15 text-sm ${index === 1 ? "bg-[#96FF6F]" : ""}`}
+                        className={`border-t border-black/15 text-sm ${index === 1 ? "bg-[#f4d44d]" : ""}`}
                       >
                         {row.map((cell) => (
                           <td key={cell} className="px-2 py-5 first:pl-0">
@@ -360,7 +360,7 @@ export function NavigationSystemExplorations({
                   </tbody>
                 </table>
               </div>
-              <div className="mt-8 grid gap-px bg-[#00063D]/15 md:hidden">
+              <div className="mt-8 grid gap-px bg-black/15 md:hidden">
                 {[
                   ["Current", "0.82", "3.4s", "$0.052", "Hold"],
                   ["v2.4", "0.94", "2.8s", "$0.041", "Promote"],
@@ -368,7 +368,7 @@ export function NavigationSystemExplorations({
                 ].map(([candidate, quality, latency, cost, decision], index) => (
                   <div
                     key={candidate}
-                    className={`p-5 ${index === 1 ? "bg-[#96FF6F]" : "bg-white"}`}
+                    className={`p-5 ${index === 1 ? "bg-[#f4d44d]" : "bg-white"}`}
                   >
                     <div className="flex items-center justify-between gap-4">
                       <p className="text-base font-medium">{candidate}</p>
@@ -394,8 +394,8 @@ export function NavigationSystemExplorations({
                 ))}
               </div>
             </div>
-            <div className="flex flex-col justify-between bg-[#00063D] p-7 text-white">
-              <Sparkles className="size-6 text-[#96FF6F]" />
+            <div className="flex flex-col justify-between bg-black p-7 text-white">
+              <Sparkles className="size-6 text-[#f4d44d]" />
               <div>
                 <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/55">
                   Sample result
@@ -412,7 +412,7 @@ export function NavigationSystemExplorations({
 
       <section
         id="navsys-developer-install"
-        className="bg-[#FFFFFF] px-6 py-20 text-black md:px-10"
+        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
       >
         <div className="mx-auto max-w-[1240px]">
           <StudyLabel number="06" title="developer setup" />
@@ -429,7 +429,7 @@ export function NavigationSystemExplorations({
                 <TextLink href="/docs/quickstart">Read quickstart</TextLink>
               </div>
             </div>
-            <div className="bg-[#00063D] p-6 font-mono text-[12px] leading-7 text-white/80 md:p-9">
+            <div className="bg-black p-6 font-mono text-[12px] leading-7 text-white/80 md:p-9">
               <div className="flex items-center justify-between border-b border-white/15 pb-4 text-[8px] uppercase tracking-[0.13em] text-white/62">
                 <span>agent.ts</span>
                 <span>typescript</span>
@@ -450,7 +450,7 @@ export function NavigationSystemExplorations({
                   {"  )"}
                 </code>
               </pre>
-              <div className="mt-8 flex items-center gap-3 border-t border-white/15 pt-5 text-[8px] uppercase tracking-[0.12em] text-[#0095FF]">
+              <div className="mt-8 flex items-center gap-3 border-t border-white/15 pt-5 text-[8px] uppercase tracking-[0.12em] text-[#f4d44d]">
                 <CircleDot className="size-3" /> first trace received
               </div>
             </div>
@@ -460,7 +460,7 @@ export function NavigationSystemExplorations({
 
       <section
         id="navsys-security-controls"
-        className="bg-[#FFFFFF] px-6 py-20 text-black md:px-10"
+        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
       >
         <div className="mx-auto max-w-[1240px]">
           <StudyLabel number="07" title="production trust" />
@@ -487,7 +487,7 @@ export function NavigationSystemExplorations({
               ].map(([title, body], index) => (
                 <div
                   key={title}
-                  className={`border-b border-r border-black/15 p-6 ${index === 3 ? "bg-[#CEEBFF]" : ""}`}
+                  className={`border-b border-r border-black/15 p-6 ${index === 3 ? "bg-[#f4d44d]" : ""}`}
                 >
                   <ShieldCheck className="size-4" />
                   <h4 className="mt-12 font-pixel text-4xl tracking-[-0.06em]">
@@ -510,7 +510,7 @@ export function NavigationSystemExplorations({
                   <th className="p-5">Operating model</th>
                   <th className="p-5">Logs</th>
                   <th className="p-5">Dashboards</th>
-                  <th className="bg-[#FFF133] p-5 text-black">Tracify</th>
+                  <th className="bg-[#f4d44d] p-5 text-black">Tracify</th>
                 </tr>
               </thead>
               <tbody>
@@ -524,7 +524,7 @@ export function NavigationSystemExplorations({
                     {row.map((cell, index) => (
                       <td
                         key={cell}
-                        className={`p-5 text-sm ${index === 3 ? "bg-[#FFF67D] font-medium" : index === 0 ? "font-pixel text-2xl tracking-[-0.04em]" : "text-black/70"}`}
+                        className={`p-5 text-sm ${index === 3 ? "bg-[#fff4b5] font-medium" : index === 0 ? "font-pixel text-2xl tracking-[-0.04em]" : "text-black/70"}`}
                       >
                         {cell}
                       </td>
@@ -541,14 +541,14 @@ export function NavigationSystemExplorations({
 
       <section
         id="navsys-final-conversion"
-        className="bg-[#FFFFFF] px-6 py-20 text-black md:px-10"
+        className="bg-[#eceae3] px-6 py-20 text-black md:px-10"
       >
         <div className="mx-auto max-w-[1240px]">
           <StudyLabel number="08" title="pricing + field notes" />
-          <div className="mt-10 grid gap-px bg-[#00063D]/15 lg:grid-cols-[1.25fr_0.75fr]">
-            <article className="flex min-h-[480px] flex-col justify-between bg-[#00063D] p-8 text-white md:p-10">
+          <div className="mt-10 grid gap-px bg-black/15 lg:grid-cols-[1.25fr_0.75fr]">
+            <article className="flex min-h-[480px] flex-col justify-between bg-black p-8 text-white md:p-10">
               <div>
-                <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-[#FFF133]">
+                <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-[#f4d44d]">
                   Featured field guide
                 </p>
                 <h3 className="mt-12 max-w-2xl font-pixel text-7xl leading-[0.84] tracking-[-0.075em]">
@@ -557,7 +557,7 @@ export function NavigationSystemExplorations({
               </div>
               <Link
                 href="/blog"
-                className="font-mono text-[9px] uppercase tracking-[0.12em] text-[#FFF133]"
+                className="font-mono text-[9px] uppercase tracking-[0.12em] text-[#f4d44d]"
               >
                 Read the guide →
               </Link>
@@ -571,7 +571,7 @@ export function NavigationSystemExplorations({
                 <Link
                   key={title}
                   href={index === 0 ? "/blog/ai-agent-observability-complete-guide" : "/blog"}
-                  className={`border-b border-black/15 p-6 ${index === 1 ? "bg-[#FF80C8]" : "bg-white hover:bg-[#FF80C8]"}`}
+                  className={`border-b border-black/15 p-6 ${index === 1 ? "bg-[#f4d44d]" : "bg-white hover:bg-[#f4d44d]"}`}
                 >
                   <span className="font-mono text-[8px] uppercase text-black/70">
                     {type}
@@ -602,12 +602,12 @@ export function NavigationSystemExplorations({
               </p>
               <Link
                 href="/contact?intent=trace-clinic"
-                className="mt-10 inline-flex h-12 items-center gap-3 bg-[#00063D] px-6 font-mono text-[9px] uppercase tracking-[0.13em] text-white hover:bg-[#FFF133] hover:text-black"
+                className="mt-10 inline-flex h-12 items-center gap-3 bg-black px-6 font-mono text-[9px] uppercase tracking-[0.13em] text-white hover:bg-[#f4d44d] hover:text-black"
               >
                 Book a trace clinic <ArrowRight className="size-4" />
               </Link>
             </div>
-            <div className="flex flex-col justify-between bg-[#0095FF] p-8">
+            <div className="flex flex-col justify-between bg-[#f4d44d] p-8">
               <CircleDot className="size-6" />
               <div>
                 <p className="font-pixel text-6xl tracking-[-0.07em]">30 min</p>
@@ -624,13 +624,13 @@ export function NavigationSystemExplorations({
       {showFooter ? (
         <footer
           id="navsys-footer-atlas"
-          className="overflow-hidden bg-[#FFFFFF] px-6 pt-20 text-black md:px-10"
+          className="overflow-hidden bg-[#eceae3] px-6 pt-20 text-black md:px-10"
         >
           <div className="mx-auto max-w-[1240px]">
             <StudyLabel number="15" title="footer atlas" />
             <div className="mt-10 grid gap-10 border-b border-black/15 pb-14 md:grid-cols-[1fr_auto]">
               <div>
-                <p className="relative isolate inline-block px-1 font-pixel text-3xl tracking-[-0.05em] text-[#F5D400] before:absolute before:-inset-x-1 before:bottom-0.5 before:-z-10 before:h-[68%] before:-rotate-1 before:skew-x-[-7deg] before:bg-[#00063D]/10 before:content-['']">
+                <p className="relative isolate inline-block px-1 font-pixel text-3xl tracking-[-0.05em] before:absolute before:-inset-x-1 before:bottom-0.5 before:-z-10 before:h-[68%] before:-rotate-1 before:skew-x-[-7deg] before:bg-[#f4d44d]/80 before:content-['']">
                   tracify
                 </p>
                 <p className="mt-5 max-w-sm text-sm leading-7 text-black/70">
@@ -656,7 +656,7 @@ export function NavigationSystemExplorations({
                   />
                   <button
                     type="submit"
-                    className="bg-[#00063D] px-4 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#FFF133] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                    className="bg-black px-4 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                   >
                     Subscribe
                   </button>
@@ -666,7 +666,7 @@ export function NavigationSystemExplorations({
                 </p>
                 <Link
                   href="/sign-up"
-                  className="mt-6 inline-flex items-center gap-3 bg-[#00063D] px-5 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#FFF133] hover:text-black"
+                  className="mt-6 inline-flex items-center gap-3 bg-black px-5 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black"
                 >
                   Start free <ArrowRight className="size-3" />
                 </Link>
@@ -732,14 +732,7 @@ export function NavigationSystemExplorations({
               tracify
             </div>
           </div>
-          <div className="flex h-4">
-            <span className="flex-1 bg-[#FFF133]" />
-            <span className="flex-1 bg-[#FF80C8]" />
-            <span className="flex-1 bg-[#0095FF]" />
-            <span className="flex-1 bg-[#45FF00]" />
-            <span className="flex-1 bg-[#FA4028]" />
-            <span className="flex-1 bg-[#7C5AC4]" />
-          </div>
+          <div className="h-4 bg-[#f4d44d]" />
         </footer>
       ) : null}
     </section>

@@ -114,29 +114,6 @@ const mobileMenuMeta = {
 
 type MenuName = keyof typeof menus;
 
-// Rainbow accent per menu — replaces the old single-orange hover accent with
-// a multi-color system (yellow/pink/blue/green).
-const MENU_ACCENT_CLASS: Record<MenuName, string> = {
-  Product: "hover:bg-[#FFF133]",
-  Solutions: "hover:bg-[#FF80C8]",
-  Developers: "hover:bg-[#0095FF]",
-  Company: "hover:bg-[#45FF00]",
-};
-
-const MENU_ACCENT_HEX: Record<MenuName, string> = {
-  Product: "#FFF133",
-  Solutions: "#FF80C8",
-  Developers: "#0095FF",
-  Company: "#45FF00",
-};
-
-const MENU_MOBILE_BG_CLASS: Record<MenuName, string> = {
-  Product: "bg-[#FFF133]",
-  Solutions: "bg-[#FF80C8]",
-  Developers: "bg-[#CEEBFF]",
-  Company: "bg-[#D2FFC1]",
-};
-
 export function Navbar() {
   const [active, setActive] = useState<MenuName | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -152,7 +129,7 @@ export function Navbar() {
     <header className="fixed inset-x-0 top-0 z-50">
       <div
         onMouseLeave={() => setActive(null)}
-        className="w-full border-b border-black/20 bg-[#FFFFFF] text-black shadow-[0_8px_0_rgba(0,0,0,0.22)]"
+        className="w-full border-b border-black/20 bg-[#eceae3] text-black shadow-[0_8px_0_rgba(0,0,0,0.22)]"
       >
         <div className="flex h-[54px] items-center justify-between px-4 sm:px-6">
           <Link
@@ -192,7 +169,7 @@ export function Navbar() {
                 </button>
                 <Link
                   href="/dashboard"
-                  className="bg-[#00063D] px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#FFF133] hover:text-black"
+                  className="bg-black px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black"
                 >
                   Dashboard
                 </Link>
@@ -201,13 +178,13 @@ export function Navbar() {
               <>
                 <Link
                   href="/cloud?next=/sign-in"
-                  className="px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] hover:bg-[#00063D]/5"
+                  className="px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] hover:bg-black/5"
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/cloud?next=/sign-up"
-                  className="bg-[#00063D] px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#FFF133] hover:text-black"
+                  className="bg-black px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black"
                 >
                   Start free
                 </Link>
@@ -255,14 +232,14 @@ function DesktopPanel({
             onClick={onClose}
             key={title}
             href={href}
-            className={`border-b border-r border-black/10 p-6 transition-colors ${MENU_ACCENT_CLASS[name]}`}
+            className="border-b border-r border-black/10 p-6 transition-colors hover:bg-[#f4d44d]"
           >
             <p className="font-pixel text-4xl tracking-[-0.06em]">{title}</p>
             <p className="mt-3 text-xs leading-5 text-black/55">{body}</p>
           </Link>
         ))}
       </div>
-      <div className="bg-[#00063D] p-7 text-white">
+      <div className="bg-black p-7 text-white">
         <p className="font-mono text-[8px] uppercase tracking-[0.12em] text-zinc-600">
           {featured[name].eyebrow}
         </p>
@@ -275,8 +252,7 @@ function DesktopPanel({
         <Link
           onClick={onClose}
           href={featured[name].href}
-          className="mt-10 inline-block border-b pb-1 font-mono text-[8px] uppercase tracking-[0.12em]"
-          style={{ borderColor: MENU_ACCENT_HEX[name], color: MENU_ACCENT_HEX[name] }}
+          className="mt-10 inline-block border-b border-[#f4d44d] pb-1 font-mono text-[8px] uppercase tracking-[0.12em] text-[#f4d44d]"
         >
           {featured[name].label}
         </Link>
@@ -298,7 +274,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="max-h-[calc(100dvh-54px)] overflow-y-auto border-t border-black bg-[#FFFFFF] md:hidden">
+    <div className="max-h-[calc(100dvh-54px)] overflow-y-auto border-t border-black bg-[#eceae3] md:hidden">
       {(Object.keys(menus) as MenuName[]).map((name, sectionIndex) => {
         const expanded = activeSection === name;
         const meta = mobileMenuMeta[name];
@@ -306,7 +282,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
         return (
           <section
             key={name}
-            className={expanded ? MENU_MOBILE_BG_CLASS[name] : "bg-[#FFFFFF]"}
+            className={expanded ? "bg-[#f4d44d]" : "bg-[#eceae3]"}
           >
             <button
               type="button"
@@ -346,7 +322,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
                         onClick={onClose}
                         key={title}
                         href={href}
-                        className={`group flex min-h-40 flex-col justify-between border-b border-r border-black p-4 transition-colors hover:bg-[#00063D] hover:text-white focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] ${MENU_MOBILE_BG_CLASS[name]}`}
+                        className="group flex min-h-40 flex-col justify-between border-b border-r border-black bg-[#f4d44d] p-4 transition-colors hover:bg-black hover:text-white focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px]"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <Icon className="size-5" strokeWidth={1.5} aria-hidden="true" />
@@ -369,7 +345,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
                   <Link
                     onClick={onClose}
                     href="/pricing"
-                    className="mt-4 flex min-h-20 items-center justify-between border border-black bg-[#FFF133] px-5 py-4 font-pixel text-3xl tracking-[-0.05em] transition-colors hover:bg-[#00063D] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px]"
+                    className="mt-4 flex min-h-20 items-center justify-between border border-black bg-[#f4d44d] px-5 py-4 font-pixel text-3xl tracking-[-0.05em] transition-colors hover:bg-black hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px]"
                   >
                     <span>Pricing</span>
                     <span className="flex items-center gap-4 font-mono text-xs uppercase tracking-[0.14em]">
@@ -384,7 +360,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
         );
       })}
 
-      <div className="sticky bottom-0 border-t border-black bg-[#00063D] p-4 text-white">
+      <div className="sticky bottom-0 border-t border-black bg-black p-4 text-white">
         {session ? (
           <>
             <button
@@ -416,7 +392,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
           <Link
             onClick={onClose}
             href="/cloud?next=/sign-up"
-            className="flex min-h-16 w-full items-center justify-between bg-[#00063D] px-1 font-mono text-xs uppercase tracking-[0.14em] text-white"
+            className="flex min-h-16 w-full items-center justify-between bg-black px-1 font-mono text-xs uppercase tracking-[0.14em] text-white"
           >
             <span>
               <span className="block">Start free</span>
