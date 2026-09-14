@@ -22,19 +22,33 @@ function useScrolled(threshold = 20) {
   return scrolled;
 }
 
-/** Hand-built abstract visual: a gradient mesh over a faint trace/network grid. No stock photography is used anywhere on this page. */
-function AbstractVisual({ variant = "mesh", className = "" }: { variant?: "mesh" | "grid" | "nodes"; className?: string }) {
+type VisualVariant = "mesh" | "grid" | "nodes" | "waveform" | "terminal" | "pipeline" | "bars" | "circuit" | "contour";
+
+function baseGradient(id: string, accent: string) {
+  return (
+    <radialGradient id={id} cx="30%" cy="20%" r="80%">
+      <stop offset="0%" stopColor={accent} stopOpacity="0.3" />
+      <stop offset="45%" stopColor="#0d2e37" stopOpacity="0.6" />
+      <stop offset="100%" stopColor="#091b20" stopOpacity="1" />
+    </radialGradient>
+  );
+}
+
+/**
+ * Hand-built abstract compositions standing in for photography (no external
+ * image host is reachable from this environment). Each variant is visually
+ * distinct — a waveform, a terminal mock, a pipeline diagram, etc. — rather
+ * than one gradient reused everywhere.
+ */
+function AbstractVisual({ variant = "mesh", className = "" }: { variant?: VisualVariant; className?: string }) {
   const gradientId = `grad-${variant}-${useId().replace(/:/g, "")}`;
+  const accent = variant === "bars" || variant === "contour" ? "#ffffff" : "#fb9826";
+
   return (
     <svg viewBox="0 0 800 600" className={`h-full w-full ${className}`} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <radialGradient id={gradientId} cx="30%" cy="20%" r="80%">
-          <stop offset="0%" stopColor="#fb9826" stopOpacity="0.35" />
-          <stop offset="45%" stopColor="#0d2e37" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#091b20" stopOpacity="1" />
-        </radialGradient>
-      </defs>
+      <defs>{baseGradient(gradientId, accent)}</defs>
       <rect width="800" height="600" fill={`url(#${gradientId})`} />
+
       {variant === "grid" ? (
         <g stroke="#ffffff" strokeOpacity="0.06">
           {Array.from({ length: 17 }).map((_, i) => (
@@ -45,35 +59,136 @@ function AbstractVisual({ variant = "mesh", className = "" }: { variant?: "mesh"
           ))}
         </g>
       ) : null}
+
       {variant === "nodes" ? (
         <g>
-          {[
-            [120, 140], [340, 90], [560, 180], [220, 320], [480, 360], [660, 300], [140, 460], [420, 480],
-          ].map(([x, y], i, arr) => (
-            <g key={`${x}-${y}`}>
-              {arr[i + 1] ? (
-                <line
-                  x1={x}
-                  y1={y}
-                  x2={arr[i + 1][0]}
-                  y2={arr[i + 1][1]}
-                  stroke="#fb9826"
-                  strokeOpacity="0.25"
-                  strokeWidth="1.5"
-                />
-              ) : null}
-              <circle cx={x} cy={y} r={5} fill="#fb9826" fillOpacity="0.7" />
-            </g>
-          ))}
+          {[[120, 140], [340, 90], [560, 180], [220, 320], [480, 360], [660, 300], [140, 460], [420, 480]].map(
+            ([x, y], i, arr) => (
+              <g key={`${x}-${y}`}>
+                {arr[i + 1] ? (
+                  <line x1={x} y1={y} x2={arr[i + 1][0]} y2={arr[i + 1][1]} stroke="#fb9826" strokeOpacity="0.25" strokeWidth="1.5" />
+                ) : null}
+                <circle cx={x} cy={y} r={5} fill="#fb9826" fillOpacity="0.7" />
+              </g>
+            ),
+          )}
         </g>
       ) : null}
+
       {variant === "mesh" ? (
         <g>
           <circle cx="600" cy="120" r="220" fill="#fb9826" fillOpacity="0.08" />
           <circle cx="180" cy="440" r="260" fill="#ffffff" fillOpacity="0.04" />
         </g>
       ) : null}
+
+      {variant === "waveform" ? (
+        <g fill="none" stroke="#fb9826" strokeWidth="2.5">
+          <path
+            d="M0 340 L60 340 L100 220 L140 420 L180 300 L220 300 L260 150 L300 460 L340 320 L380 320 L420 260 L460 380 L500 300 L540 300 L580 200 L620 400 L660 320 L700 320 L740 260 L800 340"
+            strokeOpacity="0.55"
+          />
+          {[100, 260, 420, 580, 740].map((x) => (
+            <circle key={x} cx={x} cy={220} r="4" fill="#fb9826" stroke="none" />
+          ))}
+        </g>
+      ) : null}
+
+      {variant === "terminal" ? (
+        <g>
+          <rect x="80" y="90" width="640" height="420" fill="#091b20" stroke="#ffffff" strokeOpacity="0.15" />
+          <rect x="80" y="90" width="640" height="36" fill="#ffffff" fillOpacity="0.06" />
+          {[0, 1, 2].map((i) => (
+            <circle key={i} cx={106 + i * 20} cy={108} r="5" fill="#ffffff" fillOpacity="0.25" />
+          ))}
+          <g fontFamily="monospace" fontSize="16" fill="#ffffff" fillOpacity="0.5">
+            <text x="106" y="160">$ tracify.trace(agent)</text>
+            <text x="106" y="190" fill="#fb9826" fillOpacity="0.8">
+              ✓ model.call → 340ms
+            </text>
+            <text x="106" y="220">✓ tool.search → 0 results</text>
+            <text x="106" y="250" fill="#fb9826" fillOpacity="0.8">
+              ↻ fallback.invoked
+            </text>
+            <text x="106" y="280">✓ eval.groundedness → 0.94</text>
+          </g>
+        </g>
+      ) : null}
+
+      {variant === "pipeline" ? (
+        <g fontFamily="monospace" fontSize="14" fill="#ffffff" fillOpacity="0.6">
+          {["Instrument", "Observe", "Evaluate", "Release"].map((label, i) => {
+            const x = 60 + i * 180;
+            return (
+              <g key={label}>
+                <rect x={x} y="270" width="140" height="60" fill="none" stroke="#fb9826" strokeOpacity="0.5" />
+                <text x={x + 70} y="305" textAnchor="middle">
+                  {label}
+                </text>
+                {i < 3 ? (
+                  <line x1={x + 140} y1="300" x2={x + 180} y2="300" stroke="#fb9826" strokeOpacity="0.4" strokeWidth="2" />
+                ) : null}
+              </g>
+            );
+          })}
+        </g>
+      ) : null}
+
+      {variant === "bars" ? (
+        <g fill="#ffffff" fillOpacity="0.5">
+          {[120, 260, 180, 340, 220, 300, 160, 380, 240, 200].map((h, i) => (
+            <rect key={i} x={40 + i * 74} y={480 - h} width="46" height={h} />
+          ))}
+        </g>
+      ) : null}
+
+      {variant === "circuit" ? (
+        <g stroke="#fb9826" strokeOpacity="0.4" strokeWidth="2" fill="none">
+          <path d="M0 100 H240 V220 H460 V80 H800" />
+          <path d="M0 500 H140 V360 H380 V500 H800" />
+          <path d="M300 0 V180 H520 V600" />
+          {[[240, 100], [460, 220], [140, 500], [380, 360], [300, 180], [520, 220]].map(([x, y]) => (
+            <circle key={`${x}-${y}`} cx={x} cy={y} r="6" fill="#fb9826" fillOpacity="0.7" stroke="none" />
+          ))}
+        </g>
+      ) : null}
+
+      {variant === "contour" ? (
+        <g fill="none" stroke="#ffffff" strokeOpacity="0.12">
+          {[80, 140, 200, 260, 320, 380].map((r) => (
+            <ellipse key={r} cx="400" cy="300" rx={r * 1.6} ry={r} />
+          ))}
+        </g>
+      ) : null}
     </svg>
+  );
+}
+
+/**
+ * Wraps a visual in a "spec sheet" frame — dashed border, corner ticks, and a
+ * small monospace label — a deliberate in-progress/blueprint texture rather
+ * than a finished photo treatment.
+ */
+function BlueprintFrame({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`relative border border-dashed border-white/15 ${className}`}>
+      <span className="absolute -top-px -left-px h-3 w-3 border-l border-t border-white/40" />
+      <span className="absolute -top-px -right-px h-3 w-3 border-r border-t border-white/40" />
+      <span className="absolute -bottom-px -left-px h-3 w-3 border-b border-l border-white/40" />
+      <span className="absolute -bottom-px -right-px h-3 w-3 border-b border-r border-white/40" />
+      <span className="absolute bottom-2 left-2 z-10 font-mono text-[9px] uppercase tracking-[0.1em] text-white/35">
+        {label}
+      </span>
+      {children}
+    </div>
   );
 }
 
@@ -187,9 +302,9 @@ function Hero() {
 }
 
 const PROOF_ITEMS = [
-  { title: "Full run context", detail: "Model, tool, retrieval, and eval events in one timeline." },
-  { title: "Native transport", detail: "SDK, OpenTelemetry, or plain HTTP — your call." },
-  { title: "One wrapper", detail: "No agent rewrite required to get started." },
+  { title: "Full run context", detail: "Model, tool, retrieval, and eval events in one timeline.", visual: "waveform" as const, tag: "FIG.01 TRACE.TIMELINE" },
+  { title: "Native transport", detail: "SDK, OpenTelemetry, or plain HTTP — your call.", visual: "circuit" as const, tag: "FIG.02 TRANSPORT.MAP" },
+  { title: "One wrapper", detail: "No agent rewrite required to get started.", visual: "terminal" as const, tag: "FIG.03 CLI.OUTPUT" },
 ];
 
 function ProofSection() {
@@ -204,9 +319,9 @@ function ProofSection() {
             <span className="text-xs font-semibold uppercase tracking-[0.12em] text-white/40">
               / {item.title}
             </span>
-            <div className="aspect-[4/3] w-full overflow-hidden">
-              <AbstractVisual variant="grid" />
-            </div>
+            <BlueprintFrame label={item.tag} className="aspect-[4/3] w-full overflow-hidden">
+              <AbstractVisual variant={item.visual} />
+            </BlueprintFrame>
           </div>
         ))}
       </div>
@@ -256,7 +371,8 @@ const FEATURED = [
   {
     title: "Trace Viewer",
     tag: "Included on every plan",
-    visual: "grid" as const,
+    visual: "terminal" as const,
+    frameTag: "FIG.04 RUN.INSPECT",
     meta: [
       ["Full decision trail", "Model, tool, retry, eval"],
       ["Any transport", "SDK · OTel · HTTP"],
@@ -266,7 +382,8 @@ const FEATURED = [
   {
     title: "Release Gates",
     tag: "Pro",
-    visual: "nodes" as const,
+    visual: "pipeline" as const,
+    frameTag: "FIG.05 RELEASE.FLOW",
     meta: [
       ["Candidate comparison", "Quality · latency · cost"],
       ["Rollout window", "Configurable per project"],
@@ -292,9 +409,9 @@ function FeaturedSection() {
             <p className="mt-2 text-sm font-medium text-white/50">
               from <span className="font-semibold text-white">{item.tag}</span>
             </p>
-            <div className="mt-8 aspect-video w-full overflow-hidden">
+            <BlueprintFrame label={item.frameTag} className="mt-8 aspect-video w-full overflow-hidden">
               <AbstractVisual variant={item.visual} />
-            </div>
+            </BlueprintFrame>
             <dl className="mt-8 flex flex-col gap-4 border-t border-white/10 pt-8 sm:flex-row sm:justify-between">
               {item.meta.map(([label, value]) => (
                 <div key={label}>
@@ -322,7 +439,7 @@ function CombineSection() {
   return (
     <section className="relative overflow-hidden border-t border-white/10">
       <div className="relative aspect-[3/4] w-full sm:aspect-[16/9]">
-        <AbstractVisual variant="mesh" />
+        <AbstractVisual variant="contour" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#091b20]/40 to-[#091b20]" />
         <div className="absolute inset-x-0 top-0 flex flex-col gap-4 px-6 pt-16 lg:px-10">
           <h2 data-anim="fade-up" className="text-5xl font-semibold leading-[0.95] tracking-[-0.04em] text-white sm:text-7xl">
@@ -359,9 +476,9 @@ function CombineSection() {
 }
 
 const INTEGRATIONS = [
-  { name: "SDK", count: "TypeScript & Python", visual: "grid" as const },
-  { name: "OpenTelemetry", count: "Native OTLP export", visual: "nodes" as const },
-  { name: "HTTP", count: "Any language, any stack", visual: "mesh" as const },
+  { name: "SDK", count: "TypeScript & Python", visual: "bars" as const, tag: "FIG.06 SDK.CALLS" },
+  { name: "OpenTelemetry", count: "Native OTLP export", visual: "nodes" as const, tag: "FIG.07 OTEL.SPANS" },
+  { name: "HTTP", count: "Any language, any stack", visual: "grid" as const, tag: "FIG.08 HTTP.INGEST" },
 ];
 
 function IntegrationsSection() {
@@ -383,9 +500,9 @@ function IntegrationsSection() {
           <div key={item.name} data-anim="fade-up" className="border-t border-white/10 pt-8">
             <h3 className="text-2xl font-semibold tracking-[-0.02em] text-white">{item.name}</h3>
             <p className="mt-1 text-sm font-medium text-white/40">/ {item.count}</p>
-            <div className="mt-6 aspect-[16/8] w-full overflow-hidden">
+            <BlueprintFrame label={item.tag} className="mt-6 aspect-[16/8] w-full overflow-hidden">
               <AbstractVisual variant={item.visual} />
-            </div>
+            </BlueprintFrame>
           </div>
         ))}
       </div>
@@ -423,8 +540,8 @@ function HowWorksSection() {
 }
 
 const TEAM_PRINCIPLES = [
-  { title: "On-call built the alerts", body: "Every threshold exists because someone got paged for it once." },
-  { title: "No black boxes", body: "If Tracify can't explain a number, it doesn't ship the number." },
+  { title: "On-call built the alerts", body: "Every threshold exists because someone got paged for it once.", visual: "circuit" as const, tag: "FIG.09 ALERT.PATH" },
+  { title: "No black boxes", body: "If Tracify can't explain a number, it doesn't ship the number.", visual: "bars" as const, tag: "FIG.10 EVAL.SCORES" },
 ];
 
 function TeamSection() {
@@ -439,9 +556,9 @@ function TeamSection() {
       <div data-anim="fade-up" data-anim-stagger="0.15" className="mt-12 grid gap-px overflow-hidden bg-white/10 sm:grid-cols-2">
         {TEAM_PRINCIPLES.map((item) => (
           <div key={item.title} className="flex flex-col gap-4 bg-[#091b20] p-8">
-            <div className="aspect-square w-full max-w-[10rem] overflow-hidden">
-              <AbstractVisual variant="mesh" />
-            </div>
+            <BlueprintFrame label={item.tag} className="aspect-square w-full max-w-[10rem] overflow-hidden">
+              <AbstractVisual variant={item.visual} />
+            </BlueprintFrame>
             <h3 className="text-xl font-semibold tracking-[-0.02em] text-white">{item.title}</h3>
             <p className="text-sm font-medium leading-[1.35] text-white/50">{item.body}</p>
           </div>
