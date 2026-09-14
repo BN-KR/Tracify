@@ -138,6 +138,43 @@ export function NavigationSystemExplorations({
         </div>
       </section>
 
+      <section id="navsys-stats-band" className="bg-black px-6 py-20 text-white md:px-10">
+        <div className="mx-auto max-w-[1240px]">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
+            One wrapper, the whole run
+          </p>
+          <div className="mt-10 grid gap-10 border-t border-white/15 pt-10 sm:grid-cols-3">
+            <div>
+              <p className="text-6xl font-semibold tracking-[-0.02em] text-[#f4d44d] md:text-7xl">
+                4
+              </p>
+              <p className="mt-3 max-w-xs text-sm leading-6 text-white/60">
+                Decision types captured on every run — model, tool, retry, and
+                evaluation.
+              </p>
+            </div>
+            <div>
+              <p className="text-6xl font-semibold tracking-[-0.02em] text-[#f4d44d] md:text-7xl">
+                3
+              </p>
+              <p className="mt-3 max-w-xs text-sm leading-6 text-white/60">
+                Ways in — SDK, OpenTelemetry, or plain HTTP, for the stack you
+                already run.
+              </p>
+            </div>
+            <div>
+              <p className="text-6xl font-semibold tracking-[-0.02em] text-[#f4d44d] md:text-7xl">
+                1
+              </p>
+              <p className="mt-3 max-w-xs text-sm leading-6 text-white/60">
+                Wrapper to install before the first trace shows up in your
+                dashboard.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="navsys-proof-band" className="bg-[#eceae3] py-20 text-black">
         <div className="mx-auto max-w-[1240px] px-6 md:px-10">
           <StudyLabel number="02" title="verified proof strip" />
