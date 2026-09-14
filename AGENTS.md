@@ -29,7 +29,8 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 - **API keys:** HMAC-SHA256 with `TRACIFY_API_KEY_HASH_SECRET`. Prefix: `tracify_sk_live_` (legacy `tracify_sk_live_` accepted). Plaintext never stored server-side — shown once during onboarding.
 
 ## Conventions
-- **Design:** Monochrome (#000000 bg, #FFFFFF text), 0px border-radius. Geist Pixel Square for logos/H1s, Geist Mono for UI/data, Geist Sans for prose. Tailwind v4 + shadcn/ui (`base-nova`). No blue accents.
+- **Design:** Marketing pages (`/`, `/pricing`, `/product/[feature]`, shared navbar/footer) use exactly three colors — cream/off-white (`#eceae3`) backgrounds, near-black (`#090909`) text/panels, and yellow (`#f4d44d`/`#fff4b5`) as the only accent. No navy, no rainbow accent system, no blue. 0px border-radius everywhere. Geist Pixel Square for logos/H1s, Geist Mono for UI/data, Geist Sans for prose. Tailwind v4 + shadcn/ui (`base-nova`). This is the current, intentional design — do not reintroduce a multi-color/navy "rebrand" system without the user explicitly asking for it (one was tried and reverted; see git history around commit 334ad09 for the exact revert point if this needs restoring again).
+- **Design exploration workflow:** Never redesign or restyle marketing pages directly on `main`. Any new visual direction — palette change, new homepage layout, new component treatment — goes on its own branch with its own draft PR and Vercel preview link, so it can be reviewed live before anything touches production. Only merge a design PR when the user explicitly approves what they see in the preview. Multiple competing ideas can exist as separate open draft PRs at once; don't feel pressure to pick one before the user has seen previews of each.
 - **Dashboard localStorage keys:** `tracify.sidebar.collapsed`, `tracify.lastProjectId`, `tracify:dashboard-sidebar-groups`, `tracify.onboarding.*`
 - **`legacy-peer-deps=true`** in `.npmrc`. Use `npx.cmd` on Windows for shadcn additions.
 - **React:** Server Components by default, Client Components at leaf nodes.
@@ -85,6 +86,7 @@ This project uses Convex as its backend. **Always read `convex/_generated/ai/gui
 - Direct pushes to `main` are allowed only for small, low-risk content fixes after required checks pass.
 - Never push directly to `main` unless the user explicitly requests it.
 - Before publishing, inspect the staged diff and exclude unrelated scratch files or user changes.
+- **Design/visual changes specifically:** always land on a draft PR with a live Vercel preview link first, regardless of how confident the change seems — screenshots from a headless browser are a sanity check, not a substitute for the user seeing the real preview. Merge only after explicit approval of that preview.
 
 ## SEO and production release guardrails
 
