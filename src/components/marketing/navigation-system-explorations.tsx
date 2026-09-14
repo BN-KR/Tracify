@@ -12,6 +12,7 @@ import {
 import { Future19Pricing } from "@/components/marketing/future19-pricing";
 import { ThirdPartyLogo } from "@/components/third-party-logo";
 import { LandingSampleRun } from "@/components/marketing/landing-sample-run";
+import { LineReveal, ScrollRevealInit } from "@/components/marketing/scroll-reveal";
 
 const integrationMarks = [
   { name: "OpenAI", mark: "✳", className: "font-semibold tracking-[-0.05em]" },
@@ -80,6 +81,7 @@ export function NavigationSystemExplorations({
       aria-label="Future 19 navigation visual system explorations"
       className={`border-t border-white/15 bg-[#00063D] ${showSectionLabels ? "" : "future19-public-page"}`}
     >
+      <ScrollRevealInit />
       {showIntroduction ? (
         <div className="bg-[#FFFFFF] px-6 py-20 text-black md:px-10">
           <div className="mx-auto max-w-[1240px]">
@@ -108,17 +110,32 @@ export function NavigationSystemExplorations({
           </p>
           <div className="mt-10 grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-[#FFF9E0] px-4 py-1.5 text-[13px] font-medium text-[#7A5B00]">
+              <span
+                data-anim="fade-down"
+                className="inline-flex items-center gap-2 rounded-full bg-[#FFF9E0] px-4 py-1.5 text-[13px] font-medium text-[#7A5B00]"
+              >
                 <Radio className="size-3.5 text-[#E8B800]" /> The run explains the release
               </span>
-              <h1 className="mt-8 max-w-[620px] font-sans text-[56px] font-semibold normal-case leading-[1.04] tracking-[-0.02em] text-[#00063D] md:text-[68px]">
+              <h1
+                data-anim="fade-up"
+                data-anim-delay="0.1"
+                className="mt-8 max-w-[620px] font-sans text-[56px] font-semibold normal-case leading-[1.04] tracking-[-0.02em] text-[#00063D] md:text-[68px]"
+              >
                 See why it failed. Ship with proof.
               </h1>
-              <p className="mt-6 max-w-lg text-lg leading-8 text-black/60 md:text-xl">
+              <p
+                data-anim="fade-up"
+                data-anim-delay="0.2"
+                className="mt-6 max-w-lg text-lg leading-8 text-black/60 md:text-xl"
+              >
                 Trace every model, tool, retrieval, and fallback decision.
                 Evaluate the fix before it reaches production.
               </p>
-              <div className="mt-9 flex flex-wrap gap-4">
+              <div
+                data-anim="fade-up"
+                data-anim-delay="0.3"
+                className="mt-9 flex flex-wrap gap-4"
+              >
                 <Link
                   href="/sign-up"
                   className="inline-flex h-13 items-center gap-2 bg-[#00063D] px-7 text-[15px] font-medium text-white transition-colors hover:bg-[#FA4028]"
@@ -133,7 +150,9 @@ export function NavigationSystemExplorations({
                 </Link>
               </div>
             </div>
-            <LandingSampleRun />
+            <div data-anim="fade-left" data-anim-delay="0.15">
+              <LandingSampleRun />
+            </div>
           </div>
         </div>
       </section>
@@ -143,15 +162,23 @@ export function NavigationSystemExplorations({
           <StudyLabel number="02" title="verified proof strip" />
           <div className="mt-10 flex flex-col justify-between gap-8 md:flex-row md:items-end">
             <div>
-              <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
+              <p data-anim="fade-up" className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
                 What the record contains
               </p>
-              <h3 className="mt-5 max-w-2xl font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
+              <h3
+                data-anim="fade-up"
+                data-anim-delay="0.1"
+                className="mt-5 max-w-2xl font-pixel text-6xl leading-[0.86] tracking-[-0.07em]"
+              >
                 Evidence that survives the handoff.
               </h3>
             </div>
           </div>
-          <div className="mt-10 grid border-y border-black/15 sm:grid-cols-3">
+          <div
+            data-anim="fade-up"
+            data-anim-stagger="0.12"
+            className="mt-10 grid border-y border-black/15 sm:grid-cols-3"
+          >
             {[
               ["01", "Full run context", "Model, tool, retrieval, fallback, and evaluation in one trail."],
               ["02", "Release evidence", "Quality, latency, cost, and a decision you can defend."],
@@ -171,7 +198,11 @@ export function NavigationSystemExplorations({
         <p className="mt-10 px-6 font-mono text-[8px] uppercase tracking-[0.13em] text-black/60 md:px-10">
           Supported runtimes / current integration coverage
         </p>
-        <div className="mt-12 grid border-y border-black/15 sm:grid-cols-3 lg:grid-cols-6">
+        <div
+          data-anim="fade"
+          data-anim-stagger="0.06"
+          className="mt-12 grid border-y border-black/15 sm:grid-cols-3 lg:grid-cols-6"
+        >
           {integrationMarks.map(({ name, className }) => (
             <div
               key={name}
@@ -191,7 +222,7 @@ export function NavigationSystemExplorations({
         <div className="mx-auto max-w-[1240px]">
           <StudyLabel number="03" title="observe / evaluate / release" />
           <div className="mt-10 border border-black/20 bg-white">
-            <div className="grid md:grid-cols-4">
+            <div data-anim="fade-up" data-anim-stagger="0.1" className="grid md:grid-cols-4">
               {[
                 ["01", "Instrument", "Capture the complete run."],
                 ["02", "Observe", "Find the decision that changed it."],
@@ -226,7 +257,7 @@ export function NavigationSystemExplorations({
           </div>
           <div className="mt-12 border border-black/20 bg-white">
             <div className="border-b border-black/15 p-6 md:flex md:items-end md:justify-between md:gap-8">
-              <div>
+              <div data-anim="fade-up">
                 <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
                   Use cases
                 </p>
@@ -234,11 +265,15 @@ export function NavigationSystemExplorations({
                   Apply the record to the agent you ship.
                 </h3>
               </div>
-              <p className="mt-4 max-w-sm text-sm leading-6 text-black/70 md:mt-0">
+              <p
+                data-anim="fade-up"
+                data-anim-delay="0.1"
+                className="mt-4 max-w-sm text-sm leading-6 text-black/70 md:mt-0"
+              >
                 Start with the failure mode that costs your team the most time.
               </p>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4">
+            <div data-anim="fade-up" data-anim-stagger="0.1" className="grid sm:grid-cols-2 lg:grid-cols-4">
               {[
                 ["Support", "Escalations, retrieval, handoffs", "/use-cases/support"],
                 ["Research", "Sources, browsing, synthesis", "/use-cases/research"],
@@ -268,7 +303,7 @@ export function NavigationSystemExplorations({
         <div className="mx-auto max-w-[1240px]">
           <StudyLabel number="04" title="observe / decision trail" />
           <div className="mt-10 grid border border-black/20 bg-white lg:grid-cols-[0.8fr_1.2fr]">
-            <div className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
+            <div data-anim="fade-right" className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
               <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/70">
                 Incident / sample run_018204
               </p>
@@ -283,7 +318,7 @@ export function NavigationSystemExplorations({
                 <TextLink href="/demo">Inspect sample trace</TextLink>
               </div>
             </div>
-            <div className="bg-[#00063D] p-6 text-white md:p-8">
+            <div data-anim="fade-left" data-anim-delay="0.15" className="bg-[#00063D] p-6 text-white md:p-8">
               <div className="border-l-2 border-[#FF80C8] pl-5">
                 <p className="font-mono text-[8px] uppercase text-[#FF80C8]">
                   Root cause
@@ -292,7 +327,7 @@ export function NavigationSystemExplorations({
                   Fallback ignored an empty retrieval result.
                 </h4>
               </div>
-              <div className="mt-8 space-y-px bg-white/15">
+              <div data-anim="fade-up" data-anim-delay="0.2" data-anim-stagger="0.08" className="mt-8 space-y-px bg-white/15">
                 {[
                   ["12:41:08.120", "model", "response drafted"],
                   ["12:41:08.604", "tool", "knowledge.search → 0 results"],
@@ -315,7 +350,7 @@ export function NavigationSystemExplorations({
         <div className="mt-12 border-t border-black/15 pt-12">
           <StudyLabel number="05" title="evaluate / release decision" />
           <div className="mt-10 grid gap-px bg-[#00063D]/15 lg:grid-cols-[1fr_0.42fr]">
-            <div className="bg-white p-7 md:p-10">
+            <div data-anim="fade-up" className="bg-white p-7 md:p-10">
               <div className="flex flex-col justify-between gap-6 border-b border-black/15 pb-7 sm:flex-row sm:items-end">
                 <div>
                   <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/70">
@@ -394,7 +429,11 @@ export function NavigationSystemExplorations({
                 ))}
               </div>
             </div>
-            <div className="flex flex-col justify-between bg-[#00063D] p-7 text-white">
+            <div
+              data-anim="fade-left"
+              data-anim-delay="0.2"
+              className="flex flex-col justify-between bg-[#00063D] p-7 text-white"
+            >
               <Sparkles className="size-6 text-[#96FF6F]" />
               <div>
                 <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-white/55">
@@ -417,7 +456,7 @@ export function NavigationSystemExplorations({
         <div className="mx-auto max-w-[1240px]">
           <StudyLabel number="06" title="developer setup" />
           <div className="mt-10 grid border border-black/20 bg-white lg:grid-cols-[0.72fr_1.28fr]">
-            <div className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
+            <div data-anim="fade-right" className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
               <Code2 className="size-7" />
               <h3 className="mt-10 font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
                 One wrapper. A complete record.
@@ -429,7 +468,7 @@ export function NavigationSystemExplorations({
                 <TextLink href="/docs/quickstart">Read quickstart</TextLink>
               </div>
             </div>
-            <div className="bg-[#00063D] p-6 font-mono text-[12px] leading-7 text-white/80 md:p-9">
+            <div data-anim="fade-left" data-anim-delay="0.15" className="bg-[#00063D] p-6 font-mono text-[12px] leading-7 text-white/80 md:p-9">
               <div className="flex items-center justify-between border-b border-white/15 pb-4 text-[8px] uppercase tracking-[0.13em] text-white/62">
                 <span>agent.ts</span>
                 <span>typescript</span>
@@ -465,7 +504,7 @@ export function NavigationSystemExplorations({
         <div className="mx-auto max-w-[1240px]">
           <StudyLabel number="07" title="production trust" />
           <div className="mt-10 grid border border-black/20 bg-white lg:grid-cols-[1fr_1fr]">
-            <div className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
+            <div data-anim="fade-right" className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
               <LockKeyhole className="size-7" />
               <h3 className="mt-10 font-pixel text-6xl leading-[0.86] tracking-[-0.07em]">
                 Production context, controlled.
@@ -478,7 +517,7 @@ export function NavigationSystemExplorations({
                 <TextLink href="/security">Open security page</TextLink>
               </div>
             </div>
-            <div className="grid sm:grid-cols-2">
+            <div data-anim="fade-up" data-anim-stagger="0.08" className="grid sm:grid-cols-2">
               {[
                 ["Encryption", "In transit and at rest"],
                 ["Retention", "Plan-defined windows"],
@@ -546,7 +585,7 @@ export function NavigationSystemExplorations({
         <div className="mx-auto max-w-[1240px]">
           <StudyLabel number="08" title="pricing + field notes" />
           <div className="mt-10 grid gap-px bg-[#00063D]/15 lg:grid-cols-[1.25fr_0.75fr]">
-            <article className="flex min-h-[480px] flex-col justify-between bg-[#00063D] p-8 text-white md:p-10">
+            <article data-anim="fade-right" className="flex min-h-[480px] flex-col justify-between bg-[#00063D] p-8 text-white md:p-10">
               <div>
                 <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-[#FFF133]">
                   Featured field guide
@@ -562,7 +601,7 @@ export function NavigationSystemExplorations({
                 Read the guide →
               </Link>
             </article>
-            <div className="grid">
+            <div data-anim="fade-up" data-anim-delay="0.15" data-anim-stagger="0.08" className="grid">
               {[
                 ["Guide", "The complete guide to AI agent observability"],
                 ["Guide", "How to debug failed agent runs"],
@@ -589,7 +628,7 @@ export function NavigationSystemExplorations({
             Start with a real run
           </p>
           <div className="mt-10 grid border border-black/20 bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[1.25fr_0.75fr]">
-            <div className="p-8 md:p-12">
+            <div data-anim="fade-up" className="p-8 md:p-12">
               <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/70">
                 The next useful conversation
               </p>
@@ -607,7 +646,7 @@ export function NavigationSystemExplorations({
                 Book a trace clinic <ArrowRight className="size-4" />
               </Link>
             </div>
-            <div className="flex flex-col justify-between bg-[#0095FF] p-8">
+            <div data-anim="fade-left" data-anim-delay="0.2" className="flex flex-col justify-between bg-[#0095FF] p-8">
               <CircleDot className="size-6" />
               <div>
                 <p className="font-pixel text-6xl tracking-[-0.07em]">30 min</p>
@@ -629,7 +668,7 @@ export function NavigationSystemExplorations({
           <div className="mx-auto max-w-[1240px]">
             <StudyLabel number="15" title="footer atlas" />
             <div className="mt-10 grid gap-10 border-b border-black/15 pb-14 md:grid-cols-[1fr_auto]">
-              <div>
+              <div data-anim="fade-up">
                 <p className="relative isolate inline-block px-1 font-pixel text-3xl tracking-[-0.05em] text-[#F5D400] before:absolute before:-inset-x-1 before:bottom-0.5 before:-z-10 before:h-[68%] before:-rotate-1 before:skew-x-[-7deg] before:bg-[#00063D]/10 before:content-['']">
                   tracify
                 </p>
@@ -671,7 +710,12 @@ export function NavigationSystemExplorations({
                   Start free <ArrowRight className="size-3" />
                 </Link>
               </div>
-              <div className="grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-4">
+              <div
+                data-anim="fade-up"
+                data-anim-delay="0.15"
+                data-anim-stagger="0.08"
+                className="grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-4"
+              >
                 {(
                   [
                     [
@@ -728,17 +772,32 @@ export function NavigationSystemExplorations({
                 ))}
               </div>
             </div>
-            <div className="select-none pt-8 font-pixel text-[clamp(5.5rem,18.2vw,18rem)] leading-[0.66] tracking-[-0.1em] text-black">
+            <div
+              data-anim="fade-up"
+              data-anim-delay="0.25"
+              className="select-none pt-8 font-pixel text-[clamp(5.5rem,18.2vw,18rem)] leading-[0.66] tracking-[-0.1em] text-black"
+            >
               tracify
             </div>
           </div>
           <div className="flex h-4">
-            <span className="flex-1 bg-[#FFF133]" />
-            <span className="flex-1 bg-[#FF80C8]" />
-            <span className="flex-1 bg-[#0095FF]" />
-            <span className="flex-1 bg-[#45FF00]" />
-            <span className="flex-1 bg-[#FA4028]" />
-            <span className="flex-1 bg-[#7C5AC4]" />
+            {[
+              ["#FFF133", 0],
+              ["#FF80C8", 0.05],
+              ["#0095FF", 0.1],
+              ["#45FF00", 0.15],
+              ["#FA4028", 0.2],
+              ["#7C5AC4", 0.25],
+            ].map(([color, delay]) => (
+              <span key={color as string} className="flex-1 overflow-hidden">
+                <LineReveal
+                  axis="width"
+                  delay={delay as number}
+                  className="block h-4"
+                  style={{ backgroundColor: color as string }}
+                />
+              </span>
+            ))}
           </div>
         </footer>
       ) : null}
