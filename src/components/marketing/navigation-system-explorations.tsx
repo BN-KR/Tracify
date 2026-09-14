@@ -100,38 +100,34 @@ export function NavigationSystemExplorations({
 
       <section
         id="navsys-hero-split"
-        className="bg-[#FFFFFF] px-6 py-14 text-black md:px-10 md:py-16"
+        className="bg-[#FFFFFF] px-6 py-24 text-black md:px-10 md:py-32"
       >
         <div className="mx-auto max-w-[1240px]">
-          <div className="flex flex-col gap-2 border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/70 sm:flex-row sm:items-center sm:justify-between">
-            <span>AI agent observability / evaluation</span>
-            <span>Production infrastructure</span>
-          </div>
-          <div className="mt-7 grid border border-black/20 bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[0.95fr_1.05fr] md:mt-8">
-            <div className="flex min-h-[470px] flex-col justify-between border-b border-black/15 p-6 md:p-8 lg:border-b-0 lg:border-r">
-              <div>
-                <span className="inline-flex items-center gap-2 bg-[#00063D] px-3 py-2 font-mono text-[8px] uppercase tracking-[0.13em] text-white">
-                  <Radio className="size-3 text-[#FFF133]" /> the run explains
-                  the release
-                </span>
-                <h1 className="mt-7 max-w-[740px] font-pixel text-7xl leading-[0.82] tracking-[-0.08em] md:text-7xl">
-                  See why it failed. Ship with proof.
-                </h1>
-                <p className="mt-5 max-w-xl text-base leading-7 text-black/70 md:text-lg">
-                  Trace every model, tool, retrieval, and fallback decision.
-                  Evaluate the fix before it reaches production.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/50">
+            AI agent observability
+          </p>
+          <div className="mt-10 grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full bg-[#FFF9E0] px-4 py-1.5 text-[13px] font-medium text-[#7A5B00]">
+                <Radio className="size-3.5 text-[#E8B800]" /> The run explains the release
+              </span>
+              <h1 className="mt-8 max-w-[620px] font-sans text-[56px] font-semibold normal-case leading-[1.04] tracking-[-0.02em] text-[#00063D] md:text-[68px]">
+                See why it failed. Ship with proof.
+              </h1>
+              <p className="mt-6 max-w-lg text-lg leading-8 text-black/60 md:text-xl">
+                Trace every model, tool, retrieval, and fallback decision.
+                Evaluate the fix before it reaches production.
+              </p>
+              <div className="mt-9 flex flex-wrap gap-4">
                 <Link
                   href="/sign-up"
-                  className="inline-flex h-12 items-center gap-3 bg-[#00063D] px-6 font-mono text-[9px] uppercase tracking-[0.13em] text-white hover:bg-[#FFF133] hover:text-black"
+                  className="inline-flex h-13 items-center gap-2 bg-[#00063D] px-7 text-[15px] font-medium text-white transition-colors hover:bg-[#FA4028]"
                 >
                   Start tracing <ArrowRight className="size-4" />
                 </Link>
                 <Link
                   href="/demo"
-                  className="inline-flex h-12 items-center border border-black/25 px-6 font-mono text-[9px] uppercase tracking-[0.13em] hover:bg-[#FF80C8]"
+                  className="inline-flex h-13 items-center border border-black/15 px-7 text-[15px] font-medium text-black/80 transition-colors hover:border-black/30 hover:bg-[#F2F2F3]"
                 >
                   Open sample run
                 </Link>
