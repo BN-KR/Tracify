@@ -1,13 +1,17 @@
-import { DarkHomepage } from "@/components/marketing/dark-homepage";
+import { NavigationSystemExplorations } from "@/components/marketing/navigation-system-explorations";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#091b20] text-white">
+    <div className="min-h-screen overflow-x-hidden bg-[#eceae3] pt-[54px] text-black">
       <main id="main-content">
-        <DarkHomepage />
+        <NavigationSystemExplorations
+          showIntroduction={false}
+          showSectionLabels={false}
+          showFooter={false}
+        />
       </main>
     </div>
   );

@@ -60,14 +60,14 @@ export function Future19Pricing() {
                   role="radio"
                   aria-checked={billing === interval}
                   onClick={() => setBilling(interval)}
-                  className={`min-h-9 px-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black ${billing === interval ? "bg-black text-white" : "hover:bg-[#FFF9E0]"}`}
+                  className={`min-h-9 px-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black ${billing === interval ? "bg-black text-white" : "hover:bg-[#f4d44d]"}`}
                 >
                   {interval}
                 </button>
               ))}
             </div>
             <span
-              className={`inline-flex min-h-9 min-w-[166px] items-center border px-3 font-mono text-[8px] uppercase tracking-[0.11em] transition-colors ${billing === "annual" ? "border-[#E8D9A0] bg-[#FFF9E0] text-black" : "border-black/15 bg-white text-black/70"}`}
+              className={`inline-flex min-h-9 min-w-[166px] items-center border px-3 font-mono text-[8px] uppercase tracking-[0.11em] transition-colors ${billing === "annual" ? "border-[#d2b32f] bg-[#f4d44d] text-black" : "border-black/15 bg-white text-black/70"}`}
             >
               {billing === "annual"
                 ? "Billed annually · save 20%"
@@ -80,7 +80,7 @@ export function Future19Pricing() {
           {plans.map((plan) => (
             <article
               key={plan.name}
-              className={`flex flex-col p-5 md:p-6 ${plan.featured ? "bg-[#FFF9E0]" : "bg-white"}`}
+              className={`flex flex-col p-5 md:p-6 ${plan.featured ? "bg-[#f4d44d]" : "bg-white"}`}
             >
               <div className="flex items-start justify-between gap-4">
                 <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/70">
