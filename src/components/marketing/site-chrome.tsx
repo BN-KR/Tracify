@@ -16,7 +16,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   if (isDashboard || isPlayground || isOnboarding || isAuth || isCloudDirectory) return <>{children}</>;
 
   return (
-    <div className="marketing-jasper">
+    <div className="marketing-rebrand">
       <Navbar />
       {children}
       <Footer />
