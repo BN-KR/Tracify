@@ -114,6 +114,29 @@ const mobileMenuMeta = {
 
 type MenuName = keyof typeof menus;
 
+// Rainbow accent per menu — replaces the old single-orange hover accent with
+// jasper.ai's real multi-color system (yellow/pink/blue/green).
+const MENU_ACCENT_CLASS: Record<MenuName, string> = {
+  Product: "hover:bg-[#FFF133]",
+  Solutions: "hover:bg-[#FF80C8]",
+  Developers: "hover:bg-[#0095FF]",
+  Company: "hover:bg-[#45FF00]",
+};
+
+const MENU_ACCENT_HEX: Record<MenuName, string> = {
+  Product: "#FFF133",
+  Solutions: "#FF80C8",
+  Developers: "#0095FF",
+  Company: "#45FF00",
+};
+
+const MENU_MOBILE_BG_CLASS: Record<MenuName, string> = {
+  Product: "bg-[#FFF133]",
+  Solutions: "bg-[#FF80C8]",
+  Developers: "bg-[#CEEBFF]",
+  Company: "bg-[#D2FFC1]",
+};
+
 export function Navbar() {
   const [active, setActive] = useState<MenuName | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -169,7 +192,7 @@ export function Navbar() {
                 </button>
                 <Link
                   href="/dashboard"
-                  className="bg-[#00063D] px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#FA4028] hover:text-black"
+                  className="bg-[#00063D] px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#FFF133] hover:text-black"
                 >
                   Dashboard
                 </Link>
@@ -184,7 +207,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/cloud?next=/sign-up"
-                  className="bg-[#00063D] px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#FA4028] hover:text-black"
+                  className="bg-[#00063D] px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#FFF133] hover:text-black"
                 >
                   Start free
                 </Link>
@@ -232,7 +255,7 @@ function DesktopPanel({
             onClick={onClose}
             key={title}
             href={href}
-            className="border-b border-r border-black/10 p-6 transition-colors hover:bg-[#FA4028]"
+            className={`border-b border-r border-black/10 p-6 transition-colors ${MENU_ACCENT_CLASS[name]}`}
           >
             <p className="font-pixel text-4xl tracking-[-0.06em]">{title}</p>
             <p className="mt-3 text-xs leading-5 text-black/55">{body}</p>
@@ -252,7 +275,8 @@ function DesktopPanel({
         <Link
           onClick={onClose}
           href={featured[name].href}
-          className="mt-10 inline-block border-b border-[#FA4028] pb-1 font-mono text-[8px] uppercase tracking-[0.12em] text-[#FA4028]"
+          className="mt-10 inline-block border-b pb-1 font-mono text-[8px] uppercase tracking-[0.12em]"
+          style={{ borderColor: MENU_ACCENT_HEX[name], color: MENU_ACCENT_HEX[name] }}
         >
           {featured[name].label}
         </Link>
@@ -282,7 +306,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
         return (
           <section
             key={name}
-            className={expanded ? "bg-[#FA4028]" : "bg-[#FFFFFF]"}
+            className={expanded ? MENU_MOBILE_BG_CLASS[name] : "bg-[#FFFFFF]"}
           >
             <button
               type="button"
@@ -322,7 +346,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
                         onClick={onClose}
                         key={title}
                         href={href}
-                        className="group flex min-h-40 flex-col justify-between border-b border-r border-black bg-[#FA4028] p-4 transition-colors hover:bg-[#00063D] hover:text-white focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px]"
+                        className={`group flex min-h-40 flex-col justify-between border-b border-r border-black p-4 transition-colors hover:bg-[#00063D] hover:text-white focus-visible:relative focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px] ${MENU_MOBILE_BG_CLASS[name]}`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <Icon className="size-5" strokeWidth={1.5} aria-hidden="true" />
@@ -345,7 +369,7 @@ function MobilePanel({ onClose }: { onClose: () => void }) {
                   <Link
                     onClick={onClose}
                     href="/pricing"
-                    className="mt-4 flex min-h-20 items-center justify-between border border-black bg-[#FA4028] px-5 py-4 font-pixel text-3xl tracking-[-0.05em] transition-colors hover:bg-[#00063D] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px]"
+                    className="mt-4 flex min-h-20 items-center justify-between border border-black bg-[#FFF133] px-5 py-4 font-pixel text-3xl tracking-[-0.05em] transition-colors hover:bg-[#00063D] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-4px]"
                   >
                     <span>Pricing</span>
                     <span className="flex items-center gap-4 font-mono text-xs uppercase tracking-[0.14em]">
