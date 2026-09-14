@@ -22,13 +22,13 @@ export function BlueprintFrame({
 }) {
   return (
     <div className={`relative ${className}`}>
-      <span className="absolute -top-1 -left-1 h-2.5 w-2.5 border-l-2 border-t-2 border-black/70" />
-      <span className="absolute -top-1 -right-1 h-2.5 w-2.5 border-r-2 border-t-2 border-black/70" />
-      <span className="absolute -bottom-1 -left-1 h-2.5 w-2.5 border-b-2 border-l-2 border-black/70" />
-      <span className="absolute -bottom-1 -right-1 h-2.5 w-2.5 border-b-2 border-r-2 border-black/70" />
-      <div className="absolute -top-6 left-0 flex w-full items-baseline justify-between font-mono text-[9px] uppercase tracking-[0.1em] text-black/40">
+      <span className="absolute -top-2.5 -left-2.5 h-7 w-7 border-l-[3px] border-t-[3px] border-[#f4d44d]" />
+      <span className="absolute -top-2.5 -right-2.5 h-7 w-7 border-r-[3px] border-t-[3px] border-[#f4d44d]" />
+      <span className="absolute -bottom-2.5 -left-2.5 h-7 w-7 border-b-[3px] border-l-[3px] border-[#f4d44d]" />
+      <span className="absolute -bottom-2.5 -right-2.5 h-7 w-7 border-b-[3px] border-r-[3px] border-[#f4d44d]" />
+      <div className="absolute -top-8 left-0 flex w-full items-baseline justify-between font-mono text-xs font-bold uppercase tracking-[0.1em] text-black">
         <span>{label}</span>
-        {dimension ? <span className="text-black/30">{dimension}</span> : null}
+        {dimension ? <span className="text-black/60">{dimension}</span> : null}
       </div>
       {children}
     </div>
@@ -38,9 +38,10 @@ export function BlueprintFrame({
 /** A single small "+" reference mark, the way a technical drawing pins a point. */
 export function Crosshair({ className = "" }: { className?: string }) {
   return (
-    <span className={`pointer-events-none relative inline-block h-3 w-3 ${className}`} aria-hidden="true">
-      <span className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-black/30" />
-      <span className="absolute top-1/2 left-0 h-px w-full -translate-y-1/2 bg-black/30" />
+    <span className={`pointer-events-none relative inline-block h-5 w-5 ${className}`} aria-hidden="true">
+      <span className="absolute left-1/2 top-0 h-full w-[3px] -translate-x-1/2 bg-[#f4d44d]" />
+      <span className="absolute top-1/2 left-0 h-[3px] w-full -translate-y-1/2 bg-[#f4d44d]" />
+      <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 border-2 border-black bg-[#eceae3]" />
     </span>
   );
 }
@@ -54,12 +55,12 @@ export function DimensionLine({
   className?: string;
 }) {
   return (
-    <div className={`flex items-center gap-2 ${className}`} aria-hidden="true">
-      <span className="h-2 w-px bg-black/30" />
-      <span className="h-px flex-1 bg-black/30" />
-      <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-black/40">{label}</span>
-      <span className="h-px flex-1 bg-black/30" />
-      <span className="h-2 w-px bg-black/30" />
+    <div className={`flex items-center gap-3 ${className}`} aria-hidden="true">
+      <span className="h-3 w-[3px] bg-[#f4d44d]" />
+      <span className="h-[3px] flex-1 bg-[#f4d44d]" />
+      <span className="font-mono text-xs font-bold uppercase tracking-[0.1em] text-black">{label}</span>
+      <span className="h-[3px] flex-1 bg-[#f4d44d]" />
+      <span className="h-3 w-[3px] bg-[#f4d44d]" />
     </div>
   );
 }
