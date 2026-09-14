@@ -40,7 +40,7 @@ const footerGroups = [
 
 export function Footer() {
   return (
-    <footer className="overflow-hidden bg-[#eceae3] px-6 pt-20 text-black md:px-10">
+    <footer className="overflow-hidden bg-[#FFFFFF] px-6 pt-20 text-black md:px-10">
       <div className="mx-auto max-w-[1240px]">
         <div className="grid gap-10 border-b border-black/15 pb-14 md:grid-cols-[1fr_auto]">
           <div>
@@ -73,7 +73,7 @@ export function Footer() {
               />
               <button
                 type="submit"
-                className="bg-black px-4 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                className="bg-[#00063D] px-4 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#FA4028] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
               >
                 Subscribe
               </button>
@@ -83,7 +83,7 @@ export function Footer() {
             </p>
             <Link
               href="/sign-up"
-              className="mt-6 inline-flex items-center gap-3 bg-black px-5 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+              className="mt-6 inline-flex items-center gap-3 bg-[#00063D] px-5 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#FA4028] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
             >
               Start free <ArrowRight className="size-3" />
             </Link>
@@ -112,7 +112,7 @@ export function Footer() {
           tracify
         </div>
       </div>
-      <div className="h-4 bg-[#f4d44d]" />
+      <div className="h-4 bg-[#FA4028]" />
     </footer>
   );
 }

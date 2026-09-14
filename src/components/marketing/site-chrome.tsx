@@ -16,11 +16,11 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   if (isDashboard || isPlayground || isOnboarding || isAuth || isCloudDirectory) return <>{children}</>;
 
   return (
-    <>
+    <div className="marketing-jasper">
       <Navbar />
       {children}
       <Footer />
       <SiteAssistant />
-    </>
+    </div>
   );
 }
