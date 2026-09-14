@@ -227,6 +227,9 @@
 .marketing-rebrand span[aria-label="Tracify"] {
   color: #f5d400;
 }
+.marketing-rebrand span[aria-label="Tracify"]::before {
+  content: none;
+}
 
 @custom-variant dark (&:is(.dark *));
 
