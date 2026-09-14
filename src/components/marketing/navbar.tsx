@@ -115,7 +115,7 @@ const mobileMenuMeta = {
 type MenuName = keyof typeof menus;
 
 // Rainbow accent per menu — replaces the old single-orange hover accent with
-// jasper.ai's real multi-color system (yellow/pink/blue/green).
+// a multi-color system (yellow/pink/blue/green).
 const MENU_ACCENT_CLASS: Record<MenuName, string> = {
   Product: "hover:bg-[#FFF133]",
   Solutions: "hover:bg-[#FF80C8]",

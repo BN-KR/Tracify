@@ -154,17 +154,16 @@
 @media(max-width:700px) { .tracify-connection-form { display:flex; flex-direction:column; } }
 @media (max-width:700px) { .tracify-module-heading { flex-direction:column; } .tracify-users-row { grid-template-columns:1.5fr 1fr 1fr; } .tracify-users-row span:last-child { display:none; } }
 
-/* ── Jasper-inspired marketing theme (scoped, does not touch dashboard) ──
-   Applied via the `.marketing-jasper` wrapper in site-chrome.tsx. Only the
+/* ── Rebranded marketing theme (scoped, does not touch dashboard) ──
+   Applied via the `.marketing-rebrand` wrapper in site-chrome.tsx. Only the
    public marketing site (/, /pricing, /product/[feature], nav & footer)
    should ever carry this class. Dashboard, onboarding, billing, and auth
    keep the editorial monochrome tokens defined above untouched.
 
-   Corrected against jasper.ai's real site: a white/light base with a full
-   playful multi-color accent system (yellow/pink/purple/green/blue/orange),
-   dark navy for headers/nav text, and SQUARE corners throughout — jasper.ai
-   does not use rounded corners, so every radius token here is zero. */
-.marketing-jasper {
+   A white/light base with a full playful multi-color accent system
+   (yellow/pink/purple/green/blue/orange), dark navy for headers/nav text,
+   and SQUARE corners throughout — every radius token here is zero. */
+.marketing-rebrand {
   --mkt-navy: #00063d;
   --mkt-navy-soft: #0b1054;
   --mkt-ink: #1f1d1e;
@@ -173,7 +172,7 @@
   --mkt-bg-alt: #f2f2f3;
   --mkt-bg-alt2: #e0e0e1;
 
-  /* Accent rainbow (real jasper.ai extracted values) */
+  /* Accent rainbow */
   --mkt-yellow: #fff133;
   --mkt-yellow-soft: #fff67d;
   --mkt-orange: #fa4028;
@@ -195,7 +194,7 @@
   --mkt-accent: var(--mkt-orange);
   --mkt-accent-soft: var(--mkt-orange-soft);
 
-  /* Square corners everywhere on marketing — jasper.ai has no border-radius. */
+  /* Square corners everywhere on marketing. */
   --mkt-radius-sm: 0px;
   --mkt-radius-md: 0px;
   --mkt-radius-lg: 0px;
@@ -204,29 +203,28 @@
 }
 
 /* No automatic rounding on the marketing site — every surface stays
-   sharp-cornered, matching the original Tracify 0px-radius convention and
-   the real (unrounded) jasper.ai layout. */
-.marketing-jasper a,
-.marketing-jasper button,
-.marketing-jasper div,
-.marketing-jasper span,
-.marketing-jasper nav,
-.marketing-jasper header,
-.marketing-jasper form,
-.marketing-jasper input,
-.marketing-jasper select,
-.marketing-jasper img,
-.marketing-jasper svg {
+   sharp-cornered, matching the original Tracify 0px-radius convention. */
+.marketing-rebrand a,
+.marketing-rebrand button,
+.marketing-rebrand div,
+.marketing-rebrand span,
+.marketing-rebrand nav,
+.marketing-rebrand header,
+.marketing-rebrand form,
+.marketing-rebrand input,
+.marketing-rebrand select,
+.marketing-rebrand img,
+.marketing-rebrand svg {
   border-radius: 0 !important;
 }
 
 /* Marketing-only logo color override — BrandLogo (src/components/brand-logo.tsx)
    is shared with the dashboard/onboarding/auth surfaces, which must keep their
    existing black/white treatment untouched. This selector only ever matches
-   inside the `.marketing-jasper` wrapper (nav + footer on the public site),
+   inside the `.marketing-rebrand` wrapper (nav + footer on the public site),
    so it recolors just the marketing wordmark without touching the component
    itself or any other usage of it. */
-.marketing-jasper span[aria-label="Tracify"] {
+.marketing-rebrand span[aria-label="Tracify"] {
   color: #f5d400;
 }
 

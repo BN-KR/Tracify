@@ -319,8 +319,8 @@ function ProductFaq({ faq }: { faq: FeaturePage["faq"] }) {
   );
 }
 
-// Rainbow accent per feature type — jasper.ai's real palette used as a
-// rotating accent system instead of the old single navy/orange two-tone.
+// Rainbow accent per feature type — a rotating accent system instead of
+// the old single navy/orange two-tone.
 const VISUAL_ACCENT_HEX: Record<FeaturePage["visual"], string> = {
   trace: "#FA4028",
   cost: "#FFF133",
