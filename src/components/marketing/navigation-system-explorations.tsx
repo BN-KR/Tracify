@@ -159,7 +159,7 @@ export function NavigationSystemExplorations({
             ].map(([number, title, body], index) => (
               <div
                 key={title}
-                className={`min-h-44 border-b border-black/15 p-6 sm:border-b-0 sm:border-r last:border-r-0 ${index === 1 ? "bg-[#FFF133]" : "bg-white"}`}
+                className={`min-h-44 border-b border-black/15 p-6 sm:border-b-0 sm:border-r last:border-r-0 ${index === 1 ? "bg-[#FFF9E0]" : "bg-white"}`}
               >
                 <span className="font-mono text-[9px] text-black/60">{number}</span>
                 <h4 className="mt-8 font-pixel text-3xl tracking-[-0.06em]">{title}</h4>
@@ -200,7 +200,7 @@ export function NavigationSystemExplorations({
               ].map(([number, title, body], index) => (
                 <div
                   key={title as string}
-                  className={`min-h-72 border-b border-r border-black/15 p-6 md:border-b-0 ${index === 2 ? "bg-[#96FF6F]" : ""}`}
+                  className={`min-h-72 border-b border-r border-black/15 p-6 md:border-b-0 ${index === 2 ? "bg-[#EAFBE0]" : ""}`}
                 >
                   <span className="font-mono text-[9px] text-black/70">
                     {number}
@@ -248,7 +248,7 @@ export function NavigationSystemExplorations({
                 <Link
                   key={title}
                   href={href}
-                  className={`group border-b border-r border-black/15 p-5 last:border-r-0 ${index === 0 ? "bg-[#00063D] text-white" : "bg-white hover:bg-[#FFB3DE]"}`}
+                  className={`group border-b border-r border-black/15 p-5 last:border-r-0 ${index === 0 ? "bg-[#00063D] text-white" : "bg-white hover:bg-[#FDEAF3]"}`}
                 >
                   <span className="font-mono text-[8px] uppercase opacity-45">0{index + 1}</span>
                   <h4 className="mt-8 font-pixel text-4xl tracking-[-0.06em]">{title}</h4>
@@ -301,7 +301,7 @@ export function NavigationSystemExplorations({
                 ].map(([time, type, event], index) => (
                   <div
                     key={time}
-                    className={`grid grid-cols-[105px_70px_1fr] gap-3 p-4 font-mono text-[9px] ${index === 2 ? "bg-[#FF80C8] text-black" : "bg-[#00063D] text-white/72"}`}
+                    className={`grid grid-cols-[105px_70px_1fr] gap-3 p-4 font-mono text-[9px] ${index === 2 ? "bg-[#FDEAF3] text-black" : "bg-[#00063D] text-white/72"}`}
                   >
                     <span>{time}</span>
                     <span className="uppercase opacity-55">{type}</span>
@@ -325,7 +325,7 @@ export function NavigationSystemExplorations({
                     Release 2.4 wins.
                   </h3>
                 </div>
-                <span className="bg-[#96FF6F] px-4 py-2 font-mono text-[8px] uppercase">
+                <span className="bg-[#EAFBE0] px-4 py-2 font-mono text-[8px] uppercase">
                   Safe to promote
                 </span>
               </div>
@@ -348,7 +348,7 @@ export function NavigationSystemExplorations({
                     ].map((row, index) => (
                       <tr
                         key={row[0]}
-                        className={`border-t border-black/15 text-sm ${index === 1 ? "bg-[#96FF6F]" : ""}`}
+                        className={`border-t border-black/15 text-sm ${index === 1 ? "bg-[#EAFBE0]" : ""}`}
                       >
                         {row.map((cell) => (
                           <td key={cell} className="px-2 py-5 first:pl-0">
@@ -368,7 +368,7 @@ export function NavigationSystemExplorations({
                 ].map(([candidate, quality, latency, cost, decision], index) => (
                   <div
                     key={candidate}
-                    className={`p-5 ${index === 1 ? "bg-[#96FF6F]" : "bg-white"}`}
+                    className={`p-5 ${index === 1 ? "bg-[#EAFBE0]" : "bg-white"}`}
                   >
                     <div className="flex items-center justify-between gap-4">
                       <p className="text-base font-medium">{candidate}</p>
@@ -510,7 +510,7 @@ export function NavigationSystemExplorations({
                   <th className="p-5">Operating model</th>
                   <th className="p-5">Logs</th>
                   <th className="p-5">Dashboards</th>
-                  <th className="bg-[#FFF133] p-5 text-black">Tracify</th>
+                  <th className="bg-[#FFF9E0] p-5 text-black">Tracify</th>
                 </tr>
               </thead>
               <tbody>
@@ -524,7 +524,7 @@ export function NavigationSystemExplorations({
                     {row.map((cell, index) => (
                       <td
                         key={cell}
-                        className={`p-5 text-sm ${index === 3 ? "bg-[#FFF67D] font-medium" : index === 0 ? "font-pixel text-2xl tracking-[-0.04em]" : "text-black/70"}`}
+                        className={`p-5 text-sm ${index === 3 ? "bg-[#FFF9E0] font-medium" : index === 0 ? "font-pixel text-2xl tracking-[-0.04em]" : "text-black/70"}`}
                       >
                         {cell}
                       </td>
@@ -571,7 +571,7 @@ export function NavigationSystemExplorations({
                 <Link
                   key={title}
                   href={index === 0 ? "/blog/ai-agent-observability-complete-guide" : "/blog"}
-                  className={`border-b border-black/15 p-6 ${index === 1 ? "bg-[#FF80C8]" : "bg-white hover:bg-[#FF80C8]"}`}
+                  className={`border-b border-black/15 p-6 ${index === 1 ? "bg-[#FDEAF3]" : "bg-white hover:bg-[#FDEAF3]"}`}
                 >
                   <span className="font-mono text-[8px] uppercase text-black/70">
                     {type}
@@ -602,12 +602,12 @@ export function NavigationSystemExplorations({
               </p>
               <Link
                 href="/contact?intent=trace-clinic"
-                className="mt-10 inline-flex h-12 items-center gap-3 bg-[#00063D] px-6 font-mono text-[9px] uppercase tracking-[0.13em] text-white hover:bg-[#FFF133] hover:text-black"
+                className="mt-10 inline-flex h-12 items-center gap-3 bg-[#00063D] px-6 font-mono text-[9px] uppercase tracking-[0.13em] text-white hover:bg-[#FFF9E0] hover:text-black"
               >
                 Book a trace clinic <ArrowRight className="size-4" />
               </Link>
             </div>
-            <div className="flex flex-col justify-between bg-[#0095FF] p-8">
+            <div className="flex flex-col justify-between bg-[#EFF8FF] p-8">
               <CircleDot className="size-6" />
               <div>
                 <p className="font-pixel text-6xl tracking-[-0.07em]">30 min</p>
@@ -656,7 +656,7 @@ export function NavigationSystemExplorations({
                   />
                   <button
                     type="submit"
-                    className="bg-[#00063D] px-4 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#FFF133] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                    className="bg-[#00063D] px-4 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#FFF9E0] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                   >
                     Subscribe
                   </button>
@@ -666,7 +666,7 @@ export function NavigationSystemExplorations({
                 </p>
                 <Link
                   href="/sign-up"
-                  className="mt-6 inline-flex items-center gap-3 bg-[#00063D] px-5 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#FFF133] hover:text-black"
+                  className="mt-6 inline-flex items-center gap-3 bg-[#00063D] px-5 py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-white hover:bg-[#FFF9E0] hover:text-black"
                 >
                   Start free <ArrowRight className="size-3" />
                 </Link>
