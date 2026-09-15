@@ -2,7 +2,7 @@
 
 ## 2026-09-15 — Google Analytics 4
 
-- [pending] Publish the isolated `codex/google-analytics` branch as a draft pull request, merge after checks, then verify the production deployment contains the intended commit and that GA4 receives a live page view.
+- [pending] Merge PR #121 after checks, then verify the production deployment contains the intended commit and that GA4 receives a live page view.
 
 ## 2026-09-08 — Site linking and mobile hardening
 
