@@ -1,5 +1,12 @@
 # Project Memory
 
+## 2026-09-15 Google Analytics 4 setup
+- Created the `Tracify` GA4 property in the existing Analytics account and the `Tracify website` web stream for `https://www.tracify.tech`; measurement ID: `G-XW154R1G8Y`.
+- Added a consent-aware Google tag integration controlled by `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID`. It loads only while the existing analytics preference is enabled, updates Google consent state when preferences change, and always denies advertising storage/personalization.
+- Added GA4 disclosure to the cookie policy and documented the environment variable. Production Vercel configuration now contains the ID, but it only takes effect after a deployment containing the code change.
+- Clean-branch verification passed: consent/unit tests 8/8, focused ESLint, full TypeScript, production build (211 routes), and browser analytics contract 2/2 (loads when enabled; absent when rejected).
+- Published draft PR #121 from `codex/google-analytics`; its first hosted-check run passed security, activation, adapter, and both Vercel previews.
+
 ## 2026-09-08 site linking and mobile hardening
 - Added responsive shell behavior for dashboard and Sandbox: mobile sidebar slides over content with backdrop, closes after navigation, and the existing shell toggle opens/closes it below 700px.
 - Routed email authentication through `/auth/callback` so email and OAuth share the same Better Auth/Convex readiness path; unauthenticated `/dashboard` now redirects to sign-in with its destination preserved.
