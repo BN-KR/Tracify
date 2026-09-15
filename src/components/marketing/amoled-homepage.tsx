@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, CircleDot, Sparkles } from "lucide-react";
+import { ArrowRight, CircleDot } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Card } from "@/components/ui/card";
 import { LandingSampleRun } from "@/components/marketing/landing-sample-run";
 import { ThirdPartyLogo } from "@/components/third-party-logo";
-import { GridOverlay, BlueprintFrame, GridTick } from "@/components/marketing/wireframe-grid";
 
 const integrationMarks = [
   { name: "OpenAI", className: "font-semibold tracking-[-0.05em]" },
@@ -14,29 +17,104 @@ const integrationMarks = [
 ] as const;
 
 /**
- * Exploration: same production copy/content as the live homepage, laid out
- * against a visible column-guide + ruler grid, with dashed "blueprint"
- * frames and FIG. labels around major panels. Strictly white/black/yellow
- * — no new colors introduced.
+ * Exploration: true AMOLED black (#000000) in place of the cream
+ * background, built from the project's real shadcn/ui primitives
+ * (Button, Badge, Card, Separator) rather than bespoke decoration.
+ * Still strictly the 3-color system — black, white, #f4d44d yellow.
  */
-export function WireframeHomepage() {
+function Header() {
   return (
-    <div className="relative bg-[#eceae3] text-black">
-      <GridOverlay />
+    <header className="border-b border-white/10 bg-black px-6 py-4 md:px-10">
+      <div className="mx-auto flex max-w-[1240px] items-center justify-between">
+        <Link href="/" className="text-2xl font-semibold tracking-[-0.05em] text-white no-underline">
+          <span className="text-[#f4d44d]">tracify</span>
+        </Link>
+        <nav className="hidden items-center gap-6 lg:flex">
+          <Link href="/pricing" className="text-sm font-semibold text-white/70 no-underline hover:text-white">
+            Pricing
+          </Link>
+          <Link href="/product/trace-viewer" className="text-sm font-semibold text-white/70 no-underline hover:text-white">
+            Product
+          </Link>
+          <Link href="/docs/quickstart" className="text-sm font-semibold text-white/70 no-underline hover:text-white">
+            Docs
+          </Link>
+        </nav>
+        <div className="flex items-center gap-4">
+          <Link href="/sign-in" className="hidden text-sm font-semibold text-white/70 no-underline hover:text-white sm:block">
+            Sign in
+          </Link>
+          <Link href="/sign-up" className={buttonVariants({ size: "sm" })}>
+            Start free
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
 
-      {/* SEC.01 — HERO */}
-      <section className="relative px-6 py-20 md:px-10 md:py-28">
-        <div className="mx-auto max-w-[1240px]">
-          <div className="flex items-center justify-between border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/50">
-            <span>SEC.01 / HERO</span>
-            <GridTick n="LIVE PREVIEW" />
+function Footer() {
+  return (
+    <footer className="border-t border-white/10 bg-black px-6 pt-16 text-white md:px-10">
+      <div className="mx-auto max-w-[1240px]">
+        <div className="grid gap-10 border-b border-white/10 pb-14 md:grid-cols-[1fr_auto]">
+          <div>
+            <p className="text-2xl font-semibold tracking-[-0.05em] text-[#f4d44d]">tracify</p>
+            <p className="mt-5 max-w-sm text-sm leading-7 text-white/60">
+              The operating record for the agents your team ships.
+            </p>
           </div>
-          <BlueprintFrame label="FIG.01 RUN.SPLIT" className="mt-8 grid bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3">
+            {(
+              [
+                ["Product", [["Trace viewer", "/product/trace-viewer"], ["Pricing", "/pricing"]]],
+                ["Developers", [["Docs", "/docs/quickstart"], ["API reference", "/docs/api"]]],
+                ["Company", [["Blog", "/blog"], ["Contact", "/contact"]]],
+              ] as Array<[string, Array<[string, string]>]>
+            ).map(([title, links]) => (
+              <div key={title} className="space-y-3 text-sm">
+                <p className="text-white/40">{title}</p>
+                {links.map(([label, href]) => (
+                  <Link key={href} href={href} className="block text-white/70 no-underline hover:text-white">
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-between gap-4 py-8 text-xs text-white/40 sm:flex-row">
+          <p>&copy; {new Date().getFullYear()} Tracify. All rights reserved.</p>
+          <div className="flex gap-6">
+            <Link href="/privacy" className="text-white/40 no-underline hover:text-white">
+              Privacy
+            </Link>
+            <Link href="/terms" className="text-white/40 no-underline hover:text-white">
+              Terms
+            </Link>
+          </div>
+        </div>
+      </div>
+      <div className="select-none pb-2 pl-4 font-pixel text-[clamp(4rem,22vw,14rem)] leading-[0.75] tracking-[-0.05em] text-white/[0.06]">
+        tracify
+      </div>
+    </footer>
+  );
+}
+
+export function AmoledHomepage() {
+  return (
+    <div className="bg-black text-white">
+      <Header />
+      {/* HERO */}
+      <section className="px-6 py-20 md:px-10 md:py-28">
+        <div className="mx-auto max-w-[1240px]">
+          <Card className="grid overflow-hidden border-white/15 bg-white text-black shadow-[18px_18px_0_#f4d44d] lg:grid-cols-[0.95fr_1.05fr]">
             <div className="flex min-h-[470px] flex-col justify-between border-b border-black/15 p-6 md:p-8 lg:border-b-0 lg:border-r">
               <div>
-                <span className="inline-flex items-center gap-2 bg-black px-3 py-2 font-mono text-[8px] uppercase tracking-[0.13em] text-white">
+                <Badge className="bg-black text-white">
                   <CircleDot className="size-3 text-[#f4d44d]" /> the run explains the release
-                </span>
+                </Badge>
                 <h1 className="mt-7 max-w-[740px] font-pixel text-6xl leading-[0.86] tracking-[-0.07em] md:text-7xl">
                   See why it failed. Ship with proof.
                 </h1>
@@ -46,36 +124,28 @@ export function WireframeHomepage() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/sign-up"
-                  className="inline-flex h-12 items-center gap-3 bg-black px-6 font-mono text-[9px] uppercase tracking-[0.13em] text-white hover:bg-[#f4d44d] hover:text-black"
-                >
+                <Link href="/sign-up" className={buttonVariants({ size: "lg" })}>
                   Start tracing <ArrowRight className="size-4" />
                 </Link>
-                <Link
-                  href="/demo"
-                  className="inline-flex h-12 items-center border border-black/25 px-6 font-mono text-[9px] uppercase tracking-[0.13em] hover:bg-[#f4d44d]"
-                >
+                <Link href="/demo" className={buttonVariants({ size: "lg", variant: "outline" })}>
                   Open sample run
                 </Link>
               </div>
             </div>
             <LandingSampleRun />
-          </BlueprintFrame>
+          </Card>
         </div>
       </section>
 
-      {/* SEC.02 — PROOF */}
-      <section className="relative border-t border-black/10 py-20">
+      <Separator className="bg-white/10" />
+
+      {/* PROOF */}
+      <section className="py-20">
         <div className="mx-auto max-w-[1240px] px-6 md:px-10">
-          <div className="flex items-center justify-between border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/50">
-            <span>SEC.02 / VERIFIED PROOF STRIP</span>
-            <GridTick n="03 ITEMS" />
-          </div>
-          <h3 className="mt-8 max-w-2xl font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">
+          <h3 className="max-w-2xl font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">
             Evidence that survives the handoff.
           </h3>
-          <BlueprintFrame label="FIG.02 PROOF.GRID" className="mt-10 grid sm:grid-cols-3">
+          <div className="mt-10 grid gap-px overflow-hidden bg-white/10 sm:grid-cols-3">
             {[
               ["01", "Full run context", "Model, tool, retrieval, fallback, and evaluation in one trail."],
               ["02", "Release evidence", "Quality, latency, cost, and a decision you can defend."],
@@ -83,22 +153,22 @@ export function WireframeHomepage() {
             ].map(([number, title, body], index) => (
               <div
                 key={title}
-                className={`min-h-44 border-b border-black/15 p-6 sm:border-b-0 sm:border-r last:border-r-0 ${index === 1 ? "bg-[#f4d44d]" : "bg-white"}`}
+                className={`min-h-44 p-6 ${index === 1 ? "bg-[#f4d44d] text-black" : "bg-black"}`}
               >
-                <span className="font-mono text-[9px] text-black/60">{number}</span>
+                <span className={`font-mono text-[9px] ${index === 1 ? "text-black/60" : "text-white/50"}`}>{number}</span>
                 <h4 className="mt-8 font-pixel text-3xl tracking-[-0.06em]">{title}</h4>
-                <p className="mt-3 text-sm leading-6 text-black/70">{body}</p>
+                <p className={`mt-3 text-sm leading-6 ${index === 1 ? "text-black/70" : "text-white/60"}`}>{body}</p>
               </div>
             ))}
-          </BlueprintFrame>
-          <p className="mt-10 font-mono text-[8px] uppercase tracking-[0.13em] text-black/50">
+          </div>
+          <p className="mt-10 font-mono text-[8px] uppercase tracking-[0.13em] text-white/40">
             Supported runtimes / current integration coverage
           </p>
-          <div className="mt-4 grid border-y border-black/15 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="mt-4 grid gap-px overflow-hidden bg-white/10 sm:grid-cols-3 lg:grid-cols-6">
             {integrationMarks.map(({ name, className }) => (
               <div
                 key={name}
-                className="flex min-h-24 items-center justify-center gap-2 border-r border-black/15 bg-white px-4 text-lg last:border-r-0 hover:bg-[#f4d44d]"
+                className="flex min-h-24 items-center justify-center gap-2 bg-black px-4 text-lg text-white hover:bg-[#f4d44d] hover:text-black"
               >
                 <ThirdPartyLogo brand={name} className="size-4 shrink-0 object-contain" />
                 <span className={className}>{name}</span>
@@ -108,14 +178,12 @@ export function WireframeHomepage() {
         </div>
       </section>
 
-      {/* SEC.03 — LIFECYCLE */}
-      <section className="relative border-t border-black/10 py-20">
+      <Separator className="bg-white/10" />
+
+      {/* LIFECYCLE */}
+      <section className="py-20">
         <div className="mx-auto max-w-[1240px] px-6 md:px-10">
-          <div className="flex items-center justify-between border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/50">
-            <span>SEC.03 / OBSERVE — EVALUATE — RELEASE</span>
-            <GridTick n="04 STEPS" />
-          </div>
-          <BlueprintFrame label="FIG.03 LIFECYCLE.MAP" className="mt-8 bg-white">
+          <Card className="overflow-hidden border-white/15 bg-white text-black">
             <div className="grid md:grid-cols-4">
               {[
                 ["01", "Instrument", "Capture the complete run."],
@@ -139,23 +207,21 @@ export function WireframeHomepage() {
               </span>
               <Link
                 href="/product/lifecycle"
-                className="inline-flex items-center gap-2 border-b border-[#f4d44d] pb-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#f4d44d] hover:text-white"
+                className={buttonVariants({ size: "sm", variant: "ghost", className: "text-[#f4d44d] hover:bg-transparent hover:text-white" })}
               >
-                Explore lifecycle <ArrowUpRight className="size-3" />
+                Explore lifecycle →
               </Link>
             </div>
-          </BlueprintFrame>
+          </Card>
         </div>
       </section>
 
-      {/* SEC.04 — TRACE REPORT */}
-      <section className="relative border-t border-black/10 py-20">
+      <Separator className="bg-white/10" />
+
+      {/* TRACE REPORT */}
+      <section className="py-20">
         <div className="mx-auto max-w-[1240px] px-6 md:px-10">
-          <div className="flex items-center justify-between border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/50">
-            <span>SEC.04 / DECISION TRAIL</span>
-            <GridTick n="LIVE SAMPLE" />
-          </div>
-          <BlueprintFrame label="FIG.04 TRACE.REPORT" className="mt-8 grid bg-white lg:grid-cols-[0.8fr_1.2fr]">
+          <Card className="grid overflow-hidden border-white/15 bg-white text-black lg:grid-cols-[0.8fr_1.2fr]">
             <div className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
               <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/60">
                 Incident / sample run_018204
@@ -193,41 +259,40 @@ export function WireframeHomepage() {
                 ))}
               </div>
             </div>
-          </BlueprintFrame>
+          </Card>
         </div>
       </section>
 
-      {/* SEC.05 — PRICING TEASER */}
-      <section className="relative border-t border-black/10 py-20">
+      <Separator className="bg-white/10" />
+
+      {/* PRICING TEASER */}
+      <section className="py-20">
         <div className="mx-auto max-w-[1240px] px-6 md:px-10">
-          <div className="flex items-center justify-between border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/50">
-            <span>SEC.05 / PRICING</span>
-            <GridTick n="03 TIERS" />
-          </div>
-          <BlueprintFrame label="FIG.05 PRICING.TIERS" className="mt-8 grid gap-px bg-black/15 sm:grid-cols-3">
+          <div className="grid gap-px overflow-hidden bg-white/10 sm:grid-cols-3">
             {[
               ["Free", "$0", "Start tracing solo projects."],
               ["Pro", "$49", "Release gates and candidate comparison."],
               ["Team", "$149", "Shared workspaces and audit trail."],
             ].map(([tier, price, body], index) => (
-              <div key={tier} className={`p-8 ${index === 1 ? "bg-[#f4d44d]" : "bg-white"}`}>
+              <Card
+                key={tier}
+                className={`rounded-none border-0 p-8 ${index === 1 ? "bg-[#f4d44d] text-black" : "bg-white text-black"}`}
+              >
                 <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/60">{tier}</p>
                 <p className="mt-4 font-pixel text-5xl tracking-[-0.05em]">{price}</p>
                 <p className="mt-4 text-sm leading-6 text-black/70">{body}</p>
-              </div>
+              </Card>
             ))}
-          </BlueprintFrame>
+          </div>
         </div>
       </section>
 
-      {/* SEC.06 — FINAL CTA */}
-      <section className="relative border-t border-black/10 py-20">
+      <Separator className="bg-white/10" />
+
+      {/* FINAL CTA */}
+      <section className="py-20">
         <div className="mx-auto max-w-[1240px] px-6 md:px-10">
-          <div className="flex items-center justify-between border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/50">
-            <span>SEC.06 / CONVERSION</span>
-            <GridTick n="30 MIN" />
-          </div>
-          <BlueprintFrame label="FIG.06 TRACE.CLINIC" className="mt-10 grid bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[1.25fr_0.75fr]">
+          <Card className="grid overflow-hidden border-white/15 bg-white text-black shadow-[18px_18px_0_#f4d44d] lg:grid-cols-[1.25fr_0.75fr]">
             <div className="p-8 md:p-12">
               <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/60">
                 The next useful conversation
@@ -241,13 +306,12 @@ export function WireframeHomepage() {
               </p>
               <Link
                 href="/contact?intent=trace-clinic"
-                className="mt-10 inline-flex h-12 items-center gap-3 bg-black px-6 font-mono text-[9px] uppercase tracking-[0.13em] text-white hover:bg-[#f4d44d] hover:text-black"
+                className={buttonVariants({ size: "lg", className: "mt-10" })}
               >
                 Book a trace clinic <ArrowRight className="size-4" />
               </Link>
             </div>
             <div className="flex flex-col justify-between bg-[#f4d44d] p-8">
-              <Sparkles className="size-6" />
               <div>
                 <p className="font-pixel text-5xl tracking-[-0.06em]">30 min</p>
                 <p className="mt-4 text-sm leading-6 text-black/70">
@@ -256,9 +320,10 @@ export function WireframeHomepage() {
                 </p>
               </div>
             </div>
-          </BlueprintFrame>
+          </Card>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }
