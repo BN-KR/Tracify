@@ -7,6 +7,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { GeistPixelSquare } from "geist/font/pixel";
 import "./globals.css";
 import { ConsentBanner } from "@/components/privacy/consent-banner";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -47,6 +48,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <ConvexClientProvider initialToken={await getToken()}>
           <TooltipProvider><SiteChrome>{children}</SiteChrome><ConsentBanner /></TooltipProvider>
         </ConvexClientProvider>
+        <GoogleAnalytics />
       </body>
     </html>
   );

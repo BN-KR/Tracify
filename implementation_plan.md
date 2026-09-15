@@ -1,5 +1,11 @@
 # Langfuse parity-plus product epic — 2026-09-03
 
+## Google Analytics 4 — 2026-09-15
+
+- Implemented the consent-aware GA4 tag, environment contract, cookie-policy disclosure, and deterministic browser coverage.
+- Created the live Tracify GA4 property/web stream and configured the production Vercel measurement ID.
+- Release gate: publish and merge the clean analytics branch, allow the GitHub/Vercel integration to deploy once, verify the deployment SHA, then confirm a production page view in GA4.
+
 ## Captured dashboard integration hardening — 2026-09-08
 
 - [completed] Make the shared dashboard shell usable on mobile with an overlay sidebar, backdrop dismissal, and close-on-navigation behavior.
