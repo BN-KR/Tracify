@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, CircleDot, Sparkles } from "lucide-react";
 import { LandingSampleRun } from "@/components/marketing/landing-sample-run";
 import { ThirdPartyLogo } from "@/components/third-party-logo";
-import { GridOverlay, BlueprintFrame, GridTick } from "@/components/marketing/wireframe-grid";
+import { BlueprintFrame, Crosshair, DimensionLine, GridTick } from "@/components/marketing/wireframe-grid";
 
 const integrationMarks = [
   { name: "OpenAI", className: "font-semibold tracking-[-0.05em]" },
@@ -14,24 +14,24 @@ const integrationMarks = [
 ] as const;
 
 /**
- * Exploration: same production copy/content as the live homepage, laid out
- * against a visible column-guide + ruler grid, with dashed "blueprint"
- * frames and FIG. labels around major panels. Strictly white/black/yellow
- * — no new colors introduced.
+ * Exploration: same production copy/content as the live homepage, with
+ * blueprint/technical-drawing accents (component-selection corner frames,
+ * a measured dimension line, a reference crosshair) used sparingly in
+ * whitespace — never laid over content like a page-spanning grid. Strictly
+ * white/black/yellow — no new colors introduced.
  */
 export function WireframeHomepage() {
   return (
     <div className="relative bg-[#eceae3] text-black">
-      <GridOverlay />
-
       {/* SEC.01 — HERO */}
-      <section className="relative px-6 py-20 md:px-10 md:py-28">
+      <section className="relative px-6 pb-20 pt-24 md:px-10 md:pt-32">
         <div className="mx-auto max-w-[1240px]">
-          <div className="flex items-center justify-between border-b border-black/15 pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/50">
+          <div className="flex items-center justify-between pb-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/50">
             <span>SEC.01 / HERO</span>
             <GridTick n="LIVE PREVIEW" />
           </div>
-          <BlueprintFrame label="FIG.01 RUN.SPLIT" className="mt-8 grid bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[0.95fr_1.05fr]">
+          <DimensionLine label="1240 × 470" className="pb-6" />
+          <BlueprintFrame label="FIG.01 RUN.SPLIT" className="grid bg-white shadow-[18px_18px_0_#111] lg:grid-cols-[0.95fr_1.05fr]">
             <div className="flex min-h-[470px] flex-col justify-between border-b border-black/15 p-6 md:p-8 lg:border-b-0 lg:border-r">
               <div>
                 <span className="inline-flex items-center gap-2 bg-black px-3 py-2 font-mono text-[8px] uppercase tracking-[0.13em] text-white">
@@ -115,7 +115,11 @@ export function WireframeHomepage() {
             <span>SEC.03 / OBSERVE — EVALUATE — RELEASE</span>
             <GridTick n="04 STEPS" />
           </div>
-          <BlueprintFrame label="FIG.03 LIFECYCLE.MAP" className="mt-8 bg-white">
+          <div className="flex items-center gap-2 pt-6 pb-2">
+            <Crosshair />
+            <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-black/30">Anchor point / lifecycle</span>
+          </div>
+          <BlueprintFrame label="FIG.03 LIFECYCLE.MAP" dimension="1240 × 540" className="mt-8 bg-white">
             <div className="grid md:grid-cols-4">
               {[
                 ["01", "Instrument", "Capture the complete run."],
@@ -155,7 +159,7 @@ export function WireframeHomepage() {
             <span>SEC.04 / DECISION TRAIL</span>
             <GridTick n="LIVE SAMPLE" />
           </div>
-          <BlueprintFrame label="FIG.04 TRACE.REPORT" className="mt-8 grid bg-white lg:grid-cols-[0.8fr_1.2fr]">
+          <BlueprintFrame label="FIG.04 TRACE.REPORT" dimension="992 × 420" className="mt-8 grid bg-white lg:grid-cols-[0.8fr_1.2fr]">
             <div className="border-b border-black/15 p-7 lg:border-b-0 lg:border-r md:p-10">
               <p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/60">
                 Incident / sample run_018204
