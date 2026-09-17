@@ -24,7 +24,7 @@ import { useNow } from "@/hooks/use-now";
 import { DashboardEmptyState } from "./dashboard-primitives";
 import type { SavedRunView } from "./dashboard-contracts";
 import { FilterBuilder, type FilterCondition, type FilterColumnDef } from "./filter-builder";
-import { ColumnVisibilityMenu, useColumnVisibility, type ColumnVisibilityDef } from "./column-visibility";
+import { ColumnVisibilityMenu, useColumnVisibility, type ColumnVisibilityDef } from "./column-visibility-menu";
 
 const RUNS_TABLE_COLUMNS: ColumnVisibilityDef[] = [
   { id: "status", label: "Status", required: true },
