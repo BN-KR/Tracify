@@ -23,6 +23,28 @@ import { CancelRunButton } from "./cancel-run-button";
 import { useNow } from "@/hooks/use-now";
 import { DashboardEmptyState } from "./dashboard-primitives";
 import type { SavedRunView } from "./dashboard-contracts";
+import { FilterBuilder, type FilterCondition, type FilterColumnDef } from "./filter-builder";
+import { ColumnVisibilityMenu, useColumnVisibility, type ColumnVisibilityDef } from "./column-visibility";
+
+const RUNS_TABLE_COLUMNS: ColumnVisibilityDef[] = [
+  { id: "status", label: "Status", required: true },
+  { id: "runId", label: "Run ID", required: true },
+  { id: "context", label: "Context" },
+  { id: "spans", label: "Spans" },
+  { id: "cost", label: "Cost" },
+  { id: "duration", label: "Duration" },
+  { id: "started", label: "Started" },
+  { id: "actions", label: "Actions", required: true },
+];
+
+const RUNS_FILTER_COLUMNS: FilterColumnDef[] = [
+  { id: "model", name: "Model", type: "string", allowedOperators: ["="] },
+  { id: "session", name: "Session ID", type: "string", allowedOperators: ["="] },
+  { id: "environment", name: "Environment", type: "string", allowedOperators: ["="] },
+  { id: "release", name: "Release", type: "string", allowedOperators: ["="] },
+  { id: "minCost", name: "Cost USD", type: "number", allowedOperators: [">="] },
+  { id: "minSpans", name: "Spans", type: "number", allowedOperators: [">="] },
+];
 
 interface RunsTableProps {
   projectId: string;
@@ -45,6 +67,45 @@ export function RunsTable({ projectId }: RunsTableProps) {
   const [days, setDays] = useState(() => searchParams.get("days") ?? "30");
   const [startedAtAfter, setStartedAtAfter] = useState(() => new Date(Date.now() - Math.max(1, Number(searchParams.get("days") ?? "30")) * 86400000).toISOString());
   const [selectedRunIds, setSelectedRunIds] = useState<Set<string>>(new Set());
+
+  // Adapts the FilterBuilder's generic condition list onto the individual
+  // filter state vars above, which are what the Convex query/URL sync/saved
+  // views already key off of. Each column maps 1:1 to one state var, so a
+  // condition exists in the builder only while its value is non-empty.
+  const filterConditions: FilterCondition[] = [];
+  if (modelFilter) filterConditions.push({ id: "model", column: "model", operator: "=", value: modelFilter });
+  if (sessionFilter) filterConditions.push({ id: "session", column: "session", operator: "=", value: sessionFilter });
+  if (environmentFilter) filterConditions.push({ id: "environment", column: "environment", operator: "=", value: environmentFilter });
+  if (releaseFilter) filterConditions.push({ id: "release", column: "release", operator: "=", value: releaseFilter });
+  if (minCost) filterConditions.push({ id: "minCost", column: "minCost", operator: ">=", value: minCost });
+  if (minSpans) filterConditions.push({ id: "minSpans", column: "minSpans", operator: ">=", value: minSpans });
+
+  function handleFilterConditionsChange(next: FilterCondition[]) {
+    const byColumn = new Map(next.map((c) => [c.column, String(c.value)]));
+    const nextModel = byColumn.get("model") ?? "";
+    const nextSession = byColumn.get("session") ?? "";
+    const nextEnvironment = byColumn.get("environment") ?? "";
+    const nextRelease = byColumn.get("release") ?? "";
+    const nextMinCost = byColumn.get("minCost") ?? "";
+    const nextMinSpans = byColumn.get("minSpans") ?? "";
+    setModelFilter(nextModel);
+    setSessionFilter(nextSession);
+    setEnvironmentFilter(nextEnvironment);
+    setReleaseFilter(nextRelease);
+    setMinCost(nextMinCost);
+    setMinSpans(nextMinSpans);
+    updateQuery({
+      q: search,
+      status: statusFilter,
+      model: nextModel,
+      session: nextSession,
+      environment: nextEnvironment,
+      release: nextRelease,
+      minCost: nextMinCost,
+      minSpans: nextMinSpans,
+      limit: pageSize,
+    });
+  }
   const initialPageSize = [10, 25, 50].includes(Number(searchParams.get("limit"))) ? Number(searchParams.get("limit")) : 10;
   const initialPageIndex = Math.max(0, Number(searchParams.get("page") || "1") - 1);
   const [pageSize, setPageSize] = useState(initialPageSize);
@@ -54,6 +115,10 @@ export function RunsTable({ projectId }: RunsTableProps) {
   const didMount = useRef(false);
 
   const savedViewsKey = `tracify.saved-run-views.${projectId}`;
+  const { isVisible: isColumnVisible, toggle: toggleColumn } = useColumnVisibility(
+    `tracify.runs-table.columns.${projectId}`,
+    RUNS_TABLE_COLUMNS,
+  );
 
   const updateQuery = useCallback((next: { q?: string; status?: string; page?: number; limit?: number; sort?: string; model?: string; session?: string; environment?: string; release?: string; minCost?: string; minSpans?: string; days?: string }) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -461,14 +526,10 @@ export function RunsTable({ projectId }: RunsTableProps) {
         </div>
       </div>
 
-      <div className="grid gap-2 border border-border bg-muted/5 p-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
-        <Input value={modelFilter} onChange={(event) => { setModelFilter(event.target.value); updateQuery({ q: search, status: statusFilter, model: event.target.value, session: sessionFilter, minCost, minSpans, limit: pageSize }); }} placeholder="Model…" aria-label="Filter runs by model" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
-        <Input value={sessionFilter} onChange={(event) => { setSessionFilter(event.target.value); updateQuery({ q: search, status: statusFilter, model: modelFilter, session: event.target.value, minCost, minSpans, limit: pageSize }); }} placeholder="Session ID…" aria-label="Filter runs by session" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
-        <Input value={environmentFilter} onChange={(event) => { setEnvironmentFilter(event.target.value); updateQuery({ q: search, status: statusFilter, environment: event.target.value, release: releaseFilter, model: modelFilter, session: sessionFilter, minCost, minSpans, limit: pageSize }); }} placeholder="Environment…" aria-label="Filter runs by environment" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
-        <Input value={releaseFilter} onChange={(event) => { setReleaseFilter(event.target.value); updateQuery({ q: search, status: statusFilter, environment: environmentFilter, release: event.target.value, model: modelFilter, session: sessionFilter, minCost, minSpans, limit: pageSize }); }} placeholder="Release…" aria-label="Filter runs by release" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
-        <Input value={minCost} onChange={(event) => { setMinCost(event.target.value); updateQuery({ q: search, status: statusFilter, model: modelFilter, session: sessionFilter, minCost: event.target.value, minSpans, limit: pageSize }); }} placeholder="Minimum cost USD…" aria-label="Filter runs by minimum cost" inputMode="decimal" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
-        <Input value={minSpans} onChange={(event) => { setMinSpans(event.target.value); updateQuery({ q: search, status: statusFilter, model: modelFilter, session: sessionFilter, minCost, minSpans: event.target.value, limit: pageSize }); }} placeholder="Minimum spans…" aria-label="Filter runs by minimum span count" inputMode="numeric" className="h-9 rounded-none border-black/15 bg-white font-mono text-[11px]" />
-        <select value={days} onChange={(event) => { setDays(event.target.value); setStartedAtAfter(new Date(Date.now() - Math.max(1, Number(event.target.value)) * 86400000).toISOString()); setPageIndex(0); updateQuery({ q: search, status: statusFilter, days: event.target.value, limit: pageSize }); }} aria-label="Filter runs by time window" className="h-9 border border-black/15 bg-white px-3 font-mono text-[11px] text-black/70">
+      <div className="flex flex-wrap items-center gap-3 border border-border bg-muted/5 p-3">
+        <FilterBuilder columns={RUNS_FILTER_COLUMNS} value={filterConditions} onChange={handleFilterConditionsChange} />
+        <ColumnVisibilityMenu columns={RUNS_TABLE_COLUMNS} isVisible={isColumnVisible} onToggle={toggleColumn} />
+        <select value={days} onChange={(event) => { setDays(event.target.value); setStartedAtAfter(new Date(Date.now() - Math.max(1, Number(event.target.value)) * 86400000).toISOString()); setPageIndex(0); updateQuery({ q: search, status: statusFilter, days: event.target.value, limit: pageSize }); }} aria-label="Filter runs by time window" className="ml-auto h-8 border border-black/15 bg-white px-3 font-mono text-[11px] text-black/70">
           <option value="1">Last 24 hours</option>
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
@@ -507,21 +568,31 @@ export function RunsTable({ projectId }: RunsTableProps) {
                 <TableHead className="font-mono text-[10px] uppercase tracking-widest">
                   Run ID
                 </TableHead>
-                <TableHead className="hidden max-w-[150px] font-mono text-[10px] uppercase tracking-widest lg:table-cell">
-                  Context
-                </TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right">
-                  Spans
-                </TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right">
-                  Cost
-                </TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right">
-                  Duration
-                </TableHead>
-                <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right">
-                  Started
-                </TableHead>
+                {isColumnVisible("context") && (
+                  <TableHead className="hidden max-w-[150px] font-mono text-[10px] uppercase tracking-widest lg:table-cell">
+                    Context
+                  </TableHead>
+                )}
+                {isColumnVisible("spans") && (
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right">
+                    Spans
+                  </TableHead>
+                )}
+                {isColumnVisible("cost") && (
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right">
+                    Cost
+                  </TableHead>
+                )}
+                {isColumnVisible("duration") && (
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right">
+                    Duration
+                  </TableHead>
+                )}
+                {isColumnVisible("started") && (
+                  <TableHead className="font-mono text-[10px] uppercase tracking-widest text-right">
+                    Started
+                  </TableHead>
+                )}
                 <TableHead className="w-[84px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -565,25 +636,35 @@ export function RunsTable({ projectId }: RunsTableProps) {
                         {run.runId}
                       </Link>
                     </TableCell>
-                    <TableCell className="hidden max-w-[150px] lg:table-cell">
-                      <div className="min-w-0 space-y-1 font-mono text-[10px] text-black/55">
-                        <div className="truncate text-black/70">{run.primaryModel || "model not reported"}</div>
-                        <div className="truncate">{run.sessionId ? `session:${run.sessionId}` : "no session context"}</div>
-                        <div className="truncate">{run.environment ? `env:${run.environment}` : "no environment"}{run.release ? ` · release:${run.release}` : ""}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs text-black/55">
-                      {run.spanCount}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs">
-                      {formatCurrency(run.totalCostUsd)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs text-black/55">
-                      {formatDuration(durationMs)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs text-black/55">
-                      {formatRelativeTime(run.startedAt)}
-                    </TableCell>
+                    {isColumnVisible("context") && (
+                      <TableCell className="hidden max-w-[150px] lg:table-cell">
+                        <div className="min-w-0 space-y-1 font-mono text-[10px] text-black/55">
+                          <div className="truncate text-black/70">{run.primaryModel || "model not reported"}</div>
+                          <div className="truncate">{run.sessionId ? `session:${run.sessionId}` : "no session context"}</div>
+                          <div className="truncate">{run.environment ? `env:${run.environment}` : "no environment"}{run.release ? ` · release:${run.release}` : ""}</div>
+                        </div>
+                      </TableCell>
+                    )}
+                    {isColumnVisible("spans") && (
+                      <TableCell className="text-right font-mono text-xs text-black/55">
+                        {run.spanCount}
+                      </TableCell>
+                    )}
+                    {isColumnVisible("cost") && (
+                      <TableCell className="text-right font-mono text-xs">
+                        {formatCurrency(run.totalCostUsd)}
+                      </TableCell>
+                    )}
+                    {isColumnVisible("duration") && (
+                      <TableCell className="text-right font-mono text-xs text-black/55">
+                        {formatDuration(durationMs)}
+                      </TableCell>
+                    )}
+                    {isColumnVisible("started") && (
+                      <TableCell className="text-right font-mono text-xs text-black/55">
+                        {formatRelativeTime(run.startedAt)}
+                      </TableCell>
+                    )}
                     <TableCell>
                       <div className="flex items-center justify-end gap-2">
                         {run.status === "running" && (

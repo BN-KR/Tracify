@@ -1,9 +1,9 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { formatDuration } from "@/lib/utils";
@@ -20,20 +20,27 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Activity, DollarSign, Zap, AlertTriangle, ArrowUpRight, CircleCheck, Clock3, Gauge, Percent } from "lucide-react";
 import { RunsTable } from "./runs-table";
 import { OrchestrationSavings } from "./orchestration-savings";
 import { FailOpenAlert } from "./fail-open-alert";
 import { useProjectStats } from "@/hooks/use-project-stats";
 import { AnalyticsRefreshControl } from "./analytics-refresh-control";
-import { AttentionItem, DashboardMetric, SignalBadge } from "./dashboard-primitives";
+import { DashboardMetric, SignalBadge } from "./dashboard-primitives";
 
 interface DashboardOverviewProps {
   projectId: string;
 }
 
 export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+  const [reviewRun, setReviewRun] = useState<{ runId: string; spanCount: number } | null>(null);
+  const [cause, setCause] = useState("tool_or_workflow_failure");
+  const [evidence, setEvidence] = useState("");
+  const [nextAction, setNextAction] = useState("");
+  const [owner, setOwner] = useState("");
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -54,6 +61,11 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
     api.evaluationEngine.overview,
     projectId ? { projectId: projectId as Id<"projects"> } : "skip",
   );
+  const investigations = useQuery(
+    api.annotations.list,
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
+  );
+  const createInvestigation = useMutation(api.annotations.create);
   const liveRefreshKey =
     summary?.latestActivityAt ??
     summary?.totals.totalRuns ??
@@ -65,7 +77,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
     liveRefreshKey,
   });
 
-  if (loading || recentRuns === undefined || summary === undefined || evaluationOverview === undefined) {
+  if (loading || recentRuns === undefined || summary === undefined || evaluationOverview === undefined || investigations === undefined) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -98,8 +110,9 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
   );
   const activeRuns =
     summary?.totals.activeRuns ?? recentRuns.filter(r => r.status === "running").length;
+  const reviewedTraceIds = new Set(investigations.filter((item) => item.status === "completed").map((item) => item.traceId));
   const failedRuns =
-    summary?.totals.failedRuns ?? recentRuns.filter(r => r.status === "failed").length;
+    recentRuns.filter((run) => run.status === "failed" && !reviewedTraceIds.has(run.runId)).length;
   const recentFailureRate = recentRuns.length ? (recentRuns.filter((run) => run.status === "failed").length / recentRuns.length) * 100 : 0;
   const recentDurations = recentRuns
     .map((run) => run.finishedAt ? new Date(run.finishedAt).getTime() - new Date(run.startedAt).getTime() : null)
@@ -133,14 +146,14 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
   ];
 
   return (
-    <div className="dashboard-grid flex flex-col gap-8 p-1">
+    <div className="dashboard-grid flex flex-col gap-6 bg-[#0b0d10] p-4 text-zinc-100 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="font-pixel text-xl uppercase tracking-wide text-black">
-            Workspace health
+          <h2 className="font-pixel text-xl uppercase tracking-wide text-zinc-100">
+            Investigation queue
           </h2>
-          <p className="mt-1 font-mono text-[11px] text-black/55">
-            Find the next failure worth investigating.
+          <p className="mt-1 font-mono text-[11px] text-zinc-400">
+            Find the next tool or workflow failure worth investigating.
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3 sm:ml-auto">
@@ -163,8 +176,8 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
                 }}
                 className={
                   range === option.value
-                    ? "h-8 border border-black bg-black px-3 font-mono text-[11px] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
-                    : "h-8 border border-black/15 bg-white px-3 font-mono text-[11px] text-black/55 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                    ? "h-8 border border-zinc-100 bg-zinc-100 px-3 font-mono text-[11px] text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100"
+                    : "h-8 border border-zinc-700 bg-zinc-900 px-3 font-mono text-[11px] text-zinc-400 hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100"
                 }
               >
                 {option.label}
@@ -180,7 +193,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-7">
+      <div className="grid grid-cols-2 gap-px border border-zinc-800 bg-zinc-800 sm:grid-cols-4 xl:grid-cols-7">
         <DashboardMetric
           label="Spend"
           value={formatGraphCurrency(totalSpend)} 
@@ -237,31 +250,39 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
-        <Card className="border-black/15 bg-white p-0 shadow-none">
+      <div className="grid gap-6">
+        <Card className="border-zinc-800 bg-[#111418] p-0 shadow-none">
           <div className="flex items-start justify-between gap-4 border-b border-black/15 p-5">
             <div>
-              <h3 className="font-mono text-sm uppercase tracking-widest text-black">Attention queue</h3>
-              <p className="mt-1 font-mono text-[10px] text-black/55">The fastest path to your next useful action.</p>
+            <h3 className="font-mono text-sm uppercase tracking-widest text-zinc-100">Unreviewed failures</h3>
+              <p className="mt-1 font-mono text-[10px] text-zinc-400">Explicit errors from the selected window.</p>
             </div>
             <SignalBadge signal={failedRuns > 0 ? "danger" : "success"}>{failedRuns > 0 ? `${failedRuns} open` : "Clear"}</SignalBadge>
           </div>
           {failedRuns > 0 ? (
-            <div>
-              <AttentionItem label={`${failedRuns} failed run${failedRuns === 1 ? "" : "s"} need review`} detail="Open the failed-runs view to inspect the latest error." signal="danger" href={`/dashboard/${projectId}/runs?status=failed&${runsWindow}`} />
-              <AttentionItem label="Review recent activity" detail="Compare the newest traces against successful runs." signal="info" href={`/dashboard/${projectId}/runs?${runsWindow}`} />
+            <div className="divide-y divide-zinc-800">
+              {recentRuns.filter((run) => run.status === "failed" && !investigations.some((item) => item.traceId === run.runId && item.status === "completed")).slice(0, 8).map((run) => (
+                <div key={run._id} className="grid gap-3 px-5 py-4 transition-colors hover:bg-zinc-900 sm:grid-cols-[1.4fr_1fr_0.7fr_auto] sm:items-center">
+                  <Link href={`/dashboard/${projectId}/runs/${run.runId}`} className="min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100">
+                    <span className="block truncate font-mono text-xs text-zinc-100">{run.runId}</span><span className="mt-1 block truncate font-mono text-[10px] text-zinc-500">{run.environment ?? "default"} · {run.primaryModel ?? "unknown model"}</span>
+                  </Link>
+                  <span className="truncate font-mono text-[11px] text-red-300">Run failed · inspect trace</span>
+                  <span className="font-mono text-[11px] text-zinc-400">{run.spanCount} spans · {new Date(run.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                  <button type="button" className="h-8 border border-zinc-700 px-2 font-mono text-[10px] uppercase text-zinc-300 hover:border-zinc-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100" onClick={() => { setReviewRun({ runId: run.runId, spanCount: run.spanCount }); setEvidence(""); setNextAction(""); setOwner(""); }}>Review</button>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="flex items-start gap-3 p-5">
               <CircleCheck className="mt-0.5 size-4 text-emerald-300" aria-hidden="true" />
               <div>
-                <p className="font-mono text-xs text-black">No failures in the current window.</p>
-                <p className="mt-1 font-mono text-[10px] text-black/55">Keep an eye on latency and spend as traffic grows.</p>
+                <p className="font-mono text-xs text-zinc-100">No failures in the current window.</p>
+                <p className="mt-1 font-mono text-[10px] text-zinc-400">The queue will appear when an explicit error is ingested.</p>
               </div>
             </div>
           )}
         </Card>
-        <Card className="border-black/15 bg-white p-0 shadow-none">
+        <Card className="border-zinc-800 bg-[#111418] p-0 shadow-none">
           <div className="border-b border-black/15 p-5">
           <h3 className="font-mono text-sm uppercase tracking-widest text-black">Launch plan</h3>
           <p className="mt-1 font-mono text-[10px] text-black/55">A lightweight path to a more useful workspace.</p>
@@ -281,6 +302,19 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
           </ol>
         </Card>
       </div>
+
+      <Dialog open={Boolean(reviewRun)} onOpenChange={(open) => { if (!open) setReviewRun(null); }}>
+        <DialogContent className="border-zinc-700 bg-[#111418] text-zinc-100 sm:max-w-lg">
+          <DialogHeader><DialogTitle className="font-mono uppercase tracking-widest">Record investigation</DialogTitle><DialogDescription className="font-mono text-xs text-zinc-400">Capture what you know about {reviewRun?.runId} before moving it to Reviewed.</DialogDescription></DialogHeader>
+          <div className="grid gap-3">
+            <label className="font-mono text-[10px] uppercase text-zinc-400">Cause<select value={cause} onChange={(event) => setCause(event.target.value)} className="mt-1 h-9 w-full border border-zinc-700 bg-zinc-900 px-2 font-mono text-xs text-zinc-100"><option value="tool_or_workflow_failure">Tool or workflow failure</option><option value="bad_model_output">Bad model output</option><option value="missing_context">Missing context</option><option value="unknown">Unknown</option></select></label>
+            <label className="font-mono text-[10px] uppercase text-zinc-400">Evidence<textarea value={evidence} onChange={(event) => setEvidence(event.target.value)} placeholder="What in the trace supports this?" className="mt-1 min-h-20 w-full border border-zinc-700 bg-zinc-900 p-2 font-mono text-xs text-zinc-100 placeholder:text-zinc-600" /></label>
+            <label className="font-mono text-[10px] uppercase text-zinc-400">Next action<Input value={nextAction} onChange={(event) => setNextAction(event.target.value)} placeholder="Retry tool with validated input" className="mt-1 border-zinc-700 bg-zinc-900 text-zinc-100 placeholder:text-zinc-600" /></label>
+            <label className="font-mono text-[10px] uppercase text-zinc-400">Owner (optional)<Input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="you@example.com" className="mt-1 border-zinc-700 bg-zinc-900 text-zinc-100 placeholder:text-zinc-600" /></label>
+          </div>
+          <div className="flex justify-end gap-2"><Button variant="outline" className="border-zinc-700 bg-transparent text-zinc-300" onClick={() => setReviewRun(null)}>Cancel</Button><Button disabled={!evidence.trim() || !nextAction.trim()} onClick={() => { if (!reviewRun) return; void createInvestigation({ projectId: projectId as Id<"projects">, traceId: reviewRun.runId, label: cause, notes: `${evidence.trim()}\nNext action: ${nextAction.trim()}${owner.trim() ? `\nOwner: ${owner.trim()}` : ""}` }).then(() => setReviewRun(null)); }}>Save review</Button></div>
+        </DialogContent>
+      </Dialog>
 
       {/* Orchestration Savings */}
       <OrchestrationSavings projectId={projectId} range={range} />
