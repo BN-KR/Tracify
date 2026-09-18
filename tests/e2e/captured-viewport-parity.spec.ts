@@ -42,8 +42,8 @@ test.describe("captured Sandbox viewport parity", () => {
           timeout: 30_000,
         });
         await expect(page.locator(".captured-workspace")).toBeVisible();
-        await expect(page.getByRole("link", { name: "Langfuse dashboard" })).toHaveCount(1);
-        await expect(page.getByText("langfuse-docs", { exact: true }).first()).toBeVisible();
+        await expect(page.getByRole("link", { name: "Tracify dashboard" })).toHaveCount(1);
+        await expect(page.getByText("tracify-docs", { exact: true }).first()).toBeVisible();
         await expect(page.locator(".captured-workspace")).not.toContainText("Tracify");
         await page.screenshot({
           path: testInfo.outputPath(`${viewportName}-${surfaceName}.png`),
