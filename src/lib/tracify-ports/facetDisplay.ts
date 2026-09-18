@@ -1,9 +1,9 @@
-// Adapted from langfuse/langfuse (MIT License)
+// Adapted from open-source observability patterns (MIT License)
 // Source: web/src/features/filters/lib/facet-display.ts
 // See /THIRD_PARTY_NOTICES.md
 //
 // Pure display helpers for a faceted filter sidebar. No React, no state —
-// unit-testable. `UIFilter` is a local type, not @langfuse/shared's.
+// unit-testable. `UIFilter` is a local type, not an external shared package's.
 
 import { filterRank } from "./searchRank";
 
