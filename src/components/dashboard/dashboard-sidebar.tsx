@@ -13,6 +13,7 @@ import {
   PanelLeftOpen,
   Search,
   MessageSquareText,
+  PhoneCall,
   FlaskConical,
   GitCompare,
   FlaskConical as PlaygroundIcon,
@@ -150,8 +151,15 @@ export function DashboardSidebar({
           id: "manage",
           label: "",
           items: [
-            { title: "Upgrade Plan", icon: Zap, href: isSynthetic ? "/cloud" : workspaceHref("billing") },
             { title: "Settings", icon: Settings2, href: workspaceHref("settings") },
+          ],
+        },
+        {
+          id: "resources",
+          label: "",
+          items: [
+            { title: "Book a call", icon: PhoneCall, href: "/contact" },
+            { title: "Support", icon: MessageSquareText, href: "/contact" },
           ],
         },
       ];
@@ -463,10 +471,10 @@ export function DashboardSidebar({
         {showExpandedContent ? (
           <Link
             href={projectDashboardHref}
-            aria-label="Langfuse dashboard"
+            aria-label="Tracify dashboard"
             className="text-white focus-visible:outline-1 focus-visible:outline-offset-4"
           >
-            <span className="captured-reference-brand"><i aria-hidden="true" />langfuse</span>
+          <span className="captured-reference-brand"><i aria-hidden="true" />tracify</span>
           </Link>
         ) : null}
 
@@ -497,7 +505,7 @@ export function DashboardSidebar({
       {isSynthetic && showExpandedContent ? (
         <div className="captured-sidebar-context border-b border-white/10">
           <Link href="/playground" className="captured-sidebar-context-link is-demo">↗ <span>Use Demo App</span></Link>
-          <Link href="/cloud" className="captured-sidebar-context-link">⊞ <span>Your Langfuse Orgs</span></Link>
+          <Link href="/cloud" className="captured-sidebar-context-link">⊞ <span>Your Orgs</span></Link>
         </div>
       ) : null}
 
@@ -534,14 +542,32 @@ export function DashboardSidebar({
         ))}
       </nav>
 
-      <Link
-        href={isSynthetic ? "/cloud" : "/cloud"}
-        className={cn("flex min-h-12 items-center border-t border-white/10 px-4 text-white/55 hover:bg-white/10 hover:text-white", showExpandedContent ? "gap-3" : "justify-center")}
-        aria-label={`${region.name} cloud region. Open region directory`}
-      >
-        <Globe2 className="size-4 shrink-0" />
-        {showExpandedContent ? <span className="font-mono text-[10px] uppercase tracking-[0.12em]">{region.flag} {region.shortName} cloud · Switch</span> : null}
-      </Link>
+      {isSynthetic ? (
+        <button
+          type="button"
+          className={cn("captured-sidebar-account flex min-h-12 items-center border-t border-white/10 px-3 text-left text-white/70 hover:bg-white/10 hover:text-white", showExpandedContent ? "gap-2" : "justify-center")}
+          aria-label="Kristoffer Bon account menu"
+          onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}
+        >
+          <span className="captured-sidebar-avatar" aria-hidden="true">KB</span>
+          {showExpandedContent ? (
+            <span className="captured-sidebar-account-copy min-w-0">
+              <span className="truncate">Kristoffer Bon</span>
+              <span className="truncate">kristoffer.bon@gmail.com</span>
+            </span>
+          ) : null}
+          {showExpandedContent ? <ChevronDown className="ml-auto size-3 shrink-0 text-white/45" /> : null}
+        </button>
+      ) : (
+        <Link
+          href="/cloud"
+          className={cn("flex min-h-12 items-center border-t border-white/10 px-4 text-white/55 hover:bg-white/10 hover:text-white", showExpandedContent ? "gap-3" : "justify-center")}
+          aria-label={`${region.name} cloud region. Open region directory`}
+        >
+          <Globe2 className="size-4 shrink-0" />
+          {showExpandedContent ? <span className="font-mono text-[10px] uppercase tracking-[0.12em]">{region.flag} {region.shortName} cloud · Switch</span> : null}
+        </Link>
+      )}
 
     </aside>
   );
@@ -579,7 +605,7 @@ function SidebarGroup({
 
   return (
     <div className="mb-5">
-      {showExpandedContent ? (
+      {showExpandedContent && group.label ? (
         <button
           type="button"
           onClick={onToggle}
