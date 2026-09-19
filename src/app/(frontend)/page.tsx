@@ -1,13 +1,13 @@
-import { WireframeHomepage } from "@/components/marketing/wireframe-homepage";
+import { AmoledHomepage } from "@/components/marketing/amoled-homepage";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#eceae3] pt-[54px] text-black">
+    <div className="min-h-screen overflow-x-hidden bg-black pt-[54px] text-white">
       <main id="main-content">
-        <WireframeHomepage />
+        <AmoledHomepage />
       </main>
     </div>
   );
