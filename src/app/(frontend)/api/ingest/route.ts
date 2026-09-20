@@ -7,6 +7,7 @@ import { inngest } from "@/lib/inngest";
 import { getWrongRegionApiKeyResponse, hashApiKey, isTracifyApiKey } from "@/lib/api-keys";
 import { DEFAULT_REDACTION_RULES, redactPayload, redactRecord } from "@/lib/redaction";
 import { consumeRateLimit } from "@/lib/redis-cache";
+import { measureTracePayload } from "@/lib/trace-payload";
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const INGEST_LIMIT_PER_MINUTE = Number(process.env.TRACIFY_INGEST_LIMIT_PER_MINUTE ?? 6_000);
@@ -203,6 +204,9 @@ export async function POST(request: NextRequest) {
   const now = Date.now();
   const redactionEnabled = project.redactionEnabled !== false;
   const redactionRules = project.redactionRules?.length ? project.redactionRules : [...DEFAULT_REDACTION_RULES];
+  const storedInput = redactionEnabled ? redactPayload(payload.input, redactionRules) : jsonString(payload.input);
+  const storedOutput = redactionEnabled ? redactPayload(payload.output, redactionRules) : jsonString(payload.output);
+  const payloadStats = measureTracePayload(storedInput, storedOutput);
 
   await convex.mutation(api.projects.markApiKeyUsed, {
     projectId: projectDocId,
@@ -219,14 +223,20 @@ export async function POST(request: NextRequest) {
         projectId: projectDocId,
         projectDocId,
         spanType: payload.spanType,
-        input: redactionEnabled ? redactPayload(payload.input, redactionRules) : jsonString(payload.input),
-        output: redactionEnabled ? redactPayload(payload.output, redactionRules) : jsonString(payload.output),
+        input: storedInput,
+        output: storedOutput,
         attachments: redactionEnabled ? redactPayload(payload.attachments ?? [], redactionRules) : jsonString(payload.attachments ?? []),
         latencyMs: payload.latencyMs,
         costUsd: payload.costUsd ?? 0,
         modelId: payload.modelId ?? "",
         toolName: payload.toolName ?? "",
-        metadata: redactionEnabled ? redactRecord(payload.metadata ?? {}, redactionRules) : payload.metadata ?? {},
+        metadata: {
+          ...(redactionEnabled ? redactRecord(payload.metadata ?? {}, redactionRules) : payload.metadata ?? {}),
+          _tracifyPayloadBytes: payloadStats.inputBytes + payloadStats.outputBytes,
+          _tracifyMessageCount: payloadStats.messageCount,
+          _tracifyUniqueMessageCount: payloadStats.uniqueMessageCount,
+          _tracifyRepeatedMessageBytes: payloadStats.repeatedMessageBytes,
+        },
         parentSpanId: payload.parentSpanId ?? "",
         sessionId: payload.sessionId ?? "",
         endUserId: payload.endUserId ?? "",
