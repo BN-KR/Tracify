@@ -16,7 +16,6 @@ import {
   PhoneCall,
   FlaskConical,
   GitCompare,
-  FlaskConical as PlaygroundIcon,
   Settings2,
   ShieldCheck,
   Terminal,
@@ -24,12 +23,11 @@ import {
   Zap,
   Users,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProjectSwitcher } from "@/components/dashboard/project-switcher";
 import { usePathname, useParams, useSearchParams } from "next/navigation";
-
 import {
   Tooltip,
   TooltipContent,
@@ -43,7 +41,7 @@ type GroupId = "primary" | "observe" | "analyze" | "improve" | "operate" | "mana
 type NavItem = {
   title: string;
   href: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string }>;
   external?: boolean;
 };
 
@@ -55,9 +53,7 @@ type NavGroup = {
 
 const GROUP_STORAGE_KEY = "tracify:dashboard-sidebar-groups";
 const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
-// Matches the captured dashboard shell's 3rem collapsed rail.
 const COLLAPSED_WIDTH = 48;
-// Matches the captured dashboard shell's 11.5rem expanded sidebar.
 const EXPANDED_WIDTH = 184;
 
 function isActivePath(pathname: string, href: string, projectId: string, isPreview = false, currentSearch = "") {
@@ -80,10 +76,10 @@ export function DashboardSidebar({
   onCollapsedChange,
   projectIdOverride,
   previewProjectName,
-    synthetic = false,
-    isMobileOpen = false,
-    onMobileClose,
-    onMobileToggle,
+  synthetic = false,
+  isMobileOpen = false,
+  onMobileClose,
+  onMobileToggle,
 }: {
   canAccessContent: boolean;
   isCollapsed: boolean;
@@ -91,21 +87,31 @@ export function DashboardSidebar({
   projectIdOverride?: string;
   previewProjectName?: string;
   synthetic?: boolean;
-    isMobileOpen?: boolean;
-    onMobileClose?: () => void;
-    onMobileToggle?: () => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
+  onMobileToggle?: () => void;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const params = useParams();
   const projectId = projectIdOverride || (params?.projectId as string) || "";
   const isSynthetic = synthetic && pathname.startsWith("/playground");
-  const syntheticHref = (view: string) => view === "home" ? "/playground" : `/playground/${view}`;
+  const syntheticHref = (view: string) => (view === "home" ? "/playground" : `/playground/${view}`);
   const projectDashboardHref = isSynthetic ? "/dashboard" : projectId ? `/dashboard/${projectId}` : "/dashboard";
-  const workspaceHref = useCallback((view: string, liveView = view) =>
-    isSynthetic ? (view === "home" ? "/playground" : `/playground/${view}`) : liveView === "home" ? projectDashboardHref : `${projectDashboardHref}/${liveView}`,
-  [isSynthetic, projectDashboardHref]);
+  const workspaceHref = useCallback(
+    (view: string, liveView = view) =>
+      isSynthetic
+        ? view === "home"
+          ? "/playground"
+          : `/playground/${view}`
+        : liveView === "home"
+          ? projectDashboardHref
+          : `${projectDashboardHref}/${liveView}`,
+    [isSynthetic, projectDashboardHref],
+  );
+
   const region = getTracifyRegion();
+
   const dynamicGroups = useMemo<NavGroup[]>(() => {
     if (isSynthetic || projectId) {
       return [
@@ -133,7 +139,7 @@ export function DashboardSidebar({
           label: "Prompt Management",
           items: [
             { title: "Prompts", icon: MessageSquareText, href: workspaceHref("prompts") },
-            { title: "Playground", icon: PlaygroundIcon, href: workspaceHref("playground") },
+            { title: "Playground", icon: FlaskConical, href: workspaceHref("playground") },
           ],
         },
         {
@@ -150,9 +156,7 @@ export function DashboardSidebar({
         {
           id: "manage",
           label: "",
-          items: [
-            { title: "Settings", icon: Settings2, href: workspaceHref("settings") },
-          ],
+          items: [{ title: "Settings", icon: Settings2, href: workspaceHref("settings") }],
         },
         {
           id: "resources",
@@ -165,227 +169,82 @@ export function DashboardSidebar({
       ];
     }
     return [
-    {
-      id: "observe",
-      label: "Observe",
-      items: [
-        {
-          title: "Home",
-          icon: LayoutDashboard,
-          href: isSynthetic ? syntheticHref("home") : projectDashboardHref,
-        },
-        {
-          title: "Dashboards",
-          icon: LayoutDashboard,
-          href: isSynthetic ? syntheticHref("dashboards") : projectId ? `/dashboard/${projectId}/dashboards` : "/dashboard/dashboards",
-        },
-        {
-          title: "Tracing",
-          icon: Activity,
-          href: isSynthetic ? syntheticHref("tracing") : projectId ? `/dashboard/${projectId}/tracing` : "/dashboard/runs",
-        },
-        {
-          title: "Sessions",
-          icon: Activity,
-          href: isSynthetic ? syntheticHref("sessions") : projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions",
-        },
-        {
-          title: "Users",
-          icon: Users,
-          href: isSynthetic ? syntheticHref("users") : projectId ? `/dashboard/${projectId}/users` : "/dashboard/users",
-        },
-        {
-          title: "Search",
-          icon: Search,
-          href: isSynthetic ? syntheticHref("search") : projectId ? `/dashboard/${projectId}/search` : "/dashboard/search",
-        },
-      ],
-    },
-    {
-      id: "analyze",
-      label: "Analyze",
-      items: [
-        {
-          title: "Costs",
-          icon: BarChart3,
-          href: isSynthetic ? syntheticHref("costs") : projectId ? `/dashboard/${projectId}/costs` : "/dashboard/costs",
-        },
-        {
-          title: "Reports",
-          icon: FileText,
-          href: isSynthetic ? syntheticHref("reports") : projectId ? `/dashboard/${projectId}/reports` : "/dashboard/reports",
-        },
-        {
-          title: "Trace Compare",
-          icon: GitCompare,
-          href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare",
-        },
-        {
-          title: "Investigation",
-          icon: Search,
-          href: isSynthetic ? syntheticHref("investigate") : projectId ? `/dashboard/${projectId}/investigate` : "/dashboard/investigate",
-        },
-      ],
-    },
-    {
-      id: "improve",
-      label: "Improve",
-      items: [
-        {
-          title: "Prompt Management",
-          icon: MessageSquareText,
-          href: isSynthetic ? syntheticHref("prompts") : projectId ? "/dashboard/" + projectId + "/prompt-management" : "/dashboard/prompts",
-        },
-        {
-          title: "Evaluation",
-          icon: FlaskConical,
-          href: isSynthetic ? syntheticHref("evaluation") : projectId ? "/dashboard/" + projectId + "/evaluation" : "/dashboard/evaluation",
-        },
-        {
-          title: "Scores",
-          icon: BarChart3,
-          href: isSynthetic ? syntheticHref("scores") : projectId ? `/dashboard/${projectId}/scores` : "/dashboard/evaluation",
-        },
-        {
-          title: "Evaluators",
-          icon: FlaskConical,
-          href: isSynthetic ? syntheticHref("evaluators") : projectId ? `/dashboard/${projectId}/evaluators` : "/dashboard/evaluation",
-        },
-        {
-          title: "Human Annotation",
-          icon: MessageSquareText,
-          href: isSynthetic ? syntheticHref("annotation") : projectId ? `/dashboard/${projectId}/human-annotation` : "/dashboard/evaluation",
-        },
-        {
-          title: "Datasets",
-          icon: Database,
-          href: isSynthetic ? syntheticHref("datasets") : projectId ? "/dashboard/" + projectId + "/datasets" : "/dashboard/datasets",
-        },
-        {
-          title: "Experiments",
-          icon: GitCompare,
-          href: isSynthetic ? syntheticHref("experiments") : projectId ? "/dashboard/" + projectId + "/experiments" : "/dashboard/experiments",
-        },
-        {
-          title: "Playground",
-          icon: PlaygroundIcon,
-          href: isSynthetic ? syntheticHref("playground") : projectId ? "/dashboard/" + projectId + "/playground" : "/dashboard/playground",
-        },
-        {
-          title: "Resilience",
-          icon: Zap,
-          href: isSynthetic ? syntheticHref("resilience") : projectId ? "/dashboard/" + projectId + "/resilience" : "/dashboard/resilience",
-        },
-      ],
-    },
-    {
-      id: "operate",
-      label: "Operate",
-      items: [
-        {
-          title: "Runtime Policy",
-          icon: ShieldCheck,
-          href: isSynthetic ? syntheticHref("control") : projectId ? `/dashboard/${projectId}/control` : "/dashboard/control",
-        },
-        {
-          title: "Alerts",
-          icon: Activity,
-          href: isSynthetic ? syntheticHref("alerts") : projectId ? `/dashboard/${projectId}/alerts` : "/dashboard/alerts",
-        },
-        {
-          title: "Automations",
-          icon: Zap,
-          href: isSynthetic ? syntheticHref("automations") : projectId ? `/dashboard/${projectId}/automations` : "/dashboard/automations",
-        },
-        {
-          title: "Operations",
-          icon: Globe2,
-          href: isSynthetic ? syntheticHref("operations") : projectId ? `/dashboard/${projectId}/operations` : "/dashboard/operations",
-        },
-        {
-          title: "Integrations",
-          icon: Terminal,
-          href: isSynthetic ? syntheticHref("integrations") : projectId ? `/dashboard/${projectId}/settings/integrations` : "/integrations",
-        },
-      ],
-    },
-    {
-      id: "manage",
-      label: "Manage",
-      items: [
-        {
-          title: "Settings",
-          icon: Settings2,
-          href: isSynthetic ? syntheticHref("settings") : projectId ? `/dashboard/${projectId}/settings` : "/dashboard/settings",
-        },
-        {
-          title: "Members",
-          icon: Activity,
-          href: isSynthetic ? syntheticHref("members") : projectId ? `/dashboard/${projectId}/settings?tab=members` : "/dashboard/members",
-        },
-        {
-          title: "Manage",
-          icon: SlidersHorizontal,
-          href: isSynthetic ? syntheticHref("manage") : projectId ? `/dashboard/${projectId}/manage` : "/dashboard/manage",
-        },
-        {
-          title: "API Keys",
-          icon: Terminal,
-          href: isSynthetic ? syntheticHref("api-keys") : projectId ? `/dashboard/${projectId}/api-keys` : "/dashboard/api-keys",
-        },
-        {
-          title: "Billing",
-          icon: FileText,
-          href: isSynthetic ? syntheticHref("billing") : projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing",
-        },
-        {
-          title: "Widget library",
-          icon: Settings2,
-          href: isSynthetic ? syntheticHref("widgets") : projectId ? `/dashboard/${projectId}/widgets` : "/dashboard/widgets",
-        },
-        {
-          title: "Upgrade Plan",
-          icon: Zap,
-          href: isSynthetic ? syntheticHref("upgrade") : projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing",
-        },
-      ],
-    },
-    {
-      id: "resources",
-      label: "Resources",
-      items: [
-        {
-          title: "Quickstart",
-          icon: Terminal,
-          href: isSynthetic ? syntheticHref("quickstart") : projectId ? `/dashboard/${projectId}/quickstart` : "/dashboard/quickstart",
-        },
-        {
-          title: "Docs",
-          icon: BookOpen,
-          href: "/docs",
-          external: true,
-        },
-        {
-          title: "Support",
-          icon: MessageSquareText,
-          href: "/contact",
-          external: true,
-        },
-        {
-          title: "Roadmap",
-          icon: FileText,
-          href: "/roadmap",
-          external: true,
-        },
-        ...(canAccessContent
-          ? [
-              { title: "Admin Library", icon: ShieldCheck, href: "/admin/library" },
-            ]
-          : []),
-      ],
-    },
+      {
+        id: "observe",
+        label: "Observe",
+        items: [
+          { title: "Home", icon: LayoutDashboard, href: isSynthetic ? syntheticHref("home") : projectDashboardHref },
+          { title: "Dashboards", icon: LayoutDashboard, href: isSynthetic ? syntheticHref("dashboards") : projectId ? `/dashboard/${projectId}/dashboards` : "/dashboard/dashboards" },
+          { title: "Tracing", icon: Activity, href: isSynthetic ? syntheticHref("tracing") : projectId ? `/dashboard/${projectId}/tracing` : "/dashboard/runs" },
+          { title: "Sessions", icon: Activity, href: isSynthetic ? syntheticHref("sessions") : projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions" },
+          { title: "Users", icon: Users, href: isSynthetic ? syntheticHref("users") : projectId ? `/dashboard/${projectId}/users` : "/dashboard/users" },
+          { title: "Search", icon: Search, href: isSynthetic ? syntheticHref("search") : projectId ? `/dashboard/${projectId}/search` : "/dashboard/search" },
+        ],
+      },
+      {
+        id: "analyze",
+        label: "Analyze",
+        items: [
+          { title: "Costs", icon: BarChart3, href: isSynthetic ? syntheticHref("costs") : projectId ? `/dashboard/${projectId}/costs` : "/dashboard/costs" },
+          { title: "Reports", icon: FileText, href: isSynthetic ? syntheticHref("reports") : projectId ? `/dashboard/${projectId}/reports` : "/dashboard/reports" },
+          { title: "Trace Compare", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare" },
+          { title: "Investigation", icon: Search, href: isSynthetic ? syntheticHref("investigate") : projectId ? `/dashboard/${projectId}/investigate` : "/dashboard/investigate" },
+        ],
+      },
+      {
+        id: "improve",
+        label: "Improve",
+        items: [
+          { title: "Prompt Management", icon: MessageSquareText, href: isSynthetic ? syntheticHref("prompts") : projectId ? `/dashboard/${projectId}/prompt-management` : "/dashboard/prompts" },
+          { title: "Evaluation", icon: FlaskConical, href: isSynthetic ? syntheticHref("evaluation") : projectId ? `/dashboard/${projectId}/evaluation` : "/dashboard/evaluation" },
+          { title: "Scores", icon: BarChart3, href: isSynthetic ? syntheticHref("scores") : projectId ? `/dashboard/${projectId}/scores` : "/dashboard/evaluation" },
+          { title: "Evaluators", icon: FlaskConical, href: isSynthetic ? syntheticHref("evaluators") : projectId ? `/dashboard/${projectId}/evaluators` : "/dashboard/evaluation" },
+          { title: "Human Annotation", icon: MessageSquareText, href: isSynthetic ? syntheticHref("annotation") : projectId ? `/dashboard/${projectId}/human-annotation` : "/dashboard/evaluation" },
+          { title: "Datasets", icon: Database, href: isSynthetic ? syntheticHref("datasets") : projectId ? `/dashboard/${projectId}/datasets` : "/dashboard/datasets" },
+          { title: "Experiments", icon: GitCompare, href: isSynthetic ? syntheticHref("experiments") : projectId ? `/dashboard/${projectId}/experiments` : "/dashboard/experiments" },
+          { title: "Playground", icon: FlaskConical, href: isSynthetic ? syntheticHref("playground") : projectId ? `/dashboard/${projectId}/playground` : "/dashboard/playground" },
+          { title: "Resilience", icon: Zap, href: isSynthetic ? syntheticHref("resilience") : projectId ? `/dashboard/${projectId}/resilience` : "/dashboard/resilience" },
+        ],
+      },
+      {
+        id: "operate",
+        label: "Operate",
+        items: [
+          { title: "Runtime Policy", icon: ShieldCheck, href: isSynthetic ? syntheticHref("control") : projectId ? `/dashboard/${projectId}/control` : "/dashboard/control" },
+          { title: "Alerts", icon: Activity, href: isSynthetic ? syntheticHref("alerts") : projectId ? `/dashboard/${projectId}/alerts` : "/dashboard/alerts" },
+          { title: "Automations", icon: Zap, href: isSynthetic ? syntheticHref("automations") : projectId ? `/dashboard/${projectId}/automations` : "/dashboard/automations" },
+          { title: "Operations", icon: Globe2, href: isSynthetic ? syntheticHref("operations") : projectId ? `/dashboard/${projectId}/operations` : "/dashboard/operations" },
+          { title: "Integrations", icon: Terminal, href: isSynthetic ? syntheticHref("integrations") : projectId ? `/dashboard/${projectId}/settings/integrations` : "/integrations" },
+        ],
+      },
+      {
+        id: "manage",
+        label: "Manage",
+        items: [
+          { title: "Settings", icon: Settings2, href: isSynthetic ? syntheticHref("settings") : projectId ? `/dashboard/${projectId}/settings` : "/dashboard/settings" },
+          { title: "Members", icon: Activity, href: isSynthetic ? syntheticHref("members") : projectId ? `/dashboard/${projectId}/settings?tab=members` : "/dashboard/members" },
+          { title: "Manage", icon: SlidersHorizontal, href: isSynthetic ? syntheticHref("manage") : projectId ? `/dashboard/${projectId}/manage` : "/dashboard/manage" },
+          { title: "API Keys", icon: Terminal, href: isSynthetic ? syntheticHref("api-keys") : projectId ? `/dashboard/${projectId}/api-keys` : "/dashboard/api-keys" },
+          { title: "Billing", icon: FileText, href: isSynthetic ? syntheticHref("billing") : projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing" },
+          { title: "Widget library", icon: Settings2, href: isSynthetic ? syntheticHref("widgets") : projectId ? `/dashboard/${projectId}/widgets` : "/dashboard/widgets" },
+          { title: "Upgrade Plan", icon: Zap, href: isSynthetic ? syntheticHref("upgrade") : projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing" },
+        ],
+      },
+      {
+        id: "resources",
+        label: "Resources",
+        items: [
+          { title: "Quickstart", icon: Terminal, href: isSynthetic ? syntheticHref("quickstart") : projectId ? `/dashboard/${projectId}/quickstart` : "/dashboard/quickstart" },
+          { title: "Docs", icon: BookOpen, href: "/docs", external: true },
+          { title: "Support", icon: MessageSquareText, href: "/contact", external: true },
+          { title: "Roadmap", icon: FileText, href: "/roadmap", external: true },
+          ...(canAccessContent
+            ? [{ title: "Admin Library", icon: ShieldCheck, href: "/admin/library" }]
+            : []),
+        ],
+      },
     ];
-  }, [canAccessContent, isSynthetic, projectDashboardHref, projectId, workspaceHref]);
+  }, [canAccessContent, isSynthetic, projectDashboardHref]);
 
   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
     if (typeof window === "undefined") {
@@ -416,17 +275,17 @@ export function DashboardSidebar({
     onCollapsedChange(!isCollapsed);
   }
 
-    useEffect(() => {
-      function onShellToggle() {
-        if (window.matchMedia("(max-width: 700px)").matches) {
-          onMobileToggle?.();
-          return;
-        }
-        onCollapsedChange(!isCollapsed);
+  useEffect(() => {
+    function onShellToggle() {
+      if (window.matchMedia("(max-width: 700px)").matches) {
+        onMobileToggle?.();
+        return;
       }
+      onCollapsedChange(!isCollapsed);
+    }
     window.addEventListener("tracify:toggle-sidebar", onShellToggle);
     return () => window.removeEventListener("tracify:toggle-sidebar", onShellToggle);
-    }, [isCollapsed, onCollapsedChange, onMobileToggle]);
+  }, [isCollapsed, onCollapsedChange, onMobileToggle]);
 
   function expandSidebar(groupId?: GroupId) {
     if (groupId) {
@@ -474,7 +333,7 @@ export function DashboardSidebar({
             aria-label="Tracify dashboard"
             className="text-white focus-visible:outline-1 focus-visible:outline-offset-4"
           >
-          <span className="captured-reference-brand"><i aria-hidden="true" />tracify</span>
+            <span className="captured-reference-brand"><i aria-hidden="true" />tracify</span>
           </Link>
         ) : null}
 
@@ -485,7 +344,7 @@ export function DashboardSidebar({
                 variant="ghost"
                 aria-label={collapseLabel}
                 onClick={toggleCollapsed}
-            className="size-7 text-white/70 hover:bg-white/10 hover:text-white"
+                className="size-7 text-white/70 hover:bg-white/10 hover:text-white"
               >
                 <CollapseIcon className="size-4" />
               </Button>
@@ -499,9 +358,11 @@ export function DashboardSidebar({
           </TooltipContent>
         </Tooltip>
       </div>
-      <div className={cn("border-b border-white/10 p-3", isSynthetic && "captured-sidebar-project") }>
+
+      <div className={cn("border-b border-white/10 p-3", isSynthetic && "captured-sidebar-project")}>
         <ProjectSwitcher isCollapsed={!showExpandedContent} previewProjectName={previewProjectName} synthetic={isSynthetic} />
       </div>
+
       {isSynthetic && showExpandedContent ? (
         <div className="captured-sidebar-context border-b border-white/10">
           <Link href="/playground" className="captured-sidebar-context-link is-demo">↗ <span>Use Demo App</span></Link>
@@ -520,8 +381,14 @@ export function DashboardSidebar({
           )}
         >
           <Search className="size-4 shrink-0" />
-          {showExpandedContent ? <><span className="truncate">Go to...</span><kbd className="ml-auto border border-white/15 px-1.5 py-0.5 text-[9px] leading-none text-white/50">Ctrl K</kbd></> : null}
+          {showExpandedContent ? (
+            <>
+              <span className="truncate">Go to...</span>
+              <kbd className="ml-auto border border-white/15 px-1.5 py-0.5 text-[9px] leading-none text-white/50">Ctrl K</kbd>
+            </>
+          ) : null}
         </button>
+
         {dynamicGroups.map((group) => (
           <SidebarGroup
             key={group.id}
@@ -534,7 +401,7 @@ export function DashboardSidebar({
             isPreview={Boolean(projectIdOverride)}
             onToggle={() => toggleGroup(group.id)}
             onNavClick={(href) => {
-              const navGroup = dynamicGroups.find((group) => group.items.some((item) => item.href === href));
+              const navGroup = dynamicGroups.find((g) => g.items.some((item) => item.href === href));
               expandSidebar(navGroup?.id);
               onMobileClose?.();
             }}
@@ -545,7 +412,10 @@ export function DashboardSidebar({
       {isSynthetic ? (
         <button
           type="button"
-          className={cn("captured-sidebar-account flex min-h-12 items-center border-t border-white/10 px-3 text-left text-white/70 hover:bg-white/10 hover:text-white", showExpandedContent ? "gap-2" : "justify-center")}
+          className={cn(
+            "captured-sidebar-account flex min-h-12 items-center border-t border-white/10 px-3 text-left text-white/70 hover:bg-white/10 hover:text-white",
+            showExpandedContent ? "gap-2" : "justify-center",
+          )}
           aria-label="Kristoffer Bon account menu"
           onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}
         >
@@ -561,14 +431,20 @@ export function DashboardSidebar({
       ) : (
         <Link
           href="/cloud"
-          className={cn("flex min-h-12 items-center border-t border-white/10 px-4 text-white/55 hover:bg-white/10 hover:text-white", showExpandedContent ? "gap-3" : "justify-center")}
+          className={cn(
+            "flex min-h-12 items-center border-t border-white/10 px-4 text-white/55 hover:bg-white/10 hover:text-white",
+            showExpandedContent ? "gap-3" : "justify-center",
+          )}
           aria-label={`${region.name} cloud region. Open region directory`}
         >
           <Globe2 className="size-4 shrink-0" />
-          {showExpandedContent ? <span className="font-mono text-[10px] uppercase tracking-[0.12em]">{region.flag} {region.shortName} cloud · Switch</span> : null}
+          {showExpandedContent ? (
+            <span className="font-mono text-[10px] uppercase tracking-[0.12em]">
+              {region.flag} {region.shortName} cloud · Switch
+            </span>
+          ) : null}
         </Link>
       )}
-
     </aside>
   );
 }
@@ -594,8 +470,8 @@ function SidebarGroup({
   onToggle: () => void;
   onNavClick: (href: string) => void;
 }) {
-  const hasActiveItem = group.items.some((item) =>
-    isActivePath(pathname, item.href, projectId, isPreview, currentSearch),
+  const hasActiveItem = group.items.some(
+    (item) => isActivePath(pathname, item.href, projectId, isPreview, currentSearch),
   );
   const isVisuallyOpen = isOpen || hasActiveItem;
   const visibleItems = useMemo(
@@ -659,17 +535,11 @@ function NavLink({
     showExpandedContent ? "gap-2" : "justify-center",
     isActive && "border-l-white bg-white/10 text-white hover:bg-white/10",
   );
+
   const link = (
-    <Link
-      href={item.href}
-      className={className}
-      aria-label={item.title}
-      onClick={onNavClick}
-    >
+    <Link href={item.href} className={className} aria-label={item.title} onClick={onNavClick}>
       <Icon className="size-4 shrink-0" />
-      {showExpandedContent ? (
-        <span className="truncate">{item.title}</span>
-      ) : null}
+      {showExpandedContent ? <span className="truncate">{item.title}</span> : null}
     </Link>
   );
 
@@ -680,7 +550,7 @@ function NavLink({
       <TooltipTrigger render={link} />
       <TooltipContent
         side="right"
-          className="rounded-none border border-white/15 bg-[#171717] font-mono text-xs text-white/70 shadow-none"
+        className="rounded-none border border-white/15 bg-[#171717] font-mono text-xs text-white/70 shadow-none"
       >
         {item.title}
       </TooltipContent>

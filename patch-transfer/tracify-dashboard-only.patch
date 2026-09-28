@@ -1,0 +1,1723 @@
+diff --git a/src/components/dashboard/dashboard-overview.tsx b/src/components/dashboard/dashboard-overview.tsx
+index 165baec..03092f6 100644
+--- a/src/components/dashboard/dashboard-overview.tsx
++++ b/src/components/dashboard/dashboard-overview.tsx
+@@ -22,8 +22,24 @@ import {
+ import { Card } from "@/components/ui/card";
+ import { Button, buttonVariants } from "@/components/ui/button";
+ import { Input } from "@/components/ui/input";
+-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+-import { Activity, DollarSign, Zap, AlertTriangle, ArrowUpRight, CircleCheck, Clock3, Gauge, Percent } from "lucide-react";
++import {
++  Dialog,
++  DialogContent,
++  DialogHeader,
++  DialogTitle,
++  DialogDescription,
++} from "@/components/ui/dialog";
++import {
++  Activity,
++  DollarSign,
++  Zap,
++  AlertTriangle,
++  ArrowUpRight,
++  CircleCheck,
++  Clock3,
++  Gauge,
++  Percent,
++} from "lucide-react";
+ import { RunsTable } from "./runs-table";
+ import { OrchestrationSavings } from "./orchestration-savings";
+ import { FailOpenAlert } from "./fail-open-alert";
+@@ -41,43 +57,58 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+   const [evidence, setEvidence] = useState("");
+   const [nextAction, setNextAction] = useState("");
+   const [owner, setOwner] = useState("");
++
+   const searchParams = useSearchParams();
+   const pathname = usePathname();
+   const router = useRouter();
++
+   const requestedRange = Number(searchParams.get("range"));
+   const range = useMemo(
+     () => ([1, 7, 30, 90].includes(requestedRange) ? requestedRange : 7),
+     [requestedRange],
+   );
++
+   const recentRuns = useQuery(
+-    api.agentRuns.getRecentRunsByProject, 
+-    projectId ? { projectId: projectId as Id<"projects"> } : "skip"
++    api.agentRuns.getRecentRunsByProject,
++    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
+   );
++
+   const summary = useQuery(
+     api.projects.getProjectManagementSummary,
+     projectId ? { projectId: projectId as Id<"projects"> } : "skip",
+   );
++
+   const evaluationOverview = useQuery(
+     api.evaluationEngine.overview,
+     projectId ? { projectId: projectId as Id<"projects"> } : "skip",
+   );
++
+   const investigations = useQuery(
+     api.annotations.list,
+     projectId ? { projectId: projectId as Id<"projects"> } : "skip",
+   );
++
+   const createInvestigation = useMutation(api.annotations.create);
++
+   const liveRefreshKey =
+     summary?.latestActivityAt ??
+     summary?.totals.totalRuns ??
+     summary?.totals.totalSpans ??
+     null;
++
+   const { stats, loading, refreshing, refreshStats } = useProjectStats({
+     projectId,
+     range,
+     liveRefreshKey,
+   });
+ 
+-  if (loading || recentRuns === undefined || summary === undefined || evaluationOverview === undefined || investigations === undefined) {
++  if (
++    loading ||
++    recentRuns === undefined ||
++    summary === undefined ||
++    evaluationOverview === undefined ||
++    investigations === undefined
++  ) {
+     return (
+       <div className="space-y-6">
+         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+@@ -90,38 +121,63 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+     );
+   }
+ 
+-  const analyticsSpend =
+-    stats?.dailyCosts.reduce((acc, curr) => acc + curr.totalCostUsd, 0) || 0;
+-  const analyticsSpans =
+-    stats?.dailyCosts.reduce((acc, curr) => acc + curr.spanCount, 0) || 0;
++  // ---- Derived data ----
++
++  const analyticsSpend = stats?.dailyCosts.reduce((acc, curr) => acc + curr.totalCostUsd, 0) || 0;
++  const analyticsSpans = stats?.dailyCosts.reduce((acc, curr) => acc + curr.spanCount, 0) || 0;
+   const savedSpend = summary?.totals.totalCostUsd || 0;
+   const savedSpans = summary?.totals.totalSpans || 0;
+   const useSavedFallback = stats?.unavailable;
+   const totalSpend = useSavedFallback ? savedSpend : analyticsSpend;
+   const totalSpans = useSavedFallback ? savedSpans : analyticsSpans;
++
+   const analyticsDailyCosts = stats?.dailyCosts ?? [];
+   const dailyCosts = analyticsDailyCosts.length
+     ? analyticsDailyCosts
+     : buildDailyCostSeries(range, recentRuns);
++
+   const latestDailySpend = dailyCosts.at(-1)?.totalCostUsd ?? 0;
++
+   const couldHaveSavedUsd = dailyCosts.reduce(
+     (sum, day) => sum + Math.max(day.totalCostUsd - latestDailySpend, 0),
+     0,
+   );
+-  const activeRuns =
+-    summary?.totals.activeRuns ?? recentRuns.filter(r => r.status === "running").length;
+-  const reviewedTraceIds = new Set(investigations.filter((item) => item.status === "completed").map((item) => item.traceId));
+-  const failedRuns =
+-    recentRuns.filter((run) => run.status === "failed" && !reviewedTraceIds.has(run.runId)).length;
+-  const recentFailureRate = recentRuns.length ? (recentRuns.filter((run) => run.status === "failed").length / recentRuns.length) * 100 : 0;
++
++  const activeRuns = summary?.totals.activeRuns ?? recentRuns.filter((r) => r.status === "running").length;
++
++  const reviewedTraceIds = new Set(
++    investigations
++      .filter((item) => item.status === "completed")
++      .map((item) => item.traceId),
++  );
++
++  const failedRuns = recentRuns
++    .filter((run) => run.status === "failed" && !reviewedTraceIds.has(run.runId))
++    .length;
++
++  const recentFailureRate =
++    recentRuns.length
++      ? (recentRuns.filter((run) => run.status === "failed").length / recentRuns.length) * 100
++      : 0;
++
+   const recentDurations = recentRuns
+-    .map((run) => run.finishedAt ? new Date(run.finishedAt).getTime() - new Date(run.startedAt).getTime() : null)
++    .map((run) =>
++      run.finishedAt
++        ? new Date(run.finishedAt).getTime() - new Date(run.startedAt).getTime()
++        : null,
++    )
+     .filter((duration): duration is number => duration !== null && Number.isFinite(duration) && duration >= 0)
+     .sort((left, right) => left - right);
+-  const p95Duration = recentDurations.length ? recentDurations[Math.min(recentDurations.length - 1, Math.ceil(recentDurations.length * 0.95) - 1)] : 0;
++
++  const p95Duration = recentDurations.length
++    ? recentDurations[Math.min(recentDurations.length - 1, Math.ceil(recentDurations.length * 0.95) - 1)]
++    : 0;
++
+   const runTrend = buildRunTrendSeries(range, recentRuns);
+   const qualityTrend = buildQualityTrendSeries(range, evaluationOverview?.recentResults ?? []);
++
+   const runsWindow = `days=${range}`;
++
+   const launchPlan = [
+     {
+       label: "Capture a first trace",
+@@ -145,8 +201,46 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+     },
+   ];
+ 
++  // ---- Range picker ----
++
++  const RangeOption = ({ label, value }: { label: string; value: number }) => (
++    <button
++      type="button"
++      aria-pressed={range === value}
++      aria-label={`Show workspace health for ${label}`}
++      onClick={() => {
++        const nextParams = new URLSearchParams(searchParams.toString());
++        nextParams.set("range", String(value));
++        router.replace(`${pathname}?${nextParams.toString()}`, { scroll: false });
++      }}
++      className={
++        range === value
++          ? "h-8 border border-zinc-100 bg-zinc-100 px-3 font-mono text-[11px] text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100"
++          : "h-8 border border-zinc-700 bg-zinc-900 px-3 font-mono text-[11px] text-zinc-400 hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100"
++      }
++    >
++      {label}
++    </button>
++  );
++
++  // ---- Loading state ----
++
++  if (loading) {
++    return (
++      <div className="space-y-6">
++        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
++          {Array.from({ length: 4 }).map((_, i) => (
++            <Skeleton key={i} className="h-24 w-full rounded-none" />
++          ))}
++        </div>
++        <Skeleton className="h-[300px] w-full rounded-none" />
++      </div>
++    );
++  }
++
+   return (
+     <div className="dashboard-grid flex flex-col gap-6 bg-[#0b0d10] p-4 text-zinc-100 sm:p-6">
++      {/* Header row */}
+       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+         <div>
+           <h2 className="font-pixel text-xl uppercase tracking-wide text-zinc-100">
+@@ -158,31 +252,10 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+         </div>
+         <div className="flex flex-wrap items-center justify-end gap-3 sm:ml-auto">
+           <div className="flex gap-2">
+-            {[
+-              { label: "1d", value: 1 },
+-              { label: "7d", value: 7 },
+-              { label: "30d", value: 30 },
+-              { label: "90d", value: 90 },
+-            ].map((option) => (
+-              <button
+-                key={option.value}
+-                type="button"
+-                aria-pressed={range === option.value}
+-                aria-label={`Show workspace health for ${option.label}`}
+-                onClick={() => {
+-                  const nextParams = new URLSearchParams(searchParams.toString());
+-                  nextParams.set("range", String(option.value));
+-                  router.replace(`${pathname}?${nextParams.toString()}`, { scroll: false });
+-                }}
+-                className={
+-                  range === option.value
+-                    ? "h-8 border border-zinc-100 bg-zinc-100 px-3 font-mono text-[11px] text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100"
+-                    : "h-8 border border-zinc-700 bg-zinc-900 px-3 font-mono text-[11px] text-zinc-400 hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100"
+-                }
+-              >
+-                {option.label}
+-              </button>
+-            ))}
++            <RangeOption label="1d" value={1} />
++            <RangeOption label="7d" value={7} />
++            <RangeOption label="30d" value={30} />
++            <RangeOption label="90d" value={90} />
+           </div>
+           <AnalyticsRefreshControl
+             stats={stats}
+@@ -192,34 +265,34 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+         </div>
+       </div>
+ 
+-      {/* Stat Cards */}
++      {/* Stat cards */}
+       <div className="grid grid-cols-2 gap-px border border-zinc-800 bg-zinc-800 sm:grid-cols-4 xl:grid-cols-7">
+         <DashboardMetric
+           label="Spend"
+-          value={formatGraphCurrency(totalSpend)} 
++          value={formatGraphCurrency(totalSpend)}
+           icon={DollarSign}
+           href={`/dashboard/${projectId}/costs`}
+           detail={useSavedFallback ? "Saved summary" : `Could save ${formatGraphCurrency(couldHaveSavedUsd)}`}
+         />
+         <DashboardMetric
+           label="Spans"
+-          value={totalSpans.toLocaleString()} 
+-          icon={Zap} 
++          value={totalSpans.toLocaleString()}
++          icon={Zap}
+           detail={`Observed in last ${range} days`}
+           href={`/dashboard/${projectId}/runs?${runsWindow}`}
+         />
+         <DashboardMetric
+-          label="Active Runs" 
+-          value={activeRuns.toString()} 
+-          icon={Activity} 
++          label="Active Runs"
++          value={activeRuns.toString()}
++          icon={Activity}
+           signal="info"
+           detail="Currently running"
+           href={`/dashboard/${projectId}/runs?status=running&${runsWindow}`}
+         />
+         <DashboardMetric
+-          label="Failed Runs" 
+-          value={failedRuns.toString()} 
+-          icon={AlertTriangle} 
++          label="Failed Runs"
++          value={failedRuns.toString()}
++          icon={AlertTriangle}
+           signal={failedRuns > 0 ? "danger" : "success"}
+           detail={failedRuns > 0 ? "Needs attention" : "No failures detected"}
+           href={`/dashboard/${projectId}/runs?status=failed&${runsWindow}`}
+@@ -242,59 +315,142 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+         />
+         <DashboardMetric
+           label="Evaluation Quality"
+-          value={evaluationOverview?.passRate === null || evaluationOverview?.passRate === undefined ? "—" : `${Math.round(evaluationOverview.passRate * 100)}%`}
++          value={
++            evaluationOverview?.passRate === null || evaluationOverview?.passRate === undefined
++              ? "—"
++              : `${Math.round(evaluationOverview.passRate * 100)}%`
++          }
+           icon={CircleCheck}
+-          signal={evaluationOverview?.passRate === null || evaluationOverview?.passRate === undefined ? "neutral" : evaluationOverview.passRate >= 0.9 ? "success" : "warning"}
++          signal={
++            evaluationOverview?.passRate === null || evaluationOverview?.passRate === undefined
++              ? "neutral"
++              : evaluationOverview.passRate >= 0.9
++                ? "success"
++                : "warning"
++          }
+           detail={evaluationOverview?.resultCount ? `${evaluationOverview.resultCount} evaluation results` : "No evaluation results"}
+           href={`/dashboard/${projectId}/evaluation`}
+         />
+       </div>
+ 
++      {/* Investigation queue + Launch plan */}
+       <div className="grid gap-6">
+         <Card className="border-zinc-800 bg-[#111418] p-0 shadow-none">
+           <div className="flex items-start justify-between gap-4 border-b border-black/15 p-5">
+             <div>
+-            <h3 className="font-mono text-sm uppercase tracking-widest text-zinc-100">Unreviewed failures</h3>
+-              <p className="mt-1 font-mono text-[10px] text-zinc-400">Explicit errors from the selected window.</p>
++              <h3 className="font-mono text-sm uppercase tracking-widest text-zinc-100">
++                Unreviewed failures
++              </h3>
++              <p className="mt-1 font-mono text-[10px] text-zinc-400">
++                Explicit errors from the selected window.
++              </p>
+             </div>
+-            <SignalBadge signal={failedRuns > 0 ? "danger" : "success"}>{failedRuns > 0 ? `${failedRuns} open` : "Clear"}</SignalBadge>
++            <SignalBadge
++              signal={failedRuns > 0 ? "danger" : "success"}
++            >
++              {failedRuns > 0 ? `${failedRuns} open` : "Clear"}
++            </SignalBadge>
+           </div>
++
+           {failedRuns > 0 ? (
+             <div className="divide-y divide-zinc-800">
+-              {recentRuns.filter((run) => run.status === "failed" && !investigations.some((item) => item.traceId === run.runId && item.status === "completed")).slice(0, 8).map((run) => (
+-                <div key={run._id} className="grid gap-3 px-5 py-4 transition-colors hover:bg-zinc-900 sm:grid-cols-[1.4fr_1fr_0.7fr_auto] sm:items-center">
+-                  <Link href={`/dashboard/${projectId}/runs/${run.runId}`} className="min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100">
+-                    <span className="block truncate font-mono text-xs text-zinc-100">{run.runId}</span><span className="mt-1 block truncate font-mono text-[10px] text-zinc-500">{run.environment ?? "default"} · {run.primaryModel ?? "unknown model"}</span>
+-                  </Link>
+-                  <span className="truncate font-mono text-[11px] text-red-300">Run failed · inspect trace</span>
+-                  <span className="font-mono text-[11px] text-zinc-400">{run.spanCount} spans · {new Date(run.startedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+-                  <button type="button" className="h-8 border border-zinc-700 px-2 font-mono text-[10px] uppercase text-zinc-300 hover:border-zinc-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100" onClick={() => { setReviewRun({ runId: run.runId, spanCount: run.spanCount }); setEvidence(""); setNextAction(""); setOwner(""); }}>Review</button>
+-                </div>
+-              ))}
++              {recentRuns
++                .filter(
++                  (run) =>
++                    run.status === "failed" &&
++                    !investigations.some(
++                      (item) => item.traceId === run.runId && item.status === "completed",
++                    ),
++                )
++                .slice(0, 8)
++                .map((run) => (
++                  <div
++                    key={run._id}
++                    className="grid gap-3 px-5 py-4 transition-colors hover:bg-zinc-900 sm:grid-cols-[1.4fr_1fr_0.7fr_auto] sm:items-center"
++                  >
++                    <Link
++                      href={`/dashboard/${projectId}/runs/${run.runId}`}
++                      className="min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100"
++                    >
++                      <span className="block truncate font-mono text-xs text-zinc-100">
++                        {run.runId}
++                      </span>
++                      <span className="mt-1 block truncate font-mono text-[10px] text-zinc-500">
++                        {run.environment ?? "default"} · {run.primaryModel ?? "unknown model"}
++                      </span>
++                    </Link>
++                    <span className="truncate font-mono text-[11px] text-red-300">
++                      Run failed · inspect trace
++                    </span>
++                    <span className="font-mono text-[11px] text-zinc-400">
++                      {run.spanCount} spans ·{" "}
++                      {new Date(run.startedAt).toLocaleTimeString([], {
++                        hour: "2-digit",
++                        minute: "2-digit",
++                      })}
++                    </span>
++                    <button
++                      type="button"
++                      className="h-8 border border-zinc-700 px-2 font-mono text-[10px] uppercase text-zinc-300 hover:border-zinc-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100"
++                      onClick={() => {
++                        setReviewRun({ runId: run.runId, spanCount: run.spanCount });
++                        setEvidence("");
++                        setNextAction("");
++                        setOwner("");
++                      }}
++                    >
++                      Review
++                    </button>
++                  </div>
++                ))}
+             </div>
+           ) : (
+             <div className="flex items-start gap-3 p-5">
+               <CircleCheck className="mt-0.5 size-4 text-emerald-300" aria-hidden="true" />
+               <div>
+                 <p className="font-mono text-xs text-zinc-100">No failures in the current window.</p>
+-                <p className="mt-1 font-mono text-[10px] text-zinc-400">The queue will appear when an explicit error is ingested.</p>
++                <p className="mt-1 font-mono text-[10px] text-zinc-400">
++                  The queue will appear when an explicit error is ingested.
++                </p>
+               </div>
+             </div>
+           )}
+         </Card>
++
+         <Card className="border-zinc-800 bg-[#111418] p-0 shadow-none">
+           <div className="border-b border-black/15 p-5">
+-          <h3 className="font-mono text-sm uppercase tracking-widest text-black">Launch plan</h3>
+-          <p className="mt-1 font-mono text-[10px] text-black/55">A lightweight path to a more useful workspace.</p>
++            <h3 className="font-mono text-sm uppercase tracking-widest text-black">Launch plan</h3>
++            <p className="mt-1 font-mono text-[10px] text-black/55">
++              A lightweight path to a more useful workspace.
++            </p>
+           </div>
+           <ol className="space-y-2 p-4">
+             {launchPlan.map((item, index) => (
+               <li key={item.label}>
+-                <Link href={item.href} className="flex items-center gap-3 border border-black/15 p-3 font-mono text-xs text-black/70 transition-colors hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black">
+-                  <span className={item.complete ? "flex size-5 shrink-0 items-center justify-center bg-emerald-600 text-white" : "flex size-5 shrink-0 items-center justify-center border border-black/30 text-black/55"}>
+-                    {item.complete ? <CircleCheck className="size-3" aria-hidden="true" /> : index + 1}
++                <Link
++                  href={item.href}
++                  className="flex items-center gap-3 border border-black/15 p-3 font-mono text-xs text-black/70 transition-colors hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
++                >
++                  <span
++                    className={
++                      item.complete
++                        ? "flex size-5 shrink-0 items-center justify-center bg-emerald-600 text-white"
++                        : "flex size-5 shrink-0 items-center justify-center border border-black/30 text-black/55"
++                    }
++                  >
++                    {item.complete ? (
++                      <CircleCheck className="size-3" aria-hidden="true" />
++                    ) : (
++                      index + 1
++                    )}
++                  </span>
++                  <span
++                    className={
++                      item.complete ? "line-through decoration-black/75 text-black/55" : "flex-1"
++                    }
++                  >
++                    {item.label}
+                   </span>
+-                  <span className={item.complete ? "line-through decoration-black/75 text-black/55" : "flex-1"}>{item.label}</span>
+                   <ArrowUpRight className="size-3 shrink-0" aria-hidden="true" />
+                 </Link>
+               </li>
+@@ -303,33 +459,104 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+         </Card>
+       </div>
+ 
+-      <Dialog open={Boolean(reviewRun)} onOpenChange={(open) => { if (!open) setReviewRun(null); }}>
++      {/* Review dialog */}
++      <Dialog
++        open={Boolean(reviewRun)}
++        onOpenChange={(open) => {
++          if (!open) setReviewRun(null);
++        }}
++      >
+         <DialogContent className="border-zinc-700 bg-[#111418] text-zinc-100 sm:max-w-lg">
+-          <DialogHeader><DialogTitle className="font-mono uppercase tracking-widest">Record investigation</DialogTitle><DialogDescription className="font-mono text-xs text-zinc-400">Capture what you know about {reviewRun?.runId} before moving it to Reviewed.</DialogDescription></DialogHeader>
++          <DialogHeader>
++            <DialogTitle className="font-mono uppercase tracking-widest">
++              Record investigation
++            </DialogTitle>
++            <DialogDescription className="font-mono text-xs text-zinc-400">
++              Capture what you know about {reviewRun?.runId} before moving it to Reviewed.
++            </DialogDescription>
++          </DialogHeader>
+           <div className="grid gap-3">
+-            <label className="font-mono text-[10px] uppercase text-zinc-400">Cause<select value={cause} onChange={(event) => setCause(event.target.value)} className="mt-1 h-9 w-full border border-zinc-700 bg-zinc-900 px-2 font-mono text-xs text-zinc-100"><option value="tool_or_workflow_failure">Tool or workflow failure</option><option value="bad_model_output">Bad model output</option><option value="missing_context">Missing context</option><option value="unknown">Unknown</option></select></label>
+-            <label className="font-mono text-[10px] uppercase text-zinc-400">Evidence<textarea value={evidence} onChange={(event) => setEvidence(event.target.value)} placeholder="What in the trace supports this?" className="mt-1 min-h-20 w-full border border-zinc-700 bg-zinc-900 p-2 font-mono text-xs text-zinc-100 placeholder:text-zinc-600" /></label>
+-            <label className="font-mono text-[10px] uppercase text-zinc-400">Next action<Input value={nextAction} onChange={(event) => setNextAction(event.target.value)} placeholder="Retry tool with validated input" className="mt-1 border-zinc-700 bg-zinc-900 text-zinc-100 placeholder:text-zinc-600" /></label>
+-            <label className="font-mono text-[10px] uppercase text-zinc-400">Owner (optional)<Input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="you@example.com" className="mt-1 border-zinc-700 bg-zinc-900 text-zinc-100 placeholder:text-zinc-600" /></label>
++            <label className="font-mono text-[10px] uppercase text-zinc-400">
++              Cause
++              <select
++                value={cause}
++                onChange={(event) => setCause(event.target.value)}
++                className="mt-1 h-9 w-full border border-zinc-700 bg-zinc-900 px-2 font-mono text-xs text-zinc-100"
++              >
++                <option value="tool_or_workflow_failure">Tool or workflow failure</option>
++                <option value="bad_model_output">Bad model output</option>
++                <option value="missing_context">Missing context</option>
++                <option value="unknown">Unknown</option>
++              </select>
++            </label>
++            <label className="font-mono text-[10px] uppercase text-zinc-400">
++              Evidence
++              <textarea
++                value={evidence}
++                onChange={(event) => setEvidence(event.target.value)}
++                placeholder="What in the trace supports this?"
++                className="mt-1 min-h-20 w-full border border-zinc-700 bg-zinc-900 p-2 font-mono text-xs text-zinc-100 placeholder:text-zinc-600"
++              />
++            </label>
++            <label className="font-mono text-[10px] uppercase text-zinc-400">
++              Next action
++              <Input
++                value={nextAction}
++                onChange={(event) => setNextAction(event.target.value)}
++                placeholder="Retry tool with validated input"
++                className="mt-1 border-zinc-700 bg-zinc-900 text-zinc-100 placeholder:text-zinc-600"
++              />
++            </label>
++            <label className="font-mono text-[10px] uppercase text-zinc-400">
++              Owner (optional)
++              <Input
++                value={owner}
++                onChange={(event) => setOwner(event.target.value)}
++                placeholder="you@example.com"
++                className="mt-1 border-zinc-700 bg-zinc-900 text-zinc-100 placeholder:text-zinc-600"
++              />
++            </label>
++          </div>
++          <div className="flex justify-end gap-2">
++            <Button
++              variant="outline"
++              className="border-zinc-700 bg-transparent text-zinc-300"
++              onClick={() => setReviewRun(null)}
++            >
++              Cancel
++            </Button>
++            <Button
++              disabled={!evidence.trim() || !nextAction.trim()}
++              onClick={() => {
++                if (!reviewRun) return;
++                void createInvestigation({
++                  projectId: projectId as Id<"projects">,
++                  traceId: reviewRun.runId,
++                  label: cause,
++                  notes: `${evidence.trim()}\nNext action: ${nextAction.trim()}${owner.trim() ? `\nOwner: ${owner.trim()}` : ""}`,
++                }).then(() => setReviewRun(null));
++              }}
++            >
++              Save review
++            </Button>
+           </div>
+-          <div className="flex justify-end gap-2"><Button variant="outline" className="border-zinc-700 bg-transparent text-zinc-300" onClick={() => setReviewRun(null)}>Cancel</Button><Button disabled={!evidence.trim() || !nextAction.trim()} onClick={() => { if (!reviewRun) return; void createInvestigation({ projectId: projectId as Id<"projects">, traceId: reviewRun.runId, label: cause, notes: `${evidence.trim()}\nNext action: ${nextAction.trim()}${owner.trim() ? `\nOwner: ${owner.trim()}` : ""}` }).then(() => setReviewRun(null)); }}>Save review</Button></div>
+         </DialogContent>
+       </Dialog>
+ 
+-      {/* Orchestration Savings */}
++      {/* Orchestration savings + fail-open */}
+       <OrchestrationSavings projectId={projectId} range={range} />
+-
+-      {/* Fail-open Alert */}
+       <FailOpenAlert projectId={projectId} />
+ 
+-      {/* Charts Section */}
++      {/* Charts */}
+       <div className="grid grid-cols-1 gap-6">
+         <Card className="p-6 rounded-none border-border bg-white shadow-none">
+           <div className="mb-6 flex items-start justify-between gap-4">
+             <div>
+               <h3 className="font-mono text-[14px] text-black">Run Volume &amp; Failure Rate</h3>
+               <p className="mt-1 text-[11px] uppercase tracking-widest text-black/55">
+-                {recentRuns.length ? `Recent ${recentRuns.length}-run sample · selected ${range}-day window` : "No run summaries in the selected window"}
++                {recentRuns.length
++                  ? `Recent ${recentRuns.length}-run sample · selected ${range}-day window`
++                  : "No run summaries in the selected window"}
+               </p>
+             </div>
+             <Activity className="size-4 text-black/55" aria-hidden="true" />
+@@ -338,22 +565,54 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+             <ResponsiveContainer width="100%" height="100%">
+               <ComposedChart data={runTrend}>
+                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.12)" vertical={false} />
+-                <XAxis dataKey="day" stroke="rgba(0,0,0,0.6)" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
++                <XAxis
++                  dataKey="day"
++                  stroke="rgba(0,0,0,0.6)"
++                  fontSize={10}
++                  tickFormatter={(value) =>
++                    new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })
++                  }
++                />
+                 <YAxis yAxisId="runs" stroke="rgba(0,0,0,0.6)" fontSize={10} allowDecimals={false} />
+-                <YAxis yAxisId="failure" orientation="right" stroke="rgba(0,0,0,0.6)" fontSize={10} tickFormatter={(value) => `${value}%`} />
+-                <Tooltip contentStyle={{ backgroundColor: "#ffffff", border: "1px solid rgba(0,0,0,0.15)", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }} />
++                <YAxis
++                  yAxisId="failure"
++                  orientation="right"
++                  stroke="rgba(0,0,0,0.6)"
++                  fontSize={10}
++                  tickFormatter={(value) => `${value}%`}
++                />
++                <Tooltip
++                  contentStyle={{
++                    backgroundColor: "#ffffff",
++                    border: "1px solid rgba(0,0,0,0.15)",
++                    borderRadius: "0px",
++                    fontSize: "12px",
++                    fontFamily: "var(--font-geist-mono)",
++                  }}
++                />
+                 <Bar yAxisId="runs" dataKey="runs" fill="#000000" barSize={18} name="Runs" />
+-                <Line yAxisId="failure" type="monotone" dataKey="failureRate" stroke="#B45309" strokeWidth={2} dot={false} name="Failure rate" />
++                <Line
++                  yAxisId="failure"
++                  type="monotone"
++                  dataKey="failureRate"
++                  stroke="#B45309"
++                  strokeWidth={2}
++                  dot={false}
++                  name="Failure rate"
++                />
+               </ComposedChart>
+             </ResponsiveContainer>
+           </div>
+         </Card>
++
+         <Card className="p-6 rounded-none border-border bg-white shadow-none">
+           <div className="mb-6 flex items-start justify-between gap-4">
+             <div>
+               <h3 className="font-mono text-[14px] text-black">Quality Score Trend</h3>
+               <p className="mt-1 text-[11px] uppercase tracking-widest text-black/55">
+-                {evaluationOverview?.resultCount ? `${evaluationOverview.resultCount} recent evaluation results` : "No evaluation results in the selected window"}
++                {evaluationOverview?.resultCount
++                  ? `${evaluationOverview.resultCount} recent evaluation results`
++                  : "No evaluation results in the selected window"}
+               </p>
+             </div>
+             <CircleCheck className="size-4 text-black/55" aria-hidden="true" />
+@@ -362,14 +621,38 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+             <ResponsiveContainer width="100%" height="100%">
+               <LineChart data={qualityTrend}>
+                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.12)" vertical={false} />
+-                <XAxis dataKey="day" stroke="rgba(0,0,0,0.6)" fontSize={10} tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })} />
++                <XAxis
++                  dataKey="day"
++                  stroke="rgba(0,0,0,0.6)"
++                  fontSize={10}
++                  tickFormatter={(value) =>
++                    new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric" })
++                  }
++                />
+                 <YAxis stroke="rgba(0,0,0,0.6)" fontSize={10} domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+-                <Tooltip formatter={(value) => `${Number(value).toFixed(0)}%`} contentStyle={{ backgroundColor: "#ffffff", border: "1px solid rgba(0,0,0,0.15)", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }} />
+-                <Line type="monotone" dataKey="passRate" stroke="#000000" strokeWidth={2} dot={{ r: 2, fill: "#000000" }} name="Pass rate" />
++                <Tooltip
++                  formatter={(value) => `${Number(value).toFixed(0)}%`}
++                  contentStyle={{
++                    backgroundColor: "#ffffff",
++                    border: "1px solid rgba(0,0,0,0.15)",
++                    borderRadius: "0px",
++                    fontSize: "12px",
++                    fontFamily: "var(--font-geist-mono)",
++                  }}
++                />
++                <Line
++                  type="monotone"
++                  dataKey="passRate"
++                  stroke="#000000"
++                  strokeWidth={2}
++                  dot={{ r: 2, fill: "#000000" }}
++                  name="Pass rate"
++                />
+               </LineChart>
+             </ResponsiveContainer>
+           </div>
+         </Card>
++
+         <Card className="p-6 rounded-none border-border bg-white shadow-none">
+           <div className="mb-6">
+             <div className="flex items-center justify-between gap-4">
+@@ -386,27 +669,35 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+             <ResponsiveContainer width="100%" height="100%">
+               <LineChart data={dailyCosts}>
+                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.12)" vertical={false} />
+-                <XAxis 
+-                  dataKey="day" 
++                <XAxis
++                  dataKey="day"
+                   stroke="rgba(0,0,0,0.45)"
+-                  fontSize={10} 
+-                  tickFormatter={(val) => new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
++                  fontSize={10}
++                  tickFormatter={(val) =>
++                    new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric" })
++                  }
+                 />
+                 <YAxis
+                   stroke="rgba(0,0,0,0.45)"
+                   fontSize={10}
+                   tickFormatter={(val) => formatGraphCurrency(Number(val))}
+                 />
+-                <Tooltip 
++                <Tooltip
+                   formatter={(value) => formatGraphCurrency(Number(value))}
+-                  contentStyle={{ backgroundColor: "#ffffff", border: "1px solid rgba(0,0,0,0.15)", borderRadius: "0px", fontSize: "12px", fontFamily: "var(--font-geist-mono)" }}
++                  contentStyle={{
++                    backgroundColor: "#ffffff",
++                    border: "1px solid rgba(0,0,0,0.15)",
++                    borderRadius: "0px",
++                    fontSize: "12px",
++                    fontFamily: "var(--font-geist-mono)",
++                  }}
+                   itemStyle={{ color: "#000000" }}
+                 />
+-                <Line 
+-                  type="monotone" 
+-                  dataKey="totalCostUsd" 
++                <Line
++                  type="monotone"
++                  dataKey="totalCostUsd"
+                   stroke="#000000"
+-                  strokeWidth={2} 
++                  strokeWidth={2}
+                   dot={false}
+                   activeDot={{ r: 4, fill: "#FFFFFF", stroke: "#000000", strokeWidth: 2 }}
+                 />
+@@ -416,7 +707,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+         </Card>
+       </div>
+ 
+-      {/* Recent Runs */}
++      {/* Recent activity */}
+       <div className="space-y-4">
+         <div className="flex items-center justify-between">
+           <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">Recent Activity</h3>
+@@ -437,6 +728,8 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
+   );
+ }
+ 
++// ---- Helpers ----
++
+ type CostSeriesRun = {
+   startedAt: string;
+   totalCostUsd: number;
+@@ -477,7 +770,9 @@ function buildRunTrendSeries(range: number, runs: Array<{ startedAt: string; sta
+     return {
+       day,
+       runs: dayRuns.length,
+-      failureRate: dayRuns.length ? Math.round((dayRuns.filter((run) => run.status === "failed").length / dayRuns.length) * 100) : 0,
++      failureRate: dayRuns.length
++        ? Math.round((dayRuns.filter((run) => run.status === "failed").length / dayRuns.length) * 100)
++        : 0,
+     };
+   });
+ }
+@@ -490,8 +785,17 @@ function buildQualityTrendSeries(range: number, results: Array<{ createdAt?: num
+     return date.toISOString().slice(0, 10);
+   });
+   return days.map((day) => {
+-    const dayResults = results.filter((result) => result.createdAt !== undefined && new Date(result.createdAt).toISOString().slice(0, 10) === day);
+-    return { day, passRate: dayResults.length ? (dayResults.filter((result) => result.status === "passed").length / dayResults.length) * 100 : 0 };
++    const dayResults = results.filter(
++      (result) =>
++        result.createdAt !== undefined &&
++        new Date(result.createdAt).toISOString().slice(0, 10) === day,
++    );
++    return {
++      day,
++      passRate: dayResults.length
++        ? (dayResults.filter((result) => result.status === "passed").length / dayResults.length) * 100
++        : 0,
++    };
+   });
+ }
+ 
+diff --git a/src/components/dashboard/dashboard-shell.tsx b/src/components/dashboard/dashboard-shell.tsx
+index c49c0bf..7fd715e 100644
+--- a/src/components/dashboard/dashboard-shell.tsx
++++ b/src/components/dashboard/dashboard-shell.tsx
+@@ -3,14 +3,12 @@
+ import { useEffect, useState, useSyncExternalStore } from "react";
+ import { useParams, usePathname, useRouter } from "next/navigation";
+ 
+-import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
++import { DashboardSidebar } from "./dashboard-sidebar";
+ 
+ const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
+ const LEGACY_COLLAPSED_STORAGE_KEY = "tracify:dashboard-sidebar";
+ 
+-// Matches the captured dashboard shell's 3rem collapsed rail.
+ const COLLAPSED_WIDTH = 48;
+-// Matches the captured dashboard shell's 11.5rem expanded sidebar.
+ const EXPANDED_WIDTH = 184;
+ type DashboardTheme = "legacy" | "tracify-v2";
+ 
+@@ -35,25 +33,33 @@ export function DashboardShell({
+   const params = useParams();
+   const pathname = usePathname();
+   const projectId = params?.projectId as string | undefined;
+-  const isDashboardRoute = synthetic || preview || pathname === "/dashboard" || pathname.startsWith("/dashboard/");
++
++  const isDashboardRoute =
++    synthetic || preview || pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+   const isTracifyOverview = synthetic || preview || Boolean(projectId);
++
+   const defaultTheme = dashboardTheme ?? (process.env.NEXT_PUBLIC_TRACIFY_DASHBOARD_V2 === "false" ? "legacy" : "tracify-v2");
++
+   const requestedTheme = useSyncExternalStore(
+     () => () => undefined,
+     () => new URLSearchParams(window.location.search).get("ui"),
+     () => null,
+   );
+-  const activeTheme: DashboardTheme = dashboardTheme ?? (requestedTheme === "legacy" || requestedTheme === "tracify-v2" ? requestedTheme : defaultTheme);
++
++  const activeTheme: DashboardTheme =
++    dashboardTheme ??
++    (requestedTheme === "legacy" || requestedTheme === "tracify-v2" ? requestedTheme : defaultTheme);
++
+   const [isCollapsed, setIsCollapsed] = useState(() => {
+     if (typeof window === "undefined") return false;
+     const stored = window.localStorage.getItem(COLLAPSED_STORAGE_KEY);
+     if (stored === "true" || stored === "false") return stored === "true";
+-    return (
+-      window.localStorage.getItem(LEGACY_COLLAPSED_STORAGE_KEY) === "collapsed"
+-    );
++    return window.localStorage.getItem(LEGACY_COLLAPSED_STORAGE_KEY) === "collapsed";
+   });
++
+   const [isMobileOpen, setIsMobileOpen] = useState(false);
+   const [isMobileViewport, setIsMobileViewport] = useState(false);
++
+   useEffect(() => {
+     const media = window.matchMedia("(max-width: 700px)");
+     const update = () => setIsMobileViewport(media.matches);
+@@ -61,6 +67,7 @@ export function DashboardShell({
+     media.addEventListener("change", update);
+     return () => media.removeEventListener("change", update);
+   }, []);
++
+   function updateCollapsed(next: boolean) {
+     setIsCollapsed(next);
+     window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(next));
+@@ -89,7 +96,10 @@ export function DashboardShell({
+   const layoutSidebarWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
+ 
+   return (
+-    <div data-dashboard-theme={activeTheme} className={`flex min-h-svh w-full font-mono ${isDashboardRoute ? "tracify-cloud-shell text-white/70" : "text-black/70 bg-[#eceae3]"} ${isTracifyOverview ? "tracify-shell" : ""}`}>
++    <div
++      data-dashboard-theme={activeTheme}
++      className={`flex min-h-svh w-full font-mono ${isDashboardRoute ? "tracify-cloud-shell text-white/70" : "text-black/70 bg-[#eceae3]"} ${isTracifyOverview ? "tracify-shell" : ""}`}
++    >
+       <DashboardSidebar
+         canAccessContent={canAccessContent}
+         isCollapsed={isCollapsed}
+@@ -101,12 +111,21 @@ export function DashboardShell({
+         onMobileClose={() => setIsMobileOpen(false)}
+         onMobileToggle={() => setIsMobileOpen((current) => !current)}
+       />
+-      {isMobileOpen ? <button type="button" aria-label="Close sidebar" className="tracify-shell-sidebar-backdrop" onClick={() => setIsMobileOpen(false)} /> : null}
++      {isMobileOpen ? (
++        <button
++          type="button"
++          aria-label="Close sidebar"
++          className="tracify-shell-sidebar-backdrop"
++          onClick={() => setIsMobileOpen(false)}
++        />
++      ) : null}
+       <div
+         className={`flex min-h-svh min-w-0 flex-1 flex-col transition-[padding] duration-150 motion-reduce:transition-none ${isDashboardRoute ? "bg-[#101010]" : "bg-[#eceae3]"}`}
+         style={{ paddingLeft: isMobileViewport ? 0 : layoutSidebarWidth }}
+       >
+-        <main className={`h-svh pb-0 overflow-y-auto scrollbar-hide ${isDashboardRoute ? "bg-[#101010] p-0" : "bg-[#eceae3] p-4 lg:p-6"}`}>
++        <main
++          className={`h-svh pb-0 overflow-y-auto scrollbar-hide ${isDashboardRoute ? "bg-[#101010] p-0" : "bg-[#eceae3] p-4 lg:p-6"}`}
++        >
+           {children}
+         </main>
+       </div>
+diff --git a/src/components/dashboard/dashboard-sidebar.tsx b/src/components/dashboard/dashboard-sidebar.tsx
+index 7a0050e..6bb5219 100644
+--- a/src/components/dashboard/dashboard-sidebar.tsx
++++ b/src/components/dashboard/dashboard-sidebar.tsx
+@@ -16,7 +16,6 @@ import {
+   PhoneCall,
+   FlaskConical,
+   GitCompare,
+-  FlaskConical as PlaygroundIcon,
+   Settings2,
+   ShieldCheck,
+   Terminal,
+@@ -24,12 +23,11 @@ import {
+   Zap,
+   Users,
+ } from "lucide-react";
+-import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
++import { useCallback, useEffect, useMemo, useState } from "react";
+ import Link from "next/link";
+ import { Button } from "@/components/ui/button";
+ import { ProjectSwitcher } from "@/components/dashboard/project-switcher";
+ import { usePathname, useParams, useSearchParams } from "next/navigation";
+-
+ import {
+   Tooltip,
+   TooltipContent,
+@@ -43,7 +41,7 @@ type GroupId = "primary" | "observe" | "analyze" | "improve" | "operate" | "mana
+ type NavItem = {
+   title: string;
+   href: string;
+-  icon: ComponentType<{ className?: string }>;
++  icon: React.ComponentType<{ className?: string }>;
+   external?: boolean;
+ };
+ 
+@@ -55,9 +53,7 @@ type NavGroup = {
+ 
+ const GROUP_STORAGE_KEY = "tracify:dashboard-sidebar-groups";
+ const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
+-// Matches the captured dashboard shell's 3rem collapsed rail.
+ const COLLAPSED_WIDTH = 48;
+-// Matches the captured dashboard shell's 11.5rem expanded sidebar.
+ const EXPANDED_WIDTH = 184;
+ 
+ function isActivePath(pathname: string, href: string, projectId: string, isPreview = false, currentSearch = "") {
+@@ -80,10 +76,10 @@ export function DashboardSidebar({
+   onCollapsedChange,
+   projectIdOverride,
+   previewProjectName,
+-    synthetic = false,
+-    isMobileOpen = false,
+-    onMobileClose,
+-    onMobileToggle,
++  synthetic = false,
++  isMobileOpen = false,
++  onMobileClose,
++  onMobileToggle,
+ }: {
+   canAccessContent: boolean;
+   isCollapsed: boolean;
+@@ -91,21 +87,31 @@ export function DashboardSidebar({
+   projectIdOverride?: string;
+   previewProjectName?: string;
+   synthetic?: boolean;
+-    isMobileOpen?: boolean;
+-    onMobileClose?: () => void;
+-    onMobileToggle?: () => void;
++  isMobileOpen?: boolean;
++  onMobileClose?: () => void;
++  onMobileToggle?: () => void;
+ }) {
+   const pathname = usePathname();
+   const searchParams = useSearchParams();
+   const params = useParams();
+   const projectId = projectIdOverride || (params?.projectId as string) || "";
+   const isSynthetic = synthetic && pathname.startsWith("/playground");
+-  const syntheticHref = (view: string) => view === "home" ? "/playground" : `/playground/${view}`;
++  const syntheticHref = (view: string) => (view === "home" ? "/playground" : `/playground/${view}`);
+   const projectDashboardHref = isSynthetic ? "/dashboard" : projectId ? `/dashboard/${projectId}` : "/dashboard";
+-  const workspaceHref = useCallback((view: string, liveView = view) =>
+-    isSynthetic ? (view === "home" ? "/playground" : `/playground/${view}`) : liveView === "home" ? projectDashboardHref : `${projectDashboardHref}/${liveView}`,
+-  [isSynthetic, projectDashboardHref]);
++  const workspaceHref = useCallback(
++    (view: string, liveView = view) =>
++      isSynthetic
++        ? view === "home"
++          ? "/playground"
++          : `/playground/${view}`
++        : liveView === "home"
++          ? projectDashboardHref
++          : `${projectDashboardHref}/${liveView}`,
++    [isSynthetic, projectDashboardHref],
++  );
++
+   const region = getTracifyRegion();
++
+   const dynamicGroups = useMemo<NavGroup[]>(() => {
+     if (isSynthetic || projectId) {
+       return [
+@@ -133,7 +139,7 @@ export function DashboardSidebar({
+           label: "Prompt Management",
+           items: [
+             { title: "Prompts", icon: MessageSquareText, href: workspaceHref("prompts") },
+-            { title: "Playground", icon: PlaygroundIcon, href: workspaceHref("playground") },
++            { title: "Playground", icon: FlaskConical, href: workspaceHref("playground") },
+           ],
+         },
+         {
+@@ -150,9 +156,7 @@ export function DashboardSidebar({
+         {
+           id: "manage",
+           label: "",
+-          items: [
+-            { title: "Settings", icon: Settings2, href: workspaceHref("settings") },
+-          ],
++          items: [{ title: "Settings", icon: Settings2, href: workspaceHref("settings") }],
+         },
+         {
+           id: "resources",
+@@ -165,227 +169,82 @@ export function DashboardSidebar({
+       ];
+     }
+     return [
+-    {
+-      id: "observe",
+-      label: "Observe",
+-      items: [
+-        {
+-          title: "Home",
+-          icon: LayoutDashboard,
+-          href: isSynthetic ? syntheticHref("home") : projectDashboardHref,
+-        },
+-        {
+-          title: "Dashboards",
+-          icon: LayoutDashboard,
+-          href: isSynthetic ? syntheticHref("dashboards") : projectId ? `/dashboard/${projectId}/dashboards` : "/dashboard/dashboards",
+-        },
+-        {
+-          title: "Tracing",
+-          icon: Activity,
+-          href: isSynthetic ? syntheticHref("tracing") : projectId ? `/dashboard/${projectId}/tracing` : "/dashboard/runs",
+-        },
+-        {
+-          title: "Sessions",
+-          icon: Activity,
+-          href: isSynthetic ? syntheticHref("sessions") : projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions",
+-        },
+-        {
+-          title: "Users",
+-          icon: Users,
+-          href: isSynthetic ? syntheticHref("users") : projectId ? `/dashboard/${projectId}/users` : "/dashboard/users",
+-        },
+-        {
+-          title: "Search",
+-          icon: Search,
+-          href: isSynthetic ? syntheticHref("search") : projectId ? `/dashboard/${projectId}/search` : "/dashboard/search",
+-        },
+-      ],
+-    },
+-    {
+-      id: "analyze",
+-      label: "Analyze",
+-      items: [
+-        {
+-          title: "Costs",
+-          icon: BarChart3,
+-          href: isSynthetic ? syntheticHref("costs") : projectId ? `/dashboard/${projectId}/costs` : "/dashboard/costs",
+-        },
+-        {
+-          title: "Reports",
+-          icon: FileText,
+-          href: isSynthetic ? syntheticHref("reports") : projectId ? `/dashboard/${projectId}/reports` : "/dashboard/reports",
+-        },
+-        {
+-          title: "Trace Compare",
+-          icon: GitCompare,
+-          href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare",
+-        },
+-        {
+-          title: "Investigation",
+-          icon: Search,
+-          href: isSynthetic ? syntheticHref("investigate") : projectId ? `/dashboard/${projectId}/investigate` : "/dashboard/investigate",
+-        },
+-      ],
+-    },
+-    {
+-      id: "improve",
+-      label: "Improve",
+-      items: [
+-        {
+-          title: "Prompt Management",
+-          icon: MessageSquareText,
+-          href: isSynthetic ? syntheticHref("prompts") : projectId ? "/dashboard/" + projectId + "/prompt-management" : "/dashboard/prompts",
+-        },
+-        {
+-          title: "Evaluation",
+-          icon: FlaskConical,
+-          href: isSynthetic ? syntheticHref("evaluation") : projectId ? "/dashboard/" + projectId + "/evaluation" : "/dashboard/evaluation",
+-        },
+-        {
+-          title: "Scores",
+-          icon: BarChart3,
+-          href: isSynthetic ? syntheticHref("scores") : projectId ? `/dashboard/${projectId}/scores` : "/dashboard/evaluation",
+-        },
+-        {
+-          title: "Evaluators",
+-          icon: FlaskConical,
+-          href: isSynthetic ? syntheticHref("evaluators") : projectId ? `/dashboard/${projectId}/evaluators` : "/dashboard/evaluation",
+-        },
+-        {
+-          title: "Human Annotation",
+-          icon: MessageSquareText,
+-          href: isSynthetic ? syntheticHref("annotation") : projectId ? `/dashboard/${projectId}/human-annotation` : "/dashboard/evaluation",
+-        },
+-        {
+-          title: "Datasets",
+-          icon: Database,
+-          href: isSynthetic ? syntheticHref("datasets") : projectId ? "/dashboard/" + projectId + "/datasets" : "/dashboard/datasets",
+-        },
+-        {
+-          title: "Experiments",
+-          icon: GitCompare,
+-          href: isSynthetic ? syntheticHref("experiments") : projectId ? "/dashboard/" + projectId + "/experiments" : "/dashboard/experiments",
+-        },
+-        {
+-          title: "Playground",
+-          icon: PlaygroundIcon,
+-          href: isSynthetic ? syntheticHref("playground") : projectId ? "/dashboard/" + projectId + "/playground" : "/dashboard/playground",
+-        },
+-        {
+-          title: "Resilience",
+-          icon: Zap,
+-          href: isSynthetic ? syntheticHref("resilience") : projectId ? "/dashboard/" + projectId + "/resilience" : "/dashboard/resilience",
+-        },
+-      ],
+-    },
+-    {
+-      id: "operate",
+-      label: "Operate",
+-      items: [
+-        {
+-          title: "Runtime Policy",
+-          icon: ShieldCheck,
+-          href: isSynthetic ? syntheticHref("control") : projectId ? `/dashboard/${projectId}/control` : "/dashboard/control",
+-        },
+-        {
+-          title: "Alerts",
+-          icon: Activity,
+-          href: isSynthetic ? syntheticHref("alerts") : projectId ? `/dashboard/${projectId}/alerts` : "/dashboard/alerts",
+-        },
+-        {
+-          title: "Automations",
+-          icon: Zap,
+-          href: isSynthetic ? syntheticHref("automations") : projectId ? `/dashboard/${projectId}/automations` : "/dashboard/automations",
+-        },
+-        {
+-          title: "Operations",
+-          icon: Globe2,
+-          href: isSynthetic ? syntheticHref("operations") : projectId ? `/dashboard/${projectId}/operations` : "/dashboard/operations",
+-        },
+-        {
+-          title: "Integrations",
+-          icon: Terminal,
+-          href: isSynthetic ? syntheticHref("integrations") : projectId ? `/dashboard/${projectId}/settings/integrations` : "/integrations",
+-        },
+-      ],
+-    },
+-    {
+-      id: "manage",
+-      label: "Manage",
+-      items: [
+-        {
+-          title: "Settings",
+-          icon: Settings2,
+-          href: isSynthetic ? syntheticHref("settings") : projectId ? `/dashboard/${projectId}/settings` : "/dashboard/settings",
+-        },
+-        {
+-          title: "Members",
+-          icon: Activity,
+-          href: isSynthetic ? syntheticHref("members") : projectId ? `/dashboard/${projectId}/settings?tab=members` : "/dashboard/members",
+-        },
+-        {
+-          title: "Manage",
+-          icon: SlidersHorizontal,
+-          href: isSynthetic ? syntheticHref("manage") : projectId ? `/dashboard/${projectId}/manage` : "/dashboard/manage",
+-        },
+-        {
+-          title: "API Keys",
+-          icon: Terminal,
+-          href: isSynthetic ? syntheticHref("api-keys") : projectId ? `/dashboard/${projectId}/api-keys` : "/dashboard/api-keys",
+-        },
+-        {
+-          title: "Billing",
+-          icon: FileText,
+-          href: isSynthetic ? syntheticHref("billing") : projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing",
+-        },
+-        {
+-          title: "Widget library",
+-          icon: Settings2,
+-          href: isSynthetic ? syntheticHref("widgets") : projectId ? `/dashboard/${projectId}/widgets` : "/dashboard/widgets",
+-        },
+-        {
+-          title: "Upgrade Plan",
+-          icon: Zap,
+-          href: isSynthetic ? syntheticHref("upgrade") : projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing",
+-        },
+-      ],
+-    },
+-    {
+-      id: "resources",
+-      label: "Resources",
+-      items: [
+-        {
+-          title: "Quickstart",
+-          icon: Terminal,
+-          href: isSynthetic ? syntheticHref("quickstart") : projectId ? `/dashboard/${projectId}/quickstart` : "/dashboard/quickstart",
+-        },
+-        {
+-          title: "Docs",
+-          icon: BookOpen,
+-          href: "/docs",
+-          external: true,
+-        },
+-        {
+-          title: "Support",
+-          icon: MessageSquareText,
+-          href: "/contact",
+-          external: true,
+-        },
+-        {
+-          title: "Roadmap",
+-          icon: FileText,
+-          href: "/roadmap",
+-          external: true,
+-        },
+-        ...(canAccessContent
+-          ? [
+-              { title: "Admin Library", icon: ShieldCheck, href: "/admin/library" },
+-            ]
+-          : []),
+-      ],
+-    },
++      {
++        id: "observe",
++        label: "Observe",
++        items: [
++          { title: "Home", icon: LayoutDashboard, href: isSynthetic ? syntheticHref("home") : projectDashboardHref },
++          { title: "Dashboards", icon: LayoutDashboard, href: isSynthetic ? syntheticHref("dashboards") : projectId ? `/dashboard/${projectId}/dashboards` : "/dashboard/dashboards" },
++          { title: "Tracing", icon: Activity, href: isSynthetic ? syntheticHref("tracing") : projectId ? `/dashboard/${projectId}/tracing` : "/dashboard/runs" },
++          { title: "Sessions", icon: Activity, href: isSynthetic ? syntheticHref("sessions") : projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions" },
++          { title: "Users", icon: Users, href: isSynthetic ? syntheticHref("users") : projectId ? `/dashboard/${projectId}/users` : "/dashboard/users" },
++          { title: "Search", icon: Search, href: isSynthetic ? syntheticHref("search") : projectId ? `/dashboard/${projectId}/search` : "/dashboard/search" },
++        ],
++      },
++      {
++        id: "analyze",
++        label: "Analyze",
++        items: [
++          { title: "Costs", icon: BarChart3, href: isSynthetic ? syntheticHref("costs") : projectId ? `/dashboard/${projectId}/costs` : "/dashboard/costs" },
++          { title: "Reports", icon: FileText, href: isSynthetic ? syntheticHref("reports") : projectId ? `/dashboard/${projectId}/reports` : "/dashboard/reports" },
++          { title: "Trace Compare", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare" },
++          { title: "Investigation", icon: Search, href: isSynthetic ? syntheticHref("investigate") : projectId ? `/dashboard/${projectId}/investigate` : "/dashboard/investigate" },
++        ],
++      },
++      {
++        id: "improve",
++        label: "Improve",
++        items: [
++          { title: "Prompt Management", icon: MessageSquareText, href: isSynthetic ? syntheticHref("prompts") : projectId ? `/dashboard/${projectId}/prompt-management` : "/dashboard/prompts" },
++          { title: "Evaluation", icon: FlaskConical, href: isSynthetic ? syntheticHref("evaluation") : projectId ? `/dashboard/${projectId}/evaluation` : "/dashboard/evaluation" },
++          { title: "Scores", icon: BarChart3, href: isSynthetic ? syntheticHref("scores") : projectId ? `/dashboard/${projectId}/scores` : "/dashboard/evaluation" },
++          { title: "Evaluators", icon: FlaskConical, href: isSynthetic ? syntheticHref("evaluators") : projectId ? `/dashboard/${projectId}/evaluators` : "/dashboard/evaluation" },
++          { title: "Human Annotation", icon: MessageSquareText, href: isSynthetic ? syntheticHref("annotation") : projectId ? `/dashboard/${projectId}/human-annotation` : "/dashboard/evaluation" },
++          { title: "Datasets", icon: Database, href: isSynthetic ? syntheticHref("datasets") : projectId ? `/dashboard/${projectId}/datasets` : "/dashboard/datasets" },
++          { title: "Experiments", icon: GitCompare, href: isSynthetic ? syntheticHref("experiments") : projectId ? `/dashboard/${projectId}/experiments` : "/dashboard/experiments" },
++          { title: "Playground", icon: FlaskConical, href: isSynthetic ? syntheticHref("playground") : projectId ? `/dashboard/${projectId}/playground` : "/dashboard/playground" },
++          { title: "Resilience", icon: Zap, href: isSynthetic ? syntheticHref("resilience") : projectId ? `/dashboard/${projectId}/resilience` : "/dashboard/resilience" },
++        ],
++      },
++      {
++        id: "operate",
++        label: "Operate",
++        items: [
++          { title: "Runtime Policy", icon: ShieldCheck, href: isSynthetic ? syntheticHref("control") : projectId ? `/dashboard/${projectId}/control` : "/dashboard/control" },
++          { title: "Alerts", icon: Activity, href: isSynthetic ? syntheticHref("alerts") : projectId ? `/dashboard/${projectId}/alerts` : "/dashboard/alerts" },
++          { title: "Automations", icon: Zap, href: isSynthetic ? syntheticHref("automations") : projectId ? `/dashboard/${projectId}/automations` : "/dashboard/automations" },
++          { title: "Operations", icon: Globe2, href: isSynthetic ? syntheticHref("operations") : projectId ? `/dashboard/${projectId}/operations` : "/dashboard/operations" },
++          { title: "Integrations", icon: Terminal, href: isSynthetic ? syntheticHref("integrations") : projectId ? `/dashboard/${projectId}/settings/integrations` : "/integrations" },
++        ],
++      },
++      {
++        id: "manage",
++        label: "Manage",
++        items: [
++          { title: "Settings", icon: Settings2, href: isSynthetic ? syntheticHref("settings") : projectId ? `/dashboard/${projectId}/settings` : "/dashboard/settings" },
++          { title: "Members", icon: Activity, href: isSynthetic ? syntheticHref("members") : projectId ? `/dashboard/${projectId}/settings?tab=members` : "/dashboard/members" },
++          { title: "Manage", icon: SlidersHorizontal, href: isSynthetic ? syntheticHref("manage") : projectId ? `/dashboard/${projectId}/manage` : "/dashboard/manage" },
++          { title: "API Keys", icon: Terminal, href: isSynthetic ? syntheticHref("api-keys") : projectId ? `/dashboard/${projectId}/api-keys` : "/dashboard/api-keys" },
++          { title: "Billing", icon: FileText, href: isSynthetic ? syntheticHref("billing") : projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing" },
++          { title: "Widget library", icon: Settings2, href: isSynthetic ? syntheticHref("widgets") : projectId ? `/dashboard/${projectId}/widgets` : "/dashboard/widgets" },
++          { title: "Upgrade Plan", icon: Zap, href: isSynthetic ? syntheticHref("upgrade") : projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing" },
++        ],
++      },
++      {
++        id: "resources",
++        label: "Resources",
++        items: [
++          { title: "Quickstart", icon: Terminal, href: isSynthetic ? syntheticHref("quickstart") : projectId ? `/dashboard/${projectId}/quickstart` : "/dashboard/quickstart" },
++          { title: "Docs", icon: BookOpen, href: "/docs", external: true },
++          { title: "Support", icon: MessageSquareText, href: "/contact", external: true },
++          { title: "Roadmap", icon: FileText, href: "/roadmap", external: true },
++          ...(canAccessContent
++            ? [{ title: "Admin Library", icon: ShieldCheck, href: "/admin/library" }]
++            : []),
++        ],
++      },
+     ];
+-  }, [canAccessContent, isSynthetic, projectDashboardHref, projectId, workspaceHref]);
++  }, [canAccessContent, isSynthetic, projectDashboardHref]);
+ 
+   const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
+     if (typeof window === "undefined") {
+@@ -416,17 +275,17 @@ export function DashboardSidebar({
+     onCollapsedChange(!isCollapsed);
+   }
+ 
+-    useEffect(() => {
+-      function onShellToggle() {
+-        if (window.matchMedia("(max-width: 700px)").matches) {
+-          onMobileToggle?.();
+-          return;
+-        }
+-        onCollapsedChange(!isCollapsed);
++  useEffect(() => {
++    function onShellToggle() {
++      if (window.matchMedia("(max-width: 700px)").matches) {
++        onMobileToggle?.();
++        return;
+       }
++      onCollapsedChange(!isCollapsed);
++    }
+     window.addEventListener("tracify:toggle-sidebar", onShellToggle);
+     return () => window.removeEventListener("tracify:toggle-sidebar", onShellToggle);
+-    }, [isCollapsed, onCollapsedChange, onMobileToggle]);
++  }, [isCollapsed, onCollapsedChange, onMobileToggle]);
+ 
+   function expandSidebar(groupId?: GroupId) {
+     if (groupId) {
+@@ -474,7 +333,7 @@ export function DashboardSidebar({
+             aria-label="Tracify dashboard"
+             className="text-white focus-visible:outline-1 focus-visible:outline-offset-4"
+           >
+-          <span className="captured-reference-brand"><i aria-hidden="true" />tracify</span>
++            <span className="captured-reference-brand"><i aria-hidden="true" />tracify</span>
+           </Link>
+         ) : null}
+ 
+@@ -485,7 +344,7 @@ export function DashboardSidebar({
+                 variant="ghost"
+                 aria-label={collapseLabel}
+                 onClick={toggleCollapsed}
+-            className="size-7 text-white/70 hover:bg-white/10 hover:text-white"
++                className="size-7 text-white/70 hover:bg-white/10 hover:text-white"
+               >
+                 <CollapseIcon className="size-4" />
+               </Button>
+@@ -499,9 +358,11 @@ export function DashboardSidebar({
+           </TooltipContent>
+         </Tooltip>
+       </div>
+-      <div className={cn("border-b border-white/10 p-3", isSynthetic && "captured-sidebar-project") }>
++
++      <div className={cn("border-b border-white/10 p-3", isSynthetic && "captured-sidebar-project")}>
+         <ProjectSwitcher isCollapsed={!showExpandedContent} previewProjectName={previewProjectName} synthetic={isSynthetic} />
+       </div>
++
+       {isSynthetic && showExpandedContent ? (
+         <div className="captured-sidebar-context border-b border-white/10">
+           <Link href="/playground" className="captured-sidebar-context-link is-demo">↗ <span>Use Demo App</span></Link>
+@@ -520,8 +381,14 @@ export function DashboardSidebar({
+           )}
+         >
+           <Search className="size-4 shrink-0" />
+-          {showExpandedContent ? <><span className="truncate">Go to...</span><kbd className="ml-auto border border-white/15 px-1.5 py-0.5 text-[9px] leading-none text-white/50">Ctrl K</kbd></> : null}
++          {showExpandedContent ? (
++            <>
++              <span className="truncate">Go to...</span>
++              <kbd className="ml-auto border border-white/15 px-1.5 py-0.5 text-[9px] leading-none text-white/50">Ctrl K</kbd>
++            </>
++          ) : null}
+         </button>
++
+         {dynamicGroups.map((group) => (
+           <SidebarGroup
+             key={group.id}
+@@ -534,7 +401,7 @@ export function DashboardSidebar({
+             isPreview={Boolean(projectIdOverride)}
+             onToggle={() => toggleGroup(group.id)}
+             onNavClick={(href) => {
+-              const navGroup = dynamicGroups.find((group) => group.items.some((item) => item.href === href));
++              const navGroup = dynamicGroups.find((g) => g.items.some((item) => item.href === href));
+               expandSidebar(navGroup?.id);
+               onMobileClose?.();
+             }}
+@@ -545,7 +412,10 @@ export function DashboardSidebar({
+       {isSynthetic ? (
+         <button
+           type="button"
+-          className={cn("captured-sidebar-account flex min-h-12 items-center border-t border-white/10 px-3 text-left text-white/70 hover:bg-white/10 hover:text-white", showExpandedContent ? "gap-2" : "justify-center")}
++          className={cn(
++            "captured-sidebar-account flex min-h-12 items-center border-t border-white/10 px-3 text-left text-white/70 hover:bg-white/10 hover:text-white",
++            showExpandedContent ? "gap-2" : "justify-center",
++          )}
+           aria-label="Kristoffer Bon account menu"
+           onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}
+         >
+@@ -561,14 +431,20 @@ export function DashboardSidebar({
+       ) : (
+         <Link
+           href="/cloud"
+-          className={cn("flex min-h-12 items-center border-t border-white/10 px-4 text-white/55 hover:bg-white/10 hover:text-white", showExpandedContent ? "gap-3" : "justify-center")}
++          className={cn(
++            "flex min-h-12 items-center border-t border-white/10 px-4 text-white/55 hover:bg-white/10 hover:text-white",
++            showExpandedContent ? "gap-3" : "justify-center",
++          )}
+           aria-label={`${region.name} cloud region. Open region directory`}
+         >
+           <Globe2 className="size-4 shrink-0" />
+-          {showExpandedContent ? <span className="font-mono text-[10px] uppercase tracking-[0.12em]">{region.flag} {region.shortName} cloud · Switch</span> : null}
++          {showExpandedContent ? (
++            <span className="font-mono text-[10px] uppercase tracking-[0.12em]">
++              {region.flag} {region.shortName} cloud · Switch
++            </span>
++          ) : null}
+         </Link>
+       )}
+-
+     </aside>
+   );
+ }
+@@ -594,8 +470,8 @@ function SidebarGroup({
+   onToggle: () => void;
+   onNavClick: (href: string) => void;
+ }) {
+-  const hasActiveItem = group.items.some((item) =>
+-    isActivePath(pathname, item.href, projectId, isPreview, currentSearch),
++  const hasActiveItem = group.items.some(
++    (item) => isActivePath(pathname, item.href, projectId, isPreview, currentSearch),
+   );
+   const isVisuallyOpen = isOpen || hasActiveItem;
+   const visibleItems = useMemo(
+@@ -659,17 +535,11 @@ function NavLink({
+     showExpandedContent ? "gap-2" : "justify-center",
+     isActive && "border-l-white bg-white/10 text-white hover:bg-white/10",
+   );
++
+   const link = (
+-    <Link
+-      href={item.href}
+-      className={className}
+-      aria-label={item.title}
+-      onClick={onNavClick}
+-    >
++    <Link href={item.href} className={className} aria-label={item.title} onClick={onNavClick}>
+       <Icon className="size-4 shrink-0" />
+-      {showExpandedContent ? (
+-        <span className="truncate">{item.title}</span>
+-      ) : null}
++      {showExpandedContent ? <span className="truncate">{item.title}</span> : null}
+     </Link>
+   );
+ 
+@@ -680,7 +550,7 @@ function NavLink({
+       <TooltipTrigger render={link} />
+       <TooltipContent
+         side="right"
+-          className="rounded-none border border-white/15 bg-[#171717] font-mono text-xs text-white/70 shadow-none"
++        className="rounded-none border border-white/15 bg-[#171717] font-mono text-xs text-white/70 shadow-none"
+       >
+         {item.title}
+       </TooltipContent>
+diff --git a/src/components/dashboard/dashboard-topbar.tsx b/src/components/dashboard/dashboard-topbar.tsx
+index 7f23590..83ab503 100644
+--- a/src/components/dashboard/dashboard-topbar.tsx
++++ b/src/components/dashboard/dashboard-topbar.tsx
+@@ -12,7 +12,7 @@ import {
+   LogOut,
+   Settings,
+   MessageSquare,
+-  Book
++  Book,
+ } from "lucide-react";
+ import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
+ import { hasDismissedOnboarding, setReturnPath } from "@/lib/onboarding-client-state";
+@@ -50,16 +50,12 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+   const searchParams = useSearchParams();
+   const params = useParams();
+   const projectId = params?.projectId as string | undefined;
+-  const projectSettingsHref = projectId
+-    ? `/dashboard/${projectId}/settings`
+-    : "/dashboard/account";
+-  const projectManageHref = projectId
+-    ? `/dashboard/${projectId}/manage`
+-    : "/dashboard";
+-  const projectDocsHref = projectId
+-    ? `/dashboard/${projectId}/docs`
+-    : "/docs";
++
++  const projectSettingsHref = projectId ? `/dashboard/${projectId}/settings` : "/dashboard/account";
++  const projectManageHref = projectId ? `/dashboard/${projectId}/manage` : "/dashboard";
++  const projectDocsHref = projectId ? `/dashboard/${projectId}/docs` : "/docs";
+   const dashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
++
+   const environmentContext = searchParams.get("environment")?.trim() || "all environments";
+   const usesRunsWindow = pathname.includes("/runs") || pathname.includes("/search");
+   const requestedRange = usesRunsWindow ? searchParams.get("days") : searchParams.get("range");
+@@ -70,10 +66,12 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+       : "7d";
+   const rangeValue = rangeContext.replace("d", "");
+   const environmentValue = environmentContext === "all environments" ? "all" : environmentContext;
++
+   const region = getTracifyRegion();
+   const { data: session } = authClient.useSession();
+   const { data: organization } = authClient.useActiveOrganization();
+   const user = session?.user;
++
+   const project = useQuery(
+     api.projects.getProject,
+     projectId ? { projectId: projectId as Id<"projects"> } : "skip",
+@@ -81,15 +79,15 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+ 
+   const alerts = useQuery(
+     api.alerts.listByProject,
+-    projectId ? { projectId: projectId as Id<"projects"> } : "skip"
++    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
+   );
++
+   const markAllAlertsRead = useMutation(api.alerts.markAllRead);
+   const markAlertRead = useMutation(api.alerts.markRead);
+   const [isMarkingAlertsRead, setIsMarkingAlertsRead] = useState(false);
+   const unreadAlertCount = alerts?.filter((alert) => !alert.readAt).length ?? 0;
+ 
+   const initials = user?.name?.charAt(0) || user?.email?.charAt(0) || "U";
+-
+   const router = useRouter();
+ 
+   function updateDashboardQuery(key: "range" | "days" | "environment", value: string) {
+@@ -105,7 +103,6 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+ 
+   const handleReadAllAlerts = async () => {
+     if (!projectId || unreadAlertCount === 0 || isMarkingAlertsRead) return;
+-
+     setIsMarkingAlertsRead(true);
+     try {
+       await markAllAlertsRead({ projectId: projectId as Id<"projects"> });
+@@ -114,7 +111,6 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+     }
+   };
+ 
+-  // Breadcrumb logic
+   const segments = pathname.split("/").filter(Boolean);
+   const sectionHref =
+     projectId && segments.length > 2
+@@ -123,7 +119,10 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+ 
+   return (
+     <header className="tracify-dashboard-topbar flex h-14 shrink-0 items-center justify-between border-b border-black/15 bg-[#f3f2ed] px-4 font-mono lg:px-6">
+-      <span className="sr-only">{title || "Dashboard"}{description ? `: ${description}` : ""}</span>
++      <span className="sr-only">
++        {title || "Dashboard"}{description ? `: ${description}` : ""}
++      </span>
++
+       <div className="flex min-w-0 items-center gap-4">
+         <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-black/55">
+           <div className="flex items-center gap-2 overflow-hidden">
+@@ -170,7 +169,11 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+           </Link>
+           <label className="tracify-topbar-select">
+             <span className="sr-only">Dashboard time range</span>
+-            <select aria-label="Dashboard time range" value={rangeValue} onChange={(event) => updateDashboardQuery(usesRunsWindow ? "days" : "range", event.target.value)}>
++            <select
++              aria-label="Dashboard time range"
++              value={rangeValue}
++              onChange={(event) => updateDashboardQuery(usesRunsWindow ? "days" : "range", event.target.value)}
++            >
+               <option value="1">1d</option>
+               <option value="7">7d</option>
+               <option value="30">30d</option>
+@@ -179,16 +182,28 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+           </label>
+           <label className="tracify-topbar-select">
+             <span className="sr-only">Environment</span>
+-            <select aria-label="Environment" value={environmentValue} onChange={(event) => updateDashboardQuery("environment", event.target.value === "all" ? "all environments" : event.target.value)}>
++            <select
++              aria-label="Environment"
++              value={environmentValue}
++              onChange={(event) => updateDashboardQuery("environment", event.target.value === "all" ? "all environments" : event.target.value)}
++            >
+               <option value="all">All environments</option>
+               <option value="default">default</option>
+               <option value="production">production</option>
+             </select>
+           </label>
+-          <button type="button" className="tracify-topbar-filter" onClick={() => window.dispatchEvent(new Event("tracify:toggle-dashboard-filters"))}>Filters</button>
++          <button
++            type="button"
++            className="tracify-topbar-filter"
++            onClick={() => window.dispatchEvent(new Event("tracify:toggle-dashboard-filters"))}
++          >
++            Filters
++          </button>
+         </div>
++
+         <DashboardCommandMenu projectId={projectId} />
+         <OrganizationSwitcher />
++
+         {!hasDismissedOnboarding() ? (
+           <button
+             onClick={handleOnboardingClick}
+@@ -201,6 +216,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+             Setup
+           </button>
+         ) : null}
++
+         <div className="hidden max-w-[360px] items-center gap-2 border border-black/15 bg-white px-2 sm:flex">
+           <span className="size-1.5 bg-emerald-600" aria-hidden="true" />
+           <span className="truncate text-[10px] uppercase tracking-widest text-black/70">
+@@ -209,9 +225,13 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+           <span className="text-black/55">/</span>
+           <span className="truncate text-[10px] text-black/55">{project?.name || "Loading project…"}</span>
+           <span className="text-black/55">/</span>
+-          <span className="truncate text-[10px] uppercase text-black/55" title="Environment context">{environmentContext}</span>
++          <span className="truncate text-[10px] uppercase text-black/55" title="Environment context">
++            {environmentContext}
++          </span>
+           <span className="text-black/55">/</span>
+-          <span className="shrink-0 text-[10px] uppercase text-black/55" title="Dashboard time range">{rangeContext}</span>
++          <span className="shrink-0 text-[10px] uppercase text-black/55" title="Dashboard time range">
++            {rangeContext}
++          </span>
+         </div>
+ 
+         <DropdownMenu>
+@@ -246,20 +266,16 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+                 )}
+               </div>
+               <div className="flex min-w-0 flex-col">
+-                <span className="truncate text-[11px] font-mono text-black">
+-                  {user?.name || "User"}
+-                </span>
+-                <span className="truncate text-[10px] font-mono text-black/55">
+-                  {user?.email}
+-                </span>
++                <span className="truncate text-[11px] font-mono text-black">{user?.name || "User"}</span>
++                <span className="truncate text-[10px] font-mono text-black/55">{user?.email}</span>
+               </div>
+             </DropdownMenuLabel>
+             <DropdownMenuSeparator />
+             <DropdownMenuGroup>
+               <DropdownMenuItem asChild>
+                 <Link href="/dashboard/account">
+-                <UserPen size={14} className="opacity-60" />
+-                <span>Manage Account</span>
++                  <UserPen size={14} className="opacity-60" />
++                  <span>Manage Account</span>
+                 </Link>
+               </DropdownMenuItem>
+               <DropdownMenuItem asChild>
+@@ -291,7 +307,9 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+               </DropdownMenuItem>
+             </DropdownMenuGroup>
+             <DropdownMenuSeparator />
+-            <DropdownMenuItem onClick={() => void authClient.signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}>
++            <DropdownMenuItem
++              onClick={() => void authClient.signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
++            >
+               <LogOut size={14} className="opacity-60" />
+               <span>Sign Out</span>
+             </DropdownMenuItem>
+@@ -323,12 +341,8 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+             <DropdownMenuContent className="w-[360px] p-0" align="end" sideOffset={8}>
+               <div className="flex items-start justify-between gap-3 border-b border-black/15 p-3">
+                 <div>
+-                  <div className="font-mono text-[11px] uppercase tracking-widest text-black">
+-                    Alerts
+-                  </div>
+-                  <div className="mt-1 font-mono text-[10px] text-black/55">
+-                    Cost, failure, and duration triggers
+-                  </div>
++                  <div className="font-mono text-[11px] uppercase tracking-widest text-black">Alerts</div>
++                  <div className="mt-1 font-mono text-[10px] text-black/55">Cost, failure, and duration triggers</div>
+                 </div>
+                 <button
+                   type="button"
+@@ -343,10 +357,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+                 {alerts === undefined ? (
+                   <div className="space-y-2 p-2">
+                     {Array.from({ length: 3 }).map((_, index) => (
+-                      <div
+-                        key={index}
+-                        className="h-16 border border-black/15 bg-[#f3f2ed]"
+-                      />
++                      <div key={index} className="h-16 border border-black/15 bg-[#f3f2ed]" />
+                     ))}
+                   </div>
+                 ) : alerts.length === 0 ? (
+@@ -357,7 +368,6 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+                   <div className="space-y-2">
+                     {alerts.slice(0, 8).map((alert) => {
+                       const isUnread = !alert.readAt;
+-
+                       return (
+                         <Link
+                           key={alert._id}
+@@ -374,9 +384,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+                               : "border-black/15 bg-[#f3f2ed] hover:bg-white",
+                           )}
+                         >
+-                          {isUnread ? (
+-                            <span className="absolute left-0 top-0 h-full w-1 bg-black" />
+-                          ) : null}
++                          {isUnread ? <span className="absolute left-0 top-0 h-full w-1 bg-black" /> : null}
+                           <div className="flex items-center justify-between gap-3">
+                             <div className="flex min-w-0 items-center gap-2">
+                               {isUnread ? (
+@@ -387,9 +395,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+                               <span
+                                 className={cn(
+                                   "truncate font-mono text-[10px] uppercase tracking-widest",
+-                                  alert.type === "cost_exceeded"
+-                                    ? "text-[#7d5e00]"
+-                                    : "text-red-600",
++                                  alert.type === "cost_exceeded" ? "text-[#7d5e00]" : "text-red-600",
+                                 )}
+                               >
+                                 {alert.type.replace("_", " ")}
+@@ -416,6 +422,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
+             </DropdownMenuContent>
+           </DropdownMenu>
+         )}
++
+         <Link
+           href="/docs"
+           className="flex h-8 items-center gap-2 border border-black/15 bg-white px-2 text-black/60 transition-colors hover:bg-[#f3f2ed] hover:text-black"
