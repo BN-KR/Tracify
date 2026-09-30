@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 const CLOUD_APP_PREFIXES = [
   "/dashboard",
+  "/dash",
   "/playground",
   "/onboarding",
   "/sign-in",
