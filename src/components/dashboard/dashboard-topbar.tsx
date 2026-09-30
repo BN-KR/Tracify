@@ -12,7 +12,7 @@ import {
   LogOut,
   Settings,
   MessageSquare,
-  Book
+  Book,
 } from "lucide-react";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { hasDismissedOnboarding, setReturnPath } from "@/lib/onboarding-client-state";
@@ -50,16 +50,12 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
   const searchParams = useSearchParams();
   const params = useParams();
   const projectId = params?.projectId as string | undefined;
-  const projectSettingsHref = projectId
-    ? `/dashboard/${projectId}/settings`
-    : "/dashboard/account";
-  const projectManageHref = projectId
-    ? `/dashboard/${projectId}/manage`
-    : "/dashboard";
-  const projectDocsHref = projectId
-    ? `/dashboard/${projectId}/docs`
-    : "/docs";
+
+  const projectSettingsHref = projectId ? `/dashboard/${projectId}/settings` : "/dashboard/account";
+  const projectManageHref = projectId ? `/dashboard/${projectId}/manage` : "/dashboard";
+  const projectDocsHref = projectId ? `/dashboard/${projectId}/docs` : "/docs";
   const dashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
+
   const environmentContext = searchParams.get("environment")?.trim() || "all environments";
   const usesRunsWindow = pathname.includes("/runs") || pathname.includes("/search");
   const requestedRange = usesRunsWindow ? searchParams.get("days") : searchParams.get("range");
@@ -70,10 +66,12 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
       : "7d";
   const rangeValue = rangeContext.replace("d", "");
   const environmentValue = environmentContext === "all environments" ? "all" : environmentContext;
+
   const region = getTracifyRegion();
   const { data: session } = authClient.useSession();
   const { data: organization } = authClient.useActiveOrganization();
   const user = session?.user;
+
   const project = useQuery(
     api.projects.getProject,
     projectId ? { projectId: projectId as Id<"projects"> } : "skip",
@@ -81,15 +79,15 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
 
   const alerts = useQuery(
     api.alerts.listByProject,
-    projectId ? { projectId: projectId as Id<"projects"> } : "skip"
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
   );
+
   const markAllAlertsRead = useMutation(api.alerts.markAllRead);
   const markAlertRead = useMutation(api.alerts.markRead);
   const [isMarkingAlertsRead, setIsMarkingAlertsRead] = useState(false);
   const unreadAlertCount = alerts?.filter((alert) => !alert.readAt).length ?? 0;
 
   const initials = user?.name?.charAt(0) || user?.email?.charAt(0) || "U";
-
   const router = useRouter();
 
   function updateDashboardQuery(key: "range" | "days" | "environment", value: string) {
@@ -105,7 +103,6 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
 
   const handleReadAllAlerts = async () => {
     if (!projectId || unreadAlertCount === 0 || isMarkingAlertsRead) return;
-
     setIsMarkingAlertsRead(true);
     try {
       await markAllAlertsRead({ projectId: projectId as Id<"projects"> });
@@ -114,7 +111,6 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
     }
   };
 
-  // Breadcrumb logic
   const segments = pathname.split("/").filter(Boolean);
   const sectionHref =
     projectId && segments.length > 2
@@ -123,7 +119,10 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
 
   return (
     <header className="tracify-dashboard-topbar flex h-14 shrink-0 items-center justify-between border-b border-black/15 bg-[#f3f2ed] px-4 font-mono lg:px-6">
-      <span className="sr-only">{title || "Dashboard"}{description ? `: ${description}` : ""}</span>
+      <span className="sr-only">
+        {title || "Dashboard"}{description ? `: ${description}` : ""}
+      </span>
+
       <div className="flex min-w-0 items-center gap-4">
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-black/55">
           <div className="flex items-center gap-2 overflow-hidden">
@@ -170,7 +169,11 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
           </Link>
           <label className="tracify-topbar-select">
             <span className="sr-only">Dashboard time range</span>
-            <select aria-label="Dashboard time range" value={rangeValue} onChange={(event) => updateDashboardQuery(usesRunsWindow ? "days" : "range", event.target.value)}>
+            <select
+              aria-label="Dashboard time range"
+              value={rangeValue}
+              onChange={(event) => updateDashboardQuery(usesRunsWindow ? "days" : "range", event.target.value)}
+            >
               <option value="1">1d</option>
               <option value="7">7d</option>
               <option value="30">30d</option>
@@ -179,16 +182,28 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
           </label>
           <label className="tracify-topbar-select">
             <span className="sr-only">Environment</span>
-            <select aria-label="Environment" value={environmentValue} onChange={(event) => updateDashboardQuery("environment", event.target.value === "all" ? "all environments" : event.target.value)}>
+            <select
+              aria-label="Environment"
+              value={environmentValue}
+              onChange={(event) => updateDashboardQuery("environment", event.target.value === "all" ? "all environments" : event.target.value)}
+            >
               <option value="all">All environments</option>
               <option value="default">default</option>
               <option value="production">production</option>
             </select>
           </label>
-          <button type="button" className="tracify-topbar-filter" onClick={() => window.dispatchEvent(new Event("tracify:toggle-dashboard-filters"))}>Filters</button>
+          <button
+            type="button"
+            className="tracify-topbar-filter"
+            onClick={() => window.dispatchEvent(new Event("tracify:toggle-dashboard-filters"))}
+          >
+            Filters
+          </button>
         </div>
+
         <DashboardCommandMenu projectId={projectId} />
         <OrganizationSwitcher />
+
         {!hasDismissedOnboarding() ? (
           <button
             onClick={handleOnboardingClick}
@@ -201,6 +216,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
             Setup
           </button>
         ) : null}
+
         <div className="hidden max-w-[360px] items-center gap-2 border border-black/15 bg-white px-2 sm:flex">
           <span className="size-1.5 bg-emerald-600" aria-hidden="true" />
           <span className="truncate text-[10px] uppercase tracking-widest text-black/70">
@@ -209,9 +225,13 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
           <span className="text-black/55">/</span>
           <span className="truncate text-[10px] text-black/55">{project?.name || "Loading project…"}</span>
           <span className="text-black/55">/</span>
-          <span className="truncate text-[10px] uppercase text-black/55" title="Environment context">{environmentContext}</span>
+          <span className="truncate text-[10px] uppercase text-black/55" title="Environment context">
+            {environmentContext}
+          </span>
           <span className="text-black/55">/</span>
-          <span className="shrink-0 text-[10px] uppercase text-black/55" title="Dashboard time range">{rangeContext}</span>
+          <span className="shrink-0 text-[10px] uppercase text-black/55" title="Dashboard time range">
+            {rangeContext}
+          </span>
         </div>
 
         <DropdownMenu>
@@ -246,20 +266,16 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                 )}
               </div>
               <div className="flex min-w-0 flex-col">
-                <span className="truncate text-[11px] font-mono text-black">
-                  {user?.name || "User"}
-                </span>
-                <span className="truncate text-[10px] font-mono text-black/55">
-                  {user?.email}
-                </span>
+                <span className="truncate text-[11px] font-mono text-black">{user?.name || "User"}</span>
+                <span className="truncate text-[10px] font-mono text-black/55">{user?.email}</span>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/account">
-                <UserPen size={14} className="opacity-60" />
-                <span>Manage Account</span>
+                  <UserPen size={14} className="opacity-60" />
+                  <span>Manage Account</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
@@ -291,7 +307,9 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => void authClient.signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}>
+            <DropdownMenuItem
+              onClick={() => void authClient.signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
+            >
               <LogOut size={14} className="opacity-60" />
               <span>Sign Out</span>
             </DropdownMenuItem>
@@ -323,12 +341,8 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
             <DropdownMenuContent className="w-[360px] p-0" align="end" sideOffset={8}>
               <div className="flex items-start justify-between gap-3 border-b border-black/15 p-3">
                 <div>
-                  <div className="font-mono text-[11px] uppercase tracking-widest text-black">
-                    Alerts
-                  </div>
-                  <div className="mt-1 font-mono text-[10px] text-black/55">
-                    Cost, failure, and duration triggers
-                  </div>
+                  <div className="font-mono text-[11px] uppercase tracking-widest text-black">Alerts</div>
+                  <div className="mt-1 font-mono text-[10px] text-black/55">Cost, failure, and duration triggers</div>
                 </div>
                 <button
                   type="button"
@@ -343,10 +357,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                 {alerts === undefined ? (
                   <div className="space-y-2 p-2">
                     {Array.from({ length: 3 }).map((_, index) => (
-                      <div
-                        key={index}
-                        className="h-16 border border-black/15 bg-[#f3f2ed]"
-                      />
+                      <div key={index} className="h-16 border border-black/15 bg-[#f3f2ed]" />
                     ))}
                   </div>
                 ) : alerts.length === 0 ? (
@@ -357,7 +368,6 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                   <div className="space-y-2">
                     {alerts.slice(0, 8).map((alert) => {
                       const isUnread = !alert.readAt;
-
                       return (
                         <Link
                           key={alert._id}
@@ -374,9 +384,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                               : "border-black/15 bg-[#f3f2ed] hover:bg-white",
                           )}
                         >
-                          {isUnread ? (
-                            <span className="absolute left-0 top-0 h-full w-1 bg-black" />
-                          ) : null}
+                          {isUnread ? <span className="absolute left-0 top-0 h-full w-1 bg-black" /> : null}
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex min-w-0 items-center gap-2">
                               {isUnread ? (
@@ -387,9 +395,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                               <span
                                 className={cn(
                                   "truncate font-mono text-[10px] uppercase tracking-widest",
-                                  alert.type === "cost_exceeded"
-                                    ? "text-[#7d5e00]"
-                                    : "text-red-600",
+                                  alert.type === "cost_exceeded" ? "text-[#7d5e00]" : "text-red-600",
                                 )}
                               >
                                 {alert.type.replace("_", " ")}
@@ -416,6 +422,7 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+
         <Link
           href="/docs"
           className="flex h-8 items-center gap-2 border border-black/15 bg-white px-2 text-black/60 transition-colors hover:bg-[#f3f2ed] hover:text-black"

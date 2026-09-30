@@ -3,14 +3,12 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 
-import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
+import { DashboardSidebar } from "./dashboard-sidebar";
 
 const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
 const LEGACY_COLLAPSED_STORAGE_KEY = "tracify:dashboard-sidebar";
 
-// Matches the captured dashboard shell's 3rem collapsed rail.
 const COLLAPSED_WIDTH = 48;
-// Matches the captured dashboard shell's 11.5rem expanded sidebar.
 const EXPANDED_WIDTH = 184;
 type DashboardTheme = "legacy" | "tracify-v2";
 
@@ -35,25 +33,33 @@ export function DashboardShell({
   const params = useParams();
   const pathname = usePathname();
   const projectId = params?.projectId as string | undefined;
-  const isDashboardRoute = synthetic || preview || pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+
+  const isDashboardRoute =
+    synthetic || preview || pathname === "/dashboard" || pathname.startsWith("/dashboard/");
   const isTracifyOverview = synthetic || preview || Boolean(projectId);
+
   const defaultTheme = dashboardTheme ?? (process.env.NEXT_PUBLIC_TRACIFY_DASHBOARD_V2 === "false" ? "legacy" : "tracify-v2");
+
   const requestedTheme = useSyncExternalStore(
     () => () => undefined,
     () => new URLSearchParams(window.location.search).get("ui"),
     () => null,
   );
-  const activeTheme: DashboardTheme = dashboardTheme ?? (requestedTheme === "legacy" || requestedTheme === "tracify-v2" ? requestedTheme : defaultTheme);
+
+  const activeTheme: DashboardTheme =
+    dashboardTheme ??
+    (requestedTheme === "legacy" || requestedTheme === "tracify-v2" ? requestedTheme : defaultTheme);
+
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
     const stored = window.localStorage.getItem(COLLAPSED_STORAGE_KEY);
     if (stored === "true" || stored === "false") return stored === "true";
-    return (
-      window.localStorage.getItem(LEGACY_COLLAPSED_STORAGE_KEY) === "collapsed"
-    );
+    return window.localStorage.getItem(LEGACY_COLLAPSED_STORAGE_KEY) === "collapsed";
   });
+
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+
   useEffect(() => {
     const media = window.matchMedia("(max-width: 700px)");
     const update = () => setIsMobileViewport(media.matches);
@@ -61,6 +67,7 @@ export function DashboardShell({
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
+
   function updateCollapsed(next: boolean) {
     setIsCollapsed(next);
     window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(next));
@@ -89,7 +96,10 @@ export function DashboardShell({
   const layoutSidebarWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
   return (
-    <div data-dashboard-theme={activeTheme} className={`flex min-h-svh w-full font-mono ${isDashboardRoute ? "tracify-cloud-shell text-white/70" : "text-black/70 bg-[#eceae3]"} ${isTracifyOverview ? "tracify-shell" : ""}`}>
+    <div
+      data-dashboard-theme={activeTheme}
+      className={`flex min-h-svh w-full font-mono ${isDashboardRoute ? "tracify-cloud-shell text-white/70" : "text-black/70 bg-[#eceae3]"} ${isTracifyOverview ? "tracify-shell" : ""}`}
+    >
       <DashboardSidebar
         canAccessContent={canAccessContent}
         isCollapsed={isCollapsed}
@@ -101,12 +111,21 @@ export function DashboardShell({
         onMobileClose={() => setIsMobileOpen(false)}
         onMobileToggle={() => setIsMobileOpen((current) => !current)}
       />
-      {isMobileOpen ? <button type="button" aria-label="Close sidebar" className="tracify-shell-sidebar-backdrop" onClick={() => setIsMobileOpen(false)} /> : null}
+      {isMobileOpen ? (
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          className="tracify-shell-sidebar-backdrop"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      ) : null}
       <div
         className={`flex min-h-svh min-w-0 flex-1 flex-col transition-[padding] duration-150 motion-reduce:transition-none ${isDashboardRoute ? "bg-[#101010]" : "bg-[#eceae3]"}`}
         style={{ paddingLeft: isMobileViewport ? 0 : layoutSidebarWidth }}
       >
-        <main className={`h-svh pb-0 overflow-y-auto scrollbar-hide ${isDashboardRoute ? "bg-[#101010] p-0" : "bg-[#eceae3] p-4 lg:p-6"}`}>
+        <main
+          className={`h-svh pb-0 overflow-y-auto scrollbar-hide ${isDashboardRoute ? "bg-[#101010] p-0" : "bg-[#eceae3] p-4 lg:p-6"}`}
+        >
           {children}
         </main>
       </div>
