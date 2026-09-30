@@ -1,5 +1,5 @@
-import { LiveCapturedHome } from "@/components/dashboard/live-captured-home";
+import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
 
 export function ProjectDashboardContent({ projectId }: { projectId: string }) {
-  return <LiveCapturedHome projectId={projectId} />;
+  return <DashboardOverview projectId={projectId} />;
 }

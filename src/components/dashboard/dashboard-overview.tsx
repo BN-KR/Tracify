@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Activity,
+  Binary,
   DollarSign,
   Zap,
   AlertTriangle,
@@ -145,6 +146,8 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
 
   const activeRuns = summary?.totals.activeRuns ?? recentRuns.filter((r) => r.status === "running").length;
 
+  const totalTokens = stats?.userCosts?.reduce((sum, user) => sum + user.totalTokens, 0) ?? 0;
+
   const reviewedTraceIds = new Set(
     investigations
       .filter((item) => item.status === "completed")
@@ -222,10 +225,10 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-pixel text-xl uppercase tracking-wide text-zinc-100">
-            Investigation queue
+            Project overview
           </h2>
           <p className="mt-1 font-mono text-[11px] text-zinc-400">
-            Find the next tool or workflow failure worth investigating.
+            Live execution speed, run volume, token usage, cost, and reliability for this project.
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3 sm:ml-auto">
@@ -260,7 +263,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-px border border-zinc-800 bg-zinc-800 sm:grid-cols-4 xl:grid-cols-7">
+      <div className="grid grid-cols-2 gap-px border border-zinc-800 bg-zinc-800 sm:grid-cols-4 xl:grid-cols-8">
         <DashboardMetric
           label="Spend"
           value={formatGraphCurrency(totalSpend)}
@@ -274,6 +277,13 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
           icon={Zap}
           detail={`Observed in last ${range} days`}
           href={`/dashboard/${projectId}/runs?${runsWindow}`}
+        />
+        <DashboardMetric
+          label="Tokens"
+          value={totalTokens.toLocaleString()}
+          icon={Binary}
+          detail={useSavedFallback ? "No token analytics yet" : `Observed in last ${range} days`}
+          href={`/dashboard/${projectId}/costs`}
         />
         <DashboardMetric
           label="Active Runs"
