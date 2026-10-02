@@ -12,8 +12,9 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   const isOnboarding = pathname.startsWith("/onboarding");
   const isCloudDirectory = pathname.startsWith("/cloud");
   const isAuth = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/accept-invitation", "/auth/error"].some((route) => pathname.startsWith(route));
+  const isHomepage = pathname === "/";
 
-  if (isDashboard || isPlayground || isOnboarding || isAuth || isCloudDirectory) return <>{children}</>;
+  if (isDashboard || isPlayground || isOnboarding || isAuth || isCloudDirectory || isHomepage) return <>{children}</>;
 
   return (
     <>
