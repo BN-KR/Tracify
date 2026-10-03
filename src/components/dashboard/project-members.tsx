@@ -20,11 +20,17 @@ export function ProjectMembers({ readOnly = false }: { readOnly?: boolean }) {
     if (!organization || !inviteEmail.trim()) return;
     setInviting(true);
     setStatus("");
-    const result = await authClient.organization.inviteMember({
-      email: inviteEmail.trim(),
-      role: inviteRole,
-      organizationId: organization.id,
-    });
+    let result: Awaited<ReturnType<typeof authClient.organization.inviteMember>>;
+    try {
+      result = await authClient.organization.inviteMember({
+        email: inviteEmail.trim(),
+        role: inviteRole,
+        organizationId: organization.id,
+      });
+    } catch (error) {
+      setInviting(false);
+      return setStatus(error instanceof Error ? error.message : "Could not send invitation.");
+    }
     setInviting(false);
     if (result.error) return setStatus(result.error.message || "Could not send invitation.");
     setInviteEmail("");
@@ -44,6 +50,7 @@ export function ProjectMembers({ readOnly = false }: { readOnly?: boolean }) {
       </div> : <span className="font-mono text-[10px] uppercase tracking-widest text-black/45">Read only</span>}
     </div>
     <Card className="divide-y divide-black/15 rounded-none border-border bg-white shadow-none">
+      {!organization.members?.length ? <p className="p-6 text-center font-mono text-[10px] uppercase tracking-widest text-black/55">No members yet</p> : null}
       {organization.members?.map((membership) => <MemberRow key={membership.id} name={membership.user.name} email={membership.user.email} role={formatRole(membership.role)} isMe={membership.userId === session?.user.id} />)}
     </Card>
     {status ? <p className="border border-black/15 p-3 font-mono text-[10px] text-black/60">{status}</p> : null}
@@ -56,7 +63,8 @@ function PersonalMember({ name, email }: { name: string; email: string }) {
   const [message, setMessage] = useState("");
   async function createOrganization() {
     const slug = organizationName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const result = await authClient.organization.create({ name: organizationName.trim(), slug });
+    let result: Awaited<ReturnType<typeof authClient.organization.create>>;
+    try { result = await authClient.organization.create({ name: organizationName.trim(), slug }); } catch (error) { return setMessage(error instanceof Error ? error.message : "Could not create workspace."); }
     if (result.error) return setMessage(result.error.message || "Could not create workspace.");
     if (result.data) await authClient.organization.setActive({ organizationId: result.data.id });
     setMessage("Workspace created.");
@@ -67,5 +75,5 @@ function PersonalMember({ name, email }: { name: string; email: string }) {
 function formatRole(role: string) { return role === "owner" ? "Owner" : role === "admin" ? "Admin" : role === "member" ? "Developer" : role === "viewer" ? "Viewer" : role; }
 
 function MemberRow({ name, email, role, isMe }: { name: string; email: string; role: string; isMe?: boolean }) {
-  return <div className="flex items-center justify-between p-4"><div className="flex items-center gap-3"><div className="flex size-8 items-center justify-center border border-black/15 bg-[#f3f2ed] font-mono text-xs uppercase text-black">{name.slice(0, 1)}</div><div><p className="font-mono text-[13px] text-black">{name}{isMe ? <span className="ml-1 text-black/55">(me)</span> : null}</p><p className="flex items-center gap-2 font-mono text-[11px] text-black/55"><Mail className="size-3" />{email}</p></div></div><span className="bg-[#f3f2ed] px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-black/60">{role}</span></div>;
+  return <div className="flex items-center justify-between gap-3 p-4"><div className="flex min-w-0 items-center gap-3"><div className="flex size-8 items-center justify-center border border-black/15 bg-[#f3f2ed] font-mono text-xs uppercase text-black">{name.slice(0, 1)}</div><div className="min-w-0"><p className="truncate font-mono text-[13px] text-black">{name}{isMe ? <span className="ml-1 text-black/55">(me)</span> : null}</p><p className="flex items-center gap-2 font-mono text-[11px] text-black/55"><Mail className="size-3 shrink-0" /><span className="truncate">{email}</span></p></div></div><span className="bg-[#f3f2ed] px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-black/60">{role}</span></div>;
 }

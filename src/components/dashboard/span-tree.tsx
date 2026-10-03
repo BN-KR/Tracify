@@ -56,14 +56,15 @@ export function SpanTree({ spans, selectedSpanId, onSelectSpan }: SpanTreeProps)
   }
 
   return (
-    <div className="border border-border bg-muted/10 p-4">
-      <div className="mb-3 flex items-center justify-between gap-3">
+    <div className="border border-border bg-muted/10 p-3 sm:p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">Span tree</div>
-        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">
+        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55" aria-live="polite">
           {rootTotalCost != null ? formatCurrency(rootTotalCost) : "—"} total
         </div>
       </div>
-      <div className="space-y-0.5">
+      <div className="-mx-1 overflow-x-auto px-1 pb-1">
+        <div className="min-w-[520px] space-y-0.5">
         {flat.map(({ node, depth, treeLines }) => (
           <SpanTreeRow
             key={node.id}
@@ -78,6 +79,7 @@ export function SpanTree({ spans, selectedSpanId, onSelectSpan }: SpanTreeProps)
             onSelect={() => onSelectSpan(node.id)}
           />
         ))}
+        </div>
       </div>
     </div>
   );
@@ -120,7 +122,7 @@ function SpanTreeRow({
       id={`span-tree-row-${node.id}`}
       onClick={onSelect}
       className={cn(
-        "group flex w-full items-center gap-2 border border-transparent px-1.5 py-1 text-left transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black",
+        "group flex min-h-8 w-full items-center gap-2 border border-transparent px-1.5 py-1 text-left transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black",
         isSelected && "border-black/30 bg-black/5",
       )}
     >

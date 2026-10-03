@@ -1,5 +1,25 @@
 # Project Memory
 
+## 2026-10-03 integrator verification
+- Audited the combined dashboard ownership diff and preserved live Clerk, Convex, Tinybird, Redis, and Inngest paths; no fixture replacement or secret material was introduced.
+- Repaired the Stripe SDK API-version mismatch by aligning the client with the installed `2026-07-29.dahlia` type and removing the checkout route's incompatible preview override.
+- Typecheck, content tests (27/27), focused changed-file ESLint, production build, and `git diff --check` passed. Full lint remains blocked by pre-existing errors outside this diff in blog/marketing/UI files.
+
+## 2026-10-03 trace/run/session surface pass
+- Updated only owned trace/run/session/investigation UI components: span-tree now keeps dense hierarchy usable with horizontal overflow on narrow screens and announces aggregate cost changes; session-detail adds URL-synchronized run selection with responsive rows; trace-search uses readable light warning contrast.
+- Preserved live Convex session/project/run queries and existing trace span API paths; no mocks, shell changes, backend changes, or deployment actions.
+- Focused ESLint passed. `npm run typecheck` reached the existing unrelated Stripe API-version error in `src/lib/stripe.ts` (`2026-08-26.dahlia` vs installed `2026-07-29.dahlia`). `git diff --check` passed.
+
+## 2026-10-03 dashboard route boundaries
+- Converted legacy unscoped project dashboard entries that passed `projectId=""` into server-side redirects to `/dashboard`; account and organization routes remain unscoped by design.
+- Preserved the existing `DashboardShell`, `ProjectRouteGate`, Clerk/Convex readiness flow, project switcher, and domain components without modification.
+- Focused route lint and TypeScript verification were run; unrelated pre-existing worktree changes remain untouched.
+
+## 2026-10-03 dashboard live overview surfaces
+- Replaced the project costs route's captured workspace adapter with the existing live `CostDashboard`, preserving Convex summary and Tinybird/Redis stats paths.
+- Added explicit analytics fallback/error messaging, project permission/not-found handling, and a no-activity state to the live overview.
+- No shell, tracing, settings, or route infrastructure was changed.
+
 ## 2026-09-15 Google Analytics 4 setup
 - Created the `Tracify` GA4 property in the existing Analytics account and the `Tracify website` web stream for `https://www.tracify.tech`; measurement ID: `G-XW154R1G8Y`.
 - Added a consent-aware Google tag integration controlled by `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID`. It loads only while the existing analytics preference is enabled, updates Google consent state when preferences change, and always denies advertising storage/personalization.

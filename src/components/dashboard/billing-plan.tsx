@@ -252,30 +252,40 @@ function PlanCard({
 
 function CheckoutButton({ projectId, plan, interval }: { projectId: string; plan: "pro" | "team"; interval: "monthly" | "annual" }) {
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const startCheckout = async () => {
     if (!projectId) return;
     setPending(true);
+    setError(null);
     try {
       const response = await fetch("/api/stripe/checkout", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ projectId, plan, interval }) });
       const data = await response.json() as { url?: string; error?: string };
       if (!response.ok || !data.url) throw new Error(data.error ?? "Checkout unavailable");
       window.location.assign(data.url);
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : "Checkout unavailable");
+      setError(error instanceof Error ? error.message : "Checkout unavailable");
       setPending(false);
     }
   };
-  return <button type="button" onClick={startCheckout} disabled={pending} className="mt-8 border border-black bg-black px-3 py-2 font-mono text-[10px] uppercase text-white disabled:opacity-50">{pending ? "Opening checkout…" : `Choose ${plan}`}</button>;
+  return <div className="mt-8"><button type="button" onClick={startCheckout} disabled={pending} className="border border-black bg-black px-3 py-2 font-mono text-[10px] uppercase text-white disabled:opacity-50">{pending ? "Opening checkout…" : `Choose ${plan}`}</button>{error ? <p role="alert" className="mt-2 font-mono text-[10px] text-black/70">{error}</p> : null}</div>;
 }
 
 function PortalButton({ projectId }: { projectId: string }) {
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const openPortal = async () => {
     if (!projectId) return;
     setPending(true);
-    const response = await fetch("/api/stripe/portal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ projectId }) });
-    const data = await response.json() as { url?: string };
-    if (data.url) window.location.assign(data.url); else setPending(false);
+    setError(null);
+    try {
+      const response = await fetch("/api/stripe/portal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ projectId }) });
+      const data = await response.json() as { url?: string; error?: string };
+      if (!response.ok || !data.url) throw new Error(data.error ?? "Billing portal unavailable");
+      window.location.assign(data.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Billing portal unavailable");
+      setPending(false);
+    }
   };
-  return <button type="button" onClick={openPortal} disabled={pending} className="mt-4 border border-black/30 px-3 py-2 font-mono text-[10px] uppercase text-black">{pending ? "Opening…" : "Manage billing"}</button>;
+  return <div className="mt-4"><button type="button" onClick={openPortal} disabled={pending} className="border border-black/30 px-3 py-2 font-mono text-[10px] uppercase text-black disabled:opacity-50">{pending ? "Opening…" : "Manage billing"}</button>{error ? <p role="alert" className="mt-2 font-mono text-[10px] text-black/70">{error}</p> : null}</div>;
 }
