@@ -404,6 +404,7 @@ function AlertsSurface({ workspace, onReadOnly, onCreate, onStateChange }: { wor
 }
 
 function TracingSurface({ workspace, basePath, query, environment, onReadOnly }: { workspace: DashboardWorkspace; basePath: string; query: string; environment: string; onReadOnly: (action: string) => void }) {
+  const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [view, setView] = useState<"table" | "chart">(() => searchParams.get("view") === "chart" ? "chart" : "table");
@@ -427,12 +428,14 @@ function TracingSurface({ workspace, basePath, query, environment, onReadOnly }:
     const next = new URLSearchParams(searchParams.toString());
     if (!value || value === "all" || (key === "view" && value === "table")) next.delete(key);
     else next.set(key, value);
-    router.replace(`?${next.toString()}`, { scroll: false });
+    const nextQuery = next.toString();
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
   };
   const updateTraceQuery = (value: string) => {
     const next = new URLSearchParams(searchParams.toString());
     if (value) next.set("q", value); else next.delete("q");
-    router.replace(`?${next.toString()}`, { scroll: false });
+    const nextQuery = next.toString();
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
   };
   const toggleColumn = (column: string) => setSelectedColumns((current) => {
     const next = current.includes(column) ? current.filter((item) => item !== column) : [...current, column];
