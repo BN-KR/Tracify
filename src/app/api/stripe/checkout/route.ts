@@ -42,7 +42,6 @@ export async function POST(request: Request) {
       cancel_url: `${origin}/dashboard/${projectId}/billing?checkout=cancelled`,
       integration_identifier: "tracify_checkout_qplmzvka",
     },
-    { apiVersion: "2026-02-25.preview" },
   );
     return NextResponse.json({ url: session.url });
   } catch (error) {

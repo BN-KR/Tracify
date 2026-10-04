@@ -29,6 +29,7 @@ export type ProjectStats = {
     avgLatencyMs?: number;
   }>;
   unavailable?: boolean;
+  error?: string;
   meta?: {
     source: string;
     cacheStatus: string;
@@ -49,6 +50,7 @@ const EMPTY_STATS: ProjectStats = {
   modelCosts: [],
   toolCosts: [],
   unavailable: true,
+  error: "Analytics are temporarily unavailable.",
   meta: {
     source: "none",
     cacheStatus: "unavailable",
@@ -99,7 +101,7 @@ export function useProjectStats({
         );
         const data = response.ok
           ? ((await response.json()) as ProjectStats)
-          : EMPTY_STATS;
+          : { ...EMPTY_STATS, error: response.status === 403 ? "You do not have access to analytics for this project." : EMPTY_STATS.error };
         if (
           !cancelledRef.current &&
           activeRequestKeyRef.current === `${projectId}:${range}`
@@ -135,6 +137,8 @@ export function useProjectStats({
     hasSeenLiveKeyRef.current = false;
     activeRequestKeyRef.current = `${projectId}:${range}`;
 
+    // The async fetch updates loading/data after the external request resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchStats({ showLoading: true, force: true });
 
     function handleVisibilityChange() {

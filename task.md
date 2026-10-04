@@ -1,5 +1,21 @@
 # 2026-09-02 — First-customer execution
 
+## 2026-10-03 — Final integration verification
+
+- [completed] Inspect the complete worker diff, route inventory, ownership boundaries, live backend paths, and secret/unrelated-file surface.
+- [completed] Restore Stripe SDK compatibility and verify project-scoped routes retain canonical project routing.
+- [completed] Run typecheck, content tests, focused lint, production build, and diff hygiene; full lint's unrelated baseline failures remain documented in memory.
+
+## 2026-10-03 — Trace/run/session surface ownership
+
+No active follow-up remains for this focused UI slice. Backend/API, shell, and unrelated dashboard route work remain outside this ownership boundary.
+
+## 2026-10-03 — Dashboard shell ownership slice
+
+- [completed] Replace unscoped project dashboard entry renders that used empty project IDs with redirects to the authenticated project selector.
+- [completed] Preserve account/organization entry surfaces, project route gating, shell navigation, and live Clerk/Convex paths.
+- [completed] Run focused lint, typecheck, and diff hygiene checks; unrelated existing changes remain outside this slice.
+
 ## 2026-09-15 — Google Analytics 4
 
 - [pending] Merge PR #121 after checks, then verify the production deployment contains the intended commit and that GA4 receives a live page view.

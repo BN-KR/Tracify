@@ -1,4 +1,4 @@
-import { LiveCapturedHome } from "@/components/dashboard/live-captured-home";
+import { CostDashboard } from "@/components/dashboard/cost-dashboard";
 
 export default async function CostsPage({
   params,
@@ -7,5 +7,5 @@ export default async function CostsPage({
 }) {
   const { projectId } = await params;
 
-  return <LiveCapturedHome projectId={projectId} surface="costs" />;
+  return <CostDashboard projectId={projectId} />;
 }

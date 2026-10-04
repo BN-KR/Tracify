@@ -72,6 +72,11 @@ export function ResilienceTestingDashboard({ projectId }: ResilienceTestingDashb
       return;
     }
 
+    if (Object.values(parsedMix).every((weight) => weight === 0)) {
+      setError("At least one failure mix weight must be greater than zero");
+      return;
+    }
+
     setError(null);
     setRunning(true);
     try {
@@ -133,7 +138,7 @@ export function ResilienceTestingDashboard({ projectId }: ResilienceTestingDashb
         </div>
 
         {error ? (
-          <div className="flex items-center gap-2 text-red-600 text-[11px] font-mono">
+          <div role="alert" className="flex items-center gap-2 text-red-600 text-[11px] font-mono">
             <AlertCircle className="size-3" />
             {error}
           </div>
@@ -142,7 +147,7 @@ export function ResilienceTestingDashboard({ projectId }: ResilienceTestingDashb
         <Button
           type="button"
           onClick={handleRun}
-          disabled={running}
+          disabled={running || runs === undefined}
           className="rounded-none h-10 px-6 font-mono uppercase text-xs"
         >
           <Play className="size-4" />
@@ -156,7 +161,7 @@ export function ResilienceTestingDashboard({ projectId }: ResilienceTestingDashb
           {runs === undefined ? (
             <Skeleton className="h-40 w-full rounded-none" />
           ) : runs.length === 0 ? (
-            <p className="text-[11px] font-mono text-black/55 uppercase">No runs yet</p>
+            <p className="text-[11px] font-mono text-black/55 uppercase">No runs yet. Configure a run above, or you may lack access to this project.</p>
           ) : (
             <div className="space-y-2">
               {runs.map((run) => (
@@ -217,13 +222,21 @@ function RunDetail({
   if (!run) {
     return (
       <Card className="flex items-center justify-center p-6 rounded-none border-border bg-white shadow-none">
-        <p className="text-[11px] font-mono text-black/55 uppercase">Select a run to see results</p>
+        <p className="text-[11px] font-mono text-black/55 uppercase">Select a run to see results, or the run is unavailable to your account</p>
       </Card>
     );
   }
 
+  const failed = run.run.status === "failed";
+
   return (
     <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
+      {failed ? (
+        <div role="alert" className="flex items-center gap-2 text-red-600 text-[11px] font-mono">
+          <AlertCircle className="size-3" />
+          This run failed before completing; results below may be partial.
+        </div>
+      ) : null}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
           ["Status", run.run.status],
@@ -254,6 +267,9 @@ function RunDetail({
               </tr>
             </thead>
             <tbody>
+              {breakdown.length === 0 ? (
+                <tr><td colSpan={5} className="py-3 text-black/55 uppercase text-[10px]">No iterations recorded yet</td></tr>
+              ) : null}
               {breakdown.map((row) => (
                 <tr key={row.mode} className="border-b border-black/10 text-black/70">
                   <td className="py-2 pr-4">{FAILURE_MODE_LABELS[row.mode] ?? row.mode}</td>

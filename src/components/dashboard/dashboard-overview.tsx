@@ -103,13 +103,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
     liveRefreshKey,
   });
 
-  if (
-    loading ||
-    recentRuns === undefined ||
-    summary === undefined ||
-    evaluationOverview === undefined ||
-    investigations === undefined
-  ) {
+  if (loading || recentRuns === undefined || summary === undefined || evaluationOverview === undefined || investigations === undefined) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -118,6 +112,14 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
           ))}
         </div>
         <Skeleton className="h-[300px] w-full rounded-none" />
+      </div>
+    );
+  }
+
+  if (!summary) {
+    return (
+      <div className="border border-black/15 bg-white p-6 font-mono text-sm text-black/60">
+        Project not found or you do not have permission to view this project.
       </div>
     );
   }
@@ -221,6 +223,11 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
 
   return (
     <div className="dashboard-grid flex flex-col gap-6 bg-[#0b0d10] p-4 text-zinc-100 sm:p-6">
+      {stats?.error ? (
+        <div role="status" className="border border-amber-400/30 bg-amber-400/10 px-4 py-3 font-mono text-xs text-amber-100">
+          {stats.error} Showing saved project summaries where available.
+        </div>
+      ) : null}
       {/* Header row */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -407,6 +414,11 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
                     </button>
                   </div>
                 ))}
+            </div>
+          ) : recentRuns.length === 0 ? (
+            <div className="p-5">
+              <p className="font-mono text-xs text-zinc-100">No activity in the current window.</p>
+              <p className="mt-1 font-mono text-[10px] text-zinc-400">Send a trace to populate reliability and activity signals.</p>
             </div>
           ) : (
             <div className="flex items-start gap-3 p-5">

@@ -26,11 +26,18 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
     projectId ? { projectId: projectId as Id<"projects"> } : "skip"
   );
 
+  const adminProject = useQuery(
+    api.projects.getProjectForAdmin,
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip"
+  );
+  const canRotate = Boolean(adminProject);
+
   const rotateApiKey = useMutation(api.projects.rotateApiKey);
 
   const [newKey, setNewKey] = useState<string | null>(null);
   const [rotating, setRotating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleRotate() {
     if (!projectId) return;
@@ -39,6 +46,7 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
     }
 
     setRotating(true);
+    setError(null);
     try {
       const result = await rotateApiKey({ projectId: projectId as Id<"projects"> });
       if (isPostHogConfigured) {
@@ -46,19 +54,23 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
       }
       setNewKey(result.plaintextApiKey);
     } catch (err) {
-      console.error("Failed to rotate API key:", err);
+      setError(err instanceof Error ? err.message : "Could not rotate the API key. Try again.");
     } finally {
       setRotating(false);
     }
   }
 
   function copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(text).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+      () => setError("Could not copy automatically. Select the key and copy it manually."),
+    );
   }
 
-  if (project === undefined) {
+  if (project === undefined || adminProject === undefined) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-40 w-full rounded-none" />
@@ -69,7 +81,7 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
   if (!project) {
     return (
       <div className="border border-dashed border-border py-16 text-center font-mono text-sm uppercase tracking-widest text-black/55">
-        Project not found
+        Project not found or access denied
       </div>
     );
   }
@@ -77,7 +89,7 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
   return (
     <div className="space-y-8 max-w-3xl">
       <Card className="p-6 rounded-none border-border bg-white shadow-none space-y-6">
-        <div className="flex items-start justify-between">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">Active API Key</h3>
             <p className="text-[11px] text-black/55 mt-1">This key grants write access to your project&apos;s ingestion pipeline.</p>
@@ -85,12 +97,22 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
           <Button 
             variant="outline" 
             onClick={handleRotate}
-            disabled={rotating}
+            disabled={rotating || !canRotate}
+            title={canRotate ? undefined : "Admin access required"}
             className="rounded-none border-black/15 h-8 px-3 font-mono text-[10px] uppercase hover:bg-black hover:text-white"
           >
             {rotating ? "Rotating..." : <span className="flex items-center gap-2"><RefreshCw className="size-3" /> Rotate Key</span>}
           </Button>
         </div>
+
+        {!canRotate ? (
+          <p role="status" className="border border-black/15 bg-black/5 p-3 font-mono text-[10px] uppercase tracking-widest text-black/60">
+            Read only. Only project admins can rotate the API key.
+          </p>
+        ) : null}
+        {error ? (
+          <p role="alert" className="border border-black p-3 font-mono text-[11px] text-black">{error}</p>
+        ) : null}
 
         {newKey ? (
           <div className="p-4 border border-black bg-black/5 space-y-4 animate-in fade-in slide-in-from-top-2">
@@ -128,14 +150,14 @@ export function ApiKeysManager({ projectId }: ApiKeysManagerProps) {
               </Button>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1">
                 <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Created</label>
                 <div className="text-[11px] font-mono text-black/60">
                   {project.apiKeyCreatedAt ? formatRelativeTime(project.apiKeyCreatedAt) : "Unknown"}
                 </div>
               </div>
-              <div className="space-y-1 text-right">
+              <div className="space-y-1 sm:text-right">
                 <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">Last Used</label>
                 <div className="text-[11px] font-mono text-black/60">
                   {project.apiKeyLastUsedAt ? formatRelativeTime(project.apiKeyLastUsedAt) : "Never"}

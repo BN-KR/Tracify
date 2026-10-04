@@ -48,10 +48,6 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  if (!projectId) {
-    return <div className="border border-black/15 bg-white p-6"><h2 className="font-mono text-xl text-black">Project Settings</h2><p className="mt-2 max-w-xl font-sans text-sm leading-6 text-black/60">Project settings are shown read-only until a project is selected.</p></div>;
-  }
-
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (project) {
@@ -69,6 +65,10 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
     }
   }, [project]);
   /* eslint-enable react-hooks/set-state-in-effect */
+
+  if (!projectId) {
+    return <div className="border border-black/15 bg-white p-6"><h2 className="font-mono text-xl text-black">Project Settings</h2><p className="mt-2 max-w-xl font-sans text-sm leading-6 text-black/60">Project settings are shown read-only until a project is selected.</p></div>;
+  }
 
   async function handleSave() {
     if (!projectId) return;
@@ -173,6 +173,14 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
       <div className="space-y-6">
         <Skeleton className="h-40 w-full rounded-none" />
         <Skeleton className="h-60 w-full rounded-none" />
+      </div>
+    );
+  }
+
+  if (project === null) {
+    return (
+      <div role="alert" className="border border-dashed border-border py-16 text-center font-mono text-sm uppercase tracking-widest text-black/55">
+        Project not found or access denied
       </div>
     );
   }

@@ -1,5 +1,21 @@
 # Langfuse parity-plus product epic — 2026-09-03
 
+## 2026-10-03 final integration note
+
+The combined dashboard hardening slices were verified without commits, pushes, merges, or deploys. Project-scoped routes and live backend integrations were preserved. Stripe was aligned to the installed SDK API version; typecheck, content tests, focused lint, build, and diff checks passed. Full lint still reports unrelated pre-existing errors outside the integration diff.
+
+## Dashboard route boundary hardening — 2026-10-03
+
+- [completed] Remove empty-project-ID domain renders from legacy unscoped dashboard entries.
+- [completed] Redirect those entries through `/dashboard`, where the existing auth-aware project selection flow chooses a valid project or shows the empty-project state.
+- [completed] Leave shared shell, project gate, switcher, domain components, and backend/auth paths unchanged.
+
+## 2026-10-03 dashboard overview ownership
+
+- Keep overview and paired analytics surfaces on live Convex/Tinybird/Redis data paths.
+- Replace captured costs rendering only within the owned project costs route.
+- Verify changed files with focused lint, TypeScript, and diff checks.
+
 ## Google Analytics 4 — 2026-09-15
 
 - Implemented the consent-aware GA4 tag, environment contract, cookie-policy disclosure, and deterministic browser coverage.
@@ -246,6 +262,11 @@ Each numbered capability becomes its own 1–3 day implementation issue or a sma
 4. [completed] Verify generated metadata routes and build output.
 
 # tracify Strategic Implementation Plan
+
+## 2026-10-03 trace/run/session UI ownership slice
+
+- Completed a focused responsive/state synchronization pass within the owned trace surfaces: hierarchical span trees remain inspectable on mobile, session run selection is shareable through the URL, and search availability errors remain legible on the light dashboard palette.
+- Verification: focused ESLint and `git diff --check` passed. Full typecheck remains blocked by the pre-existing Stripe SDK API-version mismatch in `src/lib/stripe.ts`.
 
 ## Better Auth Migration (2026-08-10)
 

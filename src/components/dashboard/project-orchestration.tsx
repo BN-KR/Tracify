@@ -162,6 +162,21 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
     );
   }
 
+  if (project === null) {
+    return (
+      <Card className="max-w-3xl p-6 rounded-none border-border bg-white shadow-none space-y-2" role="alert">
+        <h3 className="font-mono text-[14px] text-black uppercase tracking-widest flex items-center gap-2">
+          <AlertCircle className="size-4" />
+          Project unavailable
+        </h3>
+        <p className="text-[11px] text-black/55">
+          This project does not exist or your account does not have access to its orchestration policy. Ask a project
+          owner to invite you, or switch to a project you belong to.
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-8 max-w-3xl">
       {/* Enforcement Mode */}
@@ -181,7 +196,7 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
             <label className="text-[10px] uppercase tracking-widest text-black/55 font-mono">
               Enforcement Mode
             </label>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               {(["observe", "enforce"] as const).map((mode) => (
                 <button
                   key={mode}
@@ -468,9 +483,9 @@ export function ProjectOrchestration({ projectId }: ProjectOrchestrationProps) {
       </Card>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
         {error ? (
-          <div className="flex items-center gap-2 text-red-600 text-[11px] font-mono">
+          <div role="alert" className="flex items-center gap-2 text-red-600 text-[11px] font-mono">
             <AlertCircle className="size-3" />
             {error}
           </div>
