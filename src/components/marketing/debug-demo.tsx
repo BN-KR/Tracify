@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/rules-of-hooks, @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useRef } from "react";

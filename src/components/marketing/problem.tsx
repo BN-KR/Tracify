@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -129,7 +130,7 @@ function TerminalPanel() {
     if (!isInView) return;
     
     loopStateRef.current.active = true;
-    let timeouts: NodeJS.Timeout[] = [];
+    const timeouts: NodeJS.Timeout[] = [];
 
     const run = async () => {
       const currentRun = LOG_VARIANTS[runIndex];

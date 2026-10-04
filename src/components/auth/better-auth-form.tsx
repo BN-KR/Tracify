@@ -15,7 +15,7 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
-  const requestedPath = searchParams.get("redirect") || searchParams.get("redirect_url");
+  const requestedPath = searchParams.get("redirect_url") || searchParams.get("redirect");
   const callbackPath = safeRelativePath(requestedPath, mode === "sign-up" ? "/onboarding" : "/dashboard");
   const intent = parseEntryIntent(searchParams.get("intent"));
 
