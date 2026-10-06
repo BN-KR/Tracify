@@ -1,0 +1,11 @@
+node_modules/
+.next/
+test-results/
+playwright-report/
+tsconfig.tsbuildinfo
+test-results/
+scripts/*.log
+
+# Local visual-parity scratch output must never be part of a deployment.
+tmp-*.png
+artifacts/

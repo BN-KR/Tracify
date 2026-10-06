@@ -1,6 +1,7 @@
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 import { BillingPlan } from "@/components/dashboard/billing-plan";
 import { IngestQuotaCard } from "@/components/dashboard/ingest-quota-card";
+import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
+import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
 
 export default async function BillingPage({
   params,
@@ -9,17 +10,6 @@ export default async function BillingPage({
 }) {
   const { projectId } = await params;
 
-  return (
-    <div className="flex flex-col gap-6">
-      <DashboardTopbar
-        title="Billing & Plan"
-        description="Real usage, current plan, and beta plan access."
-      />
-
-      <div className="px-6 pb-20 space-y-6 max-w-3xl">
-        <IngestQuotaCard projectId={projectId} />
-        <BillingPlan projectId={projectId} />
-      </div>
-    </div>
-  );
+  const workspace = createLiveWorkspace({ id: projectId, name: "Project", organizationName: "Workspace" });
+  return <CapturedWorkspace workspace={workspace} childrenOnly segments={["settings"]}><div className="captured-route-stack"><IngestQuotaCard projectId={projectId} /><BillingPlan projectId={projectId} /></div></CapturedWorkspace>;
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Activity,
   ArrowRight,
@@ -117,6 +117,7 @@ type MenuName = keyof typeof menus;
 export function Navbar() {
   const [active, setActive] = useState<MenuName | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isHome = usePathname() === "/";
   const router = useRouter();
   const { data: session } = authClient.useSession();
 
@@ -129,19 +130,20 @@ export function Navbar() {
     <header className="fixed inset-x-0 top-0 z-50">
       <div
         onMouseLeave={() => setActive(null)}
-        className="w-full border-b border-black/20 bg-[#eceae3] text-black shadow-[0_8px_0_rgba(0,0,0,0.22)]"
+        className={`w-full border-b ${isHome ? "border-white/20 bg-[#08090a]/95 text-white shadow-none" : "border-black/20 bg-[#eceae3] text-black shadow-[0_8px_0_rgba(0,0,0,0.22)]"}`}
       >
         <div className="flex h-[54px] items-center justify-between px-4 sm:px-6">
           <Link
             href="/"
             aria-label="Tracify home"
-            className="active-press focus-visible:outline-2 focus-visible:outline-offset-4"
+          className="active-press focus-visible:outline-2 focus-visible:outline-offset-4"
           >
-            <BrandLogo />
+            {isHome ? <span className="font-sans text-[20px] font-medium lowercase tracking-[-.07em]">tracify</span> : <BrandLogo />}
           </Link>
           <nav className="hidden h-full items-center gap-7 font-mono text-[9px] uppercase tracking-[0.12em] md:flex">
-            <Link href="/pricing" className="flex h-full items-center border-b-2 border-transparent normal-case hover:border-black/35">Pricing</Link>
+            {isHome ? <Link href="/pricing" className="order-4 flex h-full items-center border-b-2 border-transparent normal-case hover:border-white/60">Pricing</Link> : <Link href="/pricing" className="flex h-full items-center border-b-2 border-transparent normal-case hover:border-black/35">Pricing</Link>}
             {(Object.keys(menus) as MenuName[]).map((name) => (
+              isHome && (name === "Developers" || name === "Company") ? null :
               <button
                 key={name}
                 type="button"
@@ -151,11 +153,12 @@ export function Navbar() {
                   setActive((current) => (current === name ? null : name))
                 }
                 aria-expanded={active === name}
-                className={`h-full border-b-2 transition-colors ${active === name ? "border-black" : "border-transparent hover:border-black/35"}`}
+                className={`${isHome && name === "Solutions" ? "order-2" : isHome ? "order-1" : ""} h-full border-b-2 transition-colors ${active === name ? (isHome ? "border-white" : "border-black") : isHome ? "border-transparent hover:border-white/60" : "border-transparent hover:border-black/35"}`}
               >
                 {name}
               </button>
             ))}
+            {isHome && <Link href="/docs" className="order-3 flex h-full items-center border-b-2 border-transparent hover:border-white/60">Docs</Link>}
           </nav>
           <div className="hidden items-center gap-4 md:flex">
             {session ? (
@@ -163,13 +166,13 @@ export function Navbar() {
                 <button
                   type="button"
                   onClick={() => void signOut()}
-                  className="font-mono text-[8px] uppercase tracking-[0.12em] text-black/55 hover:text-black"
+                  className={`font-mono text-[8px] uppercase tracking-[0.12em] ${isHome ? "text-white/70 hover:text-white" : "text-black/55 hover:text-black"}`}
                 >
                   Sign out
                 </button>
                 <Link
                   href="/dashboard"
-                  className="bg-black px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black"
+                  className={`px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] ${isHome ? "bg-white text-black hover:bg-white/85" : "bg-black text-white hover:bg-[#f4d44d] hover:text-black"}`}
                 >
                   Dashboard
                 </Link>
@@ -178,15 +181,15 @@ export function Navbar() {
               <>
                 <Link
                   href="/cloud?next=/sign-in"
-                  className="px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] hover:bg-black/5"
+                  className={`px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] ${isHome ? "text-white/70 hover:bg-white/10 hover:text-white" : "hover:bg-black/5"}`}
                 >
                   Sign in
                 </Link>
                 <Link
-                  href="/cloud?next=/sign-up"
-                  className="bg-black px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black"
+                  href={isHome ? "/demo" : "/cloud?next=/sign-up"}
+                  className={`px-4 py-2.5 font-mono text-[8px] uppercase tracking-[0.12em] ${isHome ? "bg-white text-black hover:bg-white/85" : "bg-black text-white hover:bg-[#f4d44d] hover:text-black"}`}
                 >
-                  Start free
+                  {isHome ? "Explore a trace" : "Start free"}
                 </Link>
               </>
             )}
@@ -195,7 +198,7 @@ export function Navbar() {
             type="button"
             onClick={() => setMobileOpen((open) => !open)}
             aria-label="Toggle navigation"
-            className="md:hidden"
+            className={`md:hidden ${isHome ? "text-white" : "text-black"}`}
           >
             {mobileOpen ? (
               <X className="size-5" />

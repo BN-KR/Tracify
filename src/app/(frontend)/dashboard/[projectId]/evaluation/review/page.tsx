@@ -1,7 +1,9 @@
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 import { ReviewQueue } from "@/components/dashboard/review-queue";
+import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
+import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
 
 export default async function ReviewPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
-  return <div><DashboardTopbar title="Annotation Queue" description="Turn production edge cases into reviewed labels and evaluation evidence." /><div className="p-6"><ReviewQueue projectId={projectId} /></div></div>;
+  const workspace = createLiveWorkspace({ id: projectId, name: "Project", organizationName: "Workspace" });
+  return <CapturedWorkspace workspace={workspace} childrenOnly segments={["annotation-queues"]}><ReviewQueue projectId={projectId} /></CapturedWorkspace>;
 }

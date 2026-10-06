@@ -1,4 +1,4 @@
-// Adapted from langfuse/langfuse (MIT License)
+// Adapted from open-source observability patterns (MIT License)
 // Source: web/src/features/scores/lib/mergeScoresWithCache.ts
 // See /THIRD_PARTY_NOTICES.md
 //

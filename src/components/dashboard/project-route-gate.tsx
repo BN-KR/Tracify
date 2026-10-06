@@ -5,8 +5,11 @@ import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 
 import { api } from "convex/_generated/api";
+import type { Id } from "convex/_generated/dataModel";
 import { ConvexAuthState } from "@/components/auth/convex-auth-state";
 import { useConvexAuthReadiness } from "@/hooks/use-convex-auth-readiness";
+import { LiveWorkspaceIdentityContext } from "@/features/dashboard-workspace/live-workspace-context";
+import { authClient } from "@/lib/auth-client";
 
 const LAST_PROJECT_STORAGE_KEY = "tracify.lastProjectId";
 const PROJECT_ID_STORAGE_KEY = "tracify.onboarding.projectId";
@@ -20,13 +23,24 @@ export function ProjectRouteGate({
 }) {
   const router = useRouter();
   const auth = useConvexAuthReadiness();
+  const { data: betterAuthSession, isPending: betterAuthPending } = authClient.useSession();
   const isAuthenticated = auth.isAuthenticated;
   const routeState = useQuery(
     api.projects.getProjectRouteState,
     isAuthenticated ? { projectId } : "skip",
   );
+  const project = useQuery(
+    api.projects.getProject,
+    isAuthenticated ? { projectId: projectId as Id<"projects"> } : "skip",
+  );
 
   useEffect(() => {
+    if (betterAuthPending) return;
+    if (!betterAuthSession?.user) {
+      const returnPath = `${window.location.pathname}${window.location.search}`;
+      router.replace(`/sign-in?redirect_url=${encodeURIComponent(returnPath)}`);
+      return;
+    }
     if (auth.status === "unauthenticated") {
       const returnPath = `${window.location.pathname}${window.location.search}`;
       router.replace(`/sign-in?redirect_url=${encodeURIComponent(returnPath)}`);
@@ -44,7 +58,7 @@ export function ProjectRouteGate({
     window.localStorage.removeItem(LAST_PROJECT_STORAGE_KEY);
     window.sessionStorage.removeItem(PROJECT_ID_STORAGE_KEY);
     return;
-  }, [auth.status, isAuthenticated, routeState, router]);
+  }, [auth.status, betterAuthPending, betterAuthSession?.user, isAuthenticated, routeState, router]);
 
   if (auth.status === "error") {
     const returnPath =
@@ -54,7 +68,11 @@ export function ProjectRouteGate({
     return <ConvexAuthState mode="error" redirectPath={returnPath} />;
   }
 
-  if (auth.status === "loading" || !isAuthenticated || routeState === undefined) {
+  // Convex can briefly report an unauthenticated route state while Better Auth
+  // has already established the browser session. Keep the route in the
+  // readiness state until the Convex exchange catches up instead of rendering
+  // protected children or starting a second sign-in redirect.
+  if (betterAuthPending || !betterAuthSession?.user || auth.status === "loading" || !isAuthenticated || routeState === undefined || routeState.status === "unauthenticated") {
     return (
       <div className="px-6 py-6 font-mono text-sm text-black/55">
         Loading project...
@@ -84,7 +102,11 @@ export function ProjectRouteGate({
     );
   }
 
-  return <>{children}</>;
+  return project ? (
+    <LiveWorkspaceIdentityContext.Provider value={{ id: projectId, name: project.name, organizationName: "Workspace" }}>
+      {children}
+    </LiveWorkspaceIdentityContext.Provider>
+  ) : <>{children}</>;
 }
 
 function RouteStatePanel({

@@ -135,7 +135,9 @@ export function useProjectStats({
     hasSeenLiveKeyRef.current = false;
     activeRequestKeyRef.current = `${projectId}:${range}`;
 
-    void fetchStats({ showLoading: true, force: true });
+    const initialRefresh = window.setTimeout(() => {
+      void fetchStats({ showLoading: true, force: true });
+    }, 0);
 
     function handleVisibilityChange() {
       if (document.visibilityState === "visible") {
@@ -147,6 +149,7 @@ export function useProjectStats({
 
     return () => {
       cancelledRef.current = true;
+      window.clearTimeout(initialRefresh);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [fetchStats, projectId, range]);

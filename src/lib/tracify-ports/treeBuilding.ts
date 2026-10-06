@@ -1,4 +1,4 @@
-// Adapted from langfuse/langfuse (MIT License)
+// Adapted from open-source observability patterns (MIT License)
 // Source: web/src/features/traces/fns/treeBuilding.ts
 // See /THIRD_PARTY_NOTICES.md
 //
@@ -17,7 +17,7 @@
 // Complexity: O(N) time, O(N) space - handles unlimited depth without stack overflow.
 //
 // Field names below are Tracify's own (convex/schema.ts `runSpanCache.spans[]`:
-// spanId, parentSpanId, costUsd, latencyMs, modelId, toolName), not Langfuse's
+// spanId, parentSpanId, costUsd, latencyMs, modelId, toolName), not an external vendor implementation
 // Prisma/Clickhouse-typed ObservationReturnType — the tree/cost aggregation
 // algorithm was adapted to that shape.
 
@@ -245,7 +245,7 @@ function buildTreeNodesBottomUp(
 
 /**
  * Builds the span tree (roots + O(1) node lookup) from a run's cached spans.
- * Unlike Langfuse's trace tree, there is no synthetic wrapper root here —
+ * Unlike a reference trace tree, there is no synthetic wrapper root here —
  * Tracify's runSpanCache spans are already rooted (top-level spans have no
  * parentSpanId), so roots are returned directly.
  */

@@ -1,9 +1,10 @@
 "use client";
 
 import { useId } from "react";
+import type { SVGProps } from "react";
 import { cn } from "@/lib/utils";
 
-interface DotPatternProps {
+interface DotPatternOptions {
   width?: number;
   height?: number;
   x?: number;
@@ -12,8 +13,8 @@ interface DotPatternProps {
   cy?: number;
   cr?: number;
   className?: string;
-  [key: string]: any;
 }
+type DotPatternProps = DotPatternOptions & SVGProps<SVGSVGElement>;
 
 export function DotPattern({
   width = 16,

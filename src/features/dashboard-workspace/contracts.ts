@@ -64,3 +64,26 @@ export type DashboardWorkspaceData = {
 export type DashboardWorkspace = DashboardWorkspaceData & {
   dataSource: "tracify-live" | "tracify-sandbox";
 };
+
+export type WorkspaceCapability = "read" | "filter" | "create" | "update" | "delete" | "annotate" | "configure";
+
+export type WorkspaceAction = {
+  type: "create" | "update" | "delete" | "annotate" | "configure";
+  surface: WorkspaceSurface;
+  recordId?: string;
+  payload?: Record<string, string | number | boolean | null>;
+};
+
+export type WorkspaceActionResult = {
+  ok: boolean;
+  mode: WorkspaceMode;
+  message: string;
+  recordId?: string;
+};
+
+export type WorkspaceAdapter = {
+  mode: WorkspaceMode;
+  capabilities: ReadonlySet<WorkspaceCapability>;
+  workspace: DashboardWorkspace;
+  dispatch(action: WorkspaceAction): Promise<WorkspaceActionResult>;
+};

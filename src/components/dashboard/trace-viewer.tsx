@@ -35,6 +35,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CancelRunButton } from "./cancel-run-button";
 import { useNow } from "@/hooks/use-now";
 import { captureAnalytics } from "@/lib/analytics";
+import { SpanTree } from "./span-tree";
 
 const isPostHogConfigured = Boolean(
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
@@ -261,6 +262,14 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
 
       <SpanOverview spans={safeSpans} />
       <TraceQualityPanel projectId={projectId} runId={runId} />
+      <SpanTree
+        spans={safeSpans}
+        selectedSpanId={replaySpan?.spanId ?? null}
+        onSelectSpan={(spanId) => {
+          const index = safeSpans.findIndex((span) => span.spanId === spanId);
+          if (index >= 0) selectSpan(index);
+        }}
+      />
       <LatencyWaterfall spans={safeSpans} />
 
       <div className="border border-border bg-muted/10 p-4 space-y-4">

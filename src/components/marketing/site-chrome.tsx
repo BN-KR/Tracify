@@ -7,6 +7,7 @@ import { SiteAssistant } from "@/components/marketing/site-assistant";
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isHome = pathname === "/";
   const isDashboard = pathname.startsWith("/dashboard") || pathname.startsWith("/tracify-preview");
   const isPlayground = pathname.startsWith("/playground");
   const isOnboarding = pathname.startsWith("/onboarding");
@@ -19,8 +20,8 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     <>
       <Navbar />
       {children}
-      <Footer />
-      <SiteAssistant />
+      {!isHome && <Footer />}
+      {!isHome && <SiteAssistant />}
     </>
   );
 }

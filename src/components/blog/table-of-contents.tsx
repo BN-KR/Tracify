@@ -1,31 +1,31 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
+
+type TocChild = { text?: string };
+type TocBlock = { _type?: string; style?: string; children?: TocChild[] };
 
 function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-const hideScrollbar: React.CSSProperties = {
+const hideScrollbar: CSSProperties = {
   scrollbarWidth: "none",
   msOverflowStyle: "none",
 };
 
-export function TableOfContents({ body, collapsible }: { body: any[]; collapsible?: boolean }) {
+export function TableOfContents({ body, collapsible }: { body: TocBlock[]; collapsible?: boolean }) {
   const [activeId, setActiveId] = useState<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  if (!body || !Array.isArray(body)) return null;
-
-  const headings = body.filter(
-    (block: any) => block?._type === "block" && (block.style === "h2" || block.style === "h3")
-  );
-
-  const headingItems = headings.map((heading: any) => {
-    const text = heading.children?.map((c: any) => c.text).join("") || "";
+  const headingItems = useMemo(() => body.filter(
+    (block) => block?._type === "block" && (block.style === "h2" || block.style === "h3")
+  ).map((heading) => {
+    const text = heading.children?.map((c) => c.text).join("") || "";
     const slug = slugify(text);
     return { text, slug, level: heading.style };
-  });
+  }), [body]);
 
   useEffect(() => {
     function handleScroll() {

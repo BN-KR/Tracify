@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
-import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
-import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
+import { SandboxWorkspace } from "@/features/dashboard-workspace/components/sandbox-workspace";
 
 export const metadata: Metadata = {
   title: "Explore the Sandbox",
@@ -10,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function PlaygroundPage() {
-  return <CapturedWorkspace workspace={sandboxWorkspace} />;
+  return <SandboxWorkspace />;
 }

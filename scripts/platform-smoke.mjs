@@ -1,4 +1,5 @@
 const baseUrl = (process.env.TRACIFY_SMOKE_BASE_URL || "http://127.0.0.1:3000").replace(/\/+$/, "");
+const requestTimeoutMs = Number(process.env.TRACIFY_SMOKE_TIMEOUT_MS || 8000);
 const routes = [
   ["/", 200],
   ["/demo", 200],
@@ -31,7 +32,7 @@ const routes = [
 
 let failed = 0;
 async function fetchWithTimeout(url, options = {}) {
-  const signal = AbortSignal.timeout(8000);
+  const signal = AbortSignal.timeout(requestTimeoutMs);
   return fetch(url, { ...options, signal });
 }
 for (const [path, expected] of routes) {

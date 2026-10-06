@@ -1,5 +1,6 @@
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 import { ProjectManagement } from "@/components/dashboard/project-management";
+import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
+import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
 
 export default async function ProjectManagePage({
   params,
@@ -8,12 +9,6 @@ export default async function ProjectManagePage({
 }) {
   const { projectId } = await params;
 
-  return (
-    <div className="flex flex-col gap-6">
-      <DashboardTopbar title="Project Management" />
-      <div className="px-6 pb-20">
-        <ProjectManagement projectId={projectId} />
-      </div>
-    </div>
-  );
+  const workspace = createLiveWorkspace({ id: projectId, name: "Project", organizationName: "Workspace" });
+  return <CapturedWorkspace workspace={workspace} childrenOnly segments={["settings"]}><ProjectManagement projectId={projectId} /></CapturedWorkspace>;
 }

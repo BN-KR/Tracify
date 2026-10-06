@@ -29,9 +29,19 @@ function isLocalHost(hostname: string) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname.endsWith(".localhost");
 }
 
+function hasBetterAuthSession(request: NextRequest) {
+  return Boolean(request.cookies.get("better-auth.session_token")?.value || request.cookies.get("__Secure-better-auth.session_token")?.value);
+}
+
 export function proxy(request: NextRequest) {
   const deploymentKind = process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND ?? "marketing";
   const { pathname, search } = request.nextUrl;
+
+  if (pathname.startsWith("/dashboard/") && !hasBetterAuthSession(request)) {
+    const signIn = new URL("/sign-in", request.url);
+    signIn.searchParams.set("redirect_url", `${pathname}${search}`);
+    return NextResponse.redirect(signIn);
+  }
 
   if (
     deploymentKind === "cloud" &&

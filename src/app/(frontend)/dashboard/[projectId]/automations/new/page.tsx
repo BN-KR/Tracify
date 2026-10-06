@@ -1,2 +1,9 @@
-import { CapturedSurface } from "@/components/dashboard/captured-surface";
-export default async function NewAutomationPage({ params }: { params: Promise<{ projectId: string }> }) { const { projectId } = await params; return <CapturedSurface projectId={projectId} title="Create automation" description="Define an event source, action, and destination." />; }
+import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
+import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
+import { AutomationsWorkspace } from "@/components/dashboard/automations-workspace";
+
+export default async function NewAutomationPage({ params }: { params: Promise<{ projectId: string }> }) {
+  const { projectId } = await params;
+  const workspace = createLiveWorkspace({ id: projectId, name: "Project", organizationName: "Workspace" });
+  return <CapturedWorkspace workspace={workspace} toolbarTitle="Create automation" childrenOnly segments={["settings"]}><AutomationsWorkspace projectId={projectId} /></CapturedWorkspace>;
+}

@@ -1,13 +1,9 @@
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 import { DocsViewer } from "@/components/dashboard/docs-viewer";
+import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
+import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
 
-export default function DocsPage() {
-  return (
-    <div className="flex flex-col gap-6">
-      <DashboardTopbar title="Documentation" description="SDK Reference & Quickstart" />
-      <div className="px-6 pb-10">
-        <DocsViewer />
-      </div>
-    </div>
-  );
+export default async function DocsPage({ params }: { params: Promise<{ projectId: string }> }) {
+  const { projectId } = await params;
+  const workspace = createLiveWorkspace({ id: projectId, name: "Project", organizationName: "Workspace" });
+  return <CapturedWorkspace workspace={workspace} childrenOnly segments={["settings"]}><DocsViewer /></CapturedWorkspace>;
 }

@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+// The managed Windows Next server can spend more than the default test budget
+// compiling the first uncached public route.
+test.describe.configure({ timeout: 120_000 });
+
 test("public product surfaces load", async ({ request }) => {
   for (const route of ["/", "/pricing", "/docs", "/integrations"]) {
     const response = await request.get(route);

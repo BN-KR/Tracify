@@ -15,7 +15,9 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
-  const requestedPath = searchParams.get("redirect") || searchParams.get("redirect_url");
+  // `redirect_url` is canonical; keep accepting the legacy `redirect` name
+  // only when the canonical parameter is absent.
+  const requestedPath = searchParams.get("redirect_url") || searchParams.get("redirect");
   const callbackPath = safeRelativePath(requestedPath, mode === "sign-up" ? "/onboarding" : "/dashboard");
   const intent = parseEntryIntent(searchParams.get("intent"));
 

@@ -6,10 +6,10 @@ import { organizationClient } from "better-auth/client/plugins";
 export const authClient = createAuthClient({
   plugins: [
     organizationClient(),
-    sentinelClient({
+    ...(process.env.NODE_ENV === "production" ? [sentinelClient({
       identifyUrl: process.env.NEXT_PUBLIC_BETTER_AUTH_IDENTIFY_URL,
       autoSolveChallenge: true,
-    }),
+    })] : []),
     convexClient(),
   ],
 });

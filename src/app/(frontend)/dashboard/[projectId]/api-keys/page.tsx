@@ -1,5 +1,6 @@
 import { ApiKeysManager } from "@/components/dashboard/api-keys-manager";
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
+import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
+import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
 
 export default async function ApiKeysPage({
   params,
@@ -8,16 +9,6 @@ export default async function ApiKeysPage({
 }) {
   const { projectId } = await params;
 
-  return (
-    <div className="flex flex-col gap-6">
-      <DashboardTopbar
-        title="API Keys"
-        description="Manage security tokens for authenticating your agent runs."
-      />
-
-      <div className="px-6 pb-20">
-        <ApiKeysManager projectId={projectId} />
-      </div>
-    </div>
-  );
+  const workspace = createLiveWorkspace({ id: projectId, name: "Project", organizationName: "Workspace" });
+  return <CapturedWorkspace workspace={workspace} childrenOnly segments={["settings"]}><ApiKeysManager projectId={projectId} /></CapturedWorkspace>;
 }

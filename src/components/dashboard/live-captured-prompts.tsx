@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
-import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
+import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
 
 export function LiveCapturedPrompts({ projectId }: { projectId: string }) {
   const createPrompt = useMutation(api.prompts.create);
@@ -17,7 +17,7 @@ export function LiveCapturedPrompts({ projectId }: { projectId: string }) {
     const version = prompt.versions[0];
     return { id: prompt._id, name: prompt.name, status: version?.labels.includes("production") ? "Production" : "Draft", environment: "all", timestamp: new Date(prompt.updatedAt).toLocaleDateString(), model: version?.model ?? "—", input: version?.content ?? "" };
   });
-  const workspace = { ...sandboxWorkspace, mode: "live" as const, readOnly: false, dataSource: "tracify-live" as const, project: { id: projectId, name: project.name, organizationName: "Workspace" }, collections: { ...sandboxWorkspace.collections, prompts: { description: "Version, test, and promote prompts used by your agents.", records } } };
+  const workspace = createLiveWorkspace({ id: projectId, name: project.name, organizationName: "Workspace" }, { collections: { prompts: { description: "Version, test, and promote prompts used by your agents.", records } } });
   async function savePrompt(input: { promptId?: string; name: string; type: "text" | "chat"; content: string }) {
     const typedProjectId = projectId as Id<"projects">;
     if (input.promptId) {

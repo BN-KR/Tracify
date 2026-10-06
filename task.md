@@ -1,4 +1,30 @@
+# 2026-09-25 — Always-on cloud coding environment
+
+## Active
+
+
 # 2026-09-02 — First-customer execution
+
+## 2026-09-17 — Dashboard investigation queue
+
+- [completed] Replace the project Home attention block with a dark, dense failure investigation queue using real failed runs and direct trace links.
+- [completed] Add a persistent review action using project-scoped Convex annotations; reviewed failures leave the default queue.
+- [completed] Add shadcn review dialog fields for cause, evidence, next action, and optional owner.
+- [completed] Resolve the existing `runs-table.tsx` TypeScript errors; focused ESLint and full TypeScript pass.
+- [pending] Run browser verification for populated, empty, reviewed, and mobile investigation queue states.
+- [completed] Add and pass a deterministic public Sandbox browser regression against the running local app.
+- [completed] Align the public entry-point browser assertion with the current Tracify Demo sample identity.
+- [completed] Align the prompt collection browser assertion with the current Tracify-owned fixture name.
+- [completed] Run the full account-access browser contract; all 12 tests pass.
+
+## 2026-09-14 — Public homepage release validation
+
+- [pending owner] Resolve the existing TypeScript error in the already-modified `src/components/dashboard/runs-table.tsx` (`FilterCondition[]` inferred with empty-string entries at line 75), then rerun the full production build before any production release that includes the homepage and visual refresh. Re-run on 2026-09-14 again confirmed successful bundling followed by this same typecheck failure. Homepage lint, E2E (2/2), SEO metadata/social-card assertions, mobile overflow check, and visual QA passed. A broad platform-smoke attempt timed out and is not counted as passing.
+
+## 2026-09-09 — Better Auth environment diagnosis
+
+- [pending owner] Compare the active Convex deployment (`jovial-owl-711.eu-west-1` for local development) with the Better Auth dashboard project/API key environment. Confirm `BETTER_AUTH_SECRET` and `BETTER_AUTH_API_KEY` are configured together in that deployment and that the dashboard key is not from another region/instance.
+- [pending owner] Replace the shared local/production Better Auth dashboard API key arrangement with separate dashboard projects/keys, or explicitly use one canonical auth deployment. Keep `BETTER_AUTH_SECRET` environment-specific unless a deliberate global-session migration is intended.
 
 ## 2026-09-08 — Site linking and mobile hardening
 
@@ -1611,3 +1637,129 @@ Current verification gap: completing a valid provider-backed sign-in still requi
 93. [in progress] Align Users Sandbox identifiers, localized event timestamps, fixed column widths, and mobile overflow with the populated page 027 reference while preserving live data behavior.
 94. [in progress] Correct Tracing table column geometry after the leading selection column; verify Type icon, Start Time, Input, Output, and horizontal overflow across all six viewports.
 95. [in progress] Keep the accepted Tracing selector/icon correction and reject the measured vertical-spacing experiment; continue shell and content-density parity from the 28.40%/24.54% baseline.
+96. [in progress] Retain the verified Tracing populated-output fixtures and measured Input-column geometry; continue structural shell/table-density parity because the full matrix is green but raw Tracing mismatch remains.
+97. [in progress] Complete and verify child-only shared-shell migration across all linked live dashboard routes; then continue live functional coverage and residual pixel-parity audits.
+98. [in progress] Replace remaining generic captured fallback surfaces with reference-shell page-specific implementations while preserving Sandbox reset semantics and the no-mixed-branding invariant.
+99. [in progress] Refine the page-specific content and responsive behavior of the newly shell-wrapped fallback routes against the corresponding 4173 reference states.
+100. [in progress] Continue replacing generic fallback content with reference-shaped controls, states, and responsive layouts for each remaining linked route.
+101. [in progress] Complete the authenticated dashboard visible-branding audit and rerun the full rebuilt visual matrix after the reference namespace corrections.
+102. [in progress] Continue page-by-page comparison and functional parity work; current six-viewport captured matrix is green but does not prove every live route is pixel-perfect.
+103. [in progress] Preserve the verified reference accessible names and no-mixed-branding assertions while continuing page-specific live-route parity work.
+104. [in progress] Continue replacing schema-backed generic route fallbacks with their existing live adapters and route-specific reference shell titles.
+105. [in progress] Verify the widget alias redirect and continue full build/smoke verification after the remaining fallback-route migrations.
+106. [in progress] Continue auditing all remaining authenticated route families for generic content, unsupported mutations, and reference-responsive mismatches.
+107. [in progress] Canonicalize or explicitly preserve unscoped `/dashboard/*` legacy aliases without reintroducing the old DashboardTopbar presentation.
+108. [in progress] Finish the unscoped account/organization route audit and run the complete post-canonicalization Playwright and smoke suites.
+109. [in progress] Resolve or document the remaining full-lint baseline separately from the parity work, then continue account/organization route ownership verification.
+110. [in progress] If account/workspace surfaces enter the parity scope, migrate their project-independent shell separately without weakening project-scoped route ownership.
+111. [in progress] Continue resolving dashboard-scope quality-gate findings while keeping unrelated repository lint baseline errors isolated.
+112. [in progress] Preserve Playwright isolation and complete the final release-gate audit without deleting unrelated generated/reference artifacts.
+113. [in progress] Perform a focused crop-level audit of the Tracing desktop mismatch and mobile Sessions/Users residuals before accepting further CSS changes.
+114. [in progress] Reject measured-regression responsive experiments and continue crop-level comparison from the restored baseline.
+115. [in progress] Continue the responsive crop audit from the stabilized 6/6 capture baseline, prioritizing Sessions table geometry and Tracing desktop structure.
+116. [in progress] Reject the measured sidebar typography regression and continue the Tracing page-body crop audit from the restored shell baseline.
+117. [in progress] Reject the Users mobile offset regression and rebuild the restored baseline before the next crop experiment.
+118. [in progress] Continue page-specific parity work from the rebuilt and fully verified baseline.
+119. [in progress] Retain the accepted Tracing header correction and continue isolated body/table parity measurements.
+120. [in progress] Retain the accepted Tracing table geometry correction and continue measuring remaining page-specific differences.
+121. [in progress] Reject the Sessions mobile width regression and rebuild the restored responsive baseline before the next crop pass.
+122. [in progress] Retain the accepted 2px Sessions mobile vertical correction and continue remaining page-specific parity work.
+123. [in progress] Retain the accepted mobile Tracing action-order and inset correction and continue the remaining responsive audit.
+124. [in progress] Reject the unchanged tablet Sessions rail experiment and rebuild the accepted baseline before the next responsive crop pass.
+125. [in progress] Reject the coordinated tablet Sessions geometry regression and rebuild the accepted baseline before deeper structural work.
+126. [in progress] Reject the Users fixed-grid mobile regression and rebuild the accepted baseline before the next surface audit.
+127. [in progress] Preserve the 16/16 functional viewport/account-access verification while continuing pixel-level parity work.
+128. [in progress] Reject the no-effect Home model-label change and rebuild the accepted baseline before continuing data-rendering parity work.
+129. [in progress] Reject the Home path-only SVG regression and rebuild the accepted baseline before implementing complete chart semantics.
+130. [in progress] Reject the complete Home chart-semantics regression (20.70% vs 20.50%) and rebuild the stable baseline before the next crop-level audit.
+131. [in progress] Retain the accepted Sessions desktop header correction and continue the remaining table/crop parity audit.
+132. [in progress] Reject the unchanged Sessions desktop row-density experiment and rebuild the accepted header-only baseline.
+133. [in progress] Reject the Tracing desktop header-offset regression and rebuild the accepted baseline before the next crop audit.
+134. [in progress] Preserve the 10/10 account-access and 6/6 captured Sandbox viewport verification while continuing page-specific parity work.
+135. [in progress] Retain the accepted Sessions-only mobile header-height correction and continue responsive parity work.
+136. [in progress] Reject the Users mobile partial-offset regression and rebuild the accepted responsive baseline.
+137. [in progress] Retain the 390-700px Sessions header breakpoint refinement and continue the remaining responsive audit.
+138. [in progress] Retain the deterministic mobile hamburger icon and continue the remaining responsive parity work.
+139. [in progress] Retain the Users-only mobile controls alignment and continue the remaining responsive audit.
+140. [in progress] Reject the Users mobile table-origin regression and rebuild the accepted controls-only baseline.
+141. [in progress] Retain the accepted Tracing mobile action grouping and continue the desktop/tablet Tracing audit.
+142. [in progress] Reject the Tracing desktop action-height regression and rebuild the accepted mobile-only grouping baseline.
+143. [in progress] Preserve the current 6/6 matrix and measured Tracing/Users/Sessions residuals while continuing the next crop-level audit.
+144. [in progress] Retain the Tracing table-options control and continue the remaining desktop/tablet parity audit.
+145. [in progress] Retain the Tracing Quality/Slow/Cost icon alignment pass and continue the remaining parity audit.
+146. [in progress] Retain the accepted 701-800px tablet wrapped-header correction and continue tablet/desktop parity work.
+147. [in progress] Preserve the 6/6 verification after the tablet shell pass and continue remaining desktop/tablet structural audit.
+148. [in progress] Preserve the 10/10 account-access verification after the Tracing options-control accessibility fix and continue parity work.
+149. [in progress] Preserve the final 6/6 six-viewport parity verification after the accessibility correction and continue the remaining page-level residual audit.
+150. [in progress] Retain the mobile assistant/time-range header geometry correction, preserve the refreshed 6/6 matrix and 211-route build, and continue the remaining Sessions/Users/table audit.
+151. [in progress] Reject the Sessions mobile toolbar-offset regression and restore the accepted baseline before continuing the remaining crop audit.
+152. [in progress] Confirm the restored source/runtime baseline after the rejected Sessions experiment, then continue page-level parity work.
+153. [in progress] Reject the Users mobile table-only compensation regression and restore the accepted coupled crop before continuing the responsive audit.
+154. [in progress] Retain the accepted Settings General structure and toolbar correction after the 14.04% mobile-standard result; verify all other viewports before moving to the next surface.
+155. [in progress] Preserve the Settings 6/6 cross-viewport verification and continue auditing the remaining Tracing, Sessions, Users, and route-specific surfaces.
+156. [in progress] Retain the Tracing refresh/Off header control pending full-matrix verification, then continue the remaining Tracing table and route audit.
+157. [in progress] Preserve the Tracing header-control 6/6 verification and continue the remaining table/chart and route-specific parity work.
+158. [in progress] Retain the authoritative Sessions fixture alignment and continue structural Sessions/table parity despite the desktop pixel metric increasing from text-width coverage.
+159. [in progress] Retain the authoritative Users timestamp alignment after focused desktop/mobile verification and continue the remaining route/state audit.
+160. [in progress] Preserve the Alerts table/toolbar correction and its 6/6 verification, then continue the remaining Scores, Evaluators, Dashboards, Tracing, and Sessions audits.
+161. [in progress] Preserve the reference-accurate Scores workspace and fixture alignment after focused mobile verification, then complete full-matrix verification and continue remaining surfaces.
+162. [in progress] Preserve Scores 6/6 verification and continue the next Evaluators/Dashboards route audit.
+163. [in progress] Preserve the Evaluators reference structure and mobile rhythm correction after focused verification, then complete full-matrix verification.
+164. [in progress] Preserve Evaluators 6/6 verification and continue the Dashboards route audit.
+165. [in progress] Continue the Tracing table/chart geometry audit after aligning the default column set, then proceed through remaining Sessions/Users and route-state parity coverage.
+166. [in progress] Retain the rejected Tracing mobile grid experiment's rollback, rebuild the accepted baseline, and continue the coupled shell/crop audit.
+167. [in progress] Retain the rejected Users crop rollback and continue evidence-driven Sessions/Users/Tracing parity work from the rebuilt baseline.
+168. [in progress] Preserve the expanded 28-row Users fixture after 6/6 verification and continue the remaining Tracing/Sessions and route-state audits.
+169. [in progress] Preserve the expanded 27-row Sessions fixture after 6/6 verification and continue the Tracing table/chart and route-state audit.
+170. [in progress] Preserve the 41-row Tracing fixture after 6/6 verification and continue the structural shell/table geometry audit.
+171. [in progress] Preserve the 2,655px Tracing table overflow correction and continue column sizing, shell header, and chart-state parity work.
+172. [in progress] Preserve the split Tracing refresh/Off header controls and continue the remaining shell, column, chart-state, and route-state parity audit.
+173. [in progress] Preserve the reference Tracing column-count state and rebuilt runtime, then continue shell/column/chart parity and remaining route coverage.
+174. [in progress] Preserve the measured Tracing column-width map after 6/6 verification and continue chart-state and remaining route parity work.
+175. [in progress] Preserve the desktop/tablet-only Tracing action sizing refinement and continue mobile shell, chart-state, and remaining route parity audits.
+176. [in progress] Preserve the scoped Tracing action sizing after post-rebuild mobile verification and continue chart-state plus remaining route coverage.
+177. [in progress] Preserve the Prompts reference-list surface after 6/6 verification and continue the remaining route/state audit.
+178. [in progress] Preserve the Datasets reference-list surface after 6/6 verification and continue the remaining route/state audit.
+179. [in progress] Replace the generic Experiments collection body with the captured populated experiment-results structure while preserving run/create actions.
+- [in progress] Continue exact reference parity audit for Experiments and remaining dashboard surfaces; preserve functional Build/Sandbox actions and verify all six viewports.
+- [in progress] Keep `apps/captured-dashboard` independently verifiable and deployment-safe while continuing the remaining reference parity audit; do not create Vercel settings until the standalone preview boundary is reviewed.
+- [in progress] Preserve the verified standalone payload boundary and boundary guard before any preview-project approval or Vercel settings change.
+- [in progress] Preserve the verified standalone shell command/project/account controls and complete the remaining reference-gated visual parity audit once 127.0.0.1:4173 is available.
+- [in progress] Preserve the local Your Orgs/project-context control and continue the remaining reference-gated route and visual parity audit.
+- [in progress] Preserve valid mail actions for standalone Book a call and Support controls while continuing the remaining reference-gated audit.
+- [in progress] Preserve the verified Sandbox mutation simulation contract and continue the separate live Build adapter and reference-gated parity work.
+- [in progress] Preserve the corrected dashboard/admin access boundary and continue root authentication, live adapter, and reference-gated parity verification.
+- [in progress] Preserve the Convex/Better Auth readiness guard and continue the remaining authentication, live adapter, and reference-gated parity verification.
+- [in progress] Preserve canonical `redirect_url` precedence with legacy fallback and continue the remaining authentication, live adapter, and reference-gated parity verification.
+- [in progress] Preserve compatible dashboard creation routes in root and standalone renderers while continuing live adapter and reference-gated parity work.
+- [in progress] Preserve URL-backed Users search/environment state and continue the remaining route-state, live adapter, and reference-gated parity work.
+- [in progress] Preserve URL-backed Sessions search state and continue the remaining route-state, live adapter, and reference-gated parity work.
+- [in progress] Preserve the standalone 58/58 full-gate result while continuing live Build coverage and authoritative 4173 visual verification.
+- [in progress] Preserve the verified Project Name Save action and continue remaining live mutation, route-state, and authoritative visual verification.
+- [in progress] Preserve the standalone 59/59 full-gate result and continue remaining live Build and authoritative 4173 verification.
+- [in progress] Preserve clean standalone lint and evaluator toggle coverage while continuing live Build and authoritative 4173 verification.
+- [in progress] Preserve root evaluator status-toggle parity and continue live Build coverage plus authoritative 4173 verification.
+- [in progress] Preserve the verified standalone package/deployment boundary and continue live Build extraction plus reference-gated screenshot parity; do not create Vercel settings before approval.
+- [in progress] Preserve the verified Sandbox reducer and explicit simulated feedback; continue live Build adapter work and authoritative 4173 screenshot parity.
+- [in progress] Preserve Sandbox mutation state across client navigation with refresh reset and updated collection rendering; continue live Build and authoritative 4173 parity work.
+- [in progress] Preserve the verified Sandbox navigation/reset regression and continue live Build plus authoritative 4173 visual parity work.
+- [in progress] Preserve the explicit reference-parity capture/diff commands and run them once 127.0.0.1:4173 is available.
+- [in progress] Preserve the aligned root/standalone typed adapter seam and continue wiring remaining live Build capabilities plus reference-gated parity.
+- [in progress] Preserve reducer-backed behavior across both root and isolated Sandbox entry points; continue live Build coverage and authoritative 4173 verification.
+- [in progress] Preserve the documented parity capture/diff handoff and continue live Build coverage plus 4173 screenshot verification.
+- [in progress] Preserve fast authoritative-reference preflight and run the paired six-viewport suite when 4173 is available.
+- [in progress] Preserve the verified 4173 ECONNREFUSED preflight evidence; run all six paired captures when the authority is restored.
+### Active
+- [verified with limitation] Hermes supervised dashboard filter-state run completed on local branch `feat/dashboard-filter-state-20261004`; scoped implementation and static/build checks passed, but focused Chrome verification timed out. No PR was pushed or deployed. Requires owner review before any promotion.
+- [pending owner review] Review draft PR #134 at commit `628cffac1faa671bb1494af04e7b20b03bbf3a47`. All GitHub and both Vercel preview checks pass; previews are Ready behind Vercel SSO. Do not merge or promote to production without explicit owner approval.
+- [monitoring] Verify Vercel production deployment `tracify-3hcslicr4-tracify-tech.vercel.app` reaches Ready for merge commit `0b4dac58c200b3c925998d97145d3cdbda439b16`, becomes the canonical `www.tracify.tech` deployment, and passes live route checks. A 15-minute heartbeat is active; do not create or retry deployments while queued/building.
+- Deploy and verify the GhM-backed GA4 integration (`GTM-TQS6MZ2P` / `G-4hCSWLRCEG`).
+
+## 2026-09-28 VPS worker environment — active
+
+- [pending] Decide whether and when to resolve the 20 full-repository lint errors in unchanged files; dashboard scope already passes its focused gates.
+- [pending] Decide the separate Stripe fix and dashboard release sequence; the verification checkout has four staged dashboard files and an unstaged Stripe compatibility change.
+
+## VPS fleet follow-up — 2026-10-06
+
+- [owner action] Resume dashboard after the passed paid-OpenCode runtime test using the base_ref Teams message in docs/vps-agent-fleet.md and inspect progress in the separate Orca tracify-vps Tracify Fleet terminal; preserved integration branch is hermes/T20261004-232559-a0b311/integrated.

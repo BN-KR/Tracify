@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence, type MotionValue } from "framer-motion";
 
 const EXECUTION_STEPS = [
   { type: 'start', name: 'AGENT_INIT', meta: 'region: us-east-1' },
@@ -67,7 +67,6 @@ export function DebugDemo() {
           {/* Execution Stack */}
           <div className="relative flex flex-col items-center w-full">
             {EXECUTION_STEPS.map((step, i) => {
-              const isLast = i === EXECUTION_STEPS.length - 1;
               const isError = step.type === 'error';
 
               return (
@@ -77,7 +76,6 @@ export function DebugDemo() {
                   index={i} 
                   currentIndex={stepIndex} 
                   dimOpacity={dimOpacity}
-                  isLast={isLast}
                   isError={isError}
                 />
               );
@@ -99,18 +97,20 @@ export function DebugDemo() {
   );
 }
 
-function StepItem({ step, index, currentIndex, dimOpacity, isLast, isError }: any) {
-  const isActive = useTransform(currentIndex, (val: any) => val > index);
+type DebugStep = { type: string; name: string; meta: string; cost?: string; detail?: { input: string; output: string; retries: string; total_cost: string } };
+function StepItem({ step, index, currentIndex, dimOpacity, isError }: { step: DebugStep; index: number; currentIndex: MotionValue<number>; dimOpacity: MotionValue<number>; isError: boolean }) {
   const opacity = useTransform(currentIndex, [index, index + 0.5], [0, 1]);
   
   // Failure expansion logic
-  const isFailurePhase = useTransform(currentIndex, (val: any) => val >= 7);
+  const isFailurePhase = useTransform(currentIndex, (val) => val >= 7);
+  const dimmedOpacity = useTransform(opacity, (value) => isFailurePhase.get() ? value * dimOpacity.get() : value);
+  const errorScale = useTransform(currentIndex, [6, 7], [1, 1.05]);
 
   return (
     <motion.div 
       style={{ 
-        opacity: isError ? opacity : useTransform([opacity, dimOpacity], ([o, d]: any) => isFailurePhase.get() ? (isError ? o : o * d) : o),
-        scale: isError ? useTransform(currentIndex, [6, 7], [1, 1.05]) : 1,
+        opacity: isError ? opacity : dimmedOpacity,
+        scale: isError ? errorScale : 1,
       }}
       className={`relative w-full flex flex-col items-center ${isError ? 'z-50' : 'z-10'}`}
     >
@@ -160,22 +160,22 @@ function StepItem({ step, index, currentIndex, dimOpacity, isLast, isError }: an
                 <div>
                   <div className="text-[#444444] uppercase text-[8px] tracking-widest mb-2 font-mono">Payload Input</div>
                   <div className="text-[#CCCCCC] bg-[#0A0A0A] p-3 border border-[#1A1A1A] text-[11px] font-mono leading-relaxed">
-                    {step.detail.input}
+                    {step.detail?.input}
                   </div>
                 </div>
                 <div>
                   <div className="text-[#444444] uppercase text-[8px] tracking-widest mb-2 font-mono">Diagnostic Output</div>
                   <div className="text-[#EF4444] bg-[#110000] p-3 border border-[#EF4444]/20 text-[11px] font-mono leading-relaxed">
-                    {step.detail.output}
+                    {step.detail?.output}
                   </div>
                 </div>
               </div>
               <div className="flex justify-between items-center mt-6 pt-4 border-t border-[#EF4444]/20 font-mono text-[10px]">
                 <div className="flex gap-6">
-                  <span className="text-[#444444]">RETRIES: {step.detail.retries}</span>
+                  <span className="text-[#444444]">RETRIES: {step.detail?.retries}</span>
                   <span className="text-[#444444]">SYSTEM: stripe_gateway</span>
                 </div>
-                <div className="text-[#EF4444] font-bold text-[14px]">TOTAL_LEAK: {step.detail.total_cost}</div>
+                <div className="text-[#EF4444] font-bold text-[14px]">TOTAL_LEAK: {step.detail?.total_cost}</div>
               </div>
             </motion.div>
           )}

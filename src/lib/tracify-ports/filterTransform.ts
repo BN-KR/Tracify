@@ -1,9 +1,9 @@
-// Adapted from langfuse/langfuse (MIT License)
+// Adapted from open-source observability patterns (MIT License)
 // Source: web/src/features/filters/lib/filter-transform.ts
 // See /THIRD_PARTY_NOTICES.md
 //
 // Filter column name normalization/remapping — pure, no React, no backend
-// dependency. Types are Tracify's own local shapes, not @langfuse/shared.
+// dependency. Types are Tracify's own local shapes, not an external shared package.
 
 export type FilterCondition = {
   column: string;

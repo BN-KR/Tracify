@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 export function ShareButtons({ title }: { title: string }) {
-  const [url, setUrl] = useState("");
-
-  useEffect(() => {
-    setUrl(window.location.href);
-  }, []);
+  const url = useSyncExternalStore(
+    () => () => undefined,
+    () => window.location.href,
+    () => "",
+  );
 
   if (!url) return null;
 

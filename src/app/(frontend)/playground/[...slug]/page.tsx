@@ -1,5 +1,4 @@
-import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
-import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
+import { SandboxWorkspace } from "@/features/dashboard-workspace/components/sandbox-workspace";
 
 export default async function PlaygroundNestedPage({
   params,
@@ -7,5 +6,5 @@ export default async function PlaygroundNestedPage({
   params: Promise<{ slug: string[] }>;
 }) {
   const { slug } = await params;
-  return <CapturedWorkspace workspace={sandboxWorkspace} segments={slug} />;
+  return <SandboxWorkspace segments={slug} />;
 }

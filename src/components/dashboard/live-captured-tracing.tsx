@@ -5,7 +5,7 @@ import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
-import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
+import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
 
 export function LiveCapturedTracing({ projectId, runId }: { projectId: string; runId?: string }) {
   const [startedAtAfter] = useState(() => new Date(Date.now() - 30 * 86400000).toISOString());
@@ -33,17 +33,17 @@ export function LiveCapturedTracing({ projectId, runId }: { projectId: string; r
   }));
   const environments = ["all", ...Array.from(new Set(records.map((record) => record.environment).filter(Boolean)))];
   const models = Array.from(new Set(records.map((record) => record.model).filter((model): model is string => Boolean(model))));
-  const workspace = {
-    ...sandboxWorkspace,
-    mode: "live" as const,
-    readOnly: false,
-    dataSource: "tracify-live" as const,
-    project: { id: projectId, name: project.name, organizationName: "Workspace" },
+  const workspace = createLiveWorkspace(
+    { id: projectId, name: project.name, organizationName: "Workspace" },
+    {
     environments,
-    models: models.length ? models : sandboxWorkspace.models,
-    collections: { ...sandboxWorkspace.collections, tracing: { description: "Inspect every trace and observation emitted by instrumented agents.", records } },
-    metrics: { ...sandboxWorkspace.metrics, traces: records.length, observations: records.length },
-  };
+    ...(models.length ? { models } : {}),
+    collections: {
+      tracing: { description: "Inspect every trace and observation emitted by instrumented agents.", records },
+    },
+    metrics: { traces: records.length, observations: records.length },
+    },
+  );
 
   return <CapturedWorkspace workspace={workspace} segments={runId ? ["tracing", runId] : ["tracing"]} />;
 }

@@ -1,33 +1,58 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Tracify agent observability: make every agent run a better decision";
+export const alt = "Every run leaves a trail. AI agent tracing and observability by Tracify.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const dynamic = "force-dynamic";
 
 export default function OpenGraphImage() {
   return new ImageResponse(
-    <div style={{ width: "100%", height: "100%", display: "flex", position: "relative", overflow: "hidden", background: "#050505", color: "#ffffff", padding: "56px", fontFamily: "monospace" }}>
-      <div style={{ position: "absolute", inset: 0, opacity: 0.22, backgroundImage: "linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)", backgroundSize: "72px 72px" }} />
-      <div style={{ position: "relative", display: "flex", width: "100%", height: "100%", flexDirection: "column", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", fontSize: 20, letterSpacing: "0.16em", textTransform: "uppercase" }}>tracify</div>
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "48px" }}>
-          <div style={{ display: "flex", maxWidth: "650px", flexDirection: "column", gap: "24px" }}>
-            <div style={{ display: "flex", fontSize: 18, color: "#999999", letterSpacing: "0.14em", textTransform: "uppercase" }}>The operational record for AI agents</div>
-            <div style={{ display: "flex", fontSize: 68, fontWeight: 800, letterSpacing: "-0.07em", lineHeight: 0.92, textTransform: "uppercase" }}>Make every agent run a better decision.</div>
-            <div style={{ display: "flex", fontSize: 18, color: "#aaaaaa" }}>Connect the trace, quality signal, and release decision.</div>
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          background: "#000",
+          color: "#fff",
+          padding: "52px 60px",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #555", paddingBottom: 18, fontSize: 16, letterSpacing: 3, color: "#bbb" }}>
+          <span>TRACIFY</span>
+          <span>AI AGENT OBSERVABILITY</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 55 }}>
+          <div style={{ width: 580, display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: 18, letterSpacing: 2, color: "#aaa" }}>TRACE THE RUN. FIND THE DECISION.</span>
+            <span style={{ marginTop: 22, fontSize: 78, fontWeight: 700, lineHeight: 0.98, letterSpacing: -5 }}>Every run leaves a trail.</span>
+            <span style={{ marginTop: 26, fontSize: 23, lineHeight: 1.4, color: "#ccc" }}>Inspect the model, tool, and retrieval decisions behind an agent response.</span>
           </div>
-          <div style={{ display: "flex", width: "350px", flexDirection: "column", border: "1px solid #555", background: "#0b0b0b" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #333", padding: "14px 16px", color: "#aaaaaa", fontSize: 13, letterSpacing: "0.1em" }}><span>RUN HEALTH</span><span>v2.4.0</span></div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "16px", fontSize: 15 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}><span>quality score</span><span>0.94</span></div>
-              <div style={{ display: "flex", justifyContent: "space-between", color: "#aaaaaa" }}><span>p95 latency</span><span>2.8s</span></div>
-              <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #333", paddingTop: "12px" }}><span style={{ color: "#ffffff" }}>RELEASE CHECK PASSED</span><span>→</span></div>
-            </div>
+          <div style={{ width: 430, display: "flex", flexDirection: "column", border: "1px solid #555", padding: 22, fontFamily: "monospace" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #444", paddingBottom: 14, fontSize: 14, letterSpacing: 1, color: "#aaa" }}><span>SAMPLE TRACE</span><span>RUN_018</span></div>
+            {[
+              ["14:08:31", "MODEL", "response drafted"],
+              ["14:08:31", "TOOL", "orders.lookup"],
+              ["14:08:32", "RETRIEVAL", "0 sources returned"],
+              ["14:08:32", "EVALUATION", "0.42 · review"],
+            ].map(([time, kind, detail], index) => (
+              <div key={kind} style={{ display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid #333", padding: "19px 0", fontSize: 11, color: index === 2 ? "#fff" : "#999" }}>
+                <span style={{ width: 66, color: "#777" }}>{time}</span>
+                <span style={{ width: 90, letterSpacing: 1 }}>{kind}</span>
+                <span>{detail}</span>
+              </div>
+            ))}
+            <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid #444", fontSize: 13, color: "#ccc" }}>ILLUSTRATIVE DATA · NO CUSTOMER INFORMATION</div>
           </div>
         </div>
+        <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #555", paddingTop: 16, fontSize: 14, letterSpacing: 2, color: "#aaa" }}>
+          <span>TRACES · COST · EVALUATION</span>
+          <span>TRACIFY.TECH</span>
+        </div>
       </div>
-    </div>,
-    size,
+    ),
+    { ...size },
   );
 }

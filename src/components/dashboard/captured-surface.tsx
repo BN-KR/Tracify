@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
+import { useState } from "react";
+import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
+import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
 
 export function CapturedSurface({ title, description, projectId }: { title: string; description: string; projectId: string }) {
   const [view, setView] = useState("Overview");
@@ -10,14 +11,17 @@ export function CapturedSurface({ title, description, projectId }: { title: stri
   const [filter, setFilter] = useState("All environments");
   const [created, setCreated] = useState(false);
   const isCreateSurface = /^(Create|Configure)/.test(title);
-  const draftKey = `tracify.surface-draft.${projectId}.${title.toLowerCase().replace(/\s+/g, "-")}`;
-  // Restore the lightweight project-scoped draft marker after a reload.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { if (isCreateSurface && window.localStorage.getItem(draftKey)) setCreated(true); }, [draftKey, isCreateSurface]);
-  return (
+  const workspace = {
+    ...sandboxWorkspace,
+    mode: "live" as const,
+    readOnly: false,
+    dataSource: "tracify-live" as const,
+    project: { ...sandboxWorkspace.project, id: projectId },
+  };
+  return <CapturedWorkspace workspace={workspace} childrenOnly toolbarTitle={title} segments={["settings"]}>
     <div className="flex flex-col gap-6">
-      <DashboardTopbar title={title} description={description} />
       <div className="px-6 pb-10">
+        <p className="mb-4 text-sm text-black/55">{description}</p>
         <div className="flex flex-wrap items-center gap-2 border-b border-black/10 pb-4">
           {['Overview', 'Activity', 'Configuration'].map((item) => (
             <button key={item} type="button" onClick={() => setView(item)} className={`border px-3 py-2 font-mono text-[10px] uppercase tracking-[0.12em] ${view === item ? 'border-black bg-black text-white' : 'border-black/15 bg-white text-black/60 hover:border-black'}`}>{item}</button>
@@ -37,7 +41,7 @@ export function CapturedSurface({ title, description, projectId }: { title: stri
           <div className="grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 border-b border-black/10 bg-black/[0.02] px-4 py-3 font-mono text-[10px] uppercase tracking-[0.12em] text-black/45"><span>Name</span><span>Status</span><span>Updated</span><span /></div>
           <div className="flex min-h-28 flex-col items-center justify-center gap-2 px-4 py-6 text-center"><p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/45">No {title.toLowerCase()} yet</p><p className="text-xs text-black/50">Create your first item to see it appear in this project view.</p></div>
         </section>
-        {isCreateSurface ? <form onSubmit={(event) => { event.preventDefault(); window.localStorage.setItem(draftKey, "saved"); setCreated(true); }} className="mt-4 grid gap-4 border border-black/10 bg-white p-5 md:grid-cols-2">
+        {isCreateSurface ? <form onSubmit={(event) => { event.preventDefault(); setCreated(true); }} className="mt-4 grid gap-4 border border-black/10 bg-white p-5 md:grid-cols-2">
           <label className="grid gap-2 text-xs text-black/65">Name<input required placeholder={`${title.replace(/^Create |^Configure /, "")} name`} className="h-10 border border-black/15 px-3 font-mono text-xs outline-none focus:border-black" /></label>
           <label className="grid gap-2 text-xs text-black/65">Environment<select className="h-10 border border-black/15 bg-white px-3 font-mono text-xs outline-none focus:border-black"><option>default</option><option>production</option></select></label>
           <label className="grid gap-2 text-xs text-black/65 md:col-span-2">Description<textarea rows={3} placeholder="Describe the purpose of this configuration" className="border border-black/15 px-3 py-2 text-xs outline-none focus:border-black" /></label>
@@ -45,7 +49,7 @@ export function CapturedSurface({ title, description, projectId }: { title: stri
         </form> : null}
         <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {[
-          ["Ready to configure", "Connect this Tracify surface to your project data and workflows."],
+          ["Ready to configure", "Connect this surface to your project data and workflows."],
           ["Project scope", projectId],
           ["Activity", "No recent activity in this preview project."],
         ].map(([label, value]) => (
@@ -57,5 +61,5 @@ export function CapturedSurface({ title, description, projectId }: { title: stri
         </div>
       </div>
     </div>
-  );
+  </CapturedWorkspace>;
 }

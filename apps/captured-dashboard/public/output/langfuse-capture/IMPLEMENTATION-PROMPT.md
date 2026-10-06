@@ -1,0 +1,11 @@
+# Copy-ready implementation prompt
+
+Implement the supplied Langfuse empty-project dashboard reference inside our existing dashboard application. Read `CHIEF-DEV-HANDOFF.md` first. Use `pages/empty-home.html` and its actual styles/assets as the visual source of truth. Do not design a new dashboard or use the earlier top-level langfuse.* mock files.
+
+1. Inspect our application's framework, routes, components, auth and data interfaces. Serve the supplied `langfuse-capture` folder locally and inspect `/pages/empty-home.html` in the browser. Record the viewport and zoom used for comparison.
+2. Inspect the rendered DOM and computed styles. The five source CSS files and their load order are listed in the handoff. Preserve the source's dark palette, sidebar/header geometry, typography, card grid, spacing, borders, inline SVGs and empty-chart states. Reuse captured assets locally. Do not hotlink production assets.
+3. Implement maintainable components using our current stack: dashboard shell, navigation sidebar, header/breadcrumbs, filters and time controls, metric cards and chart panels. Preserve our app's routing/auth/data conventions and isolate captured global CSS where necessary. Replace captured account/project identifiers, user photo and branding with our product values while preserving reference geometry.
+4. Wire the controls to our own state and APIs. Implement navigation, sidebar collapse, menus, tabs, filters and empty/populated states where their behavior is supported by our app and the supplied reference evidence. Report missing API contracts or uncaptured interactions explicitly rather than inventing successful behavior. Do not enable archived production JS bundles or send requests to Langfuse.
+5. Compare the implementation with the source capture at identical viewport and zoom, then check responsive layouts, keyboard behavior, asset loading and console errors. Supply comparison screenshots and a concise list of verified interactions and remaining gaps.
+
+Deliver the implementation files, route entry, local run instructions, verification results and remaining blockers. The supplied archive is static and incomplete; HTML links can work while dropdowns and other script-driven controls still need implementation. Reproduce this requested screen fully without treating the whole archive as a finished application.

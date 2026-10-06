@@ -23,3 +23,19 @@ Server state stays in the live Convex/Tinybird adapters. Route state stays in Ne
 ## Stability boundaries
 
 The supplied static captures are the visual authority. Product names and example records are Tracify-owned, while layout, density, controls, and empty/populated behavior remain aligned with the references.
+
+## Reference parity verification
+
+The paired six-viewport capture suite uses `127.0.0.1:4173` as its default
+authority and keeps the implementation on the managed Playwright port:
+
+```text
+pnpm test:reference-parity
+pnpm compare:reference-parity
+```
+
+The first command writes paired reference/implementation screenshots under
+`artifacts/reference-parity/<viewport>/`; the second writes per-surface diff
+images and `summary.json`. Set `REFERENCE_BASE_URL` only when an explicitly
+approved alternate reference host is being used. A green standalone route or
+responsive contract does not replace this screenshot comparison.
