@@ -4,6 +4,7 @@ import { usePaginatedQuery, useQuery } from "convex/react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { CapturedLoadState } from "./live-captured-home";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
 
@@ -16,8 +17,9 @@ export function LiveCapturedTracing({ projectId, runId }: { projectId: string; r
     { initialNumItems: 50 },
   );
 
-  if (project === undefined || project === null || runs.status === "LoadingFirstPage") {
-    return <div className="captured-build-loading">Loading traces…</div>;
+  if (project === null) return <CapturedLoadState missing />;
+  if (project === undefined || runs.status === "LoadingFirstPage") {
+    return <CapturedLoadState label="Loading traces…" />;
   }
 
   const records = runs.results.map((run) => ({

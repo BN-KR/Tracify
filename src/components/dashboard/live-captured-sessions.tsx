@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { CapturedLoadState } from "./live-captured-home";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
 
@@ -19,8 +20,9 @@ export function LiveCapturedSessions({ projectId, sessionId }: { projectId: stri
   const runs = useQuery(api.sessions.getRecentRuns, sessionId ? { projectId: projectId as Id<"projects">, sessionId } : "skip");
   const datasets = useQuery(api.evaluation.listDatasets, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
 
-  if (project === undefined || project === null || sessions === undefined || datasets === undefined || (sessionId && (selected === undefined || runs === undefined))) {
-    return <div className="captured-build-loading">Loading sessions…</div>;
+  if (project === null) return <CapturedLoadState missing />;
+  if (project === undefined || sessions === undefined || datasets === undefined || (sessionId && (selected === undefined || runs === undefined))) {
+    return <CapturedLoadState label="Loading sessions…" />;
   }
 
   const sessionRecords = sessions.map((session) => ({

@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { CapturedLoadState } from "./live-captured-home";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
 
@@ -11,7 +12,8 @@ function formatTime(value: string | number) { return new Date(value).toLocaleTim
 export function LiveCapturedUsers({ projectId, userId }: { projectId: string; userId?: string }) {
   const project = useQuery(api.projects.getProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
   const sessions = useQuery(api.sessions.listByProject, projectId ? { projectId: projectId as Id<"projects">, limit: 250 } : "skip");
-  if (project === undefined || project === null || sessions === undefined) return <div className="captured-build-loading">Loading users…</div>;
+  if (project === null) return <CapturedLoadState missing />;
+  if (project === undefined || sessions === undefined) return <CapturedLoadState label="Loading users…" />;
   const grouped = new Map<string, (typeof sessions)[number]>();
   for (const session of sessions) if (session.endUserId && !grouped.has(session.endUserId)) grouped.set(session.endUserId, session);
   const records = Array.from(grouped.entries()).map(([id, session]) => ({ id, name: id, status: session.latestStatus, environment: session.environment ?? "default", timestamp: formatTime(session.lastSeenAt), cost: `$${session.totalCostUsd.toFixed(5)}`, model: session.traceName ?? "user activity", userId: id, sessionId: session.sessionId }));
