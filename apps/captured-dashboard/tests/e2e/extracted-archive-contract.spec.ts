@@ -3,65 +3,37 @@ import path from "node:path";
 import { expect, test } from "@playwright/test";
 
 const projectId = "clkpwwm0m000gmm094odg11gi";
-
-function capturedRoutes() {
-  const index = fs.readFileSync(
-    path.join(process.cwd(), "public/output/langfuse-capture/index.html"),
-    "utf8",
-  );
-  const routes = new Set<string>();
-  const links = /<a href="([^"]+)">([\s\S]*?)<\/a>/g;
-
-  for (const match of index.matchAll(links)) {
-    const file = match[1];
-    const label = match[2].replace(/<[^>]+>/g, "");
-    const route = label.match(/—\s(\/[^\s<]*)/u)?.[1];
-    if (route && route !== "/" && file.startsWith("pages/")) {
-      routes.add(route.split("?")[0]);
-    }
-  }
-
-  return [...routes];
+function archivedPages() {
+  const html = fs.readFileSync(path.join(process.cwd(), "public/output/langfuse-capture/index.html"), "utf8");
+  return [...new Set([...html.matchAll(/<a href="(pages\/[^"#]+\.html)"/g)].map((match) => `/output/langfuse-capture/${match[1]}`))];
 }
-
-test.describe("extracted reference archive contract", () => {
-  test("root enters the extracted Home snapshot", async ({ page }) => {
-    const response = await page.goto("/", { waitUntil: "domcontentloaded" });
-
+test("root opens the interactive workspace and preserves the reference archive", async ({ page }) => {
+  const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+  expect(response?.status()).toBe(200);
+  await expect(page).toHaveURL(/\/playground$/);
+  await expect(page.getByRole("heading", { name: "Home", exact: true })).toBeVisible();
+  const archive = await page.goto("/output/langfuse-capture/pages/023.html", { waitUntil: "domcontentloaded" });
+  expect(archive?.status()).toBe(200);
+  await expect(page).toHaveTitle("Home | Langfuse");
+});
+for (const [route, surface] of [
+  ["traces", "tracing"], ["sessions", "sessions"], ["settings", "settings"],
+  ["sessions/chat_e3649383-4371-439f-9b79-1b8da230fb3f", "sessions/chat_e3649383-4371-439f-9b79-1b8da230fb3f"],
+  ["users/u-hqLy_X6u77lTTd8j8XzlK", "users/u-hqLy_X6u77lTTd8j8XzlK"], ["settings/api-keys", "settings"],
+] as const) {
+  test(`${route} opens the interactive ${surface} surface`, async ({ page }) => {
+    const response = await page.goto(`/project/${projectId}/${route}`, { waitUntil: "domcontentloaded" });
     expect(response?.status()).toBe(200);
-    await expect(page).toHaveTitle("Home | Langfuse");
-    expect(page.url()).toContain("/output/langfuse-capture/pages/023.html");
+    expect(new URL(page.url()).pathname).toBe(`/playground/${surface}`);
+    await expect(page.locator(".captured-workspace")).toBeVisible();
   });
-
-  for (const [route, title, pageNumber] of [
-    ["traces", "Tracing | Langfuse", "025"],
-    ["sessions", "Sessions | Langfuse", "026"],
-    ["settings", "Settings | Langfuse", "036"],
-    ["sessions/chat_e3649383-4371-439f-9b79-1b8da230fb3f", "Sessions | Langfuse", "065"],
-    ["users/u-hqLy_X6u77lTTd8j8XzlK", "Users | Langfuse", "066"],
-    ["settings/api-keys", "Settings | Langfuse", "044"],
-  ] as const) {
-    test(`${route} resolves to extracted snapshot ${pageNumber}`, async ({ page }) => {
-      const response = await page.goto(`/project/${projectId}/${route}`, {
-        waitUntil: "domcontentloaded",
-      });
-
-      expect(response?.status()).toBe(200);
-      await expect(page).toHaveTitle(title);
-      expect(page.url()).toContain(`/output/langfuse-capture/pages/${pageNumber}.html`);
-      expect(await page.locator('link[href^="../assets/"], script[src^="../assets/"]').count()).toBeGreaterThan(0);
-    });
+}
+test("every indexed reference archive page remains accessible directly", async ({ request }) => {
+  const pages = archivedPages();
+  expect(pages.length).toBeGreaterThan(100);
+  for (const url of pages) {
+    const response = await request.get(url);
+    expect(response.status(), url).toBe(200);
+    expect(await response.text(), url).toContain("<html");
   }
-
-  test("every route listed by the extracted index resolves", async ({ page }) => {
-    test.setTimeout(120_000);
-    const routes = capturedRoutes();
-    expect(routes.length).toBeGreaterThan(100);
-
-    for (const route of routes) {
-      const response = await page.goto(route, { waitUntil: "domcontentloaded" });
-      expect(response?.status(), route).toBe(200);
-      expect(page.url(), route).toContain("/output/langfuse-capture/pages/");
-    }
-  });
 });

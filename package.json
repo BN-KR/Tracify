@@ -20,6 +20,7 @@
     "test:erpnext": "vitest run src/lib/erpnext.test.ts src/lib/integration-crypto.test.ts",
     "test:leads": "playwright test tests/e2e/leads.spec.ts",
     "test:reference-parity": "playwright test tests/e2e/reference-screenshot-parity.spec.ts --config=playwright.config.ts",
+    "test:cloud": "playwright test tests/e2e/cloud-redesign.spec.ts --config=playwright.config.ts --workers=1",
     "compare:reference-parity": "node scripts/compare-reference-parity.mjs",
     "test:convex:leads": "vitest run convex/leads.test.ts",
     "verify:regions": "node scripts/verify-regional-cloud.mjs",

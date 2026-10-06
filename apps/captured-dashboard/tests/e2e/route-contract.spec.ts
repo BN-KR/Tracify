@@ -171,7 +171,7 @@ test.describe("standalone captured Sandbox", () => {
     await page.getByRole("button", { name: "Create dashboard" }).click();
     await expect(page.getByRole("status")).toContainText("Sandbox simulated creation");
     await page.getByRole("link", { name: "Dashboards", exact: true }).first().click();
-    await expect(page).toHaveURL(/\/playground\/dashboards$/);
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/playground/dashboards");
     await expect(page.getByRole("link", { name: "Sandbox dashboard" })).toBeVisible();
     await page.reload({ waitUntil: "domcontentloaded" });
     await expect(page.getByRole("link", { name: "Sandbox dashboard" })).toHaveCount(0);

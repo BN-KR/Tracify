@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint app components features tests",
     "boundary": "node scripts/verify-boundary.mjs",
+    "test:cloud": "pnpm exec playwright test --config=playwright.config.ts --project=chromium --workers=1",
     "verify": "pnpm boundary && pnpm typecheck && pnpm lint && pnpm build && pnpm exec playwright test --config=playwright.config.ts --project=chromium --workers=1"
   },
   "dependencies": {
