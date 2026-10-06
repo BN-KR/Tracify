@@ -167,7 +167,7 @@ export function CapturedWorkspace({
   }
 
   return (
-    <div className="captured-workspace" data-workspace-mode={effectiveWorkspace.mode} data-hydrated={hydrated ? "true" : "false"}>
+    <div className="captured-workspace" data-workspace-mode={effectiveWorkspace.mode} data-workspace-surface={surface} data-hydrated={hydrated ? "true" : "false"}>
       <header className="captured-workspace-header">
         <div className="captured-workspace-breadcrumbs">
           <button
