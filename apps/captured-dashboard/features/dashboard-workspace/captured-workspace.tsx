@@ -188,7 +188,7 @@ export function CapturedWorkspace({
             </select>
             <span>{range === "1d" ? "Past 1 day" : `Past ${range.slice(0, -1)} days`}</span><ChevronDown />
           </label>
-          {surface === "tracing" ? <><button type="button" className="captured-refresh-icon" aria-label="Refresh traces" onClick={() => handleAction("Refresh traces")}><RefreshCw /></button><button type="button" className="captured-refresh-control" aria-label="Auto refresh off" onClick={() => handleAction("Change auto refresh")}><span>Off</span><ChevronDown /></button></> : null}
+          {surface === "tracing" ? <><button type="button" className="captured-refresh-icon" aria-label="Refresh traces" onClick={() => window.dispatchEvent(new Event("tracify:refresh-traces"))}><RefreshCw /></button><button type="button" className="captured-refresh-control" aria-label="Auto refresh off" onClick={() => handleAction("Change auto refresh")}><span>Off</span><ChevronDown /></button></> : null}
           <button type="button" className="captured-assistant" onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}>
             <Bot /> Assistant <kbd>Ctrl I</kbd>
           </button>
@@ -465,6 +465,8 @@ function TracingSurface({ workspace, basePath, query, environment, onReadOnly }:
   const defaultColumns = ["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Metadata", "Status", "Latency (s)", "Cost ($)", "Time To First Token (s)", "Provided Model Name", "Prompt Name", "Environment", "Trace Tags"];
   const [selectedColumns, setSelectedColumns] = useState(() => searchParams.get("columns")?.split(",").filter(Boolean) ?? defaultColumns);
   const [filterSearch, setFilterSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(() => searchParams.get("state") === "error" ? "The trace service did not respond. Try again." : null);
   const columns = ["Start Time", "Type", "Name", "Trace Name", "Input", "Output", "Metadata", "Status", "Latency (s)", "Cost ($)", "Time To First Token (s)", "Provided Model Name", "Prompt Name", "Model ID", "Environment", "Trace Tags", "SDK Name", "SDK Version", "Ingestion Source", "Input Tokens", "Output Tokens", "Total Tokens", "Input Cost ($)", "Output Cost ($)", "Tool Calls", "Categorical Scores", "Boolean Scores", "Comment Count", "Comment Content"];
   const filterNames = ["Name", "Is Root Observation", "Type", "Environment", "Trace Name", "Metadata", "Trace Tags", "Session ID", "User ID", "Trace ID", "Status", "Provided Model Name", "Prompt Name", "Latency (s)", "Numeric Scores", "Model ID", "Version", "Release", "Status Message", "API Key", "SDK Name", "SDK Version", "Ingestion Source", "Experiment Dataset ID", "Experiment ID", "Experiment Name", "Time To First Token (s)", "Input Tokens", "Cached Input Tokens", "Output Tokens", "Total Tokens", "Input Cost ($)", "Cached Input Cost ($)", "Output Cost ($)", "Cost ($)", "Tool Names (Available)", "Tool Names (Called)", "Available Tools", "Tool Calls", "Categorical Scores", "Boolean Scores", "Comment Count", "Comment Content"];
   const records = workspace.collections.tracing.records.filter((record) => {
@@ -501,6 +503,15 @@ function TracingSurface({ workspace, basePath, query, environment, onReadOnly }:
     setPage(bounded);
     updateTracingState("page", String(bounded));
   };
+  useEffect(() => {
+    const refresh = () => {
+      setLoading(true);
+      setLoadError(null);
+      window.setTimeout(() => setLoading(false), 450);
+    };
+    window.addEventListener("tracify:refresh-traces", refresh);
+    return () => window.removeEventListener("tracify:refresh-traces", refresh);
+  }, []);
   return <main className="captured-tracing">
     <div className="captured-tracing-actions">
       <button type="button" className="captured-tracing-top-filter" aria-expanded={filtersOpen} onClick={() => setFiltersOpen((open) => !open)}>Filters</button>
@@ -510,7 +521,8 @@ function TracingSurface({ workspace, basePath, query, environment, onReadOnly }:
       <div className="captured-tracing-columns"><button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)}>Columns {selectedColumns.length + 1}/40 ▾</button>{columnsOpen ? <div className="captured-column-menu" role="menu">{columns.map((column) => <label key={column}><input type="checkbox" checked={selectedColumns.includes(column)} onChange={() => toggleColumn(column)} />{column}</label>)}</div> : null}</div><button type="button" className="captured-tracing-layout-toggle" aria-label="View options" onClick={() => onReadOnly("Open table view options")}>▤</button>
     </div>
     {filtersOpen ? <div className="captured-tracing-filter-menu" role="dialog" aria-label="Tracing filters"><label><span>Search traces</span><input aria-label="Search" value={query} onChange={(event) => updateTraceQuery(event.target.value)} placeholder="name, trace, model…" /></label><div><button type="button" className={preset === "all" ? "is-active" : ""} onClick={() => { setPreset("all"); updateTracingState("preset", "all"); }}>All traces</button><button type="button" onClick={() => { setPreset("quality"); updateTracingState("preset", "quality"); }}>Quality ≥ 0.8</button><button type="button" onClick={() => { setPreset("slow"); updateTracingState("preset", "slow"); }}>Slow ≥ 2s</button><button type="button" onClick={() => { setPreset("cost"); updateTracingState("preset", "cost"); }}>Cost ≥ $0.02</button></div></div> : null}
-    <div className="captured-tracing-layout">
+    {loadError ? <div className="captured-tracing-state is-error" role="alert"><strong>Trace data is unavailable</strong><span>{loadError}</span><button type="button" onClick={() => { setLoadError(null); setLoading(true); window.setTimeout(() => setLoading(false), 450); }}>Retry</button></div> : null}
+    <div className={`captured-tracing-layout${loading ? " is-loading" : ""}`} aria-busy={loading}>
       <aside className="captured-filter-rail">
         <div className="captured-filter-rail-heading"><button type="button" className="captured-filter-heading-toggle" aria-expanded={filtersOpen} onClick={() => setFiltersOpen((open) => !open)}>Filters <span className="captured-filter-count">{preset === "all" ? "" : "1"}</span></button><button type="button" onClick={() => setFilterSearch("")}>Clear</button></div>
         <label className="captured-filter-search"><Search /> <input value={filterSearch} onChange={(event) => setFilterSearch(event.target.value)} placeholder="Search filters" aria-label="Search filters" /></label>
@@ -519,7 +531,7 @@ function TracingSurface({ workspace, basePath, query, environment, onReadOnly }:
         <section className="captured-filter-group"><header><strong>Type</strong><button type="button">⌄</button></header><div className="captured-filter-tabs"><button type="button" className="is-active">Select</button><button type="button">Text</button></div></section>
         {filterNames.slice(3).filter((name) => name.toLowerCase().includes(filterSearch.toLowerCase())).map((name) => <button className="captured-filter-row" type="button" key={name} onClick={() => onReadOnly(`Open ${name} filter`)}><span>{name}</span><span>⌄</span></button>)}
       </aside>
-      <section className="captured-tracing-results">{view === "chart" ? <div className="captured-trace-chart"><span>Count per bucket</span><div>{records.map((record, index) => <i key={record.id} style={{ height: `${28 + ((index * 19) % 65)}%` }} title={record.name} />)}</div></div> : <div className="captured-trace-table-wrap"><table><thead><tr><th className="captured-trace-selection-column" aria-label="Select traces" />{selectedColumns.map((column) => <th key={column}>{column}</th>)}</tr></thead><tbody>{visibleRecords.map((record) => <tr key={record.id}><td className="captured-trace-selection-column"><input type="checkbox" aria-label={`Select ${record.id}`} /></td>{selectedColumns.map((column) => <td key={column}>{renderTraceCell(column, record, basePath)}</td>)}</tr>)}</tbody></table>{records.length === 0 ? <div className="captured-empty">No traces match the current filters.</div> : null}<footer className="captured-table-footer"><span>Total {records.length} · Rows per page 50 · Page {page}</span><span className="captured-pagination"><button type="button" disabled={page <= 1} aria-label="Go to previous page" onClick={() => changePage(page - 1)}>‹</button><button type="button" disabled={page >= pageCount} aria-label="Go to next page" onClick={() => changePage(page + 1)}>›</button></span></footer></div>}</section>
+      <section className="captured-tracing-results">{loading ? <div className="captured-tracing-state is-loading" role="status"><span className="captured-tracing-spinner" aria-hidden="true" /><strong>Loading traces</strong><span>Refreshing the current view…</span></div> : view === "chart" ? <div className="captured-trace-chart"><span>Count per bucket</span><div>{records.map((record, index) => <i key={record.id} style={{ height: `${28 + ((index * 19) % 65)}%` }} title={record.name} />)}</div></div> : <div className="captured-trace-table-wrap"><table><thead><tr><th className="captured-trace-selection-column" aria-label="Select traces" />{selectedColumns.map((column) => <th key={column}>{column}</th>)}</tr></thead><tbody>{visibleRecords.map((record) => <tr key={record.id}><td className="captured-trace-selection-column"><input type="checkbox" aria-label={`Select ${record.id}`} /></td>{selectedColumns.map((column) => <td key={column}>{renderTraceCell(column, record, basePath)}</td>)}</tr>)}</tbody></table>{records.length === 0 ? <div className="captured-empty"><strong>No traces match these filters</strong><span>Try clearing a filter or searching for another trace.</span><button type="button" onClick={() => { setPreset("all"); updateTracingState("preset", "all"); updateTraceQuery(""); }}>Clear filters</button></div> : null}<footer className="captured-table-footer"><span>Total {records.length} · Rows per page 50 · Page {page}</span><span className="captured-pagination"><button type="button" disabled={page <= 1} aria-label="Go to previous page" onClick={() => changePage(page - 1)}>‹</button><button type="button" disabled={page >= pageCount} aria-label="Go to next page" onClick={() => changePage(page + 1)}>›</button></span></footer></div>}</section>
     </div>
   </main>;
 }
