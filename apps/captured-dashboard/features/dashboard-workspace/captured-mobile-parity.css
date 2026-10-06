@@ -77,3 +77,98 @@
 }
 
 
+
+/* ───────── Tracify cloud · monochrome instrument design layer ─────────
+   Pure black ground, white ink, hairline rules, zero radius. Inverted blocks
+   mark the active/primary state so hierarchy never relies on hue. */
+html body{
+  --t-bg:#000;--t-ink:#fff;--t-dim:#a3a3a3;--t-mute:#6b6b6b;--t-line:#262626;--t-line-strong:#5a5a5a;--t-hover:#111;
+  --t-mono:var(--font-geist-mono),ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --t-sans:var(--font-geist-sans),"Helvetica Neue",Arial,sans-serif;
+  background:var(--t-bg);color:var(--t-ink);font-family:var(--t-mono);-webkit-font-smoothing:antialiased;
+}
+html body *{border-radius:0}
+html body ::selection{background:#fff;color:#000}
+html body :focus-visible{outline:1px solid #fff;outline-offset:2px}
+
+/* Shell */
+html body .captured-app-shell,html body .captured-app-main{background:var(--t-bg)}
+html body .captured-app-main{padding-left:216px}
+html body .captured-app-sidebar{width:216px;background:var(--t-bg);border-right:1px solid var(--t-line-strong)}
+html body .captured-app-brand-row{height:56px;padding:0 16px;border-bottom:1px solid var(--t-line-strong)}
+html body .captured-reference-brand{font:700 15px/1 var(--t-mono);letter-spacing:.18em;text-transform:uppercase;color:#fff;gap:10px}
+html body .captured-reference-brand i{width:12px;height:12px;background:#fff;clip-path:none;box-shadow:inset 0 0 0 3px #000,0 0 0 1px #fff}
+html body .captured-app-sidebar button,html body .captured-app-sidebar a{color:var(--t-dim)}
+html body .captured-app-sidebar a:hover,html body .captured-app-sidebar button:hover{background:var(--t-hover);color:#fff}
+html body .captured-app-project{height:40px;border-bottom:1px solid var(--t-line);font:500 11px var(--t-mono);letter-spacing:.04em;color:#fff}
+html body .captured-app-context{border-bottom:1px solid var(--t-line);font:500 11px var(--t-mono);letter-spacing:.04em}
+html body .captured-app-context a.active,html body .captured-app-context a.active:hover{background:#fff;color:#000}
+html body .captured-app-nav{padding:14px 0}
+html body .captured-app-nav-search{height:32px;margin:0 12px 10px;width:calc(100% - 24px);border:1px solid var(--t-line-strong);font:11px var(--t-mono);color:var(--t-dim)}
+html body .captured-app-nav-group{margin-bottom:10px}
+html body .captured-app-nav-label{height:24px;padding:0 16px;font:600 9px var(--t-mono);letter-spacing:.22em;color:var(--t-mute)}
+html body .captured-app-nav-link{height:34px;padding:0 16px;font:500 12px var(--t-mono);letter-spacing:.02em;border-left:2px solid transparent}
+html body .captured-app-nav-link.active,html body .captured-app-nav-link.active:hover{background:#fff;color:#000;border-left:2px solid #fff;padding-left:16px}
+html body .captured-app-account{min-height:56px;border-top:1px solid var(--t-line-strong)}
+html body .captured-app-avatar{background:#fff;color:#000;font:700 10px var(--t-mono);letter-spacing:.04em}
+html body .captured-app-account-copy{font-family:var(--t-mono)}
+html body .captured-app-account-copy span:first-child{color:#fff}
+html body .captured-app-account-copy span:last-child{color:var(--t-mute)}
+html body .captured-app-popover{background:#000;border:1px solid #fff;color:#fff}
+html body .captured-app-command{background:#000;border:1px solid #fff;box-shadow:8px 8px 0 #fff}
+
+/* Workspace chrome */
+html body .captured-workspace{--cw-bg:#000;--cw-panel:#000;--cw-border:var(--t-line);--cw-text:#fff;--cw-muted:var(--t-dim);background:#000;color:#fff;font-family:var(--t-mono);font-size:12px}
+html body .captured-workspace-header{border-bottom:1px solid var(--t-line-strong);background:#000;min-height:56px}
+html body .captured-workspace-toolbar{border-bottom:1px solid var(--t-line);background:#000;padding-block:14px}
+html body .captured-workspace-toolbar h1{font:700 22px/1 var(--t-mono);letter-spacing:-.02em;text-transform:uppercase;color:#fff}
+html body .captured-crumb,html body .captured-range,html body .captured-control,html body .captured-assistant,html body .captured-icon-button{border:1px solid var(--t-line);background:#000;color:#fff;font:500 11px var(--t-mono);letter-spacing:.04em}
+html body .captured-crumb:hover,html body .captured-control:hover,html body .captured-assistant:hover,html body .captured-icon-button:hover{background:#fff;color:#000;border-color:#fff}
+html body .captured-primary-action,html body .captured-button,html body .captured-editor-form button[type=submit]{background:#fff;color:#000;border:1px solid #fff;font:700 11px var(--t-mono);letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;text-decoration:none}
+html body .captured-primary-action:hover,html body .captured-button:hover,html body .captured-editor-form button[type=submit]:hover{background:#000;color:#fff}
+html body kbd{border:1px solid var(--t-line-strong);background:#000;color:var(--t-dim);font:10px var(--t-mono);padding:1px 5px}
+html body .captured-mark{background:#fff}
+html body .captured-mobile-logo i{background:#fff}
+
+/* Panels & charts */
+html body .captured-panel{position:relative;border:1px solid var(--t-line-strong);background:#000}
+html body .captured-panel::before,html body .captured-panel::after{content:"";position:absolute;width:7px;height:7px;border:1px solid #fff;pointer-events:none}
+html body .captured-panel::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+html body .captured-panel::after{right:-1px;bottom:-1px;border-left:0;border-top:0}
+html body .captured-panel-heading h2{font:600 10px var(--t-mono);letter-spacing:.18em;text-transform:uppercase;color:#fff}
+html body .captured-panel-heading p{font:11px var(--t-sans);color:var(--t-mute)}
+html body .captured-metric strong{font:300 44px/1 var(--t-mono);letter-spacing:-.04em;color:#fff;font-variant-numeric:tabular-nums}
+html body .captured-line-chart svg polyline{stroke:#fff;stroke-width:1.5;fill:none;vector-effect:non-scaling-stroke}
+html body .captured-chart-label{color:var(--t-dim);font:11px var(--t-mono)}
+html body .captured-bars span,html body .captured-horizontal-bars>div>span,html body .captured-user-bars>div>span,html body .captured-trace-chart i{background:repeating-linear-gradient(135deg,#fff 0 2px,#d0d0d0 2px 3px);opacity:.9}
+html body .captured-donut{border-radius:50%}
+
+/* Tables */
+html body table{border-collapse:collapse;font:11.5px var(--t-mono);font-variant-numeric:tabular-nums}
+html body th{font:600 10px var(--t-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--t-dim);background:#000;border-bottom:1px solid var(--t-line-strong)}
+html body td{border-bottom:1px solid var(--t-line);color:#e6e6e6}
+html body tbody tr:hover td{background:#fff;color:#000}
+html body tbody tr:hover td a,html body tbody tr:hover td button,html body tbody tr:hover td small{color:#000}
+html body td a{color:#fff;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--t-mute)}
+html body .captured-table-footer{border-top:1px solid var(--t-line-strong);color:var(--t-dim);font:11px var(--t-mono)}
+html body .captured-status{border:1px solid currentColor;background:transparent;color:#fff;font:600 10px var(--t-mono);letter-spacing:.08em;text-transform:uppercase;padding:1px 6px}
+
+/* Forms & modals */
+html body input,html body select,html body textarea{background:#000;color:#fff;border:1px solid var(--t-line-strong);font-family:var(--t-mono)}
+html body input:focus,html body select:focus,html body textarea:focus{border-color:#fff}
+html body input[type=checkbox]{accent-color:#fff}
+html body .captured-editor-form label{font:600 10px var(--t-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--t-dim)}
+html body .captured-filter-panel,html body .captured-column-menu,html body .captured-tracing-filter-menu,html body .captured-experiments-filter-drawer{background:#000;border:1px solid #fff;color:#fff}
+html body .captured-modal-backdrop{background:rgb(0 0 0 / .82)}
+html body .captured-modal{background:#000;border:1px solid #fff;box-shadow:10px 10px 0 #fff;color:#fff}
+html body .captured-modal h2{font:700 18px var(--t-mono);letter-spacing:-.01em}
+html body .captured-modal>span{font:600 10px var(--t-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--t-dim)}
+html body .captured-detail,html body .captured-collection,html body main[class^="captured-"]{background:#000}
+html body .captured-filter-rail,html body .captured-sessions-filter-rail,html body .captured-evaluator-filter-rail{border-right:1px solid var(--t-line);background:#000}
+html body .captured-settings nav button.active,html body .captured-tracing-actions .is-active,html body .captured-scores-tabs .active,html body .captured-evaluator-tabs .active,html body .captured-dashboards-reference nav .active{background:#fff;color:#000;border-color:#fff}
+
+@media (max-width:700px){
+  html body .captured-app-main{padding-left:0}
+  html body .captured-app-sidebar{width:280px;box-shadow:none;border-right:1px solid #fff}
+  html body .captured-workspace-toolbar h1{font-size:18px}
+}

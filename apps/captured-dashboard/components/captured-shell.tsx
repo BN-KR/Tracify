@@ -51,11 +51,11 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   return <>
     <aside className={`captured-app-sidebar ${open ? "is-open" : ""}`}>
       <div className="captured-app-brand-row">
-        <Link href="/playground" aria-label="Langfuse dashboard" className="captured-reference-brand"><i aria-hidden="true" />langfuse</Link>
+        <Link href="/playground" aria-label="Tracify dashboard" className="captured-reference-brand"><i aria-hidden="true" />tracify</Link>
         <button type="button" aria-label="Close sidebar" onClick={onClose}><PanelLeftClose className="size-4" /></button>
       </div>
       <button type="button" className="captured-app-project" aria-expanded={projectOpen} onClick={() => setProjectOpen((value) => !value)}>Demo Project (view only) <ChevronDown className="ml-auto size-3" /></button>
-      <div className="captured-app-context"><Link href="/playground" className={isActive(pathname, "/playground") ? "active" : ""}>↗ <span>Use Demo App</span></Link><button type="button" className="captured-app-context-link" onClick={() => setProjectOpen(true)}>⊞ <span>Your Orgs</span></button></div>
+      <div className="captured-app-context"><Link href="/playground" className={isActive(pathname, "/playground") ? "active" : ""}>↗ <span>Live demo</span></Link><button type="button" className="captured-app-context-link" onClick={() => setProjectOpen(true)}>⊞ <span>Your Orgs</span></button></div>
       <nav className="captured-app-nav">
           <button type="button" className="captured-app-nav-search" onClick={() => setCommandOpen(true)}><Search className="size-4" /><span>Go to...</span><kbd className="ml-auto text-[9px]">Ctrl K</kbd></button>
         {groups.map((group) => <div className="captured-app-nav-group" key={group.label || group.items[0][0]}>

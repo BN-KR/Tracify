@@ -1,7 +1,8 @@
 import { readFile, readdir } from "node:fs/promises";
 import { join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = new URL("..", import.meta.url).pathname.replace(/^\//, "").replaceAll("/", "\\");
+const root = fileURLToPath(new URL("..", import.meta.url));
 const sourceDirectories = ["app", "components", "features", "tests"];
 const forbiddenPatterns = [
   /from\s+["']@\//,
