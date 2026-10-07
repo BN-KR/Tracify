@@ -25,14 +25,25 @@ for (const [viewport, width, height] of [["desktop", 1440, 900], ["mobile", 390,
       const response = await page.goto(`${projectPath}${route ? `/${route}` : ""}`, { waitUntil: "domcontentloaded" });
       expect(response?.status(), route).toBeLessThan(400);
       const pathname = new URL(page.url()).pathname;
+<<<<<<< HEAD
       expect(pathname === projectPath || pathname.startsWith(`${projectPath}/`), route).toBe(true);
+=======
+      expect(pathname === projectPath || pathname.startsWith(`${projectPath}/`), `${viewport} ${route}`).toBe(true);
+      await expect(page.locator('.captured-workspace[data-workspace-mode="live"]')).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('.captured-workspace[data-workspace-mode="live"][data-hydrated="true"]')).toBeVisible({ timeout: 30_000 });
+>>>>>>> 6279edb (mission(M-20261007-184746-95e5c8): pace-authenticated-check)
       if (!route) {
-        await expect(page.locator('.captured-workspace[data-workspace-mode="live"][data-hydrated="true"]')).toBeVisible({ timeout: 30_000 });
         await page.screenshot({ path: testInfo.outputPath(`cloud-${viewport}.png`), fullPage: true });
       }
       const metrics = await page.locator("body").evaluate((body) => ({ client: body.clientWidth, scroll: body.scrollWidth }));
+<<<<<<< HEAD
       expect(metrics.scroll, route).toBeLessThanOrEqual(metrics.client);
       expect(errors, route).toEqual([]);
+=======
+      expect(metrics.scroll, `${viewport} ${route}`).toBeLessThanOrEqual(metrics.client);
+      expect(errors, `${viewport} ${route}`).toEqual([]);
+      await page.waitForTimeout(1_000);
+>>>>>>> 6279edb (mission(M-20261007-184746-95e5c8): pace-authenticated-check)
     }
   });
 }
