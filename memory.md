@@ -2108,3 +2108,9 @@
 - Sessions mobile control-row pass: retained the captured `-30px` surface offset and shifted only the search/actions row by `-22px`, matching the reference’s left alignment without moving the table/rail. Fresh paired mobile captures pass; standard mismatch improved to 26.68%, while narrow mismatch is noisier at 27.49%, so no further speculative offset was layered on.
 - Deployment verification: the branch head `b93d2165` now has Ready Vercel previews for both surfaces: marketing `https://tracify-kyi83g6vf-tracify-tech.vercel.app` and EU cloud `https://tracify-cloud-mvhgikvf1-tracify-tech.vercel.app`. GitHub reports both Vercel checks and the activation/adapter checks as passing.
 - Users mobile edge pass: fresh paired captures showed the page title, controls, and table consistently 7px too far right; the final mobile surface offset is now `-36px`. Both mobile captures pass, with mismatch at 26.51% standard and 26.13% narrow; this is retained without further offset stacking.
+
+## 2026-10-07 — Create-form alias redirects moved to next.config
+- `/dashboard/:projectId/alerts/new` and `/dashboard/:projectId/dashboards/new` crashed the authenticated workspace with React error #310 when reached by client navigation (a page whose only job was a server `redirect()`). The two alias pages were removed; `next.config.ts` `redirects()` now answers them with a 307 before rendering, passing incoming query values through and merging `view=create`.
+- In-app create actions in `captured-workspace.tsx` now push `?view=create` directly, so normal clicks never hit a redirect.
+- Verified: build with placeholder Convex env, 307s for document and `RSC: 1` requests with query passthrough. Authenticated browser check still owed on a Vercel preview.
+- Pre-existing, unrelated: `src/lib/stripe.ts` pins `2026-08-26.dahlia`, which the locked `stripe@22.4.0` types reject, so `tsc`/`next build` fail on main with the committed lockfile.

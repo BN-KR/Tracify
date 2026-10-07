@@ -16,6 +16,23 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/*": ["./content/docs/**/*.mdoc"],
   },
+  // Create-form aliases resolve at the request layer so client navigation never
+  // renders a page whose only job is to call redirect(). Query values on the
+  // incoming request are passed through and merged with `view=create`.
+  async redirects() {
+    return [
+      {
+        source: "/dashboard/:projectId/alerts/new",
+        destination: "/dashboard/:projectId/alerts?view=create",
+        permanent: false,
+      },
+      {
+        source: "/dashboard/:projectId/dashboards/new",
+        destination: "/dashboard/:projectId/dashboards?view=create",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
