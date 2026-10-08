@@ -88,7 +88,7 @@ test.describe("account access contract", () => {
 
   test("Sandbox controls filter data, open details, and enforce read-only writes", async ({ page }, testInfo) => {
     testInfo.setTimeout(180_000);
-    await page.goto("/playground/tracing", { waitUntil: "domcontentloaded" });
+    await page.goto("/playground/tracing?range=7d", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Tracing" })).toBeVisible();
     await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
     const consentButton = page.getByRole("button", { name: "Accept analytics" });
@@ -97,14 +97,20 @@ test.describe("account access contract", () => {
     await tracingFilters.click();
     await expect(tracingFilters).toHaveAttribute("aria-expanded", "true");
     await page.getByRole("textbox", { name: "Search", exact: true }).fill("handle-chatbot-message");
-    await expect(page).toHaveURL(/(?:\?|&)q=handle-chatbot-message/);
+    await expect.poll(() => {
+      const url = new URL(page.url());
+      return `${url.pathname}?${url.searchParams.toString()}`;
+    }).toBe("/playground/tracing?range=7d&q=handle-chatbot-message");
     await page.reload({ waitUntil: "domcontentloaded" });
     await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
     await tracingFilters.click();
     await expect(page.getByRole("textbox", { name: "Search", exact: true })).toHaveValue("handle-chatbot-message");
     await tracingFilters.click();
     await page.locator(".captured-tracing-actions").getByRole("button", { name: /Chart/ }).click();
-    await expect(page).toHaveURL(/(?:\?|&)view=chart/);
+    await expect.poll(() => {
+      const url = new URL(page.url());
+      return `${url.pathname}?${url.searchParams.toString()}`;
+    }).toBe("/playground/tracing?range=7d&q=handle-chatbot-message&view=chart");
     await page.reload({ waitUntil: "domcontentloaded" });
     await expect(page.locator(".captured-workspace")).toHaveAttribute("data-hydrated", "true", { timeout: 30_000 });
     await expect(page.locator(".captured-tracing-actions").getByRole("button", { name: /Chart/ })).toHaveClass(/is-active/);
