@@ -84,6 +84,26 @@ These pages live under `/dashboard` but are **not** project-scoped.
 | `/dashboard/organizations` | `src/app/(frontend)/dashboard/organizations/page.tsx` | List and switch between Clerk organizations; `OrganizationWorkspace` component |
 | `/dashboard/organization-settings` | `src/app/(frontend)/dashboard/organization-settings/page.tsx` | Org name, invite members, manage projects; `OrganizationSettings` component |
 | `/dashboard/members` | `src/app/(frontend)/dashboard/members/page.tsx` | Read-only member list via `ProjectMembers` |
+| `/dashboard/alerts` | `src/app/(frontend)/dashboard/alerts/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/api-keys` | `src/app/(frontend)/dashboard/api-keys/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/billing` | `src/app/(frontend)/dashboard/billing/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/compare` | `src/app/(frontend)/dashboard/compare/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/control` | `src/app/(frontend)/dashboard/control/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/costs` | `src/app/(frontend)/dashboard/costs/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/datasets` | `src/app/(frontend)/dashboard/datasets/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/evaluation` | `src/app/(frontend)/dashboard/evaluation/page.tsx` | Live Evaluation Engine page; `DashboardTopbar` and `EvaluationEngineDashboard` with empty `projectId` |
+| `/dashboard/experiments` | `src/app/(frontend)/dashboard/experiments/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/investigate` | `src/app/(frontend)/dashboard/investigate/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/manage` | `src/app/(frontend)/dashboard/manage/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/playground` | `src/app/(frontend)/dashboard/playground/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/prompts` | `src/app/(frontend)/dashboard/prompts/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/quickstart` | `src/app/(frontend)/dashboard/quickstart/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/reports` | `src/app/(frontend)/dashboard/reports/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/resilience` | `src/app/(frontend)/dashboard/resilience/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/runs` | `src/app/(frontend)/dashboard/runs/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/search` | `src/app/(frontend)/dashboard/search/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/sessions` | `src/app/(frontend)/dashboard/sessions/page.tsx` | **Redirect** → `/dashboard` |
+| `/dashboard/settings` | `src/app/(frontend)/dashboard/settings/page.tsx` | **Redirect** → `/dashboard` |
 
 ---
 
@@ -101,6 +121,7 @@ wraps every page in `ProjectRouteGate` which validates project access.
 | `/dashboard/[projectId]/dashboards` | `src/app/(frontend)/dashboard/[projectId]/dashboards/page.tsx` | Custom dashboard gallery; `LiveCapturedDashboards` |
 | `/dashboard/[projectId]/dashboards/[dashboardId]` | `src/app/(frontend)/dashboard/[projectId]/dashboards/[dashboardId]/page.tsx` | Single custom dashboard; `LiveCapturedDashboards` with `dashboardId` |
 | `/dashboard/[projectId]/dashboards/new` | `src/app/(frontend)/dashboard/[projectId]/dashboards/new/page.tsx` | Redirects to `/dashboards?view=create` |
+| `/dashboard/[projectId]/widgets` | `src/app/(frontend)/dashboard/[projectId]/widgets/page.tsx` | **Redirect** → `/dashboard/[projectId]/dashboards` (Widget library alias) |
 | `/dashboard/[projectId]/quickstart` | `src/app/(frontend)/dashboard/[projectId]/quickstart/page.tsx` | In-app quickstart guide; `QuickstartGuide` |
 | `/dashboard/[projectId]/docs` | `src/app/(frontend)/dashboard/[projectId]/docs/page.tsx` | Embedded documentation viewer; `DocsViewer` |
 
