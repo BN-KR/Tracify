@@ -285,3 +285,34 @@
 @media(max-width:700px){.captured-evaluators-reference .captured-evaluator-title{display:none!important}.captured-evaluators-reference .captured-evaluator-model>span{position:static!important;width:auto!important;min-width:0!important;flex:1}.captured-evaluators-reference .captured-evaluator-model>span>strong{position:static!important;margin-left:8px}}
 .captured-workspace:has(.captured-evaluators-reference)>.captured-workspace-toolbar{display:none}.captured-evaluators-reference .captured-evaluator-model{height:45px;border:0;border-bottom:1px solid #292929;padding:0 12px;gap:20px}.captured-evaluator-title{margin-right:34px;color:#eee;font-size:16px}.captured-evaluators-reference .captured-evaluator-model span{border:1px solid #3b3b3b;padding:8px 12px;min-width:370px}.captured-evaluator-content{display:grid;grid-template-columns:104px minmax(0,1fr);min-width:0}.captured-evaluator-filter-rail{display:flex;flex-direction:column;gap:8px;border-right:1px solid #292929;background:#111;padding:8px;color:#888;font-size:10px}.captured-evaluator-filter-rail strong{color:#aaa}.captured-evaluator-filter-rail button{display:flex;justify-content:space-between;border:0;background:#242424;color:#aaa;padding:7px 6px;text-align:left}.captured-evaluator-filter-rail label{display:flex;align-items:center;gap:5px;padding-left:6px}.captured-evaluator-filter-rail input{accent-color:#aaa}.captured-evaluator-content .captured-evaluator-table{min-width:0}.captured-evaluator-content .captured-evaluator-table table{min-width:720px}.captured-evaluator-content .captured-evaluator-table th:first-child,.captured-evaluator-content .captured-evaluator-table td:first-child{width:34px}.captured-evaluator-content .captured-evaluator-table th:nth-child(2),.captured-evaluator-content .captured-evaluator-table td:nth-child(2){min-width:320px}.captured-evaluator-content .captured-evaluator-table th:nth-child(3),.captured-evaluator-content .captured-evaluator-table td:nth-child(3){min-width:130px}.captured-evaluator-content .captured-evaluator-table th:nth-child(4),.captured-evaluator-content .captured-evaluator-table td:nth-child(4){min-width:130px}.captured-evaluator-active{display:inline-block;border-radius:0;background:#063c2d;color:#12d49c;padding:3px 9px}.captured-evaluator-inactive{display:inline-block;border-radius:0;background:#252525;color:#ddd;padding:3px 9px}.captured-evaluator-type{display:inline-block;border-radius:0;background:#252525;color:#ddd;padding:3px 9px}@media(max-width:700px){.captured-workspace:has(.captured-evaluators-reference)>.captured-workspace-toolbar{display:flex;transform:none}.captured-evaluator-title{display:none}.captured-evaluators-reference .captured-evaluator-model{height:32px;margin:0 8px}.captured-evaluators-reference .captured-evaluator-model span{min-width:0;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.captured-evaluator-content{grid-template-columns:40px minmax(0,1fr)}.captured-evaluator-filter-rail{padding:8px 4px}.captured-evaluator-filter-rail>*:not(strong){font-size:0;justify-content:center}.captured-evaluator-filter-rail label{display:none}.captured-evaluator-content .captured-evaluator-table table{min-width:720px}}
 .captured-evaluators-reference .captured-evaluator-model{position:relative;justify-content:flex-start;gap:0}.captured-evaluators-reference .captured-evaluator-title{position:absolute;left:12px;margin:0}.captured-evaluators-reference .captured-evaluator-model>span{position:absolute;left:188px;top:6px;width:372px;min-width:0}.captured-evaluators-reference .captured-evaluator-model>span>strong{position:absolute;left:242px;top:6px;white-space:nowrap;font-weight:400}.captured-evaluators-reference .captured-evaluator-model>strong:last-child{display:none}
+
+/* Glass Grid sandbox interactions: deterministic loading, palette, refresh
+   menu, playground variables, and status affordances for reducer-backed work. */
+.captured-workspace-loading{display:grid;place-content:center;justify-items:center;gap:10px;min-height:100vh;border:0;color:#8a8a8a;background:repeating-linear-gradient(135deg,#000 0 24px,#0a0a0a 24px 48px)}
+.captured-command-empty{margin:0;padding:14px;color:#888;font-size:11px}
+.captured-refresh-control-wrap{position:relative;display:inline-flex}
+.captured-refresh-menu{position:absolute;right:0;top:34px;z-index:30;display:grid;min-width:130px;border:1px solid #fff;background:#000;box-shadow:6px 6px 0 rgb(255 255 255 / .18)}
+.captured-refresh-menu button{border:0;border-bottom:1px solid #262626;background:transparent;color:#bbb;text-align:left;padding:8px 10px}
+.captured-refresh-menu button:last-child{border-bottom:0}
+.captured-refresh-menu button:hover,.captured-refresh-menu button.is-active{background:#fff;color:#000}
+.captured-playground-variables{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0 0}
+.captured-playground-variable-chip{border:1px dashed #6b6b6b;color:#bbb;padding:3px 8px;font:10px var(--font-mono)}
+.captured-playground-variable-chip.is-empty{color:#666;border-style:dotted}
+.captured-playground-tool-link{display:inline-flex;align-items:center;height:32px;border:1px solid #3b3b3b;background:#111;color:#bbb;padding:0 11px;text-decoration:none}
+.captured-playground-tool-link:hover{border-color:#fff;color:#fff}
+.captured-datasets-search{display:flex;align-items:center;gap:7px;height:32px;width:min(320px,45vw);border:1px solid #3b3b3b;background:#111;padding:0 10px;color:#777}
+.captured-datasets-search svg{width:13px;flex:none}
+.captured-datasets-search input{min-width:0;flex:1;border:0;background:transparent;color:#ccc;outline:0;font-size:11px}
+.captured-settings .captured-settings-reset-row{display:flex;flex-direction:row;align-items:center;gap:10px}
+.captured-settings .captured-settings-reset-row svg{color:#888}
+.captured-settings .captured-settings-reset-row button{margin:0}
+.captured-surface-status{margin:6px 8px;color:#bbb;font-size:11px}
+.captured-scores-analytics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:14px 0}
+.captured-scores-analytics .captured-scores-families{grid-column:1 / -1}
+.captured-scores-analytics .captured-metric{height:150px;min-height:150px}
+.captured-scores-analytics .captured-metric>strong{margin-top:34px;font-size:40px}
+@media(max-width:700px){
+  .captured-scores-analytics{grid-template-columns:1fr}
+  .captured-refresh-menu{right:auto;left:0}
+  .captured-datasets-search{width:100%}
+}

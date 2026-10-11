@@ -2,84 +2,151 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type ComponentType } from "react";
-import { ChevronDown, Grid2X2, Home, PanelLeftClose, Search, Settings2, Table2, Users, Activity, Bell, MessageSquareText, FlaskConical, Database, PhoneCall } from "lucide-react";
+import { useEffect, useReducer, useState, type ComponentType } from "react";
+import { Activity, Bell, ChevronDown, Database, FlaskConical, Grid2X2, Home, MessageSquareText, PanelLeftClose, Search, Settings2, Table2, Users } from "lucide-react";
 
-type NavItem = [title: string, href: string, icon: ComponentType<{ className?: string }>];
-type NavGroup = { label: string; items: NavItem[] };
-const groups: NavGroup[] = [
-  { label: "", items: [["Home", "/playground", Home], ["Dashboards", "/playground/dashboards", Grid2X2]] },
-  { label: "Observability", items: [["Tracing", "/playground/tracing", Activity], ["Sessions", "/playground/sessions", Activity], ["Users", "/playground/users", Users], ["Alerts", "/playground/alerts", Bell]] },
-  { label: "Prompt Management", items: [["Prompts", "/playground/prompts", MessageSquareText], ["Playground", "/playground/playground", FlaskConical]] },
-  { label: "Evaluation", items: [["Scores", "/playground/scores", Table2], ["Evaluators", "/playground/evaluators", FlaskConical], ["Human Annotation", "/playground/annotation-queues", MessageSquareText], ["Datasets", "/playground/datasets", Database], ["Experiments", "/playground/experiments", FlaskConical]] },
-  { label: "", items: [["Settings", "/playground/settings", Settings2]] },
-  { label: "", items: [["Book a call", "mailto:support@tracify.tech?subject=Book%20a%20call", PhoneCall], ["Support", "mailto:support@tracify.tech", MessageSquareText]] },
-];
+import type { WorkspaceSurface } from "../features/dashboard-workspace/contracts";
+import { PLAYGROUND_NAV_GROUPS, PLAYGROUND_SUPPORT_LINKS, SURFACE_LABELS, playgroundPath } from "../features/dashboard-workspace/route-map";
+
+const NAV_ICONS: Partial<Record<WorkspaceSurface, ComponentType<{ className?: string }>>> = {
+  home: Home,
+  dashboards: Grid2X2,
+  tracing: Activity,
+  sessions: Activity,
+  users: Users,
+  alerts: Bell,
+  prompts: MessageSquareText,
+  playground: FlaskConical,
+  scores: Table2,
+  evaluators: FlaskConical,
+  "annotation-queues": MessageSquareText,
+  datasets: Database,
+  experiments: FlaskConical,
+  settings: Settings2,
+};
+
+type Overlay = "none" | "command" | "project" | "account";
+type ShellState = { mobileOpen: boolean; overlay: Overlay };
+type ShellAction =
+  | { type: "toggle-sidebar" }
+  | { type: "close-sidebar" }
+  | { type: "open-overlay"; overlay: Overlay }
+  | { type: "toggle-overlay"; overlay: Overlay }
+  | { type: "close-overlays" };
+
+// Single reducer owns every shell overlay state so keyboard, backdrop, and
+// navigation gestures always settle the drawer, popovers, and palette together.
+function shellReducer(state: ShellState, action: ShellAction): ShellState {
+  switch (action.type) {
+    case "toggle-sidebar":
+      return { ...state, mobileOpen: !state.mobileOpen };
+    case "close-sidebar":
+      return { ...state, mobileOpen: false };
+    case "open-overlay":
+      return { ...state, overlay: action.overlay };
+    case "toggle-overlay":
+      return { ...state, overlay: state.overlay === action.overlay ? "none" : action.overlay };
+    case "close-overlays":
+      return { ...state, mobileOpen: false, overlay: "none" };
+    default:
+      return state;
+  }
+}
 
 function isActive(pathname: string, href: string) {
   return href === "/playground" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CapturedShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [commandOpen, setCommandOpen] = useState(false);
-  const [projectOpen, setProjectOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
+  const [state, dispatch] = useReducer(shellReducer, { mobileOpen: false, overlay: "none" });
+  const [commandQuery, setCommandQuery] = useState("");
+
   useEffect(() => {
-    const openCommand = () => setCommandOpen(true);
-    const openProject = () => setProjectOpen(true);
+    const openCommand = () => dispatch({ type: "open-overlay", overlay: "command" });
+    const openProject = () => dispatch({ type: "open-overlay", overlay: "project" });
+    const toggleSidebar = () => dispatch({ type: "toggle-sidebar" });
     window.addEventListener("tracify:open-command", openCommand);
     window.addEventListener("tracify:open-project-switcher", openProject);
+    window.addEventListener("tracify:toggle-sidebar", toggleSidebar);
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setCommandOpen(true);
+        dispatch({ type: "open-overlay", overlay: "command" });
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "i") {
+        event.preventDefault();
+        dispatch({ type: "open-overlay", overlay: "command" });
       }
       if (event.key === "Escape") {
-        setCommandOpen(false);
-        setProjectOpen(false);
-        setAccountOpen(false);
+        dispatch({ type: "close-overlays" });
+        setCommandQuery("");
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("tracify:open-command", openCommand);
       window.removeEventListener("tracify:open-project-switcher", openProject);
+      window.removeEventListener("tracify:toggle-sidebar", toggleSidebar);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, []);
-  return <>
-    <aside className={`captured-app-sidebar ${open ? "is-open" : ""}`}>
+
+  const navEntries = PLAYGROUND_NAV_GROUPS.flatMap((group) => group.surfaces.map((surface) => ({
+    title: SURFACE_LABELS[surface],
+    href: playgroundPath("/playground", surface),
+    Icon: NAV_ICONS[surface] ?? Activity,
+  })));
+  const supportEntries = PLAYGROUND_SUPPORT_LINKS.map(([title, href]) => ({ title, href, Icon: MessageSquareText }));
+  const paletteMatches = [...navEntries, ...supportEntries].filter((entry) => {
+    const query = commandQuery.trim().toLowerCase();
+    return !query || entry.title.toLowerCase().includes(query) || entry.href.toLowerCase().includes(query);
+  });
+
+  const settleAfterNavigation = () => {
+    dispatch({ type: "close-overlays" });
+    setCommandQuery("");
+  };
+
+  return <div className="captured-app-shell">
+    <aside className={`captured-app-sidebar ${state.mobileOpen ? "is-open" : ""}`}>
       <div className="captured-app-brand-row">
         <Link href="/playground" aria-label="Tracify dashboard" className="captured-reference-brand"><i aria-hidden="true" />tracify</Link>
-        <button type="button" aria-label="Close sidebar" onClick={onClose}><PanelLeftClose className="size-4" /></button>
+        <button type="button" aria-label="Close sidebar" onClick={() => dispatch({ type: "close-sidebar" })}><PanelLeftClose className="size-4" /></button>
       </div>
-      <button type="button" className="captured-app-project" aria-expanded={projectOpen} onClick={() => setProjectOpen((value) => !value)}>Demo Project (view only) <ChevronDown className="ml-auto size-3" /></button>
-      <div className="captured-app-context"><Link href="/playground" className={isActive(pathname, "/playground") ? "active" : ""}>↗ <span>Live demo</span></Link><button type="button" className="captured-app-context-link" onClick={() => setProjectOpen(true)}>⊞ <span>Your Orgs</span></button></div>
+      <button type="button" className="captured-app-project" aria-expanded={state.overlay === "project"} onClick={() => dispatch({ type: "toggle-overlay", overlay: "project" })}>Demo Project (view only) <ChevronDown className="ml-auto size-3" /></button>
+      <div className="captured-app-context"><Link href="/playground" className={isActive(pathname, "/playground") ? "active" : ""} onClick={settleAfterNavigation}>↗ <span>Live demo</span></Link><button type="button" className="captured-app-context-link" onClick={() => dispatch({ type: "open-overlay", overlay: "project" })}>⊞ <span>Your Orgs</span></button></div>
       <nav className="captured-app-nav">
-          <button type="button" className="captured-app-nav-search" onClick={() => setCommandOpen(true)}><Search className="size-4" /><span>Go to...</span><kbd className="ml-auto text-[9px]">Ctrl K</kbd></button>
-        {groups.map((group) => <div className="captured-app-nav-group" key={group.label || group.items[0][0]}>
+        <button type="button" className="captured-app-nav-search" onClick={() => dispatch({ type: "open-overlay", overlay: "command" })}><Search className="size-4" /><span>Go to...</span><kbd className="ml-auto text-[9px]">Ctrl K</kbd></button>
+        {PLAYGROUND_NAV_GROUPS.map((group) => <div className="captured-app-nav-group" key={group.label || group.surfaces[0]}>
           {group.label ? <div className="captured-app-nav-label">{group.label}</div> : null}
-          {group.items.map(([title, href, Icon]) => <Link href={href} key={title} className={`captured-app-nav-link ${href.startsWith("/") && isActive(pathname, href) ? "active" : ""}`} onClick={onClose}><Icon className="size-4 shrink-0" /><span className="truncate">{title}</span></Link>)}
+          {group.surfaces.map((surface) => {
+            const Icon = NAV_ICONS[surface] ?? Activity;
+            const href = playgroundPath("/playground", surface);
+            return <Link href={href} key={surface} className={`captured-app-nav-link ${isActive(pathname, href) ? "active" : ""}`} onClick={settleAfterNavigation}><Icon className="size-4 shrink-0" /><span className="truncate">{SURFACE_LABELS[surface]}</span></Link>;
+          })}
         </div>)}
+        <div className="captured-app-nav-group">
+          {PLAYGROUND_SUPPORT_LINKS.map(([title, href]) => <a href={href} key={title} className="captured-app-nav-link"><MessageSquareText className="size-4 shrink-0" /><span className="truncate">{title}</span></a>)}
+        </div>
       </nav>
-      <button type="button" className="captured-app-account" aria-label="Kristoffer Bon account menu" aria-expanded={accountOpen} onClick={() => setAccountOpen((value) => !value)}>
+      <button type="button" className="captured-app-account" aria-label="Kristoffer Bon account menu" aria-expanded={state.overlay === "account"} onClick={() => dispatch({ type: "toggle-overlay", overlay: "account" })}>
         <span className="captured-app-avatar" aria-hidden="true">KB</span><span className="captured-app-account-copy"><span className="truncate">Kristoffer Bon</span><span className="truncate">kristoffer.bon@gmail.com</span></span><ChevronDown className="ml-auto size-3" />
       </button>
-      {projectOpen ? <div className="captured-app-popover captured-app-project-popover" role="dialog" aria-label="Project switcher"><strong>Demo Project</strong><span>Sandbox reference workspace</span><button type="button" onClick={() => setProjectOpen(false)}>Close</button></div> : null}
-      {accountOpen ? <div className="captured-app-popover captured-app-account-popover" role="dialog" aria-label="Account menu"><strong>Kristoffer Bon</strong><span>kristoffer.bon@gmail.com</span><button type="button" onClick={() => setAccountOpen(false)}>Close</button></div> : null}
+      {state.overlay === "project" ? <div className="captured-app-popover captured-app-project-popover" role="dialog" aria-label="Project switcher"><strong>Demo Project</strong><span>Sandbox reference workspace</span><button type="button" onClick={() => dispatch({ type: "open-overlay", overlay: "none" })}>Close</button></div> : null}
+      {state.overlay === "account" ? <div className="captured-app-popover captured-app-account-popover" role="dialog" aria-label="Account menu"><strong>Kristoffer Bon</strong><span>kristoffer.bon@gmail.com</span><button type="button" onClick={() => dispatch({ type: "open-overlay", overlay: "none" })}>Close</button></div> : null}
     </aside>
-    {open ? <button type="button" aria-label="Close sidebar" className="captured-app-backdrop" onClick={onClose} /> : null}
-    {commandOpen ? <div className="captured-app-command-layer"><button type="button" className="captured-app-command-backdrop" aria-label="Close command menu" onClick={() => setCommandOpen(false)} /><div className="captured-app-command" role="dialog" aria-label="Go to"><div><Search className="size-4" /><input autoFocus aria-label="Search navigation" placeholder="Search navigation" onKeyDown={(event) => { if (event.key === "Escape") setCommandOpen(false); }} /></div>{groups.flatMap((group) => group.items).map(([title, href, Icon]) => <Link href={href} key={title} onClick={() => setCommandOpen(false)}><Icon className="size-4" />{title}</Link>)}</div></div> : null}
-  </>;
-}
-
-export function CapturedShell({ children }: { children: React.ReactNode }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  useEffect(() => {
-    const toggle = () => setMobileOpen((current) => !current);
-    window.addEventListener("tracify:toggle-sidebar", toggle);
-    return () => window.removeEventListener("tracify:toggle-sidebar", toggle);
-  }, []);
-  return <div className="captured-app-shell"><Sidebar open={mobileOpen} onClose={() => setMobileOpen(false)} /><div className="captured-app-main"><main className="captured-app-scroll">{children}</main></div></div>;
+    {state.mobileOpen ? <button type="button" aria-label="Close sidebar" className="captured-app-backdrop" onClick={() => dispatch({ type: "close-sidebar" })} /> : null}
+    {state.overlay === "command" ? <div className="captured-app-command-layer">
+      <button type="button" className="captured-app-command-backdrop" aria-label="Close command menu" onClick={() => dispatch({ type: "open-overlay", overlay: "none" })} />
+      <div className="captured-app-command" role="dialog" aria-label="Go to">
+        <div><Search className="size-4" /><input autoFocus aria-label="Search navigation" placeholder="Search navigation" value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Escape") dispatch({ type: "close-overlays" }); }} /></div>
+        {paletteMatches.length ? paletteMatches.map((entry) => {
+          const Icon = entry.Icon;
+          return <Link href={entry.href} key={`${entry.title}-${entry.href}`} onClick={settleAfterNavigation}><Icon className="size-4" />{entry.title}</Link>;
+        }) : <p className="captured-command-empty">No navigation target matches “{commandQuery.trim()}”.</p>}
+      </div>
+    </div> : null}
+    <div className="captured-app-main"><main className="captured-app-scroll">{children}</main></div>
+  </div>;
 }
