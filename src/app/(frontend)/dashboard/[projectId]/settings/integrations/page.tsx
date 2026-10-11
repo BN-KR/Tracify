@@ -1,6 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default async function IntegrationsPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = await params;
-  redirect(`/dashboard/${projectId}/settings?tab=Integrations`);
-}
+export default function IntegrationsPage() { return <main className="p-6 text-white"><h1 className="text-3xl font-semibold">Integrations</h1><p className="mt-2 text-white/60">Connect destinations for project events and telemetry.</p><div className="mt-8 grid gap-3 sm:grid-cols-2"><button className="border border-white/15 p-5 text-left hover:border-white/50">Slack <span className="block pt-3 text-xs text-white/45">Not connected · Configure</span></button><button className="border border-white/15 p-5 text-left hover:border-white/50">Webhooks <span className="block pt-3 text-xs text-white/45">No endpoints · Add endpoint</span></button></div></main>; }

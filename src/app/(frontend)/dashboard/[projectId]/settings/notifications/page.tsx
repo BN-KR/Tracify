@@ -1,6 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default async function ProjectNotificationsPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = await params;
-  redirect(`/dashboard/${projectId}/settings?tab=Notifications`);
-}
+export default function NotificationsPage() { return <main className="p-6 text-white"><h1 className="text-3xl font-semibold">Notifications</h1><p className="mt-2 text-white/60">Choose alert channels and delivery preferences.</p><form className="mt-8 max-w-xl space-y-4 border border-white/15 p-5"><label className="flex gap-3"><input type="checkbox" defaultChecked /> Failed runs</label><label className="flex gap-3"><input type="checkbox" defaultChecked /> Cost threshold</label><button className="border border-white/30 px-4 py-2 text-sm hover:bg-white hover:text-black" type="submit">Save preferences</button></form></main>; }

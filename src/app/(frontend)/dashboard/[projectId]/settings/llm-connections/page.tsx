@@ -1,6 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default async function LlmConnectionsPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = await params;
-  redirect(`/dashboard/${projectId}/settings?tab=LLM%20Connections`);
-}
+export default function LlmConnectionsPage() { return <main className="p-6 text-white"><h1 className="text-3xl font-semibold">LLM connections</h1><p className="mt-2 text-white/60">Manage provider credentials and connection health.</p><div className="mt-8 border border-white/15 p-5"><p className="font-medium">No provider connections</p><button className="mt-5 border border-white/30 px-4 py-2 text-sm hover:bg-white hover:text-black">Add connection</button></div></main>; }

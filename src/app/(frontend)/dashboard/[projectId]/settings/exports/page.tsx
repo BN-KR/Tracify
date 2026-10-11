@@ -1,6 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default async function ExportsPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = await params;
-  redirect(`/dashboard/${projectId}/settings?tab=${encodeURIComponent("Exports")}`);
-}
+export default function ExportsPage() { return <main className="p-6 text-white"><h1 className="text-3xl font-semibold">Exports</h1><p className="mt-2 text-white/60">Prepare a scoped export of project telemetry and metadata.</p><form className="mt-8 max-w-xl border border-white/15 p-5"><label className="grid gap-2 text-sm">Format<select className="border border-white/20 bg-black p-3" defaultValue="json"><option value="json">JSON</option><option value="csv">CSV</option></select></label><button className="mt-5 border border-white/30 px-4 py-2 text-sm hover:bg-white hover:text-black" type="submit">Request export</button></form></main>; }

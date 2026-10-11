@@ -1,6 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default async function AuditLogsPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = await params;
-  redirect(`/dashboard/${projectId}/settings?tab=${encodeURIComponent("Audit log")}`);
-}
+export default function AuditLogsPage() { return <main className="p-6 text-white"><h1 className="text-3xl font-semibold">Audit logs</h1><p className="mt-2 text-white/60">Authenticated project changes and access events.</p><div className="mt-8 border border-white/15 p-8 text-sm text-white/55">No audit events in the selected window.</div></main>; }

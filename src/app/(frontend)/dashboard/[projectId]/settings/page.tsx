@@ -1,84 +1,39 @@
-import { LiveCapturedAdmin } from "@/components/dashboard/live-captured-admin";
+import Link from "next/link";
 
-export default async function SettingsPage({
-  params,
-}: {
-  params: Promise<{ projectId: string }>;
-}) {
+type SettingsPageProps = { params: Promise<{ projectId: string }> };
+
+const sections = [
+  ["API keys", "Create, rotate, and revoke project ingestion keys.", "api-keys"],
+  ["Integrations", "Connect telemetry destinations and delivery providers.", "integrations"],
+  ["LLM connections", "Manage provider connection settings and model access.", "llm-connections"],
+  ["Models", "Define model aliases and pricing metadata.", "model-definitions"],
+  ["Notifications", "Choose where project alerts and digest events are sent.", "notifications"],
+  ["Scores", "Configure evaluation score definitions and thresholds.", "scores-configs"],
+  ["Audit logs", "Review authenticated changes made to this project.", "audit-logs"],
+  ["Exports", "Prepare project data exports for approved collaborators.", "exports"],
+  ["Batch actions", "Run controlled maintenance actions across project records.", "batch-actions"],
+] as const;
+
+export default async function SettingsPage({ params }: SettingsPageProps) {
   const { projectId } = await params;
-
-  return <LiveCapturedAdmin projectId={projectId} section="settings" />;
-  /*
-    <div className="flex flex-col gap-6">
-      <DashboardTopbar
-        title="Project Settings"
-        description="Configure thresholds, members, and project lifecycle."
-      />
-
-      <div className="px-6 pb-20">
-        <nav aria-label="Project settings" className="mb-6 flex flex-wrap gap-2 border border-black/15 bg-white p-3">
-          {[['General', `/dashboard/${projectId}/settings`], ['API Keys', `/dashboard/${projectId}/settings?tab=api-keys`], ['MCP & CLI', `/dashboard/${projectId}/settings/mcp-cli`], ['LLM Connections', `/dashboard/${projectId}/settings/llm-connections`], ['Model Definitions', `/dashboard/${projectId}/settings/model-definitions`], ['Scores Configs', `/dashboard/${projectId}/settings/scores-configs`], ['Members', `/dashboard/${projectId}/settings?tab=members`], ['Integrations', `/dashboard/${projectId}/settings/integrations`], ['Exports', `/dashboard/${projectId}/settings/exports`], ['Batch Actions', `/dashboard/${projectId}/settings/batch-actions`], ['Audit Logs', `/dashboard/${projectId}/settings/audit-logs`], ['Notifications', `/dashboard/${projectId}/settings/notifications`], ['Billing', `/dashboard/${projectId}/billing`]].map(([label, href]) => <Link key={label} href={href} className="border border-black/15 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-black/55 transition-colors hover:border-black hover:text-black">{label}</Link>)}
-        </nav>
-        <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="h-12 w-full justify-start gap-8 rounded-none border-b border-black/15 bg-transparent p-0">
-            <TabsTrigger
-              value="general"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
-            >
-              General
-            </TabsTrigger>
-            <TabsTrigger
-              value="members"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
-            >
-              Members
-            </TabsTrigger>
-            <TabsTrigger
-              value="api-keys"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
-            >
-              API Keys
-            </TabsTrigger>
-            <TabsTrigger
-              value="management"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
-            >
-              Management
-            </TabsTrigger>
-            <TabsTrigger
-              value="orchestration"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
-            >
-              Orchestration
-            </TabsTrigger>
-            <TabsTrigger
-              value="notifications"
-              className="h-12 rounded-none border-b-2 border-transparent px-0 font-mono text-[11px] uppercase tracking-widest data-[state=active]:border-black data-[state=active]:bg-transparent data-[state=active]:text-black"
-            >
-              Notifications
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="general" className="mt-0 pt-8 focus-visible:ring-0">
-            <ProjectSettings projectId={projectId} />
-          </TabsContent>
-
-          <TabsContent value="members" className="mt-0 pt-8 focus-visible:ring-0">
-            <ProjectMembers />
-          </TabsContent>
-
-          <TabsContent value="api-keys" className="mt-0 pt-8 focus-visible:ring-0">
-            <ApiKeysManager projectId={projectId} />
-          </TabsContent>
-
-          <TabsContent value="management" className="mt-0 pt-8 focus-visible:ring-0">
-            <ProjectManagement projectId={projectId} />
-          </TabsContent>
-
-          <TabsContent value="orchestration" className="mt-0 pt-8 focus-visible:ring-0">
-            <ProjectOrchestration projectId={projectId} />
-          </TabsContent>
-        </Tabs>
+  return (
+    <main className="mx-auto w-full max-w-6xl p-6 text-white">
+      <div className="mb-8 flex items-end justify-between gap-4 border-b border-white/15 pb-6">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/45">Project control plane</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Settings</h1>
+          <p className="mt-2 max-w-2xl text-sm text-white/60">Manage access, providers, evaluation policy, and data operations for this project.</p>
+        </div>
+        <Link className="border border-white/25 px-3 py-2 font-mono text-xs uppercase tracking-wider hover:bg-white hover:text-black" href={`/dashboard/${projectId}`}>Overview</Link>
       </div>
-    </div> */
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Project settings sections">
+        {sections.map(([title, description, slug]) => (
+          <Link key={slug} href={`/dashboard/${projectId}/settings/${slug}`} className="group min-h-36 border border-white/15 bg-white/[0.03] p-5 transition-colors hover:border-white/50 hover:bg-white/[0.07]">
+            <div className="flex items-start justify-between gap-3"><h2 className="font-medium">{title}</h2><span aria-hidden className="text-white/40 transition-transform group-hover:translate-x-1">→</span></div>
+            <p className="mt-8 text-sm leading-6 text-white/55">{description}</p>
+          </Link>
+        ))}
+      </section>
+    </main>
+  );
 }

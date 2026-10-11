@@ -1,15 +1,1 @@
-import { BillingPlan } from "@/components/dashboard/billing-plan";
-import { IngestQuotaCard } from "@/components/dashboard/ingest-quota-card";
-import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
-import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
-
-export default async function BillingPage({
-  params,
-}: {
-  params: Promise<{ projectId: string }>;
-}) {
-  const { projectId } = await params;
-
-  const workspace = createLiveWorkspace({ id: projectId, name: "Project", organizationName: "Workspace" });
-  return <CapturedWorkspace workspace={workspace} childrenOnly segments={["settings"]}><div className="captured-route-stack"><IngestQuotaCard projectId={projectId} /><BillingPlan projectId={projectId} /></div></CapturedWorkspace>;
-}
+export default function BillingPage() { return <main className="p-6 text-white"><h1 className="text-3xl font-semibold">Billing</h1><p className="mt-2 text-white/60">Usage, plan, and payment settings for this project.</p><section className="mt-8 grid gap-3 sm:grid-cols-3"><div className="border border-white/15 p-5"><p className="text-xs uppercase text-white/45">Current plan</p><p className="mt-3 text-xl">Free</p></div><div className="border border-white/15 p-5"><p className="text-xs uppercase text-white/45">Runs this month</p><p className="mt-3 text-xl">0</p></div><button className="border border-white/30 p-5 text-left hover:bg-white hover:text-black">View plan options →</button></section></main>; }

@@ -1,7 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default async function BatchActionsPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = await params;
-
-  redirect(`/dashboard/${projectId}/settings?tab=${encodeURIComponent("Batch Actions")}`);
-}
+export default function BatchActionsPage() { return <main className="p-6 text-white"><h1 className="text-3xl font-semibold">Batch actions</h1><p className="mt-2 text-white/60">Run controlled maintenance actions across project data.</p><form className="mt-8 grid max-w-xl gap-4 border border-white/15 p-5"><label className="grid gap-2 text-sm">Action<select className="border border-white/20 bg-black p-3" defaultValue="reprocess"><option value="reprocess">Reprocess failed runs</option><option value="archive">Archive selected runs</option></select></label><button className="border border-white/30 px-4 py-2 text-sm hover:bg-white hover:text-black" type="submit">Review action</button></form></main>; }

@@ -1,6 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default async function ScoresConfigsPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = await params;
-  redirect(`/dashboard/${projectId}/settings?tab=Scores`);
-}
+export default function ScoresConfigsPage() { return <main className="p-6 text-white"><h1 className="text-3xl font-semibold">Score configs</h1><p className="mt-2 text-white/60">Configure evaluation scores and thresholds.</p><div className="mt-8 border border-white/15 p-5"><p className="text-sm text-white/60">No score configurations yet.</p><button className="mt-5 border border-white/30 px-4 py-2 text-sm hover:bg-white hover:text-black">Create score</button></div></main>; }

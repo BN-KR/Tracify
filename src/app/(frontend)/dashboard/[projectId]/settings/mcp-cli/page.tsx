@@ -1,6 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default async function McpCliPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = await params;
-  redirect(`/dashboard/${projectId}/settings?tab=MCP%20%26%20CLI`);
-}
+export default function McpCliPage() { return <main className="p-6 text-white"><h1 className="text-3xl font-semibold">MCP CLI</h1><p className="mt-2 text-white/60">Configure local tooling access for this project.</p><pre className="mt-8 overflow-auto border border-white/15 bg-white/[0.03] p-5 text-sm text-white/70">{`tracify mcp init --project PROJECT_ID`}</pre></main>; }

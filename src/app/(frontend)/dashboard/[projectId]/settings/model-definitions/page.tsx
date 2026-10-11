@@ -1,6 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default async function ModelDefinitionsPage({ params }: { params: Promise<{ projectId: string }> }) {
-  const { projectId } = await params;
-  redirect(`/dashboard/${projectId}/settings?tab=Model%20Definitions`);
-}
+export default function ModelDefinitionsPage() { return <main className="p-6 text-white"><h1 className="text-3xl font-semibold">Model definitions</h1><p className="mt-2 text-white/60">Define aliases, providers, and pricing metadata.</p><form className="mt-8 grid max-w-xl gap-4 border border-white/15 p-5"><input className="border border-white/20 bg-black p-3" placeholder="Model alias" aria-label="Model alias" /><input className="border border-white/20 bg-black p-3" placeholder="Provider" aria-label="Provider" /><button className="border border-white/30 px-4 py-2 text-sm hover:bg-white hover:text-black" type="submit">Save model</button></form></main>; }
