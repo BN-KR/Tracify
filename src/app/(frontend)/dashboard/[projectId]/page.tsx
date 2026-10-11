@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { ProjectDashboardContent } from "@/components/dashboard/project-dashboard-content";
+
+export const metadata: Metadata = {
+  title: "Overview",
+  robots: { index: false, follow: false },
+};
 
 export default async function ProjectDashboardPage({
   params,

@@ -283,18 +283,18 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
           )}
         </Card>
         <Card className="border-zinc-800 bg-[#111418] p-0 shadow-none">
-          <div className="border-b border-black/15 p-5">
-          <h3 className="font-mono text-sm uppercase tracking-widest text-black">Launch plan</h3>
-          <p className="mt-1 font-mono text-[10px] text-black/55">A lightweight path to a more useful workspace.</p>
+          <div className="border-b border-zinc-800 p-5">
+          <h3 className="font-mono text-sm uppercase tracking-widest text-zinc-100">Launch plan</h3>
+          <p className="mt-1 font-mono text-[10px] text-zinc-400">A lightweight path to a more useful workspace.</p>
           </div>
           <ol className="space-y-2 p-4">
             {launchPlan.map((item, index) => (
               <li key={item.label}>
-                <Link href={item.href} className="flex items-center gap-3 border border-black/15 p-3 font-mono text-xs text-black/70 transition-colors hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black">
-                  <span className={item.complete ? "flex size-5 shrink-0 items-center justify-center bg-emerald-600 text-white" : "flex size-5 shrink-0 items-center justify-center border border-black/30 text-black/55"}>
+                <Link href={item.href} className="flex items-center gap-3 border border-zinc-800 p-3 font-mono text-xs text-zinc-300 transition-colors hover:border-zinc-300 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100">
+                  <span className={item.complete ? "flex size-5 shrink-0 items-center justify-center bg-emerald-600 text-white" : "flex size-5 shrink-0 items-center justify-center border border-zinc-600 text-zinc-400"}>
                     {item.complete ? <CircleCheck className="size-3" aria-hidden="true" /> : index + 1}
                   </span>
-                  <span className={item.complete ? "line-through decoration-black/75 text-black/55" : "flex-1"}>{item.label}</span>
+                  <span className={item.complete ? "flex-1 line-through decoration-zinc-400 text-zinc-500" : "flex-1"}>{item.label}</span>
                   <ArrowUpRight className="size-3 shrink-0" aria-hidden="true" />
                 </Link>
               </li>
@@ -419,7 +419,7 @@ export function DashboardOverview({ projectId }: DashboardOverviewProps) {
       {/* Recent Runs */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-mono text-[14px] text-black uppercase tracking-widest">Recent Activity</h3>
+          <h3 className="font-mono text-[14px] text-zinc-100 uppercase tracking-widest">Recent Activity</h3>
           <Link
             href={`/dashboard/${projectId}/manage`}
             className={buttonVariants({
