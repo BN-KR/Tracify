@@ -22,6 +22,7 @@ export function DashboardShell({
   previewProjectName,
   dashboardTheme,
   synthetic = false,
+  scope = "root",
 }: {
   children: React.ReactNode;
   canAccessContent: boolean;
@@ -30,6 +31,8 @@ export function DashboardShell({
   previewProjectName?: string;
   dashboardTheme?: DashboardTheme;
   synthetic?: boolean;
+  /** Root shells yield project routes so the authenticated project layout owns one shell. */
+  scope?: "root" | "project";
 }) {
   const router = useRouter();
   const params = useParams();
@@ -88,8 +91,21 @@ export function DashboardShell({
 
   const layoutSidebarWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
+  // The dashboard layout is shared by /dashboard and /dashboard/[projectId].
+  // Project routes render their authenticated shell in the nested layout; this
+  // keeps one sidebar/topbar mounted and prevents duplicated hook trees during
+  // route transitions (a common source of React error #310).
+  if (scope === "root" && projectId && !preview && !synthetic) {
+    return <>{children}</>;
+  }
+
   return (
-    <div data-dashboard-theme={activeTheme} className={`flex min-h-svh w-full font-mono ${isDashboardRoute ? "tracify-cloud-shell text-white/70" : "text-black/70 bg-[#eceae3]"} ${isTracifyOverview ? "tracify-shell" : ""}`}>
+    <div
+      data-dashboard-theme={activeTheme}
+      data-product-shell="glass-grid"
+      aria-label="Glass Grid dashboard"
+      className={`glass-grid-shell flex min-h-svh w-full font-mono ${isDashboardRoute ? "tracify-cloud-shell text-white/70" : "text-black/70 bg-[#eceae3]"} ${isTracifyOverview ? "tracify-shell" : ""}`}
+    >
       <DashboardSidebar
         canAccessContent={canAccessContent}
         isCollapsed={isCollapsed}
