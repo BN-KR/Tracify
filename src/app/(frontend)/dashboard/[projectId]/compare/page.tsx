@@ -57,29 +57,31 @@ export default function ComparePage() {
   const [loadingSpan, setLoadingSpan] = useState(false);
   const [spanError, setSpanError] = useState("");
 
-  useEffect(() => {
-    if (!runs?.length) return;
-    const known = (candidate: string) => runs.some((run) => run.runId === candidate);
-    if (!leftId || !known(leftId)) setLeftId(runs.find((run) => run.status === "failed")?.runId ?? runs[0].runId);
-    if (!rightId || !known(rightId)) setRightId(runs.find((run) => run.status === "completed" && run.runId !== leftId)?.runId ?? runs[1]?.runId ?? "");
-  }, [leftId, rightId, runs]);
+  const defaultLeftId = runs?.length ? (runs.find((run) => run.runId === leftId)?.runId ?? runs.find((run) => run.status === "failed")?.runId ?? runs[0].runId) : "";
+  const defaultRightId = runs?.length ? (runs.find((run) => run.runId === rightId)?.runId ?? runs.find((run) => run.status === "completed" && run.runId !== defaultLeftId)?.runId ?? runs[1]?.runId ?? "") : "";
+  const effectiveLeftId = leftId && runs?.some((run) => run.runId === leftId) ? leftId : defaultLeftId;
+  const effectiveRightId = rightId && runs?.some((run) => run.runId === rightId) ? rightId : defaultRightId;
 
   useEffect(() => {
     const next = new URLSearchParams(searchParams.toString());
-    if (leftId) next.set("left", leftId); else next.delete("left");
-    if (rightId) next.set("right", rightId); else next.delete("right");
+    if (effectiveLeftId) next.set("left", effectiveLeftId); else next.delete("left");
+    if (effectiveRightId) next.set("right", effectiveRightId); else next.delete("right");
     const target = `${pathname}?${next.toString()}`;
     if (target !== `${pathname}?${searchParams.toString()}`) router.replace(target, { scroll: false });
-  }, [leftId, pathname, rightId, router, searchParams]);
+  }, [effectiveLeftId, effectiveRightId, pathname, router, searchParams]);
 
   useEffect(() => {
-    if (!leftId || !rightId) return;
+    if (!effectiveLeftId || !effectiveRightId) return;
     let cancelled = false;
-    setLoadingSpan(true);
-    setSpanError("");
+    setTimeout(() => {
+      if (!cancelled) {
+        setLoadingSpan(true);
+        setSpanError("");
+      }
+    }, 0);
     Promise.all([
-      fetch(`/api/projects/${projectId}/runs/${encodeURIComponent(leftId)}/spans`).then((response) => response.json() as Promise<SpanResponse>),
-      fetch(`/api/projects/${projectId}/runs/${encodeURIComponent(rightId)}/spans`).then((response) => response.json() as Promise<SpanResponse>),
+      fetch(`/api/projects/${projectId}/runs/${encodeURIComponent(effectiveLeftId)}/spans`).then((response) => response.json() as Promise<SpanResponse>),
+      fetch(`/api/projects/${projectId}/runs/${encodeURIComponent(effectiveRightId)}/spans`).then((response) => response.json() as Promise<SpanResponse>),
     ])
       .then(([first, second]) => {
         if (cancelled) return;
@@ -96,10 +98,10 @@ export default function ComparePage() {
     return () => {
       cancelled = true;
     };
-  }, [leftId, projectId, rightId]);
+  }, [effectiveLeftId, effectiveRightId, projectId]);
 
-  const left = runs?.find((run) => run.runId === leftId) ?? null;
-  const right = runs?.find((run) => run.runId === rightId) ?? null;
+  const left = runs?.find((run) => run.runId === effectiveLeftId) ?? null;
+  const right = runs?.find((run) => run.runId === effectiveRightId) ?? null;
 
   const differences = useMemo(() => {
     if (!left || !right) return [];
