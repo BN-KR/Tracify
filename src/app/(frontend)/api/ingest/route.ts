@@ -7,6 +7,7 @@ import { inngest } from "@/lib/inngest";
 import { getWrongRegionApiKeyResponse, hashApiKey, isTracifyApiKey } from "@/lib/api-keys";
 import { DEFAULT_REDACTION_RULES, redactPayload, redactRecord } from "@/lib/redaction";
 import { consumeRateLimit } from "@/lib/redis-cache";
+import { persistSpan, type SpanEvent } from "@/lib/span-pipeline";
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const INGEST_LIMIT_PER_MINUTE = Number(process.env.TRACIFY_INGEST_LIMIT_PER_MINUTE ?? 6_000);
@@ -210,10 +211,7 @@ export async function POST(request: NextRequest) {
     lastUsedAt: now,
   });
 
-  try {
-    await inngest.send({
-      name: "tracify/span.received",
-      data: {
+  const spanEvent: SpanEvent = {
         spanId: payload.spanId,
         runId: payload.runId,
         projectId: projectDocId,
@@ -248,24 +246,13 @@ export async function POST(request: NextRequest) {
         timedOut: payload.timedOut ?? Boolean(payload.metadata?.timedOut),
         timeoutMs: payload.timeoutMs ?? Number(payload.metadata?.timeoutMs ?? 0),
         createdAt: payload.createdAt,
-      },
-    });
-    if (payload.promptVersionId) {
-      try {
-        await convex.mutation(api.prompts.linkTraceFromApiKey, {
-          projectId: projectDocId,
-          apiKeyHash: hashApiKey(apiKey),
-          promptVersionId: payload.promptVersionId as Id<"promptVersions">,
-          traceId: payload.runId,
-          spanId: payload.spanId,
-        });
-      } catch (error) {
-        console.warn("Prompt trace link rejected:", error);
-      }
-    }
-  } catch (err) {
-    console.error("Inngest send failed (span accepted but not queued):", err);
+  };
+  try {
+    await persistSpan(spanEvent);
+  } catch (error) {
+    console.error("Span storage failed:", error);
     if (process.env.NODE_ENV !== "production") {
+      // Local development without Tinybird: keep the run summary and span cache in Convex only.
       try {
         await convex.mutation(api.agentRuns.upsertRunFromSpan, {
           runId: payload.runId,
@@ -318,7 +305,31 @@ export async function POST(request: NextRequest) {
       } catch (fallbackError) {
         console.error("Development ingest fallback could not persist the run summary:", fallbackError);
       }
+      return Response.json({ ok: true, spanId: payload.spanId, storage: "development-fallback" }, { status: 202 });
     }
+    return Response.json(
+      { error: "Span storage is temporarily unavailable. Retry this span.", code: "storage_unavailable" },
+      { status: 503, headers: { "Retry-After": "5" } },
+    );
+  }
+  if (payload.promptVersionId) {
+    try {
+      await convex.mutation(api.prompts.linkTraceFromApiKey, {
+        projectId: projectDocId,
+        apiKeyHash: hashApiKey(apiKey),
+        promptVersionId: payload.promptVersionId as Id<"promptVersions">,
+        traceId: payload.runId,
+        spanId: payload.spanId,
+      });
+    } catch (error) {
+      console.warn("Prompt trace link rejected:", error);
+    }
+  }
+  try {
+    // Evaluations and alert thresholds run in the background; storage above no longer depends on the queue.
+    await inngest.send({ name: "tracify/span.received", data: { ...spanEvent, persisted: true } });
+  } catch (err) {
+    console.warn("Background follow-up for a stored span could not be queued:", err);
   }
 
   return Response.json(

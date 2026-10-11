@@ -3,7 +3,7 @@ import type { Id } from "convex/_generated/dataModel";
 
 import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
-import { ingestSpan } from "@/lib/tinybird";
+import { persistSpan, type SpanEvent } from "@/lib/span-pipeline";
 import { getTracifyRegion } from "@/lib/regions";
 import { sendTransactionalEmail } from "@/lib/transactional-email";
 
@@ -21,80 +21,10 @@ export const processSpan = inngest.createFunction(
   async ({ event, step }) => {
     const span = event.data;
 
-    await step.run("write-to-tinybird", async () => {
-      await ingestSpan({
-        spanId: span.spanId,
-        runId: span.runId,
-        projectId: span.projectId,
-        spanType: span.spanType,
-        input: span.input,
-        output: span.output,
-        attachments: span.attachments ?? "[]",
-        latencyMs: span.latencyMs,
-        costUsd: span.costUsd,
-        modelId: span.modelId,
-        toolName: span.toolName,
-        parentSpanId: span.parentSpanId,
-        metadata: span.metadata,
-        sessionId: span.sessionId ?? "",
-        endUserId: span.endUserId ?? "",
-        environment: span.environment ?? "",
-        release: span.release ?? "",
-        tags: span.tags ?? [],
-        traceName: span.traceName ?? "",
-        inputTokens: span.inputTokens ?? 0,
-        outputTokens: span.outputTokens ?? 0,
-        ttftMs: span.ttftMs ?? 0,
-        retryCount: span.retryCount ?? 0,
-        errorType: span.errorType ?? "",
-        errorMessage: span.errorMessage ?? "",
-        isStreamChunk: span.isStreamChunk ?? false,
-        streamSequence: span.streamSequence ?? 0,
-        streamFinal: span.streamFinal ?? true,
-        payloadFormat: span.payloadFormat ?? "json",
-        stackTrace: span.stackTrace ?? "",
-        timedOut: span.timedOut ?? false,
-        timeoutMs: span.timeoutMs ?? 0,
-        createdAt: span.createdAt,
-      });
-    });
-
-    const run = await step.run("upsert-convex-run", async () => {
-      const convex = getConvexClient();
-      return await convex.mutation(api.agentRuns.upsertRunFromSpan, {
-        runId: span.runId,
-        projectId: span.projectDocId as Id<"projects">,
-        costUsd: span.costUsd,
-        spanType: span.spanType,
-        createdAt: span.createdAt,
-        modelId: span.modelId || undefined,
-        sessionId: span.sessionId || undefined,
-        environment: span.environment || undefined,
-        release: span.release || undefined,
-      });
-    });
-
-    if (span.sessionId) {
-      await step.run("upsert-convex-session", async () => {
-        const convex = getConvexClient();
-        const status = span.spanType === "error"
-          ? "failed"
-          : span.spanType === "run_end"
-            ? "completed"
-            : "running";
-        await convex.mutation(api.sessions.upsertFromSpan, {
-          projectId: span.projectDocId as Id<"projects">,
-          sessionId: span.sessionId,
-          endUserId: span.endUserId || undefined,
-          environment: span.environment || undefined,
-          release: span.release || undefined,
-          traceName: span.traceName || undefined,
-          tags: span.tags ?? [],
-          createdAt: span.createdAt,
-          costUsd: span.costUsd,
-          status,
-          isNewTrace: run.created,
-        });
+    // /api/ingest stores spans itself before acknowledging them; only older queued events still need storing here.
+    if (!span.persisted) {
+      await step.run("persist-span", async () => {
+        await persistSpan(span as SpanEvent);
       });
     }
 
