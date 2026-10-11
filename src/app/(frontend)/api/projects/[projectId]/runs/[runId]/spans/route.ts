@@ -10,7 +10,7 @@ import {
   setJsonCache,
   withCacheReason,
 } from "@/lib/redis-cache";
-import { getSpansForRun, type SpanRow } from "@/lib/tinybird";
+import { analyticsBackend, getSpansForRun, type SpanRow } from "@/lib/tinybird";
 
 type SpansCachePayload = {
   spans: SpanRow[];
@@ -73,7 +73,8 @@ export async function GET(
       }
     }
 
-    const reservation = await convex.mutation(
+    // The daily read budget protects Tinybird's free-plan request limit; self-hosted ClickHouse has none.
+    const reservation = analyticsBackend() === "clickhouse" ? { allowed: true as const } : await convex.mutation(
       api.analyticsCache.reserveRunSpanRefresh,
       {
         projectId: convexProjectId,

@@ -10,7 +10,7 @@ import {
   setJsonCache,
   withCacheReason,
 } from "@/lib/redis-cache";
-import { getCostByModel, getCostByTool, getCostByUser, getDailyCosts } from "@/lib/tinybird";
+import { analyticsBackend, getCostByModel, getCostByTool, getCostByUser, getDailyCosts } from "@/lib/tinybird";
 
 type StatsCachePayload = {
   dailyCosts: Array<{ day: string; totalCostUsd: number; spanCount: number }>;
@@ -92,7 +92,8 @@ export async function GET(
       );
     }
 
-    const reservation = await convex.mutation(api.analyticsCache.reserveStatsRefresh, {
+    // The daily read budget protects Tinybird's free-plan request limit; self-hosted ClickHouse has none.
+    const reservation = analyticsBackend() === "clickhouse" ? { allowed: true as const } : await convex.mutation(api.analyticsCache.reserveStatsRefresh, {
       projectId: convexProjectId,
       rangeDays: days,
       refresh,
