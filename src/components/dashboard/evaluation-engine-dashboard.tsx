@@ -7,6 +7,7 @@ import { api } from "@/../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EvaluationLab } from "@/components/dashboard/evaluation-lab";
+import { ReviewQueue } from "@/components/dashboard/review-queue";
 
 const tabs = [
   ["Overview", ""], ["Evaluators", "/evaluators"], ["Datasets", "/datasets"], ["Runs", "/runs"], ["Review", "/review"], ["Monitors", "/monitors"], ["Settings", "/settings"],

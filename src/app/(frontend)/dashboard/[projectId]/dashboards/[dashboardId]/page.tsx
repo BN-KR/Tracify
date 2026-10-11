@@ -43,7 +43,7 @@ function TraceVolumeSurface({ projectId }: { projectId: string }) {
         ].map((entry) => (
           <Link
             key={entry.label}
-            href={"href" in entry ? entry.href : `/dashboard/${projectId}/tracing?status=${encodeURIComponent(entry.label.toLowerCase())}`}
+            href={"href" in entry && entry.href ? entry.href : `/dashboard/${projectId}/tracing?status=${encodeURIComponent(entry.label.toLowerCase())}`}
             className="bg-[#111418] p-3 transition-colors hover:bg-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-100"
           >
             <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-zinc-500">{entry.label}</p>

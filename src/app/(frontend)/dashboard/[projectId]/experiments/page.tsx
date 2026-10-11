@@ -82,8 +82,8 @@ export default function ExperimentsPage() {
   const left = rows.find((row) => row.experiment._id === leftId) ?? rows[0] ?? null;
   const right = rows.find((row) => row.experiment._id === rightId) ?? rows[1] ?? rows[0] ?? null;
 
-  const leftResult = left ? experiments.find((candidate) => candidate._id === left.experiment._id) ?? null : null;
-  const rightResult = right ? experiments.find((candidate) => candidate._id === right.experiment._id) ?? null : null;
+  const leftResult = left && experiments ? experiments.find((candidate) => candidate._id === left.experiment._id) ?? null : null;
+  const rightResult = right && experiments ? experiments.find((candidate) => candidate._id === right.experiment._id) ?? null : null;
 
   const comparisonRows: Array<{ label: string; first: string; second: string; changed: boolean }> = [];
   if (leftResult && rightResult) {
