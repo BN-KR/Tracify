@@ -1,4 +1,27 @@
 import { EvaluationEngineDashboard } from "@/components/dashboard/evaluation-engine-dashboard";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
-export default async function EvaluationSettingsPage({ params }: { params: Promise<{ projectId: string }> }) { const { projectId } = await params; const workspace = createLiveWorkspace({ id: projectId, name: "Project", organizationName: "Workspace" }); return <CapturedWorkspace workspace={workspace} childrenOnly segments={["settings"]}><EvaluationEngineDashboard projectId={projectId} section="settings" /></CapturedWorkspace>; }
+
+export default async function EvaluationSettingsPage({
+  params,
+}: {
+  params: Promise<{ projectId: string }>;
+}) {
+  const { projectId } = await params;
+  const workspace = createLiveWorkspace({
+    id: projectId,
+    name: "Project",
+    organizationName: "Workspace",
+  });
+
+  return (
+    <CapturedWorkspace
+      workspace={workspace}
+      childrenOnly
+      segments={["settings"]}
+      toolbarTitle="Evaluation Settings"
+    >
+      <EvaluationEngineDashboard projectId={projectId} section="settings" />
+    </CapturedWorkspace>
+  );
+}

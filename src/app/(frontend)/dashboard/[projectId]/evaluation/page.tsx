@@ -1,6 +1,27 @@
-import { redirect } from "next/navigation";
+import { EvaluationEngineDashboard } from "@/components/dashboard/evaluation-engine-dashboard";
+import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
+import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
 
-export default async function EvaluationPage({ params }: { params: Promise<{ projectId: string }> }) {
+export default async function EvaluationPage({
+  params,
+}: {
+  params: Promise<{ projectId: string }>;
+}) {
   const { projectId } = await params;
-  redirect(`/dashboard/${projectId}/evaluators`);
+  const workspace = createLiveWorkspace({
+    id: projectId,
+    name: "Project",
+    organizationName: "Workspace",
+  });
+
+  return (
+    <CapturedWorkspace
+      workspace={workspace}
+      childrenOnly
+      segments={["scores"]}
+      toolbarTitle="Evaluation"
+    >
+      <EvaluationEngineDashboard projectId={projectId} section="overview" />
+    </CapturedWorkspace>
+  );
 }
