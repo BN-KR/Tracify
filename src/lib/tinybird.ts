@@ -31,7 +31,8 @@ export async function checkTinybirdHealth() {
 }
 
 function sqlString(value: string) {
-  return value.replace(/'/g, "''");
+  // ClickHouse string literals treat backslash as an escape character, so escape it before quotes.
+  return value.replace(/\\/g, "\\\\").replace(/'/g, "''");
 }
 
 /**
@@ -118,7 +119,7 @@ export async function getEvaluationScoreTimeseries(projectId: string, scoreName:
  */
 export async function getSpansForRun(runId: string, projectId: string) {
   const sql =
-    `SELECT * FROM spans WHERE runId = '${runId}' AND projectId = '${projectId}' ORDER BY createdAt ASC`
+    `SELECT * FROM spans WHERE runId = '${sqlString(runId)}' AND projectId = '${sqlString(projectId)}' ORDER BY createdAt ASC`
   const res = await fetch(sqlUrl(sql), {
     headers: getHeaders(),
   });
@@ -313,6 +314,135 @@ export async function searchTraces(projectId: string, filters: TraceSearchFilter
     traceName: string; startedAt: string; lastSeenAt: string; spanCount: number;
     totalCostUsd: number; maxLatencyMs: number; ttftMs: number; retryCount: number; errorCount: number;
   }>;
+}
+
+export type TraceListFilters = {
+  query?: string;
+  fromMs: number;
+  toMs: number;
+  status?: "all" | "error" | "healthy";
+  traceName?: string;
+  modelId?: string;
+  environment?: string;
+  release?: string;
+  endUserId?: string;
+  sessionId?: string;
+  tag?: string;
+  minLatencyMs?: number;
+  maxLatencyMs?: number;
+  minCostUsd?: number;
+  maxCostUsd?: number;
+  sort?: "startedAt" | "latency" | "cost";
+  direction?: "asc" | "desc";
+  page?: number;
+  pageSize?: number;
+};
+
+export type TraceListRow = {
+  runId: string; traceName: string; startedAt: string; lastSeenAt: string; durationMs: number;
+  spanCount: number; errorCount: number; totalCostUsd: number; inputTokens: number; outputTokens: number;
+  modelId: string; endUserId: string; sessionId: string; environment: string; release: string;
+  tags: string[]; inputPreview: string; outputPreview: string;
+};
+
+function traceListClauses(projectId: string, filters: TraceListFilters) {
+  const where = [
+    `projectId = '${sqlString(projectId)}'`,
+    `createdAt >= toDateTime(${Math.floor(filters.fromMs / 1000)})`,
+    `createdAt <= toDateTime(${Math.ceil(filters.toMs / 1000)})`,
+  ];
+  const equals: Array<[keyof TraceListFilters, string]> = [
+    ["environment", "environment"], ["release", "release"], ["endUserId", "endUserId"], ["sessionId", "sessionId"],
+  ];
+  for (const [key, column] of equals) {
+    const value = filters[key];
+    if (typeof value === "string" && value) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND ${column} = '${sqlString(value)}')`);
+  }
+  if (filters.traceName) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND traceName = '${sqlString(filters.traceName)}')`);
+  if (filters.modelId) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND modelId = '${sqlString(filters.modelId)}')`);
+  if (filters.tag) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND has(tags, '${sqlString(filters.tag)}'))`);
+  if (filters.query) {
+    const value = sqlString(filters.query);
+    where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND (positionCaseInsensitive(runId, '${value}') > 0 OR positionCaseInsensitive(traceName, '${value}') > 0 OR positionCaseInsensitive(input, '${value}') > 0 OR positionCaseInsensitive(output, '${value}') > 0))`);
+  }
+  const having: string[] = [];
+  if (filters.status === "error") having.push("errorCount > 0");
+  if (filters.status === "healthy") having.push("errorCount = 0");
+  if (filters.minLatencyMs !== undefined) having.push(`durationMs >= ${Number(filters.minLatencyMs)}`);
+  if (filters.maxLatencyMs !== undefined) having.push(`durationMs <= ${Number(filters.maxLatencyMs)}`);
+  if (filters.minCostUsd !== undefined) having.push(`totalCostUsd >= ${Number(filters.minCostUsd)}`);
+  if (filters.maxCostUsd !== undefined) having.push(`totalCostUsd <= ${Number(filters.maxCostUsd)}`);
+  return { where: where.join(" AND "), having: having.length ? `HAVING ${having.join(" AND ")}` : "" };
+}
+
+const TRACE_AGGREGATE = `
+  runId,
+  argMinIf(traceName, createdAt, traceName != '') AS traceName,
+  min(createdAt) AS startedAt,
+  max(createdAt) AS lastSeenAt,
+  greatest(dateDiff('millisecond', min(createdAt), max(createdAt)), max(latencyMs)) AS durationMs,
+  count() AS spanCount,
+  countIf(spanType = 'error' OR errorType != '') AS errorCount,
+  sum(costUsd) AS totalCostUsd,
+  sum(inputTokens) AS inputTokens,
+  sum(outputTokens) AS outputTokens,
+  argMaxIf(modelId, costUsd, modelId != '') AS modelId,
+  anyIf(endUserId, endUserId != '') AS endUserId,
+  anyIf(sessionId, sessionId != '') AS sessionId,
+  anyIf(environment, environment != '') AS environment,
+  anyIf(release, release != '') AS release,
+  groupUniqArrayArray(tags) AS tags,
+  substring(argMinIf(input, createdAt, input != ''), 1, 280) AS inputPreview,
+  substring(argMaxIf(output, createdAt, output != ''), 1, 280) AS outputPreview`;
+
+async function tinybirdRows<T>(sql: string): Promise<T[]> {
+  const res = await fetch(sqlUrl(sql), { headers: getHeaders(), cache: "no-store" });
+  if (!res.ok) throw new Error(`Tinybird query failed: ${res.status} ${await res.text()}`);
+  return (await res.json()).data as T[];
+}
+
+/** One page of traces (one row per run) plus the total matching count. */
+export async function listTraces(projectId: string, filters: TraceListFilters) {
+  const { where, having } = traceListClauses(projectId, filters);
+  const pageSize = Math.min(Math.max(Math.floor(filters.pageSize ?? 50), 10), 200);
+  const page = Math.max(Math.floor(filters.page ?? 0), 0);
+  const sortColumn = filters.sort === "latency" ? "durationMs" : filters.sort === "cost" ? "totalCostUsd" : "startedAt";
+  const direction = filters.direction === "asc" ? "ASC" : "DESC";
+  const grouped = `SELECT ${TRACE_AGGREGATE} FROM spans WHERE ${where} GROUP BY runId ${having}`;
+  const [rows, totals] = await Promise.all([
+    tinybirdRows<TraceListRow>(`${grouped} ORDER BY ${sortColumn} ${direction}, runId LIMIT ${pageSize} OFFSET ${page * pageSize}`),
+    tinybirdRows<{ total: number }>(`SELECT count() AS total FROM (${grouped})`),
+  ]);
+  return { rows, total: Number(totals[0]?.total ?? 0), page, pageSize };
+}
+
+/** Trace counts per time bucket for the list chart; the bucket size follows the selected range. */
+export async function traceHistogram(projectId: string, filters: TraceListFilters) {
+  const { where, having } = traceListClauses(projectId, filters);
+  const spanSeconds = Math.max(60, Math.floor((filters.toMs - filters.fromMs) / 1000));
+  const bucketSeconds = [60, 300, 900, 1800, 3600, 10800, 21600, 43200, 86400].find((size) => spanSeconds / size <= 60) ?? 86400;
+  const rows = await tinybirdRows<{ bucket: string; traces: number; errors: number }>(`
+    SELECT toStartOfInterval(startedAt, INTERVAL ${bucketSeconds} SECOND) AS bucket, count() AS traces, countIf(errorCount > 0) AS errors
+    FROM (SELECT ${TRACE_AGGREGATE} FROM spans WHERE ${where} GROUP BY runId ${having})
+    GROUP BY bucket ORDER BY bucket`);
+  return { bucketSeconds, buckets: rows.map((row) => ({ ...row, traces: Number(row.traces), errors: Number(row.errors) })) };
+}
+
+/** Distinct values per filterable field for the filter sidebar. */
+export async function traceFilterOptions(projectId: string, fromMs: number, toMs: number) {
+  const scope = `projectId = '${sqlString(projectId)}' AND createdAt >= toDateTime(${Math.floor(fromMs / 1000)}) AND createdAt <= toDateTime(${Math.ceil(toMs / 1000)})`;
+  const rows = await tinybirdRows<Record<string, string[]>>(`
+    SELECT
+      arraySlice(groupUniqArrayIf(traceName, traceName != ''), 1, 200) AS traceName,
+      arraySlice(groupUniqArrayIf(modelId, modelId != ''), 1, 200) AS modelId,
+      arraySlice(groupUniqArrayIf(environment, environment != ''), 1, 50) AS environment,
+      arraySlice(groupUniqArrayIf(release, release != ''), 1, 100) AS release,
+      arraySlice(groupUniqArrayIf(endUserId, endUserId != ''), 1, 200) AS endUserId,
+      arraySlice(groupUniqArrayIf(sessionId, sessionId != ''), 1, 200) AS sessionId,
+      arraySlice(groupUniqArrayArray(tags), 1, 200) AS tag
+    FROM spans WHERE ${scope}`);
+  const first = rows[0] ?? {};
+  return Object.fromEntries(Object.entries(first).map(([key, values]) => [key, [...(values ?? [])].sort()])) as Record<string, string[]>;
 }
 
 /**
