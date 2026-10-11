@@ -6,6 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedLoadState } from "./live-captured-home";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
+import { LiveWorkspaceIdentityProvider } from "@/features/dashboard-workspace/live-workspace-context";
 
 export function LiveCapturedExperiments({ projectId }: { projectId: string }) {
   const project = useQuery(api.projects.getProject, projectId ? { projectId: projectId as Id<"projects"> } : "skip");
@@ -14,5 +15,9 @@ export function LiveCapturedExperiments({ projectId }: { projectId: string }) {
   if (project === undefined || experiments === undefined) return <CapturedLoadState label="Loading experiments…" />;
   const records = experiments.map((experiment) => ({ id: experiment._id, name: experiment.name, status: experiment.status, environment: "all", timestamp: new Date(experiment.createdAt).toLocaleDateString(), latency: experiment.avgLatencyMs === null ? undefined : `${experiment.avgLatencyMs.toFixed(0)}ms`, cost: `$${experiment.totalCostUsd.toFixed(5)}`, model: experiment.model ?? "default", score: experiment.avgScore === null ? undefined : experiment.avgScore.toFixed(2) }));
   const workspace = createLiveWorkspace({ id: projectId, name: project.name, organizationName: "Workspace" }, { collections: { experiments: { description: "Compare prompts, models, quality, cost, and latency across controlled runs.", records } } });
-  return <CapturedWorkspace workspace={workspace} segments={["experiments"]} />;
+  return (
+    <LiveWorkspaceIdentityProvider project={workspace.project}>
+      <CapturedWorkspace workspace={workspace} segments={["experiments"]} />
+    </LiveWorkspaceIdentityProvider>
+  );
 }

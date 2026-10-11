@@ -6,6 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedLoadState } from "./live-captured-home";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
+import { LiveWorkspaceIdentityProvider } from "@/features/dashboard-workspace/live-workspace-context";
 
 function formatTime(value: string) {
   return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -69,5 +70,9 @@ export function LiveCapturedSessions({ projectId, sessionId }: { projectId: stri
     const trace = traceRecords.find((record) => record.sessionId === input.sessionId);
     await promoteTraceToDataset({ projectId: projectId as Id<"projects">, datasetId: input.datasetId as Id<"datasets">, traceId: trace?.id ?? input.sessionId, input: `Session ${input.sessionId}` });
   }
-  return <CapturedWorkspace workspace={workspace} segments={sessionId ? ["sessions", sessionId] : ["sessions"]} onSessionAnnotate={annotateSession} onSessionAddToDataset={addSessionToDataset} />;
+  return (
+    <LiveWorkspaceIdentityProvider project={workspace.project}>
+      <CapturedWorkspace workspace={workspace} segments={sessionId ? ["sessions", sessionId] : ["sessions"]} onSessionAnnotate={annotateSession} onSessionAddToDataset={addSessionToDataset} />
+    </LiveWorkspaceIdentityProvider>
+  );
 }

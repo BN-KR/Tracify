@@ -6,6 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedLoadState } from "./live-captured-home";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
+import { LiveWorkspaceIdentityProvider } from "@/features/dashboard-workspace/live-workspace-context";
 
 type Section = "evaluators" | "datasets" | "scores";
 
@@ -34,5 +35,9 @@ export function LiveCapturedEvaluation({ projectId, section, toolbarTitle }: { p
   async function toggleEvaluator(input: { evaluatorId: string; active: boolean }) {
     await setEvaluatorActive({ projectId: projectId as Id<"projects">, evaluatorId: input.evaluatorId as Id<"evaluators">, active: input.active });
   }
-  return <CapturedWorkspace workspace={workspace} toolbarTitle={toolbarTitle} segments={[section]} onEvaluatorCreate={section === "evaluators" ? saveEvaluator : undefined} onDatasetCreate={section === "datasets" ? saveDataset : undefined} onEvaluatorToggle={section === "evaluators" ? toggleEvaluator : undefined} />;
+  return (
+    <LiveWorkspaceIdentityProvider project={workspace.project}>
+      <CapturedWorkspace workspace={workspace} toolbarTitle={toolbarTitle} segments={[section]} onEvaluatorCreate={section === "evaluators" ? saveEvaluator : undefined} onDatasetCreate={section === "datasets" ? saveDataset : undefined} onEvaluatorToggle={section === "evaluators" ? toggleEvaluator : undefined} />
+    </LiveWorkspaceIdentityProvider>
+  );
 }

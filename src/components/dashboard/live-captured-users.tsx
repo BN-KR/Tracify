@@ -6,6 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedLoadState } from "./live-captured-home";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
+import { LiveWorkspaceIdentityProvider } from "@/features/dashboard-workspace/live-workspace-context";
 
 function formatTime(value: string | number) { return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
 
@@ -25,5 +26,9 @@ export function LiveCapturedUsers({ projectId, userId }: { projectId: string; us
       metrics: { traces: sessions.length, observations: sessions.reduce((total, session) => total + session.spanCount, 0) },
     },
   );
-  return <CapturedWorkspace workspace={workspace} segments={userId ? ["users", userId] : ["users"]} />;
+  return (
+    <LiveWorkspaceIdentityProvider project={workspace.project}>
+      <CapturedWorkspace workspace={workspace} segments={userId ? ["users", userId] : ["users"]} />
+    </LiveWorkspaceIdentityProvider>
+  );
 }

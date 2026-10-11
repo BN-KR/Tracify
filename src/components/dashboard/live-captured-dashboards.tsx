@@ -6,6 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedLoadState } from "./live-captured-home";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
+import { LiveWorkspaceIdentityProvider } from "@/features/dashboard-workspace/live-workspace-context";
 
 export function LiveCapturedDashboards({ projectId, dashboardId }: { projectId: string; dashboardId?: string }) {
   const createDashboard = useMutation(api.dashboards.create);
@@ -18,5 +19,9 @@ export function LiveCapturedDashboards({ projectId, dashboardId }: { projectId: 
   async function saveDashboard(input: { name: string }) {
     await createDashboard({ projectId: projectId as Id<"projects">, name: input.name });
   }
-  return <CapturedWorkspace workspace={workspace} segments={dashboardId ? ["dashboards", dashboardId] : ["dashboards"]} onDashboardCreate={saveDashboard} />;
+  return (
+    <LiveWorkspaceIdentityProvider project={workspace.project}>
+      <CapturedWorkspace workspace={workspace} segments={dashboardId ? ["dashboards", dashboardId] : ["dashboards"]} onDashboardCreate={saveDashboard} />
+    </LiveWorkspaceIdentityProvider>
+  );
 }

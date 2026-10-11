@@ -65,6 +65,9 @@ export type DashboardWorkspace = DashboardWorkspaceData & {
   dataSource: "tracify-live" | "tracify-sandbox";
 };
 
+/** The project identity exposed to shared surfaces through the live identity context. */
+export type WorkspaceProject = DashboardWorkspaceData["project"];
+
 export type WorkspaceCapability = "read" | "filter" | "create" | "update" | "delete" | "annotate" | "configure";
 
 export type WorkspaceAction = {

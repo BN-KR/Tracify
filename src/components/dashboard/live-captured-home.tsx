@@ -6,6 +6,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
+import { LiveWorkspaceIdentityProvider } from "@/features/dashboard-workspace/live-workspace-context";
 
 export function CapturedLoadState({ label = "Loading…", missing = false }: { label?: string; missing?: boolean }) {
   return (
@@ -50,5 +51,9 @@ export function LiveCapturedHome({ projectId, surface = "home" }: { projectId: s
     collections: { tracing: { description: "Recent traces from this Tracify project.", records } },
     metrics: { traces: summary.totals.totalRuns, observations: summary.totals.totalSpans, totalCost: summary.totals.totalCostUsd },
   });
-  return <CapturedWorkspace workspace={workspace} segments={[surface]} />;
+  return (
+    <LiveWorkspaceIdentityProvider project={workspace.project}>
+      <CapturedWorkspace workspace={workspace} segments={[surface]} />
+    </LiveWorkspaceIdentityProvider>
+  );
 }

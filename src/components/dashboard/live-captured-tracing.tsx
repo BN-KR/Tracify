@@ -7,6 +7,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedLoadState } from "./live-captured-home";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
 import { createLiveWorkspace } from "@/features/dashboard-workspace/live-workspace";
+import { LiveWorkspaceIdentityProvider } from "@/features/dashboard-workspace/live-workspace-context";
 
 export function LiveCapturedTracing({ projectId, runId }: { projectId: string; runId?: string }) {
   const [startedAtAfter] = useState(() => new Date(Date.now() - 30 * 86400000).toISOString());
@@ -47,5 +48,9 @@ export function LiveCapturedTracing({ projectId, runId }: { projectId: string; r
     },
   );
 
-  return <CapturedWorkspace workspace={workspace} segments={runId ? ["tracing", runId] : ["tracing"]} />;
+  return (
+    <LiveWorkspaceIdentityProvider project={workspace.project}>
+      <CapturedWorkspace workspace={workspace} segments={runId ? ["tracing", runId] : ["tracing"]} />
+    </LiveWorkspaceIdentityProvider>
+  );
 }
