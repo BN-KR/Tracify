@@ -89,7 +89,7 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
   }
 
   return (
-    <aside aria-label="Trace detail" className="flex w-full min-w-0 flex-col border-l border-[#1F242C] bg-[#0E1115] lg:w-[min(760px,55vw)]">
+    <aside aria-label="Trace detail" className="fixed inset-0 z-40 flex min-w-0 flex-col border-l border-[#1F242C] bg-[#0E1115] shadow-[-24px_0_48px_rgba(0,0,0,0.45)] lg:left-auto lg:w-[min(820px,60vw)]">
       <div className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-3">
         <h2 className="min-w-0 flex-1 truncate text-base font-semibold">{name}</h2>
         <button type="button" aria-label="Previous trace" onClick={() => onStep(-1)} className="h-8 w-8 rounded-md border border-[#262C35] hover:border-[#4A5260]">↑</button>

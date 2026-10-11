@@ -380,7 +380,7 @@ const TRACE_AGGREGATE = `
   argMinIf(traceName, createdAt, traceName != '') AS traceName,
   min(createdAt) AS startedAt,
   max(createdAt) AS lastSeenAt,
-  greatest(dateDiff('millisecond', min(createdAt), max(createdAt)), max(latencyMs)) AS durationMs,
+  if(countIf(parentSpanId = '') > 0, maxIf(latencyMs, parentSpanId = ''), greatest(dateDiff('millisecond', min(createdAt), max(createdAt)), max(latencyMs))) AS durationMs,
   count() AS spanCount,
   countIf(spanType = 'error' OR errorType != '') AS errorCount,
   sum(costUsd) AS totalCostUsd,
@@ -392,8 +392,8 @@ const TRACE_AGGREGATE = `
   anyIf(environment, environment != '') AS environment,
   anyIf(release, release != '') AS release,
   groupUniqArrayArray(tags) AS tags,
-  substring(argMinIf(input, createdAt, input != ''), 1, 280) AS inputPreview,
-  substring(argMaxIf(output, createdAt, output != ''), 1, 280) AS outputPreview`;
+  substring(if(countIf(parentSpanId = '' AND input != '') > 0, argMinIf(input, createdAt, parentSpanId = '' AND input != ''), argMinIf(input, createdAt, input != '')), 1, 280) AS inputPreview,
+  substring(if(countIf(parentSpanId = '' AND output != '') > 0, argMaxIf(output, createdAt, parentSpanId = '' AND output != ''), argMaxIf(output, createdAt, output != '' AND spanType NOT IN ('tool', 'retrieval'))), 1, 280) AS outputPreview`;
 
 async function tinybirdRows<T>(sql: string): Promise<T[]> {
   const res = await fetch(sqlUrl(sql), { headers: getHeaders(), cache: "no-store" });
