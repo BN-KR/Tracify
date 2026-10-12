@@ -63,6 +63,9 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   // Column choice lives in this browser's storage, which only exists after hydration.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setColumns(readColumns()); }, []);
+  // Phones start with the filter sidebar collapsed so the traces are visible first.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { if (window.matchMedia("(max-width: 767px)").matches) setFiltersOpen(false); }, []);
 
   const update = useCallback((patch: TraceQuery, resetPage = true) => {
     setQuery((current) => {

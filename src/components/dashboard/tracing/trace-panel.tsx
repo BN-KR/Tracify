@@ -94,7 +94,9 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
         <h2 className="min-w-0 flex-1 truncate text-base font-semibold">{name}</h2>
         <button type="button" aria-label="Previous trace" onClick={() => onStep(-1)} className="h-8 w-8 rounded-md border border-[#262C35] hover:border-[#4A5260]">↑</button>
         <button type="button" aria-label="Next trace" onClick={() => onStep(1)} className="h-8 w-8 rounded-md border border-[#262C35] hover:border-[#4A5260]">↓</button>
-        <button type="button" aria-label="Close trace" onClick={onClose} className="h-8 w-8 rounded-md border border-[#262C35] hover:border-[#4A5260]">✕</button>
+        <button type="button" aria-label="Close trace" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md border border-[#262C35] hover:border-[#4A5260]">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        </button>
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[#1F242C] px-4 py-3 font-mono text-xs text-[#C9CED6]">
         <button type="button" className="text-[#8B93A1] hover:text-white" onClick={() => { void navigator.clipboard?.writeText(runId); setCopied(true); setTimeout(() => setCopied(false), 1200); }}>
