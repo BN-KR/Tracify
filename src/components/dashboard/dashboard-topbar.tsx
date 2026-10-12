@@ -300,10 +300,10 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/contact">
+                <a href="https://www.tracify.tech/contact">
                   <MessageSquare size={14} className="opacity-60" />
                   <span>Send Feedback</span>
-                </Link>
+                </a>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
@@ -423,13 +423,13 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
           </DropdownMenu>
         )}
 
-        <Link
-          href="/docs"
+        <a
+          href="https://www.tracify.tech/docs"
           className="flex h-8 items-center gap-2 border border-black/15 bg-white px-2 text-black/60 transition-colors hover:bg-[#f3f2ed] hover:text-black"
         >
           <BookOpen className="size-4" />
           <span className="hidden sm:inline">Docs</span>
-        </Link>
+        </a>
       </div>
     </header>
   );

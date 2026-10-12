@@ -76,7 +76,7 @@ export function ProjectSwitcher({ isCollapsed = false, previewProjectName, synth
         {synthetic ? (
           <>
             <DropdownMenuItem disabled>Tracify Demo · view only</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/cloud")}>Build a real project</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => window.location.assign("https://www.tracify.tech/cloud")}>Build a real project</DropdownMenuItem>
           </>
         ) : projects.length ? (
           projects.map((project) => (

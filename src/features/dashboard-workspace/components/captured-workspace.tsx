@@ -280,7 +280,7 @@ export function CapturedWorkspace({
             <h2 id="captured-modal-title">{workspace.readOnly ? "This workspace is view only." : `${readOnlyAction} is ready in your live project.`}</h2>
             <p>{workspace.readOnly ? "Explore filters, records, dashboards, and prompt inputs safely. Build a real project to save changes, credentials, alerts, or evaluations." : "Use the corresponding live project workflow to save this change."}</p>
             <div>
-              {workspace.readOnly ? <Link href="/cloud">Build a real project</Link> : null}
+              {workspace.readOnly ? <a href="https://www.tracify.tech/cloud">Build a real project</a> : null}
               <button type="button" onClick={() => setReadOnlyAction(null)}>Close</button>
             </div>
           </section>
