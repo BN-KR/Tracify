@@ -18,12 +18,14 @@ export function register() {
     "NEXT_PUBLIC_CONVEX_URL",
     "NEXT_PUBLIC_CONVEX_SITE_URL",
     "TRACIFY_API_KEY_HASH_SECRET",
-    "TINYBIRD_HOST",
-    "TINYBIRD_TOKEN",
     "REDIS_URL",
     "INNGEST_EVENT_KEY",
   ] as const;
-  const missing = required.filter((name) => !process.env[name]?.trim());
+  // Span analytics run on self-hosted ClickHouse when CLICKHOUSE_URL is set, otherwise on Tinybird.
+  const analytics = process.env.CLICKHOUSE_URL?.trim()
+    ? ["CLICKHOUSE_URL", "CLICKHOUSE_USER", "CLICKHOUSE_PASSWORD"]
+    : ["TINYBIRD_HOST", "TINYBIRD_TOKEN"];
+  const missing = [...required, ...analytics].filter((name) => !process.env[name]?.trim());
   if (missing.length) {
     throw new Error(`Regional cloud deployment is missing required environment variables: ${missing.join(", ")}`);
   }

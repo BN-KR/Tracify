@@ -6,6 +6,50 @@
 const TINYBIRD_HOST = process.env.TINYBIRD_HOST ?? "https://api.tinybird.co";
 const TINYBIRD_TOKEN = process.env.TINYBIRD_TOKEN;
 
+// Self-hosted ClickHouse (same SQL dialect) replaces Tinybird when CLICKHOUSE_URL is set.
+const CLICKHOUSE_URL = process.env.CLICKHOUSE_URL?.replace(/\/$/, "");
+const CLICKHOUSE_DATABASE = process.env.CLICKHOUSE_DATABASE ?? "tracify";
+
+export function analyticsBackend() {
+  return CLICKHOUSE_URL ? "clickhouse" : "tinybird";
+}
+
+function clickhouseHeaders() {
+  const user = process.env.CLICKHOUSE_USER;
+  const password = process.env.CLICKHOUSE_PASSWORD;
+  if (!user || !password) throw new Error("CLICKHOUSE_USER and CLICKHOUSE_PASSWORD must be set");
+  return { Authorization: `Basic ${Buffer.from(`${user}:${password}`).toString("base64")}` };
+}
+
+/** Runs one read query and returns the raw response; the body is `{ data: [...] }` on both backends. */
+function analyticsSql(sql: string, init: { signal?: AbortSignal } = {}) {
+  if (CLICKHOUSE_URL) {
+    const params = new URLSearchParams({ database: CLICKHOUSE_DATABASE, output_format_json_quote_64bit_integers: "1" });
+    return fetch(`${CLICKHOUSE_URL}/?${params}`, {
+      method: "POST", headers: clickhouseHeaders(), body: `${sql.trimEnd()}\nFORMAT JSON`, cache: "no-store", ...init,
+    });
+  }
+  return fetch(sqlUrl(sql), { headers: getHeaders(), cache: "no-store", ...init });
+}
+
+/** Tinybird answers an insert with JSON; ClickHouse answers with an empty body. */
+async function insertResult(res: Response) {
+  const text = await res.text();
+  return text ? (JSON.parse(text) as unknown) : { ok: true };
+}
+
+/** Appends newline-delimited JSON rows to a table (Tinybird Events API or ClickHouse INSERT). */
+function analyticsInsert(table: "spans" | "evaluation_scores", ndjson: string) {
+  if (CLICKHOUSE_URL) {
+    const params = new URLSearchParams({
+      database: CLICKHOUSE_DATABASE, query: `INSERT INTO ${table} FORMAT JSONEachRow`,
+      date_time_input_format: "best_effort", input_format_skip_unknown_fields: "1",
+    });
+    return fetch(`${CLICKHOUSE_URL}/?${params}`, { method: "POST", headers: clickhouseHeaders(), body: ndjson });
+  }
+  return fetch(`${TINYBIRD_HOST}/v0/events?name=${table}`, { method: "POST", headers: getHeaders(), body: ndjson });
+}
+
 function sqlUrl(sql: string) {
   const params = new URLSearchParams({
     q: `${sql.trimEnd()}\nFORMAT JSON`,
@@ -22,16 +66,13 @@ function getHeaders() {
 }
 
 export async function checkTinybirdHealth() {
-  const response = await fetch(sqlUrl("SELECT 1 AS healthy"), {
-    headers: getHeaders(),
-    cache: "no-store",
-    signal: AbortSignal.timeout(4_000),
-  });
+  const response = await analyticsSql("SELECT 1 AS healthy", { signal: AbortSignal.timeout(4_000) });
   if (!response.ok) throw new Error(`Tinybird returned ${response.status}`);
 }
 
 function sqlString(value: string) {
-  return value.replace(/'/g, "''");
+  // ClickHouse string literals treat backslash as an escape character, so escape it before quotes.
+  return value.replace(/\\/g, "\\\\").replace(/'/g, "''");
 }
 
 /**
@@ -73,16 +114,12 @@ export async function ingestSpan(span: {
   createdAt: string; // ISO 8601 UTC
 }) {
   const ndjson = JSON.stringify(span) + "\n";
-  const res = await fetch(`${TINYBIRD_HOST}/v0/events?name=spans`, {
-    method: "POST",
-    headers: getHeaders(),
-    body: ndjson,
-  });
+  const res = await analyticsInsert("spans", ndjson);
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Tinybird ingest failed: ${res.status} ${body}`);
+    throw new Error(`Span ingest failed (${analyticsBackend()}): ${res.status} ${body}`);
   }
-  return res.json();
+  return insertResult(res);
 }
 
 export async function ingestEvaluationScore(score: {
@@ -100,14 +137,14 @@ export async function ingestEvaluationScore(score: {
   environment?: string;
   createdAt: string;
 }) {
-  const res = await fetch(`${TINYBIRD_HOST}/v0/events?name=evaluation_scores`, { method: "POST", headers: getHeaders(), body: `${JSON.stringify(score)}\n` });
-  if (!res.ok) throw new Error(`Tinybird evaluation score ingest failed: ${res.status} ${await res.text()}`);
-  return res.json();
+  const res = await analyticsInsert("evaluation_scores", `${JSON.stringify(score)}\n`);
+  if (!res.ok) throw new Error(`Evaluation score ingest failed (${analyticsBackend()}): ${res.status} ${await res.text()}`);
+  return insertResult(res);
 }
 
 export async function getEvaluationScoreTimeseries(projectId: string, scoreName: string, days = 7) {
   const sql = `SELECT toStartOfHour(createdAt) AS bucket, count() AS sampleCount, avgIf(valueNumeric, dataType = 'numeric') AS averageScore, countIf(status IN ('failed', 'error')) / count() AS failureRate, countIf(dataType = 'boolean' AND valueBoolean = 1) / greatest(countIf(dataType = 'boolean'), 1) AS booleanPassRate FROM evaluation_scores WHERE projectId = '${sqlString(projectId)}' AND scoreName = '${sqlString(scoreName)}' AND createdAt >= now() - INTERVAL ${Math.min(Math.max(days, 1), 90)} DAY GROUP BY bucket ORDER BY bucket ASC`;
-  const res = await fetch(sqlUrl(sql), { headers: getHeaders() });
+  const res = await analyticsSql(sql);
   if (!res.ok) throw new Error(`Tinybird evaluation score query failed: ${res.status} ${await res.text()}`);
   const data = await res.json();
   return data.data as Array<{ bucket: string; sampleCount: number; averageScore: number; failureRate: number; booleanPassRate: number }>;
@@ -118,10 +155,8 @@ export async function getEvaluationScoreTimeseries(projectId: string, scoreName:
  */
 export async function getSpansForRun(runId: string, projectId: string) {
   const sql =
-    `SELECT * FROM spans WHERE runId = '${runId}' AND projectId = '${projectId}' ORDER BY createdAt ASC`
-  const res = await fetch(sqlUrl(sql), {
-    headers: getHeaders(),
-  });
+    `SELECT * FROM spans WHERE runId = '${sqlString(runId)}' AND projectId = '${sqlString(projectId)}' ORDER BY createdAt ASC`
+  const res = await analyticsSql(sql);
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Tinybird query failed: ${res.status} ${body}`);
@@ -145,9 +180,7 @@ export async function getDailyCosts(projectId: string, days = 30) {
     GROUP BY day
     ORDER BY day ASC
   `;
-  const res = await fetch(sqlUrl(sql), {
-    headers: getHeaders(),
-  });
+  const res = await analyticsSql(sql);
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Tinybird query failed: ${res.status} ${body}`);
@@ -178,9 +211,7 @@ export async function getCostByModel(projectId: string, days = 30) {
     GROUP BY modelId
     ORDER BY totalCostUsd DESC
   `;
-  const res = await fetch(sqlUrl(sql), {
-    headers: getHeaders(),
-  });
+  const res = await analyticsSql(sql);
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Tinybird query failed: ${res.status} ${body}`);
@@ -207,9 +238,7 @@ export async function getCostByTool(projectId: string, days = 30) {
     ORDER BY totalCostUsd DESC
     LIMIT 10
   `;
-  const res = await fetch(sqlUrl(sql), {
-    headers: getHeaders(),
-  });
+  const res = await analyticsSql(sql);
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Tinybird query failed: ${res.status} ${body}`);
@@ -235,7 +264,7 @@ export async function getCostByUser(projectId: string, days = 30) {
     ORDER BY totalCostUsd DESC
     LIMIT 20
   `;
-  const res = await fetch(sqlUrl(sql), { headers: getHeaders() });
+  const res = await analyticsSql(sql);
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Tinybird query failed: ${res.status} ${body}`);
@@ -303,7 +332,7 @@ export async function searchTraces(projectId: string, filters: TraceSearchFilter
     ORDER BY lastSeenAt DESC
     LIMIT ${limit}
   `;
-  const res = await fetch(sqlUrl(sql), { headers: getHeaders() });
+  const res = await analyticsSql(sql);
   if (!res.ok) {
     throw new Error(`Tinybird query failed: ${res.status} ${await res.text()}`);
   }
@@ -313,6 +342,135 @@ export async function searchTraces(projectId: string, filters: TraceSearchFilter
     traceName: string; startedAt: string; lastSeenAt: string; spanCount: number;
     totalCostUsd: number; maxLatencyMs: number; ttftMs: number; retryCount: number; errorCount: number;
   }>;
+}
+
+export type TraceListFilters = {
+  query?: string;
+  fromMs: number;
+  toMs: number;
+  status?: "all" | "error" | "healthy";
+  traceName?: string;
+  modelId?: string;
+  environment?: string;
+  release?: string;
+  endUserId?: string;
+  sessionId?: string;
+  tag?: string;
+  minLatencyMs?: number;
+  maxLatencyMs?: number;
+  minCostUsd?: number;
+  maxCostUsd?: number;
+  sort?: "startedAt" | "latency" | "cost";
+  direction?: "asc" | "desc";
+  page?: number;
+  pageSize?: number;
+};
+
+export type TraceListRow = {
+  runId: string; traceName: string; startedAt: string; lastSeenAt: string; durationMs: number;
+  spanCount: number; errorCount: number; totalCostUsd: number; inputTokens: number; outputTokens: number;
+  modelId: string; endUserId: string; sessionId: string; environment: string; release: string;
+  tags: string[]; inputPreview: string; outputPreview: string;
+};
+
+function traceListClauses(projectId: string, filters: TraceListFilters) {
+  const where = [
+    `projectId = '${sqlString(projectId)}'`,
+    `createdAt >= toDateTime(${Math.floor(filters.fromMs / 1000)})`,
+    `createdAt <= toDateTime(${Math.ceil(filters.toMs / 1000)})`,
+  ];
+  const equals: Array<[keyof TraceListFilters, string]> = [
+    ["environment", "environment"], ["release", "release"], ["endUserId", "endUserId"], ["sessionId", "sessionId"],
+  ];
+  for (const [key, column] of equals) {
+    const value = filters[key];
+    if (typeof value === "string" && value) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND ${column} = '${sqlString(value)}')`);
+  }
+  if (filters.traceName) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND traceName = '${sqlString(filters.traceName)}')`);
+  if (filters.modelId) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND modelId = '${sqlString(filters.modelId)}')`);
+  if (filters.tag) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND has(tags, '${sqlString(filters.tag)}'))`);
+  if (filters.query) {
+    const value = sqlString(filters.query);
+    where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND (positionCaseInsensitive(runId, '${value}') > 0 OR positionCaseInsensitive(traceName, '${value}') > 0 OR positionCaseInsensitive(input, '${value}') > 0 OR positionCaseInsensitive(output, '${value}') > 0))`);
+  }
+  const having: string[] = [];
+  if (filters.status === "error") having.push("errorCount > 0");
+  if (filters.status === "healthy") having.push("errorCount = 0");
+  if (filters.minLatencyMs !== undefined) having.push(`durationMs >= ${Number(filters.minLatencyMs)}`);
+  if (filters.maxLatencyMs !== undefined) having.push(`durationMs <= ${Number(filters.maxLatencyMs)}`);
+  if (filters.minCostUsd !== undefined) having.push(`totalCostUsd >= ${Number(filters.minCostUsd)}`);
+  if (filters.maxCostUsd !== undefined) having.push(`totalCostUsd <= ${Number(filters.maxCostUsd)}`);
+  return { where: where.join(" AND "), having: having.length ? `HAVING ${having.join(" AND ")}` : "" };
+}
+
+const TRACE_AGGREGATE = `
+  runId,
+  argMinIf(traceName, createdAt, traceName != '') AS traceName,
+  min(createdAt) AS startedAt,
+  max(createdAt) AS lastSeenAt,
+  if(countIf(parentSpanId = '') > 0, maxIf(latencyMs, parentSpanId = ''), greatest(dateDiff('millisecond', min(createdAt), max(createdAt)), max(latencyMs))) AS durationMs,
+  count() AS spanCount,
+  countIf(spanType = 'error' OR errorType != '') AS errorCount,
+  sum(costUsd) AS totalCostUsd,
+  sum(inputTokens) AS inputTokens,
+  sum(outputTokens) AS outputTokens,
+  argMaxIf(modelId, costUsd, modelId != '') AS modelId,
+  anyIf(endUserId, endUserId != '') AS endUserId,
+  anyIf(sessionId, sessionId != '') AS sessionId,
+  anyIf(environment, environment != '') AS environment,
+  anyIf(release, release != '') AS release,
+  groupUniqArrayArray(tags) AS tags,
+  substring(if(countIf(parentSpanId = '' AND input != '') > 0, argMinIf(input, createdAt, parentSpanId = '' AND input != ''), argMinIf(input, createdAt, input != '')), 1, 280) AS inputPreview,
+  substring(if(countIf(parentSpanId = '' AND output != '') > 0, argMaxIf(output, createdAt, parentSpanId = '' AND output != ''), argMaxIf(output, createdAt, output != '' AND spanType NOT IN ('tool', 'retrieval'))), 1, 280) AS outputPreview`;
+
+async function tinybirdRows<T>(sql: string): Promise<T[]> {
+  const res = await analyticsSql(sql);
+  if (!res.ok) throw new Error(`Tinybird query failed: ${res.status} ${await res.text()}`);
+  return (await res.json()).data as T[];
+}
+
+/** One page of traces (one row per run) plus the total matching count. */
+export async function listTraces(projectId: string, filters: TraceListFilters) {
+  const { where, having } = traceListClauses(projectId, filters);
+  const pageSize = Math.min(Math.max(Math.floor(filters.pageSize ?? 50), 10), 200);
+  const page = Math.max(Math.floor(filters.page ?? 0), 0);
+  const sortColumn = filters.sort === "latency" ? "durationMs" : filters.sort === "cost" ? "totalCostUsd" : "startedAt";
+  const direction = filters.direction === "asc" ? "ASC" : "DESC";
+  const grouped = `SELECT ${TRACE_AGGREGATE} FROM spans WHERE ${where} GROUP BY runId ${having}`;
+  const [rows, totals] = await Promise.all([
+    tinybirdRows<TraceListRow>(`${grouped} ORDER BY ${sortColumn} ${direction}, runId LIMIT ${pageSize} OFFSET ${page * pageSize}`),
+    tinybirdRows<{ total: number }>(`SELECT count() AS total FROM (${grouped})`),
+  ]);
+  return { rows, total: Number(totals[0]?.total ?? 0), page, pageSize };
+}
+
+/** Trace counts per time bucket for the list chart; the bucket size follows the selected range. */
+export async function traceHistogram(projectId: string, filters: TraceListFilters) {
+  const { where, having } = traceListClauses(projectId, filters);
+  const spanSeconds = Math.max(60, Math.floor((filters.toMs - filters.fromMs) / 1000));
+  const bucketSeconds = [60, 300, 900, 1800, 3600, 10800, 21600, 43200, 86400].find((size) => spanSeconds / size <= 60) ?? 86400;
+  const rows = await tinybirdRows<{ bucket: string; traces: number; errors: number }>(`
+    SELECT toStartOfInterval(startedAt, INTERVAL ${bucketSeconds} SECOND) AS bucket, count() AS traces, countIf(errorCount > 0) AS errors
+    FROM (SELECT ${TRACE_AGGREGATE} FROM spans WHERE ${where} GROUP BY runId ${having})
+    GROUP BY bucket ORDER BY bucket`);
+  return { bucketSeconds, buckets: rows.map((row) => ({ ...row, traces: Number(row.traces), errors: Number(row.errors) })) };
+}
+
+/** Distinct values per filterable field for the filter sidebar. */
+export async function traceFilterOptions(projectId: string, fromMs: number, toMs: number) {
+  const scope = `projectId = '${sqlString(projectId)}' AND createdAt >= toDateTime(${Math.floor(fromMs / 1000)}) AND createdAt <= toDateTime(${Math.ceil(toMs / 1000)})`;
+  const rows = await tinybirdRows<Record<string, string[]>>(`
+    SELECT
+      arraySlice(groupUniqArrayIf(traceName, traceName != ''), 1, 200) AS traceName,
+      arraySlice(groupUniqArrayIf(modelId, modelId != ''), 1, 200) AS modelId,
+      arraySlice(groupUniqArrayIf(environment, environment != ''), 1, 50) AS environment,
+      arraySlice(groupUniqArrayIf(release, release != ''), 1, 100) AS release,
+      arraySlice(groupUniqArrayIf(endUserId, endUserId != ''), 1, 200) AS endUserId,
+      arraySlice(groupUniqArrayIf(sessionId, sessionId != ''), 1, 200) AS sessionId,
+      arraySlice(groupUniqArrayArray(tags), 1, 200) AS tag
+    FROM spans WHERE ${scope}`);
+  const first = rows[0] ?? {};
+  return Object.fromEntries(Object.entries(first).map(([key, values]) => [key, [...(values ?? [])].sort()])) as Record<string, string[]>;
 }
 
 /**
@@ -345,11 +503,9 @@ export async function getOrchestrationSavings(projectId: string, days = 30) {
     FROM spans
     WHERE projectId = '${projectId}'
       AND createdAt >= now() - INTERVAL ${days} DAY
-      AND has(metadata, 'orchestrationAttempt')
+      AND JSONHas(metadata, 'orchestrationAttempt')
   `;
-  const res = await fetch(sqlUrl(sql), {
-    headers: getHeaders(),
-  });
+  const res = await analyticsSql(sql);
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Tinybird query failed: ${res.status} ${body}`);
@@ -381,14 +537,12 @@ export async function getOrchestrationSavings(projectId: string, days = 30) {
  * Returns total orchestrations, fail-open count, and rate.
  */
 export async function getFailOpenRate(projectId: string, days = 7) {
-  const endpoint = `${TINYBIRD_HOST}/v0/pipes/fail_open_rate.json`;
-  const params = new URLSearchParams({
-    projectId,
-    days: String(days),
-    token: TINYBIRD_TOKEN ?? "",
-  });
-
-  const res = await fetch(`${endpoint}?${params}`);
+  const safeDays = Math.min(Math.max(Math.floor(days), 1), 365);
+  const res = CLICKHOUSE_URL
+    ? await analyticsSql(`SELECT projectId, countIf(JSONExtractBool(metadata, 'orchestrationFailOpen') = 1) AS failOpenCount, count() AS totalOrchestrations
+        FROM spans WHERE projectId = '${sqlString(projectId)}' AND createdAt >= now() - INTERVAL ${safeDays} DAY
+          AND metadata != '' AND JSONHas(metadata, 'orchestrationFailOpen') GROUP BY projectId`)
+    : await fetch(`${TINYBIRD_HOST}/v0/pipes/fail_open_rate.json?${new URLSearchParams({ projectId, days: String(safeDays), token: TINYBIRD_TOKEN ?? "" })}`);
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Tinybird query failed: ${res.status} ${body}`);

@@ -10,7 +10,7 @@ import {
   setJsonCache,
   withCacheReason,
 } from "@/lib/redis-cache";
-import { getSpansForRun, type SpanRow } from "@/lib/tinybird";
+import { analyticsBackend, getSpansForRun, type SpanRow } from "@/lib/tinybird";
 
 type SpansCachePayload = {
   spans: SpanRow[];
@@ -73,7 +73,8 @@ export async function GET(
       }
     }
 
-    const reservation = await convex.mutation(
+    // The daily read budget protects Tinybird's free-plan request limit; self-hosted ClickHouse has none.
+    const reservation = analyticsBackend() === "clickhouse" ? { allowed: true as const } : await convex.mutation(
       api.analyticsCache.reserveRunSpanRefresh,
       {
         projectId: convexProjectId,
@@ -132,16 +133,19 @@ export async function GET(
       timedOut: span.timedOut ?? false,
       timeoutMs: span.timeoutMs ?? 0,
     }));
+    // The Convex cache validates a fixed span shape; newer analytics columns (session, user, tags...)
+    // are returned to the client but not stored in the cache document.
     const cached = await convex.mutation(api.analyticsCache.upsertRunSpanCache, {
       projectId: convexProjectId,
       runId,
       runStatus: run.status,
-      spans,
+      spans: spans.map(cacheableSpan),
       refresh,
     });
 
     const response = {
       ...cached,
+      spans,
       meta: {
         ...cached.meta,
         reason: refresh === "manual" ? "manual_refresh" : "cache_miss",
@@ -193,4 +197,25 @@ export async function GET(
       },
     });
   }
+}
+
+const CACHE_FIELDS = [
+  "spanId", "runId", "projectId", "spanType", "input", "output", "attachments", "latencyMs", "costUsd",
+  "modelId", "toolName", "parentSpanId", "metadata", "inputTokens", "outputTokens", "ttftMs", "retryCount",
+  "errorType", "errorMessage", "isStreamChunk", "streamSequence", "streamFinal", "payloadFormat",
+  "stackTrace", "timedOut", "timeoutMs", "createdAt",
+] as const;
+
+function cacheableSpan<T extends object>(span: T): T {
+  const source = span as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const key of CACHE_FIELDS) if (source[key] !== undefined) out[key] = source[key];
+  // ClickHouse/Tinybird JSON can return 64-bit or Bool columns as strings or 0/1; Convex validates strictly.
+  for (const key of ["latencyMs", "costUsd", "inputTokens", "outputTokens", "ttftMs", "retryCount", "streamSequence", "timeoutMs"]) {
+    if (out[key] !== undefined) out[key] = Number(out[key]);
+  }
+  for (const key of ["isStreamChunk", "streamFinal", "timedOut"]) {
+    if (out[key] !== undefined) out[key] = out[key] === true || out[key] === 1 || out[key] === "1" || out[key] === "true";
+  }
+  return out as T;
 }
