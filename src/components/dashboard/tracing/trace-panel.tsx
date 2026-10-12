@@ -52,6 +52,29 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
     return () => { live = false; };
   }, [projectId, runId, attempt]);
 
+  // Live updates: a running trace gets new spans after it is opened. The spans route serves a stale cache for
+  // running traces unless refresh=manual is sent, so poll with it and only re-render when something changed.
+  useEffect(() => {
+    const url = `/api/projects/${encodeURIComponent(projectId)}/runs/${encodeURIComponent(runId)}/spans?refresh=manual`;
+    const signature = (list: Span[]) => `${list.length}:${list.reduce((sum, span) => sum + Number(span.latencyMs ?? 0), 0)}`;
+    let busy = false;
+    const timer = setInterval(() => {
+      if (document.hidden || busy) return;
+      busy = true;
+      fetch(url, { cache: "no-store" })
+        .then((response) => (response.ok ? (response.json() as Promise<{ spans?: Span[] }>) : null))
+        .then((body) => {
+          if (!body?.spans?.length) return;
+          const next = body.spans;
+          setSpans((current) => (current && signature(current) === signature(next) ? current : next));
+          setError(null);
+        })
+        .catch(() => undefined)
+        .finally(() => { busy = false; });
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [projectId, runId]);
+
   const bySpanId = useMemo(() => new Map((spans ?? []).map((span) => [span.spanId, span])), [spans]);
   const tree = useMemo(() => buildSpanTree((spans ?? []).map((span) => ({
     spanId: span.spanId, parentSpanId: span.parentSpanId && bySpanId.has(span.parentSpanId) ? span.parentSpanId : "",
