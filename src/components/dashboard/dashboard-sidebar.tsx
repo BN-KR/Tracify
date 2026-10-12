@@ -55,6 +55,7 @@ const GROUP_STORAGE_KEY = "tracify:dashboard-sidebar-groups";
 const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
 const COLLAPSED_WIDTH = 48;
 const EXPANDED_WIDTH = 184;
+const MARKETING_ORIGIN = "https://www.tracify.tech";
 
 function isActivePath(pathname: string, href: string, projectId: string, isPreview = false, currentSearch = "") {
   if (href.startsWith("http")) return false;
@@ -162,8 +163,8 @@ export function DashboardSidebar({
           id: "resources",
           label: "",
           items: [
-            { title: "Book a call", icon: PhoneCall, href: "/contact" },
-            { title: "Support", icon: MessageSquareText, href: "/contact" },
+            { title: "Book a call", icon: PhoneCall, href: `${MARKETING_ORIGIN}/contact`, external: true },
+            { title: "Support", icon: MessageSquareText, href: `${MARKETING_ORIGIN}/contact`, external: true },
           ],
         },
       ];
@@ -235,9 +236,9 @@ export function DashboardSidebar({
         label: "Resources",
         items: [
           { title: "Quickstart", icon: Terminal, href: isSynthetic ? syntheticHref("quickstart") : projectId ? `/dashboard/${projectId}/quickstart` : "/dashboard/quickstart" },
-          { title: "Docs", icon: BookOpen, href: "/docs", external: true },
-          { title: "Support", icon: MessageSquareText, href: "/contact", external: true },
-          { title: "Roadmap", icon: FileText, href: "/roadmap", external: true },
+          { title: "Docs", icon: BookOpen, href: `${MARKETING_ORIGIN}/docs`, external: true },
+          { title: "Support", icon: MessageSquareText, href: `${MARKETING_ORIGIN}/contact`, external: true },
+          { title: "Roadmap", icon: FileText, href: `${MARKETING_ORIGIN}/roadmap`, external: true },
           ...(canAccessContent
             ? [{ title: "Admin Library", icon: ShieldCheck, href: "/admin/library" }]
             : []),
@@ -366,7 +367,7 @@ export function DashboardSidebar({
       {isSynthetic && showExpandedContent ? (
         <div className="captured-sidebar-context border-b border-white/10">
           <Link href="/playground" className="captured-sidebar-context-link is-demo">↗ <span>Use Demo App</span></Link>
-          <Link href="/cloud" className="captured-sidebar-context-link">⊞ <span>Your Orgs</span></Link>
+          <a href={`${MARKETING_ORIGIN}/cloud`} className="captured-sidebar-context-link">⊞ <span>Your Orgs</span></a>
         </div>
       ) : null}
 
@@ -429,8 +430,8 @@ export function DashboardSidebar({
           {showExpandedContent ? <ChevronDown className="ml-auto size-3 shrink-0 text-white/45" /> : null}
         </button>
       ) : (
-        <Link
-          href="/cloud"
+        <a
+          href={`${MARKETING_ORIGIN}/cloud`}
           className={cn(
             "flex min-h-12 items-center border-t border-white/10 px-4 text-white/55 hover:bg-white/10 hover:text-white",
             showExpandedContent ? "gap-3" : "justify-center",
@@ -443,7 +444,7 @@ export function DashboardSidebar({
               {region.flag} {region.shortName} cloud · Switch
             </span>
           ) : null}
-        </Link>
+        </a>
       )}
     </aside>
   );
@@ -536,11 +537,16 @@ function NavLink({
     isActive && "border-l-white bg-white/10 text-white hover:bg-white/10",
   );
 
-  const link = (
-    <Link href={item.href} className={className} aria-label={item.title} onClick={onNavClick}>
+  const content = (
+    <>
       <Icon className="size-4 shrink-0" />
       {showExpandedContent ? <span className="truncate">{item.title}</span> : null}
-    </Link>
+    </>
+  );
+  const link = item.external ? (
+    <a href={item.href} className={className} aria-label={item.title} onClick={onNavClick}>{content}</a>
+  ) : (
+    <Link href={item.href} className={className} aria-label={item.title} onClick={onNavClick}>{content}</Link>
   );
 
   if (showExpandedContent) return link;
