@@ -315,8 +315,8 @@ function cell(id: ColumnId, row: TraceRow, update: (patch: TraceQuery, resetPage
     : <span className="text-[#4A5260]">—</span>;
   switch (id) {
     case "startedAt": return <span className="font-mono text-xs text-[#C9CED6]">{formatTime(row.startedAt)}</span>;
-    case "status": return row.errorCount > 0
-      ? <span className="rounded bg-[#3A1C1F] px-2 py-0.5 font-mono text-xs text-[#FF8A8A]">{row.errorCount} error{row.errorCount === 1 ? "" : "s"}</span>
+    case "status": return Number(row.errorCount) > 0
+      ? <span className="rounded bg-[#3A1C1F] px-2 py-0.5 font-mono text-xs text-[#FF8A8A]">{Number(row.errorCount)} error{Number(row.errorCount) === 1 ? "" : "s"}</span>
       : <span className="rounded bg-[#15301F] px-2 py-0.5 font-mono text-xs text-[#5BE3A0]">ok</span>;
     case "name": return <span className="font-medium">{row.traceName || <span className="font-mono text-xs text-[#8B93A1]">{row.runId.slice(0, 12)}</span>}</span>;
     case "input": return <span className="text-[#C9CED6]">{previewText(row.inputPreview) || <span className="text-[#4A5260]">—</span>}</span>;
