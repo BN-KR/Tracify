@@ -122,6 +122,26 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
       });
   }, [apiParams, optionsKey, projectId, requestKey]);
 
+  // Live updates: for relative ranges, quietly refetch the list with the window moved forward so new traces
+  // appear without pressing Refresh. Skipped for fixed from/to windows, hidden tabs, and while a load is pending.
+  useEffect(() => {
+    if (query.from || query.to) return;
+    const rangeMs = RANGES.find((item) => item.id === query.range)?.ms ?? 86_400_000;
+    const timer = setInterval(() => {
+      if (document.hidden || settledKey !== requestKey) return;
+      const issued = requestId.current;
+      const params = new URLSearchParams(apiParams);
+      const to = Date.now();
+      params.set("to", String(to));
+      params.set("from", String(to - rangeMs));
+      fetch(`/api/projects/${encodeURIComponent(projectId)}/traces?${params}`, { cache: "no-store" })
+        .then(async (response) => (response.ok ? ((await response.json()) as ListResponse) : null))
+        .then((body) => { if (body && issued === requestId.current) setData((current) => ({ ...body, options: current?.options ?? body.options })); })
+        .catch(() => undefined);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [apiParams, projectId, query.from, query.range, query.to, requestKey, settledKey]);
+
   const rows = useMemo(() => data?.rows ?? [], [data]);
   const total = data?.total ?? 0;
   const page = Number(query.page ?? 0);
