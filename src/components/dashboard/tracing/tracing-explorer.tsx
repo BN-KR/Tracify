@@ -40,7 +40,7 @@ const COLUMN_STORAGE = "tracify.tracing.columns";
 const LIVE_STORAGE = "tracify.tracing.live";
 const ERRORS_STORAGE = "tracify.tracing.errorGroups";
 /** URL keys that change the view, not the data, so they are not sent to the API. */
-const VIEW_KEYS = ["range", "from", "to", "trace", "mode", "view"];
+const VIEW_KEYS = ["range", "from", "to", "trace", "mode", "view", "mapSelected", "mapEdges"];
 const EDGE_SEPARATOR = "\u2192";
 
 function currentUrlQuery(): TraceQuery {
@@ -380,6 +380,8 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
           <div className="min-h-0 flex-1 overflow-auto px-4">
             {mapMode ? (
               <AgentMap projectId={projectId} params={apiParams} live={isLive} rangeMs={query.from || query.to ? null : RANGES.find((item) => item.id === query.range)?.ms ?? 86_400_000}
+                mapSelected={query.mapSelected ?? null} edgeLimit={Math.min(100, Math.max(1, Number(query.mapEdges) || 25))}
+                onViewStateChange={(selected, limit) => update({ mapSelected: selected ?? "", mapEdges: limit === 25 ? "" : String(limit) }, false)}
                 onNode={(id) => update({ node: id, mode: "" })}
                 onEdge={(source, target) => update({ edge: `${source}${EDGE_SEPARATOR}${target}`, mode: "" })} />
             ) : error ? (

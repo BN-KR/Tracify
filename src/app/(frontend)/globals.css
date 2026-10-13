@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@xyflow/react/dist/style.css";
 @import "../../features/dashboard-workspace/captured-workspace.css";
 @import "../../features/dashboard-workspace/captured-mobile-parity.css";
 
@@ -28,6 +29,7 @@
 }
 
 .tracify-module-shell { min-height:calc(100vh - 7rem); padding:1.5rem; color:#f4f4f0; background:#101010; border:1px solid #292929; }
+.tracing-flow,.tracing-flow .react-flow__renderer,.tracing-flow .react-flow__pane{background:#0B0D10}.tracing-flow .react-flow__minimap{overflow:hidden;border-radius:2px}.tracing-flow .react-flow__minimap-mask{fill:rgba(11,13,16,.78)}.tracing-flow .react-flow__node{border:0!important;padding:0!important;background:transparent!important;box-shadow:none!important;color:#E6E9EE!important;font-family:var(--font-geist-sans),sans-serif}.tracing-flow .react-flow__node:focus-visible{outline:2px solid #F4D44D!important;outline-offset:3px}.tracing-flow .react-flow__edge:focus-visible .react-flow__edge-path{stroke:#F4D44D;stroke-width:2.5}.tracing-flow .react-flow__edge-textbg{fill:#0E1115}.tracing-flow .react-flow__controls{display:none}.tracing-flow .react-flow__attribution{display:none}
 .tracify-module-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; border-bottom:1px solid #292929; padding-bottom:1.5rem; }
 .tracify-module-heading h1 { margin:.55rem 0 0; font-family:var(--font-geist-pixel),monospace; font-size:clamp(2.25rem,5vw,4rem); letter-spacing:-.08em; line-height:.9; }
 .tracify-module-heading p { margin:.75rem 0 0; color:#888; font-family:var(--font-geist-sans),sans-serif; font-size:.9rem; }
