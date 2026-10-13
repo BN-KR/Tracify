@@ -40,6 +40,13 @@ const DEFAULT_COLUMNS: ColumnId[] = ["startedAt", "status", "name", "input", "ou
 const COLUMN_STORAGE = "tracify.tracing.columns";
 const LIVE_STORAGE = "tracify.tracing.live";
 
+function currentUrlQuery(): TraceQuery {
+  if (typeof window === "undefined") return {};
+  const query: TraceQuery = {};
+  for (const [key, value] of new URLSearchParams(window.location.search)) if (value) query[key] = value.slice(0, 200);
+  return query;
+}
+
 function readColumns(): ColumnId[] {
   try {
     const stored = JSON.parse(window.localStorage.getItem(COLUMN_STORAGE) ?? "null");
@@ -49,7 +56,9 @@ function readColumns(): ColumnId[] {
 }
 
 export function TracingExplorer({ projectId, initialQuery }: { projectId: string; initialQuery: TraceQuery }) {
-  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "24h", ...initialQuery }));
+  // Next.js syncs our history.replaceState calls into its router and can remount this page with the search
+  // params it was first rendered with. Reading the live URL here keeps the open trace and filters across that.
+  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "24h", ...initialQuery, ...currentUrlQuery() }));
   const [data, setData] = useState<ListResponse | null>(null);
   const [options, setOptions] = useState<Record<string, string[]>>({});
   const [settledKey, setSettledKey] = useState<string | null>(null);
