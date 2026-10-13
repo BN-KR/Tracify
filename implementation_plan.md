@@ -6,7 +6,7 @@
 - [done] Add cursor-centered wheel/pinch zoom, drag pan, double-click, keyboard controls, fit/selection focus, fullscreen and minimap.
 - [done] Add URL-backed map node/arrow-limit state, search, node/edge detail popovers with separate Show traces actions, and low-zoom arrow decluttering.
 - [done] Update `docs/dashboard-page-standard.md`; keep the accessible busiest-arrows table.
-- [in progress] Complete PR #145 preview checks and inspect 1440×900 and 390×844 screenshots at multiple zooms and fullscreen before owner review.
+- [in progress] Current head `473765f` is pushed to PR #145, but its Vercel deployment remains QUEUED. Rerun preview checks and inspect 1440×900 / 390×844 screenshots at multiple zooms and fullscreen once the current preview is Ready.
 
 ## Google Analytics 4 — 2026-09-15
 

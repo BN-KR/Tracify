@@ -3,8 +3,8 @@
 ## 2026-10-13 Tracing map canvas — draft PR #145
 - Built a shared React Flow canvas for the aggregate agent map and per-trace step graph, with ELK layered layout, pan/zoom/touch/keyboard controls, minimap, fullscreen, selection focus, URL-backed map selection/arrow limit, and stable positions across refreshes. No Sessions files or backend/storage paths changed.
 - Agent map defaults to the busiest 25 arrows (up to 100); overview zoom progressively hides arrows and labels. Search, selected-node/edge detail, separate Show traces actions, and the busiest-arrow table remain available.
-- Branch `codex/tracing-canvas`, worktree `/home/orca/workspaces/Tracify-canvas`, base `origin/main` after #144 merged. Draft PR: https://github.com/BN-KR/Tracify/pull/145. Latest pushed commit `e83c430`.
-- Focused ESLint, full `tsc --noEmit`, and EU-configured production build pass. Preview/browser proof is still in progress; check the current PR head's Ready EU preview before treating screenshot or browser results as final.
+- Branch `codex/tracing-canvas`, worktree `/home/orca/workspaces/Tracify-canvas`, base `origin/main` after #144 merged. Draft PR: https://github.com/BN-KR/Tracify/pull/145. Latest pushed commit `473765f`.
+- Focused ESLint, full `tsc --noEmit`, and EU-configured production build pass. Current Vercel deployment is QUEUED and the Vercel check is PENDING; the branch alias remains on an earlier Ready commit. Earlier preview checks passed click 26/26 interactions and live 7/7, but the feature suite exposed double-click/minimap/Show traces issues that were fixed afterward. Rerun all browser suites and inspect final screenshots when current preview is Ready.
 
 ## 2026-09-15 Google Analytics 4 setup
 - Created the `Tracify` GA4 property in the existing Analytics account and the `Tracify website` web stream for `https://www.tracify.tech`; measurement ID: `G-XW154R1G8Y`.
