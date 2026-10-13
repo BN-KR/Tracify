@@ -132,13 +132,13 @@ export function TraceTimeline({ rows, spans, totalMs, selectedId, isFailed, onSe
                       <TypeIcon type={span.spanType} failed={failed} size={12} /><span className="truncate">{node.name}</span>
                     </span>
                     <span className="relative h-full min-w-0 flex-1">
-                      <span className={`absolute top-1 flex h-5 items-center overflow-hidden rounded-[3px] px-1.5 font-mono text-[10px] font-medium text-[#0B0D10] ${selected ? "outline outline-2 outline-offset-1 outline-[#F4D44D]" : ""}`}
-                        style={{ left: `${left}%`, width: `${barWidth}%`, background: stepColor(span.spanType, failed) }}>
+                      <span className={`absolute top-1 flex h-5 items-center overflow-hidden rounded-[3px] font-mono text-[10px] font-medium text-[#0B0D10] ${inside ? "px-1.5" : ""} ${selected ? "outline outline-2 outline-offset-1 outline-[#F4D44D]" : ""}`}
+                        style={{ left: `${left}%`, width: `max(3px, ${barWidth}%)`, background: stepColor(span.spanType, failed) }}>
                         {inside ? <span className="truncate">{label}</span> : null}
                       </span>
                       {!inside ? (
                         <span className="absolute top-1 flex h-5 items-center whitespace-nowrap px-1.5 font-mono text-[10px] text-[#8B93A1]"
-                          style={labelBefore ? { right: `${100 - left}%` } : { left: `${left + barWidth}%` }}>{label}</span>
+                          style={labelBefore ? { right: `calc(${100 - left}% + 2px)` } : { left: `calc(${left + barWidth}% + 5px)` }}>{label}</span>
                       ) : null}
                     </span>
                   </button>
