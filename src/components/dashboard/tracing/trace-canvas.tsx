@@ -12,7 +12,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import { Maximize2, Minimize2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 
 export type CanvasNodeData = Record<string, unknown>;
 export type CanvasNode = Node<CanvasNodeData, "traceCard">;
@@ -85,6 +85,9 @@ function TraceCanvasViewport({
   const [fullscreen, setFullscreen] = useState(false);
   const [zoom, setZoom] = useState(1);
   const lastFocus = useRef<string | null>(null);
+  const pointers = useRef(new Set<number>());
+  const panGesture = useRef<{ id: number; pointerType: string; x: number; y: number; originX: number; originY: number; active: boolean } | null>(null);
+  const suppressClick = useRef(false);
   const center = useCallback((id: string, duration = 450) => {
     const node = flow.getNode(id);
     if (node) flow.setCenter(node.position.x + (node.measured?.width ?? 184) / 2, node.position.y + (node.measured?.height ?? 48) / 2, { zoom: Math.max(flow.getZoom(), 0.8), duration });
@@ -123,7 +126,7 @@ function TraceCanvasViewport({
     else return;
     event.preventDefault();
   };
-  const handleDoubleClick = (event: MouseEvent<HTMLDivElement>) => {
+  const handleDoubleClick = (event: ReactMouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
     if (target.closest("button,input,select,textarea,.react-flow__minimap")) return;
     const root = event.currentTarget.querySelector(".react-flow");
@@ -138,8 +141,51 @@ function TraceCanvasViewport({
     void flow.setViewport({ x: px - worldX * zoom, y: py - worldY * zoom, zoom }, { duration: 180 });
   };
 
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    if (target.closest("button,input,select,textarea,[contenteditable=true],.react-flow__minimap,[aria-label='Canvas controls']")) return;
+    pointers.current.add(event.pointerId);
+    if (pointers.current.size > 1) { panGesture.current = null; return; }
+    panGesture.current = { id: event.pointerId, pointerType: event.pointerType, x: event.clientX, y: event.clientY, originX: event.clientX, originY: event.clientY, active: false };
+  };
+  const handleClickCapture = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (!suppressClick.current) return;
+    suppressClick.current = false;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  useEffect(() => {
+    const move = (event: PointerEvent) => {
+      const gesture = panGesture.current;
+      if (!gesture || event.pointerId !== gesture.id || pointers.current.size > 1) return;
+      const distance = Math.hypot(event.clientX - gesture.originX, event.clientY - gesture.originY);
+      if (!gesture.active && distance < 4) return;
+      gesture.active = true;
+      suppressClick.current = true;
+      const viewport = flow.getViewport();
+      void flow.setViewport({ ...viewport, x: viewport.x + event.clientX - gesture.x, y: viewport.y + event.clientY - gesture.y });
+      gesture.x = event.clientX;
+      gesture.y = event.clientY;
+      if (gesture.pointerType === "touch") event.preventDefault();
+    };
+    const end = (event: PointerEvent) => {
+      pointers.current.delete(event.pointerId);
+      if (panGesture.current?.id === event.pointerId) panGesture.current = null;
+      if (suppressClick.current) window.setTimeout(() => { suppressClick.current = false; }, 0);
+    };
+    window.addEventListener("pointermove", move, { passive: false });
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
+    };
+  }, [flow]);
+
   return (
-    <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-[300px] w-full"} ${className}`} onKeyDown={handleKeyDown} onDoubleClick={handleDoubleClick}>
+    <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-[300px] w-full"} ${className}`} onKeyDown={handleKeyDown} onDoubleClick={handleDoubleClick} onPointerDown={handlePointerDown} onClickCapture={handleClickCapture}>
       <div className="absolute inset-0 overflow-hidden border border-[#1F242C] bg-[#0B0D10]">
         <ReactFlow
           nodes={nodes}
@@ -158,7 +204,7 @@ function TraceCanvasViewport({
           maxZoom={4}
           fitView
           fitViewOptions={{ padding: 0.18, minZoom: 0.1, maxZoom: 1.15 }}
-          panOnDrag
+          panOnDrag={false}
           panOnScroll={false}
           zoomOnScroll
           zoomOnPinch
