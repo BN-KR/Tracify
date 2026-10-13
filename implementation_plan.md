@@ -6,7 +6,9 @@
 - [done] Add cursor-centered wheel/pinch zoom, drag pan, double-click, keyboard controls, fit/selection focus, fullscreen and minimap.
 - [done] Add URL-backed map node/arrow-limit state, search, node/edge detail popovers with separate Show traces actions, and low-zoom arrow decluttering.
 - [done] Update `docs/dashboard-page-standard.md`; keep the accessible busiest-arrows table.
-- [in progress] Current head `473765f` is pushed to PR #145, but its Vercel deployment remains QUEUED. Rerun preview checks and inspect 1440×900 / 390×844 screenshots at multiple zooms and fullscreen once the current preview is Ready.
+- [done] Draft PR #145 (`codex/tracing-canvas`) is pushed and both Vercel previews are Ready at canvas implementation `88293c9`.
+- [done] Focused ESLint, full `tsc --noEmit`, and EU-configured `pnpm build` pass. The Ready EU preview passes click interactions 26/26, live updates 7/7, and the extended feature suite, including pan/zoom, fit/double-click, fullscreen fit/restore/Escape, minimap, search, node/arrow count parity, live view retention, and phone overflow.
+- [done] Reviewed desktop 1440×900 and mobile 390×844 screenshots for overview, zoomed-in, zoomed-out, and fullscreen layouts. Updated `docs/dashboard-page-standard.md`; PR remains draft/unmerged and Sessions files are untouched.
 
 ## Google Analytics 4 — 2026-09-15
 

@@ -5,8 +5,10 @@
 - [completed] Replace the map and trace graph scroll boxes with a shared React Flow pan/zoom canvas and ELK layered layout.
 - [completed] Add fullscreen, keyboard and touch navigation, zoom controls, minimap, stable positions, map search/selection, busiest-arrow limits, and overview decluttering.
 - [completed] Update the dashboard page standard; no Sessions page files changed.
-- [completed] Open draft PR #145 from `codex/tracing-canvas`; latest head `473765f`.
-- [in progress] Wait for the current Vercel deployment (QUEUED / PR status PENDING); then rerun the required browser suites, inspect current-head desktop/mobile/fullscreen screenshots, and record proof for owner review.
+- [completed] Open draft PR #145 from `codex/tracing-canvas`; latest canvas implementation `88293c9` is pushed and both Vercel previews are Ready.
+- [completed] Focused ESLint, full `tsc --noEmit`, and EU-configured production build pass; the authenticated click suite passes 26/26 interactions (known identify CORS console errors only), live updates pass 7/7, and the expanded feature suite passes on the Ready EU preview.
+- [completed] Verify view retention on live map updates, map node/arrow Show traces count parity, fullscreen fit/restore and Escape, pan/zoom/minimap/search, and 390px/360px overflow. Inspect 1440×900 and 390×844 screenshots at overview, zoomed-in, zoomed-out, and fullscreen states under `/root/tracify-tools/shots-tracing-canvas/`.
+- [completed] Update `docs/dashboard-page-standard.md` and `/root/HANDOFF.md`. PR #145 remains draft and unmerged; no Sessions page files changed.
 
 ## 2026-09-15 — Google Analytics 4
 
