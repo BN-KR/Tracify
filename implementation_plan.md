@@ -1,11 +1,5 @@
 # Langfuse parity-plus product epic — 2026-09-03
 
-## Tracing map refinement — 2026-10-13
-
-- Replace graph connectors with straight paths and retain full card text at every zoom.
-- Place the minimap inside the shared flow; add click-to-center, viewport outline, responsive size and independent directional drag/wheel verification.
-- Verify the Ready EU preview and publish a new draft PR from current main after #145 merged. Durable completion history belongs in memory.md.
-
 ## Google Analytics 4 — 2026-09-15
 
 - Implemented the consent-aware GA4 tag, environment contract, cookie-policy disclosure, and deterministic browser coverage.

@@ -1,9 +1,8 @@
 # 2026-09-02 — First-customer execution
 
-## 2026-10-13 — Tracing map refinement
+## 2026-10-13 — Tracing map refinement: owner review
 
-- [pending] Verify straight connectors, persistent card text, and minimap click/drag/wheel on both graph views in the Ready preview; inspect desktop and phone screenshots.
-- [pending] Publish the refinement as a new draft PR from main after #145 merged, record final verification, and keep handoff/standard/memory current.
+- [pending] Owner review of draft PR #146 and its Ready EU preview before merge. Implementation and verification are recorded in `memory.md`.
 
 ## 2026-09-15 — Google Analytics 4
 
