@@ -7,11 +7,13 @@ import { compactNumber, formatDuration } from "./format";
 import { layoutWithElk } from "./elk-layout";
 import type { CanvasEdge, CanvasNode } from "./trace-canvas";
 import { TraceCanvasNode } from "./trace-canvas-nodes";
+import { TraceMapEdge } from "./trace-map-edge";
 
 type MapNode = { id: string; kind: "tool" | "model"; name: string; count: number; traces: number; errors: number; p50LatencyMs: number };
 type MapEdge = { source: string; target: string; count: number; traces: number; errorRate: number; p50LatencyMs: number };
 type MapResponse = { nodes: MapNode[]; edges: MapEdge[]; totalNodes: number; totalEdges: number; limits: { nodes: number; edges: number }; error?: string };
 const NODE_TYPES = { traceCard: TraceCanvasNode };
+const EDGE_TYPES = { traceMap: TraceMapEdge };
 const EDGE_LIMITS = [10, 25, 50, 75, 100];
 const TraceCanvas = dynamic(() => import("./trace-canvas").then((module) => module.TraceCanvas), { ssr: false });
 
@@ -103,6 +105,11 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
     const activeNode = hover === node.id || related || selectedNode === node.id;
     return { ...node, selected: selectedNode === node.id, style: { ...node.style, opacity: (hover || selectedNode) && !activeNode ? 0.28 : 1 } };
   }), [positionedNodes, laidOutEdges, hover, selectedNode]);
+  const bounds = useMemo(() => {
+    const xs = positionedNodes.map((node) => node.position.x);
+    const ys = positionedNodes.map((node) => node.position.y);
+    return { maxX: Math.max(0, ...xs) + 190, minY: Math.min(0, ...ys) };
+  }, [positionedNodes]);
 
   const edges: CanvasEdge[] = useMemo(() => laidOutEdges.map((edge) => {
     const id = edge.id;
@@ -113,7 +120,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
       id,
       source: edge.source,
       target: edge.target,
-      type: "smoothstep",
+      type: "traceMap",
       focusable: true,
       ariaLabel: `${stepLabel(edge.source)} to ${stepLabel(edge.target)}: ${edge.count} calls in ${edge.traces} traces, ${(edge.errorRate * 100).toFixed(0)} percent failed, median latency ${formatDuration(edge.p50LatencyMs)}`,
       label: compactNumber(edge.count),
@@ -122,9 +129,9 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
       labelBgPadding: [4, 2] as [number, number],
       style: { stroke: failed ? "#FF6B6B" : active ? "#C9CED6" : "#4A5260", strokeWidth: 1 + 2 * Math.sqrt(edge.count / Math.max(1, visibleEdges[0]?.count ?? 1)), opacity: dim ? 0.12 : 1 },
       markerEnd: { type: "arrowclosed" as const, color: failed ? "#FF6B6B" : "#4A5260", width: 12, height: 12 },
-      data: { ...edge },
+      data: { ...edge, label: compactNumber(edge.count), routeIndex: edge.index, bounds, failed },
     };
-  }), [laidOutEdges, hover, selectedNode, selectedEdge, visibleEdges]);
+  }), [laidOutEdges, hover, selectedNode, selectedEdge, visibleEdges, bounds]);
 
   const nodeById = useMemo(() => new Map((data?.nodes ?? []).map((node) => [node.id, node])), [data?.nodes]);
   const selectNode = useCallback((node: CanvasNode) => {
@@ -166,7 +173,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
       </div>
       <div className="flex flex-wrap gap-3 text-[11px] text-[#8B93A1]"><span className="flex items-center gap-1"><span className="size-2 bg-[#F4D44D]" />model</span><span className="flex items-center gap-1"><span className="size-2 bg-[#8AB4FF]" />tool</span><span className="flex items-center gap-1"><span className="h-0.5 w-4 bg-[#FF6B6B]" />arrow with failures</span></div>
       <div className="h-[min(62vh,620px)] min-h-[330px] w-full">
-        <TraceCanvas nodes={nodes} edges={edges} nodeTypes={NODE_TYPES} focusId={selectedNode ?? searchTarget?.id ?? null} label="Agent map"
+        <TraceCanvas nodes={nodes} edges={edges} nodeTypes={NODE_TYPES} edgeTypes={EDGE_TYPES} focusId={searchTarget?.id ?? selectedNode} label="Agent map"
           onNodeClick={selectNode}
           onNodeMouseEnter={(node) => setHover(node.id)} onNodeMouseLeave={() => setHover(null)}
           onEdgeClick={chooseEdge} onEdgeMouseEnter={() => setHover(null)} onEdgeMouseLeave={() => setHover(null)}

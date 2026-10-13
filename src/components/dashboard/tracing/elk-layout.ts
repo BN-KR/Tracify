@@ -26,9 +26,22 @@ export async function layoutWithElk(
   elkPromise ??= import("elkjs/lib/elk.bundled.js").then(({ default: ELK }) => new ELK());
   const result = await (await elkPromise).layout(graph);
   const positions = new Map<string, XYPosition>();
+  const dimensions = new Map(nodes.map((node) => [node.id, node]));
+  const occupied = nodes.flatMap((node) => {
+    const old = previous.get(node.id);
+    return old ? [{ ...old, width: node.width, height: node.height }] : [];
+  });
   for (const node of result.children ?? []) {
     const old = previous.get(node.id);
-    positions.set(node.id, old ?? { x: node.x ?? 0, y: node.y ?? 0 });
+    const size = dimensions.get(node.id)!;
+    const position = old ? { ...old } : { x: node.x ?? 0, y: node.y ?? 0 };
+    if (!old) {
+      while (occupied.some((item) => position.x < item.x + item.width + 12 && position.x + size.width + 12 > item.x && position.y < item.y + item.height + 12 && position.y + size.height + 12 > item.y)) {
+        position.y += size.height + 24;
+      }
+      occupied.push({ ...position, width: size.width, height: size.height });
+    }
+    positions.set(node.id, position);
   }
   return positions;
 }

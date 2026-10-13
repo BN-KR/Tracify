@@ -6,6 +6,7 @@ import {
   ReactFlowProvider,
   useReactFlow,
   type Edge,
+  type EdgeTypes,
   type Node,
   type NodeTypes,
   type ReactFlowInstance,
@@ -23,6 +24,7 @@ export function TraceCanvas({
   nodes,
   edges,
   nodeTypes,
+  edgeTypes,
   focusId,
   label,
   onNodeClick,
@@ -38,6 +40,7 @@ export function TraceCanvas({
   nodes: CanvasNode[];
   edges: CanvasEdge[];
   nodeTypes: NodeTypes;
+  edgeTypes?: EdgeTypes;
   focusId?: string | null;
   label: string;
   onNodeClick?: (node: CanvasNode) => void;
@@ -52,7 +55,7 @@ export function TraceCanvas({
 }) {
   return (
     <ReactFlowProvider>
-      <TraceCanvasViewport {...{ nodes, edges, nodeTypes, focusId, label, onNodeClick, onEdgeClick, onNodeMouseEnter, onNodeMouseLeave, onEdgeMouseEnter, onEdgeMouseLeave, onEscape, children, className }} />
+      <TraceCanvasViewport {...{ nodes, edges, nodeTypes, edgeTypes, focusId, label, onNodeClick, onEdgeClick, onNodeMouseEnter, onNodeMouseLeave, onEdgeMouseEnter, onEdgeMouseLeave, onEscape, children, className }} />
     </ReactFlowProvider>
   );
 }
@@ -61,6 +64,7 @@ function TraceCanvasViewport({
   nodes,
   edges,
   nodeTypes,
+  edgeTypes,
   focusId,
   label,
   onNodeClick,
@@ -124,6 +128,7 @@ function TraceCanvasViewport({
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           onInit={(value) => { setInstance(value); setZoom(value.getZoom()); }}
           onMove={(_, viewport) => setZoom(viewport.zoom)}
           onNodeClick={(_, node) => onNodeClick?.(node as CanvasNode)}
@@ -147,6 +152,7 @@ function TraceCanvasViewport({
           edgesFocusable
           nodesFocusable
           aria-label={label}
+          role="group"
           proOptions={{ hideAttribution: true }}
           className="tracing-flow"
         />
@@ -157,6 +163,7 @@ function TraceCanvasViewport({
           <span aria-live="polite" className="w-14 px-1 text-center font-mono text-[10px] text-[#8B93A1]">{Math.round(zoom * 100)}%</span>
           <button type="button" aria-label="Zoom in" className={controlClass} onClick={() => zoomBy(1.25)}>+</button>
           <button type="button" aria-label="Fit to view" title="Fit to view" className={controlClass} onClick={fit}>↗</button>
+          <button type="button" aria-label="Zoom to selection" title="Zoom to selection" className={controlClass} disabled={!focusId} onClick={() => focusId && center(focusId)}>◎</button>
           <button type="button" aria-label={fullscreen ? "Exit fullscreen" : "Fullscreen"} title={fullscreen ? "Exit fullscreen" : "Fullscreen"} className={controlClass} onClick={() => setFullscreen((value) => !value)}>
             {fullscreen ? <Minimize2 aria-hidden="true" size={14} /> : <Maximize2 aria-hidden="true" size={14} />}
           </button>
