@@ -176,7 +176,7 @@ function TraceCanvasViewport({
 
 
   return (
-    <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-[300px] w-full"} ${className}`} onKeyDownCapture={handleKeyDownCapture} onKeyDown={handleKeyDown} onDoubleClick={handleDoubleClick}>
+    <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-0 w-full flex-1"} ${className}`} onKeyDownCapture={handleKeyDownCapture} onKeyDown={handleKeyDown} onDoubleClick={handleDoubleClick}>
       <div className="absolute inset-0 overflow-hidden border border-[#1F242C] bg-[#0B0D10]">
         <ReactFlow
           onPointerDownCapture={(event) => {

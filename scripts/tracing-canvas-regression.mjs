@@ -156,5 +156,17 @@ await page.locator("tbody tr").first().click();
 const panel = page.getByRole("complementary", { name: "Trace detail" });
 await panel.getByRole("tab", { name: "Graph", exact: true }).click();
 await verifyCanvas(panel.getByRole("group", { name: "Step graph" }), "graph");
+await page.setViewportSize({ width: 390, height: 844 });
+await panel.getByRole("group", { name: "Step graph" }).getByRole("button", { name: "Fit to view", exact: true }).click();
+await page.waitForTimeout(700);
+await check("phone graph: controls and minimap fit inside the visible pane", async () => {
+  const pane = await panel.locator("#trace-view").boundingBox();
+  const graph = panel.getByRole("group", { name: "Step graph" });
+  const controls = await graph.getByRole("group", { name: "Canvas controls" }).boundingBox();
+  const mini = await graph.locator(".react-flow__minimap").boundingBox();
+  for (const box of [controls, mini]) expect(box.y >= pane.y && box.y + box.height <= pane.y + pane.height && box.x >= pane.x && box.x + box.width <= pane.x + pane.width, "phone canvas overlay is clipped");
+  expect(mini.y + mini.height <= controls.y || mini.x + mini.width <= controls.x, "phone minimap overlaps controls");
+});
+await page.screenshot({ path: `${OUT}/graph-phone-fit.png` });
 await browser.close();
 process.exitCode = failed ? 1 : 0;

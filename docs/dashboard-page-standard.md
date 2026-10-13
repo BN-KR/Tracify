@@ -89,7 +89,8 @@ Detail panels for a record made of steps offer `Tree | Timeline | Graph` tabs (`
 - Graph: use the shared React Flow canvas (`tracing/trace-canvas.tsx`) with ELK layered, left-to-right
   layout (`tracing/elk-layout.ts`). Aggregated merges repeated sibling steps into one card (×N); Expanded
   shows every step. Use straight connectors, type colours, red failures, and a yellow selected border.
-- The graph canvas fills a fixed viewport with no scrollbars. Pan with mouse or touch, zoom around the
+- The graph canvas fills the remaining pane height (`flex-1 min-h-0`) with no scrollbars;
+  controls and the minimap must stay inside the visible pane on phones. Pan with mouse or touch, zoom around the
   pointer with wheel or pinch (0.1×–4×), double-click to zoom, and support arrow keys, `+`, `−`, and `0`.
   Provide animated Fit, selection centering, fullscreen with Escape, bottom-right zoom controls, and a
   pannable/zoomable minimap. Keep the transform when live data updates; preserve positions for nodes that
