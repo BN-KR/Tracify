@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { compactNumber, formatDuration } from "./format";
+import { useDragToMove, useWheelZoom } from "./trace-views";
 
 type MapNode = { id: string; kind: "tool" | "model"; name: string; count: number; traces: number; errors: number; p50LatencyMs: number };
 type MapEdge = { source: string; target: string; count: number; traces: number; errorRate: number; p50LatencyMs: number };
@@ -9,9 +10,12 @@ type MapResponse = { nodes: MapNode[]; edges: MapEdge[]; totalNodes: number; tot
 
 const NODE_W = 168;
 const NODE_H = 40;
-const COL_GAP = 96;
-const ROW_GAP = 22;
-const PAD = 28;
+const COL_GAP = 72;
+const ROW_GAP = 18;
+const PAD = 24;
+const BAND_GAP = 64;
+const MAP_LIMITS = { min: 0.3, max: 2 };
+const always = () => true;
 
 export function stepLabel(key: string) {
   return key.replace(/^(tool|model):/, "");
@@ -72,7 +76,25 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge }: {
 
   const current = state?.key === key ? state : null;
   const data = current?.data ?? (state?.data ?? null);
-  const layout = useMemo(() => (data ? layoutMap(data.nodes, data.edges) : null), [data]);
+  // The map wraps its columns into rows that fit the box, so it reads top to bottom instead of scrolling sideways.
+  const box = useRef<HTMLDivElement>(null);
+  const [boxWidth, setBoxWidth] = useState(1100);
+  const [zoom, setZoom] = useState(1);
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => setBoxWidth(Math.round(entry!.contentRect.width)));
+    observer.observe(el);
+    return () => observer.disconnect();
+  });
+  useDragToMove(box);
+  const anchor = useMemo(() => (event: WheelEvent, el: HTMLElement, from: number, to: number) => {
+    const rect = el.getBoundingClientRect();
+    const x = event.clientX - rect.left, y = event.clientY - rect.top;
+    return { left: Math.max(0, ((el.scrollLeft + x) / from) * to - x), top: Math.max(0, ((el.scrollTop + y) / from) * to - y) };
+  }, []);
+  useWheelZoom(box, zoom, setZoom, MAP_LIMITS, always, anchor);
+  const layout = useMemo(() => (data ? layoutMap(data.nodes, data.edges, boxWidth) : null), [data, boxWidth]);
 
   if (current?.error) {
     return (
@@ -105,8 +127,16 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge }: {
         <span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-[#8AB4FF]" />tool</span>
         <span className="flex items-center gap-1"><span className="h-0.5 w-4 bg-[#FF6B6B]" />arrow with failures</span>
       </div>
-      <div className="max-h-[60vh] overflow-auto rounded-lg border border-[#1F242C] bg-[#0E1115]">
-        <svg role="group" aria-label="Agent map" width={layout.width} height={layout.height} viewBox={`0 0 ${layout.width} ${layout.height}`} className="block">
+      <div className="flex items-center justify-between gap-2 text-[11px] text-[#6B7380]">
+        <span>Scroll to zoom · drag to move</span>
+        <span role="group" aria-label="Zoom" className="flex items-center gap-0.5">
+          {([["Zoom out", "−", () => setZoom(Math.max(MAP_LIMITS.min, zoom / 1.5))], ["Zoom in", "+", () => setZoom(Math.min(MAP_LIMITS.max, zoom * 1.5))], ["Fit to view", "⤢", () => setZoom(1)]] as const).map(([name, glyph, action]) => (
+            <button key={name} type="button" aria-label={name} onClick={action} className="flex h-6 w-6 items-center justify-center rounded text-[#8B93A1] hover:bg-[#1A1F27] hover:text-white">{glyph}</button>
+          ))}
+        </span>
+      </div>
+      <div ref={box} className="max-h-[70vh] cursor-grab select-none overflow-auto rounded-lg border border-[#1F242C] bg-[#0E1115]">
+        <svg role="group" aria-label="Agent map" width={layout.width * zoom} height={layout.height * zoom} viewBox={`0 0 ${layout.width} ${layout.height}`} className="block">
           <defs>
             <marker id="map-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 8 4 0 8z" fill="#4A5260" /></marker>
             <marker id="map-arrow-error" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 8 4 0 8z" fill="#FF6B6B" /></marker>
@@ -117,7 +147,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge }: {
             if (!from || !to) return null;
             const id = `${edge.source}→${edge.target}`;
             const failed = edge.errorRate > 0;
-            const path = edgePath(from, to);
+            const path = edgePath(from, to, layout.bandTop);
             const label = `${stepLabel(edge.source)} → ${stepLabel(edge.target)}: ${edge.count} times in ${edge.traces} traces, ${(edge.errorRate * 100).toFixed(0)}% failed, median ${formatDuration(edge.p50LatencyMs)}`;
             const dim = hover && hover !== id && hover !== edge.source && hover !== edge.target;
             return (
@@ -187,13 +217,13 @@ function truncate(text: string, length: number) {
   return text.length > length ? `${text.slice(0, length - 1)}…` : text;
 }
 
-type Placed = MapNode & { x: number; y: number; rank: number };
+type Placed = MapNode & { x: number; y: number; rank: number; band: number };
 
 /**
  * Left-to-right layered layout. Arrows are added busiest first and skipped when they would close a cycle, the
  * remaining DAG gives each node a column (longest path), and each column is ordered by its parents' positions.
  */
-function layoutMap(nodes: MapNode[], edges: MapEdge[]) {
+function layoutMap(nodes: MapNode[], edges: MapEdge[], boxWidth: number) {
   const ids = new Set(nodes.map((node) => node.id));
   const forward = new Map<string, string[]>(nodes.map((node) => [node.id, []]));
   const reaches = (from: string, to: string) => {
@@ -229,31 +259,53 @@ function layoutMap(nodes: MapNode[], edges: MapEdge[]) {
   const row = new Map<string, number>();
   const parents = new Map<string, string[]>();
   for (const [source, targets] of forward) for (const target of targets) parents.set(target, [...(parents.get(target) ?? []), source]);
+  // Wrap the columns into bands (rows of columns) that fit the box width; each band is as tall as its tallest column.
+  const perBand = Math.max(1, Math.floor((boxWidth - 2 * PAD + COL_GAP) / (NODE_W + COL_GAP)));
+  const bands = Math.ceil(columns.length / perBand);
+  const bandTop: number[] = [];
+  let top = PAD;
+  for (let band = 0; band < bands; band++) {
+    bandTop.push(top);
+    const tallest = Math.max(1, ...columns.slice(band * perBand, (band + 1) * perBand).map((column) => column?.length ?? 0));
+    top += tallest * NODE_H + (tallest - 1) * ROW_GAP + BAND_GAP;
+  }
   const placed: Placed[] = [];
   columns.forEach((column, index) => {
     const ordered = index === 0 ? column : [...column].sort((a, b) => center(a.id) - center(b.id));
+    const band = Math.floor(index / perBand);
     ordered.forEach((node, position) => {
       row.set(node.id, position);
-      placed.push({ ...node, rank: index, x: PAD + index * (NODE_W + COL_GAP), y: PAD + position * (NODE_H + ROW_GAP) });
+      placed.push({ ...node, rank: index, band, x: PAD + (index % perBand) * (NODE_W + COL_GAP), y: bandTop[band]! + position * (NODE_H + ROW_GAP) });
     });
   });
   function center(id: string) {
     const list = (parents.get(id) ?? []).map((parent) => row.get(parent) ?? 0);
     return list.length ? list.reduce((sum, value) => sum + value, 0) / list.length : Number.MAX_SAFE_INTEGER;
   }
-  const tallest = Math.max(1, ...columns.map((column) => column?.length ?? 0));
+  const used = Math.min(perBand, columns.length);
   return {
     nodes: placed,
-    width: PAD * 2 + columns.length * NODE_W + (columns.length - 1) * COL_GAP,
-    height: PAD * 2 + tallest * NODE_H + (tallest - 1) * ROW_GAP + 24,
+    bandTop,
+    width: PAD * 2 + used * NODE_W + (used - 1) * COL_GAP + 24,
+    height: top - BAND_GAP + PAD + 24,
   };
 }
 
-/** Forward arrows curve right; arrows back to an earlier or the same column loop below; self-repeats loop above. */
-function edgePath(from: Placed, to: Placed) {
+/**
+ * Forward arrows in the same band curve right; arrows into another band leave right, run through the gap above
+ * the target band and enter it from the left; arrows back within a band loop below; self-repeats loop above.
+ */
+function edgePath(from: Placed, to: Placed, bandTop: number[]) {
   if (from.id === to.id) {
     const x = from.x + NODE_W - 36;
     return { d: `M${x} ${from.y} C${x} ${from.y - 26} ${x + 26} ${from.y - 26} ${x + 24} ${from.y}`, lx: x + 12, ly: from.y - 20 };
+  }
+  if (to.band !== from.band) {
+    const lane = (hash(from.id + to.id) % 5) * 4;
+    const gap = (to.band === 0 ? PAD / 2 : bandTop[to.band]! - BAND_GAP / 2) - 8 + lane;
+    const x1 = from.x + NODE_W, y1 = from.y + NODE_H / 2, x2 = to.x - 2, y2 = to.y + NODE_H / 2;
+    const out = x1 + 12 + lane, into = to.x - 20 - lane;
+    return { d: `M${x1} ${y1} H${out} V${gap} H${into} V${y2} H${x2}`, lx: (out + into) / 2, ly: gap - 4 };
   }
   if (to.rank > from.rank) {
     const x1 = from.x + NODE_W, y1 = from.y + NODE_H / 2, x2 = to.x - 2, y2 = to.y + NODE_H / 2;
@@ -263,4 +315,10 @@ function edgePath(from: Placed, to: Placed) {
   const x1 = from.x + NODE_W / 2 + 10, y1 = from.y + NODE_H, x2 = to.x + NODE_W / 2 - 10, y2 = to.y + NODE_H + 2;
   const drop = Math.max(y1, y2) + 22 + Math.abs(from.rank - to.rank) * 6;
   return { d: `M${x1} ${y1} C${x1} ${drop} ${x2} ${drop} ${x2} ${y2}`, lx: (x1 + x2) / 2, ly: drop - 6 };
+}
+
+function hash(text: string) {
+  let value = 0;
+  for (let i = 0; i < text.length; i++) value = (value * 31 + text.charCodeAt(i)) >>> 0;
+  return value;
 }

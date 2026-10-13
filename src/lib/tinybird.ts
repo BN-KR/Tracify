@@ -344,18 +344,22 @@ export async function searchTraces(projectId: string, filters: TraceSearchFilter
   }>;
 }
 
+/** Filterable step fields; tags is an array column. */
+export const FACET_KEYS = ["traceName", "spanType", "toolName", "modelId", "errorType", "environment", "release", "endUserId", "sessionId", "tag"] as const;
+export type FacetKey = (typeof FACET_KEYS)[number];
+
+function facetCondition(key: FacetKey, values: string[]) {
+  const list = values.map((value) => `'${sqlString(value)}'`).join(", ");
+  return key === "tag" ? `hasAny(tags, [${list}])` : `${key} IN (${list})`;
+}
+
 export type TraceListFilters = {
   query?: string;
   fromMs: number;
   toMs: number;
   status?: "all" | "error" | "healthy";
-  traceName?: string;
-  modelId?: string;
-  environment?: string;
-  release?: string;
-  endUserId?: string;
-  sessionId?: string;
-  tag?: string;
+  /** Checkbox filters: a trace matches when one of its steps has any of the chosen values (per field). */
+  facets?: Partial<Record<FacetKey, string[]>>;
   minLatencyMs?: number;
   maxLatencyMs?: number;
   minCostUsd?: number;
@@ -412,16 +416,11 @@ function traceListClauses(projectId: string, filters: TraceListFilters) {
     `createdAt >= toDateTime(${Math.floor(filters.fromMs / 1000)})`,
     `createdAt <= toDateTime(${Math.ceil(filters.toMs / 1000)})`,
   ];
-  const equals: Array<[keyof TraceListFilters, string]> = [
-    ["environment", "environment"], ["release", "release"], ["endUserId", "endUserId"], ["sessionId", "sessionId"],
-  ];
-  for (const [key, column] of equals) {
-    const value = filters[key];
-    if (typeof value === "string" && value) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND ${column} = '${sqlString(value)}')`);
+  // Facet counts use steps inside the range, so facet filters use the same range and the counts match the list.
+  for (const key of FACET_KEYS) {
+    const values = filters.facets?.[key];
+    if (values?.length) where.push(`runId IN (SELECT runId FROM spans WHERE ${rangeScope(projectId, filters)} AND ${facetCondition(key, values)})`);
   }
-  if (filters.traceName) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND traceName = '${sqlString(filters.traceName)}')`);
-  if (filters.modelId) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND modelId = '${sqlString(filters.modelId)}')`);
-  if (filters.tag) where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND has(tags, '${sqlString(filters.tag)}'))`);
   if (filters.query) {
     const value = sqlString(filters.query);
     where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND (positionCaseInsensitive(runId, '${value}') > 0 OR positionCaseInsensitive(traceName, '${value}') > 0 OR positionCaseInsensitive(input, '${value}') > 0 OR positionCaseInsensitive(output, '${value}') > 0))`);
@@ -591,6 +590,28 @@ export async function traceAgentMap(projectId: string, filters: TraceListFilters
     totalNodes: Number(nodeRows[0]?.totalNodes ?? 0),
     totalEdges: Number(edgeRows[0]?.totalEdges ?? 0),
   };
+}
+
+export type FacetCounts = Partial<Record<FacetKey, Array<{ value: string; traces: number }>>>;
+
+/**
+ * For every filter field, its values with the number of matching traces. Each field is counted with all the
+ * other filters applied but not its own, so ticking more values of one field shows what they would add.
+ */
+export async function traceFacets(projectId: string, filters: TraceListFilters): Promise<FacetCounts> {
+  const parts = FACET_KEYS.map((key) => {
+    const others: TraceListFilters = { ...filters, facets: { ...filters.facets, [key]: undefined } };
+    const { where, having } = traceListClauses(projectId, others);
+    const value = key === "tag" ? "arrayJoin(tags)" : key;
+    return `SELECT '${key}' AS field, value, traces FROM (
+      SELECT value, uniqExact(runId) AS traces FROM (SELECT runId, ${value} AS value FROM spans WHERE ${where} AND runId IN (${matchingRunIds(where, having)}))
+      WHERE value != '' GROUP BY value ORDER BY traces DESC, value LIMIT 100)`;
+  });
+  const rows = await tinybirdRows<{ field: FacetKey; value: string; traces: number | string }>(parts.join("\nUNION ALL\n"));
+  const out: FacetCounts = {};
+  for (const row of rows) (out[row.field] ??= []).push({ value: row.value, traces: Number(row.traces) });
+  for (const list of Object.values(out)) list?.sort((a, b) => b.traces - a.traces || a.value.localeCompare(b.value));
+  return out;
 }
 
 /** Distinct values per filterable field for the filter sidebar. */

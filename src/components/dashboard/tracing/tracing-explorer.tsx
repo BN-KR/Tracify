@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AgentMap, stepLabel } from "./agent-map";
 import { ErrorGroupsPanel, errorGroupLabel, type ErrorGroups } from "./error-groups";
+import { FACETS, FacetGroup, decodeValues, encodeValues, type FacetCounts } from "./facet-filter";
 import { TRACE_VIEWS, TracePanel, type TraceView } from "./trace-panel";
 import { compactNumber, downloadFile, formatCost, formatDuration, formatTime, parseTime, previewText, relativeTime, toCsv } from "./format";
 
@@ -15,7 +16,7 @@ type Bucket = { bucket: string; traces: number; errors: number };
 type Stats = { traces: number; errors: number; p50DurationMs: number; p95DurationMs: number; totalCostUsd: number; inputTokens: number; outputTokens: number };
 type ListResponse = {
   rows: TraceRow[]; total: number; page: number; pageSize: number;
-  histogram: { bucketSeconds: number; buckets: Bucket[] }; stats?: Stats; options: Record<string, string[]> | null;
+  histogram: { bucketSeconds: number; buckets: Bucket[] }; stats?: Stats; facets?: FacetCounts | null;
   errorGroups?: ErrorGroups | null; range: { from: number; to: number }; error?: string;
 };
 
@@ -26,10 +27,6 @@ const RANGES = [
   { id: "24h", label: "24h", ms: 86_400_000 },
   { id: "7d", label: "7d", ms: 604_800_000 },
   { id: "30d", label: "30d", ms: 2_592_000_000 },
-];
-const FILTER_FIELDS: Array<{ key: string; label: string }> = [
-  { key: "traceName", label: "Trace name" }, { key: "modelId", label: "Model" }, { key: "environment", label: "Environment" },
-  { key: "release", label: "Release" }, { key: "endUserId", label: "User" }, { key: "sessionId", label: "Session" }, { key: "tag", label: "Tag" },
 ];
 const COLUMNS = [
   { id: "startedAt", label: "Start time" }, { id: "status", label: "Status" }, { id: "name", label: "Trace name" },
@@ -66,7 +63,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   // params it was first rendered with. Reading the live URL here keeps the open trace and filters across that.
   const [query, setQuery] = useState<TraceQuery>(() => ({ range: "24h", ...initialQuery, ...currentUrlQuery() }));
   const [data, setData] = useState<ListResponse | null>(null);
-  const [options, setOptions] = useState<Record<string, string[]>>({});
+  const [facets, setFacets] = useState<FacetCounts>({});
   const [settledKey, setSettledKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchDraft, setSearchDraft] = useState(initialQuery.q ?? "");
@@ -131,14 +128,12 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   }, [apiParams, errorsOpen, query.mode]);
   const requestKey = listParams.toString();
   const loading = settledKey !== requestKey;
-  const optionsKey = `${query.range ?? ""}|${query.from ?? ""}|${query.to ?? ""}`;
-  const loadedOptionsKey = useRef<string | null>(null);
 
   useEffect(() => {
     const id = ++requestId.current;
     const params = new URLSearchParams(listParams);
-    const wantOptions = loadedOptionsKey.current !== optionsKey;
-    if (wantOptions) params.set("options", "1");
+    // Filter counts change with every filter, but not between polls, so only full loads ask for them.
+    params.set("facets", "1");
     fetch(`/api/projects/${encodeURIComponent(projectId)}/traces?${params}`, { cache: "no-store" })
       .then(async (response) => {
         const body = (await response.json()) as ListResponse;
@@ -150,14 +145,14 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
         setData(body);
         setError(null);
         setSettledKey(requestKey);
-        if (body.options) { setOptions(body.options); loadedOptionsKey.current = optionsKey; }
+        if (body.facets) setFacets(body.facets);
       })
       .catch((reason: unknown) => {
         if (id !== requestId.current) return;
         setError(reason instanceof Error ? reason.message : "Could not load traces");
         setSettledKey(requestKey);
       });
-  }, [listParams, optionsKey, projectId, requestKey]);
+  }, [listParams, projectId, requestKey]);
 
   // Live updates: for relative ranges, quietly refetch the list with the window moved forward so new traces
   // appear without pressing Refresh. Skipped while paused, for fixed from/to windows, hidden tabs, and while a
@@ -187,7 +182,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
               const known = new Set((current?.rows ?? []).map((row) => row.runId));
               const added = current ? body.rows.map((row) => row.runId).filter((id) => !known.has(id)) : [];
               if (added.length) setFresh(new Set(added));
-              return { ...body, options: current?.options ?? body.options };
+              return body;
             });
           }
         } catch {
@@ -274,7 +269,10 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   }
 
   const activeFilters = [
-    ...FILTER_FIELDS.filter((field) => query[field.key]).map((field) => ({ key: field.key, label: `${field.label}: ${query[field.key]}` })),
+    ...FACETS.filter((field) => query[field.key]).map((field) => {
+      const values = decodeValues(query[field.key]);
+      return { key: field.key, label: `${field.label}: ${values.length > 2 ? `${values.slice(0, 2).join(", ")} +${values.length - 2}` : values.join(", ")}` };
+    }),
     ...(query.status && query.status !== "all" ? [{ key: "status", label: query.status === "error" ? "Errors only" : "Healthy only" }] : []),
     ...(query.minLatencyMs ? [{ key: "minLatencyMs", label: `Latency ≥ ${formatDuration(Number(query.minLatencyMs))}` }] : []),
     ...(query.minCostUsd ? [{ key: "minCostUsd", label: `Cost ≥ ${formatCost(Number(query.minCostUsd))}` }] : []),
@@ -328,9 +326,12 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
               <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => setFiltersOpen(false)}>Hide</button>
             </div>
             <FilterSelect label="Status" value={query.status ?? "all"} values={["all", "error", "healthy"]} display={{ all: "All", error: "Errors", healthy: "Healthy" }} onChange={(value) => update({ status: value === "all" ? "" : value })} />
-            {FILTER_FIELDS.map((field) => (
-              <FilterSelect key={field.key} label={field.label} value={query[field.key] ?? ""} values={["", ...(options[field.key] ?? [])]} display={{ "": "Any" }} onChange={(value) => update({ [field.key]: value })} />
-            ))}
+            <div className="mb-2.5 border-t border-[#1A1F27]">
+              {FACETS.map((field) => (
+                <FacetGroup key={field.key} label={field.label} defaultOpen={field.open} values={decodeValues(query[field.key])} counts={facets[field.key]}
+                  onChange={(values) => update({ [field.key]: encodeValues(values) })} />
+              ))}
+            </div>
             <FilterNumber key={`lat-${query.minLatencyMs ?? ""}`} label="Min latency (ms)" value={query.minLatencyMs ?? ""} onChange={(value) => update({ minLatencyMs: value })} />
             <FilterNumber key={`cost-${query.minCostUsd ?? ""}`} label="Min cost (USD)" value={query.minCostUsd ?? ""} step="0.001" onChange={(value) => update({ minCostUsd: value })} />
           </aside>
@@ -442,7 +443,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             summary={rows.find((row) => row.runId === selected)}
             view={traceView} onView={(view) => update({ view: view === "tree" ? "" : view }, false)}
             onClose={() => update({ trace: "" }, false)}
-            onFilter={(key, value) => update({ [key]: value, trace: "" })}
+            onFilter={(key, value) => update({ [key]: encodeValues([value]), trace: "" })}
             onStep={selectIndex}
           />
         ) : null}
@@ -453,7 +454,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
 function cell(id: ColumnId, row: TraceRow, update: (patch: TraceQuery, resetPage?: boolean) => void, clock: number) {
   const link = (key: string, value: string) => value
-    ? <button type="button" className="truncate text-[#8AB4FF] hover:underline" onClick={(event) => { event.stopPropagation(); update({ [key]: value }); }}>{value}</button>
+    ? <button type="button" className="truncate text-[#8AB4FF] hover:underline" onClick={(event) => { event.stopPropagation(); update({ [key]: encodeValues([value]) }); }}>{value}</button>
     : <span className="text-[#4A5260]">—</span>;
   switch (id) {
     case "startedAt": return <time dateTime={new Date(parseTime(row.startedAt)).toISOString()} title={formatTime(row.startedAt)} className="font-mono text-xs text-[#C9CED6]">{relativeTime(row.startedAt, clock)}</time>;
@@ -469,7 +470,7 @@ function cell(id: ColumnId, row: TraceRow, update: (patch: TraceQuery, resetPage
     case "model": return link("modelId", row.modelId);
     case "user": return link("endUserId", row.endUserId);
     case "session": return link("sessionId", row.sessionId);
-    case "tags": return row.tags?.length ? <span className="flex gap-1">{row.tags.slice(0, 3).map((tag) => <button key={tag} type="button" onClick={(event) => { event.stopPropagation(); update({ tag }); }} className="rounded bg-[#1A1F27] px-1.5 py-0.5 text-xs hover:bg-[#232A34]">{tag}</button>)}</span> : <span className="text-[#4A5260]">—</span>;
+    case "tags": return row.tags?.length ? <span className="flex gap-1">{row.tags.slice(0, 3).map((tag) => <button key={tag} type="button" onClick={(event) => { event.stopPropagation(); update({ tag: encodeValues([tag]) }); }} className="rounded bg-[#1A1F27] px-1.5 py-0.5 text-xs hover:bg-[#232A34]">{tag}</button>)}</span> : <span className="text-[#4A5260]">—</span>;
   }
 }
 
