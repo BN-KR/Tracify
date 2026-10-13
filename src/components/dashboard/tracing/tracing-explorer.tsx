@@ -62,7 +62,6 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   const [live, setLive] = useState(true);
   const [clock, setClock] = useState(() => Date.now());
   const [fresh, setFresh] = useState<Set<string>>(() => new Set());
-  const seenRuns = useRef<Set<string> | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const selected = query.trace ?? null;
   const requestId = useRef(0);
@@ -148,7 +147,16 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
       params.set("from", String(to - rangeMs));
       fetch(`/api/projects/${encodeURIComponent(projectId)}/traces?${params}`, { cache: "no-store" })
         .then(async (response) => (response.ok ? ((await response.json()) as ListResponse) : null))
-        .then((body) => { if (body && issued === requestId.current) setData((current) => ({ ...body, options: current?.options ?? body.options })); })
+        .then((body) => {
+          if (!body || issued !== requestId.current) return;
+          setData((current) => {
+            // Only rows that arrive through a live poll are highlighted, never a whole new filter result.
+            const known = new Set((current?.rows ?? []).map((row) => row.runId));
+            const added = current ? body.rows.map((row) => row.runId).filter((id) => !known.has(id)) : [];
+            if (added.length) setFresh(new Set(added));
+            return { ...body, options: current?.options ?? body.options };
+          });
+        })
         .catch(() => undefined);
     }, 4000);
     return () => clearInterval(timer);
@@ -156,20 +164,14 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
   const rows = useMemo(() => data?.rows ?? [], [data]);
   const stats = data?.stats;
-  const isLive = live && !query.from && !query.to;
 
-  // Rows that arrive after the first load get a short highlight so new activity is easy to spot.
   useEffect(() => {
-    const ids = rows.map((row) => row.runId);
-    const seen = seenRuns.current;
-    seenRuns.current = new Set([...(seen ?? []), ...ids]);
-    if (!seen) return;
-    const added = ids.filter((id) => !seen.has(id));
-    if (!added.length) return;
-    setFresh(new Set(added));
+    if (!fresh.size) return;
     const timer = setTimeout(() => setFresh(new Set()), 2500);
     return () => clearTimeout(timer);
-  }, [rows]);
+  }, [fresh]);
+  const isLive = live && !query.from && !query.to;
+
   const total = data?.total ?? 0;
   const page = Number(query.page ?? 0);
   const pageSize = Number(query.pageSize ?? 50);

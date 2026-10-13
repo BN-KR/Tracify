@@ -185,7 +185,7 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
     <aside aria-label="Trace detail" className="fixed inset-0 z-40 flex min-w-0 flex-col border-l border-[#1F242C] bg-[#0E1115] shadow-[-24px_0_48px_rgba(0,0,0,0.45)] lg:left-auto lg:w-[min(820px,60vw)]">
       <div className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-3">
         <h2 className="min-w-0 flex-1 truncate text-base font-semibold">{name}</h2>
-        <button type="button" onClick={copyLink} className="h-8 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">{linkCopied ? "Link copied ✓" : "Copy link"}</button>
+        <button type="button" onClick={copyLink} className="h-8 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">{linkCopied ? "Link copied" : "Copy link"}</button>
         <button type="button" onClick={downloadJson} disabled={!spans?.length} className="h-8 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40">JSON</button>
         <button type="button" aria-label="Previous trace" onClick={() => onStep(-1)} className="h-8 w-8 rounded-md border border-[#262C35] hover:border-[#4A5260]">↑</button>
         <button type="button" aria-label="Next trace" onClick={() => onStep(1)} className="h-8 w-8 rounded-md border border-[#262C35] hover:border-[#4A5260]">↓</button>
@@ -195,7 +195,7 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[#1F242C] px-4 py-3 font-mono text-xs text-[#C9CED6]">
         <button type="button" className="text-[#8B93A1] hover:text-white" onClick={() => { void navigator.clipboard?.writeText(runId); setCopied(true); setTimeout(() => setCopied(false), 1200); }}>
-          {copied ? "copied ✓" : `${runId.slice(0, 16)}… copy`}
+          {copied ? "copied" : `${runId.slice(0, 16)}… copy`}
         </button>
         <span>{formatDuration(summary?.durationMs ?? totalMs)}</span>
         <span>{formatCost(cost)}</span>
@@ -324,7 +324,7 @@ function Payload({ title, value, raw }: { title: string; value?: string; raw: bo
     <section>
       <div className="mb-2 flex items-center justify-between gap-2">
         <h4 className="text-xs font-medium uppercase tracking-wide text-[#8B93A1]">{title}</h4>
-        {!empty ? <button type="button" onClick={() => { void navigator.clipboard?.writeText(typeof parsed === "string" ? parsed : JSON.stringify(parsed, null, 2)); setCopied(true); setTimeout(() => setCopied(false), 1200); }} className="text-xs text-[#8B93A1] hover:text-white" aria-label={`Copy ${title.toLowerCase()}`}>{copied ? "Copied ✓" : "Copy"}</button> : null}
+        {!empty ? <button type="button" onClick={() => { void navigator.clipboard?.writeText(typeof parsed === "string" ? parsed : JSON.stringify(parsed, null, 2)); setCopied(true); setTimeout(() => setCopied(false), 1200); }} className="text-xs text-[#8B93A1] hover:text-white" aria-label={`Copy ${title.toLowerCase()}`}>{copied ? "Copied" : "Copy"}</button> : null}
       </div>
       {empty ? <p className="text-sm text-[#4A5260]">Nothing recorded</p> : messages ? (
         <div className="flex flex-col gap-2">
