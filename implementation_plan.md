@@ -1,5 +1,13 @@
 # Langfuse parity-plus product epic — 2026-09-03
 
+## Tracing graph canvas — 2026-10-13
+
+- [done] Use one React Flow canvas for the aggregate map and per-trace graph; add ELK left-to-right orthogonal layout and retain positions for surviving nodes.
+- [done] Add cursor-centered wheel/pinch zoom, drag pan, double-click, keyboard controls, fit/selection focus, fullscreen and minimap.
+- [done] Add URL-backed map node/arrow-limit state, search, node/edge detail popovers with separate Show traces actions, and low-zoom arrow decluttering.
+- [done] Update `docs/dashboard-page-standard.md`; keep the accessible busiest-arrows table.
+- [in progress] Complete PR #145 preview checks and inspect 1440×900 and 390×844 screenshots at multiple zooms and fullscreen before owner review.
+
 ## Google Analytics 4 — 2026-09-15
 
 - Implemented the consent-aware GA4 tag, environment contract, cookie-policy disclosure, and deterministic browser coverage.

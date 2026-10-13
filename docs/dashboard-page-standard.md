@@ -114,7 +114,7 @@ Pages that summarise many records can add a `List | Map` toggle (`tracing/agent-
   mouse/touch, wheel/pinch zoom from 0.1× to 4×, double-click, keyboard pan/zoom/fit, animated fit, a
   draggable minimap, custom zoom/fullscreen controls, and Escape to close fullscreen or clear selection.
 - Show the busiest arrows first, default 25, with a control up to the server cap of 100. At low zoom use
-  readable dots and thinner arrows; at high zoom show names, counts, median latency and errors. Searching
+  readable dots, fewer arrows, thinner strokes, and no overlapping edge labels; at high zoom show names, counts, median latency and errors. Searching
   a tool/model flies to it. Hovering a node highlights connected arrows and fades unrelated content.
 - Clicking a node or arrow selects it and opens a compact detail popover with counts, error rate and median
   latency. A separate “Show traces” action switches back to the list, filtered (`?node=`, `?edge=`) to the

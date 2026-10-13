@@ -1,5 +1,13 @@
 # 2026-09-02 — First-customer execution
 
+## 2026-10-13 — Tracing canvas PR #145 (active verification)
+
+- [completed] Replace the map and trace graph scroll boxes with a shared React Flow pan/zoom canvas and ELK layered layout.
+- [completed] Add fullscreen, keyboard and touch navigation, zoom controls, minimap, stable positions, map search/selection, busiest-arrow limits, and overview decluttering.
+- [completed] Update the dashboard page standard; no Sessions page files changed.
+- [completed] Open draft PR #145 from `codex/tracing-canvas`; latest head `e83c430`.
+- [in progress] Verify the latest Ready preview, run the required browser suites, inspect desktop/mobile/fullscreen screenshots, and record proof for owner review.
+
 ## 2026-09-15 — Google Analytics 4
 
 - [pending] Merge PR #121 after checks, then verify the production deployment contains the intended commit and that GA4 receives a live page view.
