@@ -103,6 +103,8 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
         setPositionedNodes(data.nodes.map((node) => ({
           id: node.id,
           type: "traceCard",
+          width: 190,
+          height: 62,
           position: positions.get(node.id) ?? { x: 0, y: 0 },
           focusable: true,
           ariaLabel: `${node.kind} ${node.name}: ${node.count} runs in ${node.traces} traces, ${node.errors} errors, median latency ${formatDuration(node.p50LatencyMs)}`,

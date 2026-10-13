@@ -318,6 +318,8 @@ export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
         setPositionedNodes(flattened.items.map((node) => ({
           id: node.key,
           type: "traceCard",
+          width: node.type === "tool" || node.type === "model" ? 190 : 205,
+          height: 62,
           position: positions.get(node.key) ?? { x: 0, y: 0 },
           focusable: true,
           ariaLabel: [node.name, node.spanIds.length > 1 ? `${node.spanIds.length} steps` : "", formatDuration(node.latencyMs), node.costUsd ? formatCost(node.costUsd) : "", node.failed ? `${node.failed} failed` : ""].filter(Boolean).join(" · "),
