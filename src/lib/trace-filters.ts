@@ -1,4 +1,4 @@
-import type { TraceListFilters } from "@/lib/tinybird";
+import { FACET_KEYS, type TraceListFilters } from "@/lib/tinybird";
 
 const MAX_RANGE_MS = 90 * 24 * 60 * 60 * 1000;
 
@@ -26,6 +26,13 @@ function edge(value: string | null) {
   return source && target && extra === undefined ? { from: source, to: target } : undefined;
 }
 
+/** Checkbox filters travel as comma-separated, individually URI-encoded values: `modelId=a,b%2Cc`. */
+export function facetValues(raw: string | null) {
+  if (!raw) return undefined;
+  const values = raw.split(",").map((part) => { try { return decodeURIComponent(part).slice(0, 200); } catch { return ""; } }).filter(Boolean);
+  return values.length ? [...new Set(values)].slice(0, 50) : undefined;
+}
+
 export function parseTraceFilters(searchParams: URLSearchParams, now = Date.now()): TraceListFilters {
   const toMs = Math.min(optionalNumber(searchParams.get("to")) ?? now, now);
   const fromMs = Math.max(optionalNumber(searchParams.get("from")) ?? toMs - 24 * 60 * 60 * 1000, toMs - MAX_RANGE_MS);
@@ -36,13 +43,7 @@ export function parseTraceFilters(searchParams: URLSearchParams, now = Date.now(
     toMs,
     query: text(searchParams.get("q")),
     status: status === "error" || status === "healthy" ? status : "all",
-    traceName: text(searchParams.get("traceName")),
-    modelId: text(searchParams.get("modelId")),
-    environment: text(searchParams.get("environment")),
-    release: text(searchParams.get("release")),
-    endUserId: text(searchParams.get("endUserId")),
-    sessionId: text(searchParams.get("sessionId")),
-    tag: text(searchParams.get("tag")),
+    facets: Object.fromEntries(FACET_KEYS.map((key) => [key, facetValues(searchParams.get(key))]).filter(([, values]) => values)),
     minLatencyMs: optionalNumber(searchParams.get("minLatencyMs")),
     maxLatencyMs: optionalNumber(searchParams.get("maxLatencyMs")),
     minCostUsd: optionalNumber(searchParams.get("minCostUsd")),

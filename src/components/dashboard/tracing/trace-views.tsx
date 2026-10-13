@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type RefObject } from "react";
 import type { SpanTreeNode } from "@/lib/tracify-ports/treeBuilding";
 import { compactNumber, formatCost, formatDuration } from "./format";
 
@@ -73,18 +73,105 @@ function ZoomControls({ zoom, setZoom, min, max, fit }: { zoom: number; setZoom:
   );
 }
 
+/**
+ * Drag with the mouse to move a scrollable view. A drag of more than a few pixels swallows the click that
+ * follows, so dragging across a bar or card does not select it.
+ */
+export function useDragToMove(ref: RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let start: { x: number; y: number; left: number; top: number } | null = null;
+    let moved = false;
+    const down = (event: PointerEvent) => {
+      if (event.button !== 0 || event.pointerType === "touch") return;
+      start = { x: event.clientX, y: event.clientY, left: el.scrollLeft, top: el.scrollTop };
+      moved = false;
+    };
+    const move = (event: PointerEvent) => {
+      if (!start) return;
+      const dx = event.clientX - start.x, dy = event.clientY - start.y;
+      if (!moved && Math.hypot(dx, dy) < 5) return;
+      if (!moved) { moved = true; el.setPointerCapture(event.pointerId); el.style.cursor = "grabbing"; }
+      el.scrollLeft = start.left - dx;
+      el.scrollTop = start.top - dy;
+    };
+    const up = () => {
+      if (moved) {
+        const swallow = (event: MouseEvent) => { event.stopPropagation(); event.preventDefault(); };
+        el.addEventListener("click", swallow, { capture: true, once: true });
+        setTimeout(() => el.removeEventListener("click", swallow, { capture: true }), 0);
+      }
+      start = null;
+      el.style.cursor = "";
+    };
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    return () => {
+      el.removeEventListener("pointerdown", down);
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+    };
+  }, [ref]);
+}
+
+/** Wheel zoom around the cursor. `shouldZoom` decides which wheel events zoom; the others scroll normally. */
+export function useWheelZoom(ref: RefObject<HTMLElement | null>, zoom: number, setZoom: (value: number) => void, limits: { min: number; max: number },
+  shouldZoom: (event: WheelEvent) => boolean, anchorFor: (event: WheelEvent, el: HTMLElement, from: number, to: number) => { left: number; top: number }) {
+  const state = useRef({ zoom, pending: null as null | { left: number; top: number } });
+  useLayoutEffect(() => {
+    state.current.zoom = zoom;
+    const el = ref.current;
+    const pending = state.current.pending;
+    if (el && pending) { el.scrollLeft = pending.left; el.scrollTop = pending.top; state.current.pending = null; }
+  }, [zoom, ref]);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const wheel = (event: WheelEvent) => {
+      if (!shouldZoom(event)) return;
+      event.preventDefault();
+      const from = state.current.zoom;
+      const to = Math.min(limits.max, Math.max(limits.min, from * Math.exp(-event.deltaY * (event.ctrlKey ? 0.01 : 0.0015))));
+      if (Math.abs(to - from) < 1e-4) return;
+      state.current.pending = anchorFor(event, el, from, to);
+      setZoom(to);
+    };
+    el.addEventListener("wheel", wheel, { passive: false });
+    return () => el.removeEventListener("wheel", wheel);
+  }, [ref, setZoom, limits.min, limits.max, shouldZoom, anchorFor]);
+}
+
+const timelineZooms = (event: WheelEvent) => event.ctrlKey || event.metaKey;
+const graphZooms = () => true;
+
 const NAME_COL = 190;
 
 /**
  * Every step as a bar on one time axis, in tree order: overlapping bars show parallel work, gaps show waiting.
  * Each bar is labelled with its duration and cost; hover or focus adds tokens. Zoom widens the time axis.
  */
+const TIMELINE_LIMITS = { min: 1, max: 64 };
+const GRAPH_LIMITS = { min: 0.25, max: 2.5 };
+
 export function TraceTimeline({ rows, spans, totalMs, selectedId, isFailed, onSelect }: {
   rows: SpanTreeNode[]; spans: Map<string, ViewSpan>; totalMs: number; selectedId: string | null;
   isFailed: (span: ViewSpan) => boolean; onSelect: (id: string) => void;
 }) {
   const [zoom, setZoom] = useState(1);
   const [hover, setHover] = useState<{ text: string; top: number; left: number } | null>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  useDragToMove(scroller);
+  // Ctrl/⌘ + wheel (or a trackpad pinch) zooms the time axis around the cursor; a plain wheel scrolls the rows.
+  const anchor = useMemo(() => (event: WheelEvent, el: HTMLElement, from: number, to: number) => {
+    const x = Math.max(0, event.clientX - el.getBoundingClientRect().left - NAME_COL);
+    const at = (el.scrollLeft + x) / from;
+    return { left: Math.max(0, at * to - x), top: el.scrollTop };
+  }, []);
+  useWheelZoom(scroller, zoom, setZoom, TIMELINE_LIMITS, timelineZooms, anchor);
   const step = tickStep(totalMs / zoom);
   const ticks: number[] = [];
   for (let at = 0; at < totalMs * 0.98; at += step) ticks.push(at);
@@ -92,10 +179,11 @@ export function TraceTimeline({ rows, spans, totalMs, selectedId, isFailed, onSe
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center justify-between border-b border-[#1F242C] px-2 py-1">
-        <ZoomControls zoom={zoom} setZoom={setZoom} min={1} max={32} fit={() => setZoom(1)} />
+        <ZoomControls zoom={zoom} setZoom={setZoom} min={TIMELINE_LIMITS.min} max={TIMELINE_LIMITS.max} fit={() => setZoom(1)} />
+        <span className="hidden text-[11px] text-[#6B7380] sm:inline">Ctrl + scroll to zoom · drag to move</span>
         <span className="font-mono text-[10px] text-[#6B7380]">{formatDuration(totalMs)} total</span>
       </div>
-      <div className="relative min-h-0 flex-1 overflow-auto" onMouseLeave={() => setHover(null)}>
+      <div ref={scroller} className="relative min-h-0 flex-1 cursor-grab select-none overflow-auto" onMouseLeave={() => setHover(null)}>
         <div className="relative min-w-full" style={{ width }}>
           <div className="sticky top-0 z-20 flex h-6 border-b border-[#1F242C] bg-[#0E1115] font-mono text-[10px] text-[#6B7380]" aria-hidden="true">
             <span className="sticky left-0 z-10 shrink-0 border-r border-[#1F242C] bg-[#0E1115]" style={{ width: NAME_COL }} />
@@ -211,9 +299,17 @@ export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
   roots: SpanTreeNode[]; spans: Map<string, ViewSpan>; selectedId: string | null;
   isFailed: (span: ViewSpan) => boolean; onSelect: (id: string) => void;
 }) {
-  const [mode, setMode] = useState<"aggregated" | "expanded">("aggregated");
+  const [mode, setMode] = useState<"aggregated" | "expanded">("expanded");
   const [zoom, setZoom] = useState(1);
   const box = useRef<HTMLDivElement>(null);
+  useDragToMove(box);
+  // The wheel zooms around the cursor, like a map; drag to move.
+  const anchor = useMemo(() => (event: WheelEvent, el: HTMLElement, from: number, to: number) => {
+    const rect = el.getBoundingClientRect();
+    const x = event.clientX - rect.left, y = event.clientY - rect.top;
+    return { left: Math.max(0, ((el.scrollLeft + x) / from) * to - x), top: Math.max(0, ((el.scrollTop + y) / from) * to - y) };
+  }, []);
+  useWheelZoom(box, zoom, setZoom, GRAPH_LIMITS, graphZooms, anchor);
   const tree = useMemo(() => (mode === "aggregated" ? aggregatedTree : expandedTree)(roots, spans, isFailed), [mode, roots, spans, isFailed]);
   const layout = useMemo(() => {
     // Leaves take consecutive rows; a parent sits level with the middle of its children. Iterative post-order.
@@ -251,6 +347,7 @@ export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
   const fit = () => {
     const width = box.current?.clientWidth ?? layout.width;
     setZoom(Math.max(0.55, Math.min(1, (width - 8) / layout.width)));
+    box.current?.scrollTo({ left: 0, top: 0 });
   };
   useEffect(fit, [layout.width]);
 
@@ -258,14 +355,15 @@ export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#1F242C] px-2 py-1">
         <div role="group" aria-label="Graph mode" className="flex rounded-md border border-[#262C35] p-0.5 text-xs">
-          {(["aggregated", "expanded"] as const).map((item) => (
-            <button key={item} type="button" aria-pressed={mode === item} onClick={() => setMode(item)}
-              className={`rounded px-2 py-0.5 capitalize ${mode === item ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>{item}</button>
+          {([["expanded", "All steps", "Every step as its own card"], ["aggregated", "Grouped", "Repeated steps with the same name under the same parent are merged into one card (×N)"]] as const).map(([item, label, hint]) => (
+            <button key={item} type="button" aria-pressed={mode === item} onClick={() => setMode(item)} title={hint}
+              className={`rounded px-2 py-0.5 ${mode === item ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>{label}</button>
           ))}
         </div>
-        <ZoomControls zoom={zoom} setZoom={setZoom} min={0.4} max={2} fit={fit} />
+        <span className="hidden text-[11px] text-[#6B7380] sm:inline">Scroll to zoom · drag to move</span>
+        <ZoomControls zoom={zoom} setZoom={setZoom} min={GRAPH_LIMITS.min} max={GRAPH_LIMITS.max} fit={fit} />
       </div>
-      <div ref={box} className="min-h-0 flex-1 overflow-auto">
+      <div ref={box} className="min-h-0 flex-1 cursor-grab select-none overflow-auto">
         <svg role="group" aria-label="Step graph" width={layout.width * zoom} height={layout.height * zoom} viewBox={`0 0 ${layout.width} ${layout.height}`} className="block">
           {layout.edges.map(([from, to]) => {
             const x1 = layout.xOf.get(from)! + NODE_W, y1 = layout.yOf.get(from)! + NODE_H / 2;
