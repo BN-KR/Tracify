@@ -122,7 +122,7 @@ function TraceCanvasViewport({
   };
 
   return (
-    <div className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-[300px] w-full"} ${className}`} onKeyDown={handleKeyDown}>
+    <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-[300px] w-full"} ${className}`} onKeyDown={handleKeyDown}>
       <div className="absolute inset-0 overflow-hidden border border-[#1F242C] bg-[#0B0D10]">
         <ReactFlow
           nodes={nodes}
