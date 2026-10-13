@@ -173,7 +173,7 @@ function TraceCanvasViewport({
           proOptions={{ hideAttribution: true }}
           className="tracing-flow"
         />
-        <MiniMap pannable zoomable position="bottom-left" ariaLabel={`${label} minimap`} className="!bottom-3 !left-3 !m-0 !border !border-[#262C35] !bg-[#111418]" maskColor="rgba(11,13,16,0.78)" nodeColor="#6B7380" />
+        <MiniMap pannable zoomable position="bottom-left" style={{ width: 196, height: 128 }} ariaLabel={`${label} minimap`} className="!bottom-3 !left-3 !m-0 !border !border-[#262C35] !bg-[#111418]" maskColor="rgba(11,13,16,0.78)" nodeColor="#6B7380" />
         {children}
         <div role="group" aria-label="Canvas controls" className="absolute bottom-3 right-3 z-10 flex items-center divide-x divide-[#262C35] border border-[#262C35] bg-[#111418] shadow-lg">
           <button type="button" aria-label="Zoom out" className={controlClass} onClick={() => zoomBy(1 / 1.25)}>−</button>
