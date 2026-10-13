@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { buildSpanTree, type SpanTreeNode } from "@/lib/tracify-ports/treeBuilding";
-import { chatMessages, compactNumber, formatCost, formatDuration, formatTime, parsePayload } from "./format";
+import { chatMessages, compactNumber, downloadFile, formatCost, formatDuration, formatTime, parsePayload } from "./format";
 
 type Span = {
   spanId: string; parentSpanId: string; spanType: string; createdAt: string; latencyMs: number; costUsd: number;
@@ -12,6 +12,23 @@ type Span = {
   stackTrace?: string; timedOut?: boolean;
 };
 type Summary = { traceName: string; durationMs: number; totalCostUsd: number; inputTokens: number; outputTokens: number; endUserId: string; sessionId: string; tags: string[]; errorCount: number } | undefined;
+
+const STEP_FILTERS = [
+  { id: "all", label: "All" }, { id: "llm", label: "LLM" }, { id: "tool", label: "Tools" }, { id: "error", label: "Errors" },
+] as const;
+type StepFilter = (typeof STEP_FILTERS)[number]["id"];
+
+function isFailed(span: Span) {
+  return span.spanType === "error" || Boolean(span.errorType);
+}
+
+function matchesFilter(span: Span, filter: StepFilter) {
+  const type = (span.spanType || "").toLowerCase();
+  if (filter === "error") return isFailed(span);
+  if (filter === "llm") return type === "llm" || type === "generation";
+  if (filter === "tool") return type === "tool" || type === "retrieval";
+  return true;
+}
 
 const TYPE_STYLE: Record<string, string> = {
   llm: "bg-[#F4D44D] text-[#0B0D10]", generation: "bg-[#F4D44D] text-[#0B0D10]",
@@ -33,6 +50,9 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [copied, setCopied] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [stepFilter, setStepFilter] = useState<StepFilter>("all");
+  const [stepSearch, setStepSearch] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     let live = true;
@@ -52,27 +72,40 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
     return () => { live = false; };
   }, [projectId, runId, attempt]);
 
-  // Live updates: a running trace gets new spans after it is opened. The spans route serves a stale cache for
-  // running traces unless refresh=manual is sent, so poll with it and only re-render when something changed.
+  // Live updates: a trace can keep gaining spans after it is opened. Poll with live=1 (the server skips its
+  // Convex auth and cache work after a recent read) and only re-render when something changed. The interval
+  // starts at 3s, doubles up to 30s while nothing changes or a poll fails, and drops back when spans arrive.
   useEffect(() => {
-    const url = `/api/projects/${encodeURIComponent(projectId)}/runs/${encodeURIComponent(runId)}/spans?refresh=manual`;
+    const url = `/api/projects/${encodeURIComponent(projectId)}/runs/${encodeURIComponent(runId)}/spans?refresh=manual&live=1`;
     const signature = (list: Span[]) => `${list.length}:${list.reduce((sum, span) => sum + Number(span.latencyMs ?? 0), 0)}`;
-    let busy = false;
-    const timer = setInterval(() => {
-      if (document.hidden || busy) return;
-      busy = true;
-      fetch(url, { cache: "no-store" })
-        .then((response) => (response.ok ? (response.json() as Promise<{ spans?: Span[] }>) : null))
-        .then((body) => {
-          if (!body?.spans?.length) return;
-          const next = body.spans;
-          setSpans((current) => (current && signature(current) === signature(next) ? current : next));
-          setError(null);
-        })
-        .catch(() => undefined)
-        .finally(() => { busy = false; });
-    }, 3000);
-    return () => clearInterval(timer);
+    let delay = 3000;
+    let lastSignature: string | null = null;
+    let timer: ReturnType<typeof setTimeout>;
+    let stopped = false;
+    const tick = async () => {
+      if (!document.hidden) {
+        try {
+          const response = await fetch(url, { cache: "no-store" });
+          const body = response.ok ? ((await response.json()) as { spans?: Span[] }) : null;
+          const next = body?.spans;
+          if (next?.length) {
+            const nextSignature = signature(next);
+            const changed = nextSignature !== lastSignature;
+            lastSignature = nextSignature;
+            if (changed) setSpans(next);
+            setError(null);
+            delay = changed ? 3000 : Math.min(delay * 2, 30_000);
+          } else {
+            delay = Math.min(delay * 2, 30_000);
+          }
+        } catch {
+          delay = Math.min(delay * 2, 30_000);
+        }
+      }
+      if (!stopped) timer = setTimeout(tick, delay);
+    };
+    timer = setTimeout(tick, delay);
+    return () => { stopped = true; clearTimeout(timer); };
   }, [projectId, runId]);
 
   const bySpanId = useMemo(() => new Map((spans ?? []).map((span) => [span.spanId, span])), [spans]);
@@ -93,6 +126,29 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
     return out;
   }, [tree, collapsed]);
 
+  const filtering = stepFilter !== "all" || stepSearch.trim() !== "";
+  const visibleRows = useMemo(() => {
+    if (!filtering) return rows;
+    const needle = stepSearch.trim().toLowerCase();
+    const all: SpanTreeNode[] = [];
+    const stack = [...tree.roots].reverse();
+    while (stack.length) {
+      const node = stack.pop()!;
+      all.push(node);
+      for (let i = node.children.length - 1; i >= 0; i--) stack.push(node.children[i]!);
+    }
+    return all.filter((node) => {
+      const span = bySpanId.get(node.id);
+      if (!span || !matchesFilter(span, stepFilter)) return false;
+      if (!needle) return true;
+      return [node.name, span.spanType, span.toolName, span.modelId, span.input, span.output, span.errorMessage]
+        .some((value) => typeof value === "string" && value.toLowerCase().includes(needle));
+    });
+  }, [filtering, rows, tree, bySpanId, stepFilter, stepSearch]);
+  const counts = useMemo(() => Object.fromEntries(STEP_FILTERS.map((filter) => [filter.id, (spans ?? []).filter((span) => matchesFilter(span, filter.id)).length])) as Record<StepFilter, number>, [spans]);
+  // Earliest failing step by start time.
+  const firstErrorId = useMemo(() => (spans ?? []).filter(isFailed).sort((x, y) => toIso(x.createdAt).localeCompare(toIso(y.createdAt)))[0]?.spanId ?? null, [spans]);
+
   const totalMs = Math.max(1, ...tree.roots.map((root) => root.subtreeWallClockDurationMs));
   const selected = selectedId ? bySpanId.get(selectedId) : undefined;
   const name = summary?.traceName || spans?.find((span) => span.traceName)?.traceName || "Trace";
@@ -102,6 +158,33 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
   const firstWithSession = spans?.find((span) => span.sessionId);
   const user = summary?.endUserId || firstWithUser?.endUserId || "";
   const session = summary?.sessionId || firstWithSession?.sessionId || "";
+
+  function setAllCollapsed(collapse: boolean) {
+    setCollapsed(collapse ? new Set((spans ?? []).filter((span) => (spans ?? []).some((child) => child.parentSpanId === span.spanId)).map((span) => span.spanId)) : new Set());
+  }
+
+  function jumpToError() {
+    const target = firstErrorId;
+    if (!target) return;
+    setCollapsed(new Set());
+    setStepFilter("all");
+    setStepSearch("");
+    setSelectedId(target);
+    requestAnimationFrame(() => document.getElementById(`step-${target}`)?.scrollIntoView({ block: "center" }));
+  }
+
+  function copyLink() {
+    const url = new URL(window.location.href);
+    url.searchParams.set("trace", runId);
+    void navigator.clipboard?.writeText(url.toString());
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 1200);
+  }
+
+  function downloadJson() {
+    const body = JSON.stringify({ runId, summary: summary ?? null, spans: (spans ?? []).map((span) => ({ ...span, input: parsePayload(span.input), output: parsePayload(span.output), metadata: parsePayload(span.metadata) })) }, null, 2);
+    downloadFile(`trace-${runId.replace(/[^\w.-]+/g, "_").slice(0, 80)}.json`, body, "application/json");
+  }
 
   function toggle(id: string) {
     setCollapsed((current) => {
@@ -115,6 +198,8 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
     <aside aria-label="Trace detail" className="fixed inset-0 z-40 flex min-w-0 flex-col border-l border-[#1F242C] bg-[#0E1115] shadow-[-24px_0_48px_rgba(0,0,0,0.45)] lg:left-auto lg:w-[min(820px,60vw)]">
       <div className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-3">
         <h2 className="min-w-0 flex-1 truncate text-base font-semibold">{name}</h2>
+        <button type="button" onClick={copyLink} className="h-8 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">{linkCopied ? "Link copied" : "Copy link"}</button>
+        <button type="button" onClick={downloadJson} disabled={!spans?.length} className="h-8 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40">JSON</button>
         <button type="button" aria-label="Previous trace" onClick={() => onStep(-1)} className="h-8 w-8 rounded-md border border-[#262C35] hover:border-[#4A5260]">↑</button>
         <button type="button" aria-label="Next trace" onClick={() => onStep(1)} className="h-8 w-8 rounded-md border border-[#262C35] hover:border-[#4A5260]">↓</button>
         <button type="button" aria-label="Close trace" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md border border-[#262C35] hover:border-[#4A5260]">
@@ -123,11 +208,13 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[#1F242C] px-4 py-3 font-mono text-xs text-[#C9CED6]">
         <button type="button" className="text-[#8B93A1] hover:text-white" onClick={() => { void navigator.clipboard?.writeText(runId); setCopied(true); setTimeout(() => setCopied(false), 1200); }}>
-          {copied ? "copied ✓" : `${runId.slice(0, 16)}… copy`}
+          {copied ? "copied" : `${runId.slice(0, 16)}… copy`}
         </button>
         <span>{formatDuration(summary?.durationMs ?? totalMs)}</span>
         <span>{formatCost(cost)}</span>
         <span>{compactNumber(tokens)} tokens</span>
+        {spans ? <span>{spans.length} step{spans.length === 1 ? "" : "s"}</span> : null}
+        {counts.error ? <button type="button" onClick={jumpToError} className="rounded bg-[#3A1C1F] px-1.5 py-0.5 text-[#FF8A8A] hover:bg-[#4A2226]">{counts.error} error{counts.error === 1 ? "" : "s"} · jump</button> : null}
         {user ? <button type="button" className="text-[#8AB4FF] hover:underline" onClick={() => onFilter("endUserId", user)}>user: {user}</button> : null}
         {session ? <button type="button" className="text-[#8AB4FF] hover:underline" onClick={() => onFilter("sessionId", session)}>session: {session}</button> : null}
         {(summary?.tags ?? []).map((tag) => <button key={tag} type="button" className="rounded bg-[#1A1F27] px-1.5 py-0.5 hover:bg-[#232A34]" onClick={() => onFilter("tag", tag)}>{tag}</button>)}
@@ -143,16 +230,34 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
       ) : spans.length === 0 ? (
         <p className="p-4 text-sm text-[#8B93A1]">This trace has no recorded steps yet.</p>
       ) : (
+        <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
+          <div role="group" aria-label="Step type" className="flex rounded-md border border-[#262C35] p-0.5 text-xs">
+            {STEP_FILTERS.map((filter) => (
+              <button key={filter.id} type="button" aria-pressed={stepFilter === filter.id} onClick={() => setStepFilter(filter.id)}
+                disabled={filter.id !== "all" && !counts[filter.id]}
+                className={`rounded px-2 py-1 disabled:opacity-40 ${stepFilter === filter.id ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>
+                {filter.label} <span className="font-mono text-[10px] text-[#6B7380]">{counts[filter.id]}</span>
+              </button>
+            ))}
+          </div>
+          <label htmlFor="step-search" className="sr-only">Search steps</label>
+          <input id="step-search" value={stepSearch} onChange={(event) => setStepSearch(event.target.value)} placeholder="Search steps"
+            className="h-8 min-w-[120px] flex-1 rounded-md border border-[#262C35] bg-[#111418] px-2 text-xs outline-none placeholder:text-[#6B7380] focus:border-[#4A5260]" />
+          <button type="button" onClick={() => setAllCollapsed(false)} disabled={filtering} className="h-8 rounded-md px-2 text-xs text-[#8B93A1] hover:text-white disabled:opacity-40">Expand all</button>
+          <button type="button" onClick={() => setAllCollapsed(true)} disabled={filtering} className="h-8 rounded-md px-2 text-xs text-[#8B93A1] hover:text-white disabled:opacity-40">Collapse all</button>
+        </div>
         <div className="flex min-h-0 flex-1 flex-wrap">
           <ol aria-label="Steps" className="max-h-[70vh] w-full overflow-auto border-b border-[#1F242C] py-2 md:max-h-none md:w-[44%] md:border-b-0 md:border-r">
-            {rows.map((node) => {
+            {visibleRows.length === 0 ? <li className="px-4 py-3 text-sm text-[#8B93A1]">No steps match.</li> : null}
+            {visibleRows.map((node) => {
               const span = bySpanId.get(node.id)!;
-              const failed = span.spanType === "error" || Boolean(span.errorType);
+              const failed = isFailed(span);
               const type = (span.spanType || "span").toLowerCase();
               return (
-                <li key={node.id}>
-                  <div className={`flex items-center gap-1 pr-2 ${selectedId === node.id ? "bg-[#161B22] shadow-[inset_3px_0_0_#F4D44D]" : "hover:bg-[#12161C]"}`} style={{ paddingLeft: 8 + node.depth * 16 }}>
-                    {node.children.length ? (
+                <li key={node.id} id={`step-${node.id}`}>
+                  <div className={`flex items-center gap-1 pr-2 ${selectedId === node.id ? "bg-[#161B22] shadow-[inset_3px_0_0_#F4D44D]" : "hover:bg-[#12161C]"}`} style={{ paddingLeft: 8 + (filtering ? 0 : node.depth * 16) }}>
+                    {node.children.length && !filtering ? (
                       <button type="button" aria-label={collapsed.has(node.id) ? "Expand" : "Collapse"} aria-expanded={!collapsed.has(node.id)} onClick={() => toggle(node.id)} className="h-7 w-5 text-[#8B93A1] hover:text-white">{collapsed.has(node.id) ? "▸" : "▾"}</button>
                     ) : <span className="w-5" />}
                     <button type="button" onClick={() => setSelectedId(node.id)} className="flex min-w-0 flex-1 flex-col py-1.5 text-left">
@@ -173,6 +278,7 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
             })}
           </ol>
           <div className="min-w-0 flex-1 overflow-auto p-4">{selected ? <StepDetail span={selected} /> : null}</div>
+        </div>
         </div>
       )}
     </aside>
@@ -223,12 +329,16 @@ function StepDetail({ span }: { span: Span }) {
 }
 
 function Payload({ title, value, raw }: { title: string; value?: string; raw: boolean }) {
+  const [copied, setCopied] = useState(false);
   const parsed = parsePayload(value);
   const messages = raw ? null : chatMessages(parsed);
   const empty = parsed === "" || parsed === null || (typeof parsed === "object" && parsed !== null && !Object.keys(parsed).length);
   return (
     <section>
-      <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-[#8B93A1]">{title}</h4>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h4 className="text-xs font-medium uppercase tracking-wide text-[#8B93A1]">{title}</h4>
+        {!empty ? <button type="button" onClick={() => { void navigator.clipboard?.writeText(typeof parsed === "string" ? parsed : JSON.stringify(parsed, null, 2)); setCopied(true); setTimeout(() => setCopied(false), 1200); }} className="text-xs text-[#8B93A1] hover:text-white" aria-label={`Copy ${title.toLowerCase()}`}>{copied ? "Copied" : "Copy"}</button> : null}
+      </div>
       {empty ? <p className="text-sm text-[#4A5260]">Nothing recorded</p> : messages ? (
         <div className="flex flex-col gap-2">
           {messages.map((message, index) => (

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TracePanel } from "./trace-panel";
-import { compactNumber, formatCost, formatDuration, formatTime, previewText } from "./format";
+import { compactNumber, downloadFile, formatCost, formatDuration, formatTime, parseTime, previewText, relativeTime, toCsv } from "./format";
 
 type TraceRow = {
   runId: string; traceName: string; startedAt: string; durationMs: number; spanCount: number; errorCount: number;
@@ -10,9 +10,10 @@ type TraceRow = {
   sessionId: string; environment: string; release: string; tags: string[]; inputPreview: string; outputPreview: string;
 };
 type Bucket = { bucket: string; traces: number; errors: number };
+type Stats = { traces: number; errors: number; p50DurationMs: number; p95DurationMs: number; totalCostUsd: number; inputTokens: number; outputTokens: number };
 type ListResponse = {
   rows: TraceRow[]; total: number; page: number; pageSize: number;
-  histogram: { bucketSeconds: number; buckets: Bucket[] }; options: Record<string, string[]> | null;
+  histogram: { bucketSeconds: number; buckets: Bucket[] }; stats?: Stats; options: Record<string, string[]> | null;
   range: { from: number; to: number }; error?: string;
 };
 
@@ -37,6 +38,14 @@ const COLUMNS = [
 type ColumnId = (typeof COLUMNS)[number]["id"];
 const DEFAULT_COLUMNS: ColumnId[] = ["startedAt", "status", "name", "input", "output", "latency", "cost", "tokens", "model"];
 const COLUMN_STORAGE = "tracify.tracing.columns";
+const LIVE_STORAGE = "tracify.tracing.live";
+
+function currentUrlQuery(): TraceQuery {
+  if (typeof window === "undefined") return {};
+  const query: TraceQuery = {};
+  for (const [key, value] of new URLSearchParams(window.location.search)) if (value) query[key] = value.slice(0, 200);
+  return query;
+}
 
 function readColumns(): ColumnId[] {
   try {
@@ -47,7 +56,9 @@ function readColumns(): ColumnId[] {
 }
 
 export function TracingExplorer({ projectId, initialQuery }: { projectId: string; initialQuery: TraceQuery }) {
-  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "24h", ...initialQuery }));
+  // Next.js syncs our history.replaceState calls into its router and can remount this page with the search
+  // params it was first rendered with. Reading the live URL here keeps the open trace and filters across that.
+  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "24h", ...initialQuery, ...currentUrlQuery() }));
   const [data, setData] = useState<ListResponse | null>(null);
   const [options, setOptions] = useState<Record<string, string[]>>({});
   const [settledKey, setSettledKey] = useState<string | null>(null);
@@ -57,6 +68,10 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   const [columnsOpen, setColumnsOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [now, setNow] = useState(() => Date.now());
+  const [live, setLive] = useState(true);
+  const [clock, setClock] = useState(() => Date.now());
+  const [fresh, setFresh] = useState<Set<string>>(() => new Set());
+  const searchRef = useRef<HTMLInputElement>(null);
   const selected = query.trace ?? null;
   const requestId = useRef(0);
 
@@ -66,6 +81,11 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   // Phones start with the filter sidebar collapsed so the traces are visible first.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (window.matchMedia("(max-width: 767px)").matches) setFiltersOpen(false); }, []);
+  // The live/paused choice is remembered per browser.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { try { if (window.localStorage.getItem(LIVE_STORAGE) === "paused") setLive(false); } catch {} }, []);
+  // Relative start times ("2m ago") stay correct between data refreshes.
+  useEffect(() => { const timer = setInterval(() => setClock(Date.now()), 10_000); return () => clearInterval(timer); }, []);
 
   const update = useCallback((patch: TraceQuery, resetPage = true) => {
     setQuery((current) => {
@@ -123,26 +143,56 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   }, [apiParams, optionsKey, projectId, requestKey]);
 
   // Live updates: for relative ranges, quietly refetch the list with the window moved forward so new traces
-  // appear without pressing Refresh. Skipped for fixed from/to windows, hidden tabs, and while a load is pending.
+  // appear without pressing Refresh. Skipped while paused, for fixed from/to windows, hidden tabs, and while a
+  // load is pending. A successful poll clears an earlier error; failures back off from 5s up to 60s.
   useEffect(() => {
-    if (query.from || query.to) return;
+    if (!live || query.from || query.to) return;
     const rangeMs = RANGES.find((item) => item.id === query.range)?.ms ?? 86_400_000;
-    const timer = setInterval(() => {
-      if (document.hidden || settledKey !== requestKey) return;
-      const issued = requestId.current;
-      const params = new URLSearchParams(apiParams);
-      const to = Date.now();
-      params.set("to", String(to));
-      params.set("from", String(to - rangeMs));
-      fetch(`/api/projects/${encodeURIComponent(projectId)}/traces?${params}`, { cache: "no-store" })
-        .then(async (response) => (response.ok ? ((await response.json()) as ListResponse) : null))
-        .then((body) => { if (body && issued === requestId.current) setData((current) => ({ ...body, options: current?.options ?? body.options })); })
-        .catch(() => undefined);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [apiParams, projectId, query.from, query.range, query.to, requestKey, settledKey]);
+    let delay = 5000;
+    let timer: ReturnType<typeof setTimeout>;
+    let stopped = false;
+    const tick = async () => {
+      if (!document.hidden && settledKey === requestKey) {
+        const issued = requestId.current;
+        const params = new URLSearchParams(apiParams);
+        const to = Date.now();
+        params.set("to", String(to));
+        params.set("from", String(to - rangeMs));
+        try {
+          const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/traces?${params}`, { cache: "no-store" });
+          const body = response.ok ? ((await response.json()) as ListResponse) : null;
+          if (!body) throw new Error(`poll ${response.status}`);
+          delay = 5000;
+          if (issued === requestId.current) {
+            setError(null);
+            setData((current) => {
+              // Only rows that arrive through a live poll are highlighted, never a whole new filter result.
+              const known = new Set((current?.rows ?? []).map((row) => row.runId));
+              const added = current ? body.rows.map((row) => row.runId).filter((id) => !known.has(id)) : [];
+              if (added.length) setFresh(new Set(added));
+              return { ...body, options: current?.options ?? body.options };
+            });
+          }
+        } catch {
+          delay = Math.min(delay * 2, 60_000);
+        }
+      }
+      if (!stopped) timer = setTimeout(tick, delay);
+    };
+    timer = setTimeout(tick, delay);
+    return () => { stopped = true; clearTimeout(timer); };
+  }, [apiParams, live, projectId, query.from, query.range, query.to, requestKey, settledKey]);
 
   const rows = useMemo(() => data?.rows ?? [], [data]);
+  const stats = data?.stats;
+
+  useEffect(() => {
+    if (!fresh.size) return;
+    const timer = setTimeout(() => setFresh(new Set()), 2500);
+    return () => clearTimeout(timer);
+  }, [fresh]);
+  const isLive = live && !query.from && !query.to;
+
   const total = data?.total ?? 0;
   const page = Number(query.page ?? 0);
   const pageSize = Number(query.pageSize ?? 50);
@@ -159,6 +209,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     function onKey(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null;
       if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      if (event.key === "/") { event.preventDefault(); searchRef.current?.focus(); return; }
       if (event.key === "Escape" && selected) update({ trace: "" }, false);
       if (event.key === "ArrowDown" || event.key === "j") { event.preventDefault(); selectIndex(1); }
       if (event.key === "ArrowUp" || event.key === "k") { event.preventDefault(); selectIndex(-1); }
@@ -171,6 +222,23 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     const next = columns.includes(id) ? columns.filter((column) => column !== id) : COLUMNS.map((c) => c.id).filter((c) => c === id || columns.includes(c));
     setColumns(next);
     try { window.localStorage.setItem(COLUMN_STORAGE, JSON.stringify(next)); } catch {}
+  }
+
+  function toggleLive() {
+    const next = !live;
+    setLive(next);
+    if (next) setNow(Date.now());
+    try { window.localStorage.setItem(LIVE_STORAGE, next ? "live" : "paused"); } catch {}
+  }
+
+  function exportCsv() {
+    const header = ["trace_id", "start_time_utc", "trace_name", "status", "errors", "latency_ms", "cost_usd", "input_tokens", "output_tokens", "model", "user", "session", "environment", "release", "tags", "input", "output"];
+    const body = rows.map((row) => [
+      row.runId, new Date(parseTime(row.startedAt)).toISOString(), row.traceName, Number(row.errorCount) > 0 ? "error" : "ok", Number(row.errorCount),
+      Number(row.durationMs), Number(row.totalCostUsd), Number(row.inputTokens), Number(row.outputTokens), row.modelId, row.endUserId,
+      row.sessionId, row.environment, row.release, (row.tags ?? []).join(" "), previewText(row.inputPreview), previewText(row.outputPreview),
+    ]);
+    downloadFile(`traces-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.csv`, toCsv(header, body), "text/csv;charset=utf-8");
   }
 
   function sortBy(sort: string) {
@@ -196,11 +264,11 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
           <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 text-[#8B93A1]" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
           <label htmlFor="trace-search" className="sr-only">Search traces</label>
           <input
-            id="trace-search" value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)}
-            placeholder="Search name, id, input or output — press Enter"
+            id="trace-search" ref={searchRef} value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)}
+            placeholder="Search name, id, input or output"
             className="h-10 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#6B7380]"
           />
-          {query.q ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => { setSearchDraft(""); update({ q: "" }); }}>Clear</button> : null}
+          {query.q ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => { setSearchDraft(""); update({ q: "" }); }}>Clear</button> : <kbd className="hidden rounded border border-[#262C35] px-1.5 font-mono text-[10px] text-[#6B7380] sm:block" aria-hidden="true">/</kbd>}
         </form>
         <div role="group" aria-label="Time range" className="flex rounded-lg border border-[#262C35] bg-[#111418] p-1">
           {RANGES.map((range) => {
@@ -214,6 +282,11 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
           })}
           {query.from ? <button type="button" onClick={() => update({ from: "", to: "" })} className="h-8 rounded-md bg-[#F4D44D] px-3 font-mono text-xs text-[#0B0D10]">Zoomed · reset</button> : null}
         </div>
+        <button type="button" aria-pressed={isLive} onClick={toggleLive} disabled={Boolean(query.from || query.to)}
+          title={query.from || query.to ? "Live updates are off while zoomed to a fixed window" : isLive ? "New traces appear automatically. Click to pause." : "Paused. Click to resume live updates."}
+          className="flex h-10 items-center gap-2 rounded-lg border border-[#262C35] px-3 text-sm text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-50">
+          <span aria-hidden="true" className={`size-2 rounded-full ${isLive ? "animate-pulse bg-[#5BE3A0]" : "bg-[#6B7380]"}`} />{isLive ? "Live" : "Paused"}
+        </button>
         <button type="button" onClick={() => setNow(Date.now())} className="h-10 rounded-lg border border-[#262C35] px-3 text-sm text-[#C9CED6] hover:border-[#4A5260]">Refresh</button>
       </header>
 
@@ -242,7 +315,8 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
               </button>
             ))}
             {activeFilters.length ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => update(Object.fromEntries(activeFilters.map((f) => [f.key, ""])))}>Clear all</button> : null}
-            <div className="relative ml-auto">
+            <button type="button" onClick={exportCsv} disabled={!rows.length} className="ml-auto h-8 rounded-md border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
+            <div className="relative">
               <button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)} className="h-8 rounded-md border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:border-[#4A5260]">Columns {columns.length}/{COLUMNS.length}</button>
               {columnsOpen ? (
                 <div className="absolute right-0 z-20 mt-2 w-52 rounded-lg border border-[#262C35] bg-[#111418] p-2 shadow-2xl">
@@ -256,6 +330,8 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
               ) : null}
             </div>
           </div>
+
+          <StatsStrip stats={stats} loading={!data} onErrors={() => update({ status: "error" })} />
 
           <CountChart histogram={data?.histogram} onZoom={(from, to) => update({ from: String(from), to: String(to) })} />
 
@@ -290,9 +366,9 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                 <tbody className={loading ? "opacity-60" : ""}>
                   {rows.map((row) => (
                     <tr key={row.runId} aria-selected={selected === row.runId}
-                      className={`cursor-pointer ${selected === row.runId ? "bg-[#161B22] shadow-[inset_3px_0_0_#F4D44D]" : "hover:bg-[#12161C]"}`}
+                      className={`cursor-pointer transition-colors duration-700 ${selected === row.runId ? "bg-[#161B22] shadow-[inset_3px_0_0_#F4D44D]" : fresh.has(row.runId) ? "bg-[#1F2A1F]" : "hover:bg-[#12161C]"}`}
                       onClick={() => update({ trace: row.runId }, false)}>
-                      {columns.map((id) => <td key={id} className="max-w-[320px] truncate border-b border-[#171B21] px-3 py-2.5 align-middle">{cell(id, row, update)}</td>)}
+                      {columns.map((id) => <td key={id} className="max-w-[320px] truncate border-b border-[#171B21] px-3 py-2.5 align-middle">{cell(id, row, update, clock)}</td>)}
                     </tr>
                   ))}
                 </tbody>
@@ -329,12 +405,12 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   );
 }
 
-function cell(id: ColumnId, row: TraceRow, update: (patch: TraceQuery, resetPage?: boolean) => void) {
+function cell(id: ColumnId, row: TraceRow, update: (patch: TraceQuery, resetPage?: boolean) => void, clock: number) {
   const link = (key: string, value: string) => value
     ? <button type="button" className="truncate text-[#8AB4FF] hover:underline" onClick={(event) => { event.stopPropagation(); update({ [key]: value }); }}>{value}</button>
     : <span className="text-[#4A5260]">—</span>;
   switch (id) {
-    case "startedAt": return <span className="font-mono text-xs text-[#C9CED6]">{formatTime(row.startedAt)}</span>;
+    case "startedAt": return <time dateTime={new Date(parseTime(row.startedAt)).toISOString()} title={formatTime(row.startedAt)} className="font-mono text-xs text-[#C9CED6]">{relativeTime(row.startedAt, clock)}</time>;
     case "status": return Number(row.errorCount) > 0
       ? <span className="rounded bg-[#3A1C1F] px-2 py-0.5 font-mono text-xs text-[#FF8A8A]">{Number(row.errorCount)} error{Number(row.errorCount) === 1 ? "" : "s"}</span>
       : <span className="rounded bg-[#15301F] px-2 py-0.5 font-mono text-xs text-[#5BE3A0]">ok</span>;
@@ -401,5 +477,35 @@ function CountChart({ histogram, onZoom }: { histogram?: { bucketSeconds: number
         })}
       </div>
     </div>
+  );
+}
+
+function StatsStrip({ stats, loading, onErrors }: { stats?: Stats; loading: boolean; onErrors: () => void }) {
+  const errorRate = stats?.traces ? stats.errors / stats.traces : 0;
+  const tiles: Array<{ label: string; value: string; hint?: string; tone?: string; onClick?: () => void }> = [
+    { label: "Traces", value: stats ? compactNumber(stats.traces) : "—" },
+    { label: "Error rate", value: stats ? `${(errorRate * 100).toFixed(errorRate && errorRate < 0.1 ? 1 : 0)}%` : "—", hint: stats ? `${compactNumber(stats.errors)} with errors` : undefined, tone: errorRate > 0 ? "text-[#FF8A8A]" : undefined, onClick: stats?.errors ? onErrors : undefined },
+    { label: "Latency p50", value: stats ? formatDuration(stats.p50DurationMs) : "—" },
+    { label: "Latency p95", value: stats ? formatDuration(stats.p95DurationMs) : "—" },
+    { label: "Total cost", value: stats ? formatCost(stats.totalCostUsd) : "—", hint: stats?.traces ? `${formatCost(stats.totalCostUsd / stats.traces)} per trace` : undefined },
+    { label: "Tokens", value: stats ? compactNumber(stats.inputTokens + stats.outputTokens) : "—", hint: stats ? `${compactNumber(stats.inputTokens)} in · ${compactNumber(stats.outputTokens)} out` : undefined },
+  ];
+  return (
+    <section aria-label="Summary for this range" aria-busy={loading} className="mx-5 mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[#1F242C] bg-[#1F242C] sm:grid-cols-3 xl:grid-cols-6">
+      {tiles.map((tile) => {
+        const body = (
+          <>
+            <span className="block text-xs text-[#8B93A1]">{tile.label}</span>
+            <span className={`mt-1 block font-mono text-lg leading-6 ${tile.tone ?? "text-[#E6E9EE]"}`}>{tile.value}</span>
+            {tile.hint ? <span className="mt-0.5 block truncate font-mono text-[11px] text-[#6B7380]">{tile.hint}</span> : null}
+          </>
+        );
+        return tile.onClick ? (
+          <button key={tile.label} type="button" onClick={tile.onClick} title="Show only traces with errors" className="min-w-0 bg-[#0E1115] px-4 py-3 text-left hover:bg-[#12161C]">{body}</button>
+        ) : (
+          <div key={tile.label} className="min-w-0 bg-[#0E1115] px-4 py-3">{body}</div>
+        );
+      })}
+    </section>
   );
 }
