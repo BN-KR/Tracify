@@ -34,6 +34,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
   const [selectedEdge, setSelectedEdge] = useState<MapEdge | null>(null);
   const [search, setSearch] = useState("");
   const [positionedNodes, setPositionedNodes] = useState<CanvasNode[]>([]);
+  const [mapZoom, setMapZoom] = useState(1);
   const previousPositions = useRef(new Map<string, XYPosition>());
 
   useEffect(() => {
@@ -80,6 +81,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
   const selectedNode = mapSelected?.startsWith("node:") ? mapSelected.slice(5) : null;
   const visibleEdges = useMemo(() => (data?.edges ?? []).slice(0, Math.max(1, Math.min(100, edgeLimit))), [data?.edges, edgeLimit]);
   const laidOutEdges = useMemo(() => visibleEdges.map((edge, index) => ({ ...edge, id: `${edge.source}→${edge.target}`, index })), [visibleEdges]);
+  const displayedEdges = useMemo(() => laidOutEdges.slice(0, mapZoom < 0.65 ? Math.min(12, edgeLimit) : mapZoom < 0.82 ? Math.min(18, edgeLimit) : edgeLimit), [laidOutEdges, mapZoom, edgeLimit]);
 
   useEffect(() => {
     if (!data) return;
@@ -101,17 +103,17 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
   }, [data, laidOutEdges]);
 
   const nodes: CanvasNode[] = useMemo(() => positionedNodes.map((node) => {
-    const related = laidOutEdges.some((edge) => (edge.source === hover && edge.target === node.id) || (edge.target === hover && edge.source === node.id));
+    const related = displayedEdges.some((edge) => (edge.source === hover && edge.target === node.id) || (edge.target === hover && edge.source === node.id));
     const activeNode = hover === node.id || related || selectedNode === node.id;
     return { ...node, selected: selectedNode === node.id, style: { ...node.style, opacity: (hover || selectedNode) && !activeNode ? 0.28 : 1 } };
-  }), [positionedNodes, laidOutEdges, hover, selectedNode]);
+  }), [positionedNodes, displayedEdges, hover, selectedNode]);
   const bounds = useMemo(() => {
     const xs = positionedNodes.map((node) => node.position.x);
     const ys = positionedNodes.map((node) => node.position.y);
     return { maxX: Math.max(0, ...xs) + 190, minY: Math.min(0, ...ys) };
   }, [positionedNodes]);
 
-  const edges: CanvasEdge[] = useMemo(() => laidOutEdges.map((edge) => {
+  const edges: CanvasEdge[] = useMemo(() => displayedEdges.map((edge) => {
     const id = edge.id;
     const active = hover === edge.source || hover === edge.target || hover === id || selectedEdge?.source === edge.source && selectedEdge.target === edge.target;
     const dim = Boolean(hover || selectedNode || selectedEdge) && !active && selectedNode !== edge.source && selectedNode !== edge.target;
@@ -131,7 +133,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
       markerEnd: { type: "arrowclosed" as const, color: failed ? "#FF6B6B" : "#4A5260", width: 12, height: 12 },
       data: { ...edge, label: compactNumber(edge.count), routeIndex: edge.index, bounds, failed },
     };
-  }), [laidOutEdges, hover, selectedNode, selectedEdge, visibleEdges, bounds]);
+  }), [displayedEdges, hover, selectedNode, selectedEdge, visibleEdges, bounds]);
 
   const nodeById = useMemo(() => new Map((data?.nodes ?? []).map((node) => [node.id, node])), [data?.nodes]);
   const selectNode = useCallback((node: CanvasNode) => {
@@ -159,7 +161,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
   return (
     <div className={`flex flex-col gap-3 py-3 ${current ? "" : "opacity-60"}`} aria-busy={!current}>
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#8B93A1]">
-        <p><span className="font-mono">{data.nodes.length}</span>{data.totalNodes > data.nodes.length ? ` of ${compactNumber(data.totalNodes)}` : ""} steps · <span className="font-mono">{visibleEdges.length}</span> of {compactNumber(data.totalEdges)} arrows shown (busiest first)</p>
+        <p><span className="font-mono">{data.nodes.length}</span>{data.totalNodes > data.nodes.length ? ` of ${compactNumber(data.totalNodes)}` : ""} steps · <span className="font-mono">{displayedEdges.length}</span> arrows visible, {visibleEdges.length} max (busiest first)</p>
         <div className="flex flex-wrap items-center gap-2">
           <label htmlFor="map-edge-limit">Busiest arrows</label>
           <select id="map-edge-limit" aria-label="Number of busiest arrows" value={edgeLimit} onChange={(event) => onViewStateChange(selectedNode ? `node:${selectedNode}` : null, Number(event.target.value))} className="h-7 border border-[#262C35] bg-[#111418] px-2 font-mono text-xs text-[#C9CED6]">
@@ -173,7 +175,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
       </div>
       <div className="flex flex-wrap gap-3 text-[11px] text-[#8B93A1]"><span className="flex items-center gap-1"><span className="size-2 bg-[#F4D44D]" />model</span><span className="flex items-center gap-1"><span className="size-2 bg-[#8AB4FF]" />tool</span><span className="flex items-center gap-1"><span className="h-0.5 w-4 bg-[#FF6B6B]" />arrow with failures</span></div>
       <div className="h-[min(62vh,620px)] min-h-[330px] w-full">
-        <TraceCanvas nodes={nodes} edges={edges} nodeTypes={NODE_TYPES} edgeTypes={EDGE_TYPES} focusId={searchTarget?.id ?? selectedNode} label="Agent map"
+        <TraceCanvas nodes={nodes} edges={edges} nodeTypes={NODE_TYPES} edgeTypes={EDGE_TYPES} focusId={searchTarget?.id ?? selectedNode} label="Agent map" onZoomChange={setMapZoom}
           onNodeClick={selectNode}
           onNodeMouseEnter={(node) => setHover(node.id)} onNodeMouseLeave={() => setHover(null)}
           onEdgeClick={chooseEdge} onEdgeMouseEnter={() => setHover(null)} onEdgeMouseLeave={() => setHover(null)}
@@ -192,7 +194,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
           </div>
         </TraceCanvas>
       </div>
-      {data.totalEdges > visibleEdges.length ? <p className="text-[11px] text-[#6B7380]">Showing the busiest {visibleEdges.length} of {compactNumber(data.totalEdges)} arrows. Increase the limit to reveal more.</p> : null}
+      {data.totalEdges > visibleEdges.length || displayedEdges.length < visibleEdges.length ? <p className="text-[11px] text-[#6B7380]">Showing {displayedEdges.length} of the busiest {visibleEdges.length} selected arrows out of {compactNumber(data.totalEdges)}. Zoom in or increase the limit to reveal more.</p> : null}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[520px] border-separate border-spacing-0 text-sm"><caption className="mb-2 text-left text-xs text-[#8B93A1]">Arrows, busiest first</caption>
           <thead><tr className="text-left text-xs text-[#8B93A1]"><th scope="col" className="border-b border-[#1F242C] px-3 py-2 font-medium">From → to</th><th scope="col" className="border-b border-[#1F242C] px-3 py-2 font-medium">Times</th><th scope="col" className="border-b border-[#1F242C] px-3 py-2 font-medium">Traces</th><th scope="col" className="border-b border-[#1F242C] px-3 py-2 font-medium">Failed</th><th scope="col" className="border-b border-[#1F242C] px-3 py-2 font-medium">Median latency</th></tr></thead>

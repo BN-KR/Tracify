@@ -34,6 +34,7 @@ export function TraceCanvas({
   onEdgeMouseEnter,
   onEdgeMouseLeave,
   onEscape,
+  onZoomChange,
   children,
   className = "",
 }: {
@@ -50,12 +51,13 @@ export function TraceCanvas({
   onEdgeMouseEnter?: (edge: CanvasEdge) => void;
   onEdgeMouseLeave?: (edge: CanvasEdge) => void;
   onEscape?: () => void;
+  onZoomChange?: (zoom: number) => void;
   children?: ReactNode;
   className?: string;
 }) {
   return (
     <ReactFlowProvider>
-      <TraceCanvasViewport {...{ nodes, edges, nodeTypes, edgeTypes, focusId, label, onNodeClick, onEdgeClick, onNodeMouseEnter, onNodeMouseLeave, onEdgeMouseEnter, onEdgeMouseLeave, onEscape, children, className }} />
+      <TraceCanvasViewport {...{ nodes, edges, nodeTypes, edgeTypes, focusId, label, onNodeClick, onEdgeClick, onNodeMouseEnter, onNodeMouseLeave, onEdgeMouseEnter, onEdgeMouseLeave, onEscape, onZoomChange, children, className }} />
     </ReactFlowProvider>
   );
 }
@@ -74,6 +76,7 @@ function TraceCanvasViewport({
   onEdgeMouseEnter,
   onEdgeMouseLeave,
   onEscape,
+  onZoomChange,
   children,
   className,
 }: Parameters<typeof TraceCanvas>[0]) {
@@ -130,7 +133,7 @@ function TraceCanvasViewport({
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           onInit={(value) => { setInstance(value); setZoom(value.getZoom()); }}
-          onMove={(_, viewport) => setZoom(viewport.zoom)}
+          onMove={(_, viewport) => { setZoom(viewport.zoom); onZoomChange?.(viewport.zoom); }}
           onNodeClick={(_, node) => onNodeClick?.(node as CanvasNode)}
           onEdgeClick={(_, edge) => onEdgeClick?.(edge as CanvasEdge)}
           onNodeMouseEnter={(_, node) => onNodeMouseEnter?.(node as CanvasNode)}

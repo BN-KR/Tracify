@@ -1,9 +1,10 @@
 "use client";
 
-import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from "@xyflow/react";
+import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, useStore, type EdgeProps } from "@xyflow/react";
 
 /** Keep cycle-closing and self-repeat routes outside the card field; forward routes use ELK's left-to-right order. */
 export function TraceMapEdge(props: EdgeProps) {
+  const zoom = useStore((state) => state.transform[2]);
   const data = props.data ?? {};
   const bounds = data.bounds as { maxX: number; minY: number } | undefined;
   const lane = Number(data.routeIndex ?? 0) % 8;
@@ -35,8 +36,8 @@ export function TraceMapEdge(props: EdgeProps) {
 
   return (
     <>
-      <BaseEdge id={props.id} path={path} markerEnd={props.markerEnd} style={props.style} interactionWidth={20} />
-      {data.label !== undefined ? (
+      <BaseEdge id={props.id} path={path} markerEnd={props.markerEnd} style={{ ...props.style, strokeWidth: zoom < 0.65 ? 0.75 : props.style?.strokeWidth }} interactionWidth={20} />
+      {data.label !== undefined && zoom >= 0.8 ? (
         <EdgeLabelRenderer>
           <span className={`nodrag nopan rounded-sm border border-[#262C35] bg-[#0E1115] px-1 py-0.5 font-mono text-[10px] ${data.failed ? "text-[#FF8A8A]" : "text-[#C9CED6]"}`} style={{ position: "absolute", transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`, pointerEvents: "none" }} aria-hidden="true">
             {String(data.label)}
