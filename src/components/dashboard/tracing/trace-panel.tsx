@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { buildSpanTree, type SpanTreeNode } from "@/lib/tracify-ports/treeBuilding";
 import { chatMessages, compactNumber, downloadFile, formatCost, formatDuration, formatTime, parsePayload } from "./format";
+import { TraceGraph, TraceTimeline } from "./trace-views";
 
 type Span = {
   spanId: string; parentSpanId: string; spanType: string; createdAt: string; latencyMs: number; costUsd: number;
@@ -18,7 +19,10 @@ const STEP_FILTERS = [
 ] as const;
 type StepFilter = (typeof STEP_FILTERS)[number]["id"];
 
-function isFailed(span: Span) {
+export const TRACE_VIEWS = [{ id: "tree", label: "Tree" }, { id: "timeline", label: "Timeline" }, { id: "graph", label: "Graph" }] as const;
+export type TraceView = (typeof TRACE_VIEWS)[number]["id"];
+
+function isFailed(span: Pick<Span, "spanType" | "errorType">) {
   return span.spanType === "error" || Boolean(span.errorType);
 }
 
@@ -40,8 +44,8 @@ function spanName(span: Span) {
   return span.toolName || span.modelId || span.traceName || span.spanType || "span";
 }
 
-export function TracePanel({ projectId, runId, summary, onClose, onFilter, onStep }: {
-  projectId: string; runId: string; summary: Summary;
+export function TracePanel({ projectId, runId, summary, view, onView, onClose, onFilter, onStep }: {
+  projectId: string; runId: string; summary: Summary; view: TraceView; onView: (view: TraceView) => void;
   onClose: () => void; onFilter: (key: string, value: string) => void; onStep: (delta: number) => void;
 }) {
   const [spans, setSpans] = useState<Span[] | null>(null);
@@ -170,7 +174,7 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
     setStepFilter("all");
     setStepSearch("");
     setSelectedId(target);
-    requestAnimationFrame(() => document.getElementById(`step-${target}`)?.scrollIntoView({ block: "center" }));
+    requestAnimationFrame(() => document.getElementById(`${view === "tree" ? "step" : view}-${target}`)?.scrollIntoView({ block: "center", inline: "center" }));
   }
 
   function copyLink() {
@@ -232,6 +236,12 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
+          <div role="tablist" aria-label="Trace view" className="flex rounded-md border border-[#262C35] p-0.5 text-xs">
+            {TRACE_VIEWS.map((item) => (
+              <button key={item.id} type="button" role="tab" aria-selected={view === item.id} aria-controls="trace-view" onClick={() => onView(item.id)}
+                className={`rounded px-2 py-1 ${view === item.id ? "bg-[#F4D44D] text-[#0B0D10]" : "text-[#8B93A1] hover:text-white"}`}>{item.label}</button>
+            ))}
+          </div>
           <div role="group" aria-label="Step type" className="flex rounded-md border border-[#262C35] p-0.5 text-xs">
             {STEP_FILTERS.map((filter) => (
               <button key={filter.id} type="button" aria-pressed={stepFilter === filter.id} onClick={() => setStepFilter(filter.id)}
@@ -244,10 +254,19 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
           <label htmlFor="step-search" className="sr-only">Search steps</label>
           <input id="step-search" value={stepSearch} onChange={(event) => setStepSearch(event.target.value)} placeholder="Search steps"
             className="h-8 min-w-[120px] flex-1 rounded-md border border-[#262C35] bg-[#111418] px-2 text-xs outline-none placeholder:text-[#6B7380] focus:border-[#4A5260]" />
-          <button type="button" onClick={() => setAllCollapsed(false)} disabled={filtering} className="h-8 rounded-md px-2 text-xs text-[#8B93A1] hover:text-white disabled:opacity-40">Expand all</button>
-          <button type="button" onClick={() => setAllCollapsed(true)} disabled={filtering} className="h-8 rounded-md px-2 text-xs text-[#8B93A1] hover:text-white disabled:opacity-40">Collapse all</button>
+          <button type="button" onClick={() => setAllCollapsed(false)} disabled={filtering || view === "graph"} className="h-8 rounded-md px-2 text-xs text-[#8B93A1] hover:text-white disabled:opacity-40">Expand all</button>
+          <button type="button" onClick={() => setAllCollapsed(true)} disabled={filtering || view === "graph"} className="h-8 rounded-md px-2 text-xs text-[#8B93A1] hover:text-white disabled:opacity-40">Collapse all</button>
         </div>
-        <div className="flex min-h-0 flex-1 flex-wrap">
+        <div id="trace-view" role="tabpanel" aria-label={`${TRACE_VIEWS.find((item) => item.id === view)!.label} view`} className={`flex min-h-0 flex-1 ${view === "tree" ? "flex-wrap" : "flex-col"}`}>
+          {view === "timeline" ? (
+            <div className="max-h-[45vh] w-full shrink-0 overflow-auto border-b border-[#1F242C]">
+              <TraceTimeline rows={visibleRows} spans={bySpanId} totalMs={totalMs} selectedId={selectedId} isFailed={isFailed} onSelect={setSelectedId} />
+            </div>
+          ) : view === "graph" ? (
+            <div className="max-h-[45vh] w-full shrink-0 overflow-auto border-b border-[#1F242C]">
+              <TraceGraph roots={tree.roots} spans={bySpanId} selectedId={selectedId} isFailed={isFailed} onSelect={setSelectedId} />
+            </div>
+          ) : (
           <ol aria-label="Steps" className="max-h-[70vh] w-full overflow-auto border-b border-[#1F242C] py-2 md:max-h-none md:w-[44%] md:border-b-0 md:border-r">
             {visibleRows.length === 0 ? <li className="px-4 py-3 text-sm text-[#8B93A1]">No steps match.</li> : null}
             {visibleRows.map((node) => {
@@ -277,7 +296,8 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
               );
             })}
           </ol>
-          <div className="min-w-0 flex-1 overflow-auto p-4">{selected ? <StepDetail span={selected} /> : null}</div>
+          )}
+          <div className={`min-w-0 flex-1 overflow-auto p-4 ${view === "tree" ? "" : "min-h-0"}`}>{selected ? <StepDetail span={selected} /> : null}</div>
         </div>
         </div>
       )}

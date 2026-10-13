@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { TracePanel } from "./trace-panel";
+import { AgentMap, stepLabel } from "./agent-map";
+import { ErrorGroupsPanel, errorGroupLabel, type ErrorGroups } from "./error-groups";
+import { TRACE_VIEWS, TracePanel, type TraceView } from "./trace-panel";
 import { compactNumber, downloadFile, formatCost, formatDuration, formatTime, parseTime, previewText, relativeTime, toCsv } from "./format";
 
 type TraceRow = {
@@ -14,7 +16,7 @@ type Stats = { traces: number; errors: number; p50DurationMs: number; p95Duratio
 type ListResponse = {
   rows: TraceRow[]; total: number; page: number; pageSize: number;
   histogram: { bucketSeconds: number; buckets: Bucket[] }; stats?: Stats; options: Record<string, string[]> | null;
-  range: { from: number; to: number }; error?: string;
+  errorGroups?: ErrorGroups | null; range: { from: number; to: number }; error?: string;
 };
 
 export type TraceQuery = Record<string, string>;
@@ -39,6 +41,10 @@ type ColumnId = (typeof COLUMNS)[number]["id"];
 const DEFAULT_COLUMNS: ColumnId[] = ["startedAt", "status", "name", "input", "output", "latency", "cost", "tokens", "model"];
 const COLUMN_STORAGE = "tracify.tracing.columns";
 const LIVE_STORAGE = "tracify.tracing.live";
+const ERRORS_STORAGE = "tracify.tracing.errorGroups";
+/** URL keys that change the view, not the data, so they are not sent to the API. */
+const VIEW_KEYS = ["range", "from", "to", "trace", "mode", "view"];
+const EDGE_SEPARATOR = "\u2192";
 
 function currentUrlQuery(): TraceQuery {
   if (typeof window === "undefined") return {};
@@ -71,6 +77,9 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   const [live, setLive] = useState(true);
   const [clock, setClock] = useState(() => Date.now());
   const [fresh, setFresh] = useState<Set<string>>(() => new Set());
+  const [errorsOpen, setErrorsOpen] = useState(true);
+  // Label of the last clicked error group, for its chip when the group is not in the current list.
+  const [pickedGroup, setPickedGroup] = useState<{ id: string; label: string } | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const selected = query.trace ?? null;
   const requestId = useRef(0);
@@ -84,6 +93,9 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   // The live/paused choice is remembered per browser.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { try { if (window.localStorage.getItem(LIVE_STORAGE) === "paused") setLive(false); } catch {} }, []);
+  // The error-groups panel's open/closed choice is remembered per browser.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { try { if (window.localStorage.getItem(ERRORS_STORAGE) === "closed") setErrorsOpen(false); } catch {} }, []);
   // Relative start times ("2m ago") stay correct between data refreshes.
   useEffect(() => { const timer = setInterval(() => setClock(Date.now()), 10_000); return () => clearInterval(timer); }, []);
 
@@ -108,18 +120,23 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     params.set("to", String(to));
     params.set("from", query.from ?? String(to - (range?.ms ?? 86_400_000)));
     for (const [key, value] of Object.entries(query)) {
-      if (!["range", "from", "to", "trace"].includes(key)) params.set(key, value);
+      if (!VIEW_KEYS.includes(key)) params.set(key, value);
     }
     return params;
   }, [query, now]);
-  const requestKey = apiParams.toString();
+  const listParams = useMemo(() => {
+    const params = new URLSearchParams(apiParams);
+    if (errorsOpen && query.mode !== "map") params.set("errors", "1");
+    return params;
+  }, [apiParams, errorsOpen, query.mode]);
+  const requestKey = listParams.toString();
   const loading = settledKey !== requestKey;
   const optionsKey = `${query.range ?? ""}|${query.from ?? ""}|${query.to ?? ""}`;
   const loadedOptionsKey = useRef<string | null>(null);
 
   useEffect(() => {
     const id = ++requestId.current;
-    const params = new URLSearchParams(apiParams);
+    const params = new URLSearchParams(listParams);
     const wantOptions = loadedOptionsKey.current !== optionsKey;
     if (wantOptions) params.set("options", "1");
     fetch(`/api/projects/${encodeURIComponent(projectId)}/traces?${params}`, { cache: "no-store" })
@@ -140,7 +157,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
         setError(reason instanceof Error ? reason.message : "Could not load traces");
         setSettledKey(requestKey);
       });
-  }, [apiParams, optionsKey, projectId, requestKey]);
+  }, [listParams, optionsKey, projectId, requestKey]);
 
   // Live updates: for relative ranges, quietly refetch the list with the window moved forward so new traces
   // appear without pressing Refresh. Skipped while paused, for fixed from/to windows, hidden tabs, and while a
@@ -154,7 +171,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     const tick = async () => {
       if (!document.hidden && settledKey === requestKey) {
         const issued = requestId.current;
-        const params = new URLSearchParams(apiParams);
+        const params = new URLSearchParams(listParams);
         const to = Date.now();
         params.set("to", String(to));
         params.set("from", String(to - rangeMs));
@@ -181,10 +198,14 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     };
     timer = setTimeout(tick, delay);
     return () => { stopped = true; clearTimeout(timer); };
-  }, [apiParams, live, projectId, query.from, query.range, query.to, requestKey, settledKey]);
+  }, [listParams, live, projectId, query.from, query.range, query.to, requestKey, settledKey]);
 
   const rows = useMemo(() => data?.rows ?? [], [data]);
   const stats = data?.stats;
+  const activeGroup = data?.errorGroups?.groups.find((group) => group.id === query.errorGroup);
+  const activeGroupLabel = activeGroup ? errorGroupLabel(activeGroup) : pickedGroup?.id === query.errorGroup ? pickedGroup?.label : query.errorGroup?.slice(0, 8);
+  const mapMode = query.mode === "map";
+  const traceView: TraceView = TRACE_VIEWS.some((item) => item.id === query.view) ? (query.view as TraceView) : "tree";
 
   useEffect(() => {
     if (!fresh.size) return;
@@ -231,6 +252,12 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     try { window.localStorage.setItem(LIVE_STORAGE, next ? "live" : "paused"); } catch {}
   }
 
+  function toggleErrors() {
+    const next = !errorsOpen;
+    setErrorsOpen(next);
+    try { window.localStorage.setItem(ERRORS_STORAGE, next ? "open" : "closed"); } catch {}
+  }
+
   function exportCsv() {
     const header = ["trace_id", "start_time_utc", "trace_name", "status", "errors", "latency_ms", "cost_usd", "input_tokens", "output_tokens", "model", "user", "session", "environment", "release", "tags", "input", "output"];
     const body = rows.map((row) => [
@@ -251,6 +278,9 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     ...(query.status && query.status !== "all" ? [{ key: "status", label: query.status === "error" ? "Errors only" : "Healthy only" }] : []),
     ...(query.minLatencyMs ? [{ key: "minLatencyMs", label: `Latency ≥ ${formatDuration(Number(query.minLatencyMs))}` }] : []),
     ...(query.minCostUsd ? [{ key: "minCostUsd", label: `Cost ≥ ${formatCost(Number(query.minCostUsd))}` }] : []),
+    ...(query.errorGroup ? [{ key: "errorGroup", label: `Error: ${activeGroupLabel}` }] : []),
+    ...(query.node ? [{ key: "node", label: `Step: ${stepLabel(query.node)}` }] : []),
+    ...(query.edge ? [{ key: "edge", label: `Path: ${query.edge.split(EDGE_SEPARATOR).map(stepLabel).join(" → ")}` }] : []),
   ];
 
   return (
@@ -315,11 +345,16 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
               </button>
             ))}
             {activeFilters.length ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => update(Object.fromEntries(activeFilters.map((f) => [f.key, ""])))}>Clear all</button> : null}
-            <button type="button" onClick={exportCsv} disabled={!rows.length} className="ml-auto h-8 rounded-md border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
+            <div role="group" aria-label="Show traces as" className="ml-auto flex rounded-md border border-[#262C35] p-0.5 text-xs">
+              <button type="button" aria-pressed={!mapMode} onClick={() => update({ mode: "" }, false)} className={`h-7 rounded px-3 ${!mapMode ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>List</button>
+              <button type="button" aria-pressed={mapMode} onClick={() => update({ mode: "map" }, false)} className={`h-7 rounded px-3 ${mapMode ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>Map</button>
+            </div>
+            {mapMode ? null : <>
+            <button type="button" onClick={exportCsv} disabled={!rows.length} className="h-8 rounded-md border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
             <div className="relative">
               <button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)} className="h-8 rounded-md border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:border-[#4A5260]">Columns {columns.length}/{COLUMNS.length}</button>
               {columnsOpen ? (
-                <div className="absolute right-0 z-20 mt-2 w-52 rounded-lg border border-[#262C35] bg-[#111418] p-2 shadow-2xl">
+                <div className="absolute right-0 z-20 mt-2 w-52 max-w-[calc(100vw-2rem)] rounded-lg border border-[#262C35] bg-[#111418] p-2 shadow-2xl">
                   {COLUMNS.map((column) => (
                     <label key={column.id} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-[#1A1F27]">
                       <input type="checkbox" checked={columns.includes(column.id)} onChange={() => toggleColumn(column.id)} className="accent-[#F4D44D]" />{column.label}
@@ -329,14 +364,24 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                 </div>
               ) : null}
             </div>
+            </>}
           </div>
 
           <StatsStrip stats={stats} loading={!data} onErrors={() => update({ status: "error" })} />
 
           <CountChart histogram={data?.histogram} onZoom={(from, to) => update({ from: String(from), to: String(to) })} />
 
+          {mapMode ? null : (
+            <ErrorGroupsPanel data={data ? data.errorGroups : undefined} open={errorsOpen} loading={loading} active={query.errorGroup} clock={clock}
+              onToggle={toggleErrors} onSelect={(group) => { setPickedGroup({ id: group.id, label: errorGroupLabel(group) }); update({ errorGroup: query.errorGroup === group.id ? "" : group.id }); }} />
+          )}
+
           <div className="min-h-0 flex-1 overflow-auto px-5">
-            {error ? (
+            {mapMode ? (
+              <AgentMap projectId={projectId} params={apiParams} live={isLive} rangeMs={query.from || query.to ? null : RANGES.find((item) => item.id === query.range)?.ms ?? 86_400_000}
+                onNode={(id) => update({ node: id, mode: "" })}
+                onEdge={(source, target) => update({ edge: `${source}${EDGE_SEPARATOR}${target}`, mode: "" })} />
+            ) : error ? (
               <div role="alert" className="my-6 rounded-lg border border-[#5A2A2A] bg-[#1E1314] p-4 text-sm">
                 <p className="font-medium text-[#FF8A8A]">{error}</p>
                 <button type="button" className="mt-3 rounded-md border border-[#5A2A2A] px-3 py-1.5 text-xs hover:bg-[#2A1A1C]" onClick={() => setNow(Date.now())}>Try again</button>
@@ -376,7 +421,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             )}
           </div>
 
-          <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1F242C] px-5 py-3 text-sm text-[#8B93A1]">
+          {mapMode ? null : <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1F242C] px-5 py-3 text-sm text-[#8B93A1]">
             <span>{loading ? "Loading…" : `${compactNumber(total)} traces`}</span>
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-2">Rows
@@ -388,13 +433,14 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
               <button type="button" aria-label="Previous page" disabled={page === 0} onClick={() => update({ page: String(page - 1) }, false)} className="h-8 w-8 rounded-md border border-[#262C35] disabled:opacity-40">‹</button>
               <button type="button" aria-label="Next page" disabled={page + 1 >= pageCount} onClick={() => update({ page: String(page + 1) }, false)} className="h-8 w-8 rounded-md border border-[#262C35] disabled:opacity-40">›</button>
             </div>
-          </footer>
+          </footer>}
         </section>
 
         {selected ? (
           <TracePanel
             key={selected} projectId={projectId} runId={selected}
             summary={rows.find((row) => row.runId === selected)}
+            view={traceView} onView={(view) => update({ view: view === "tree" ? "" : view }, false)}
             onClose={() => update({ trace: "" }, false)}
             onFilter={(key, value) => update({ [key]: value, trace: "" })}
             onStep={selectIndex}

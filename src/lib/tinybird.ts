@@ -360,6 +360,12 @@ export type TraceListFilters = {
   maxLatencyMs?: number;
   minCostUsd?: number;
   maxCostUsd?: number;
+  /** Traces containing an error from this group (id from traceErrorGroups). */
+  errorGroup?: string;
+  /** Traces containing this agent-map step ("tool:<name>" or "model:<id>"). */
+  node?: string;
+  /** Traces where step `to` ran directly after step `from` (agent-map arrow). */
+  edge?: { from: string; to: string };
   sort?: "startedAt" | "latency" | "cost";
   direction?: "asc" | "desc";
   page?: number;
@@ -372,6 +378,33 @@ export type TraceListRow = {
   modelId: string; endUserId: string; sessionId: string; environment: string; release: string;
   tags: string[]; inputPreview: string; outputPreview: string;
 };
+
+/** A step that failed; the same rule as a trace's errorCount. */
+const IS_ERROR = `(spanType = 'error' OR errorType != '')`;
+const ERROR_TOOL = `if(toolName != '', toolName, modelId)`;
+// The first 120 characters of the error message with ids, paths and numbers replaced, so the same failure with
+// different ids groups together. Regexes avoid backslashes so they read the same in JS and ClickHouse literals.
+const ERROR_MESSAGE_KEY = `leftUTF8(trimBoth(replaceRegexpAll(replaceRegexpAll(replaceRegexpAll(replaceRegexpAll(replaceRegexpAll(
+  substring(errorMessage, 1, 600),
+  '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}', '<id>'),
+  '(~|[.]{1,2})?(/[^/[:space:]"(),:;<>]+){2,}/?', '<path>'),
+  '[0-9a-fA-F]{8,}', '<id>'),
+  '[0-9]+([.][0-9]+)?', '<n>'),
+  '[[:space:]]+', ' ')), 120)`;
+const ERROR_GROUP_ID = `lower(hex(cityHash64(${ERROR_TOOL}, errorType, ${ERROR_MESSAGE_KEY})))`;
+/** Agent-map node for a step: a model call or a tool. Agent wrappers and fleet events are not nodes. */
+const NODE_KEY = `multiIf(spanType IN ('llm', 'generation') AND modelId != '', concat('model:', modelId), toolName != '' AND spanType NOT IN ('agent', 'event'), concat('tool:', toolName), '')`;
+
+function rangeScope(projectId: string, filters: Pick<TraceListFilters, "fromMs" | "toMs">) {
+  return `projectId = '${sqlString(projectId)}' AND createdAt >= toDateTime(${Math.floor(filters.fromMs / 1000)}) AND createdAt <= toDateTime(${Math.ceil(filters.toMs / 1000)})`;
+}
+
+/** Map steps in time order with the step that ran directly before each one in the same trace. */
+function transitionsSql(scope: string) {
+  return `SELECT runId, lagInFrame(node, 1, '') OVER (PARTITION BY runId ORDER BY createdAt, spanId ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS source,
+      node AS target, latencyMs, failed
+    FROM (SELECT runId, spanId, createdAt, latencyMs, ${NODE_KEY} AS node, ${IS_ERROR} AS failed FROM spans WHERE ${scope} AND ${NODE_KEY} != '')`;
+}
 
 function traceListClauses(projectId: string, filters: TraceListFilters) {
   const where = [
@@ -393,6 +426,11 @@ function traceListClauses(projectId: string, filters: TraceListFilters) {
     const value = sqlString(filters.query);
     where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND (positionCaseInsensitive(runId, '${value}') > 0 OR positionCaseInsensitive(traceName, '${value}') > 0 OR positionCaseInsensitive(input, '${value}') > 0 OR positionCaseInsensitive(output, '${value}') > 0))`);
   }
+  // Error groups and the agent map are computed from steps inside the range, so their filters use the same range.
+  const scope = rangeScope(projectId, filters);
+  if (filters.errorGroup) where.push(`runId IN (SELECT runId FROM spans WHERE ${scope} AND ${IS_ERROR} AND ${ERROR_GROUP_ID} = '${sqlString(filters.errorGroup)}')`);
+  if (filters.node) where.push(`runId IN (SELECT runId FROM spans WHERE ${scope} AND ${NODE_KEY} = '${sqlString(filters.node)}')`);
+  if (filters.edge) where.push(`runId IN (SELECT runId FROM (${transitionsSql(scope)}) WHERE source = '${sqlString(filters.edge.from)}' AND target = '${sqlString(filters.edge.to)}')`);
   const having: string[] = [];
   if (filters.status === "error") having.push("errorCount > 0");
   if (filters.status === "healthy") having.push("errorCount = 0");
@@ -403,14 +441,23 @@ function traceListClauses(projectId: string, filters: TraceListFilters) {
   return { where: where.join(" AND "), having: having.length ? `HAVING ${having.join(" AND ")}` : "" };
 }
 
+// Shared by the full trace row and the lighter run-id filter so HAVING clauses mean the same thing in both.
+const DURATION_EXPR = `if(countIf(parentSpanId = '') > 0, maxIf(latencyMs, parentSpanId = ''), greatest(dateDiff('millisecond', min(createdAt), max(createdAt)), max(latencyMs)))`;
+const ERROR_COUNT_EXPR = `countIf(${IS_ERROR})`;
+
+/** Run ids of every trace matching the filters, for queries that aggregate steps instead of traces. */
+function matchingRunIds(where: string, having: string) {
+  return `SELECT runId FROM (SELECT runId, ${DURATION_EXPR} AS durationMs, ${ERROR_COUNT_EXPR} AS errorCount, sum(costUsd) AS totalCostUsd FROM spans WHERE ${where} GROUP BY runId ${having})`;
+}
+
 const TRACE_AGGREGATE = `
   runId,
   argMinIf(traceName, createdAt, traceName != '') AS traceName,
   min(createdAt) AS startedAt,
   max(createdAt) AS lastSeenAt,
-  if(countIf(parentSpanId = '') > 0, maxIf(latencyMs, parentSpanId = ''), greatest(dateDiff('millisecond', min(createdAt), max(createdAt)), max(latencyMs))) AS durationMs,
+  ${DURATION_EXPR} AS durationMs,
   count() AS spanCount,
-  countIf(spanType = 'error' OR errorType != '') AS errorCount,
+  ${ERROR_COUNT_EXPR} AS errorCount,
   sum(costUsd) AS totalCostUsd,
   sum(inputTokens) AS inputTokens,
   sum(outputTokens) AS outputTokens,
@@ -477,6 +524,72 @@ export async function traceStats(projectId: string, filters: TraceListFilters): 
   return {
     traces: value("traces"), errors: value("errors"), p50DurationMs: value("p50DurationMs"), p95DurationMs: value("p95DurationMs"),
     totalCostUsd: value("totalCostUsd"), inputTokens: value("inputTokens"), outputTokens: value("outputTokens"),
+  };
+}
+
+export type ErrorGroup = {
+  id: string; tool: string; errorType: string; message: string; sample: string;
+  count: number; traces: number; firstSeen: string; lastSeen: string;
+};
+
+/** The 20 most frequent error groups among the steps of every trace matching the filters. */
+export async function traceErrorGroups(projectId: string, filters: TraceListFilters) {
+  const { where, having } = traceListClauses(projectId, filters);
+  const rows = await tinybirdRows<ErrorGroup & { totalGroups: number }>(`
+    SELECT ${ERROR_GROUP_ID} AS id, ${ERROR_TOOL} AS tool, errorType, ${ERROR_MESSAGE_KEY} AS message,
+      substring(any(errorMessage), 1, 300) AS sample, count() AS count, uniqExact(runId) AS traces,
+      min(createdAt) AS firstSeen, max(createdAt) AS lastSeen, count() OVER () AS totalGroups
+    FROM spans
+    WHERE ${where} AND ${IS_ERROR} AND runId IN (${matchingRunIds(where, having)})
+    GROUP BY id, tool, errorType, message
+    ORDER BY count DESC, traces DESC, id
+    LIMIT 20`);
+  return {
+    total: Number(rows[0]?.totalGroups ?? 0),
+    groups: rows.map((row): ErrorGroup => ({
+      id: row.id, tool: row.tool, errorType: row.errorType, message: row.message, sample: row.sample,
+      count: Number(row.count), traces: Number(row.traces), firstSeen: row.firstSeen, lastSeen: row.lastSeen,
+    })),
+  };
+}
+
+export type MapNode = { id: string; kind: "tool" | "model"; name: string; count: number; traces: number; errors: number; p50LatencyMs: number };
+export type MapEdge = { source: string; target: string; count: number; traces: number; errorRate: number; p50LatencyMs: number };
+export const MAP_NODE_LIMIT = 40;
+export const MAP_EDGE_LIMIT = 100;
+
+/**
+ * Aggregate agent map for the traces matching the filters: tools and models as nodes, and an arrow A -> B for
+ * every time B ran directly after A in the same trace. Capped at the busiest 40 nodes and 100 arrows.
+ */
+export async function traceAgentMap(projectId: string, filters: TraceListFilters) {
+  const { where, having } = traceListClauses(projectId, filters);
+  const scope = `${where} AND runId IN (${matchingRunIds(where, having)})`;
+  const nodeRows = await tinybirdRows<{ id: string; count: number; traces: number; errors: number; p50LatencyMs: number; totalNodes: number }>(`
+    SELECT ${NODE_KEY} AS id, count() AS count, uniqExact(runId) AS traces, countIf(${IS_ERROR}) AS errors,
+      quantile(0.5)(latencyMs) AS p50LatencyMs, count() OVER () AS totalNodes
+    FROM spans WHERE ${scope} AND ${NODE_KEY} != ''
+    GROUP BY id ORDER BY count DESC, id LIMIT ${MAP_NODE_LIMIT}`);
+  const nodes: MapNode[] = nodeRows.map((row) => {
+    const kind = row.id.startsWith("model:") ? "model" : "tool";
+    return { id: row.id, kind, name: row.id.slice(kind.length + 1), count: Number(row.count), traces: Number(row.traces), errors: Number(row.errors), p50LatencyMs: Number(row.p50LatencyMs) };
+  });
+  if (!nodes.length) return { nodes, edges: [] as MapEdge[], totalNodes: 0, totalEdges: 0 };
+  const ids = `[${nodes.map((node) => `'${sqlString(node.id)}'`).join(", ")}]`;
+  const edgeRows = await tinybirdRows<MapEdge & { totalEdges: number }>(`
+    SELECT source, target, count() AS count, uniqExact(runId) AS traces, avg(failed) AS errorRate,
+      quantile(0.5)(latencyMs) AS p50LatencyMs, count() OVER () AS totalEdges
+    FROM (${transitionsSql(scope)})
+    WHERE source != '' AND has(${ids}, source) AND has(${ids}, target)
+    GROUP BY source, target ORDER BY count DESC, source, target LIMIT ${MAP_EDGE_LIMIT}`);
+  return {
+    nodes,
+    edges: edgeRows.map((row): MapEdge => ({
+      source: row.source, target: row.target, count: Number(row.count), traces: Number(row.traces),
+      errorRate: Number(row.errorRate), p50LatencyMs: Number(row.p50LatencyMs),
+    })),
+    totalNodes: Number(nodeRows[0]?.totalNodes ?? 0),
+    totalEdges: Number(edgeRows[0]?.totalEdges ?? 0),
   };
 }
 
