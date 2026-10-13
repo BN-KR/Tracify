@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type { Id } from "convex/_generated/dataModel";
 import { api } from "convex/_generated/api";
 import { getAuthedConvexClient } from "@/lib/convex-server";
-import { listTraces, traceFilterOptions, traceHistogram } from "@/lib/tinybird";
+import { listTraces, traceFilterOptions, traceHistogram, traceStats } from "@/lib/tinybird";
 import { parseTraceFilters } from "@/lib/trace-filters";
 
 
@@ -16,12 +16,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const filters = parseTraceFilters(request.nextUrl.searchParams);
   try {
-    const [list, histogram, options] = await Promise.all([
+    const [list, histogram, stats, options] = await Promise.all([
       listTraces(projectId, filters),
       traceHistogram(projectId, filters),
+      traceStats(projectId, filters),
       request.nextUrl.searchParams.get("options") === "1" ? traceFilterOptions(projectId, filters.fromMs, filters.toMs) : null,
     ]);
-    return NextResponse.json({ ...list, histogram, options, range: { from: filters.fromMs, to: filters.toMs } });
+    return NextResponse.json({ ...list, histogram, stats, options, range: { from: filters.fromMs, to: filters.toMs } });
   } catch (error) {
     console.error("Trace list failed:", error);
     return NextResponse.json({ error: "Trace data is temporarily unavailable. Try again in a moment." }, { status: 503 });

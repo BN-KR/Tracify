@@ -19,9 +19,44 @@ export function compactNumber(value: number | null | undefined) {
 
 /** Tinybird returns "YYYY-MM-DD hh:mm:ss" in UTC; show it in the viewer's local time. */
 export function formatTime(value: string) {
-  const parsed = Date.parse(value.includes("T") ? value : `${value.replace(" ", "T")}Z`);
+  const parsed = parseTime(value);
   if (!Number.isFinite(parsed)) return value;
   return new Date(parsed).toLocaleString([], { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+export function parseTime(value: string) {
+  return Date.parse(value.includes("T") ? value : `${value.replace(" ", "T")}Z`);
+}
+
+/** "just now", "42s ago", "5m ago", "3h ago"; older than a day falls back to the absolute local time. */
+export function relativeTime(value: string, now: number) {
+  const parsed = parseTime(value);
+  if (!Number.isFinite(parsed)) return value;
+  const seconds = Math.max(0, Math.round((now - parsed) / 1000));
+  if (seconds < 5) return "just now";
+  if (seconds < 60) return `${seconds}s ago`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86_400) return `${Math.floor(seconds / 3600)}h ago`;
+  return formatTime(value);
+}
+
+/** RFC 4180 CSV; cells are quoted and leading formula characters are neutralised for spreadsheet safety. */
+export function toCsv(header: string[], rows: Array<Array<string | number>>) {
+  const cell = (value: string | number) => {
+    const text = String(value ?? "");
+    const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+    return `"${safe.replace(/"/g, '""')}"`;
+  };
+  return [header, ...rows].map((row) => row.map(cell).join(",")).join("\r\n");
+}
+
+export function downloadFile(name: string, body: string, type: string) {
+  const url = URL.createObjectURL(new Blob([body], { type }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /** One-line preview of a JSON or text payload: the last user/assistant message text when it is a chat. */

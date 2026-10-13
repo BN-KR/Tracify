@@ -456,6 +456,30 @@ export async function traceHistogram(projectId: string, filters: TraceListFilter
   return { bucketSeconds, buckets: rows.map((row) => ({ ...row, traces: Number(row.traces), errors: Number(row.errors) })) };
 }
 
+export type TraceStats = {
+  traces: number; errors: number; p50DurationMs: number; p95DurationMs: number;
+  totalCostUsd: number; inputTokens: number; outputTokens: number;
+};
+
+/** Totals for every trace matching the filters (not just the visible page) for the summary strip. */
+export async function traceStats(projectId: string, filters: TraceListFilters): Promise<TraceStats> {
+  const { where, having } = traceListClauses(projectId, filters);
+  const rows = await tinybirdRows<Record<keyof TraceStats, number | string>>(`
+    SELECT count() AS traces, countIf(errorCount > 0) AS errors,
+      quantile(0.5)(durationMs) AS p50DurationMs, quantile(0.95)(durationMs) AS p95DurationMs,
+      sum(totalCostUsd) AS totalCostUsd, sum(inputTokens) AS inputTokens, sum(outputTokens) AS outputTokens
+    FROM (SELECT ${TRACE_AGGREGATE} FROM spans WHERE ${where} GROUP BY runId ${having})`);
+  const row = rows[0] ?? {};
+  const value = (key: keyof TraceStats) => {
+    const parsed = Number(row[key] ?? 0);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+  return {
+    traces: value("traces"), errors: value("errors"), p50DurationMs: value("p50DurationMs"), p95DurationMs: value("p95DurationMs"),
+    totalCostUsd: value("totalCostUsd"), inputTokens: value("inputTokens"), outputTokens: value("outputTokens"),
+  };
+}
+
 /** Distinct values per filterable field for the filter sidebar. */
 export async function traceFilterOptions(projectId: string, fromMs: number, toMs: number) {
   const scope = `projectId = '${sqlString(projectId)}' AND createdAt >= toDateTime(${Math.floor(fromMs / 1000)}) AND createdAt <= toDateTime(${Math.ceil(toMs / 1000)})`;
