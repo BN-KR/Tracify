@@ -72,27 +72,40 @@ export function TracePanel({ projectId, runId, summary, onClose, onFilter, onSte
     return () => { live = false; };
   }, [projectId, runId, attempt]);
 
-  // Live updates: a running trace gets new spans after it is opened. The spans route serves a stale cache for
-  // running traces unless refresh=manual is sent, so poll with it and only re-render when something changed.
+  // Live updates: a trace can keep gaining spans after it is opened. Poll with live=1 (the server skips its
+  // Convex auth and cache work after a recent read) and only re-render when something changed. The interval
+  // starts at 3s, doubles up to 30s while nothing changes or a poll fails, and drops back when spans arrive.
   useEffect(() => {
-    const url = `/api/projects/${encodeURIComponent(projectId)}/runs/${encodeURIComponent(runId)}/spans?refresh=manual`;
+    const url = `/api/projects/${encodeURIComponent(projectId)}/runs/${encodeURIComponent(runId)}/spans?refresh=manual&live=1`;
     const signature = (list: Span[]) => `${list.length}:${list.reduce((sum, span) => sum + Number(span.latencyMs ?? 0), 0)}`;
-    let busy = false;
-    const timer = setInterval(() => {
-      if (document.hidden || busy) return;
-      busy = true;
-      fetch(url, { cache: "no-store" })
-        .then((response) => (response.ok ? (response.json() as Promise<{ spans?: Span[] }>) : null))
-        .then((body) => {
-          if (!body?.spans?.length) return;
-          const next = body.spans;
-          setSpans((current) => (current && signature(current) === signature(next) ? current : next));
-          setError(null);
-        })
-        .catch(() => undefined)
-        .finally(() => { busy = false; });
-    }, 3000);
-    return () => clearInterval(timer);
+    let delay = 3000;
+    let lastSignature: string | null = null;
+    let timer: ReturnType<typeof setTimeout>;
+    let stopped = false;
+    const tick = async () => {
+      if (!document.hidden) {
+        try {
+          const response = await fetch(url, { cache: "no-store" });
+          const body = response.ok ? ((await response.json()) as { spans?: Span[] }) : null;
+          const next = body?.spans;
+          if (next?.length) {
+            const nextSignature = signature(next);
+            const changed = nextSignature !== lastSignature;
+            lastSignature = nextSignature;
+            if (changed) setSpans(next);
+            setError(null);
+            delay = changed ? 3000 : Math.min(delay * 2, 30_000);
+          } else {
+            delay = Math.min(delay * 2, 30_000);
+          }
+        } catch {
+          delay = Math.min(delay * 2, 30_000);
+        }
+      }
+      if (!stopped) timer = setTimeout(tick, delay);
+    };
+    timer = setTimeout(tick, delay);
+    return () => { stopped = true; clearTimeout(timer); };
   }, [projectId, runId]);
 
   const bySpanId = useMemo(() => new Map((spans ?? []).map((span) => [span.spanId, span])), [spans]);

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
+import { accessKey, hasRecentAccess, rememberAccess } from "@/lib/access-cache";
 import { getAuthedConvexClient } from "@/lib/convex-server";
 import {
   getJsonCache,
@@ -28,15 +29,47 @@ const RUNNING_SPANS_FRESH_MS = 30 * 1000;
 const TERMINAL_SPANS_FRESH_MS = 24 * 60 * 60 * 1000;
 const REDIS_STALE_TTL_SECONDS = 24 * 60 * 60;
 
+function normalizeSpan(span: SpanRow) {
+  return {
+    ...span,
+    attachments: span.attachments ?? "[]",
+    inputTokens: span.inputTokens ?? 0,
+    outputTokens: span.outputTokens ?? 0,
+    ttftMs: span.ttftMs ?? 0,
+    retryCount: span.retryCount ?? 0,
+    errorType: span.errorType ?? "",
+    errorMessage: span.errorMessage ?? "",
+    isStreamChunk: span.isStreamChunk ?? false,
+    streamSequence: span.streamSequence ?? 0,
+    streamFinal: span.streamFinal ?? true,
+    payloadFormat: span.payloadFormat ?? "json",
+    stackTrace: span.stackTrace ?? "",
+    timedOut: span.timedOut ?? false,
+    timeoutMs: span.timeoutMs ?? 0,
+  };
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ projectId: string; runId: string }> },
 ) {
+  const { projectId, runId } = await params;
+  // Open trace panels poll with live=1. After a recent successful read by the same session, read the spans
+  // straight from analytics: no Convex token, access query, cache mutation or Redis write per poll.
+  const key = accessKey(req, "run", projectId, runId);
+  if (req.nextUrl.searchParams.get("live") === "1" && hasRecentAccess(key)) {
+    try {
+      const spans = (await getSpansForRun(runId, projectId)).map(normalizeSpan);
+      return NextResponse.json({ spans, meta: { source: "analytics", cacheStatus: "live", reason: "live_poll", updatedAt: Date.now(), ageMs: 0 } });
+    } catch (error) {
+      console.error("Live span read failed:", error);
+      return NextResponse.json({ error: "Step data is temporarily unavailable." }, { status: 503 });
+    }
+  }
+
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const { projectId, runId } = await params;
   const refresh = req.nextUrl.searchParams.get("refresh") === "manual"
     ? "manual"
     : "normal";
@@ -45,7 +78,7 @@ export async function GET(
   const redisKey = `analytics:spans:${projectId}:${runId}`;
 
   try {
-    const run = await convex.query(api.agentRuns.getByRunId, {
+    const run = await convex.query(api.agentRuns.getByRunIdForViewer, {
       projectId: convexProjectId,
       runId,
     });
@@ -53,6 +86,7 @@ export async function GET(
     if (!run) {
       return NextResponse.json({ error: "Run not found" }, { status: 404 });
     }
+    rememberAccess(key);
 
     const redisCache = await getJsonCache<SpansCachePayload>(redisKey);
     if (refresh === "normal" && redisCache) {
@@ -116,23 +150,7 @@ export async function GET(
       });
     }
 
-    const spans = (await getSpansForRun(runId, projectId)).map((span) => ({
-      ...span,
-      attachments: span.attachments ?? "[]",
-      inputTokens: span.inputTokens ?? 0,
-      outputTokens: span.outputTokens ?? 0,
-      ttftMs: span.ttftMs ?? 0,
-      retryCount: span.retryCount ?? 0,
-      errorType: span.errorType ?? "",
-      errorMessage: span.errorMessage ?? "",
-      isStreamChunk: span.isStreamChunk ?? false,
-      streamSequence: span.streamSequence ?? 0,
-      streamFinal: span.streamFinal ?? true,
-      payloadFormat: span.payloadFormat ?? "json",
-      stackTrace: span.stackTrace ?? "",
-      timedOut: span.timedOut ?? false,
-      timeoutMs: span.timeoutMs ?? 0,
-    }));
+    const spans = (await getSpansForRun(runId, projectId)).map(normalizeSpan);
     // The Convex cache validates a fixed span shape; newer analytics columns (session, user, tags...)
     // are returned to the client but not stored in the cache document.
     const cached = await convex.mutation(api.analyticsCache.upsertRunSpanCache, {

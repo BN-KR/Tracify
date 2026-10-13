@@ -16,7 +16,14 @@ dashboard page. A new or rebuilt page is done only when it meets each section be
 ## Live by default
 
 - New records appear without a reload or a Refresh click. Poll every 3–5 s while the tab is visible,
-  and skip when the tab is hidden or a request is already in flight.
+  and skip when the tab is hidden or a request is already in flight. Back off (double, capped at
+  30–60 s) while nothing changes or a poll fails, and drop back to the base interval when data changes.
+- A successful poll clears any earlier error, so one failed request never leaves the page stuck.
+- Polled API routes must stay cheap: check project access once, remember it per session with
+  `src/lib/access-cache.ts`, and skip Convex token, access and cache writes on later polls. Per-poll
+  Convex calls trip Convex's JWKS rate limit (HTTP 429) for every viewer.
+- Every route that returns project data checks the viewer's access (`canAccessProject`), including
+  detail routes looked up by id. Never use an unchecked lookup such as `agentRuns.getByRunId` for viewers.
 - Show the state in the header: a "Live" control with a pulsing dot that the viewer can pause. Remember
   the choice per browser. Fixed (zoomed) time windows do not poll and say why.
 - Re-render only when data changed, keep scroll and selection, and do not flash a loading state on polls.

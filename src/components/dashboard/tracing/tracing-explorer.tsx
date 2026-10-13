@@ -134,32 +134,44 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   }, [apiParams, optionsKey, projectId, requestKey]);
 
   // Live updates: for relative ranges, quietly refetch the list with the window moved forward so new traces
-  // appear without pressing Refresh. Skipped for fixed from/to windows, hidden tabs, and while a load is pending.
+  // appear without pressing Refresh. Skipped while paused, for fixed from/to windows, hidden tabs, and while a
+  // load is pending. A successful poll clears an earlier error; failures back off from 5s up to 60s.
   useEffect(() => {
     if (!live || query.from || query.to) return;
     const rangeMs = RANGES.find((item) => item.id === query.range)?.ms ?? 86_400_000;
-    const timer = setInterval(() => {
-      if (document.hidden || settledKey !== requestKey) return;
-      const issued = requestId.current;
-      const params = new URLSearchParams(apiParams);
-      const to = Date.now();
-      params.set("to", String(to));
-      params.set("from", String(to - rangeMs));
-      fetch(`/api/projects/${encodeURIComponent(projectId)}/traces?${params}`, { cache: "no-store" })
-        .then(async (response) => (response.ok ? ((await response.json()) as ListResponse) : null))
-        .then((body) => {
-          if (!body || issued !== requestId.current) return;
-          setData((current) => {
-            // Only rows that arrive through a live poll are highlighted, never a whole new filter result.
-            const known = new Set((current?.rows ?? []).map((row) => row.runId));
-            const added = current ? body.rows.map((row) => row.runId).filter((id) => !known.has(id)) : [];
-            if (added.length) setFresh(new Set(added));
-            return { ...body, options: current?.options ?? body.options };
-          });
-        })
-        .catch(() => undefined);
-    }, 4000);
-    return () => clearInterval(timer);
+    let delay = 5000;
+    let timer: ReturnType<typeof setTimeout>;
+    let stopped = false;
+    const tick = async () => {
+      if (!document.hidden && settledKey === requestKey) {
+        const issued = requestId.current;
+        const params = new URLSearchParams(apiParams);
+        const to = Date.now();
+        params.set("to", String(to));
+        params.set("from", String(to - rangeMs));
+        try {
+          const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/traces?${params}`, { cache: "no-store" });
+          const body = response.ok ? ((await response.json()) as ListResponse) : null;
+          if (!body) throw new Error(`poll ${response.status}`);
+          delay = 5000;
+          if (issued === requestId.current) {
+            setError(null);
+            setData((current) => {
+              // Only rows that arrive through a live poll are highlighted, never a whole new filter result.
+              const known = new Set((current?.rows ?? []).map((row) => row.runId));
+              const added = current ? body.rows.map((row) => row.runId).filter((id) => !known.has(id)) : [];
+              if (added.length) setFresh(new Set(added));
+              return { ...body, options: current?.options ?? body.options };
+            });
+          }
+        } catch {
+          delay = Math.min(delay * 2, 60_000);
+        }
+      }
+      if (!stopped) timer = setTimeout(tick, delay);
+    };
+    timer = setTimeout(tick, delay);
+    return () => { stopped = true; clearTimeout(timer); };
   }, [apiParams, live, projectId, query.from, query.range, query.to, requestKey, settledKey]);
 
   const rows = useMemo(() => data?.rows ?? [], [data]);

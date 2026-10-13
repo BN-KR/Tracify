@@ -2,17 +2,23 @@ import { isAuthenticated } from "@/lib/auth-server";
 import { NextRequest, NextResponse } from "next/server";
 import type { Id } from "convex/_generated/dataModel";
 import { api } from "convex/_generated/api";
+import { accessKey, hasRecentAccess, rememberAccess } from "@/lib/access-cache";
 import { getAuthedConvexClient } from "@/lib/convex-server";
 import { listTraces, traceFilterOptions, traceHistogram, traceStats } from "@/lib/tinybird";
 import { parseTraceFilters } from "@/lib/trace-filters";
 
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
-  if (!(await isAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { projectId } = await params;
-  const convex = await getAuthedConvexClient();
-  const project = await convex.query(api.projects.getProjectById, { projectId: projectId as Id<"projects"> });
-  if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  // The list polls every few seconds; skip the Convex token and access round trips after a recent success.
+  const key = accessKey(request, "project", projectId);
+  if (!hasRecentAccess(key)) {
+    if (!(await isAuthenticated())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const convex = await getAuthedConvexClient();
+    const project = await convex.query(api.projects.getProjectById, { projectId: projectId as Id<"projects"> });
+    if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    rememberAccess(key);
+  }
 
   const filters = parseTraceFilters(request.nextUrl.searchParams);
   try {
