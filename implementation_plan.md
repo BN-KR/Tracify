@@ -1,14 +1,10 @@
 # Langfuse parity-plus product epic — 2026-09-03
 
-## Tracing graph canvas — 2026-10-13
+## Tracing map refinement — 2026-10-13
 
-- [done] Use one React Flow canvas for the aggregate map and per-trace graph; add ELK left-to-right orthogonal layout and retain positions for surviving nodes.
-- [done] Add cursor-centered wheel/pinch zoom, drag pan, double-click, keyboard controls, fit/selection focus, fullscreen and minimap.
-- [done] Add URL-backed map node/arrow-limit state, search, node/edge detail popovers with separate Show traces actions, and low-zoom arrow decluttering.
-- [done] Update `docs/dashboard-page-standard.md`; keep the accessible busiest-arrows table.
-- [done] Draft PR #145 (`codex/tracing-canvas`) is pushed and both Vercel previews are Ready at canvas implementation `88293c9`.
-- [done] Focused ESLint, full `tsc --noEmit`, and EU-configured `pnpm build` pass. The Ready EU preview passes click interactions 26/26, live updates 7/7, and the extended feature suite, including pan/zoom, fit/double-click, fullscreen fit/restore/Escape, minimap, search, node/arrow count parity, live view retention, and phone overflow.
-- [done] Reviewed desktop 1440×900 and mobile 390×844 screenshots for overview, zoomed-in, zoomed-out, and fullscreen layouts. Updated `docs/dashboard-page-standard.md`; PR remains draft/unmerged and Sessions files are untouched.
+- Replace graph connectors with straight paths and retain full card text at every zoom.
+- Place the minimap inside the shared flow; add click-to-center, viewport outline, responsive size and independent directional drag/wheel verification.
+- Verify the Ready EU preview and publish a new draft PR from current main after #145 merged. Durable completion history belongs in memory.md.
 
 ## Google Analytics 4 — 2026-09-15
 

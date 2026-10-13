@@ -336,7 +336,7 @@ export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
   const focusNodeId = selectedId ? flattened.items.find((node) => node.spanIds.includes(selectedId))?.key : null;
   const edges: CanvasEdge[] = useMemo(() => flattened.edges.map((edge) => ({
     ...edge,
-    type: "smoothstep",
+    type: "straight",
     focusable: true,
     ariaLabel: `${nodeById.get(edge.source)?.name ?? "Step"} leads to ${nodeById.get(edge.target)?.name ?? "step"}`,
     style: { stroke: "#4A5260", strokeWidth: 1.5 },

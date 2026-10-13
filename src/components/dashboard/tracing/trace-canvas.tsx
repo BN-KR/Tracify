@@ -5,6 +5,7 @@ import {
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
+  useStore,
   type Edge,
   type EdgeTypes,
   type Node,
@@ -251,8 +252,9 @@ function TraceCanvasViewport({
           role="group"
           proOptions={{ hideAttribution: true }}
           className="tracing-flow"
-        />
-        <MiniMap pannable zoomable position="bottom-left" style={{ width: 196, height: 128 }} ariaLabel={`${label} minimap`} className="!bottom-3 !left-3 !m-0 !border !border-[#262C35] !bg-[#111418]" maskColor="rgba(11,13,16,0.78)" nodeColor="#6B7380" />
+        >
+          <CanvasMinimap label={label} />
+        </ReactFlow>
         {children}
         <div role="group" aria-label="Canvas controls" className="absolute bottom-3 right-3 z-10 flex items-center divide-x divide-[#262C35] border border-[#262C35] bg-[#111418] shadow-lg">
           <button type="button" aria-label="Zoom out" className={controlClass} onClick={() => zoomBy(1 / 1.25)}>−</button>
@@ -268,5 +270,28 @@ function TraceCanvasViewport({
       </div>
       <span className="sr-only">{instance ? "Canvas ready. Drag to pan, scroll or pinch to zoom, use arrow keys to pan, plus or minus to zoom, and zero to fit." : "Preparing canvas…"}</span>
     </div>
+  );
+}
+
+/** Lives inside the flow so its viewport, node geometry and gesture controller share one store. */
+function CanvasMinimap({ label }: { label: string }) {
+  const flow = useReactFlow();
+  const narrow = useStore((state) => state.width < 500);
+  return (
+    <MiniMap
+      pannable
+      zoomable
+      inversePan={false}
+      position="bottom-left"
+      style={{ width: narrow ? 120 : 196, height: narrow ? 80 : 128, touchAction: "none", cursor: "crosshair" }}
+      ariaLabel={`${label} minimap. Click to navigate, drag to pan, scroll to zoom.`}
+      className="!bottom-14 !left-3 !m-0 !border !border-[#262C35] !bg-[#111418] sm:!bottom-3"
+      maskColor="rgba(11,13,16,0.65)"
+      maskStrokeColor="#F4D44D"
+      maskStrokeWidth={1.5}
+      nodeColor="#6B7380"
+      nodeBorderRadius={1}
+      onClick={(_, position) => { void flow.setCenter(position.x, position.y, { zoom: flow.getZoom(), duration: 200 }); }}
+    />
   );
 }
