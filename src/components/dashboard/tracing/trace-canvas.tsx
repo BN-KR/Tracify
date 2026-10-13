@@ -12,7 +12,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import { Maximize2, Minimize2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 
 export type CanvasNodeData = Record<string, unknown>;
 export type CanvasNode = Node<CanvasNodeData, "traceCard">;
@@ -123,9 +123,23 @@ function TraceCanvasViewport({
     else return;
     event.preventDefault();
   };
+  const handleDoubleClick = (event: MouseEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    if (target.closest("button,input,select,textarea,.react-flow__minimap")) return;
+    const root = event.currentTarget.querySelector(".react-flow");
+    if (!root) return;
+    const bounds = root.getBoundingClientRect();
+    const px = event.clientX - bounds.left;
+    const py = event.clientY - bounds.top;
+    const current = flow.getViewport();
+    const zoom = Math.min(4, current.zoom * 1.2);
+    const worldX = (px - current.x) / current.zoom;
+    const worldY = (py - current.y) / current.zoom;
+    void flow.setViewport({ x: px - worldX * zoom, y: py - worldY * zoom, zoom }, { duration: 180 });
+  };
 
   return (
-    <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-[300px] w-full"} ${className}`} onKeyDown={handleKeyDown}>
+    <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-[300px] w-full"} ${className}`} onKeyDown={handleKeyDown} onDoubleClick={handleDoubleClick}>
       <div className="absolute inset-0 overflow-hidden border border-[#1F242C] bg-[#0B0D10]">
         <ReactFlow
           nodes={nodes}
@@ -148,7 +162,7 @@ function TraceCanvasViewport({
           panOnScroll={false}
           zoomOnScroll
           zoomOnPinch
-          zoomOnDoubleClick
+          zoomOnDoubleClick={false}
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable
@@ -159,7 +173,7 @@ function TraceCanvasViewport({
           proOptions={{ hideAttribution: true }}
           className="tracing-flow"
         />
-        <MiniMap pannable zoomable ariaLabel={`${label} minimap`} className="!bottom-3 !left-3 !m-0 !border !border-[#262C35] !bg-[#111418]" maskColor="rgba(11,13,16,0.78)" nodeColor="#6B7380" />
+        <MiniMap pannable zoomable position="bottom-left" ariaLabel={`${label} minimap`} className="!bottom-3 !left-3 !m-0 !border !border-[#262C35] !bg-[#111418]" maskColor="rgba(11,13,16,0.78)" nodeColor="#6B7380" />
         {children}
         <div role="group" aria-label="Canvas controls" className="absolute bottom-3 right-3 z-10 flex items-center divide-x divide-[#262C35] border border-[#262C35] bg-[#111418] shadow-lg">
           <button type="button" aria-label="Zoom out" className={controlClass} onClick={() => zoomBy(1 / 1.25)}>−</button>
