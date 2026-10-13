@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
+import dynamic from "next/dynamic";
 import type { SpanTreeNode } from "@/lib/tracify-ports/treeBuilding";
 import { compactNumber, formatCost, formatDuration } from "./format";
+import { layoutWithElk } from "./elk-layout";
+import type { CanvasEdge, CanvasNode } from "./trace-canvas";
+import { TraceCanvasNode } from "./trace-canvas-nodes";
 
 /** The span fields the views need; the panel's Span type satisfies it. */
 export type ViewSpan = {
@@ -16,6 +20,7 @@ export const TYPE_COLOR: Record<string, string> = {
 };
 const OTHER = "#8B93A1";
 const FAILED = "#FF6B6B";
+const TraceCanvas = dynamic(() => import("./trace-canvas").then((module) => module.TraceCanvas), { ssr: false });
 
 export function stepColor(type: string, failed: boolean) {
   return failed ? FAILED : TYPE_COLOR[(type || "").toLowerCase()] ?? OTHER;
@@ -47,10 +52,6 @@ function describe(name: string, span: ViewSpan, failed: boolean) {
     name, formatDuration(span.latencyMs), Number(span.costUsd) ? formatCost(Number(span.costUsd)) : "",
     tokens ? `${compactNumber(tokens)} tokens` : "", failed ? `failed${span.errorType ? `: ${span.errorType}` : ""}` : "",
   ].filter(Boolean).join(" · ");
-}
-
-function activate(event: KeyboardEvent, action: () => void) {
-  if (event.key === "Enter" || event.key === " ") { event.preventDefault(); action(); }
 }
 
 /** 1, 2 or 5 × 10ⁿ so the axis shows roughly six labelled ticks. */
@@ -146,8 +147,6 @@ export function useWheelZoom(ref: RefObject<HTMLElement | null>, zoom: number, s
 }
 
 const timelineZooms = (event: WheelEvent) => event.ctrlKey || event.metaKey;
-const graphZooms = () => true;
-
 const NAME_COL = 190;
 
 /**
@@ -155,8 +154,6 @@ const NAME_COL = 190;
  * Each bar is labelled with its duration and cost; hover or focus adds tokens. Zoom widens the time axis.
  */
 const TIMELINE_LIMITS = { min: 1, max: 64 };
-const GRAPH_LIMITS = { min: 0.25, max: 2.5 };
-
 export function TraceTimeline({ rows, spans, totalMs, selectedId, isFailed, onSelect }: {
   rows: SpanTreeNode[]; spans: Map<string, ViewSpan>; totalMs: number; selectedId: string | null;
   isFailed: (span: ViewSpan) => boolean; onSelect: (id: string) => void;
@@ -285,123 +282,83 @@ function aggregatedTree(roots: SpanTreeNode[], spans: Map<string, ViewSpan>, isF
   return merge(roots, 0, "");
 }
 
-const NODE_W = 184;
-const NODE_H = 44;
-const COL_GAP = 40;
-const ROW_GAP = 10;
-const PAD = 16;
-
 /**
- * Steps as cards with parent → child connectors, left to right. Aggregated merges repeated steps (×N);
- * Expanded shows every step. Colour = type, the bar inside = latency, failed = red. Clicking selects the step.
+ * Steps as ELK layered cards in the shared pan/zoom canvas. The viewport and user transform survive polls;
+ * the last position of every existing node is kept when live data adds or updates steps.
  */
 export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
   roots: SpanTreeNode[]; spans: Map<string, ViewSpan>; selectedId: string | null;
   isFailed: (span: ViewSpan) => boolean; onSelect: (id: string) => void;
 }) {
   const [mode, setMode] = useState<"aggregated" | "expanded">("expanded");
-  const [zoom, setZoom] = useState(1);
-  const box = useRef<HTMLDivElement>(null);
-  useDragToMove(box);
-  // The wheel zooms around the cursor, like a map; drag to move.
-  const anchor = useMemo(() => (event: WheelEvent, el: HTMLElement, from: number, to: number) => {
-    const rect = el.getBoundingClientRect();
-    const x = event.clientX - rect.left, y = event.clientY - rect.top;
-    return { left: Math.max(0, ((el.scrollLeft + x) / from) * to - x), top: Math.max(0, ((el.scrollTop + y) / from) * to - y) };
-  }, []);
-  useWheelZoom(box, zoom, setZoom, GRAPH_LIMITS, graphZooms, anchor);
+  const [positionedNodes, setPositionedNodes] = useState<CanvasNode[]>([]);
+  const previous = useRef(new Map<string, { x: number; y: number }>());
   const tree = useMemo(() => (mode === "aggregated" ? aggregatedTree : expandedTree)(roots, spans, isFailed), [mode, roots, spans, isFailed]);
-  const layout = useMemo(() => {
-    // Leaves take consecutive rows; a parent sits level with the middle of its children. Iterative post-order.
-    const placed: Array<{ node: GraphNode; x: number; y: number }> = [];
-    const yOf = new Map<string, number>();
-    const edges: Array<[string, string]> = [];
-    let row = 0;
-    let maxDepth = 0;
-    const stack: Array<{ node: GraphNode; done: boolean }> = [...tree].reverse().map((node) => ({ node, done: false }));
+  const flattened = useMemo(() => {
+    const items: GraphNode[] = [];
+    const edges: Array<{ id: string; source: string; target: string }> = [];
+    const stack = [...tree].reverse();
     while (stack.length) {
-      const item = stack.pop()!;
-      const { node } = item;
-      maxDepth = Math.max(maxDepth, node.depth);
-      if (!item.done && node.children.length) {
-        stack.push({ node, done: true });
-        for (let i = node.children.length - 1; i >= 0; i--) stack.push({ node: node.children[i]!, done: false });
-        continue;
+      const node = stack.pop()!;
+      items.push(node);
+      for (const child of node.children) {
+        edges.push({ id: `${node.key}>${child.key}`, source: node.key, target: child.key });
+        stack.push(child);
       }
-      const ys = node.children.map((child) => yOf.get(child.key)!);
-      const y = ys.length ? (ys[0]! + ys[ys.length - 1]!) / 2 : PAD + row++ * (NODE_H + ROW_GAP);
-      yOf.set(node.key, y);
-      placed.push({ node, x: PAD + node.depth * (NODE_W + COL_GAP), y });
-      for (const child of node.children) edges.push([node.key, child.key]);
     }
-    const xOf = new Map(placed.map((item) => [item.node.key, item.x]));
-    return {
-      placed, edges, yOf, xOf,
-      width: PAD * 2 + (maxDepth + 1) * NODE_W + maxDepth * COL_GAP,
-      height: PAD * 2 + Math.max(1, row) * (NODE_H + ROW_GAP) - ROW_GAP,
-    };
+    return { items, edges };
   }, [tree]);
-  const maxLatency = Math.max(1, ...layout.placed.map((item) => item.node.latencyMs));
 
-  // Fit to the pane width (never above 1:1, never so small the text is unreadable) when the layout changes.
-  const fit = () => {
-    const width = box.current?.clientWidth ?? layout.width;
-    setZoom(Math.max(0.55, Math.min(1, (width - 8) / layout.width)));
-    box.current?.scrollTo({ left: 0, top: 0 });
+  useEffect(() => {
+    let active = true;
+    layoutWithElk("trace-steps", flattened.items.map((node) => ({ id: node.key, width: 205, height: 62 })), flattened.edges, previous.current)
+      .then((positions) => {
+        if (!active) return;
+        previous.current = positions;
+        setPositionedNodes(flattened.items.map((node) => ({
+          id: node.key,
+          type: "traceCard",
+          position: positions.get(node.key) ?? { x: 0, y: 0 },
+          focusable: true,
+          ariaLabel: [node.name, node.spanIds.length > 1 ? `${node.spanIds.length} steps` : "", formatDuration(node.latencyMs), node.costUsd ? formatCost(node.costUsd) : "", node.failed ? `${node.failed} failed` : ""].filter(Boolean).join(" · "),
+          data: { kind: node.type, name: node.name, runs: node.spanIds.length, spanIds: node.spanIds, failed: node.failed, latencyMs: node.latencyMs, costUsd: node.costUsd },
+        } as CanvasNode)));
+      });
+    return () => { active = false; };
+  }, [flattened]);
+
+  const nodes: CanvasNode[] = useMemo(() => positionedNodes.map((node) => ({
+    ...node,
+    selected: selectedId !== null && (node.data.spanIds as string[] | undefined)?.includes(selectedId),
+  })), [positionedNodes, selectedId]);
+
+  const nodeById = useMemo(() => new Map(flattened.items.map((node) => [node.key, node])), [flattened]);
+  const focusNodeId = selectedId ? flattened.items.find((node) => node.spanIds.includes(selectedId))?.key : null;
+  const edges: CanvasEdge[] = useMemo(() => flattened.edges.map((edge) => ({
+    ...edge,
+    type: "smoothstep",
+    focusable: true,
+    ariaLabel: `${nodeById.get(edge.source)?.name ?? "Step"} leads to ${nodeById.get(edge.target)?.name ?? "step"}`,
+    style: { stroke: "#4A5260", strokeWidth: 1.5 },
+    markerEnd: { type: "arrowclosed" as const, color: "#4A5260", width: 12, height: 12 },
+  })), [flattened, nodeById]);
+  const selectNode = (node: CanvasNode) => {
+    const spanId = (node.data.spanIds as string[] | undefined)?.[0];
+    if (spanId) onSelect(spanId);
   };
-  useEffect(fit, [layout.width]);
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#1F242C] px-2 py-1">
-        <div role="group" aria-label="Graph mode" className="flex rounded-md border border-[#262C35] p-0.5 text-xs">
+        <div role="group" aria-label="Graph mode" className="flex rounded-sm border border-[#262C35] p-0.5 text-xs">
           {([["expanded", "All steps", "Every step as its own card"], ["aggregated", "Grouped", "Repeated steps with the same name under the same parent are merged into one card (×N)"]] as const).map(([item, label, hint]) => (
             <button key={item} type="button" aria-pressed={mode === item} onClick={() => setMode(item)} title={hint}
-              className={`rounded px-2 py-0.5 ${mode === item ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>{label}</button>
+              className={`rounded-sm px-2 py-0.5 ${mode === item ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>{label}</button>
           ))}
         </div>
-        <span className="hidden text-[11px] text-[#6B7380] sm:inline">Scroll to zoom · drag to move</span>
-        <ZoomControls zoom={zoom} setZoom={setZoom} min={GRAPH_LIMITS.min} max={GRAPH_LIMITS.max} fit={fit} />
+        <span className="hidden text-[11px] text-[#6B7380] sm:inline">Drag to pan · scroll or pinch to zoom · 0 to fit</span>
       </div>
-      <div ref={box} className="min-h-0 flex-1 cursor-grab select-none overflow-auto">
-        <svg role="group" aria-label="Step graph" width={layout.width * zoom} height={layout.height * zoom} viewBox={`0 0 ${layout.width} ${layout.height}`} className="block">
-          {layout.edges.map(([from, to]) => {
-            const x1 = layout.xOf.get(from)! + NODE_W, y1 = layout.yOf.get(from)! + NODE_H / 2;
-            const x2 = layout.xOf.get(to)!, y2 = layout.yOf.get(to)! + NODE_H / 2;
-            const mid = x1 + COL_GAP / 2;
-            const r = Math.min(6, Math.abs(y2 - y1) / 2);
-            const dir = Math.sign(y2 - y1);
-            const d = Math.abs(y2 - y1) < 0.5 ? `M${x1} ${y1} H${x2}`
-              : `M${x1} ${y1} H${mid - r} Q${mid} ${y1} ${mid} ${y1 + dir * r} V${y2 - dir * r} Q${mid} ${y2} ${mid + r} ${y2} H${x2}`;
-            return <path key={`${from}>${to}`} data-edge="" d={d} fill="none" stroke="#3A414C" strokeWidth={1.25} />;
-          })}
-          {layout.placed.map(({ node, x, y }) => {
-            const selected = selectedId !== null && node.spanIds.includes(selectedId);
-            const failed = node.failed > 0;
-            const runs = node.spanIds.length;
-            const label = [node.name, runs > 1 ? `${runs} runs` : "", formatDuration(node.latencyMs), node.costUsd ? formatCost(node.costUsd) : "", failed ? `${node.failed} failed` : ""].filter(Boolean).join(" · ");
-            const select = () => onSelect(selected ? selectedId! : node.spanIds[0]!);
-            const room = runs > 1 ? 18 : 22;
-            return (
-              <g key={node.key} id={`graph-${node.spanIds[0]}`} role="button" tabIndex={0} aria-label={label} aria-pressed={selected}
-                className="cursor-pointer outline-none" transform={`translate(${x},${y})`} onClick={select} onKeyDown={(event) => activate(event, select)}>
-                <title>{label}</title>
-                <rect width={NODE_W} height={NODE_H} rx={7} fill={failed ? "#1E1314" : selected ? "#161B22" : "#111418"} stroke={selected ? "#F4D44D" : failed ? "#5A2A2A" : "#262C35"} strokeWidth={selected ? 2 : 1} />
-                <svg x={10} y={8} width={13} height={13} viewBox="0 0 16 16" fill="none" stroke={stepColor(node.type, failed)} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d={ICON_PATHS[failed ? "error" : (node.type || "").toLowerCase() === "generation" ? "llm" : (node.type || "").toLowerCase()] ?? ICON_PATHS.other} />
-                </svg>
-                <text x={29} y={19} fontSize={12} fill={failed ? "#FF8A8A" : "#E6E9EE"} fontFamily="var(--font-geist-sans), sans-serif">{node.name.length > room ? `${node.name.slice(0, room - 1)}…` : node.name}</text>
-                {runs > 1 ? <text x={NODE_W - 10} y={19} fontSize={10} textAnchor="end" fill="#8B93A1" fontFamily="var(--font-geist-mono), monospace">×{runs}</text> : null}
-                <text x={10} y={34} fontSize={10} fill={failed ? "#FF8A8A" : "#8B93A1"} fontFamily="var(--font-geist-mono), monospace">
-                  {formatDuration(node.latencyMs)}{node.costUsd ? ` · ${formatCost(node.costUsd)}` : ""}{failed ? ` · ${node.failed} err` : ""}
-                </text>
-                <rect x={6} y={NODE_H - 5} width={NODE_W - 12} height={2} rx={1} fill="#1A1F27" />
-                <rect x={6} y={NODE_H - 5} width={Math.max(2, (NODE_W - 12) * (node.latencyMs / maxLatency))} height={2} rx={1} fill={stepColor(node.type, failed)} />
-              </g>
-            );
-          })}
-        </svg>
-      </div>
+      {nodes.length ? <TraceCanvas nodes={nodes} edges={edges} nodeTypes={{ traceCard: TraceCanvasNode }} focusId={focusNodeId} label="Step graph" onNodeClick={selectNode} /> : <p className="flex min-h-0 flex-1 items-center justify-center text-sm text-[#8B93A1]">Laying out steps…</p>}
     </div>
   );
 }
