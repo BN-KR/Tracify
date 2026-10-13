@@ -12,7 +12,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import { Maximize2, Minimize2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 
 export type CanvasNodeData = Record<string, unknown>;
 export type CanvasNode = Node<CanvasNodeData, "traceCard">;
@@ -85,6 +85,7 @@ function TraceCanvasViewport({
   const [fullscreen, setFullscreen] = useState(false);
   const [zoom, setZoom] = useState(1);
   const lastFocus = useRef<string | null>(null);
+  const hasFitInitialNodes = useRef(false);
   const pointers = useRef(new Set<number>());
   const panGesture = useRef<{ id: number; pointerType: string; x: number; y: number; originX: number; originY: number; active: boolean } | null>(null);
   const suppressClick = useRef(false);
@@ -101,9 +102,15 @@ function TraceCanvasViewport({
   }, [center, focusId]);
 
   useEffect(() => {
+    if (!instance || !nodes.length || hasFitInitialNodes.current) return;
+    hasFitInitialNodes.current = true;
+    void instance.fitView({ padding: 0.18, duration: 0, minZoom: 0.1, maxZoom: 4 });
+  }, [instance, nodes.length]);
+
+  useEffect(() => {
     const onKey = (event: globalThis.KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      if (fullscreen) setFullscreen(false);
+      if (fullscreen) { setFullscreen(false); return; }
       onEscape?.();
     };
     window.addEventListener("keydown", onKey);
@@ -154,6 +161,13 @@ function TraceCanvasViewport({
     event.preventDefault();
     event.stopPropagation();
   };
+  const handleKeyDownCapture = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape" && fullscreen) {
+      event.preventDefault();
+      event.stopPropagation();
+      setFullscreen(false);
+    }
+  };
 
   useEffect(() => {
     const move = (event: PointerEvent) => {
@@ -185,7 +199,7 @@ function TraceCanvasViewport({
   }, [flow]);
 
   return (
-    <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-[300px] w-full"} ${className}`} onKeyDown={handleKeyDown} onDoubleClick={handleDoubleClick} onPointerDown={handlePointerDown} onClickCapture={handleClickCapture}>
+    <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-[300px] w-full"} ${className}`} onKeyDownCapture={handleKeyDownCapture} onKeyDown={handleKeyDown} onDoubleClick={handleDoubleClick} onPointerDown={handlePointerDown} onClickCapture={handleClickCapture}>
       <div className="absolute inset-0 overflow-hidden border border-[#1F242C] bg-[#0B0D10]">
         <ReactFlow
           nodes={nodes}
@@ -202,8 +216,7 @@ function TraceCanvasViewport({
           onEdgeMouseLeave={(_, edge) => onEdgeMouseLeave?.(edge as CanvasEdge)}
           minZoom={0.1}
           maxZoom={4}
-          fitView
-          fitViewOptions={{ padding: 0.18, minZoom: 0.1, maxZoom: 1.15 }}
+          fitView={false}
           panOnDrag={false}
           panOnScroll={false}
           zoomOnScroll

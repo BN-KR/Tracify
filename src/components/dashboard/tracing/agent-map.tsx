@@ -178,7 +178,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
       <div className="h-[min(62vh,620px)] min-h-[330px] w-full">
         <TraceCanvas nodes={nodes} edges={edges} nodeTypes={NODE_TYPES} edgeTypes={EDGE_TYPES} focusId={searchTarget?.id ?? selectedNode} label="Agent map" onZoomChange={setMapZoom}
           onNodeMouseEnter={(node) => setHover(node.id)} onNodeMouseLeave={() => setHover(null)}
-          onEdgeMouseEnter={() => setHover(null)} onEdgeMouseLeave={() => setHover(null)}
+          onEdgeClick={chooseEdge} onEdgeMouseEnter={() => setHover(null)} onEdgeMouseLeave={() => setHover(null)}
           onEscape={() => { onViewStateChange(null, edgeLimit); setSelectedEdge(null); }}>
           <div className="pointer-events-none absolute right-3 top-3 z-10 max-w-[min(310px,calc(100%-1.5rem))]">
             {selected ? <div className="pointer-events-auto border border-[#262C35] bg-[#111418]/95 p-3 shadow-xl">
