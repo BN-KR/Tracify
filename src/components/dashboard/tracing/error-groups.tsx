@@ -19,9 +19,9 @@ export function ErrorGroupsPanel({ data, open, loading, active, clock, onToggle,
 }) {
   const groups = data?.groups ?? [];
   return (
-    <section aria-label="Error groups" aria-busy={loading} className="mx-5 mt-4 rounded-lg border border-[#1F242C] bg-[#0E1115]">
+    <section aria-label="Error groups" aria-busy={loading} className="mx-4 mt-3 rounded-lg border border-[#1F242C] bg-[#0E1115]">
       <h2 className="m-0">
-        <button type="button" aria-expanded={open} onClick={onToggle} className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs text-[#8B93A1] hover:text-white">
+        <button type="button" aria-expanded={open} onClick={onToggle} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-[#8B93A1] hover:text-white">
           <span aria-hidden="true">{open ? "▾" : "▸"}</span>
           <span className="font-medium text-[#E6E9EE]">Error groups</span>
           {data ? <span className="font-mono">{data.total > groups.length ? `top ${groups.length} of ${compactNumber(data.total)}` : compactNumber(data.total)}</span> : null}
@@ -35,16 +35,16 @@ export function ErrorGroupsPanel({ data, open, loading, active, clock, onToggle,
       ) : groups.length === 0 ? (
         <p className="border-t border-[#1F242C] px-4 py-3 text-xs text-[#8B93A1]">No errors in the traces that match this range and these filters.</p>
       ) : (
-        <ul className="max-h-64 overflow-y-auto border-t border-[#1F242C]">
+        <ul className="max-h-56 overflow-y-auto border-t border-[#1F242C]">
           {groups.map((group) => {
             const selected = active === group.id;
             return (
               <li key={group.id} className="border-b border-[#171B21] last:border-b-0">
                 <button type="button" aria-pressed={selected} onClick={() => onSelect(group)} title={group.sample}
-                  className={`grid w-full grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-1 px-4 py-2 text-left sm:grid-cols-[auto_minmax(0,1fr)_auto] ${selected ? "bg-[#161B22] shadow-[inset_3px_0_0_#F4D44D]" : "hover:bg-[#12161C]"}`}>
+                  className={`grid w-full grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-0.5 px-3 py-1.5 text-left sm:grid-cols-[auto_minmax(0,1fr)_auto] ${selected ? "bg-[#161B22] shadow-[inset_3px_0_0_#F4D44D]" : "hover:bg-[#12161C]"}`}>
                   <span className="rounded bg-[#3A1C1F] px-2 py-0.5 font-mono text-xs text-[#FF8A8A]" aria-label={`${group.count} errors`}>{compactNumber(group.count)}</span>
                   <span className="min-w-0">
-                    <span className="block truncate text-sm"><span className="text-[#8AB4FF]">{group.tool || "—"}</span>{group.errorType ? <span className="text-[#8B93A1]"> · {group.errorType}</span> : null}</span>
+                    <span className="block truncate text-[13px]"><span className="text-[#8AB4FF]">{group.tool || "—"}</span>{group.errorType ? <span className="text-[#8B93A1]"> · {group.errorType}</span> : null}</span>
                     <span className="block truncate font-mono text-[11px] text-[#C9CED6]">{group.message || "No message recorded"}</span>
                   </span>
                   <span className="col-start-2 flex flex-wrap gap-x-3 font-mono text-[11px] text-[#8B93A1] sm:col-start-3 sm:row-start-1 sm:flex-col sm:items-end">

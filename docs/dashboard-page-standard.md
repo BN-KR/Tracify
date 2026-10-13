@@ -40,6 +40,10 @@ dashboard page. A new or rebuilt page is done only when it meets each section be
   actions → summary stats strip → chart → table → footer (count, rows per page, paging).
 - Numbers, ids, times and costs use the mono font. Times show relative ("5m ago") with the absolute
   local time on hover. Durations, costs and counts use the shared helpers in `tracing/format.ts`.
+- Density: Geist Sans 13 px for text, mono 11–12 px for numbers and ids, 28–32 px table rows, 28–32 px
+  controls, 12–16 px page padding. Prefer type icons in the step colours over text badges.
+- Side panels split into panes that each scroll on their own (`min-h-0` + `overflow-auto` on every pane,
+  CSS grid, never `flex-wrap`), so the end of a long list is always reachable. Test it with a long record.
 - No horizontal page scroll at any width from 360 px up. Wide tables scroll inside their container.
   Phones start with secondary panels (filters) collapsed.
 
@@ -80,8 +84,11 @@ Detail panels for a record made of steps offer `Tree | Timeline | Graph` tabs (`
   step, one data source (the polled detail request) and one set of step filters.
 - Timeline: one bar per step on a shared time axis, in tree order, so overlapping bars show parallel
   work and gaps show waiting. Hover or focus shows name, latency, cost and tokens.
-- Graph: steps as nodes with parent → child arrows. Colour = step type (the same colours as the type
-  badges), size = latency, failed = red, selected = yellow ring. Clicking a node selects the step.
+- Timeline: a fixed name column with type icons, a time axis with gridlines, duration and cost written on
+  every bar (beside it when the bar is short), and zoom in/out/fit.
+- Graph: cards with elbow connectors, left to right. Aggregated (default) merges repeated sibling steps
+  into one card (×N); Expanded shows every step. Colour = step type, the thin bar = latency, failed = red,
+  selected = yellow border. Zoom in/out/fit; it starts fitted to the pane. Clicking a card selects the step.
 - Both are SVG/HTML from data already loaded; they need no extra request. Wide or tall views scroll
   inside their own box, never the page. Nodes and bars are buttons with a full `aria-label`.
 

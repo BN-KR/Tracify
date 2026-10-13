@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { buildSpanTree, type SpanTreeNode } from "@/lib/tracify-ports/treeBuilding";
 import { chatMessages, compactNumber, downloadFile, formatCost, formatDuration, formatTime, parsePayload } from "./format";
-import { TraceGraph, TraceTimeline } from "./trace-views";
+import { TraceGraph, TraceTimeline, TypeIcon } from "./trace-views";
 
 type Span = {
   spanId: string; parentSpanId: string; spanType: string; createdAt: string; latencyMs: number; costUsd: number;
@@ -33,12 +33,6 @@ function matchesFilter(span: Span, filter: StepFilter) {
   if (filter === "tool") return type === "tool" || type === "retrieval";
   return true;
 }
-
-const TYPE_STYLE: Record<string, string> = {
-  llm: "bg-[#F4D44D] text-[#0B0D10]", generation: "bg-[#F4D44D] text-[#0B0D10]",
-  tool: "bg-[#8AB4FF] text-[#0B0D10]", retrieval: "bg-[#7CF5C8] text-[#0B0D10]",
-  error: "bg-[#FF6B6B] text-[#0B0D10]", agent: "bg-[#C9CED6] text-[#0B0D10]",
-};
 
 function spanName(span: Span) {
   return span.toolName || span.modelId || span.traceName || span.spanType || "span";
@@ -198,19 +192,20 @@ export function TracePanel({ projectId, runId, summary, view, onView, onClose, o
     });
   }
 
+  const toolButton = "h-7 rounded-md border border-[#262C35] px-2 text-xs text-[#C9CED6] hover:border-[#4A5260]";
   return (
-    <aside aria-label="Trace detail" className="fixed inset-0 z-40 flex min-w-0 flex-col border-l border-[#1F242C] bg-[#0E1115] shadow-[-24px_0_48px_rgba(0,0,0,0.45)] lg:left-auto lg:w-[min(820px,60vw)]">
-      <div className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-3">
-        <h2 className="min-w-0 flex-1 truncate text-base font-semibold">{name}</h2>
-        <button type="button" onClick={copyLink} className="h-8 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">{linkCopied ? "Link copied" : "Copy link"}</button>
-        <button type="button" onClick={downloadJson} disabled={!spans?.length} className="h-8 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40">JSON</button>
-        <button type="button" aria-label="Previous trace" onClick={() => onStep(-1)} className="h-8 w-8 rounded-md border border-[#262C35] hover:border-[#4A5260]">↑</button>
-        <button type="button" aria-label="Next trace" onClick={() => onStep(1)} className="h-8 w-8 rounded-md border border-[#262C35] hover:border-[#4A5260]">↓</button>
-        <button type="button" aria-label="Close trace" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-md border border-[#262C35] hover:border-[#4A5260]">
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+    <aside aria-label="Trace detail" className="fixed inset-0 z-40 flex min-w-0 flex-col border-l border-[#1F242C] bg-[#0E1115] font-[family-name:var(--font-geist-sans)] text-[13px] shadow-[-24px_0_48px_rgba(0,0,0,0.45)] lg:left-auto lg:w-[min(1180px,84vw)]">
+      <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[#1F242C] px-3 py-2">
+        <h2 className="min-w-0 flex-1 truncate text-sm font-semibold">{name}</h2>
+        <button type="button" onClick={copyLink} className={toolButton}>{linkCopied ? "Link copied" : "Copy link"}</button>
+        <button type="button" onClick={downloadJson} disabled={!spans?.length} className={`${toolButton} disabled:opacity-40`}>JSON</button>
+        <button type="button" aria-label="Previous trace" onClick={() => onStep(-1)} className="h-7 w-7 rounded-md border border-[#262C35] hover:border-[#4A5260]">↑</button>
+        <button type="button" aria-label="Next trace" onClick={() => onStep(1)} className="h-7 w-7 rounded-md border border-[#262C35] hover:border-[#4A5260]">↓</button>
+        <button type="button" aria-label="Close trace" onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-md border border-[#262C35] hover:border-[#4A5260]">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
         </button>
       </div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[#1F242C] px-4 py-3 font-mono text-xs text-[#C9CED6]">
+      <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-[#1F242C] px-3 py-1.5 font-mono text-[11px] text-[#C9CED6]">
         <button type="button" className="text-[#8B93A1] hover:text-white" onClick={() => { void navigator.clipboard?.writeText(runId); setCopied(true); setTimeout(() => setCopied(false), 1200); }}>
           {copied ? "copied" : `${runId.slice(0, 16)}… copy`}
         </button>
@@ -234,71 +229,78 @@ export function TracePanel({ projectId, runId, summary, view, onView, onClose, o
       ) : spans.length === 0 ? (
         <p className="p-4 text-sm text-[#8B93A1]">This trace has no recorded steps yet.</p>
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col">
-        <div className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
-          <div role="tablist" aria-label="Trace view" className="flex rounded-md border border-[#262C35] p-0.5 text-xs">
-            {TRACE_VIEWS.map((item) => (
-              <button key={item.id} type="button" role="tab" aria-selected={view === item.id} aria-controls="trace-view" onClick={() => onView(item.id)}
-                className={`rounded px-2 py-1 ${view === item.id ? "bg-[#F4D44D] text-[#0B0D10]" : "text-[#8B93A1] hover:text-white"}`}>{item.label}</button>
-            ))}
-          </div>
-          <div role="group" aria-label="Step type" className="flex rounded-md border border-[#262C35] p-0.5 text-xs">
-            {STEP_FILTERS.map((filter) => (
-              <button key={filter.id} type="button" aria-pressed={stepFilter === filter.id} onClick={() => setStepFilter(filter.id)}
-                disabled={filter.id !== "all" && !counts[filter.id]}
-                className={`rounded px-2 py-1 disabled:opacity-40 ${stepFilter === filter.id ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>
-                {filter.label} <span className="font-mono text-[10px] text-[#6B7380]">{counts[filter.id]}</span>
+        // Two panes that each scroll on their own: steps (tree, timeline or graph) and the selected step's detail.
+        // Phones stack them, with the steps pane capped so the detail is always reachable.
+        <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,48%)_minmax(0,1fr)] md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:grid-rows-1">
+          <div className="flex min-h-0 min-w-0 flex-col border-b border-[#1F242C] md:border-b-0 md:border-r">
+            <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[#1F242C] px-2 py-1.5">
+              <div role="tablist" aria-label="Trace view" className="flex rounded-md border border-[#262C35] p-0.5 text-xs">
+                {TRACE_VIEWS.map((item) => (
+                  <button key={item.id} type="button" role="tab" aria-selected={view === item.id} aria-controls="trace-view" onClick={() => onView(item.id)}
+                    className={`rounded px-2 py-0.5 ${view === item.id ? "bg-[#F4D44D] font-medium text-[#0B0D10]" : "text-[#8B93A1] hover:text-white"}`}>{item.label}</button>
+                ))}
+              </div>
+              <label htmlFor="step-search" className="sr-only">Search steps</label>
+              <input id="step-search" value={stepSearch} onChange={(event) => setStepSearch(event.target.value)} placeholder="Search steps"
+                className="h-7 min-w-[90px] flex-1 rounded-md border border-[#262C35] bg-[#111418] px-2 text-xs outline-none placeholder:text-[#6B7380] focus:border-[#4A5260]" />
+              <div role="group" aria-label="Step type" className="flex rounded-md border border-[#262C35] p-0.5 text-xs">
+                {STEP_FILTERS.map((filter) => (
+                  <button key={filter.id} type="button" aria-pressed={stepFilter === filter.id} onClick={() => setStepFilter(filter.id)}
+                    disabled={filter.id !== "all" && !counts[filter.id]}
+                    className={`rounded px-1.5 py-0.5 disabled:opacity-40 ${stepFilter === filter.id ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>
+                    {filter.label} <span className="font-mono text-[10px] text-[#6B7380]">{counts[filter.id]}</span>
+                  </button>
+                ))}
+              </div>
+              <button type="button" aria-label="Expand all" title="Expand all" onClick={() => setAllCollapsed(false)} disabled={filtering || view === "graph"} className="flex h-7 w-7 items-center justify-center rounded-md text-[#8B93A1] hover:bg-[#1A1F27] hover:text-white disabled:opacity-30">
+                <svg aria-hidden="true" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 6l4-3 4 3M4 10l4 3 4-3" /></svg>
               </button>
-            ))}
+              <button type="button" aria-label="Collapse all" title="Collapse all" onClick={() => setAllCollapsed(true)} disabled={filtering || view === "graph"} className="flex h-7 w-7 items-center justify-center rounded-md text-[#8B93A1] hover:bg-[#1A1F27] hover:text-white disabled:opacity-30">
+                <svg aria-hidden="true" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 3l4 3 4-3M4 13l4-3 4 3" /></svg>
+              </button>
+            </div>
+            <div id="trace-view" role="tabpanel" aria-label={`${TRACE_VIEWS.find((item) => item.id === view)!.label} view`} className={`min-h-0 flex-1 ${view === "tree" ? "overflow-auto" : "overflow-hidden"}`}>
+              {view === "timeline" ? (
+                <TraceTimeline rows={visibleRows} spans={bySpanId} totalMs={totalMs} selectedId={selectedId} isFailed={isFailed} onSelect={setSelectedId} />
+              ) : view === "graph" ? (
+                <TraceGraph roots={tree.roots} spans={bySpanId} selectedId={selectedId} isFailed={isFailed} onSelect={setSelectedId} />
+              ) : (
+                <ol aria-label="Steps" className="py-1">
+                  {visibleRows.length === 0 ? <li className="px-4 py-3 text-sm text-[#8B93A1]">No steps match.</li> : null}
+                  {visibleRows.map((node) => {
+                    const span = bySpanId.get(node.id)!;
+                    const failed = isFailed(span);
+                    const depth = filtering ? 0 : node.depth;
+                    const tokenCount = Number(span.inputTokens) + Number(span.outputTokens);
+                    return (
+                      <li key={node.id} id={`step-${node.id}`}>
+                        <div className={`relative flex items-start pr-2 ${selectedId === node.id ? "bg-[#161B22] shadow-[inset_3px_0_0_#F4D44D]" : "hover:bg-[#12161C]"}`} style={{ paddingLeft: 6 + depth * 14 }}>
+                          {Array.from({ length: depth }, (_, level) => <span key={level} aria-hidden="true" className="absolute inset-y-0 border-l border-[#1F242C]" style={{ left: 14 + level * 14 }} />)}
+                          {node.children.length && !filtering ? (
+                            <button type="button" aria-label={collapsed.has(node.id) ? "Expand" : "Collapse"} aria-expanded={!collapsed.has(node.id)} onClick={() => toggle(node.id)} className="mt-1 h-5 w-4 shrink-0 text-[10px] text-[#6B7380] hover:text-white">{collapsed.has(node.id) ? "▸" : "▾"}</button>
+                          ) : <span className="w-4 shrink-0" />}
+                          <button type="button" onClick={() => setSelectedId(node.id)} className="flex min-w-0 flex-1 flex-col py-1 pl-1 text-left">
+                            <span className="flex min-w-0 items-center gap-1.5">
+                              <TypeIcon type={span.spanType} failed={failed} size={13} />
+                              <span className={`truncate ${failed ? "text-[#FF8A8A]" : "text-[#E6E9EE]"}`}>{node.name}</span>
+                              <span className="sr-only">{(span.spanType || "span").toLowerCase()}</span>
+                            </span>
+                            <span className="mt-0.5 flex min-w-0 items-center gap-2 pl-[19px] font-mono text-[11px] text-[#8B93A1]">
+                              <span>{formatDuration(span.latencyMs)}</span>
+                              {Number(span.costUsd) ? <span>{formatCost(Number(span.costUsd))}</span> : null}
+                              {tokenCount ? <span>{compactNumber(tokenCount)} tok</span> : null}
+                              {failed && span.errorType ? <span className="truncate text-[#FF8A8A]">{span.errorType}</span> : null}
+                            </span>
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+            </div>
           </div>
-          <label htmlFor="step-search" className="sr-only">Search steps</label>
-          <input id="step-search" value={stepSearch} onChange={(event) => setStepSearch(event.target.value)} placeholder="Search steps"
-            className="h-8 min-w-[120px] flex-1 rounded-md border border-[#262C35] bg-[#111418] px-2 text-xs outline-none placeholder:text-[#6B7380] focus:border-[#4A5260]" />
-          <button type="button" onClick={() => setAllCollapsed(false)} disabled={filtering || view === "graph"} className="h-8 rounded-md px-2 text-xs text-[#8B93A1] hover:text-white disabled:opacity-40">Expand all</button>
-          <button type="button" onClick={() => setAllCollapsed(true)} disabled={filtering || view === "graph"} className="h-8 rounded-md px-2 text-xs text-[#8B93A1] hover:text-white disabled:opacity-40">Collapse all</button>
-        </div>
-        <div id="trace-view" role="tabpanel" aria-label={`${TRACE_VIEWS.find((item) => item.id === view)!.label} view`} className={`flex min-h-0 flex-1 ${view === "tree" ? "flex-wrap" : "flex-col"}`}>
-          {view === "timeline" ? (
-            <div className="max-h-[45vh] w-full shrink-0 overflow-auto border-b border-[#1F242C]">
-              <TraceTimeline rows={visibleRows} spans={bySpanId} totalMs={totalMs} selectedId={selectedId} isFailed={isFailed} onSelect={setSelectedId} />
-            </div>
-          ) : view === "graph" ? (
-            <div className="max-h-[45vh] w-full shrink-0 overflow-auto border-b border-[#1F242C]">
-              <TraceGraph roots={tree.roots} spans={bySpanId} selectedId={selectedId} isFailed={isFailed} onSelect={setSelectedId} />
-            </div>
-          ) : (
-          <ol aria-label="Steps" className="max-h-[70vh] w-full overflow-auto border-b border-[#1F242C] py-2 md:max-h-none md:w-[44%] md:border-b-0 md:border-r">
-            {visibleRows.length === 0 ? <li className="px-4 py-3 text-sm text-[#8B93A1]">No steps match.</li> : null}
-            {visibleRows.map((node) => {
-              const span = bySpanId.get(node.id)!;
-              const failed = isFailed(span);
-              const type = (span.spanType || "span").toLowerCase();
-              return (
-                <li key={node.id} id={`step-${node.id}`}>
-                  <div className={`flex items-center gap-1 pr-2 ${selectedId === node.id ? "bg-[#161B22] shadow-[inset_3px_0_0_#F4D44D]" : "hover:bg-[#12161C]"}`} style={{ paddingLeft: 8 + (filtering ? 0 : node.depth * 16) }}>
-                    {node.children.length && !filtering ? (
-                      <button type="button" aria-label={collapsed.has(node.id) ? "Expand" : "Collapse"} aria-expanded={!collapsed.has(node.id)} onClick={() => toggle(node.id)} className="h-7 w-5 text-[#8B93A1] hover:text-white">{collapsed.has(node.id) ? "▸" : "▾"}</button>
-                    ) : <span className="w-5" />}
-                    <button type="button" onClick={() => setSelectedId(node.id)} className="flex min-w-0 flex-1 flex-col py-1.5 text-left">
-                      <span className="flex min-w-0 items-center gap-2">
-                        <span className={`shrink-0 rounded px-1.5 py-0.5 font-mono text-[10px] uppercase ${failed ? TYPE_STYLE.error : TYPE_STYLE[type] ?? "bg-[#2A303A] text-[#E6E9EE]"}`}>{type}</span>
-                        <span className={`truncate text-sm ${failed ? "text-[#FF8A8A]" : ""}`}>{node.name}</span>
-                      </span>
-                      <span className="mt-1 flex items-center gap-2 font-mono text-[11px] text-[#8B93A1]">
-                        {formatDuration(span.latencyMs)}{Number(span.costUsd) ? ` · ${formatCost(Number(span.costUsd))}` : ""}{Number(span.inputTokens) + Number(span.outputTokens) ? ` · ${compactNumber(Number(span.inputTokens) + Number(span.outputTokens))} tok` : ""}
-                      </span>
-                      <span className="mt-1 h-1 rounded bg-[#1A1F27]" aria-hidden="true">
-                        <span className={`block h-1 rounded ${failed ? "bg-[#FF6B6B]" : "bg-[#F4D44D]"}`} style={{ marginLeft: `${(node.startTimeSinceRootMs / totalMs) * 100}%`, width: `${Math.max(1.5, (Number(span.latencyMs) / totalMs) * 100)}%` }} />
-                      </span>
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-          )}
-          <div className={`min-w-0 flex-1 overflow-auto p-4 ${view === "tree" ? "" : "min-h-0"}`}>{selected ? <StepDetail span={selected} /> : null}</div>
-        </div>
+          <div className="min-h-0 min-w-0 overflow-auto p-4">{selected ? <StepDetail span={selected} /> : null}</div>
         </div>
       )}
     </aside>

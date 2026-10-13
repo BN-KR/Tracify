@@ -284,11 +284,11 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   ];
 
   return (
-    <div className="flex min-h-svh flex-col bg-[#0B0D10] text-[#E6E9EE]">
-      <header className="flex flex-wrap items-center gap-3 border-b border-[#1F242C] px-5 py-4">
-        <h1 className="mr-2 text-xl font-semibold tracking-tight">Tracing</h1>
+    <div className="flex min-h-svh flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
+      <header className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
+        <h1 className="mr-2 text-base font-semibold tracking-tight">Tracing</h1>
         <form
-          className="flex min-w-[220px] flex-1 items-center gap-2 rounded-lg border border-[#262C35] bg-[#111418] px-3 focus-within:border-[#4A5260]"
+          className="flex min-w-[220px] flex-1 items-center gap-2 rounded-md border border-[#262C35] bg-[#111418] px-2.5 focus-within:border-[#4A5260]"
           onSubmit={(event) => { event.preventDefault(); update({ q: searchDraft.trim() }); }}
         >
           <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 text-[#8B93A1]" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
@@ -296,33 +296,33 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
           <input
             id="trace-search" ref={searchRef} value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)}
             placeholder="Search name, id, input or output"
-            className="h-10 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#6B7380]"
+            className="h-8 min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#6B7380]"
           />
           {query.q ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => { setSearchDraft(""); update({ q: "" }); }}>Clear</button> : <kbd className="hidden rounded border border-[#262C35] px-1.5 font-mono text-[10px] text-[#6B7380] sm:block" aria-hidden="true">/</kbd>}
         </form>
-        <div role="group" aria-label="Time range" className="flex rounded-lg border border-[#262C35] bg-[#111418] p-1">
+        <div role="group" aria-label="Time range" className="flex rounded-md border border-[#262C35] bg-[#111418] p-0.5">
           {RANGES.map((range) => {
             const active = !query.from && (query.range ?? "24h") === range.id;
             return (
               <button key={range.id} type="button" aria-pressed={active}
                 onClick={() => { setNow(Date.now()); update({ range: range.id, from: "", to: "" }); }}
-                className={`h-8 min-w-11 rounded-md px-3 font-mono text-xs ${active ? "bg-[#F4D44D] text-[#0B0D10]" : "text-[#8B93A1] hover:text-white"}`}
+                className={`h-7 min-w-10 rounded px-2.5 font-mono text-xs ${active ? "bg-[#F4D44D] text-[#0B0D10]" : "text-[#8B93A1] hover:text-white"}`}
               >{range.label}</button>
             );
           })}
-          {query.from ? <button type="button" onClick={() => update({ from: "", to: "" })} className="h-8 rounded-md bg-[#F4D44D] px-3 font-mono text-xs text-[#0B0D10]">Zoomed · reset</button> : null}
+          {query.from ? <button type="button" onClick={() => update({ from: "", to: "" })} className="h-7 rounded bg-[#F4D44D] px-2.5 font-mono text-xs text-[#0B0D10]">Zoomed · reset</button> : null}
         </div>
         <button type="button" aria-pressed={isLive} onClick={toggleLive} disabled={Boolean(query.from || query.to)}
           title={query.from || query.to ? "Live updates are off while zoomed to a fixed window" : isLive ? "New traces appear automatically. Click to pause." : "Paused. Click to resume live updates."}
-          className="flex h-10 items-center gap-2 rounded-lg border border-[#262C35] px-3 text-sm text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-50">
+          className="flex h-8 items-center gap-2 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-50">
           <span aria-hidden="true" className={`size-2 rounded-full ${isLive ? "animate-pulse bg-[#5BE3A0]" : "bg-[#6B7380]"}`} />{isLive ? "Live" : "Paused"}
         </button>
-        <button type="button" onClick={() => setNow(Date.now())} className="h-10 rounded-lg border border-[#262C35] px-3 text-sm text-[#C9CED6] hover:border-[#4A5260]">Refresh</button>
+        <button type="button" onClick={() => setNow(Date.now())} className="h-8 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">Refresh</button>
       </header>
 
       <div className="flex min-h-0 flex-1 flex-wrap">
         {filtersOpen ? (
-          <aside aria-label="Filters" className="w-full shrink-0 border-b border-[#1F242C] p-4 md:w-64 md:border-b-0 md:border-r">
+          <aside aria-label="Filters" className="w-full shrink-0 border-b border-[#1F242C] p-3 md:w-56 md:border-b-0 md:border-r">
             <div className="mb-3 flex items-center justify-between">
               <span className="text-sm font-medium">Filters</span>
               <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => setFiltersOpen(false)}>Hide</button>
@@ -337,22 +337,22 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
         ) : null}
 
         <section className="flex min-w-0 flex-[999_1_560px] flex-col">
-          <div className="flex flex-wrap items-center gap-2 px-5 pt-4">
-            {!filtersOpen ? <button type="button" onClick={() => setFiltersOpen(true)} className="h-8 rounded-md border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:border-[#4A5260]">Show filters</button> : null}
+          <div className="flex flex-wrap items-center gap-1.5 px-4 pt-3">
+            {!filtersOpen ? <button type="button" onClick={() => setFiltersOpen(true)} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">Show filters</button> : null}
             {activeFilters.map((filter) => (
-              <button key={filter.key} type="button" onClick={() => update({ [filter.key]: "" })} className="flex h-8 items-center gap-2 rounded-md bg-[#1A1F27] px-3 text-xs text-[#E6E9EE] hover:bg-[#232A34]" aria-label={`Remove filter ${filter.label}`}>
+              <button key={filter.key} type="button" onClick={() => update({ [filter.key]: "" })} className="flex h-7 items-center gap-2 rounded-md bg-[#1A1F27] px-2.5 text-xs text-[#E6E9EE] hover:bg-[#232A34]" aria-label={`Remove filter ${filter.label}`}>
                 {filter.label}<span aria-hidden="true" className="text-[#8B93A1]">×</span>
               </button>
             ))}
             {activeFilters.length ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => update(Object.fromEntries(activeFilters.map((f) => [f.key, ""])))}>Clear all</button> : null}
             <div role="group" aria-label="Show traces as" className="ml-auto flex rounded-md border border-[#262C35] p-0.5 text-xs">
-              <button type="button" aria-pressed={!mapMode} onClick={() => update({ mode: "" }, false)} className={`h-7 rounded px-3 ${!mapMode ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>List</button>
-              <button type="button" aria-pressed={mapMode} onClick={() => update({ mode: "map" }, false)} className={`h-7 rounded px-3 ${mapMode ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>Map</button>
+              <button type="button" aria-pressed={!mapMode} onClick={() => update({ mode: "" }, false)} className={`h-6 rounded px-2.5 ${!mapMode ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>List</button>
+              <button type="button" aria-pressed={mapMode} onClick={() => update({ mode: "map" }, false)} className={`h-6 rounded px-2.5 ${mapMode ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>Map</button>
             </div>
             {mapMode ? null : <>
-            <button type="button" onClick={exportCsv} disabled={!rows.length} className="h-8 rounded-md border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
+            <button type="button" onClick={exportCsv} disabled={!rows.length} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
             <div className="relative">
-              <button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)} className="h-8 rounded-md border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:border-[#4A5260]">Columns {columns.length}/{COLUMNS.length}</button>
+              <button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">Columns {columns.length}/{COLUMNS.length}</button>
               {columnsOpen ? (
                 <div className="absolute right-0 z-20 mt-2 w-52 max-w-[calc(100vw-2rem)] rounded-lg border border-[#262C35] bg-[#111418] p-2 shadow-2xl">
                   {COLUMNS.map((column) => (
@@ -376,7 +376,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
               onToggle={toggleErrors} onSelect={(group) => { setPickedGroup({ id: group.id, label: errorGroupLabel(group) }); update({ errorGroup: query.errorGroup === group.id ? "" : group.id }); }} />
           )}
 
-          <div className="min-h-0 flex-1 overflow-auto px-5">
+          <div className="min-h-0 flex-1 overflow-auto px-4">
             {mapMode ? (
               <AgentMap projectId={projectId} params={apiParams} live={isLive} rangeMs={query.from || query.to ? null : RANGES.find((item) => item.id === query.range)?.ms ?? 86_400_000}
                 onNode={(id) => update({ node: id, mode: "" })}
@@ -393,7 +393,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                 {activeFilters.length || query.q ? <button type="button" className="mt-4 rounded-md bg-[#F4D44D] px-4 py-2 text-sm font-medium text-[#0B0D10]" onClick={() => { setSearchDraft(""); update({ ...Object.fromEntries(activeFilters.map((f) => [f.key, ""])), q: "", range: "30d" }); }}>Clear filters and show 30 days</button> : <a className="mt-4 inline-block rounded-md bg-[#F4D44D] px-4 py-2 text-sm font-medium text-[#0B0D10]" href={`/dashboard/${projectId}/quickstart`}>Open quickstart</a>}
               </div>
             ) : (
-              <table className="w-full min-w-[900px] border-separate border-spacing-0 text-sm">
+              <table className="mt-3 w-full min-w-[900px] border-separate border-spacing-0 text-[13px]">
                 <thead className="sticky top-0 z-10 bg-[#0B0D10]">
                   <tr className="text-left text-xs text-[#8B93A1]">
                     {columns.map((id) => {
@@ -401,7 +401,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                       const sortKey = id === "startedAt" ? "startedAt" : id === "latency" ? "latency" : id === "cost" ? "cost" : null;
                       const active = sortKey && (query.sort ?? "startedAt") === sortKey;
                       return (
-                        <th key={id} scope="col" className="border-b border-[#1F242C] px-3 py-2.5 font-medium" aria-sort={active ? ((query.dir ?? "desc") === "asc" ? "ascending" : "descending") : undefined}>
+                        <th key={id} scope="col" className="border-b border-[#1F242C] px-2.5 py-1.5 font-medium" aria-sort={active ? ((query.dir ?? "desc") === "asc" ? "ascending" : "descending") : undefined}>
                           {sortKey ? <button type="button" onClick={() => sortBy(sortKey)} className={`flex items-center gap-1 hover:text-white ${active ? "text-white" : ""}`}>{label}<span aria-hidden="true">{active ? ((query.dir ?? "desc") === "asc" ? "↑" : "↓") : "↕"}</span></button> : label}
                         </th>
                       );
@@ -413,7 +413,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                     <tr key={row.runId} aria-selected={selected === row.runId}
                       className={`cursor-pointer transition-colors duration-700 ${selected === row.runId ? "bg-[#161B22] shadow-[inset_3px_0_0_#F4D44D]" : fresh.has(row.runId) ? "bg-[#1F2A1F]" : "hover:bg-[#12161C]"}`}
                       onClick={() => update({ trace: row.runId }, false)}>
-                      {columns.map((id) => <td key={id} className="max-w-[320px] truncate border-b border-[#171B21] px-3 py-2.5 align-middle">{cell(id, row, update, clock)}</td>)}
+                      {columns.map((id) => <td key={id} className="max-w-[320px] truncate border-b border-[#171B21] px-2.5 py-1.5 align-middle">{cell(id, row, update, clock)}</td>)}
                     </tr>
                   ))}
                 </tbody>
@@ -421,17 +421,17 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             )}
           </div>
 
-          {mapMode ? null : <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1F242C] px-5 py-3 text-sm text-[#8B93A1]">
+          {mapMode ? null : <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1F242C] px-4 py-2 text-xs text-[#8B93A1]">
             <span>{loading ? "Loading…" : `${compactNumber(total)} traces`}</span>
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-2">Rows
-                <select value={pageSize} onChange={(event) => update({ pageSize: event.target.value })} className="h-8 rounded-md border border-[#262C35] bg-[#111418] px-2 text-[#E6E9EE]">
+                <select value={pageSize} onChange={(event) => update({ pageSize: event.target.value })} className="h-7 rounded-md border border-[#262C35] bg-[#111418] px-2 text-[#E6E9EE]">
                   {[25, 50, 100, 200].map((size) => <option key={size} value={size}>{size}</option>)}
                 </select>
               </label>
               <span>Page {page + 1} of {pageCount}</span>
-              <button type="button" aria-label="Previous page" disabled={page === 0} onClick={() => update({ page: String(page - 1) }, false)} className="h-8 w-8 rounded-md border border-[#262C35] disabled:opacity-40">‹</button>
-              <button type="button" aria-label="Next page" disabled={page + 1 >= pageCount} onClick={() => update({ page: String(page + 1) }, false)} className="h-8 w-8 rounded-md border border-[#262C35] disabled:opacity-40">›</button>
+              <button type="button" aria-label="Previous page" disabled={page === 0} onClick={() => update({ page: String(page - 1) }, false)} className="h-7 w-7 rounded-md border border-[#262C35] disabled:opacity-40">‹</button>
+              <button type="button" aria-label="Next page" disabled={page + 1 >= pageCount} onClick={() => update({ page: String(page + 1) }, false)} className="h-7 w-7 rounded-md border border-[#262C35] disabled:opacity-40">›</button>
             </div>
           </footer>}
         </section>
@@ -476,9 +476,9 @@ function cell(id: ColumnId, row: TraceRow, update: (patch: TraceQuery, resetPage
 function FilterSelect({ label, value, values, display, onChange }: { label: string; value: string; values: string[]; display?: Record<string, string>; onChange: (value: string) => void }) {
   const id = `filter-${label.replace(/\W+/g, "-").toLowerCase()}`;
   return (
-    <div className="mb-3">
+    <div className="mb-2.5">
       <label htmlFor={id} className="mb-1 block text-xs text-[#8B93A1]">{label}</label>
-      <select id={id} value={value} onChange={(event) => onChange(event.target.value)} className="h-9 w-full rounded-md border border-[#262C35] bg-[#111418] px-2 text-sm text-[#E6E9EE] outline-none focus:border-[#4A5260]">
+      <select id={id} value={value} onChange={(event) => onChange(event.target.value)} className="h-8 w-full rounded-md border border-[#262C35] bg-[#111418] px-2 text-[13px] text-[#E6E9EE] outline-none focus:border-[#4A5260]">
         {[...new Set([...values, value])].map((option) => <option key={option} value={option}>{display?.[option] ?? (option || "Any")}</option>)}
       </select>
     </div>
@@ -489,11 +489,11 @@ function FilterNumber({ label, value, step = "1", onChange }: { label: string; v
   const [draft, setDraft] = useState(value);
   const id = `filter-${label.replace(/\W+/g, "-").toLowerCase()}`;
   return (
-    <div className="mb-3">
+    <div className="mb-2.5">
       <label htmlFor={id} className="mb-1 block text-xs text-[#8B93A1]">{label}</label>
       <input id={id} type="number" min="0" step={step} value={draft} onChange={(event) => setDraft(event.target.value)}
         onBlur={() => draft !== value && onChange(draft)} onKeyDown={(event) => { if (event.key === "Enter") onChange(draft); }}
-        className="h-9 w-full rounded-md border border-[#262C35] bg-[#111418] px-2 text-sm text-[#E6E9EE] outline-none focus:border-[#4A5260]" placeholder="Any" />
+        className="h-8 w-full rounded-md border border-[#262C35] bg-[#111418] px-2 text-[13px] text-[#E6E9EE] outline-none focus:border-[#4A5260]" placeholder="Any" />
     </div>
   );
 }
@@ -502,12 +502,12 @@ function CountChart({ histogram, onZoom }: { histogram?: { bucketSeconds: number
   const buckets = histogram?.buckets ?? [];
   const max = Math.max(1, ...buckets.map((bucket) => bucket.traces));
   return (
-    <div className="px-5 py-4">
-      <div className="mb-2 flex items-center justify-between text-xs text-[#8B93A1]">
+    <div className="px-4 pt-3">
+      <div className="mb-1.5 flex items-center justify-between text-xs text-[#8B93A1]">
         <span>Traces over time{buckets.length ? " · click a bar to zoom" : ""}</span>
         <span className="flex items-center gap-3"><span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-[#F4D44D]" />traces</span><span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-[#FF6B6B]" />with errors</span></span>
       </div>
-      <div className="flex h-20 items-end gap-[2px] rounded-lg border border-[#1F242C] bg-[#0E1115] px-2 pt-2">
+      <div className="flex h-16 items-end gap-[2px] rounded-lg border border-[#1F242C] bg-[#0E1115] px-2 pt-2">
         {buckets.length === 0 ? <span className="m-auto text-xs text-[#4A5260]">No traces to chart</span> : buckets.map((bucket) => {
           const start = Date.parse(bucket.bucket.replace(" ", "T") + "Z");
           const label = `${formatTime(new Date(start).toISOString())}: ${bucket.traces} traces, ${bucket.errors} with errors`;
@@ -537,19 +537,19 @@ function StatsStrip({ stats, loading, onErrors }: { stats?: Stats; loading: bool
     { label: "Tokens", value: stats ? compactNumber(stats.inputTokens + stats.outputTokens) : "—", hint: stats ? `${compactNumber(stats.inputTokens)} in · ${compactNumber(stats.outputTokens)} out` : undefined },
   ];
   return (
-    <section aria-label="Summary for this range" aria-busy={loading} className="mx-5 mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[#1F242C] bg-[#1F242C] sm:grid-cols-3 xl:grid-cols-6">
+    <section aria-label="Summary for this range" aria-busy={loading} className="mx-4 mt-3 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[#1F242C] bg-[#1F242C] sm:grid-cols-3 xl:grid-cols-6">
       {tiles.map((tile) => {
         const body = (
           <>
             <span className="block text-xs text-[#8B93A1]">{tile.label}</span>
-            <span className={`mt-1 block font-mono text-lg leading-6 ${tile.tone ?? "text-[#E6E9EE]"}`}>{tile.value}</span>
+            <span className={`mt-0.5 block font-mono text-[15px] leading-5 ${tile.tone ?? "text-[#E6E9EE]"}`}>{tile.value}</span>
             {tile.hint ? <span className="mt-0.5 block truncate font-mono text-[11px] text-[#6B7380]">{tile.hint}</span> : null}
           </>
         );
         return tile.onClick ? (
-          <button key={tile.label} type="button" onClick={tile.onClick} title="Show only traces with errors" className="min-w-0 bg-[#0E1115] px-4 py-3 text-left hover:bg-[#12161C]">{body}</button>
+          <button key={tile.label} type="button" onClick={tile.onClick} title="Show only traces with errors" className="min-w-0 bg-[#0E1115] px-3 py-2 text-left hover:bg-[#12161C]">{body}</button>
         ) : (
-          <div key={tile.label} className="min-w-0 bg-[#0E1115] px-4 py-3">{body}</div>
+          <div key={tile.label} className="min-w-0 bg-[#0E1115] px-3 py-2">{body}</div>
         );
       })}
     </section>
