@@ -86,6 +86,8 @@ function TraceCanvasViewport({
   const [zoom, setZoom] = useState(1);
   const lastFocus = useRef<string | null>(null);
   const hasFitInitialNodes = useRef(false);
+  const fullscreenViewport = useRef<{ x: number; y: number; zoom: number } | null>(null);
+  const wasFullscreen = useRef(false);
   const pointers = useRef(new Set<number>());
   const panGesture = useRef<{ id: number; pointerType: string; x: number; y: number; originX: number; originY: number; active: boolean } | null>(null);
   const suppressClick = useRef(false);
@@ -106,6 +108,20 @@ function TraceCanvasViewport({
     hasFitInitialNodes.current = true;
     void instance.fitView({ padding: 0.18, duration: 0, minZoom: 0.1, maxZoom: 4 });
   }, [instance, nodes.length]);
+
+  useEffect(() => {
+    if (fullscreen) {
+      const frame = requestAnimationFrame(() => { void flow.fitView({ padding: 0.18, duration: 400, minZoom: 0.1, maxZoom: 4 }); });
+      wasFullscreen.current = true;
+      return () => cancelAnimationFrame(frame);
+    }
+    if (!wasFullscreen.current || !fullscreenViewport.current) return;
+    const viewport = fullscreenViewport.current;
+    fullscreenViewport.current = null;
+    wasFullscreen.current = false;
+    const frame = requestAnimationFrame(() => { void flow.setViewport(viewport, { duration: 350 }); });
+    return () => cancelAnimationFrame(frame);
+  }, [fullscreen, flow]);
 
   useEffect(() => {
     const onKey = (event: globalThis.KeyboardEvent) => {
@@ -167,6 +183,10 @@ function TraceCanvasViewport({
       event.stopPropagation();
       setFullscreen(false);
     }
+  };
+  const toggleFullscreen = () => {
+    if (!fullscreen) fullscreenViewport.current = flow.getViewport();
+    setFullscreen((value) => !value);
   };
 
   useEffect(() => {
@@ -240,7 +260,7 @@ function TraceCanvasViewport({
           <button type="button" aria-label="Zoom in" className={controlClass} onClick={() => zoomBy(1.25)}>+</button>
           <button type="button" aria-label="Fit to view" title="Fit to view" className={controlClass} onClick={fit}>↗</button>
           <button type="button" aria-label="Zoom to selection" title="Zoom to selection" className={controlClass} disabled={!focusId} onClick={() => focusId && center(focusId)}>◎</button>
-          <button type="button" aria-label={fullscreen ? "Exit fullscreen" : "Fullscreen"} title={fullscreen ? "Exit fullscreen" : "Fullscreen"} className={controlClass} onClick={() => setFullscreen((value) => !value)}>
+          <button type="button" aria-label={fullscreen ? "Exit fullscreen" : "Fullscreen"} title={fullscreen ? "Exit fullscreen" : "Fullscreen"} className={controlClass} onClick={toggleFullscreen}>
             {fullscreen ? <Minimize2 aria-hidden="true" size={14} /> : <Maximize2 aria-hidden="true" size={14} />}
           </button>
         </div>
