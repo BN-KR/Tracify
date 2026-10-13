@@ -179,6 +179,11 @@ function TraceCanvasViewport({
     <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-[300px] w-full"} ${className}`} onKeyDownCapture={handleKeyDownCapture} onKeyDown={handleKeyDown} onDoubleClick={handleDoubleClick}>
       <div className="absolute inset-0 overflow-hidden border border-[#1F242C] bg-[#0B0D10]">
         <ReactFlow
+          onPointerDownCapture={(event) => {
+            // React Flow marks arrows as nopan. Let its native gestures also start on an arrow,
+            // before the mouse/touch start reaches the pan controller; clicks still select it.
+            (event.target as Element).closest(".react-flow__edge")?.classList.remove("nopan");
+          }}
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}

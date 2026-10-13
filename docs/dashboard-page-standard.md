@@ -93,7 +93,7 @@ Detail panels for a record made of steps offer `Tree | Timeline | Graph` tabs (`
   pointer with wheel or pinch (0.1×–4×), double-click to zoom, and support arrow keys, `+`, `−`, and `0`.
   Provide animated Fit, selection centering, fullscreen with Escape, bottom-right zoom controls, and a
   pannable/zoomable minimap. Keep the transform when live data updates; preserve positions for nodes that
-  remain in the graph.
+  remain in the graph. Supply explicit card width/height in controlled node data so the minimap renders every node.
 - Keep cards, names and metrics visible at every zoom; never replace text with dots or bubbles.
   Hover/focus exposes full names when truncated. Keep selection and mode in the URL where shareable, and make
   nodes and edges keyboard-focusable with complete accessible labels. The tree and timeline use the same
