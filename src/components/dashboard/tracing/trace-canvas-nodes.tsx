@@ -15,14 +15,20 @@ export function TraceCanvasNode({ data, selected }: NodeProps) {
   const latency = Number(data.latencyMs ?? data.p50LatencyMs ?? 0);
   const errors = Number(data.errors ?? data.failed ?? 0);
   const compact = zoom < 0.84;
+  const onActivate = data.onActivate as (() => void) | undefined;
 
   return (
     <>
       <Handle type="target" position={Position.Left} className="!invisible !size-1" />
       <div
         className={`relative flex items-center gap-2 overflow-visible border font-sans text-[#E6E9EE] ${compact ? "border-transparent bg-transparent shadow-none" : "overflow-hidden bg-[#111418] shadow-sm"} ${!compact && selected ? "border-[#F4D44D]" : !compact && failed ? "border-[#5A2A2A]" : !compact ? "border-[#262C35]" : ""}`}
-        style={{ width: isAgent ? 190 : 205, height: 62, borderLeft: compact ? undefined : `3px solid ${color}`, borderRadius: 3 }}
+        style={{ width: isAgent ? 190 : 205, height: 62, borderLeft: compact ? undefined : `3px solid ${color}`, borderRadius: 3, cursor: onActivate ? "pointer" : undefined }}
         title={compact ? name : undefined}
+        onClick={onActivate ? (event) => { event.stopPropagation(); onActivate(); } : undefined}
+        onKeyDown={onActivate ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); event.stopPropagation(); onActivate(); } } : undefined}
+        role={onActivate ? "button" : undefined}
+        tabIndex={onActivate ? 0 : undefined}
+        aria-label={onActivate ? `${kind} ${name}: ${count} runs in ${traces} traces, ${errors} errors, median latency ${formatDuration(latency)}` : undefined}
       >
         {compact ? (
           <span className="absolute left-1/2 top-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border bg-[#111418]" style={{ borderColor: color, transform: `translate(-50%, -50%) scale(${Math.max(1, 1 / zoom)})`, boxShadow: `0 0 0 1px #0B0D10` }} aria-hidden="true">

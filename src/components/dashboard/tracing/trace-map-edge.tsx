@@ -9,6 +9,7 @@ export function TraceMapEdge(props: EdgeProps) {
   const bounds = data.bounds as { maxX: number; minY: number } | undefined;
   const lane = Number(data.routeIndex ?? 0) % 8;
   const isReturn = props.targetX <= props.sourceX;
+  const onActivate = data.onActivate as (() => void) | undefined;
   let path: string;
   let labelX: number;
   let labelY: number;
@@ -35,7 +36,13 @@ export function TraceMapEdge(props: EdgeProps) {
   }
 
   return (
-    <>
+    <g
+      onClick={onActivate ? (event) => { event.stopPropagation(); onActivate(); } : undefined}
+      onKeyDown={onActivate ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); event.stopPropagation(); onActivate(); } } : undefined}
+      role={onActivate ? "button" : undefined}
+      tabIndex={onActivate ? 0 : undefined}
+      aria-label={onActivate ? `${String(data.source)} to ${String(data.target)}: ${data.count} calls in ${data.traces} traces` : undefined}
+    >
       <BaseEdge id={props.id} path={path} markerEnd={props.markerEnd} style={{ ...props.style, strokeWidth: zoom < 0.65 ? 0.75 : props.style?.strokeWidth }} interactionWidth={20} />
       {data.label !== undefined && zoom >= 0.8 ? (
         <EdgeLabelRenderer>
@@ -44,6 +51,6 @@ export function TraceMapEdge(props: EdgeProps) {
           </span>
         </EdgeLabelRenderer>
       ) : null}
-    </>
+    </g>
   );
 }

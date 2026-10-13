@@ -83,6 +83,16 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
   const laidOutEdges = useMemo(() => visibleEdges.map((edge, index) => ({ ...edge, id: `${edge.source}→${edge.target}`, index })), [visibleEdges]);
   const displayedEdges = useMemo(() => laidOutEdges.slice(0, mapZoom < 0.65 ? Math.min(12, edgeLimit) : mapZoom < 0.82 ? Math.min(18, edgeLimit) : edgeLimit), [laidOutEdges, mapZoom, edgeLimit]);
 
+  const selectNode = useCallback((node: CanvasNode) => {
+    const id = selectedNode === node.id ? null : node.id;
+    onViewStateChange(id ? `node:${id}` : null, edgeLimit);
+    setSelectedEdge(null);
+  }, [selectedNode, edgeLimit, onViewStateChange]);
+  const chooseEdge = useCallback((edge: CanvasEdge) => {
+    const picked = laidOutEdges.find((candidate) => candidate.id === edge.id);
+    if (picked) { setSelectedEdge(picked); onViewStateChange(null, edgeLimit); }
+  }, [laidOutEdges, edgeLimit, onViewStateChange]);
+
   useEffect(() => {
     if (!data) return;
     let active = true;
@@ -105,8 +115,8 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
   const nodes: CanvasNode[] = useMemo(() => positionedNodes.map((node) => {
     const related = displayedEdges.some((edge) => (edge.source === hover && edge.target === node.id) || (edge.target === hover && edge.source === node.id));
     const activeNode = hover === node.id || related || selectedNode === node.id;
-    return { ...node, selected: selectedNode === node.id, style: { ...node.style, opacity: (hover || selectedNode) && !activeNode ? 0.28 : 1 } };
-  }), [positionedNodes, displayedEdges, hover, selectedNode]);
+    return { ...node, selected: selectedNode === node.id, style: { ...node.style, opacity: (hover || selectedNode) && !activeNode ? 0.28 : 1 }, data: { ...node.data, onActivate: () => selectNode(node) } };
+  }), [positionedNodes, displayedEdges, hover, selectedNode, selectNode]);
   const bounds = useMemo(() => {
     const xs = positionedNodes.map((node) => node.position.x);
     const ys = positionedNodes.map((node) => node.position.y);
@@ -131,20 +141,11 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
       labelBgPadding: [4, 2] as [number, number],
       style: { stroke: failed ? "#FF6B6B" : active ? "#C9CED6" : "#4A5260", strokeWidth: 1 + 2 * Math.sqrt(edge.count / Math.max(1, visibleEdges[0]?.count ?? 1)), opacity: dim ? 0.12 : 1 },
       markerEnd: { type: "arrowclosed" as const, color: failed ? "#FF6B6B" : "#4A5260", width: 12, height: 12 },
-      data: { ...edge, label: compactNumber(edge.count), routeIndex: edge.index, bounds, failed },
+      data: { ...edge, label: compactNumber(edge.count), routeIndex: edge.index, bounds, failed, onActivate: () => chooseEdge(edge) },
     };
-  }), [displayedEdges, hover, selectedNode, selectedEdge, visibleEdges, bounds]);
+  }), [displayedEdges, hover, selectedNode, selectedEdge, visibleEdges, bounds, chooseEdge]);
 
   const nodeById = useMemo(() => new Map((data?.nodes ?? []).map((node) => [node.id, node])), [data?.nodes]);
-  const selectNode = useCallback((node: CanvasNode) => {
-    const id = selectedNode === node.id ? null : node.id;
-    onViewStateChange(id ? `node:${id}` : null, edgeLimit);
-    setSelectedEdge(null);
-  }, [selectedNode, edgeLimit, onViewStateChange]);
-  const chooseEdge = (edge: CanvasEdge) => {
-    const picked = laidOutEdges.find((candidate) => candidate.id === edge.id);
-    if (picked) { setSelectedEdge(picked); onViewStateChange(null, edgeLimit); }
-  };
   const searchTarget = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q ? (data?.nodes ?? []).find((node) => node.name.toLowerCase().includes(q)) ?? null : null;
