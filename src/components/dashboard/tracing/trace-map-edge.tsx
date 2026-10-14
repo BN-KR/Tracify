@@ -1,38 +1,26 @@
 "use client";
 
-import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, useStore, type EdgeProps } from "@xyflow/react";
+import { BaseEdge, EdgeLabelRenderer, getStraightPath, useStore, type EdgeProps } from "@xyflow/react";
 
-/** Keep cycle-closing and self-repeat routes outside the card field; forward routes use ELK's left-to-right order. */
+/** Direct straight connectors; self-repeats use an open, square loop above their card. */
 export function TraceMapEdge(props: EdgeProps) {
   const zoom = useStore((state) => state.transform[2]);
   const data = props.data ?? {};
-  const bounds = data.bounds as { maxX: number; minY: number } | undefined;
-  const lane = Number(data.routeIndex ?? 0) % 8;
-  const isReturn = props.targetX <= props.sourceX;
   const onActivate = data.onActivate as (() => void) | undefined;
   let path: string;
   let labelX: number;
   let labelY: number;
 
-  if (isReturn) {
-    const outerX = (bounds?.maxX ?? Math.max(props.sourceX, props.targetX)) + 44 + (lane % 4) * 12;
-    const laneY = (bounds?.minY ?? Math.min(props.sourceY, props.targetY)) - 36 - Math.floor(lane / 4) * 12;
-    const entryX = props.targetX - 22;
-    path = `M ${props.sourceX} ${props.sourceY} H ${outerX} V ${laneY} H ${entryX} V ${props.targetY} H ${props.targetX}`;
-    labelX = (outerX + entryX) / 2;
-    labelY = laneY - 5;
+  if (props.source === props.target) {
+    const top = Math.min(props.sourceY, props.targetY) - 28;
+    path = `M ${props.sourceX} ${props.sourceY} V ${top} H ${props.targetX} V ${props.targetY}`;
+    labelX = (props.sourceX + props.targetX) / 2;
+    labelY = top;
   } else {
-    const result = getSmoothStepPath({
-      sourceX: props.sourceX,
-      sourceY: props.sourceY,
-      sourcePosition: props.sourcePosition,
-      targetX: props.targetX,
-      targetY: props.targetY,
-      targetPosition: props.targetPosition,
-      borderRadius: 6,
-      offset: 18,
+    [path, labelX, labelY] = getStraightPath({
+      sourceX: props.sourceX, sourceY: props.sourceY,
+      targetX: props.targetX, targetY: props.targetY,
     });
-    [path, labelX, labelY] = result;
   }
 
   return (

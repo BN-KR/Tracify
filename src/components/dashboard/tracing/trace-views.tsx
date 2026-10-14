@@ -318,6 +318,8 @@ export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
         setPositionedNodes(flattened.items.map((node) => ({
           id: node.key,
           type: "traceCard",
+          width: node.type === "tool" || node.type === "model" ? 190 : 205,
+          height: 62,
           position: positions.get(node.key) ?? { x: 0, y: 0 },
           focusable: true,
           ariaLabel: [node.name, node.spanIds.length > 1 ? `${node.spanIds.length} steps` : "", formatDuration(node.latencyMs), node.costUsd ? formatCost(node.costUsd) : "", node.failed ? `${node.failed} failed` : ""].filter(Boolean).join(" · "),
@@ -336,7 +338,7 @@ export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
   const focusNodeId = selectedId ? flattened.items.find((node) => node.spanIds.includes(selectedId))?.key : null;
   const edges: CanvasEdge[] = useMemo(() => flattened.edges.map((edge) => ({
     ...edge,
-    type: "smoothstep",
+    type: "straight",
     focusable: true,
     ariaLabel: `${nodeById.get(edge.source)?.name ?? "Step"} leads to ${nodeById.get(edge.target)?.name ?? "step"}`,
     style: { stroke: "#4A5260", strokeWidth: 1.5 },

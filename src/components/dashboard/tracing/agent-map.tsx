@@ -103,6 +103,8 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
         setPositionedNodes(data.nodes.map((node) => ({
           id: node.id,
           type: "traceCard",
+          width: 190,
+          height: 62,
           position: positions.get(node.id) ?? { x: 0, y: 0 },
           focusable: true,
           ariaLabel: `${node.kind} ${node.name}: ${node.count} runs in ${node.traces} traces, ${node.errors} errors, median latency ${formatDuration(node.p50LatencyMs)}`,
@@ -117,22 +119,22 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
     const activeNode = hover === node.id || related || selectedNode === node.id;
     return { ...node, selected: selectedNode === node.id, style: { ...node.style, opacity: (hover || selectedNode) && !activeNode ? 0.28 : 1 }, data: { ...node.data, onActivate: () => selectNode(node) } };
   }), [positionedNodes, displayedEdges, hover, selectedNode, selectNode]);
-  const bounds = useMemo(() => {
-    const xs = positionedNodes.map((node) => node.position.x);
-    const ys = positionedNodes.map((node) => node.position.y);
-    return { maxX: Math.max(0, ...xs) + 190, minY: Math.min(0, ...ys) };
-  }, [positionedNodes]);
+  const positionsById = useMemo(() => new Map(positionedNodes.map((node) => [node.id, node.position])), [positionedNodes]);
 
   const edges: CanvasEdge[] = useMemo(() => displayedEdges.map((edge) => {
     const id = edge.id;
     const active = hover === edge.source || hover === edge.target || hover === id || selectedEdge?.source === edge.source && selectedEdge.target === edge.target;
     const dim = Boolean(hover || selectedNode || selectedEdge) && !active && selectedNode !== edge.source && selectedNode !== edge.target;
     const failed = edge.errorRate > 0;
+    const returning = (positionsById.get(edge.target)?.x ?? 0) < (positionsById.get(edge.source)?.x ?? 0);
+    const repeat = edge.source === edge.target;
     return {
       id,
       source: edge.source,
       target: edge.target,
       type: "traceMap",
+      sourceHandle: repeat ? "out-top" : returning ? "out-left" : undefined,
+      targetHandle: repeat ? "in-top" : returning ? "in-right" : undefined,
       focusable: true,
       ariaLabel: `${stepLabel(edge.source)} to ${stepLabel(edge.target)}: ${edge.count} calls in ${edge.traces} traces, ${(edge.errorRate * 100).toFixed(0)} percent failed, median latency ${formatDuration(edge.p50LatencyMs)}`,
       label: compactNumber(edge.count),
@@ -141,9 +143,9 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
       labelBgPadding: [4, 2] as [number, number],
       style: { stroke: failed ? "#FF6B6B" : active ? "#C9CED6" : "#4A5260", strokeWidth: 1 + 2 * Math.sqrt(edge.count / Math.max(1, visibleEdges[0]?.count ?? 1)), opacity: dim ? 0.12 : 1 },
       markerEnd: { type: "arrowclosed" as const, color: failed ? "#FF6B6B" : "#4A5260", width: 12, height: 12 },
-      data: { ...edge, label: compactNumber(edge.count), routeIndex: edge.index, bounds, failed, onActivate: () => chooseEdge(edge) },
+      data: { ...edge, label: compactNumber(edge.count), failed, onActivate: () => chooseEdge(edge) },
     };
-  }), [displayedEdges, hover, selectedNode, selectedEdge, visibleEdges, bounds, chooseEdge]);
+  }), [displayedEdges, hover, selectedNode, selectedEdge, visibleEdges, positionsById, chooseEdge]);
 
   const nodeById = useMemo(() => new Map((data?.nodes ?? []).map((node) => [node.id, node])), [data?.nodes]);
   const searchTarget = useMemo(() => {
