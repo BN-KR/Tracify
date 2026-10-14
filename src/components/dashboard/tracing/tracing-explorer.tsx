@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { stepLabel } from "./agent-map";
+import { parseSearch } from "@/lib/trace-search";
+import { SearchBox } from "./search-box";
 import { RANGES, TimeRangePicker } from "./time-range-picker";
 import { ColumnsMenu, DEFAULT_COLUMNS, columnLabel, extraCell, extraIdsFor, isKnownColumn, metaKeysFor, orderColumns, type TraceRowExtras } from "./trace-columns";
 import { TraceCharts, TracesOverTime, type ChartBucket } from "./trace-charts";
@@ -56,6 +58,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   const [settledKey, setSettledKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchDraft, setSearchDraft] = useState(query.q ?? "");
+  const [searchError, setSearchError] = useState("");
   const [columns, setColumns] = useState<string[]>(DEFAULT_COLUMNS);
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [now, setNow] = useState(() => Date.now());
@@ -246,6 +249,23 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     try { window.localStorage.setItem(COLUMN_STORAGE, JSON.stringify(next)); } catch {}
   }
 
+  /** Enter in the search box: `field:value` tokens become filters, the remaining words are the text search. */
+  function submitSearch(text: string) {
+    const parsed = parseSearch(text);
+    if (parsed.errors.length) { setSearchError(parsed.errors[0]!); return; }
+    setSearchError("");
+    const patch: TraceQuery = { q: parsed.text };
+    for (const filter of parsed.filters) {
+      if (filter.kind === "facet") {
+        const current = decodeValues(patch[filter.field.key] ?? query[filter.field.key]);
+        if (!current.includes(filter.value)) patch[filter.field.key] = encodeValues([...current, filter.value]);
+      } else if (filter.kind === "status") patch.status = filter.value === "all" ? "" : filter.value;
+      else patch[filter.field.key] = String(filter.value);
+    }
+    setSearchDraft(parsed.text);
+    update(patch);
+  }
+
   function toggleLive() {
     const next = !live;
     setLive(next);
@@ -293,15 +313,13 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
         <h1 className="mr-2 text-base font-semibold tracking-tight">Tracing</h1>
         <form
           className="flex min-w-[220px] flex-1 items-center gap-2 rounded-md border border-[#262C35] bg-[#111418] px-2.5 focus-within:border-[#4A5260]"
-          onSubmit={(event) => { event.preventDefault(); update({ q: searchDraft.trim() }); }}
+          onSubmit={(event) => { event.preventDefault(); submitSearch(searchDraft.trim()); }}
         >
           <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 text-[#8B93A1]" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
           <label htmlFor="trace-search" className="sr-only">Search traces</label>
-          <input
-            id="trace-search" ref={searchRef} value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)}
-            placeholder="Search name, id, input or output"
-            className="h-8 min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#6B7380]"
-          />
+          <SearchBox id="trace-search" inputRef={searchRef} value={searchDraft} onChange={(value) => { setSearchDraft(value); setSearchError(""); }}
+            onApply={(patch) => update(patch)} facets={facets} query={query} error={searchError}
+            placeholder="Search text, or filter: model:gpt-5  status:error  latency:>2s" />
           {query.q ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => { setSearchDraft(""); update({ q: "" }); }}>Clear</button> : <kbd className="hidden rounded border border-[#262C35] px-1.5 font-mono text-[10px] text-[#6B7380] sm:block" aria-hidden="true">/</kbd>}
         </form>
         <TimeRangePicker range={query.range ?? "24h"} from={query.from ? Number(query.from) : undefined} to={query.to ? Number(query.to) : undefined} now={now}
