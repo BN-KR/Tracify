@@ -81,6 +81,8 @@ export function SearchBox({ id, inputRef, value, onChange, onApply, facets, quer
   function select(option: Option) {
     const clear = () => onChange(replaceToken(value, token, "", caret).text);
     const { action } = option;
+    // A picked filter is done: close the list so it does not sit over the filter chips. Picking a field keeps it open for values.
+    if (action.type !== "field") setOpen(false);
     if (action.type === "facet") {
       const current = decodeValues(query[action.field.key]);
       if (!current.includes(action.value)) onApply({ [action.field.key]: encodeValues([...current, action.value]) });
@@ -111,6 +113,7 @@ export function SearchBox({ id, inputRef, value, onChange, onApply, facets, quer
     else if (event.key === "ArrowUp") { event.preventDefault(); setOpen(true); move(-1); }
     else if (event.key === "Escape" && show) { event.preventDefault(); setOpen(false); setActiveId(null); }
     else if ((event.key === "Enter" || event.key === "Tab") && show && activeIndex >= 0) { event.preventDefault(); select(options[activeIndex]!); }
+    else if (event.key === "Enter") setOpen(false);
   }
   const track = (input: HTMLInputElement) => setCaret(input.selectionStart ?? input.value.length);
 
