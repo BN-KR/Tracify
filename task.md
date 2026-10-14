@@ -1,8 +1,8 @@
+## 2026-10-14 — Agent map: owner preview review
+
+- [pending owner] Review draft PR #150 and its Ready EU preview before merge. Implementation and verification are recorded in `memory.md`.
+
 # 2026-09-02 — First-customer execution
-
-## 2026-10-13 — Tracing map refinement: owner review
-
-- [pending] Owner review of draft PR #146 and its Ready EU preview before merge. Implementation and verification are recorded in `memory.md`.
 
 ## 2026-09-15 — Google Analytics 4
 

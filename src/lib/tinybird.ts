@@ -1,3 +1,5 @@
+import { TYPE_ALIASES } from "@/components/dashboard/tracing/format";
+import { flowGraph, collapseFlowReturns, flowPairId, median, type FlowEdge, type FlowStep } from "./trace-flow";
 /**
  * Tinybird REST API client.
  * All span analytics queries go through here — never Convex.
@@ -22,11 +24,11 @@ function clickhouseHeaders() {
 }
 
 /** Runs one read query and returns the raw response; the body is `{ data: [...] }` on both backends. */
-function analyticsSql(sql: string, init: { signal?: AbortSignal } = {}) {
+function analyticsSql(sql: string, init: { signal?: AbortSignal; format?: "JSON" | "JSONEachRow" } = {}) {
   if (CLICKHOUSE_URL) {
     const params = new URLSearchParams({ database: CLICKHOUSE_DATABASE, output_format_json_quote_64bit_integers: "1" });
     return fetch(`${CLICKHOUSE_URL}/?${params}`, {
-      method: "POST", headers: clickhouseHeaders(), body: `${sql.trimEnd()}\nFORMAT JSON`, cache: "no-store", ...init,
+      method: "POST", headers: clickhouseHeaders(), body: `${sql.trimEnd()}\nFORMAT ${init.format ?? "JSON"}`, cache: "no-store", ...init,
     });
   }
   return fetch(sqlUrl(sql), { headers: getHeaders(), cache: "no-store", ...init });
@@ -370,6 +372,8 @@ export type TraceListFilters = {
   node?: string;
   /** Traces where step `to` ran directly after step `from` (agent-map arrow). */
   edge?: { from: string; to: string };
+  /** Internal: matching ids resolved through the same Flow rules as the drawing. */
+  flowRunIds?: string[];
   sort?: "startedAt" | "latency" | "cost";
   direction?: "asc" | "desc";
   page?: number;
@@ -396,18 +400,12 @@ const ERROR_MESSAGE_KEY = `leftUTF8(trimBoth(replaceRegexpAll(replaceRegexpAll(r
   '[0-9]+([.][0-9]+)?', '<n>'),
   '[[:space:]]+', ' ')), 120)`;
 const ERROR_GROUP_ID = `lower(hex(cityHash64(${ERROR_TOOL}, errorType, ${ERROR_MESSAGE_KEY})))`;
-/** Agent-map node for a step: a model call or a tool. Agent wrappers and fleet events are not nodes. */
-const NODE_KEY = `multiIf(spanType IN ('llm', 'generation') AND modelId != '', concat('model:', modelId), toolName != '' AND spanType NOT IN ('agent', 'event'), concat('tool:', toolName), '')`;
+const STEP_TYPE = `transform(lower(spanType), [${Object.keys(TYPE_ALIASES).map((key) => `'${key}'`).join(",")}], [${Object.values(TYPE_ALIASES).map((key) => `'${key}'`).join(",")}], lower(spanType))`;
+const STEP_NAME = `multiIf(toolName != '', toolName, modelId != '', modelId, traceName != '', traceName, spanType != '', spanType, 'span')`;
+const NODE_KEY = `concat(${STEP_TYPE}, ':', ${STEP_NAME})`;
 
 function rangeScope(projectId: string, filters: Pick<TraceListFilters, "fromMs" | "toMs">) {
   return `projectId = '${sqlString(projectId)}' AND createdAt >= toDateTime(${Math.floor(filters.fromMs / 1000)}) AND createdAt <= toDateTime(${Math.ceil(filters.toMs / 1000)})`;
-}
-
-/** Map steps in time order with the step that ran directly before each one in the same trace. */
-function transitionsSql(scope: string) {
-  return `SELECT runId, lagInFrame(node, 1, '') OVER (PARTITION BY runId ORDER BY createdAt, spanId ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS source,
-      node AS target, latencyMs, failed
-    FROM (SELECT runId, spanId, createdAt, latencyMs, ${NODE_KEY} AS node, ${IS_ERROR} AS failed FROM spans WHERE ${scope} AND ${NODE_KEY} != '')`;
 }
 
 function traceListClauses(projectId: string, filters: TraceListFilters) {
@@ -428,8 +426,8 @@ function traceListClauses(projectId: string, filters: TraceListFilters) {
   // Error groups and the agent map are computed from steps inside the range, so their filters use the same range.
   const scope = rangeScope(projectId, filters);
   if (filters.errorGroup) where.push(`runId IN (SELECT runId FROM spans WHERE ${scope} AND ${IS_ERROR} AND ${ERROR_GROUP_ID} = '${sqlString(filters.errorGroup)}')`);
-  if (filters.node) where.push(`runId IN (SELECT runId FROM spans WHERE ${scope} AND ${NODE_KEY} = '${sqlString(filters.node)}')`);
-  if (filters.edge) where.push(`runId IN (SELECT runId FROM (${transitionsSql(scope)}) WHERE source = '${sqlString(filters.edge.from)}' AND target = '${sqlString(filters.edge.to)}')`);
+  if (filters.node && !['__start__', '__end__'].includes(filters.node)) where.push(`runId IN (SELECT runId FROM spans WHERE ${scope} AND ${NODE_KEY} = '${sqlString(filters.node)}')`);
+  if (filters.edge) where.push(filters.flowRunIds?.length ? `runId IN (${filters.flowRunIds.map((id) => `'${sqlString(id)}'`).join(',')})` : '0');
   const having: string[] = [];
   if (filters.status === "error") having.push("errorCount > 0");
   if (filters.status === "healthy") having.push("errorCount = 0");
@@ -442,6 +440,7 @@ function traceListClauses(projectId: string, filters: TraceListFilters) {
 
 // Shared by the full trace row and the lighter run-id filter so HAVING clauses mean the same thing in both.
 const DURATION_EXPR = `if(countIf(parentSpanId = '') > 0, maxIf(latencyMs, parentSpanId = ''), greatest(dateDiff('millisecond', min(createdAt), max(createdAt)), max(latencyMs)))`;
+const FINISHED_EXPR = `(countIf(spanType = 'run_end') > 0 OR countIf(parentSpanId = '' AND ${IS_ERROR}) > 0 OR argMaxIf(lower(JSONExtractString(metadata, 'status')), createdAt, parentSpanId = '' AND JSONExtractString(metadata, 'status') != '') NOT IN ('', 'running', 'pending', 'queued', 'in_progress', 'started'))`;
 const ERROR_COUNT_EXPR = `countIf(${IS_ERROR})`;
 
 /** Run ids of every trace matching the filters, for queries that aggregate steps instead of traces. */
@@ -504,7 +503,7 @@ export async function traceHistogram(projectId: string, filters: TraceListFilter
 
 export type TraceStats = {
   traces: number; errors: number; p50DurationMs: number; p95DurationMs: number;
-  totalCostUsd: number; inputTokens: number; outputTokens: number;
+  totalCostUsd: number; inputTokens: number; outputTokens: number; runningTraces: number;
 };
 
 /** Totals for every trace matching the filters (not just the visible page) for the summary strip. */
@@ -512,16 +511,16 @@ export async function traceStats(projectId: string, filters: TraceListFilters): 
   const { where, having } = traceListClauses(projectId, filters);
   const rows = await tinybirdRows<Record<keyof TraceStats, number | string>>(`
     SELECT count() AS traces, countIf(errorCount > 0) AS errors,
-      quantile(0.5)(durationMs) AS p50DurationMs, quantile(0.95)(durationMs) AS p95DurationMs,
+      quantileExactIf(0.5)(durationMs, finished) AS p50DurationMs, quantileExactIf(0.95)(durationMs, finished) AS p95DurationMs, countIf(NOT finished) AS runningTraces,
       sum(totalCostUsd) AS totalCostUsd, sum(inputTokens) AS inputTokens, sum(outputTokens) AS outputTokens
-    FROM (SELECT ${TRACE_AGGREGATE} FROM spans WHERE ${where} GROUP BY runId ${having})`);
+    FROM (SELECT ${TRACE_AGGREGATE}, ${FINISHED_EXPR} AS finished FROM spans WHERE ${where} GROUP BY runId ${having})`);
   const row = rows[0] ?? {};
   const value = (key: keyof TraceStats) => {
     const parsed = Number(row[key] ?? 0);
     return Number.isFinite(parsed) ? parsed : 0;
   };
   return {
-    traces: value("traces"), errors: value("errors"), p50DurationMs: value("p50DurationMs"), p95DurationMs: value("p95DurationMs"),
+    traces: value("traces"), runningTraces: value("runningTraces"), errors: value("errors"), p50DurationMs: value("p50DurationMs"), p95DurationMs: value("p95DurationMs"),
     totalCostUsd: value("totalCostUsd"), inputTokens: value("inputTokens"), outputTokens: value("outputTokens"),
   };
 }
@@ -552,44 +551,87 @@ export async function traceErrorGroups(projectId: string, filters: TraceListFilt
   };
 }
 
-export type MapNode = { id: string; kind: "tool" | "model"; name: string; count: number; traces: number; errors: number; p50LatencyMs: number };
-export type MapEdge = { source: string; target: string; count: number; traces: number; errorRate: number; p50LatencyMs: number };
+export type MapNode = { id: string; kind: string; name: string; count: number; traces: number; errors: number; p50LatencyMs: number };
+export type MapEdge = { source: string; target: string; count: number; back?: number; errors: number; traces: number; errorRate: number; p50LatencyMs: number };
 export const MAP_NODE_LIMIT = 40;
 export const MAP_EDGE_LIMIT = 100;
+type FlowRow = { runId: string; steps: Array<[string, string, string, string, number, number, number, number]> };
 
-/**
- * Aggregate agent map for the traces matching the filters: tools and models as nodes, and an arrow A -> B for
- * every time B ran directly after A in the same trace. Capped at the busiest 40 nodes and 100 arrows.
- */
+/** Stream one run at a time: no raw span payloads or whole-range arrays are held in the server. */
+async function* flowRuns(projectId: string, filters: TraceListFilters) {
+  const { where, having } = traceListClauses(projectId, filters);
+  const sql = `SELECT runId, groupArray(tuple(spanId, parentSpanId, spanType, ${STEP_NAME}, latencyMs, costUsd, toUnixTimestamp(createdAt) * 1000, toUInt8(${IS_ERROR}))) AS steps
+    FROM spans WHERE ${where} AND runId IN (${matchingRunIds(where, having)}) GROUP BY runId ORDER BY min(createdAt), runId`;
+  const convert = (row: FlowRow) => ({ runId: row.runId, steps: row.steps.map(([id, parentSpanId, type, name, latencyMs, costUsd, startedAt, failed]): FlowStep => ({ id, parentSpanId, type, name, latencyMs: Number(latencyMs), costUsd: Number(costUsd), startedAt: Number(startedAt), failed: Boolean(failed) })) });
+  if (!CLICKHOUSE_URL) {
+    for (const row of await tinybirdRows<FlowRow>(sql)) yield convert(row);
+    return;
+  }
+  const response = await analyticsSql(sql, { format: "JSONEachRow" });
+  if (!response.ok || !response.body) throw new Error(`Flow query failed (${response.status})`);
+  const reader = response.body.getReader(), decoder = new TextDecoder();
+  let pending = "";
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      pending += decoder.decode(value, { stream: !done });
+      let newline: number;
+      while ((newline = pending.indexOf("\n")) >= 0) {
+        const line = pending.slice(0, newline); pending = pending.slice(newline + 1);
+        if (line.trim()) yield convert(JSON.parse(line) as FlowRow);
+      }
+      if (done) break;
+    }
+    if (pending.trim()) yield convert(JSON.parse(pending) as FlowRow);
+  } finally { await reader.cancel(); }
+}
+
+/** Resolve an arrow to traces with the shared caller/return rules before list, facets and stats run. */
+export async function resolveTraceFlowFilters(projectId: string, filters: TraceListFilters): Promise<TraceListFilters> {
+  if (!filters.edge) return filters;
+  const ids: string[] = [], wanted = flowPairId(filters.edge.from, filters.edge.to);
+  for await (const run of flowRuns(projectId, { fromMs: filters.fromMs, toMs: filters.toMs })) {
+    if (flowGraph(run.steps, false).edges.some((edge) => flowPairId(edge.source, edge.target) === wanted)) ids.push(run.runId);
+  }
+  return { ...filters, flowRunIds: ids };
+}
+
+/** Every matching run contributes to one agent's Flow; node statistics stay exact in ClickHouse. */
 export async function traceAgentMap(projectId: string, filters: TraceListFilters) {
   const { where, having } = traceListClauses(projectId, filters);
   const scope = `${where} AND runId IN (${matchingRunIds(where, having)})`;
-  const nodeRows = await tinybirdRows<{ id: string; count: number; traces: number; errors: number; p50LatencyMs: number; totalNodes: number }>(`
-    SELECT ${NODE_KEY} AS id, count() AS count, uniqExact(runId) AS traces, countIf(${IS_ERROR}) AS errors,
-      quantile(0.5)(latencyMs) AS p50LatencyMs, count() OVER () AS totalNodes
-    FROM spans WHERE ${scope} AND ${NODE_KEY} != ''
-    GROUP BY id ORDER BY count DESC, id LIMIT ${MAP_NODE_LIMIT}`);
-  const nodes: MapNode[] = nodeRows.map((row) => {
-    const kind = row.id.startsWith("model:") ? "model" : "tool";
-    return { id: row.id, kind, name: row.id.slice(kind.length + 1), count: Number(row.count), traces: Number(row.traces), errors: Number(row.errors), p50LatencyMs: Number(row.p50LatencyMs) };
-  });
-  if (!nodes.length) return { nodes, edges: [] as MapEdge[], totalNodes: 0, totalEdges: 0 };
-  const ids = `[${nodes.map((node) => `'${sqlString(node.id)}'`).join(", ")}]`;
-  const edgeRows = await tinybirdRows<MapEdge & { totalEdges: number }>(`
-    SELECT source, target, count() AS count, uniqExact(runId) AS traces, avg(failed) AS errorRate,
-      quantile(0.5)(latencyMs) AS p50LatencyMs, count() OVER () AS totalEdges
-    FROM (${transitionsSql(scope)})
-    WHERE source != '' AND has(${ids}, source) AND has(${ids}, target)
-    GROUP BY source, target ORDER BY count DESC, source, target LIMIT ${MAP_EDGE_LIMIT}`);
-  return {
-    nodes,
-    edges: edgeRows.map((row): MapEdge => ({
-      source: row.source, target: row.target, count: Number(row.count), traces: Number(row.traces),
-      errorRate: Number(row.errorRate), p50LatencyMs: Number(row.p50LatencyMs),
-    })),
-    totalNodes: Number(nodeRows[0]?.totalNodes ?? 0),
-    totalEdges: Number(edgeRows[0]?.totalEdges ?? 0),
-  };
+  const rows = await tinybirdRows<MapNode & { totalNodes: number }>(`SELECT ${NODE_KEY} AS id, count() AS count, uniqExact(runId) AS traces, countIf(${IS_ERROR}) AS errors,
+    quantileExact(0.5)(latencyMs) AS p50LatencyMs, count() OVER () AS totalNodes FROM spans WHERE ${scope}
+    GROUP BY id ORDER BY count DESC, id LIMIT ${MAP_NODE_LIMIT - 2}`);
+  if (!rows.length) return { nodes: [] as MapNode[], edges: [] as MapEdge[], totalNodes: 0, totalEdges: 0 };
+  const stats = new Map(rows.map((row) => [row.id, row]));
+  const order = new Map<string, MapNode>();
+  const edges = new Map<string, FlowEdge>(), pairs = new Map<string, number>();
+  let traces = 0;
+  const marker = (id: string): MapNode => ({ id, kind: id, name: id === "__start__" ? "start" : "end", count: 0, traces: 0, errors: 0, p50LatencyMs: 0 });
+  order.set("__start__", marker("__start__"));
+  for await (const run of flowRuns(projectId, filters)) {
+    traces++;
+    const flow = flowGraph(run.steps, false);
+    for (const item of flow.items) {
+      const row = stats.get(item.key);
+      if (row && !order.has(item.key)) order.set(item.key, { id: item.key, kind: item.type, name: item.name, count: Number(row.count), traces: Number(row.traces), errors: Number(row.errors), p50LatencyMs: Number(row.p50LatencyMs) });
+    }
+    const seen = new Set<string>();
+    for (const edge of flow.edges) {
+      if (![edge.source, edge.target].every((id) => stats.has(id) || id === "__start__" || id === "__end__")) continue;
+      const current = edges.get(edge.id) ?? { ...edge, count: 0, errors: 0, traces: 0, latencies: [] };
+      current.count += edge.count; current.errors += edge.errors; current.traces++; current.latencies.push(...edge.latencies); edges.set(edge.id, current);
+      seen.add(flowPairId(edge.source, edge.target));
+    }
+    for (const pair of seen) pairs.set(pair, (pairs.get(pair) ?? 0) + 1);
+  }
+  order.set("__end__", marker("__end__"));
+  for (const key of ["__start__", "__end__"]) Object.assign(order.get(key)!, { count: traces, traces });
+  const nodes = [...order.values()];
+  const collapsed = collapseFlowReturns(nodes.map((node) => ({ key: node.id })), [...edges.values()], pairs);
+  const mapped: MapEdge[] = collapsed.sort((a, b) => b.count + (b.back ?? 0) - a.count - (a.back ?? 0)).slice(0, MAP_EDGE_LIMIT).map((edge) => ({ source: edge.source, target: edge.target, count: edge.count, back: edge.back, errors: edge.errors, traces: edge.traces, errorRate: edge.errors / Math.max(1, edge.count + (edge.back ?? 0)), p50LatencyMs: median(edge.latencies) }));
+  return { nodes, edges: mapped, totalNodes: Number(rows[0]?.totalNodes ?? 0) + 2, totalEdges: collapsed.length };
 }
 
 export type FacetCounts = Partial<Record<FacetKey, Array<{ value: string; traces: number }>>>;

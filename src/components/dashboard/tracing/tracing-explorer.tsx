@@ -13,7 +13,7 @@ type TraceRow = {
   sessionId: string; environment: string; release: string; tags: string[]; inputPreview: string; outputPreview: string;
 };
 type Bucket = { bucket: string; traces: number; errors: number };
-type Stats = { traces: number; errors: number; p50DurationMs: number; p95DurationMs: number; totalCostUsd: number; inputTokens: number; outputTokens: number };
+type Stats = { traces: number; errors: number; p50DurationMs: number; p95DurationMs: number; totalCostUsd: number; inputTokens: number; outputTokens: number; runningTraces: number };
 type ListResponse = {
   rows: TraceRow[]; total: number; page: number; pageSize: number;
   histogram: { bucketSeconds: number; buckets: Bucket[] }; stats?: Stats; facets?: FacetCounts | null;
@@ -60,13 +60,14 @@ function readColumns(): ColumnId[] {
 
 export function TracingExplorer({ projectId, initialQuery }: { projectId: string; initialQuery: TraceQuery }) {
   // Next.js syncs our history.replaceState calls into its router and can remount this page with the search
-  // params it was first rendered with. Reading the live URL here keeps the open trace and filters across that.
-  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "24h", ...initialQuery, ...currentUrlQuery() }));
+  // params it was first rendered with. The live URL is authoritative in the browser: merging stale server
+  // params back in would resurrect removed filters or map mode after Show traces.
+  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "24h", ...(typeof window === "undefined" ? initialQuery : currentUrlQuery()) }));
   const [data, setData] = useState<ListResponse | null>(null);
   const [facets, setFacets] = useState<FacetCounts>({});
   const [settledKey, setSettledKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [searchDraft, setSearchDraft] = useState(initialQuery.q ?? "");
+  const [searchDraft, setSearchDraft] = useState(query.q ?? "");
   const [columns, setColumns] = useState<ColumnId[]>(DEFAULT_COLUMNS);
   const [columnsOpen, setColumnsOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(true);
@@ -199,7 +200,8 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   const stats = data?.stats;
   const activeGroup = data?.errorGroups?.groups.find((group) => group.id === query.errorGroup);
   const activeGroupLabel = activeGroup ? errorGroupLabel(activeGroup) : pickedGroup?.id === query.errorGroup ? pickedGroup?.label : query.errorGroup?.slice(0, 8);
-  const mapMode = query.mode === "map";
+  const mapAvailable = decodeValues(query.traceName ?? "").length === 1;
+  const mapMode = query.mode === "map" && mapAvailable;
   const traceView: TraceView = TRACE_VIEWS.some((item) => item.id === query.view) ? (query.view as TraceView) : "tree";
 
   useEffect(() => {
@@ -346,9 +348,10 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
               </button>
             ))}
             {activeFilters.length ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => update(Object.fromEntries(activeFilters.map((f) => [f.key, ""])))}>Clear all</button> : null}
-            <div role="group" aria-label="Show traces as" className="ml-auto flex rounded-md border border-[#262C35] p-0.5 text-xs">
+            <div role="group" aria-label="Show traces as" className="ml-auto flex max-w-full flex-wrap rounded-md border border-[#262C35] p-0.5 text-xs">
               <button type="button" aria-pressed={!mapMode} onClick={() => update({ mode: "" }, false)} className={`h-6 rounded px-2.5 ${!mapMode ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>List</button>
-              <button type="button" aria-pressed={mapMode} onClick={() => update({ mode: "map" }, false)} className={`h-6 rounded px-2.5 ${mapMode ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>Map</button>
+              <button type="button" aria-pressed={mapMode} disabled={!mapAvailable} aria-describedby={!mapAvailable ? "map-requirement" : undefined} title={!mapAvailable ? "Pick one trace name to see its map" : undefined} onClick={() => update({ mode: "map" }, false)} className={`h-6 rounded px-2.5 ${mapMode ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"} disabled:cursor-not-allowed disabled:opacity-50`}>Map</button>
+              {!mapAvailable ? <span id="map-requirement" className="basis-full px-2.5 py-1 text-[10px] text-[#8B93A1]">Pick one trace name to see its map</span> : null}
             </div>
             {mapMode ? null : <>
             <button type="button" onClick={exportCsv} disabled={!rows.length} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
@@ -534,8 +537,8 @@ function StatsStrip({ stats, loading, onErrors }: { stats?: Stats; loading: bool
   const tiles: Array<{ label: string; value: string; hint?: string; tone?: string; onClick?: () => void }> = [
     { label: "Traces", value: stats ? compactNumber(stats.traces) : "—" },
     { label: "Error rate", value: stats ? `${(errorRate * 100).toFixed(errorRate && errorRate < 0.1 ? 1 : 0)}%` : "—", hint: stats ? `${compactNumber(stats.errors)} with errors` : undefined, tone: errorRate > 0 ? "text-[#FF8A8A]" : undefined, onClick: stats?.errors ? onErrors : undefined },
-    { label: "Latency p50", value: stats ? formatDuration(stats.p50DurationMs) : "—" },
-    { label: "Latency p95", value: stats ? formatDuration(stats.p95DurationMs) : "—" },
+    { label: "Latency p50", value: stats && stats.traces > stats.runningTraces ? formatDuration(stats.p50DurationMs) : "—", hint: stats?.runningTraces ? `${compactNumber(stats.runningTraces)} running` : undefined },
+    { label: "Latency p95", value: stats && stats.traces > stats.runningTraces ? formatDuration(stats.p95DurationMs) : "—", hint: stats?.runningTraces ? `${compactNumber(stats.runningTraces)} running` : undefined },
     { label: "Total cost", value: stats ? formatCost(stats.totalCostUsd) : "—", hint: stats?.traces ? `${formatCost(stats.totalCostUsd / stats.traces)} per trace` : undefined },
     { label: "Tokens", value: stats ? compactNumber(stats.inputTokens + stats.outputTokens) : "—", hint: stats ? `${compactNumber(stats.inputTokens)} in · ${compactNumber(stats.outputTokens)} out` : undefined },
   ];

@@ -3,7 +3,10 @@ export function formatDuration(ms: number | null | undefined) {
   if (!Number.isFinite(value) || value <= 0) return "0 ms";
   if (value < 1000) return `${Math.round(value)} ms`;
   if (value < 60_000) return `${(value / 1000).toFixed(value < 10_000 ? 2 : 1)} s`;
-  return `${Math.floor(value / 60_000)}m ${Math.round((value % 60_000) / 1000)}s`;
+  if (value >= 86_400_000) return `${Math.floor(value / 86_400_000)}d ${Math.floor(value % 86_400_000 / 3_600_000)}h`;
+  if (value >= 3_600_000) return `${Math.floor(value / 3_600_000)}h ${Math.floor(value % 3_600_000 / 60_000)}m`;
+  const seconds = Math.floor(value / 1000);
+  return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
 }
 
 export function formatCost(usd: number | null | undefined) {
@@ -101,7 +104,7 @@ export function chatMessages(value: unknown): ChatMessage[] | null {
 }
 
 /** SDK and OpenTelemetry names for the same kinds of step, mapped to the names the views colour and filter by. */
-const TYPE_ALIASES: Record<string, string> = {
+export const TYPE_ALIASES: Record<string, string> = {
   llm_call: "llm", generation: "llm", chat: "llm", tool_call: "tool", function: "tool", run_end: "agent", decision: "agent", chain: "agent",
 };
 

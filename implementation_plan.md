@@ -1,3 +1,7 @@
+## 2026-10-14 — Agent map: owner preview review
+
+- [pending owner] Review draft PR #150 and its Ready EU preview before merge. Implementation and verification are recorded in `memory.md`.
+
 # Langfuse parity-plus product epic — 2026-09-03
 
 ## Google Analytics 4 — 2026-09-15
