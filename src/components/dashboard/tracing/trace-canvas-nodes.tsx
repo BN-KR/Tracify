@@ -1,10 +1,10 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { formatDuration } from "./format";
+import { formatDuration, stepKind } from "./format";
 
 export function TraceCanvasNode({ data, selected }: NodeProps) {
-  const kind = String(data.kind ?? "span");
+  const kind = stepKind(String(data.kind ?? "span"));
   const name = String(data.name ?? "Step");
   const isAgent = kind === "tool" || kind === "model";
   const failed = Number(data.errors ?? data.failed ?? 0) > 0;
