@@ -128,7 +128,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
       id, source: edge.source, target: edge.target,
       ...flowEdgePresentation(edge, loop),
       focusable: true,
-      ariaLabel: `${stepLabel(edge.source)} to ${stepLabel(edge.target)}: ${edge.count} calls in ${edge.traces} traces, ${(edge.errorRate * 100).toFixed(0)} percent failed, median latency ${formatDuration(edge.p50LatencyMs)}`,
+      ariaLabel: `${stepLabel(edge.source)} to ${stepLabel(edge.target)}: ${edge.count + (edge.back ?? 0)} calls in ${edge.traces} traces, ${(edge.errorRate * 100).toFixed(0)} percent failed, median latency ${formatDuration(edge.p50LatencyMs)}`,
       style: { ...flowEdgePresentation(edge, loop).style, opacity: dim ? 0.12 : 1 },
 
     };
@@ -137,7 +137,10 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
   const nodeById = useMemo(() => new Map((data?.nodes ?? []).map((node) => [node.id, node])), [data?.nodes]);
   const searchTarget = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return q ? (data?.nodes ?? []).find((node) => `${node.name} ${node.kind}`.toLowerCase().includes(q)) ?? null : null;
+    if (!q) return null;
+    const candidates = data?.nodes ?? [];
+    return candidates.find((node) => node.name.toLowerCase() === q)
+      ?? candidates.find((node) => `${node.name} ${node.kind}`.toLowerCase().includes(q)) ?? null;
   }, [search, data?.nodes]);
   const searchFocus = () => { if (searchTarget) onViewStateChange(`node:${searchTarget.id}`, edgeLimit); };
 
