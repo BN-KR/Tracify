@@ -64,12 +64,14 @@ function SeriesChart({ kind, stacked = false, series, points, bucketSeconds, hei
   format: (value: number) => string; tooltip: (index: number) => TooltipRow[]; label: string; onZoom: (from: number, to: number) => void;
 }) {
   const [ref, width] = useWidth();
-  const [hovered, setHovered] = useState<{ points: Point[]; index: number } | null>(null);
+  const [hovered, setHovered] = useState<{ shape: string; index: number } | null>(null);
   const count = points.length;
-  // A hovered position belongs to the points it was read from. When the data or range changes, the chart can
-  // shrink under the pointer (zooming to one minute leaves two points), so an old index is never used.
-  const hover = hovered && hovered.points === points && hovered.index < count ? hovered.index : null;
-  const setHover = (index: number | null) => setHovered(index === null ? null : { points, index });
+  // A hovered position belongs to the time axis it was read from. When the range or bucket size changes, the chart can
+  // shrink under the pointer (zooming to one minute leaves two points), so an index from another axis is never used.
+  // Live refreshes keep the same axis, so hovering survives them.
+  const shape = `${points[0]?.start ?? 0}:${bucketSeconds}:${count}`;
+  const hover = hovered && hovered.shape === shape && hovered.index < count ? hovered.index : null;
+  const setHover = (index: number | null) => setHovered(index === null ? null : { shape, index });
   const plotWidth = Math.max(0, width - MARGIN.left - MARGIN.right);
   const plotHeight = height - MARGIN.top - MARGIN.bottom;
   const step = count ? plotWidth / count : 0;
@@ -99,10 +101,11 @@ function SeriesChart({ kind, stacked = false, series, points, bucketSeconds, hei
     return { item, path: segments.join(" ") };
   }) : [];
 
-  const move = (event: React.PointerEvent<SVGRectElement>) => {
+  const indexAt = (event: React.PointerEvent<SVGRectElement> | React.MouseEvent<SVGRectElement>) => {
     const box = event.currentTarget.getBoundingClientRect();
-    setHover(Math.max(0, Math.min(count - 1, Math.floor((event.clientX - box.left) / step))));
+    return Math.max(0, Math.min(count - 1, Math.floor((event.clientX - box.left) / step)));
   };
+  const move = (event: React.PointerEvent<SVGRectElement>) => setHover(indexAt(event));
   const rows = hover !== null ? tooltip(hover) : [];
 
   return (
@@ -146,7 +149,7 @@ function SeriesChart({ kind, stacked = false, series, points, bucketSeconds, hei
             ) : null}
             <rect x={MARGIN.left} y={MARGIN.top} width={plotWidth} height={plotHeight} fill="transparent" style={{ cursor: "pointer" }}
               onPointerMove={move} onPointerDown={move} onPointerLeave={() => setHover(null)}
-              onClick={() => hover !== null && onZoom(points[hover]!.start, points[hover]!.start + bucketSeconds * 1000)} />
+              onClick={(event) => { const at = points[indexAt(event)]; if (at) onZoom(at.start, at.start + bucketSeconds * 1000); }} />
           </svg>
           {hover !== null ? (
             <div role="tooltip" className="pointer-events-none absolute z-10 min-w-[150px] rounded-md border border-[#262C35] bg-[#111418] px-2.5 py-1.5 text-[11px] shadow-2xl"
