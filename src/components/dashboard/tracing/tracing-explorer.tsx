@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { stepLabel } from "./agent-map";
 import { RANGES, TimeRangePicker } from "./time-range-picker";
-import { TraceCharts, type ChartBucket } from "./trace-charts";
+import { TraceCharts, TracesOverTime, type ChartBucket } from "./trace-charts";
 import { ErrorGroupsPanel, errorGroupLabel, type ErrorGroups } from "./error-groups";
 import { FACETS, FacetGroup, decodeValues, encodeValues, type FacetCounts } from "./facet-filter";
 import { TRACE_VIEWS, TracePanel, type TraceView } from "./trace-panel";
@@ -376,7 +376,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
           <StatsStrip stats={stats} loading={!data} onErrors={() => update({ status: "error" })} />
 
-          {chartMode ? null : <CountChart histogram={data?.histogram} onZoom={(from, to) => update({ from: String(from), to: String(to) })} />}
+          {chartMode ? null : <TracesOverTime histogram={data?.histogram} range={data?.range} onZoom={(from, to) => update({ from: String(from), to: String(to) })} />}
 
           {chartMode ? null : (
             <ErrorGroupsPanel data={data ? data.errorGroups : undefined} open={errorsOpen} loading={loading} active={query.errorGroup} clock={clock}
@@ -488,34 +488,6 @@ function FilterNumber({ label, value, step = "1", onChange }: { label: string; v
       <input id={id} type="number" min="0" step={step} value={draft} onChange={(event) => setDraft(event.target.value)}
         onBlur={() => draft !== value && onChange(draft)} onKeyDown={(event) => { if (event.key === "Enter") onChange(draft); }}
         className="h-7 w-full rounded border border-[#262C35] bg-[#111418] px-2 text-xs text-[#E6E9EE] outline-none focus:border-[#4A5260]" placeholder="Any" />
-    </div>
-  );
-}
-
-function CountChart({ histogram, onZoom }: { histogram?: { bucketSeconds: number; buckets: ChartBucket[] }; onZoom: (from: number, to: number) => void }) {
-  const buckets = histogram?.buckets ?? [];
-  const max = Math.max(1, ...buckets.map((bucket) => bucket.traces));
-  return (
-    <div className="px-4 pt-3">
-      <div className="mb-1.5 flex items-center justify-between text-xs text-[#8B93A1]">
-        <span>Traces over time{buckets.length ? " · click a bar to zoom" : ""}</span>
-        <span className="flex items-center gap-3"><span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-[#F4D44D]" />traces</span><span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-[#FF6B6B]" />with errors</span></span>
-      </div>
-      <div className="flex h-16 items-end gap-[2px] rounded-lg border border-[#1F242C] bg-[#0E1115] px-2 pt-2">
-        {buckets.length === 0 ? <span className="m-auto text-xs text-[#4A5260]">No traces to chart</span> : buckets.map((bucket) => {
-          const start = Date.parse(bucket.bucket.replace(" ", "T") + "Z");
-          const label = `${formatTime(new Date(start).toISOString())}: ${bucket.traces} traces, ${bucket.errors} with errors`;
-          return (
-            <button key={bucket.bucket} type="button" title={label} aria-label={label}
-              onClick={() => onZoom(start, start + (histogram?.bucketSeconds ?? 60) * 1000)}
-              className="group relative flex h-full min-w-[4px] flex-1 flex-col justify-end">
-              <span className="w-full rounded-t-sm bg-[#F4D44D] group-hover:bg-[#FFE680]" style={{ height: `${Math.max(4, (bucket.traces / max) * 100)}%` }}>
-                {bucket.errors ? <span className="block w-full rounded-t-sm bg-[#FF6B6B]" style={{ height: `${(bucket.errors / bucket.traces) * 100}%` }} /> : null}
-              </span>
-            </button>
-          );
-        })}
-      </div>
     </div>
   );
 }
