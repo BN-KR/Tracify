@@ -283,7 +283,7 @@ function aggregatedTree(roots: SpanTreeNode[], spans: Map<string, ViewSpan>, isF
   return merge(roots, 0, "");
 }
 
-type FlowEdge = { id: string; source: string; target: string; count: number };
+type FlowEdge = { id: string; source: string; target: string; count: number; back?: number };
 
 /**
  * Flow: what the agent did, in the order it did it. Every distinct step (same type and name) is one card with
@@ -309,6 +309,9 @@ function flowGraph(roots: SpanTreeNode[], spans: Map<string, ViewSpan>, isFailed
   const marker = (key: string, name: string): GraphNode => ({ key, name, type: key, spanIds: [], failed: 0, latencyMs: 0, costUsd: 0, children: [], depth: 0 });
   nodes.set("__start__", marker("__start__", "start"));
   let previous = "__start__";
+  // The last step that was not a tool: back-to-back tool calls were both made by it, so they hang from it
+  // instead of being chained tool → tool.
+  let caller = "__start__";
   for (const step of order) {
     const span = spans.get(step.id);
     const type = span?.spanType ?? "";
@@ -321,11 +324,25 @@ function flowGraph(roots: SpanTreeNode[], spans: Map<string, ViewSpan>, isFailed
       node.costUsd += Number(span.costUsd || 0);
     }
     nodes.set(key, node);
-    if (previous !== key) link(previous, key);
+    const isTool = stepKind(type) === "tool" || stepKind(type) === "retrieval";
+    const previousIsTool = previous !== "__start__" && ["tool", "retrieval"].includes(stepKind(nodes.get(previous)?.type ?? ""));
+    const source = isTool && previousIsTool ? caller : previous;
+    if (source !== key) link(source, key);
     previous = key;
+    if (!isTool) caller = key;
   }
   nodes.set("__end__", marker("__end__", "end"));
   link(previous, "__end__");
+  // A there-and-back pair (model → tool, tool → model) becomes one two-headed arrow, kept in the direction
+  // first taken, so return trips do not each draw their own loop.
+  const firstSeen = new Map([...nodes.keys()].map((key, index) => [key, index]));
+  for (const edge of [...edges.values()]) {
+    const reverse = edges.get(`${edge.target}>${edge.source}`);
+    if (!reverse || !edges.has(edge.id) || edge.source === edge.target) continue;
+    const [keep, drop] = (firstSeen.get(edge.source) ?? 0) <= (firstSeen.get(reverse.source) ?? 0) ? [edge, reverse] : [reverse, edge];
+    keep.back = drop.count;
+    edges.delete(drop.id);
+  }
   return { items: [...nodes.values()], edges: [...edges.values()] };
 }
 
@@ -368,7 +385,7 @@ export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
         setPositionedNodes(flattened.items.map((node) => ({
           id: node.key,
           type: "traceCard",
-          width: node.type === "__start__" || node.type === "__end__" ? 120 : node.type === "tool" || node.type === "model" ? 190 : 205,
+          width: node.type === "__start__" || node.type === "__end__" ? 120 : stepKind(node.type) === "tool" || node.type === "model" ? 190 : 205,
           height: 62,
           position: positions.get(node.key) ?? { x: 0, y: 0 },
           // Start and end only frame the flow; they are not steps, so they cannot be focused or selected.
@@ -400,13 +417,14 @@ export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
         sourceHandle: mode === "flow" ? (loop ? "out-right" : "out-bottom") : undefined,
         targetHandle: mode === "flow" ? (loop ? "in-right" : "in-top-center") : undefined,
         focusable: true,
-        ariaLabel: `${nodeById.get(edge.source)?.name ?? "Step"} leads to ${nodeById.get(edge.target)?.name ?? "step"}${edge.count > 1 ? `, ${edge.count} times` : ""}`,
-        label: edge.count > 1 ? `${edge.count}×` : undefined,
+        ariaLabel: `${nodeById.get(edge.source)?.name ?? "Step"} leads to ${nodeById.get(edge.target)?.name ?? "step"}${edge.count > 1 ? `, ${edge.count} times` : ""}${edge.back ? `, and back ${edge.back} ${edge.back === 1 ? "time" : "times"}` : ""}`,
+        label: edge.back ? (edge.back === edge.count ? `${edge.count}× ⇅` : `${edge.count}↓ ${edge.back}↑`) : edge.count > 1 ? `${edge.count}×` : undefined,
         labelStyle: { fill: "#C9CED6", fontSize: 10, fontFamily: "var(--font-geist-mono), monospace" },
         labelBgStyle: { fill: "#0E1115", fillOpacity: 0.95 },
         labelBgPadding: [4, 2] as [number, number],
         style: { stroke: color, strokeWidth: 1.5, strokeDasharray: loop ? "4 3" : undefined },
         markerEnd: { type: "arrowclosed" as const, color, width: 12, height: 12 },
+        markerStart: edge.back ? { type: "arrowclosed" as const, color, width: 12, height: 12 } : undefined,
       };
     });
   }, [flattened, nodeById, positionedNodes, mode]);
