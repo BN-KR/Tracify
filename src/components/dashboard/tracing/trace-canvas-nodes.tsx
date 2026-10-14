@@ -14,6 +14,27 @@ export function TraceCanvasNode({ data, selected }: NodeProps) {
   const latency = Number(data.latencyMs ?? data.p50LatencyMs ?? 0);
   const errors = Number(data.errors ?? data.failed ?? 0);
   const onActivate = data.onActivate as (() => void) | undefined;
+  const flowHandles = (
+    <>
+      <Handle id="in-top-center" type="target" position={Position.Top} className="!invisible !size-1" />
+      <Handle id="out-bottom" type="source" position={Position.Bottom} className="!invisible !size-1" />
+      <Handle id="out-right" type="source" position={Position.Right} style={{ top: "70%" }} className="!invisible !size-1" />
+    </>
+  );
+
+  if (kind === "__start__" || kind === "__end__") {
+    const start = kind === "__start__";
+    return (
+      <>
+        <Handle id="in-right" type="target" position={Position.Right} className="!invisible !size-1" />
+        {flowHandles}
+        <div className="flex items-center justify-center font-mono text-[11px] font-semibold text-[#0B0D10]"
+          style={{ width: 120, height: 62, padding: "15px 0" }}>
+          <span className="flex h-8 w-full items-center justify-center rounded" style={{ background: start ? "#3DDC84" : "#FF6B6B" }}>{start ? "start" : "end"}</span>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -39,6 +60,7 @@ export function TraceCanvasNode({ data, selected }: NodeProps) {
         </div>
         <span className="sr-only">{name}; {count} runs in {traces} traces; {errors} errors; median latency {formatDuration(latency)}</span>
       </div>
+      {flowHandles}
       <Handle id="out-left" type="source" position={Position.Left} className="!invisible !size-1" />
       <Handle id="out-top" type="source" position={Position.Top} style={{ left: "33%" }} className="!invisible !size-1" />
     </>

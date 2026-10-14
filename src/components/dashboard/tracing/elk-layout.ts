@@ -8,12 +8,13 @@ export async function layoutWithElk(
   nodes: Array<{ id: string; width: number; height: number }>,
   edges: Array<{ id: string; source: string; target: string }>,
   previous: Map<string, XYPosition>,
+  direction: "RIGHT" | "DOWN" = "RIGHT",
 ) {
   const graph: ElkNode = {
     id,
     layoutOptions: {
       "elk.algorithm": "layered",
-      "elk.direction": "RIGHT",
+      "elk.direction": direction,
       "elk.edgeRouting": "ORTHOGONAL",
       "elk.layered.spacing.nodeNodeBetweenLayers": "76",
       "elk.spacing.nodeNode": "24",
