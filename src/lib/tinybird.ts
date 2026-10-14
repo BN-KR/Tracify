@@ -517,6 +517,35 @@ export async function traceHistogram(projectId: string, filters: TraceListFilter
   };
 }
 
+export type ActivityDay = { day: string; traces: number; errors: number; costUsd: number };
+export const ACTIVITY_DAYS = 371;
+
+/** A time zone name this server can pass to ClickHouse; anything else is read as UTC. */
+export function activityTimeZone(value: string | null | undefined) {
+  if (!value || value === "UTC") return "UTC";
+  try {
+    return Intl.supportedValuesOf("timeZone").includes(value) ? value : "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+
+/**
+ * Traces, traces with errors and cost per calendar day (in the reader's time zone) for the last 53 weeks.
+ * The filters apply but the page's time range does not, so the grid always shows the longer pattern.
+ */
+export async function traceActivity(projectId: string, filters: TraceListFilters, timeZone: string, now = Date.now()) {
+  const scoped: TraceListFilters = { ...filters, fromMs: now - ACTIVITY_DAYS * 86_400_000, toMs: now };
+  const { where, having } = traceListClauses(projectId, scoped);
+  const zone = sqlString(activityTimeZone(timeZone));
+  const rows = await tinybirdRows<{ day: string; traces: number; errors: number; costUsd: number }>(`
+    SELECT toString(toDate(startedAt, '${zone}')) AS day, count() AS traces, countIf(errorCount > 0) AS errors, sum(totalCostUsd) AS costUsd
+    FROM (SELECT ${TRACE_AGGREGATE} FROM spans WHERE ${where} GROUP BY runId ${having})
+    GROUP BY day ORDER BY day`);
+  const finite = (value: number | string) => { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : 0; };
+  return rows.map((row): ActivityDay => ({ day: String(row.day), traces: finite(row.traces), errors: finite(row.errors), costUsd: finite(row.costUsd) }));
+}
+
 export type TraceStats = {
   traces: number; errors: number; p50DurationMs: number; p95DurationMs: number;
   totalCostUsd: number; inputTokens: number; outputTokens: number; runningTraces: number;

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { stepLabel } from "./agent-map";
+import { RANGES, TimeRangePicker } from "./time-range-picker";
 import { TraceCharts, type ChartBucket } from "./trace-charts";
 import { ErrorGroupsPanel, errorGroupLabel, type ErrorGroups } from "./error-groups";
 import { FACETS, FacetGroup, decodeValues, encodeValues, type FacetCounts } from "./facet-filter";
@@ -22,12 +23,6 @@ type ListResponse = {
 
 export type TraceQuery = Record<string, string>;
 
-const RANGES = [
-  { id: "1h", label: "1h", ms: 3_600_000 },
-  { id: "24h", label: "24h", ms: 86_400_000 },
-  { id: "7d", label: "7d", ms: 604_800_000 },
-  { id: "30d", label: "30d", ms: 2_592_000_000 },
-];
 const COLUMNS = [
   { id: "startedAt", label: "Start time" }, { id: "status", label: "Status" }, { id: "name", label: "Trace name" },
   { id: "input", label: "Input" }, { id: "output", label: "Output" }, { id: "latency", label: "Latency" },
@@ -122,6 +117,13 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     }
     return params;
   }, [query, now]);
+  // The activity grid follows the filters but ignores the time range.
+  const activityParams = useMemo(() => {
+    const params = new URLSearchParams(apiParams);
+    params.delete("from");
+    params.delete("to");
+    return params;
+  }, [apiParams]);
   const listParams = useMemo(() => {
     const params = new URLSearchParams(apiParams);
     if (errorsOpen && query.mode !== "map") params.set("errors", "1");
@@ -299,18 +301,10 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
           />
           {query.q ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => { setSearchDraft(""); update({ q: "" }); }}>Clear</button> : <kbd className="hidden rounded border border-[#262C35] px-1.5 font-mono text-[10px] text-[#6B7380] sm:block" aria-hidden="true">/</kbd>}
         </form>
-        <div role="group" aria-label="Time range" className="flex rounded-md border border-[#262C35] bg-[#111418] p-0.5">
-          {RANGES.map((range) => {
-            const active = !query.from && (query.range ?? "24h") === range.id;
-            return (
-              <button key={range.id} type="button" aria-pressed={active}
-                onClick={() => { setNow(Date.now()); update({ range: range.id, from: "", to: "" }); }}
-                className={`h-7 min-w-10 rounded px-2.5 font-mono text-xs ${active ? "bg-[#F4D44D] text-[#0B0D10]" : "text-[#8B93A1] hover:text-white"}`}
-              >{range.label}</button>
-            );
-          })}
-          {query.from ? <button type="button" onClick={() => update({ from: "", to: "" })} className="h-7 rounded bg-[#F4D44D] px-2.5 font-mono text-xs text-[#0B0D10]">Zoomed · reset</button> : null}
-        </div>
+        <TimeRangePicker range={query.range ?? "24h"} from={query.from ? Number(query.from) : undefined} to={query.to ? Number(query.to) : undefined} now={now}
+          onPreset={(id) => { setNow(Date.now()); update({ range: id, from: "", to: "" }); }}
+          onCustom={(from, to) => { const current = Date.now(); setNow(current); update({ from: String(from), to: String(Math.min(to, current)) }); }}
+          onReset={() => update({ from: "", to: "" })} />
         <button type="button" aria-pressed={isLive} onClick={toggleLive} disabled={Boolean(query.from || query.to)}
           title={query.from || query.to ? "Live updates are off while zoomed to a fixed window" : isLive ? "New traces appear automatically. Click to pause." : "Paused. Click to resume live updates."}
           className="flex h-8 items-center gap-2 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-50">
@@ -383,7 +377,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
           <div className="min-h-0 flex-1 overflow-auto px-4">
             {chartMode ? (
               error ? <p role="alert" className="my-6 text-sm text-[#FF8A8A]">{error}</p>
-                : <TraceCharts histogram={data?.histogram} range={data?.range} onZoom={(from, to) => update({ from: String(from), to: String(to) })} />
+                : <TraceCharts projectId={projectId} filterParams={activityParams} histogram={data?.histogram} range={data?.range} onZoom={(from, to) => update({ from: String(from), to: String(to) })} />
             ) : error ? (
               <div role="alert" className="my-6 rounded-lg border border-[#5A2A2A] bg-[#1E1314] p-4 text-sm">
                 <p className="font-medium text-[#FF8A8A]">{error}</p>
