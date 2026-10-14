@@ -51,7 +51,7 @@ function useWidth() {
 
 function tickLabel(start: number, bucketSeconds: number, spanMs: number) {
   const date = new Date(start);
-  if (bucketSeconds >= 86_400) return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (bucketSeconds >= 21_600) return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   if (spanMs > 86_400_000) return date.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
   return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 }
@@ -79,7 +79,9 @@ function SeriesChart({ kind, stacked = false, series, points, bucketSeconds, hei
   const y = (value: number) => MARGIN.top + plotHeight - (value / peak) * plotHeight;
   const xCenter = (index: number) => MARGIN.left + (index + 0.5) * step;
   const span = count > 1 ? points[count - 1]!.start - points[0]!.start : 0;
-  const ticks = count ? [0, Math.floor((count - 1) / 2), count - 1].filter((value, index, all) => all.indexOf(value) === index) : [];
+  // As many labels as fit without touching: roughly one per 110px, between two and five.
+  const tickCount = Math.max(2, Math.min(5, Math.floor(plotWidth / 110)));
+  const ticks = count > 1 ? [...new Set(Array.from({ length: tickCount }, (_, i) => Math.round((i * (count - 1)) / (tickCount - 1))))] : count ? [0] : [];
 
   const lines = kind === "line" ? series.map((item) => {
     const segments: string[] = [];
