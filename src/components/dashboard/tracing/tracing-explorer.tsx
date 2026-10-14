@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { stepLabel } from "./agent-map";
+import { traceCsv } from "@/lib/trace-csv";
 import { parseSearch } from "@/lib/trace-search";
 import { SearchBox } from "./search-box";
 import { RANGES, TimeRangePicker } from "./time-range-picker";
@@ -10,7 +11,7 @@ import { TraceCharts, TracesOverTime, type ChartBucket } from "./trace-charts";
 import { ErrorGroupsPanel, errorGroupLabel, type ErrorGroups } from "./error-groups";
 import { FACETS, FacetGroup, decodeValues, encodeValues, type FacetCounts } from "./facet-filter";
 import { TRACE_VIEWS, TracePanel, type TraceView } from "./trace-panel";
-import { compactNumber, downloadFile, formatCost, formatDuration, formatTime, parseTime, previewText, relativeTime, toCsv } from "./format";
+import { compactNumber, downloadFile, formatCost, formatDuration, formatTime, parseTime, previewText, relativeTime } from "./format";
 
 type TraceRow = TraceRowExtras & {
   runId: string; traceName: string; startedAt: string; durationMs: number; spanCount: number; errorCount: number;
@@ -280,13 +281,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   }
 
   function exportCsv() {
-    const header = ["trace_id", "start_time_utc", "trace_name", "status", "errors", "latency_ms", "cost_usd", "input_tokens", "output_tokens", "model", "user", "session", "environment", "release", "tags", "input", "output"];
-    const body = rows.map((row) => [
-      row.runId, new Date(parseTime(row.startedAt)).toISOString(), row.traceName, Number(row.errorCount) > 0 ? "error" : "ok", Number(row.errorCount),
-      Number(row.durationMs), Number(row.totalCostUsd), Number(row.inputTokens), Number(row.outputTokens), row.modelId, row.endUserId,
-      row.sessionId, row.environment, row.release, (row.tags ?? []).join(" "), previewText(row.inputPreview), previewText(row.outputPreview),
-    ]);
-    downloadFile(`traces-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.csv`, toCsv(header, body), "text/csv;charset=utf-8");
+    downloadFile(`traces-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.csv`, traceCsv(columns, rows), "text/csv;charset=utf-8");
   }
 
   function sortBy(sort: string) {
@@ -378,7 +373,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             {activeFilters.length ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => update(Object.fromEntries(activeFilters.map((f) => [f.key, ""])))}>Clear all</button> : null}
             {/* The right-hand controls belong to the list. In Chart they stay in place, hidden and unfocusable, so the row does not reflow. */}
             <div className={chartMode ? "invisible contents" : "contents"}>
-            <button type="button" onClick={exportCsv} disabled={!rows.length} className="ml-auto h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
+            <button type="button" onClick={exportCsv} disabled={!rows.length || loading} className="ml-auto h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
             <ColumnsMenu projectId={projectId} rangeParams={rangeParams} columns={columns} onToggle={toggleColumn}
               onReset={() => { setColumns(DEFAULT_COLUMNS); try { window.localStorage.removeItem(COLUMN_STORAGE); } catch {} }} />
             </div>
