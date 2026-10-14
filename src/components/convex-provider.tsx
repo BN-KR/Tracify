@@ -5,6 +5,7 @@ import { ConvexReactClient } from "convex/react";
 import { useEffect, useRef } from "react";
 import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
+import { AuthIdentityProvider } from "@/components/auth/auth-identity";
 import { CONSENT_EVENT, readConsent } from "@/lib/consent";
 
 // Auth and marketing routes do not need Convex. Avoid constructing a client
@@ -71,8 +72,10 @@ export function ConvexClientProvider({
 
   return (
     <ConvexBetterAuthProvider client={convex} authClient={authClient as unknown as AuthClient} initialToken={initialToken}>
-      <PostHogIdentity />
-      {children}
+      <AuthIdentityProvider initialToken={initialToken}>
+        <PostHogIdentity />
+        {children}
+      </AuthIdentityProvider>
     </ConvexBetterAuthProvider>
   );
 }
