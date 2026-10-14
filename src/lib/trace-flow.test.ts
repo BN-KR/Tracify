@@ -15,7 +15,7 @@ describe("shared trace Flow", () => {
     expect(flow.edges.some(e => e.source === "tool:a" && e.target === "tool:b")).toBe(false);
     const pair = flow.edges.find(e => e.source === "llm:think" && e.target === "tool:b")!;
     expect(pair).toMatchObject({ count: 1, back: 1, traces: 1, errors: 1 });
-    expect(flowEdgePresentation(pair, false)).toMatchObject({ label: "1× ⇅ · 1 failed", style: { stroke: "#FF6B6B" }, markerStart: { type: "arrowclosed" } });
+    expect(flowEdgePresentation(pair, false)).toMatchObject({ label: "1× ↕ · 1 failed", style: { stroke: "#FF6B6B" }, markerStart: { type: "arrowclosed" } });
   });
   it("keeps each run independent and unions bidirectional trace counts", () => {
     const raw = flowGraph([step("1", "llm", "think", 0), step("2", "tool", "a", 1), step("3", "llm", "think", 2)], false);

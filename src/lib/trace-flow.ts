@@ -80,7 +80,7 @@ export function flowGraph(steps: FlowStep[], collapseReturns = true) {
 /** Shared arrow presentation: downwards cards, two heads for returns, dashed genuine back edges, red failures. */
 export function flowEdgePresentation(edge: Pick<FlowEdge, "count" | "back" | "errors">, loop: boolean) {
   const color = edge.errors ? "#FF6B6B" : loop ? "#6B7380" : "#4A5260";
-  const count = edge.back ? edge.back === edge.count ? `${edge.count}× ⇅` : `${edge.count}↓ ${edge.back}↑` : edge.count > 1 ? `${edge.count}×` : "";
+  const count = edge.back ? edge.back === edge.count ? `${edge.count}× ↕` : `${edge.count}↓ ${edge.back}↑` : edge.count > 1 ? `${edge.count}×` : "";
   const marker = { type: "arrowclosed" as const, color, width: 12, height: 12 };
   return {
     type: loop ? "smoothstep" : "straight",
