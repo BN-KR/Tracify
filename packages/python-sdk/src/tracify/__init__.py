@@ -5,7 +5,10 @@ import uuid
 import functools
 import asyncio
 import threading
-from datetime import datetime
+import re
+import contextlib
+import contextvars
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -17,6 +20,50 @@ except ImportError:
     _HAS_HTTPX = False
 
 import requests as _requests_fallback
+
+
+
+# The current run and step for this thread or async task. Context variables keep concurrent runs apart, so
+# steps from two agents running at once never land in each other's trace.
+_current_run: "contextvars.ContextVar[Optional[str]]" = contextvars.ContextVar("tracify_run", default=None)
+_current_span: "contextvars.ContextVar[Optional[str]]" = contextvars.ContextVar("tracify_span", default=None)
+
+MAX_PAYLOAD_CHARS = 10_000
+_SECRET_PATTERNS = [
+    re.compile(r"(?i)\bbearer\s+[a-z0-9._~+/=-]{12,}"),
+    re.compile(r"\b(?:sk|pk|rk)[-_](?:live|test|proj|ant)?[-_]?[A-Za-z0-9_-]{16,}"),
+    re.compile(r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}"),
+    re.compile(r"(?i)((?:api[_-]?key|password|secret|token)[\"']?\s*[:=]\s*[\"']?)[^\s\"',}]{6,}"),
+]
+
+
+def _redact(text: str) -> str:
+    for pattern in _SECRET_PATTERNS:
+        text = pattern.sub(lambda m: (m.group(1) if m.lastindex else "") + "[redacted]", text)
+    return text
+
+
+def _payload(value: Any) -> str:
+    """Serialise an input or output, remove obvious secrets and cap its size."""
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        try:
+            value = json.dumps(value, default=str)
+        except Exception:
+            value = str(value)
+    value = _redact(value)
+    if len(value) > MAX_PAYLOAD_CHARS:
+        value = value[:MAX_PAYLOAD_CHARS] + f"… [truncated {len(value) - MAX_PAYLOAD_CHARS} chars]"
+    return value
+
+
+def current_run_id() -> str:
+    return _current_run.get() or os.environ.get("TRACIFY_CURRENT_RUN_ID") or "unknown"
+
+
+def current_span_id() -> Optional[str]:
+    return _current_span.get()
 
 
 class LatencyBudgetExceeded(Exception):
@@ -241,6 +288,14 @@ class TracifyClient:
             "metadata": {},
             **kwargs
         }
+        if not span.get("runId"):
+            span["runId"] = current_run_id()
+        parent = current_span_id()
+        if not span.get("parentSpanId") and parent and parent != span["spanId"]:
+            span["parentSpanId"] = parent
+        for key in ("input", "output"):
+            if key in span:
+                span[key] = _payload(span[key])
         span.setdefault("release", self.release or os.environ.get("TRACIFY_RELEASE"))
         span.setdefault("environment", self.environment or os.environ.get("TRACIFY_ENVIRONMENT"))
         span.setdefault("deploymentId", self.deployment_id)
@@ -328,7 +383,7 @@ class TracifyClient:
         calculate_cost: Optional[Callable[[Any, str], float]] = None,
         run_id: Optional[str] = None,
     ) -> Any:
-        run_id = run_id or os.environ.get("TRACIFY_CURRENT_RUN_ID") or os.environ.get("TRACIFY_CURRENT_RUN_ID") or str(uuid.uuid4())
+        run_id = run_id or _current_run.get() or os.environ.get("TRACIFY_CURRENT_RUN_ID") or str(uuid.uuid4())
         all_models = [model] + [m for m in policy.fallback_chain if m != model]
         last_error: Optional[Exception] = None
 
@@ -489,92 +544,166 @@ class TracifyClient:
         raise last_error or Exception("All fallback models exhausted")
 
 
-def trace_agent(client: Optional[TracifyClient] = None, environment: Optional[str] = None, release: Optional[str] = None, deployment_id: Optional[str] = None, session_id: Optional[str] = None, end_user_id: Optional[str] = None, tags: Optional[List[str]] = None):
+_default_client: Optional[TracifyClient] = None
+
+
+def _client(client: Optional[TracifyClient]) -> TracifyClient:
+    global _default_client
+    if client is not None:
+        return client
+    if _default_client is None:
+        _default_client = TracifyClient()
+    return _default_client
+
+
+class Span:
+    """A step in progress. Set its output and any measured fields before it ends."""
+
+    def __init__(self, name: str, span_type: str, input_data: Any = None, metadata: Optional[Dict[str, Any]] = None):
+        self.id = str(uuid.uuid4())
+        self.name = name
+        self.span_type = span_type
+        self.input = input_data
+        self.output: Any = None
+        self.metadata: Dict[str, Any] = dict(metadata or {})
+        self.fields: Dict[str, Any] = {}
+
+    def set_output(self, output: Any) -> "Span":
+        self.output = output
+        return self
+
+    def set(self, model: Optional[str] = None, input_tokens: Optional[int] = None, output_tokens: Optional[int] = None,
+            cost_usd: Optional[float] = None, **metadata: Any) -> "Span":
+        """Record what the step measured (model, tokens, cost); anything else goes into metadata."""
+        if model is not None: self.fields["modelId"] = model
+        if input_tokens is not None: self.fields["inputTokens"] = int(input_tokens)
+        if output_tokens is not None: self.fields["outputTokens"] = int(output_tokens)
+        if cost_usd is not None: self.fields["costUsd"] = float(cost_usd)
+        self.metadata.update(metadata)
+        return self
+
+
+@contextlib.contextmanager
+def span(name: str, type: str = "span", input: Any = None, metadata: Optional[Dict[str, Any]] = None,
+         client: Optional[TracifyClient] = None, run_id: Optional[str] = None, root: bool = False, **fields: Any):
     """
-    Decorator to wrap an agent's main entry point.
-    Automatically handles runId generation and run_end span.
+    Record one step of the agent. Steps opened inside it become its children, so the trace shows which step
+    called which. `type` is what the step is: "agent", "llm", "tool", "retrieval" or "span".
+
+        with tracify.span("search-docs", type="tool", input=query) as step:
+            step.set_output(search(query))
+    """
+    current = Span(name, type, input, metadata)
+    if fields: current.set(**fields)
+    run_token = _current_run.set(run_id) if run_id else None
+    span_token = _current_span.set(current.id)
+    started = time.time()
+    error: Optional[BaseException] = None
+    try:
+        yield current
+    except BaseException as exc:
+        error = exc
+        raise
+    finally:
+        _current_span.reset(span_token)
+        payload: Dict[str, Any] = {
+            "spanId": current.id, "spanType": current.span_type, "toolName": current.name,
+            "input": current.input, "output": current.output if error is None else str(error),
+            "latencyMs": int((time.time() - started) * 1000), "costUsd": 0,
+            "createdAt": datetime.fromtimestamp(started, timezone.utc).isoformat().replace("+00:00", "Z"), "metadata": current.metadata,
+            **current.fields,
+        }
+        if root:
+            # The root closes the run: run_end or error is what marks a run completed or failed.
+            payload["spanType"] = "error" if error is not None else "run_end"
+            payload["metadata"] = {**current.metadata, "stepType": current.span_type}
+        if error is not None and not isinstance(error, (GeneratorExit, KeyboardInterrupt)):
+            payload["errorType"] = error.__class__.__name__
+            payload["errorMessage"] = _payload(str(error))
+        try:
+            _client(client).ingest(**payload)
+        finally:
+            if run_token is not None:
+                _current_run.reset(run_token)
+
+
+def observe(name: Optional[str] = None, type: str = "span", capture_input: bool = True, capture_output: bool = True,
+            client: Optional[TracifyClient] = None):
+    """
+    Decorator form of `span`: records each call of the function as a step, with its arguments and result.
+
+        @tracify.observe(type="tool")
+        def search_docs(query): ...
     """
     def decorator(func: Callable):
-        @functools.wraps(func)
-        async def async_wrapper(*args, **kwargs):
-            nonlocal client
-            if client is None:
-                client = TracifyClient(environment=environment, release=release, deployment_id=deployment_id, session_id=session_id, end_user_id=end_user_id, tags=tags)
-            
-            run_id = str(uuid.uuid4())
-            start_time = time.time()
-            
-            os.environ["TRACIFY_CURRENT_RUN_ID"] = run_id
-            os.environ["TRACIFY_CURRENT_RUN_ID"] = run_id
-            
-            try:
-                result = await func(*args, **kwargs)
-                latency_ms = int((time.time() - start_time) * 1000)
-                client.ingest(
-                    runId=run_id,
-                    spanType="run_end",
-                    output=json.dumps(result) if result else "",
-                    latencyMs=latency_ms,
-                    costUsd=0,
-                )
-                return result
-            except Exception as e:
-                latency_ms = int((time.time() - start_time) * 1000)
-                client.ingest(
-                    runId=run_id,
-                    spanType="error",
-                    output=str(e),
-                    latencyMs=latency_ms,
-                    costUsd=0,
-                )
-                raise e
+        step_name = name or func.__name__
+
+        def describe(args, kwargs):
+            if not capture_input: return None
+            return {"args": list(args), "kwargs": kwargs} if kwargs else list(args)
+
+        if asyncio.iscoroutinefunction(func):
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                with span(step_name, type=type, input=describe(args, kwargs), client=client) as step:
+                    result = await func(*args, **kwargs)
+                    if capture_output: step.set_output(result)
+                    return result
+            return async_wrapper
 
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
-            nonlocal client
-            if client is None:
-                client = TracifyClient(environment=environment, release=release, deployment_id=deployment_id, session_id=session_id, end_user_id=end_user_id, tags=tags)
-            
-            run_id = str(uuid.uuid4())
-            start_time = time.time()
-            os.environ["TRACIFY_CURRENT_RUN_ID"] = run_id
-            os.environ["TRACIFY_CURRENT_RUN_ID"] = run_id
-            
-            try:
+            with span(step_name, type=type, input=describe(args, kwargs), client=client) as step:
                 result = func(*args, **kwargs)
-                latency_ms = int((time.time() - start_time) * 1000)
-                client.ingest(
-                    runId=run_id,
-                    spanType="run_end",
-                    output=json.dumps(result) if result else "",
-                    latencyMs=latency_ms,
-                    costUsd=0,
-                )
+                if capture_output: step.set_output(result)
                 return result
-            except Exception as e:
-                latency_ms = int((time.time() - start_time) * 1000)
-                client.ingest(
-                    runId=run_id,
-                    spanType="error",
-                    output=str(e),
-                    latencyMs=latency_ms,
-                    costUsd=0,
-                )
-                raise e
-
-        if asyncio.iscoroutinefunction(func):
-            return async_wrapper
         return sync_wrapper
     return decorator
 
 
-def llm_call(input_data: Any, output_data: Any, model_id: str, cost_usd: float, latency_ms: int, client: Optional[TracifyClient] = None, session_id: Optional[str] = None, end_user_id: Optional[str] = None, environment: Optional[str] = None, release: Optional[str] = None, tags: Optional[List[str]] = None, trace_name: Optional[str] = None):
-    if client is None: client = TracifyClient()
-    client.ingest(
-        runId=os.environ.get("TRACIFY_CURRENT_RUN_ID") or os.environ.get("TRACIFY_CURRENT_RUN_ID", "unknown"),
+def trace_agent(client: Optional[TracifyClient] = None, environment: Optional[str] = None, release: Optional[str] = None, deployment_id: Optional[str] = None, session_id: Optional[str] = None, end_user_id: Optional[str] = None, tags: Optional[List[str]] = None, name: Optional[str] = None):
+    """
+    Decorator to wrap an agent's main entry point. Each call is one trace: a new run id, and a root step that
+    every step recorded inside it hangs from. The root is sent as run_end (or error) when the call returns.
+    """
+    def decorator(func: Callable):
+        step_name = name or func.__name__
+
+        def make_client():
+            nonlocal client
+            if client is None:
+                client = TracifyClient(environment=environment, release=release, deployment_id=deployment_id, session_id=session_id, end_user_id=end_user_id, tags=tags)
+            return client
+
+        if asyncio.iscoroutinefunction(func):
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                with span(step_name, type="agent", client=make_client(), run_id=str(uuid.uuid4()), root=True) as step:
+                    result = await func(*args, **kwargs)
+                    step.set_output(result)
+                    return result
+            return async_wrapper
+
+        @functools.wraps(func)
+        def sync_wrapper(*args, **kwargs):
+            with span(step_name, type="agent", client=make_client(), run_id=str(uuid.uuid4()), root=True) as step:
+                result = func(*args, **kwargs)
+                step.set_output(result)
+                return result
+        return sync_wrapper
+    return decorator
+
+
+def llm_call(input_data: Any, output_data: Any, model_id: str, cost_usd: float, latency_ms: int, client: Optional[TracifyClient] = None, session_id: Optional[str] = None, end_user_id: Optional[str] = None, environment: Optional[str] = None, release: Optional[str] = None, tags: Optional[List[str]] = None, trace_name: Optional[str] = None, input_tokens: Optional[int] = None, output_tokens: Optional[int] = None, name: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
+    """Record a finished model call. It is attached to the step it was made in."""
+    extra: Dict[str, Any] = {}
+    if input_tokens is not None: extra["inputTokens"] = int(input_tokens)
+    if output_tokens is not None: extra["outputTokens"] = int(output_tokens)
+    if name: extra["toolName"] = name
+    _client(client).ingest(
         spanType="llm_call",
-        input=json.dumps(input_data) if not isinstance(input_data, str) else input_data,
-        output=json.dumps(output_data) if not isinstance(output_data, str) else output_data,
+        input=input_data,
+        output=output_data,
         modelId=model_id,
         costUsd=cost_usd,
         latencyMs=latency_ms,
@@ -584,17 +713,18 @@ def llm_call(input_data: Any, output_data: Any, model_id: str, cost_usd: float, 
         release=release or "",
         tags=tags or [],
         traceName=trace_name or "",
+        metadata=metadata or {},
+        **extra,
     )
 
 
-def tool_call(tool_name: str, input_data: Any, output_data: Any, latency_ms: int, client: Optional[TracifyClient] = None, session_id: Optional[str] = None, end_user_id: Optional[str] = None, environment: Optional[str] = None, release: Optional[str] = None, tags: Optional[List[str]] = None, trace_name: Optional[str] = None):
-    if client is None: client = TracifyClient()
-    client.ingest(
-        runId=os.environ.get("TRACIFY_CURRENT_RUN_ID") or os.environ.get("TRACIFY_CURRENT_RUN_ID", "unknown"),
+def tool_call(tool_name: str, input_data: Any, output_data: Any, latency_ms: int, client: Optional[TracifyClient] = None, session_id: Optional[str] = None, end_user_id: Optional[str] = None, environment: Optional[str] = None, release: Optional[str] = None, tags: Optional[List[str]] = None, trace_name: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None):
+    """Record a finished tool call. It is attached to the step it was made in."""
+    _client(client).ingest(
         spanType="tool_call",
         toolName=tool_name,
-        input=json.dumps(input_data) if not isinstance(input_data, str) else input_data,
-        output=json.dumps(output_data) if not isinstance(output_data, str) else output_data,
+        input=input_data,
+        output=output_data,
         latencyMs=latency_ms,
         costUsd=0,
         sessionId=session_id or "",
@@ -603,6 +733,5 @@ def tool_call(tool_name: str, input_data: Any, output_data: Any, latency_ms: int
         release=release or "",
         tags=tags or [],
         traceName=trace_name or "",
+        metadata=metadata or {},
     )
-
-
