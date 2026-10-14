@@ -64,10 +64,12 @@ async function checkMinimap(canvas) {
 }
 
 async function checkCardsAndLines(canvas) {
-  const cards = canvas.locator(".react-flow__node");
+  // Start and end cards frame a Flow graph; only step cards carry a name and an accessible label.
+  const cards = canvas.locator(".react-flow__node[aria-label]");
   const names = await cards.evaluateAll((nodes) => nodes.map((node) => node.querySelector(".truncate[title]")?.textContent));
   expect(names.length > 0 && names.every((name) => name && name.trim().length > 0), "node text disappeared or became a bubble");
-  const paths = await canvas.locator(".react-flow__edge-path").evaluateAll((edges) => edges.map((edge) => edge.getAttribute("d")));
+  // Forward connectors are straight; dashed loop arrows (Flow's back-edges) are allowed to curve.
+  const paths = await canvas.locator(".react-flow__edge-path").evaluateAll((edges) => edges.filter((edge) => !/dasharray/.test(edge.getAttribute("style") ?? "")).map((edge) => edge.getAttribute("d")));
   expect(paths.length > 0 && paths.every((path) => !/[CQAST]/i.test(path)), "connector still has curved segments");
 }
 
