@@ -8,17 +8,24 @@ export async function layoutWithElk(
   nodes: Array<{ id: string; width: number; height: number }>,
   edges: Array<{ id: string; source: string; target: string }>,
   previous: Map<string, XYPosition>,
+  direction: "RIGHT" | "DOWN" = "RIGHT",
 ) {
   const graph: ElkNode = {
     id,
     layoutOptions: {
       "elk.algorithm": "layered",
-      "elk.direction": "RIGHT",
+      "elk.direction": direction,
       "elk.edgeRouting": "ORTHOGONAL",
       "elk.layered.spacing.nodeNodeBetweenLayers": "76",
       "elk.spacing.nodeNode": "24",
       "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
       "elk.layered.cycleBreaking.strategy": "GREEDY",
+      // Top-down flows keep the order steps first ran in, so loops point back up instead of reshuffling the cards.
+      ...(direction === "DOWN" ? {
+        "elk.layered.cycleBreaking.strategy": "DEPTH_FIRST",
+        "elk.layered.considerModelOrder.strategy": "NODES_AND_EDGES",
+        "elk.layered.crossingMinimization.forceNodeModelOrder": "true",
+      } : {}),
     },
     children: nodes.map((node) => ({ id: node.id, width: node.width, height: node.height })),
     edges: edges.map((edge) => ({ id: edge.id, sources: [edge.source], targets: [edge.target] })),

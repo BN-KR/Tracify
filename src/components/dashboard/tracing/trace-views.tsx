@@ -3,7 +3,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
 import dynamic from "next/dynamic";
 import type { SpanTreeNode } from "@/lib/tracify-ports/treeBuilding";
-import { compactNumber, formatCost, formatDuration } from "./format";
+import { compactNumber, formatCost, formatDuration, stepKind } from "./format";
+
+export { stepKind };
 import { layoutWithElk } from "./elk-layout";
 import type { CanvasEdge, CanvasNode } from "./trace-canvas";
 import { TraceCanvasNode } from "./trace-canvas-nodes";
@@ -23,7 +25,7 @@ const FAILED = "#FF6B6B";
 const TraceCanvas = dynamic(() => import("./trace-canvas").then((module) => module.TraceCanvas), { ssr: false });
 
 export function stepColor(type: string, failed: boolean) {
-  return failed ? FAILED : TYPE_COLOR[(type || "").toLowerCase()] ?? OTHER;
+  return failed ? FAILED : TYPE_COLOR[stepKind(type)] ?? OTHER;
 }
 
 const ICON_PATHS: Record<string, string> = {
@@ -37,8 +39,7 @@ const ICON_PATHS: Record<string, string> = {
 
 /** Small type glyph in the step colour, used in every view. */
 export function TypeIcon({ type, failed = false, size = 14 }: { type: string; failed?: boolean; size?: number }) {
-  const lower = (type || "").toLowerCase();
-  const key = failed ? "error" : lower === "generation" ? "llm" : lower;
+  const key = failed ? "error" : stepKind(type);
   return (
     <svg aria-hidden="true" viewBox="0 0 16 16" width={size} height={size} className="shrink-0" fill="none" stroke={stepColor(type, failed)} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <path d={ICON_PATHS[key] ?? ICON_PATHS.other} />
@@ -282,6 +283,69 @@ function aggregatedTree(roots: SpanTreeNode[], spans: Map<string, ViewSpan>, isF
   return merge(roots, 0, "");
 }
 
+type FlowEdge = { id: string; source: string; target: string; count: number; back?: number };
+
+/**
+ * Flow: what the agent did, in the order it did it. Every distinct step (same type and name) is one card with
+ * its run count; arrows join steps that ran one after the other, counted, so loops such as
+ * think → tool → think show up as one cycle instead of a long chain. Start and end cards frame the run.
+ */
+function flowGraph(roots: SpanTreeNode[], spans: Map<string, ViewSpan>, isFailed: (span: ViewSpan) => boolean) {
+  const order: SpanTreeNode[] = [];
+  const visit = (nodes: SpanTreeNode[]) => {
+    for (const node of [...nodes].sort((a, b) => a.startTimeSinceRootMs - b.startTimeSinceRootMs)) {
+      order.push(node);
+      visit(node.children);
+    }
+  };
+  visit(roots);
+  const nodes = new Map<string, GraphNode>();
+  const edges = new Map<string, FlowEdge>();
+  const link = (source: string, target: string) => {
+    const id = `${source}>${target}`;
+    const edge = edges.get(id);
+    if (edge) edge.count += 1; else edges.set(id, { id, source, target, count: 1 });
+  };
+  const marker = (key: string, name: string): GraphNode => ({ key, name, type: key, spanIds: [], failed: 0, latencyMs: 0, costUsd: 0, children: [], depth: 0 });
+  nodes.set("__start__", marker("__start__", "start"));
+  let previous = "__start__";
+  // The last step that was not a tool: back-to-back tool calls were both made by it, so they hang from it
+  // instead of being chained tool → tool.
+  let caller = "__start__";
+  for (const step of order) {
+    const span = spans.get(step.id);
+    const type = span?.spanType ?? "";
+    const key = `${type}:${step.name}`;
+    const node = nodes.get(key) ?? { key, name: step.name, type, spanIds: [], failed: 0, latencyMs: 0, costUsd: 0, children: [], depth: 0 };
+    node.spanIds.push(step.id);
+    if (span) {
+      node.failed += isFailed(span) ? 1 : 0;
+      node.latencyMs += Number(span.latencyMs || 0);
+      node.costUsd += Number(span.costUsd || 0);
+    }
+    nodes.set(key, node);
+    const isTool = stepKind(type) === "tool" || stepKind(type) === "retrieval";
+    const previousIsTool = previous !== "__start__" && ["tool", "retrieval"].includes(stepKind(nodes.get(previous)?.type ?? ""));
+    const source = isTool && previousIsTool ? caller : previous;
+    if (source !== key) link(source, key);
+    previous = key;
+    if (!isTool) caller = key;
+  }
+  nodes.set("__end__", marker("__end__", "end"));
+  link(previous, "__end__");
+  // A there-and-back pair (model → tool, tool → model) becomes one two-headed arrow, kept in the direction
+  // first taken, so return trips do not each draw their own loop.
+  const firstSeen = new Map([...nodes.keys()].map((key, index) => [key, index]));
+  for (const edge of [...edges.values()]) {
+    const reverse = edges.get(`${edge.target}>${edge.source}`);
+    if (!reverse || !edges.has(edge.id) || edge.source === edge.target) continue;
+    const [keep, drop] = (firstSeen.get(edge.source) ?? 0) <= (firstSeen.get(reverse.source) ?? 0) ? [edge, reverse] : [reverse, edge];
+    keep.back = drop.count;
+    edges.delete(drop.id);
+  }
+  return { items: [...nodes.values()], edges: [...edges.values()] };
+}
+
 /**
  * Steps as ELK layered cards in the shared pan/zoom canvas. The viewport and user transform survive polls;
  * the last position of every existing node is kept when live data adds or updates steps.
@@ -290,44 +354,49 @@ export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
   roots: SpanTreeNode[]; spans: Map<string, ViewSpan>; selectedId: string | null;
   isFailed: (span: ViewSpan) => boolean; onSelect: (id: string) => void;
 }) {
-  const [mode, setMode] = useState<"aggregated" | "expanded">("expanded");
+  const [mode, setMode] = useState<"flow" | "aggregated" | "expanded">("flow");
   const [positionedNodes, setPositionedNodes] = useState<CanvasNode[]>([]);
   const previous = useRef(new Map<string, { x: number; y: number }>());
-  const tree = useMemo(() => (mode === "aggregated" ? aggregatedTree : expandedTree)(roots, spans, isFailed), [mode, roots, spans, isFailed]);
   const flattened = useMemo(() => {
+    if (mode === "flow") return flowGraph(roots, spans, isFailed);
+    const tree = (mode === "aggregated" ? aggregatedTree : expandedTree)(roots, spans, isFailed);
     const items: GraphNode[] = [];
-    const edges: Array<{ id: string; source: string; target: string }> = [];
+    const edges: FlowEdge[] = [];
     const stack = [...tree].reverse();
     while (stack.length) {
       const node = stack.pop()!;
       items.push(node);
       for (const child of node.children) {
-        edges.push({ id: `${node.key}>${child.key}`, source: node.key, target: child.key });
+        edges.push({ id: `${node.key}>${child.key}`, source: node.key, target: child.key, count: 1 });
         stack.push(child);
       }
     }
     return { items, edges };
-  }, [tree]);
+  }, [mode, roots, spans, isFailed]);
+  // Positions belong to one mode; switching modes lays the graph out afresh.
+  useEffect(() => { previous.current = new Map(); }, [mode]);
 
   useEffect(() => {
     let active = true;
-    layoutWithElk("trace-steps", flattened.items.map((node) => ({ id: node.key, width: 205, height: 62 })), flattened.edges, previous.current)
+    layoutWithElk("trace-steps", flattened.items.map((node) => ({ id: node.key, width: 205, height: 62 })), flattened.edges, previous.current, mode === "flow" ? "DOWN" : "RIGHT")
       .then((positions) => {
         if (!active) return;
         previous.current = positions;
         setPositionedNodes(flattened.items.map((node) => ({
           id: node.key,
           type: "traceCard",
-          width: node.type === "tool" || node.type === "model" ? 190 : 205,
+          width: node.type === "__start__" || node.type === "__end__" ? 120 : stepKind(node.type) === "tool" || node.type === "model" ? 190 : 205,
           height: 62,
           position: positions.get(node.key) ?? { x: 0, y: 0 },
-          focusable: true,
-          ariaLabel: [node.name, node.spanIds.length > 1 ? `${node.spanIds.length} steps` : "", formatDuration(node.latencyMs), node.costUsd ? formatCost(node.costUsd) : "", node.failed ? `${node.failed} failed` : ""].filter(Boolean).join(" · "),
-          data: { kind: node.type, name: node.name, runs: node.spanIds.length, spanIds: node.spanIds, failed: node.failed, latencyMs: node.latencyMs, costUsd: node.costUsd },
+          // Start and end only frame the flow; they are not steps, so they cannot be focused or selected.
+          focusable: node.spanIds.length > 0,
+          selectable: node.spanIds.length > 0,
+          ariaLabel: node.spanIds.length === 0 ? undefined : [node.name, node.spanIds.length > 1 ? `${node.spanIds.length} steps` : "", formatDuration(node.latencyMs), node.costUsd ? formatCost(node.costUsd) : "", node.failed ? `${node.failed} failed` : ""].filter(Boolean).join(" · "),
+          data: { kind: node.type, name: node.name, runs: node.spanIds.length, vertical: mode === "flow", spanIds: node.spanIds, failed: node.failed, latencyMs: node.latencyMs, costUsd: node.costUsd },
         } as CanvasNode)));
       });
     return () => { active = false; };
-  }, [flattened]);
+  }, [flattened, mode]);
 
   const nodes: CanvasNode[] = useMemo(() => positionedNodes.map((node) => ({
     ...node,
@@ -336,24 +405,42 @@ export function TraceGraph({ roots, spans, selectedId, isFailed, onSelect }: {
 
   const nodeById = useMemo(() => new Map(flattened.items.map((node) => [node.key, node])), [flattened]);
   const focusNodeId = selectedId ? flattened.items.find((node) => node.spanIds.includes(selectedId))?.key : null;
-  const edges: CanvasEdge[] = useMemo(() => flattened.edges.map((edge) => ({
-    ...edge,
-    type: "straight",
-    focusable: true,
-    ariaLabel: `${nodeById.get(edge.source)?.name ?? "Step"} leads to ${nodeById.get(edge.target)?.name ?? "step"}`,
-    style: { stroke: "#4A5260", strokeWidth: 1.5 },
-    markerEnd: { type: "arrowclosed" as const, color: "#4A5260", width: 12, height: 12 },
-  })), [flattened, nodeById]);
+  const edges: CanvasEdge[] = useMemo(() => {
+    const at = new Map(positionedNodes.map((node) => [node.id, node.position]));
+    return flattened.edges.map((edge) => {
+      // In Flow, an arrow that points back up is a loop: it leaves and enters on the right so it does not cross the cards.
+      const loop = mode === "flow" && (at.get(edge.target)?.y ?? 0) <= (at.get(edge.source)?.y ?? 0);
+      const color = loop ? "#6B7380" : "#4A5260";
+      return {
+        ...edge,
+        type: loop ? "smoothstep" : "straight",
+        sourceHandle: mode === "flow" ? (loop ? "out-right" : "out-bottom") : undefined,
+        targetHandle: mode === "flow" ? (loop ? "in-right" : "in-top-center") : undefined,
+        focusable: true,
+        ariaLabel: `${nodeById.get(edge.source)?.name ?? "Step"} leads to ${nodeById.get(edge.target)?.name ?? "step"}${edge.count > 1 ? `, ${edge.count} times` : ""}${edge.back ? `, and back ${edge.back} ${edge.back === 1 ? "time" : "times"}` : ""}`,
+        label: edge.back ? (edge.back === edge.count ? `${edge.count}× ⇅` : `${edge.count}↓ ${edge.back}↑`) : edge.count > 1 ? `${edge.count}×` : undefined,
+        labelStyle: { fill: "#C9CED6", fontSize: 10, fontFamily: "var(--font-geist-mono), monospace" },
+        labelBgStyle: { fill: "#0E1115", fillOpacity: 0.95 },
+        labelBgPadding: [4, 2] as [number, number],
+        style: { stroke: color, strokeWidth: 1.5, strokeDasharray: loop ? "4 3" : undefined },
+        markerEnd: { type: "arrowclosed" as const, color, width: 12, height: 12 },
+        markerStart: edge.back ? { type: "arrowclosed" as const, color, width: 12, height: 12 } : undefined,
+      };
+    });
+  }, [flattened, nodeById, positionedNodes, mode]);
+  // A grouped card holds several steps: each click opens the next one, so every run can be reached from the graph.
   const selectNode = (node: CanvasNode) => {
-    const spanId = (node.data.spanIds as string[] | undefined)?.[0];
-    if (spanId) onSelect(spanId);
+    const ids = (node.data.spanIds as string[] | undefined) ?? [];
+    if (!ids.length) return;
+    const current = selectedId ? ids.indexOf(selectedId) : -1;
+    onSelect(ids[(current + 1) % ids.length]!);
   };
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#1F242C] px-2 py-1">
         <div role="group" aria-label="Graph mode" className="flex rounded-sm border border-[#262C35] p-0.5 text-xs">
-          {([["expanded", "All steps", "Every step as its own card"], ["aggregated", "Grouped", "Repeated steps with the same name under the same parent are merged into one card (×N)"]] as const).map(([item, label, hint]) => (
+          {([["flow", "Flow", "What the agent did, in order: each distinct step once with its run count; loops show as arrows back"], ["expanded", "All steps", "Every step as its own card"], ["aggregated", "Grouped", "Repeated steps with the same name under the same parent are merged into one card (×N)"]] as const).map(([item, label, hint]) => (
             <button key={item} type="button" aria-pressed={mode === item} onClick={() => setMode(item)} title={hint}
               className={`rounded-sm px-2 py-0.5 ${mode === item ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>{label}</button>
           ))}

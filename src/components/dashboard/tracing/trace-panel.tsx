@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { buildSpanTree, type SpanTreeNode } from "@/lib/tracify-ports/treeBuilding";
 import { chatMessages, compactNumber, downloadFile, formatCost, formatDuration, formatTime, parsePayload } from "./format";
-import { TraceGraph, TraceTimeline, TypeIcon } from "./trace-views";
+import { stepKind, TraceGraph, TraceTimeline, TypeIcon } from "./trace-views";
 
 type Span = {
   spanId: string; parentSpanId: string; spanType: string; createdAt: string; latencyMs: number; costUsd: number;
@@ -27,9 +27,9 @@ function isFailed(span: Pick<Span, "spanType" | "errorType">) {
 }
 
 function matchesFilter(span: Span, filter: StepFilter) {
-  const type = (span.spanType || "").toLowerCase();
+  const type = stepKind(span.spanType);
   if (filter === "error") return isFailed(span);
-  if (filter === "llm") return type === "llm" || type === "generation";
+  if (filter === "llm") return type === "llm";
   if (filter === "tool") return type === "tool" || type === "retrieval";
   return true;
 }
