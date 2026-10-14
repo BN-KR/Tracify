@@ -170,6 +170,14 @@ show “N running” when excluded and a dash when none finished. Other summary 
 Use exact ClickHouse percentiles with the same range and filters as the list. Long durations use
 `2d 1h` or `3h 12m`, rather than thousands of minutes.
 
+## Project authorization refresh
+
+The project gate may retain an already-authorized page during a bounded Convex token/query refresh.
+Scope that grant to project and viewer/organization; never show an unverified project on first load.
+Logout, identity or project changes, explicit access denial and auth errors clear the grant immediately.
+Keep children mounted for a same-identity refresh so open menus, draft input and initial requests survive.
+An initial token's subject is only a cache key, not an authorization check; Convex and API access checks remain authoritative.
+
 ## States
 
 - Loading, empty and error states are designed, not blank. Empty explains why (filters vs. no data)

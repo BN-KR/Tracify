@@ -1,5 +1,8 @@
 # Project Memory
 
+## Tracing roadmap authorized 2026-10-14 (in progress)
+- User authorized all five recommended priorities: loading flash; CSV and sorting; OpenAI/Anthropic then LangGraph integrations; cross-trace steps table; saved views. Start base main `fcafb74` after #160/#161 merged, no open PRs. Auth isolated on `codex/project-loading-refresh` in `/home/orca/workspaces/Tracify-loading`. Sessions page files remain out of scope.
+
 ## 2026-10-14 Agent-scoped Flow map and finished latency — draft PR #150
 - Branch `codex/tracing-agent-map`, worktree `/home/orca/workspaces/Tracify-agent-map`, based on origin/main `209924a`. Draft PR: https://github.com/BN-KR/Tracify/pull/150. Verified runtime: `f3140cf`; EU preview https://tracify-cloud-eu-git-codex-tracing-agent-map-tracify-tech.vercel.app is Ready. Later verification notes do not change runtime code. Owner preview review before merge.
 - Map requires exactly one selected Trace name, in the UI and authenticated API. `src/lib/trace-flow.ts` shares canonical type/name aggregation, first-seen traversal, caller tool branches, counted return pairs, failure counts and arrow presentation with the detail Flow graph. Top-down ELK retains positions across updates. Node/arrow trace counts use distinct runs, including the union of return directions; filters resolve through the same Flow rules.

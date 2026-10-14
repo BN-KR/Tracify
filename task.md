@@ -1,3 +1,13 @@
+## Tracing roadmap — authorized 2026-10-14
+
+- Fix project loading refresh flash in an isolated authentication PR; verify auth boundaries and no remounts.
+- Export selected columns, including metadata, in a separate PR.
+- Sort every trace column across all matching records in a separate PR.
+- Add OpenAI/Anthropic and LangGraph SDK integrations with streaming/error/usage tests.
+- Add a real cross-trace steps table with server sorting and filters.
+- Add named persistent views with filters, columns, range and team sharing.
+- Draft previews and verification for each; owner merges, using merge commits. Do not edit Sessions page files.
+
 ## 2026-10-14 — Agent map: owner preview review
 
 - [pending owner] Review draft PR #150 and its Ready EU preview before merge. Implementation and verification are recorded in `memory.md`.
