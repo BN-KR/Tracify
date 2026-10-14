@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { ActivityCalendar } from "./activity-calendar";
 import { compactNumber, formatCost, formatDuration } from "./format";
 
 export type ChartBucket = {
@@ -63,8 +64,12 @@ function SeriesChart({ kind, stacked = false, series, points, bucketSeconds, hei
   format: (value: number) => string; tooltip: (index: number) => TooltipRow[]; label: string; onZoom: (from: number, to: number) => void;
 }) {
   const [ref, width] = useWidth();
-  const [hover, setHover] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<{ points: Point[]; index: number } | null>(null);
   const count = points.length;
+  // A hovered position belongs to the points it was read from. When the data or range changes, the chart can
+  // shrink under the pointer (zooming to one minute leaves two points), so an old index is never used.
+  const hover = hovered && hovered.points === points && hovered.index < count ? hovered.index : null;
+  const setHover = (index: number | null) => setHovered(index === null ? null : { points, index });
   const plotWidth = Math.max(0, width - MARGIN.left - MARGIN.right);
   const plotHeight = height - MARGIN.top - MARGIN.bottom;
   const step = count ? plotWidth / count : 0;
@@ -180,11 +185,22 @@ function Card({ title, summary, legend, children, wide = false }: { title: strin
  * The Chart view: the filtered traces over time, one small chart per measure (never two scales on one chart).
  * Hover reads values, click zooms the whole page to that period, and a table view lists the same numbers.
  */
-export function TraceCharts({ histogram, range, onZoom }: { histogram?: Histogram; range?: { from: number; to: number }; onZoom: (from: number, to: number) => void }) {
+export function TraceCharts({ projectId, filterParams, histogram, range, onZoom }: {
+  projectId: string; filterParams: URLSearchParams; histogram?: Histogram; range?: { from: number; to: number }; onZoom: (from: number, to: number) => void;
+}) {
+  return (
+    <div className="space-y-3 pb-4 pt-1">
+      <ActivityCalendar projectId={projectId} params={filterParams} onZoom={onZoom} />
+      <RangeCharts histogram={histogram} range={range} onZoom={onZoom} />
+    </div>
+  );
+}
+
+function RangeCharts({ histogram, range, onZoom }: { histogram?: Histogram; range?: { from: number; to: number }; onZoom: (from: number, to: number) => void }) {
   const points = useMemo(() => (histogram ? fillBuckets(histogram, range) : []), [histogram, range]);
   const [table, setTable] = useState(false);
   if (!histogram || !histogram.buckets.length) {
-    return <p className="my-10 text-center text-sm text-[#8B93A1]">{histogram ? "No traces to chart for these filters." : "Loading charts…"}</p>;
+    return <p className="my-10 text-center text-sm text-[#8B93A1]">{histogram ? "No traces in this time range for these filters." : "Loading charts…"}</p>;
   }
   const bucketSeconds = histogram.bucketSeconds;
   const value = (pick: (bucket: ChartBucket) => number | null, empty: number | null) => points.map((point) => (point.data ? pick(point.data) : empty));
@@ -198,7 +214,7 @@ export function TraceCharts({ histogram, range, onZoom }: { histogram?: Histogra
   const common = { points, bucketSeconds, onZoom };
 
   return (
-    <div className="space-y-3 pb-4 pt-1">
+    <div className="space-y-3">
       <p className="text-[11px] text-[#6B7380]">Hover for values · click a point to zoom the page to that period</p>
       <div className="grid gap-3 lg:grid-cols-2">
         <Card wide title="Traces" summary={`${compactNumber(totals.traces)} total · ${compactNumber(totals.errors)} with errors`} legend={[{ label: "ok", color: YELLOW }, { label: "with errors", color: RED }]}>
