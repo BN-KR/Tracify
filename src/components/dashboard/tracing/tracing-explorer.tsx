@@ -60,13 +60,14 @@ function readColumns(): ColumnId[] {
 
 export function TracingExplorer({ projectId, initialQuery }: { projectId: string; initialQuery: TraceQuery }) {
   // Next.js syncs our history.replaceState calls into its router and can remount this page with the search
-  // params it was first rendered with. Reading the live URL here keeps the open trace and filters across that.
-  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "24h", ...initialQuery, ...currentUrlQuery() }));
+  // params it was first rendered with. The live URL is authoritative in the browser: merging stale server
+  // params back in would resurrect removed filters or map mode after Show traces.
+  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "24h", ...(typeof window === "undefined" ? initialQuery : currentUrlQuery()) }));
   const [data, setData] = useState<ListResponse | null>(null);
   const [facets, setFacets] = useState<FacetCounts>({});
   const [settledKey, setSettledKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [searchDraft, setSearchDraft] = useState(initialQuery.q ?? "");
+  const [searchDraft, setSearchDraft] = useState(query.q ?? "");
   const [columns, setColumns] = useState<ColumnId[]>(DEFAULT_COLUMNS);
   const [columnsOpen, setColumnsOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(true);
