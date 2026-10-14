@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { compactNumber, formatCost, formatDuration } from "./format";
 
 export type ChartBucket = {
@@ -38,9 +38,10 @@ function niceMax(value: number) {
 function useWidth() {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
+    setWidth(Math.floor(el.getBoundingClientRect().width));
     const observer = new ResizeObserver(([entry]) => setWidth(Math.floor(entry?.contentRect.width ?? 0)));
     observer.observe(el);
     return () => observer.disconnect();
@@ -126,7 +127,8 @@ function SeriesChart({ kind, stacked = false, series, points, bucketSeconds, hei
             }) : lines.map(({ item, path }) => (
               <g key={item.key}>
                 <path d={path} fill="none" stroke={item.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-                {count <= 31 ? item.values.map((value, index) => value === null ? null : <circle key={index} cx={xCenter(index)} cy={y(value)} r={3} fill={item.color} stroke="#0E1115" strokeWidth={2} />) : null}
+                {/* A lone value has no neighbour to join a line to, so it is always drawn as a dot. */}
+                {item.values.map((value, index) => value === null || (count > 31 && (item.values[index - 1] ?? null) !== null || count > 31 && (item.values[index + 1] ?? null) !== null) ? null : <circle key={index} cx={xCenter(index)} cy={y(value)} r={3} fill={item.color} stroke="#0E1115" strokeWidth={2} />)}
               </g>
             ))}
             {hover !== null ? (
