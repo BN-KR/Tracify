@@ -129,7 +129,7 @@ mounts them: merging the steps of many traces says little. The rules below apply
 - Share `src/lib/trace-flow.ts` with the detail Flow graph. Canonicalise SDK types through `stepKind()`.
   Each distinct type/name card shows step run count, errors and exact p50 latency. Start/end mark the
   sequence. Use top-down ELK with first-seen order; consecutive tools hang from their caller.
-  Combine there-and-back pairs into one two-headed counted arrow (`N× ⇅`); true back-edges are dashed.
+  Combine there-and-back pairs into one two-headed counted arrow (`N× ↕`); true back-edges are dashed.
   Failures make arrows red and show the failure count. Retain cards and text at every zoom.
 - Keep surviving card positions and the canvas transform across live refreshes. Use the shared
   scrollbar-free canvas, native pan/pinch, wheel and keyboard zoom, fit, search and fullscreen.
