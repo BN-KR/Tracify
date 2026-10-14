@@ -126,6 +126,8 @@ The Tracing `List | Map` toggle (`tracing/agent-map.tsx`, `?mode=map`) shows one
   the existing node/path filter. Its trace count must equal the resulting list total. Combined return
   arrows use the union of matching traces, counting each trace once, rather than summing directions.
   Node and arrow selection (`mapSelected`) and arrow limit (`mapEdges`) persist in the URL.
+  On browser remount, initialise from the current URL alone; merging old server parameters can
+  resurrect a removed filter or map mode after Show traces.
 - Poll with the existing access cache, hidden-tab skip and back-off. Keep the “Arrows, busiest first”
   table below the canvas as the keyboard and non-visual alternative, independent of visible arrow limit.
 

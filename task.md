@@ -1,6 +1,6 @@
-## 2026-10-14 — Agent map verification
+## 2026-10-14 — Agent map: owner preview review
 
-- [pending] Publish draft PR for `codex/tracing-agent-map`; verify Ready EU preview, ClickHouse counts/latency, browser suites and inspected desktop/phone map screenshots. Owner preview review before merge.
+- [pending owner] Review draft PR #150 and its Ready EU preview before merge. Implementation and verification are recorded in `memory.md`.
 
 # 2026-09-02 — First-customer execution
 
