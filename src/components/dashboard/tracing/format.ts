@@ -99,3 +99,13 @@ export function chatMessages(value: unknown): ChatMessage[] | null {
   }
   return messages;
 }
+
+/** SDK and OpenTelemetry names for the same kinds of step, mapped to the names the views colour and filter by. */
+const TYPE_ALIASES: Record<string, string> = {
+  llm_call: "llm", generation: "llm", chat: "llm", tool_call: "tool", function: "tool", run_end: "agent", decision: "agent", chain: "agent",
+};
+
+export function stepKind(type: string) {
+  const lower = (type || "").toLowerCase();
+  return TYPE_ALIASES[lower] ?? lower;
+}

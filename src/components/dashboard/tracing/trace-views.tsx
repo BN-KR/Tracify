@@ -3,7 +3,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
 import dynamic from "next/dynamic";
 import type { SpanTreeNode } from "@/lib/tracify-ports/treeBuilding";
-import { compactNumber, formatCost, formatDuration } from "./format";
+import { compactNumber, formatCost, formatDuration, stepKind } from "./format";
+
+export { stepKind };
 import { layoutWithElk } from "./elk-layout";
 import type { CanvasEdge, CanvasNode } from "./trace-canvas";
 import { TraceCanvasNode } from "./trace-canvas-nodes";
@@ -23,7 +25,7 @@ const FAILED = "#FF6B6B";
 const TraceCanvas = dynamic(() => import("./trace-canvas").then((module) => module.TraceCanvas), { ssr: false });
 
 export function stepColor(type: string, failed: boolean) {
-  return failed ? FAILED : TYPE_COLOR[(type || "").toLowerCase()] ?? OTHER;
+  return failed ? FAILED : TYPE_COLOR[stepKind(type)] ?? OTHER;
 }
 
 const ICON_PATHS: Record<string, string> = {
@@ -37,8 +39,7 @@ const ICON_PATHS: Record<string, string> = {
 
 /** Small type glyph in the step colour, used in every view. */
 export function TypeIcon({ type, failed = false, size = 14 }: { type: string; failed?: boolean; size?: number }) {
-  const lower = (type || "").toLowerCase();
-  const key = failed ? "error" : lower === "generation" ? "llm" : lower;
+  const key = failed ? "error" : stepKind(type);
   return (
     <svg aria-hidden="true" viewBox="0 0 16 16" width={size} height={size} className="shrink-0" fill="none" stroke={stepColor(type, failed)} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <path d={ICON_PATHS[key] ?? ICON_PATHS.other} />
