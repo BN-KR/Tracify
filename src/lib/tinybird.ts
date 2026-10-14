@@ -499,7 +499,8 @@ export type HistogramBucket = {
 export async function traceHistogram(projectId: string, filters: TraceListFilters) {
   const { where, having } = traceListClauses(projectId, filters);
   const spanSeconds = Math.max(60, Math.floor((filters.toMs - filters.fromMs) / 1000));
-  const bucketSeconds = [60, 300, 900, 1800, 3600, 10800, 21600, 43200, 86400].find((size) => spanSeconds / size <= 60) ?? 86400;
+  // Up to 120 bars: a day is 15 minute bars, a week is 2 hour bars, a month is 6 hour bars.
+  const bucketSeconds = [60, 300, 900, 1800, 3600, 7200, 10800, 21600, 43200, 86400].find((size) => spanSeconds / size <= 120) ?? 86400;
   const rows = await tinybirdRows<Record<keyof HistogramBucket | "finishedTraces", number | string>>(`
     SELECT toStartOfInterval(startedAt, INTERVAL ${bucketSeconds} SECOND) AS bucket, count() AS traces, countIf(errorCount > 0) AS errors,
       sum(totalCostUsd) AS costUsd, sum(inputTokens + outputTokens) AS tokens, countIf(finished) AS finishedTraces,

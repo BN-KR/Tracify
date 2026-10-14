@@ -59,6 +59,16 @@ function tickLabel(start: number, bucketSeconds: number, spanMs: number) {
 
 const fullLabel = (start: number) => new Date(start).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
+/** The period a bar covers: "Jul 23, 10:00 – 12:00", or "Jul 23" for whole days. */
+function periodLabel(start: number, bucketSeconds: number) {
+  const from = new Date(start), to = new Date(start + bucketSeconds * 1000);
+  const day = (date: Date) => date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const time = (date: Date) => date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
+  if (bucketSeconds >= 86_400) return day(from);
+  const sameDay = from.toDateString() === to.toDateString() || (to.getHours() === 0 && to.getMinutes() === 0 && to.getTime() - from.getTime() <= 86_400_000);
+  return sameDay ? `${day(from)}, ${time(from)} – ${time(to)}` : `${day(from)}, ${time(from)} – ${day(to)}, ${time(to)}`;
+}
+
 function SeriesChart({ kind, stacked = false, series, points, bucketSeconds, height = 150, format, tooltip, label, onZoom }: {
   kind: "bars" | "line"; stacked?: boolean; series: Series[]; points: Point[]; bucketSeconds: number; height?: number;
   format: (value: number) => string; tooltip: (index: number) => TooltipRow[]; label: string; onZoom: (from: number, to: number) => void;
@@ -151,7 +161,7 @@ function SeriesChart({ kind, stacked = false, series, points, bucketSeconds, hei
           {hover !== null ? (
             <div role="tooltip" className="pointer-events-none absolute z-10 min-w-[150px] rounded-md border border-[#262C35] bg-[#111418] px-2.5 py-1.5 text-[11px] shadow-2xl"
               style={{ top: 4, left: xCenter(hover) > width / 2 ? undefined : xCenter(hover) + 12, right: xCenter(hover) > width / 2 ? width - xCenter(hover) + 12 : undefined }}>
-              <div className="mb-1 font-mono text-[10px] text-[#8B93A1]">{fullLabel(points[hover]!.start)}</div>
+              <div className="mb-1 font-mono text-[10px] text-[#8B93A1]">{periodLabel(points[hover]!.start, bucketSeconds)}</div>
               {rows.map((row) => (
                 <div key={row.label} className="flex items-center justify-between gap-4">
                   <span className="flex items-center gap-1.5 text-[#C9CED6]"><span aria-hidden="true" className="size-2 rounded-sm" style={{ background: row.color }} />{row.label}</span>
@@ -178,6 +188,33 @@ function Card({ title, summary, legend, children, wide = false }: { title: strin
       </header>
       {children}
     </section>
+  );
+}
+
+/**
+ * The bar chart above the trace list: traces per period on a continuous time axis (empty periods are gaps),
+ * split into ok and with errors. Hover reads a period, click zooms the page to it.
+ */
+export function TracesOverTime({ histogram, range, onZoom }: { histogram?: Histogram; range?: { from: number; to: number }; onZoom: (from: number, to: number) => void }) {
+  const points = useMemo(() => (histogram ? fillBuckets(histogram, range) : []), [histogram, range]);
+  const traces = points.map((point) => point.data?.traces ?? 0);
+  const errors = points.map((point) => point.data?.errors ?? 0);
+  const empty = Boolean(histogram) && !histogram!.buckets.length;
+  return (
+    <div className="px-4 pt-3">
+      <div className="mb-1.5 flex items-center justify-between text-xs text-[#8B93A1]">
+        <span>Traces over time{!empty && histogram ? " · click a bar to zoom" : ""}</span>
+        <span className="flex items-center gap-3"><span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-[#F4D44D]" />traces</span><span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-[#FF6B6B]" />with errors</span></span>
+      </div>
+      <div className="rounded-lg border border-[#1F242C] bg-[#0E1115] px-2" style={{ minHeight: 100 }}>
+        {empty ? <p className="py-8 text-center text-xs text-[#4A5260]">No traces to chart</p> : histogram ? (
+          <SeriesChart kind="bars" stacked height={100} points={points} bucketSeconds={histogram.bucketSeconds} label="Traces over time, split into ok and with errors"
+            format={(v) => compactNumber(Math.round(v))} onZoom={onZoom}
+            series={[{ key: "ok", color: YELLOW, values: traces.map((n, i) => n - errors[i]!) }, { key: "errors", color: RED, values: errors }]}
+            tooltip={(i) => [{ label: "Traces", color: YELLOW, value: String(traces[i]) }, { label: "With errors", color: RED, value: String(errors[i]) }]} />
+        ) : null}
+      </div>
+    </div>
   );
 }
 
