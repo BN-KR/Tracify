@@ -381,6 +381,10 @@ export type TraceListFilters = {
 };
 
 export type TraceListRow = {
+  /** Optional columns, present only when the list asked for them. */
+  meta?: Record<string, string>;
+  llmCalls?: number; toolCalls?: number; slowestStepMs?: number; avgStepMs?: number; ttftMs?: number; retries?: number; timeouts?: number;
+  firstErrorType?: string; firstErrorMessage?: string; tools?: string; models?: string; rootType?: string;
   runId: string; traceName: string; startedAt: string; lastSeenAt: string; durationMs: number;
   spanCount: number; errorCount: number; totalCostUsd: number; inputTokens: number; outputTokens: number;
   modelId: string; endUserId: string; sessionId: string; environment: string; release: string;
@@ -474,8 +478,37 @@ async function tinybirdRows<T>(sql: string): Promise<T[]> {
   return (await res.json()).data as T[];
 }
 
+/**
+ * Per-trace values the list can show as optional columns. They are computed only for the traces on the page
+ * and only when a column asks for them, so they cost nothing for the charts, counts and filters.
+ */
+const EXTRA_COLUMNS: Record<string, { sql: string; numeric?: boolean }> = {
+  llmCalls: { sql: `countIf(${STEP_TYPE} = 'llm')`, numeric: true },
+  toolCalls: { sql: `countIf(${STEP_TYPE} = 'tool')`, numeric: true },
+  slowestStepMs: { sql: `max(latencyMs)`, numeric: true },
+  avgStepMs: { sql: `avg(latencyMs)`, numeric: true },
+  ttftMs: { sql: `minIf(ttftMs, ttftMs > 0)`, numeric: true },
+  retries: { sql: `sum(retryCount)`, numeric: true },
+  timeouts: { sql: `countIf(timedOut)`, numeric: true },
+  firstErrorType: { sql: `argMinIf(errorType, createdAt, ${IS_ERROR})` },
+  firstErrorMessage: { sql: `substring(argMinIf(errorMessage, createdAt, ${IS_ERROR}), 1, 200)` },
+  tools: { sql: `arrayStringConcat(arraySlice(groupUniqArrayIf(toolName, toolName != ''), 1, 6), ', ')` },
+  models: { sql: `arrayStringConcat(arraySlice(groupUniqArrayIf(modelId, modelId != ''), 1, 4), ', ')` },
+  rootType: { sql: `anyIf(${STEP_TYPE}, parentSpanId = '')` },
+};
+export const EXTRA_COLUMN_IDS = Object.keys(EXTRA_COLUMNS);
+export const MAX_META_COLUMNS = 20;
+const META_KEY = /^[\w.\- :/]{1,60}$/;
+
+/** A metadata key that is safe to read; anything else is ignored. */
+export function metadataKey(value: string) {
+  return META_KEY.test(value) ? value : null;
+}
+
+export type ListOptions = { extras?: string[]; meta?: string[] };
+
 /** One page of traces (one row per run) plus the total matching count. */
-export async function listTraces(projectId: string, filters: TraceListFilters) {
+export async function listTraces(projectId: string, filters: TraceListFilters, options: ListOptions = {}) {
   const { where, having } = traceListClauses(projectId, filters);
   const pageSize = Math.min(Math.max(Math.floor(filters.pageSize ?? 50), 10), 200);
   const page = Math.max(Math.floor(filters.page ?? 0), 0);
@@ -486,7 +519,40 @@ export async function listTraces(projectId: string, filters: TraceListFilters) {
     tinybirdRows<TraceListRow>(`${grouped} ORDER BY ${sortColumn} ${direction}, runId LIMIT ${pageSize} OFFSET ${page * pageSize}`),
     tinybirdRows<{ total: number }>(`SELECT count() AS total FROM (${grouped})`),
   ]);
-  return { rows, total: Number(totals[0]?.total ?? 0), page, pageSize };
+  return { rows: await withExtraColumns(projectId, filters, rows, options), total: Number(totals[0]?.total ?? 0), page, pageSize };
+}
+
+async function withExtraColumns(projectId: string, filters: TraceListFilters, rows: TraceListRow[], options: ListOptions) {
+  const extras = (options.extras ?? []).filter((id) => id in EXTRA_COLUMNS);
+  const keys = [...new Set((options.meta ?? []).map(metadataKey).filter((key): key is string => key !== null))].slice(0, MAX_META_COLUMNS);
+  if (!rows.length || (!extras.length && !keys.length)) return rows;
+  const selects = [
+    ...extras.map((id) => `${EXTRA_COLUMNS[id]!.sql} AS x_${id}`),
+    // The first non-empty value of the key on any step of the trace, unquoted and capped.
+    ...keys.map((key, index) => `argMinIf(substring(replaceRegexpAll(JSONExtractRaw(metadata, '${sqlString(key)}'), '^"|"$', ''), 1, 200), createdAt, JSONExtractRaw(metadata, '${sqlString(key)}') != '') AS m_${index}`),
+  ];
+  const runIds = rows.map((row) => `'${sqlString(row.runId)}'`).join(",");
+  const found = await tinybirdRows<Record<string, string | number>>(`
+    SELECT runId, ${selects.join(", ")} FROM spans
+    WHERE ${rangeScope(projectId, filters)} AND runId IN (${runIds}) GROUP BY runId`);
+  const byRun = new Map(found.map((row) => [String(row.runId), row]));
+  return rows.map((row) => {
+    const extra = byRun.get(row.runId);
+    if (!extra) return row;
+    const merged: Record<string, unknown> = { ...row };
+    for (const id of extras) merged[id] = EXTRA_COLUMNS[id]!.numeric ? (Number.isFinite(Number(extra[`x_${id}`])) ? Number(extra[`x_${id}`]) : 0) : String(extra[`x_${id}`] ?? "");
+    if (keys.length) merged.meta = Object.fromEntries(keys.map((key, index) => [key, String(extra[`m_${index}`] ?? "")]));
+    return merged as TraceListRow;
+  });
+}
+
+/** Metadata keys seen on traces in the range, most common first, for the list's optional metadata columns. */
+export async function traceMetadataKeys(projectId: string, filters: Pick<TraceListFilters, "fromMs" | "toMs">) {
+  const rows = await tinybirdRows<{ key: string; traces: number }>(`
+    SELECT key, uniqExact(runId) AS traces FROM spans ARRAY JOIN JSONExtractKeys(metadata) AS key
+    WHERE ${rangeScope(projectId, filters)} AND metadata != '' AND metadata != '{}'
+    GROUP BY key ORDER BY traces DESC, key LIMIT 120`);
+  return rows.filter((row) => metadataKey(row.key) !== null).map((row) => ({ key: row.key, traces: Number(row.traces) }));
 }
 
 export type HistogramBucket = {
@@ -499,7 +565,8 @@ export type HistogramBucket = {
 export async function traceHistogram(projectId: string, filters: TraceListFilters) {
   const { where, having } = traceListClauses(projectId, filters);
   const spanSeconds = Math.max(60, Math.floor((filters.toMs - filters.fromMs) / 1000));
-  const bucketSeconds = [60, 300, 900, 1800, 3600, 10800, 21600, 43200, 86400].find((size) => spanSeconds / size <= 60) ?? 86400;
+  // Up to 120 bars: a day is 15 minute bars, a week is 2 hour bars, a month is 6 hour bars.
+  const bucketSeconds = [60, 300, 900, 1800, 3600, 7200, 10800, 21600, 43200, 86400].find((size) => spanSeconds / size <= 120) ?? 86400;
   const rows = await tinybirdRows<Record<keyof HistogramBucket | "finishedTraces", number | string>>(`
     SELECT toStartOfInterval(startedAt, INTERVAL ${bucketSeconds} SECOND) AS bucket, count() AS traces, countIf(errorCount > 0) AS errors,
       sum(totalCostUsd) AS costUsd, sum(inputTokens + outputTokens) AS tokens, countIf(finished) AS finishedTraces,
