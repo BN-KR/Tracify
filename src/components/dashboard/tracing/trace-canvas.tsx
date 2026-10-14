@@ -12,7 +12,7 @@ import {
   type NodeTypes,
   type ReactFlowInstance,
 } from "@xyflow/react";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Map as MapIcon, Maximize2, Minimize2 } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 
 export type CanvasNodeData = Record<string, unknown>;
@@ -85,14 +85,9 @@ function TraceCanvasViewport({
   const [instance, setInstance] = useState<ReactFlowInstance<CanvasNode, CanvasEdge> | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
   const [zoom, setZoom] = useState(1);
-  const [minimapOpen, setMinimapOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 640);
+  // The minimap is an overlay the reader turns on from the canvas controls; it is off by default so it never covers cards.
+  const [minimapOpen, setMinimapOpen] = useState(false);
   const minimapId = useId();
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 640px)");
-    const resize = () => setMinimapOpen(media.matches);
-    media.addEventListener("change", resize);
-    return () => media.removeEventListener("change", resize);
-  }, []);
   const lastFocus = useRef<string | null>(null);
   const hasFitInitialNodes = useRef(false);
   const fullscreenViewport = useRef<{ x: number; y: number; zoom: number } | null>(null);
@@ -231,22 +226,23 @@ function TraceCanvasViewport({
           <button type="button" aria-label="Zoom in" className={controlClass} onClick={() => zoomBy(1.25)}>+</button>
           <button type="button" aria-label="Fit to view" title="Fit to view" className={controlClass} onClick={fit}>↗</button>
           <button type="button" aria-label="Zoom to selection" title="Zoom to selection" className={controlClass} disabled={!focusId} onClick={() => focusId && center(focusId)}>◎</button>
+          <button type="button" aria-label={minimapOpen ? "Hide minimap" : "Show minimap"} title={minimapOpen ? "Hide minimap" : "Show minimap"} aria-pressed={minimapOpen} aria-controls={minimapId}
+            className={`${controlClass} ${minimapOpen ? "!bg-[#232A34] !text-white" : ""}`} onClick={() => setMinimapOpen((open) => !open)}>
+            <MapIcon aria-hidden="true" size={14} />
+          </button>
           <button type="button" aria-label={fullscreen ? "Exit fullscreen" : "Fullscreen"} title={fullscreen ? "Exit fullscreen" : "Fullscreen"} className={controlClass} onClick={toggleFullscreen}>
             {fullscreen ? <Minimize2 aria-hidden="true" size={14} /> : <Maximize2 aria-hidden="true" size={14} />}
           </button>
         </div>
+        {minimapOpen ? <div id={minimapId} className="absolute bottom-14 right-3 z-10"><CanvasMinimap label={label} /></div> : null}
         {fullscreen ? <button type="button" aria-label="Close fullscreen canvas" className="sr-only" onClick={() => setFullscreen(false)}>Close</button> : null}
-      </div>
-      <div className="flex shrink-0 items-center gap-3 border border-t-0 border-[#1F242C] bg-[#0E1115] px-2 py-1">
-        <button type="button" aria-expanded={minimapOpen} aria-controls={minimapId} className="shrink-0 px-1 py-1 text-[11px] text-[#8B93A1] hover:text-white" onClick={() => setMinimapOpen((open) => !open)}>{minimapOpen ? "Hide minimap" : "Show minimap"}</button>
-        {minimapOpen ? <div id={minimapId} className="min-w-0"><CanvasMinimap label={label} /></div> : null}
       </div>
       <span className="sr-only">{instance ? "Canvas ready. Drag to pan, scroll or pinch to zoom, use arrow keys to pan, plus or minus to zoom, and zero to fit." : "Preparing canvas…"}</span>
     </div>
   );
 }
 
-/** Shares the flow provider while occupying a reserved footer outside the drawing viewport. */
+/** Shares the flow provider; shown as a small overlay above the canvas controls when switched on. */
 function CanvasMinimap({ label }: { label: string }) {
   const flow = useReactFlow();
   const narrow = useStore((state) => state.width < 500);
@@ -256,7 +252,7 @@ function CanvasMinimap({ label }: { label: string }) {
       zoomable
       inversePan={false}
       position="bottom-left"
-      style={{ width: narrow ? 120 : 196, height: narrow ? 80 : 128, touchAction: "none", cursor: "crosshair" }}
+      style={{ width: narrow ? 110 : 168, height: narrow ? 72 : 108, touchAction: "none", cursor: "crosshair" }}
       ariaLabel={`${label} minimap. Click to navigate, drag to pan, scroll to zoom.`}
       className="!relative !bottom-auto !left-auto !m-0 !border !border-[#262C35] !bg-[#111418]"
       maskColor="rgba(11,13,16,0.65)"

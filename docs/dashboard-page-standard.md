@@ -103,12 +103,27 @@ Detail panels for a record made of steps offer `Tree | Timeline | Graph` tabs (`
 - Graph data is already loaded for the detail view and needs no extra request. The surrounding detail
   panes may scroll, but the canvas itself must not create page or horizontal scroll.
 
-## Aggregate map
+## Tracing views: List | Chart
 
-The Tracing `List | Map` toggle (`tracing/agent-map.tsx`, `?mode=map`) shows one agent overview.
+The Tracing page has exactly two views, a `List | Chart` toggle (`?mode=chart`; anything else is the list).
+Never add a view that is disabled until some filter is chosen, and never show explanatory hint lines under the toggle.
 
-- Enable Map only with exactly one Trace name selected. Otherwise disable it with the visible hint
-  “Pick one trace name to see its map”. The authenticated map route rejects unscoped requests.
+- Chart (`tracing/trace-charts.tsx`) charts the traces matching the current range and filters over time, from the
+  same histogram buckets as the list: Traces (ok/with errors, stacked), Error rate, Latency p50/p95 of finished
+  traces only, Cost and Tokens. One measure per chart, never two scales on one chart; counts, cost and tokens are
+  bars, rates and latency are lines. Show empty buckets as gaps and keep the filtered stats strip above.
+- Hover shows a crosshair or bar highlight and one tooltip listing every series; click zooms the page range to that
+  bucket and stays in Chart. A “View as table” disclosure lists the same numbers, and the Traces column must sum to the
+  stats strip total. Chart hides list-only controls (Export CSV, Columns, error groups, rows, footer).
+- Legend for two or more series, single series named by the title. Colours: yellow traces/p95, red errors, grey p50,
+  blue cost and tokens. Axes and grid stay recessive.
+
+## Agent map (component kept, not mounted on the Tracing page)
+
+`tracing/agent-map.tsx` and the scoped map route remain for a future per-agent page. The Tracing page no longer
+mounts them: merging the steps of many traces says little. The rules below apply wherever it is mounted.
+
+- Scope it to exactly one Trace name; the authenticated map route rejects unscoped requests.
 - Compute from every trace matching the current range and filters, including trace name, never from
   the visible list page. Keep caps of 40 cards (including start/end) and 100 arrows; disclose truncation.
 - Share `src/lib/trace-flow.ts` with the detail Flow graph. Canonicalise SDK types through `stepKind()`.
@@ -118,9 +133,10 @@ The Tracing `List | Map` toggle (`tracing/agent-map.tsx`, `?mode=map`) shows one
   Failures make arrows red and show the failure count. Retain cards and text at every zoom.
 - Keep surviving card positions and the canvas transform across live refreshes. Use the shared
   scrollbar-free canvas, native pan/pinch, wheel and keyboard zoom, fit, search and fullscreen.
-- The minimap occupies a reserved footer outside the drawing viewport, so it never covers cards.
-  Its labelled Show/Hide control exposes expanded state; default collapsed on phones. Keep explicit
-  card dimensions, click-to-center, drag, wheel zoom and the visible viewport outline.
+- The minimap is an opt-in overlay: a map-icon toggle in the canvas controls (accessible name Show/Hide minimap,
+  `aria-pressed`) opens a small panel just above the controls, off by default everywhere. Never render a labelled
+  strip or reserved footer for it. Keep explicit card dimensions, click-to-center, drag, wheel zoom and the visible
+  viewport outline.
 - Default to the 25 busiest arrows, with a control up to 100. Hover highlights related arrows.
   Clicking cards/arrows opens counts, error rate and p50 in a popover. “Show traces” separately applies
   the existing node/path filter. Its trace count must equal the resulting list total. Combined return
