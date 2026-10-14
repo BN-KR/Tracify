@@ -347,7 +347,8 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                 return <button key={label} type="button" aria-pressed={active} onClick={() => update({ mode }, false)} className={`h-6 rounded px-2.5 ${active ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>{label}</button>;
               })}
             </div>
-            {chartMode ? null : <>
+            {/* Chart does not use these, but they keep their place (hidden, unfocusable) so the List | Chart toggle never moves. */}
+            <div className={chartMode ? "invisible contents" : "contents"}>
             <button type="button" onClick={exportCsv} disabled={!rows.length} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
             <div className="relative">
               <button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">Columns {columns.length}/{COLUMNS.length}</button>
@@ -362,7 +363,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                 </div>
               ) : null}
             </div>
-            </>}
+            </div>
           </div>
 
           <StatsStrip stats={stats} loading={!data} onErrors={() => update({ status: "error" })} />
