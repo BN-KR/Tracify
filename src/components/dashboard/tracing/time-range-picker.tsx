@@ -151,7 +151,7 @@ export function TimeRangePicker({ range, from, to, now, onPreset, onCustom, onRe
       </button>
       {custom ? <button type="button" aria-label="Reset to the last 24 hours" title="Back to a relative range" onClick={() => { onReset(); close(); }} className={`${button} px-2`}>×</button> : null}
       {open ? (
-        <div role="dialog" aria-label="Choose time range" className="absolute right-0 top-full z-40 mt-2 flex max-h-[min(540px,80vh)] w-[min(560px,calc(100vw-1rem))] flex-col overflow-auto rounded-lg border border-[#262C35] bg-[#111418] shadow-2xl sm:flex-row">
+        <div role="dialog" aria-label="Choose time range" className="fixed inset-x-2 top-[4.5rem] z-40 flex max-h-[calc(100vh-5.5rem)] flex-col overflow-auto rounded-lg border border-[#262C35] bg-[#111418] shadow-2xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:max-h-[min(540px,80vh)] sm:w-[560px] sm:flex-row">
           <ul aria-label="Relative ranges" className="flex shrink-0 flex-row flex-wrap gap-0.5 border-b border-[#1F242C] p-2 sm:max-h-[420px] sm:w-44 sm:flex-col sm:flex-nowrap sm:overflow-auto sm:border-b-0 sm:border-r">
             {[{ id: "today", label: "Today" }, { id: "yesterday", label: "Yesterday" }].map((item) => (
               <li key={item.id}>
