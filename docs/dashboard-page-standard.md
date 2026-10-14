@@ -103,6 +103,14 @@ Detail panels for a record made of steps offer `Tree | Timeline | Graph` tabs (`
 - Graph data is already loaded for the detail view and needs no extra request. The surrounding detail
   panes may scroll, but the canvas itself must not create page or horizontal scroll.
 
+## Time range
+
+One control, not a row of buttons (`tracing/time-range-picker.tsx`): a dropdown with Today, Yesterday and relative
+ranges from 5 minutes to 90 days (the server maximum), plus a month calendar with start and end times for a custom
+range. A custom range is `from`/`to` in the URL, the same as a chart zoom, and shows in the button with a × to return
+to a relative range. Days in the future or older than 90 days are disabled; Escape closes it; on phones the
+dialog is fixed inside the screen. Live updates stay off for a fixed window.
+
 ## Tracing views: List | Chart
 
 The Tracing page has exactly two views, a `List | Chart` toggle (`?mode=chart`; anything else is the list).
@@ -115,6 +123,13 @@ Never add a view that is disabled until some filter is chosen, and never show ex
 - Hover shows a crosshair or bar highlight and one tooltip listing every series; click zooms the page range to that
   bucket and stays in Chart. A “View as table” disclosure lists the same numbers, and the Traces column must sum to the
   stats strip total. Chart hides list-only controls (Export CSV, Columns, error groups, rows, footer).
+- Hover state belongs to the time axis it was read from (start, bucket size, point count). A zoom can shrink a chart
+  under a still-hovered pointer, so an index from another axis must never be used (this once crashed the page).
+  Live refreshes keep the axis, so hovering survives them. Click zooms from the pointer position, not from hover state.
+- The Chart view starts with a GitHub-style Activity grid (`activity-calendar.tsx`, `/traces/activity`): a square per
+  day for the last 53 weeks in the reader's time zone, brighter for busier days, one hue per measure (Traces,
+  With errors, Cost). Filters apply, the time range does not. Hover reads the day, click zooms the page to it, a table
+  lists the same days, and a refresh must not move the reader's scroll position.
 - Legend for two or more series, single series named by the title. Colours: yellow traces/p95, red errors, grey p50,
   blue cost and tokens. Axes and grid stay recessive.
 
