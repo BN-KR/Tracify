@@ -14,7 +14,7 @@ function text(value: string | null) {
 
 /** Agent-map step key: "tool:<name>" or "model:<id>". */
 function stepKey(value: string | undefined) {
-  return value && /^(tool|model):./.test(value) ? value : undefined;
+  return value && (value === "__start__" || value === "__end__" || /^[a-z][a-z0-9_]*:./.test(value)) ? value : undefined;
 }
 
 /** Agent-map arrow "from→to"; both ends are step keys. */

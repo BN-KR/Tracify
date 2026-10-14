@@ -1,3 +1,7 @@
+## 2026-10-14 — Agent map verification
+
+- [pending] Publish draft PR for `codex/tracing-agent-map`; verify Ready EU preview, ClickHouse counts/latency, browser suites and inspected desktop/phone map screenshots. Owner preview review before merge.
+
 # Langfuse parity-plus product epic — 2026-09-03
 
 ## Google Analytics 4 — 2026-09-15

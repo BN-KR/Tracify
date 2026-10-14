@@ -1,8 +1,8 @@
+## 2026-10-14 — Agent map verification
+
+- [pending] Publish draft PR for `codex/tracing-agent-map`; verify Ready EU preview, ClickHouse counts/latency, browser suites and inspected desktop/phone map screenshots. Owner preview review before merge.
+
 # 2026-09-02 — First-customer execution
-
-## 2026-10-13 — Tracing map refinement: owner review
-
-- [pending] Owner review of draft PR #146 and its Ready EU preview before merge. Implementation and verification are recorded in `memory.md`.
 
 ## 2026-09-15 — Google Analytics 4
 

@@ -1,5 +1,8 @@
 # Project Memory
 
+## 2026-10-14 Agent-scoped Flow map and finished latency (in progress)
+- Branch `codex/tracing-agent-map`, worktree `/home/orca/workspaces/Tracify-agent-map`, from origin/main `209924a`. Shared Flow helper, single-trace-name map guard, exact counts, finished-only percentiles and a collapsible reserved minimap footer implemented. Six focused tests, full typecheck and EU build pass. Preview verification pending. No Sessions files changed.
+
 ## 2026-10-13 Tracing map refinement — draft PR #146
 - Branch `codex/tracing-map-refinement` in `/home/orca/workspaces/Tracify-canvas`, from latest main `6a0682f` after #145 merged. Draft PR: https://github.com/BN-KR/Tracify/pull/146. Verified runtime commit: `b86028b`; later documentation notes do not change runtime code.
 - Both graph views retain full cards and text at every zoom. Connectors are straight; return arrows attach to facing card edges and self-repeats use a square loop above the card. The minimap now receives explicit controlled-node dimensions, so every node renders; click centers the requested world point, drag/wheel navigate, the yellow outline shows the viewport, and its phone layout avoids controls.

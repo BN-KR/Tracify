@@ -86,9 +86,10 @@ Detail panels for a record made of steps offer `Tree | Timeline | Graph` tabs (`
   work and gaps show waiting. Hover or focus shows name, latency, cost and tokens.
 - Timeline: a fixed name column with type icons, a time axis with gridlines, duration and cost written on
   every bar (beside it when the bar is short), and zoom in/out/fit.
-- Graph: use the shared React Flow canvas (`tracing/trace-canvas.tsx`) with ELK layered, left-to-right
-  layout (`tracing/elk-layout.ts`). Aggregated merges repeated sibling steps into one card (×N); Expanded
-  shows every step. Use straight connectors, type colours, red failures, and a yellow selected border.
+- Graph: use the shared React Flow canvas (`tracing/trace-canvas.tsx`). Flow is the default,
+  with All steps and Grouped alternatives. Flow uses the same `src/lib/trace-flow.ts` rules as the
+  aggregate map: canonical step types, distinct type/name cards, caller tool branches, counted returns,
+  start/end, and top-down ELK in first-seen order. Other modes retain their step/group selection.
 - The graph canvas fills the remaining pane height (`flex-1 min-h-0`) with no scrollbars;
   controls and the minimap must stay inside the visible pane on phones. Pan with mouse or touch, zoom around the
   pointer with wheel or pinch (0.1×–4×), double-click to zoom, and support arrow keys, `+`, `−`, and `0`.
@@ -104,26 +105,37 @@ Detail panels for a record made of steps offer `Tree | Timeline | Graph` tabs (`
 
 ## Aggregate map
 
-Pages that summarise many records can add a `List | Map` toggle (`tracing/agent-map.tsx`, `?mode=map`).
+The Tracing `List | Map` toggle (`tracing/agent-map.tsx`, `?mode=map`) shows one agent overview.
 
-- Computed on the server for the current range and filters (`traceAgentMap`), never from the visible
-  page. Hard caps (40 nodes, 100 arrows) keep it fast; say "N of M" when capped.
-- Nodes are tools and models; an arrow A → B counts how often B ran directly after A in the same record,
-  with error rate and median latency (of B). Arrows with failures are red.
-- Render the map on the shared React Flow canvas with the ELK layered, left-to-right layout and straight
-  connectors. Self-repeats use a square loop above the card; return arrows attach to the facing card edges. Keep positions for surviving nodes across live refreshes. It has no scrollbars: pan with
-  mouse/touch, wheel/pinch zoom from 0.1× to 4×, double-click, keyboard pan/zoom/fit, animated fit, a
-  minimap with click-to-center, directional drag, wheel zoom and a visible viewport outline, custom zoom/fullscreen controls, and Escape to close fullscreen or clear selection.
-- Show the busiest arrows first, default 25, with a control up to the server cap of 100. Keep cards and their
-  text at every zoom. At low zoom use fewer arrows, thinner strokes and no overlapping edge labels. Searching
-  a tool/model flies to it. Hovering a node highlights connected arrows and fades unrelated content.
-- Clicking a node or arrow selects it and opens a compact detail popover with counts, error rate and median
-  latency. A separate “Show traces” action switches back to the list, filtered (`?node=`, `?edge=`) to the
-  records that contain it, with a chip. The node and arrow counts must equal the filtered list total.
-  Keep the selected map node and busiest-arrow count in the URL so reloads restore the same view.
-- The map polls like the list (live, hidden-tab skip, back-off to 60 s) through its own route with the
-  shared access check. Below the drawing, a table lists the busiest arrows: it is the accessible and
-  phone-friendly way to use the map. The table remains available independently of the canvas edge limit.
+- Enable Map only with exactly one Trace name selected. Otherwise disable it with the visible hint
+  “Pick one trace name to see its map”. The authenticated map route rejects unscoped requests.
+- Compute from every trace matching the current range and filters, including trace name, never from
+  the visible list page. Keep caps of 40 cards (including start/end) and 100 arrows; disclose truncation.
+- Share `src/lib/trace-flow.ts` with the detail Flow graph. Canonicalise SDK types through `stepKind()`.
+  Each distinct type/name card shows step run count, errors and exact p50 latency. Start/end mark the
+  sequence. Use top-down ELK with first-seen order; consecutive tools hang from their caller.
+  Combine there-and-back pairs into one two-headed counted arrow (`N× ⇅`); true back-edges are dashed.
+  Failures make arrows red and show the failure count. Retain cards and text at every zoom.
+- Keep surviving card positions and the canvas transform across live refreshes. Use the shared
+  scrollbar-free canvas, native pan/pinch, wheel and keyboard zoom, fit, search and fullscreen.
+- The minimap occupies a reserved footer outside the drawing viewport, so it never covers cards.
+  Its labelled Show/Hide control exposes expanded state; default collapsed on phones. Keep explicit
+  card dimensions, click-to-center, drag, wheel zoom and the visible viewport outline.
+- Default to the 25 busiest arrows, with a control up to 100. Hover highlights related arrows.
+  Clicking cards/arrows opens counts, error rate and p50 in a popover. “Show traces” separately applies
+  the existing node/path filter. Its trace count must equal the resulting list total. Combined return
+  arrows use the union of matching traces, counting each trace once, rather than summing directions.
+  Node and arrow selection (`mapSelected`) and arrow limit (`mapEdges`) persist in the URL.
+- Poll with the existing access cache, hidden-tab skip and back-off. Keep the “Arrows, busiest first”
+  table below the canvas as the keyboard and non-visual alternative, independent of visible arrow limit.
+
+### Finished-trace latency
+
+Summary p50/p95 use only finished traces: a `run_end`, an error root, or a non-running root metadata
+status. Child failures alone do not close a trace. Exclude running/unclosed traces from percentiles;
+show “N running” when excluded and a dash when none finished. Other summary totals still include them.
+Use exact ClickHouse percentiles with the same range and filters as the list. Long durations use
+`2d 1h` or `3h 12m`, rather than thousands of minutes.
 
 ## States
 

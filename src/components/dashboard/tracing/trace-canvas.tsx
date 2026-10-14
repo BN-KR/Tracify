@@ -13,7 +13,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import { Maximize2, Minimize2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 
 export type CanvasNodeData = Record<string, unknown>;
 export type CanvasNode = Node<CanvasNodeData, "traceCard">;
@@ -85,6 +85,14 @@ function TraceCanvasViewport({
   const [instance, setInstance] = useState<ReactFlowInstance<CanvasNode, CanvasEdge> | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [minimapOpen, setMinimapOpen] = useState(() => typeof window !== "undefined" && window.innerWidth >= 640);
+  const minimapId = useId();
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 640px)");
+    const resize = () => setMinimapOpen(media.matches);
+    media.addEventListener("change", resize);
+    return () => media.removeEventListener("change", resize);
+  }, []);
   const lastFocus = useRef<string | null>(null);
   const hasFitInitialNodes = useRef(false);
   const fullscreenViewport = useRef<{ x: number; y: number; zoom: number } | null>(null);
@@ -176,8 +184,8 @@ function TraceCanvasViewport({
 
 
   return (
-    <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100]" : "relative h-full min-h-0 w-full flex-1"} ${className}`} onKeyDownCapture={handleKeyDownCapture} onKeyDown={handleKeyDown} onDoubleClick={handleDoubleClick}>
-      <div className="absolute inset-0 overflow-hidden border border-[#1F242C] bg-[#0B0D10]">
+    <div role="group" aria-label={label} className={`${fullscreen ? "fixed inset-2 z-[100] flex flex-col" : "relative flex h-full min-h-0 w-full flex-1 flex-col"} ${className}`} onKeyDownCapture={handleKeyDownCapture} onKeyDown={handleKeyDown} onDoubleClick={handleDoubleClick}>
+      <div className="relative min-h-0 flex-1 overflow-hidden border border-[#1F242C] bg-[#0B0D10]">
         <ReactFlow
           onPointerDownCapture={(event) => {
             // React Flow marks arrows as nopan. Let its native gestures also start on an arrow,
@@ -215,9 +223,7 @@ function TraceCanvasViewport({
           role="group"
           proOptions={{ hideAttribution: true }}
           className="tracing-flow"
-        >
-          <CanvasMinimap label={label} />
-        </ReactFlow>
+        />
         {children}
         <div role="group" aria-label="Canvas controls" className="absolute bottom-3 right-3 z-10 flex items-center divide-x divide-[#262C35] border border-[#262C35] bg-[#111418] shadow-lg">
           <button type="button" aria-label="Zoom out" className={controlClass} onClick={() => zoomBy(1 / 1.25)}>−</button>
@@ -231,12 +237,16 @@ function TraceCanvasViewport({
         </div>
         {fullscreen ? <button type="button" aria-label="Close fullscreen canvas" className="sr-only" onClick={() => setFullscreen(false)}>Close</button> : null}
       </div>
+      <div className="flex shrink-0 items-center gap-3 border border-t-0 border-[#1F242C] bg-[#0E1115] px-2 py-1">
+        <button type="button" aria-expanded={minimapOpen} aria-controls={minimapId} className="shrink-0 px-1 py-1 text-[11px] text-[#8B93A1] hover:text-white" onClick={() => setMinimapOpen((open) => !open)}>{minimapOpen ? "Hide minimap" : "Show minimap"}</button>
+        {minimapOpen ? <div id={minimapId} className="min-w-0"><CanvasMinimap label={label} /></div> : null}
+      </div>
       <span className="sr-only">{instance ? "Canvas ready. Drag to pan, scroll or pinch to zoom, use arrow keys to pan, plus or minus to zoom, and zero to fit." : "Preparing canvas…"}</span>
     </div>
   );
 }
 
-/** Lives inside the flow so its viewport, node geometry and gesture controller share one store. */
+/** Shares the flow provider while occupying a reserved footer outside the drawing viewport. */
 function CanvasMinimap({ label }: { label: string }) {
   const flow = useReactFlow();
   const narrow = useStore((state) => state.width < 500);
@@ -248,7 +258,7 @@ function CanvasMinimap({ label }: { label: string }) {
       position="bottom-left"
       style={{ width: narrow ? 120 : 196, height: narrow ? 80 : 128, touchAction: "none", cursor: "crosshair" }}
       ariaLabel={`${label} minimap. Click to navigate, drag to pan, scroll to zoom.`}
-      className="!bottom-14 !left-3 !m-0 !border !border-[#262C35] !bg-[#111418] sm:!bottom-3"
+      className="!relative !bottom-auto !left-auto !m-0 !border !border-[#262C35] !bg-[#111418]"
       maskColor="rgba(11,13,16,0.65)"
       maskStrokeColor="#F4D44D"
       maskStrokeWidth={1.5}
