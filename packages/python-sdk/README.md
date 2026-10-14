@@ -44,6 +44,36 @@ async def my_agent(query: str):
     return "Final Answer"
 ```
 
+## Steps
+
+Inside a `@trace_agent` function, every step you record is linked to the step it ran in, so the trace graph
+shows which step called which and how loops repeat. Use `span` for a block and `observe` for a function:
+
+```python
+import tracify
+
+@tracify.observe(type="tool")
+def search_docs(query):
+    return search(query)
+
+@tracify.trace_agent()
+def answer(question):
+    for turn in range(5):
+        with tracify.span("think", type="agent"):
+            with tracify.span("chat", type="llm", input=question) as step:
+                reply = call_model(question)
+                step.set_output(reply.text)
+                step.set(model="claude-sonnet-5-5", input_tokens=reply.usage.input, output_tokens=reply.usage.output)
+            if reply.done:
+                return reply.text
+            search_docs(reply.query)
+```
+
+`type` is one of `agent`, `llm`, `tool`, `retrieval` or `span`. Errors are recorded with their type and
+message. Concurrent runs (threads or asyncio tasks) stay in separate traces. Inputs and outputs have obvious
+secrets (bearer tokens, API keys, JWTs, `password=` values) removed and are capped at 10,000 characters;
+avoid sending anything else you would not want stored.
+
 ## Features
 
 - **@trace_agent Decorator:** Automatically captures run lifecycle and errors.
