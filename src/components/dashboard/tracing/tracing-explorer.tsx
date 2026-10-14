@@ -363,6 +363,12 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
         <section className="flex min-w-0 flex-[999_1_560px] flex-col">
           <div className="flex flex-wrap items-center gap-1.5 px-4 pt-3">
+            <div role="group" aria-label="Show traces as" className="flex max-w-full flex-wrap rounded-md border border-[#262C35] p-0.5 text-xs">
+              {([["", "List"], ["chart", "Chart"]] as const).map(([mode, label]) => {
+                const active = chartMode === (mode === "chart");
+                return <button key={label} type="button" aria-pressed={active} onClick={() => update({ mode }, false)} className={`h-6 rounded px-2.5 ${active ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>{label}</button>;
+              })}
+            </div>
             {!filtersOpen ? <button type="button" onClick={() => setFiltersOpen(true)} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">Show filters</button> : null}
             {activeFilters.map((filter) => (
               <button key={filter.key} type="button" onClick={() => update({ [filter.key]: "" })} className="flex h-7 items-center gap-2 rounded-md bg-[#1A1F27] px-2.5 text-xs text-[#E6E9EE] hover:bg-[#232A34]" aria-label={`Remove filter ${filter.label}`}>
@@ -370,15 +376,9 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
               </button>
             ))}
             {activeFilters.length ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => update(Object.fromEntries(activeFilters.map((f) => [f.key, ""])))}>Clear all</button> : null}
-            <div role="group" aria-label="Show traces as" className="ml-auto flex max-w-full flex-wrap rounded-md border border-[#262C35] p-0.5 text-xs">
-              {([["", "List"], ["chart", "Chart"]] as const).map(([mode, label]) => {
-                const active = chartMode === (mode === "chart");
-                return <button key={label} type="button" aria-pressed={active} onClick={() => update({ mode }, false)} className={`h-6 rounded px-2.5 ${active ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>{label}</button>;
-              })}
-            </div>
-            {/* Chart does not use these, but they keep their place (hidden, unfocusable) so the List | Chart toggle never moves. */}
+            {/* The right-hand controls belong to the list. In Chart they stay in place, hidden and unfocusable, so the row does not reflow. */}
             <div className={chartMode ? "invisible contents" : "contents"}>
-            <button type="button" onClick={exportCsv} disabled={!rows.length} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
+            <button type="button" onClick={exportCsv} disabled={!rows.length} className="ml-auto h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
             <ColumnsMenu projectId={projectId} rangeParams={rangeParams} columns={columns} onToggle={toggleColumn}
               onReset={() => { setColumns(DEFAULT_COLUMNS); try { window.localStorage.removeItem(COLUMN_STORAGE); } catch {} }} />
             </div>
