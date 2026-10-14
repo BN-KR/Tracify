@@ -94,7 +94,11 @@ export function ActivityCalendar({ projectId, params, onZoom }: { projectId: str
   const color = (amount: number) => (level(amount) === 0 ? EMPTY : RAMPS[metric][level(amount) - 1]!);
   const activeDays = useMemo(() => (days ?? []).filter((day) => day.traces > 0).sort((a, b) => b.day.localeCompare(a.day)), [days]);
 
-  useEffect(() => { if (scroller.current) scroller.current.scrollLeft = scroller.current.scrollWidth; }, [days]);
+  // Start at the latest week once, when the grid first appears; later refreshes must not undo the reader's scrolling.
+  const scrolled = useRef(false);
+  useEffect(() => {
+    if (days && scroller.current && !scrolled.current) { scroller.current.scrollLeft = scroller.current.scrollWidth; scrolled.current = true; }
+  }, [days]);
 
   const cellFrom = (target: EventTarget) => {
     const dayKey = (target as SVGElement).dataset?.day;
