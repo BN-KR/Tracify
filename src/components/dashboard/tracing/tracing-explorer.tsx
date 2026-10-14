@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AgentMap, stepLabel } from "./agent-map";
+import { stepLabel } from "./agent-map";
+import { TraceCharts, type ChartBucket } from "./trace-charts";
 import { ErrorGroupsPanel, errorGroupLabel, type ErrorGroups } from "./error-groups";
 import { FACETS, FacetGroup, decodeValues, encodeValues, type FacetCounts } from "./facet-filter";
 import { TRACE_VIEWS, TracePanel, type TraceView } from "./trace-panel";
@@ -12,11 +13,10 @@ type TraceRow = {
   totalCostUsd: number; inputTokens: number; outputTokens: number; modelId: string; endUserId: string;
   sessionId: string; environment: string; release: string; tags: string[]; inputPreview: string; outputPreview: string;
 };
-type Bucket = { bucket: string; traces: number; errors: number };
 type Stats = { traces: number; errors: number; p50DurationMs: number; p95DurationMs: number; totalCostUsd: number; inputTokens: number; outputTokens: number; runningTraces: number };
 type ListResponse = {
   rows: TraceRow[]; total: number; page: number; pageSize: number;
-  histogram: { bucketSeconds: number; buckets: Bucket[] }; stats?: Stats; facets?: FacetCounts | null;
+  histogram: { bucketSeconds: number; buckets: ChartBucket[] }; stats?: Stats; facets?: FacetCounts | null;
   errorGroups?: ErrorGroups | null; range: { from: number; to: number }; error?: string;
 };
 
@@ -40,7 +40,7 @@ const COLUMN_STORAGE = "tracify.tracing.columns";
 const LIVE_STORAGE = "tracify.tracing.live";
 const ERRORS_STORAGE = "tracify.tracing.errorGroups";
 /** URL keys that change the view, not the data, so they are not sent to the API. */
-const VIEW_KEYS = ["range", "from", "to", "trace", "mode", "view", "mapSelected", "mapEdges"];
+const VIEW_KEYS = ["range", "from", "to", "trace", "mode", "view"];
 const EDGE_SEPARATOR = "\u2192";
 
 function currentUrlQuery(): TraceQuery {
@@ -200,8 +200,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   const stats = data?.stats;
   const activeGroup = data?.errorGroups?.groups.find((group) => group.id === query.errorGroup);
   const activeGroupLabel = activeGroup ? errorGroupLabel(activeGroup) : pickedGroup?.id === query.errorGroup ? pickedGroup?.label : query.errorGroup?.slice(0, 8);
-  const mapAvailable = decodeValues(query.traceName ?? "").length === 1;
-  const mapMode = query.mode === "map" && mapAvailable;
+  const chartMode = query.mode === "chart";
   const traceView: TraceView = TRACE_VIEWS.some((item) => item.id === query.view) ? (query.view as TraceView) : "tree";
 
   useEffect(() => {
@@ -349,11 +348,12 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             ))}
             {activeFilters.length ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => update(Object.fromEntries(activeFilters.map((f) => [f.key, ""])))}>Clear all</button> : null}
             <div role="group" aria-label="Show traces as" className="ml-auto flex max-w-full flex-wrap rounded-md border border-[#262C35] p-0.5 text-xs">
-              <button type="button" aria-pressed={!mapMode} onClick={() => update({ mode: "" }, false)} className={`h-6 rounded px-2.5 ${!mapMode ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>List</button>
-              <button type="button" aria-pressed={mapMode} disabled={!mapAvailable} aria-describedby={!mapAvailable ? "map-requirement" : undefined} title={!mapAvailable ? "Pick one trace name to see its map" : undefined} onClick={() => update({ mode: "map" }, false)} className={`h-6 rounded px-2.5 ${mapMode ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"} disabled:cursor-not-allowed disabled:opacity-50`}>Map</button>
-              {!mapAvailable ? <span id="map-requirement" className="basis-full px-2.5 py-1 text-[10px] text-[#8B93A1]">Pick one trace name to see its map</span> : null}
+              {([["", "List"], ["chart", "Chart"]] as const).map(([mode, label]) => {
+                const active = chartMode === (mode === "chart");
+                return <button key={label} type="button" aria-pressed={active} onClick={() => update({ mode }, false)} className={`h-6 rounded px-2.5 ${active ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>{label}</button>;
+              })}
             </div>
-            {mapMode ? null : <>
+            {chartMode ? null : <>
             <button type="button" onClick={exportCsv} disabled={!rows.length} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
             <div className="relative">
               <button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">Columns {columns.length}/{COLUMNS.length}</button>
@@ -373,20 +373,17 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
           <StatsStrip stats={stats} loading={!data} onErrors={() => update({ status: "error" })} />
 
-          <CountChart histogram={data?.histogram} onZoom={(from, to) => update({ from: String(from), to: String(to) })} />
+          {chartMode ? null : <CountChart histogram={data?.histogram} onZoom={(from, to) => update({ from: String(from), to: String(to) })} />}
 
-          {mapMode ? null : (
+          {chartMode ? null : (
             <ErrorGroupsPanel data={data ? data.errorGroups : undefined} open={errorsOpen} loading={loading} active={query.errorGroup} clock={clock}
               onToggle={toggleErrors} onSelect={(group) => { setPickedGroup({ id: group.id, label: errorGroupLabel(group) }); update({ errorGroup: query.errorGroup === group.id ? "" : group.id }); }} />
           )}
 
           <div className="min-h-0 flex-1 overflow-auto px-4">
-            {mapMode ? (
-              <AgentMap projectId={projectId} params={apiParams} live={isLive} rangeMs={query.from || query.to ? null : RANGES.find((item) => item.id === query.range)?.ms ?? 86_400_000}
-                mapSelected={query.mapSelected ?? null} edgeLimit={Math.min(100, Math.max(1, Number(query.mapEdges) || 25))}
-                onViewStateChange={(selected, limit) => update({ mapSelected: selected ?? "", mapEdges: limit === 25 ? "" : String(limit) }, false)}
-                onNode={(id) => update({ node: id, mode: "" })}
-                onEdge={(source, target) => update({ edge: `${source}${EDGE_SEPARATOR}${target}`, mode: "" })} />
+            {chartMode ? (
+              error ? <p role="alert" className="my-6 text-sm text-[#FF8A8A]">{error}</p>
+                : <TraceCharts histogram={data?.histogram} range={data?.range} onZoom={(from, to) => update({ from: String(from), to: String(to) })} />
             ) : error ? (
               <div role="alert" className="my-6 rounded-lg border border-[#5A2A2A] bg-[#1E1314] p-4 text-sm">
                 <p className="font-medium text-[#FF8A8A]">{error}</p>
@@ -427,7 +424,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             )}
           </div>
 
-          {mapMode ? null : <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1F242C] px-4 py-2 text-xs text-[#8B93A1]">
+          {chartMode ? null : <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1F242C] px-4 py-2 text-xs text-[#8B93A1]">
             <span>{loading ? "Loading…" : `${compactNumber(total)} traces`}</span>
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-2">Rows
@@ -504,7 +501,7 @@ function FilterNumber({ label, value, step = "1", onChange }: { label: string; v
   );
 }
 
-function CountChart({ histogram, onZoom }: { histogram?: { bucketSeconds: number; buckets: Bucket[] }; onZoom: (from: number, to: number) => void }) {
+function CountChart({ histogram, onZoom }: { histogram?: { bucketSeconds: number; buckets: ChartBucket[] }; onZoom: (from: number, to: number) => void }) {
   const buckets = histogram?.buckets ?? [];
   const max = Math.max(1, ...buckets.map((bucket) => bucket.traces));
   return (

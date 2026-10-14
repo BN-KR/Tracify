@@ -489,16 +489,32 @@ export async function listTraces(projectId: string, filters: TraceListFilters) {
   return { rows, total: Number(totals[0]?.total ?? 0), page, pageSize };
 }
 
-/** Trace counts per time bucket for the list chart; the bucket size follows the selected range. */
+export type HistogramBucket = {
+  bucket: string; traces: number; errors: number; costUsd: number; tokens: number;
+  /** Duration percentiles of the finished traces in the bucket; null when none finished. */
+  p50DurationMs: number | null; p95DurationMs: number | null;
+};
+
+/** Per-bucket totals for the list chart and the Chart view; the bucket size follows the selected range. */
 export async function traceHistogram(projectId: string, filters: TraceListFilters) {
   const { where, having } = traceListClauses(projectId, filters);
   const spanSeconds = Math.max(60, Math.floor((filters.toMs - filters.fromMs) / 1000));
   const bucketSeconds = [60, 300, 900, 1800, 3600, 10800, 21600, 43200, 86400].find((size) => spanSeconds / size <= 60) ?? 86400;
-  const rows = await tinybirdRows<{ bucket: string; traces: number; errors: number }>(`
-    SELECT toStartOfInterval(startedAt, INTERVAL ${bucketSeconds} SECOND) AS bucket, count() AS traces, countIf(errorCount > 0) AS errors
-    FROM (SELECT ${TRACE_AGGREGATE} FROM spans WHERE ${where} GROUP BY runId ${having})
+  const rows = await tinybirdRows<Record<keyof HistogramBucket | "finishedTraces", number | string>>(`
+    SELECT toStartOfInterval(startedAt, INTERVAL ${bucketSeconds} SECOND) AS bucket, count() AS traces, countIf(errorCount > 0) AS errors,
+      sum(totalCostUsd) AS costUsd, sum(inputTokens + outputTokens) AS tokens, countIf(finished) AS finishedTraces,
+      quantileExactIf(0.5)(durationMs, finished) AS p50DurationMs, quantileExactIf(0.95)(durationMs, finished) AS p95DurationMs
+    FROM (SELECT ${TRACE_AGGREGATE}, ${FINISHED_EXPR} AS finished FROM spans WHERE ${where} GROUP BY runId ${having})
     GROUP BY bucket ORDER BY bucket`);
-  return { bucketSeconds, buckets: rows.map((row) => ({ ...row, traces: Number(row.traces), errors: Number(row.errors) })) };
+  const finite = (value: number | string | undefined) => { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : 0; };
+  return {
+    bucketSeconds,
+    buckets: rows.map((row): HistogramBucket => ({
+      bucket: String(row.bucket), traces: finite(row.traces), errors: finite(row.errors), costUsd: finite(row.costUsd), tokens: finite(row.tokens),
+      p50DurationMs: finite(row.finishedTraces) > 0 ? finite(row.p50DurationMs) : null,
+      p95DurationMs: finite(row.finishedTraces) > 0 ? finite(row.p95DurationMs) : null,
+    })),
+  };
 }
 
 export type TraceStats = {

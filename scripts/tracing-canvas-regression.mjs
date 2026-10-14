@@ -22,6 +22,9 @@ function viewportTransform(style) {
 }
 
 async function checkMinimap(canvas) {
+  // The minimap is an opt-in overlay; switch it on from the canvas controls.
+  const open = canvas.getByRole("button", { name: "Show minimap", exact: true });
+  if (await open.count()) await open.click();
   const viewport = canvas.locator(".react-flow__viewport");
   const miniatureCount = await canvas.locator(".react-flow__minimap-node").count();
   const cardCount = await canvas.locator(".react-flow__node").count();
@@ -149,9 +152,6 @@ async function verifyCanvas(canvas, name) {
   await page.keyboard.press("Escape");
   await page.waitForTimeout(600);
 }
-await page.getByRole("button", { name: "Map", exact: true }).click();
-await verifyCanvas(page.getByRole("group", { name: "Agent map" }), "map");
-await page.getByRole("button", { name: "List", exact: true }).click();
 await page.locator("tbody tr").first().click();
 const panel = page.getByRole("complementary", { name: "Trace detail" });
 await panel.getByRole("tab", { name: "Graph", exact: true }).click();
@@ -162,6 +162,8 @@ await page.waitForTimeout(700);
 await check("phone graph: controls and minimap fit inside the visible pane", async () => {
   const pane = await panel.locator("#trace-view").boundingBox();
   const graph = panel.getByRole("group", { name: "Step graph" });
+  const toggle = graph.getByRole("button", { name: "Show minimap", exact: true });
+  if (await toggle.count()) await toggle.click();
   const controls = await graph.getByRole("group", { name: "Canvas controls" }).boundingBox();
   const mini = await graph.locator(".react-flow__minimap").boundingBox();
   for (const box of [controls, mini]) expect(box.y >= pane.y && box.y + box.height <= pane.y + pane.height && box.x >= pane.x && box.x + box.width <= pane.x + pane.width, "phone canvas overlay is clipped");
