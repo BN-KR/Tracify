@@ -84,6 +84,7 @@ export function flowEdgePresentation(edge: Pick<FlowEdge, "count" | "back" | "er
   const marker = { type: "arrowclosed" as const, color, width: 12, height: 12 };
   return {
     type: loop ? "smoothstep" : "straight",
+    pathOptions: { borderRadius: 0 },
     sourceHandle: loop ? "out-right" : "out-bottom", targetHandle: loop ? "in-right" : "in-top-center",
     label: [count, edge.errors ? `${edge.errors} failed` : ""].filter(Boolean).join(" · ") || undefined,
     labelStyle: { fill: edge.errors ? "#FF8A8A" : "#C9CED6", fontSize: 10, fontFamily: "var(--font-geist-mono), monospace" },

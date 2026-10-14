@@ -55,7 +55,7 @@ export function TraceCanvasNode({ data, selected }: NodeProps) {
         <div className="min-w-0 flex-1 px-2.5 py-1.5">
           <div className="truncate text-[12px] font-medium leading-4" title={name}>{name}</div>
           <div className="mt-1 truncate font-mono text-[10px] leading-3 text-[#8B93A1]">
-            {isAgent ? `${count.toLocaleString()}× · ${formatDuration(latency)}${errors ? ` · ${errors} err` : ""}` : `${count > 1 ? `${count} steps · ` : ""}${formatDuration(latency)}${Number(data.costUsd) ? ` · $${Number(data.costUsd).toFixed(4)}` : ""}${errors ? ` · ${errors} err` : ""}`}
+            {data.aggregate ? `${count.toLocaleString()}× · p50 ${formatDuration(latency)} · ${errors} err` : isAgent ? `${count.toLocaleString()}× · ${formatDuration(latency)}${errors ? ` · ${errors} err` : ""}` : `${count > 1 ? `${count} steps · ` : ""}${formatDuration(latency)}${Number(data.costUsd) ? ` · $${Number(data.costUsd).toFixed(4)}` : ""}${errors ? ` · ${errors} err` : ""}`}
           </div>
         </div>
         <span className="sr-only">{name}; {count} runs in {traces} traces; {errors} errors; median latency {formatDuration(latency)}</span>

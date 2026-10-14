@@ -106,7 +106,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
           position: positions.get(node.id) ?? { x: 0, y: 0 },
           focusable: true,
           ariaLabel: `${node.kind} ${node.name}: ${node.count} runs in ${node.traces} traces, ${node.errors} errors, median latency ${formatDuration(node.p50LatencyMs)}`,
-          data: { kind: node.kind, vertical: true, name: node.name, count: node.count, traces: node.traces, errors: node.errors, p50LatencyMs: node.p50LatencyMs },
+          data: { aggregate: true, kind: node.kind, vertical: true, name: node.name, count: node.count, traces: node.traces, errors: node.errors, p50LatencyMs: node.p50LatencyMs },
         } as CanvasNode)));
       });
     return () => { active = false; };
@@ -154,7 +154,7 @@ export function AgentMap({ projectId, params, live, rangeMs, onNode, onEdge, map
         <p><span className="font-mono">{data.nodes.length}</span>{data.totalNodes > data.nodes.length ? ` of ${compactNumber(data.totalNodes)}` : ""} steps · <span className="font-mono">{displayedEdges.length}</span> arrows visible, {visibleEdges.length} max (busiest first)</p>
         <div className="flex flex-wrap items-center gap-2">
           <label htmlFor="map-edge-limit">Busiest arrows</label>
-          <select id="map-edge-limit" aria-label="Number of busiest arrows" value={edgeLimit} onChange={(event) => onViewStateChange(selectedNode ? `node:${selectedNode}` : null, Number(event.target.value))} className="h-7 border border-[#262C35] bg-[#111418] px-2 font-mono text-xs text-[#C9CED6]">
+          <select id="map-edge-limit" aria-label="Number of busiest arrows" value={edgeLimit} onChange={(event) => onViewStateChange(mapSelected, Number(event.target.value))} className="h-7 border border-[#262C35] bg-[#111418] px-2 font-mono text-xs text-[#C9CED6]">
             {EDGE_LIMITS.map((value) => <option key={value} value={value}>{value}</option>)}
           </select>
           <label htmlFor="agent-map-search" className="sr-only">Search steps</label>
