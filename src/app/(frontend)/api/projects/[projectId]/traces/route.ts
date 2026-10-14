@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { denyProjectAccess } from "@/lib/project-route-access";
 import { listTraces, traceErrorGroups, traceFacets, traceHistogram, traceStats } from "@/lib/tinybird";
 import { resolveTraceFlowFilters } from "@/lib/tinybird";
-import { parseTraceFilters } from "@/lib/trace-filters";
+import { facetValues, parseTraceFilters } from "@/lib/trace-filters";
 
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const filters = await resolveTraceFlowFilters(projectId, parsed);
     const [list, histogram, stats, facets, errorGroups] = await Promise.all([
-      listTraces(projectId, filters),
+      listTraces(projectId, filters, { extras: facetValues(search.get("extras")), meta: facetValues(search.get("meta")) }),
       traceHistogram(projectId, filters),
       traceStats(projectId, filters),
       search.get("facets") === "1" ? traceFacets(projectId, filters) : null,

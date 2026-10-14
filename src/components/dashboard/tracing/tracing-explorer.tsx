@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { stepLabel } from "./agent-map";
 import { RANGES, TimeRangePicker } from "./time-range-picker";
+import { ColumnsMenu, DEFAULT_COLUMNS, columnLabel, extraCell, extraIdsFor, isKnownColumn, metaKeysFor, orderColumns, type TraceRowExtras } from "./trace-columns";
 import { TraceCharts, type ChartBucket } from "./trace-charts";
 import { ErrorGroupsPanel, errorGroupLabel, type ErrorGroups } from "./error-groups";
 import { FACETS, FacetGroup, decodeValues, encodeValues, type FacetCounts } from "./facet-filter";
 import { TRACE_VIEWS, TracePanel, type TraceView } from "./trace-panel";
 import { compactNumber, downloadFile, formatCost, formatDuration, formatTime, parseTime, previewText, relativeTime, toCsv } from "./format";
 
-type TraceRow = {
+type TraceRow = TraceRowExtras & {
   runId: string; traceName: string; startedAt: string; durationMs: number; spanCount: number; errorCount: number;
   totalCostUsd: number; inputTokens: number; outputTokens: number; modelId: string; endUserId: string;
   sessionId: string; environment: string; release: string; tags: string[]; inputPreview: string; outputPreview: string;
@@ -23,14 +24,6 @@ type ListResponse = {
 
 export type TraceQuery = Record<string, string>;
 
-const COLUMNS = [
-  { id: "startedAt", label: "Start time" }, { id: "status", label: "Status" }, { id: "name", label: "Trace name" },
-  { id: "input", label: "Input" }, { id: "output", label: "Output" }, { id: "latency", label: "Latency" },
-  { id: "cost", label: "Cost" }, { id: "tokens", label: "Tokens" }, { id: "model", label: "Model" },
-  { id: "user", label: "User" }, { id: "session", label: "Session" }, { id: "tags", label: "Tags" },
-] as const;
-type ColumnId = (typeof COLUMNS)[number]["id"];
-const DEFAULT_COLUMNS: ColumnId[] = ["startedAt", "status", "name", "input", "output", "latency", "cost", "tokens", "model"];
 const COLUMN_STORAGE = "tracify.tracing.columns";
 const LIVE_STORAGE = "tracify.tracing.live";
 const ERRORS_STORAGE = "tracify.tracing.errorGroups";
@@ -45,10 +38,10 @@ function currentUrlQuery(): TraceQuery {
   return query;
 }
 
-function readColumns(): ColumnId[] {
+function readColumns(): string[] {
   try {
     const stored = JSON.parse(window.localStorage.getItem(COLUMN_STORAGE) ?? "null");
-    if (Array.isArray(stored)) return stored.filter((id): id is ColumnId => COLUMNS.some((column) => column.id === id));
+    if (Array.isArray(stored)) return orderColumns(stored.filter((id): id is string => typeof id === "string" && isKnownColumn(id)));
   } catch {}
   return DEFAULT_COLUMNS;
 }
@@ -63,8 +56,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   const [settledKey, setSettledKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchDraft, setSearchDraft] = useState(query.q ?? "");
-  const [columns, setColumns] = useState<ColumnId[]>(DEFAULT_COLUMNS);
-  const [columnsOpen, setColumnsOpen] = useState(false);
+  const [columns, setColumns] = useState<string[]>(DEFAULT_COLUMNS);
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [now, setNow] = useState(() => Date.now());
   const [live, setLive] = useState(true);
@@ -124,11 +116,22 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     params.delete("to");
     return params;
   }, [apiParams]);
+  // The metadata keys offered as columns depend on the time range only.
+  const rangeParams = useMemo(() => {
+    const params = new URLSearchParams();
+    params.set("from", apiParams.get("from") ?? "");
+    params.set("to", apiParams.get("to") ?? "");
+    return params;
+  }, [apiParams]);
   const listParams = useMemo(() => {
     const params = new URLSearchParams(apiParams);
     if (errorsOpen && query.mode !== "map") params.set("errors", "1");
+    // Optional columns are read only for the traces on the page, and only while their column is on.
+    const extras = extraIdsFor(columns), meta = metaKeysFor(columns);
+    if (extras.length) params.set("extras", encodeValues(extras));
+    if (meta.length) params.set("meta", encodeValues(meta));
     return params;
-  }, [apiParams, errorsOpen, query.mode]);
+  }, [apiParams, errorsOpen, query.mode, columns]);
   const requestKey = listParams.toString();
   const loading = settledKey !== requestKey;
 
@@ -237,8 +240,8 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     return () => window.removeEventListener("keydown", onKey);
   }, [selectIndex, selected, update]);
 
-  function toggleColumn(id: ColumnId) {
-    const next = columns.includes(id) ? columns.filter((column) => column !== id) : COLUMNS.map((c) => c.id).filter((c) => c === id || columns.includes(c));
+  function toggleColumn(id: string) {
+    const next = columns.includes(id) ? columns.filter((column) => column !== id) : orderColumns([...columns, id]);
     setColumns(next);
     try { window.localStorage.setItem(COLUMN_STORAGE, JSON.stringify(next)); } catch {}
   }
@@ -349,19 +352,8 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             </div>
             {chartMode ? null : <>
             <button type="button" onClick={exportCsv} disabled={!rows.length} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
-            <div className="relative">
-              <button type="button" aria-expanded={columnsOpen} onClick={() => setColumnsOpen((open) => !open)} className="h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">Columns {columns.length}/{COLUMNS.length}</button>
-              {columnsOpen ? (
-                <div className="absolute right-0 z-20 mt-2 w-52 max-w-[calc(100vw-2rem)] rounded-lg border border-[#262C35] bg-[#111418] p-2 shadow-2xl">
-                  {COLUMNS.map((column) => (
-                    <label key={column.id} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-[#1A1F27]">
-                      <input type="checkbox" checked={columns.includes(column.id)} onChange={() => toggleColumn(column.id)} className="accent-[#F4D44D]" />{column.label}
-                    </label>
-                  ))}
-                  <button type="button" className="mt-1 w-full rounded px-2 py-1.5 text-left text-xs text-[#8B93A1] hover:bg-[#1A1F27]" onClick={() => { setColumns(DEFAULT_COLUMNS); try { window.localStorage.removeItem(COLUMN_STORAGE); } catch {} }}>Reset to default</button>
-                </div>
-              ) : null}
-            </div>
+            <ColumnsMenu projectId={projectId} rangeParams={rangeParams} columns={columns} onToggle={toggleColumn}
+              onReset={() => { setColumns(DEFAULT_COLUMNS); try { window.localStorage.removeItem(COLUMN_STORAGE); } catch {} }} />
             </>}
           </div>
 
@@ -394,7 +386,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                 <thead className="sticky top-0 z-10 bg-[#0B0D10]">
                   <tr className="text-left text-xs text-[#8B93A1]">
                     {columns.map((id) => {
-                      const label = COLUMNS.find((column) => column.id === id)!.label;
+                      const label = columnLabel(id);
                       const sortKey = id === "startedAt" ? "startedAt" : id === "latency" ? "latency" : id === "cost" ? "cost" : null;
                       const active = sortKey && (query.sort ?? "startedAt") === sortKey;
                       return (
@@ -448,7 +440,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   );
 }
 
-function cell(id: ColumnId, row: TraceRow, update: (patch: TraceQuery, resetPage?: boolean) => void, clock: number) {
+function cell(id: string, row: TraceRow, update: (patch: TraceQuery, resetPage?: boolean) => void, clock: number) {
   const link = (key: string, value: string) => value
     ? <button type="button" className="truncate text-[#8AB4FF] hover:underline" onClick={(event) => { event.stopPropagation(); update({ [key]: encodeValues([value]) }); }}>{value}</button>
     : <span className="text-[#4A5260]">—</span>;
@@ -467,6 +459,7 @@ function cell(id: ColumnId, row: TraceRow, update: (patch: TraceQuery, resetPage
     case "user": return link("endUserId", row.endUserId);
     case "session": return link("sessionId", row.sessionId);
     case "tags": return row.tags?.length ? <span className="flex gap-1">{row.tags.slice(0, 3).map((tag) => <button key={tag} type="button" onClick={(event) => { event.stopPropagation(); update({ tag: encodeValues([tag]) }); }} className="rounded bg-[#1A1F27] px-1.5 py-0.5 text-xs hover:bg-[#232A34]">{tag}</button>)}</span> : <span className="text-[#4A5260]">—</span>;
+    default: return extraCell(id, row, update, clock);
   }
 }
 
