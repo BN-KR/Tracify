@@ -315,20 +315,28 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
       <div className="flex min-h-0 flex-1 flex-wrap">
         {filtersOpen ? (
-          <aside aria-label="Filters" className="w-full shrink-0 border-b border-[#1F242C] p-3 md:w-56 md:border-b-0 md:border-r">
-            <div className="mb-3 flex items-center justify-between">
+          <aside aria-label="Filters" className="w-full shrink-0 border-b border-[#1F242C] p-2.5 md:w-56 md:border-b-0 md:border-r">
+            <div className="mb-2 flex items-center justify-between">
               <span className="text-sm font-medium">Filters</span>
               <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => setFiltersOpen(false)}>Hide</button>
             </div>
-            <FilterSelect label="Status" value={query.status ?? "all"} values={["all", "error", "healthy"]} display={{ all: "All", error: "Errors", healthy: "Healthy" }} onChange={(value) => update({ status: value === "all" ? "" : value })} />
-            <div className="mb-2.5 border-t border-[#1A1F27]">
+            <div role="group" aria-label="Status" className="mb-2 flex rounded-md border border-[#262C35] p-0.5 text-xs">
+              {([["all", "All"], ["error", "Errors"], ["healthy", "Healthy"]] as const).map(([value, label]) => {
+                const active = (query.status ?? "all") === value;
+                return <button key={value} type="button" aria-pressed={active} onClick={() => update({ status: value === "all" ? "" : value })}
+                  className={`h-6 flex-1 rounded px-1.5 ${active ? "bg-[#232A34] text-white" : "text-[#8B93A1] hover:text-white"}`}>{label}</button>;
+              })}
+            </div>
+            <div className="mb-2 border-t border-[#1A1F27]">
               {FACETS.map((field) => (
                 <FacetGroup key={field.key} label={field.label} defaultOpen={field.open} values={decodeValues(query[field.key])} counts={facets[field.key]}
                   onChange={(values) => update({ [field.key]: encodeValues(values) })} />
               ))}
             </div>
-            <FilterNumber key={`lat-${query.minLatencyMs ?? ""}`} label="Min latency (ms)" value={query.minLatencyMs ?? ""} onChange={(value) => update({ minLatencyMs: value })} />
-            <FilterNumber key={`cost-${query.minCostUsd ?? ""}`} label="Min cost (USD)" value={query.minCostUsd ?? ""} step="0.001" onChange={(value) => update({ minCostUsd: value })} />
+            <div className="grid grid-cols-2 gap-2">
+              <FilterNumber key={`lat-${query.minLatencyMs ?? ""}`} label="Min latency (ms)" value={query.minLatencyMs ?? ""} onChange={(value) => update({ minLatencyMs: value })} />
+              <FilterNumber key={`cost-${query.minCostUsd ?? ""}`} label="Min cost (USD)" value={query.minCostUsd ?? ""} step="0.001" onChange={(value) => update({ minCostUsd: value })} />
+            </div>
           </aside>
         ) : null}
 
@@ -471,27 +479,15 @@ function cell(id: ColumnId, row: TraceRow, update: (patch: TraceQuery, resetPage
   }
 }
 
-function FilterSelect({ label, value, values, display, onChange }: { label: string; value: string; values: string[]; display?: Record<string, string>; onChange: (value: string) => void }) {
-  const id = `filter-${label.replace(/\W+/g, "-").toLowerCase()}`;
-  return (
-    <div className="mb-2.5">
-      <label htmlFor={id} className="mb-1 block text-xs text-[#8B93A1]">{label}</label>
-      <select id={id} value={value} onChange={(event) => onChange(event.target.value)} className="h-8 w-full rounded-md border border-[#262C35] bg-[#111418] px-2 text-[13px] text-[#E6E9EE] outline-none focus:border-[#4A5260]">
-        {[...new Set([...values, value])].map((option) => <option key={option} value={option}>{display?.[option] ?? (option || "Any")}</option>)}
-      </select>
-    </div>
-  );
-}
-
 function FilterNumber({ label, value, step = "1", onChange }: { label: string; value: string; step?: string; onChange: (value: string) => void }) {
   const [draft, setDraft] = useState(value);
   const id = `filter-${label.replace(/\W+/g, "-").toLowerCase()}`;
   return (
-    <div className="mb-2.5">
-      <label htmlFor={id} className="mb-1 block text-xs text-[#8B93A1]">{label}</label>
+    <div className="min-w-0">
+      <label htmlFor={id} className="mb-0.5 block truncate text-[11px] text-[#8B93A1]" title={label}>{label}</label>
       <input id={id} type="number" min="0" step={step} value={draft} onChange={(event) => setDraft(event.target.value)}
         onBlur={() => draft !== value && onChange(draft)} onKeyDown={(event) => { if (event.key === "Enter") onChange(draft); }}
-        className="h-8 w-full rounded-md border border-[#262C35] bg-[#111418] px-2 text-[13px] text-[#E6E9EE] outline-none focus:border-[#4A5260]" placeholder="Any" />
+        className="h-7 w-full rounded border border-[#262C35] bg-[#111418] px-2 text-xs text-[#E6E9EE] outline-none focus:border-[#4A5260]" placeholder="Any" />
     </div>
   );
 }
