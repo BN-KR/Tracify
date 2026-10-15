@@ -6,7 +6,9 @@
   "git": {
     "deploymentEnabled": {
       "main": true,
-      "staging": true
+      "staging": true,
+      "codex/**": false,
+      "claude/**": false
     }
   },
   "ignoreCommand": "bash scripts/vercel-ignore-build.sh"
