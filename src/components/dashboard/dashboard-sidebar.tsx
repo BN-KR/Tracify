@@ -177,6 +177,7 @@ export function DashboardSidebar({
           { title: "Home", icon: LayoutDashboard, href: isSynthetic ? syntheticHref("home") : projectDashboardHref },
           { title: "Dashboards", icon: LayoutDashboard, href: isSynthetic ? syntheticHref("dashboards") : projectId ? `/dashboard/${projectId}/dashboards` : "/dashboard/dashboards" },
           { title: "Tracing", icon: Activity, href: isSynthetic ? syntheticHref("tracing") : projectId ? `/dashboard/${projectId}/tracing` : "/dashboard/runs" },
+          ...(!isSynthetic && projectId ? [{ title: "Steps", icon: Activity, href: `/dashboard/${projectId}/steps` }] : []),
           { title: "Sessions", icon: Activity, href: isSynthetic ? syntheticHref("sessions") : projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions" },
           { title: "Users", icon: Users, href: isSynthetic ? syntheticHref("users") : projectId ? `/dashboard/${projectId}/users` : "/dashboard/users" },
           { title: "Search", icon: Search, href: isSynthetic ? syntheticHref("search") : projectId ? `/dashboard/${projectId}/search` : "/dashboard/search" },

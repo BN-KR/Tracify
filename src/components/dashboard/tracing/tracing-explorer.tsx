@@ -358,6 +358,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
         <section className="flex min-w-0 flex-[999_1_560px] flex-col">
           <div className="flex flex-wrap items-center gap-1.5 px-4 pt-3">
+            <a href={`/dashboard/${encodeURIComponent(projectId)}/steps?${new URLSearchParams(Object.fromEntries(Object.entries(query).filter(([key]) => !["trace", "view", "mode", "page"].includes(key))))}`} className="h-7 border border-[#262C35] px-2.5 py-1 text-xs text-[#C9CED6] hover:text-white">Steps</a>
             <div role="group" aria-label="Show traces as" className="flex max-w-full flex-wrap rounded-md border border-[#262C35] p-0.5 text-xs">
               {([["", "List"], ["chart", "Chart"]] as const).map(([mode, label]) => {
                 const active = chartMode === (mode === "chart");

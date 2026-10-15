@@ -38,13 +38,13 @@ function spanName(span: Span) {
   return span.toolName || span.modelId || span.traceName || span.spanType || "span";
 }
 
-export function TracePanel({ projectId, runId, summary, view, onView, onClose, onFilter, onStep }: {
-  projectId: string; runId: string; summary: Summary; view: TraceView; onView: (view: TraceView) => void;
+export function TracePanel({ projectId, runId, summary, view, onView, onClose, onFilter, onStep, initialStepId }: {
+  initialStepId?: string; projectId: string; runId: string; summary: Summary; view: TraceView; onView: (view: TraceView) => void;
   onClose: () => void; onFilter: (key: string, value: string) => void; onStep: (delta: number) => void;
 }) {
   const [spans, setSpans] = useState<Span[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialStepId ?? null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [copied, setCopied] = useState(false);
   const [attempt, setAttempt] = useState(0);
