@@ -73,7 +73,7 @@ export const save = mutation({
     const name = args.name.trim();
     if (!name || name.length > 80)
       throw Error("Use a view name between 1 and 80 characters");
-    if (Object.keys(args.query).length > 40 || args.columns.length > 64)
+    if (Object.keys(args.query).length > 64 || JSON.stringify(args.query).length > 16000 || args.columns.length > 64)
       throw Error("View is too large");
     const value = {
       projectId: args.projectId,

@@ -40,11 +40,11 @@ export function SavedViews({
   const dialog = useRef<HTMLDivElement>(null);
   const url = `/api/projects/${encodeURIComponent(projectId)}/saved-views`,
     id = query.savedView;
+  const hasSnapshot = Boolean(query.columns);
   useEffect(() => {
-    if (!open && !id) return;
+    if ((!open && !id) || (!open && id && applied.current === id)) return;
     const controller = new AbortController();
     // This fetch is initiated only by an explicit menu open or a shared-view URL.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError("");
     fetch(`${url}${id ? `?id=${encodeURIComponent(id)}` : ""}`, {
@@ -66,6 +66,8 @@ export function SavedViews({
         }
         applied.current = id;
         setActive(view);
+        // A full URL snapshot may contain unsaved edits; reload must preserve them.
+        if (hasSnapshot && view.target === target) return;
         if (view.target === target)
           onApply(
             {
@@ -87,7 +89,7 @@ export function SavedViews({
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [open, id, url, target, projectId, onApply]);
+  }, [open, id, url, target, projectId, onApply, hasSnapshot]);
   useEffect(() => {
     if (!open) return;
     dialog.current?.focus();
@@ -134,7 +136,10 @@ export function SavedViews({
       setViews((current) => [view, ...current.filter((v) => v._id !== id)]);
       setActive(view);
       applied.current = id;
-      onApply({ ...query, savedView: id }, columns);
+      onApply(
+        { ...query, savedView: id, columns: JSON.stringify(columns) },
+        columns,
+      );
       setEditing(false);
       setMessage("View saved");
     } catch (e) {
@@ -196,6 +201,7 @@ export function SavedViews({
       >
         {active ? `${active.name}${dirty ? " · Modified" : ""}` : "Saved views"}
       </button>
+      {id && error && !open ? <p role="alert" className="mt-1 max-w-[220px] text-xs text-[#FF6B6B]">{error} <button type="button" className="underline" onClick={()=>onApply({...query,savedView:""},columns)}>Clear view</button></p> : null}
       {open ? (
         <div
           id="saved-view-menu"

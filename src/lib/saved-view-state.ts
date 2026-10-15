@@ -43,12 +43,28 @@ const KEYS = new Set([
 export function savedViewQuery(query: Record<string, string>) {
   return Object.fromEntries(
     Object.entries(query)
-      .filter(([key, value]) => KEYS.has(key) && value && value.length <= 200)
+      .filter(
+        ([key, value]) =>
+          KEYS.has(key) &&
+          value &&
+          value.length <= (key === "q" || key === "sort" ? 200 : 4096),
+      )
       .sort(([a], [b]) => a.localeCompare(b)),
   );
 }
 export function savedViewColumns(columns: string[]) {
-  return orderColumns([...new Set(columns.filter(id => isKnownColumn(id) && (!isMetaColumn(id) || /^[\w.\- :/]{1,60}$/.test(id.slice(5)))))]).filter((id, index, all) => !isMetaColumn(id) || all.slice(0,index).filter(isMetaColumn).length < 20);
+  return orderColumns([
+    ...new Set(
+      columns.filter(
+        (id) =>
+          isKnownColumn(id) &&
+          (!isMetaColumn(id) || /^[\w.\- :/]{1,60}$/.test(id.slice(5))),
+      ),
+    ),
+  ]).filter(
+    (id, index, all) =>
+      !isMetaColumn(id) || all.slice(0, index).filter(isMetaColumn).length < 20,
+  );
 }
 export function savedViewState(
   query: Record<string, string>,

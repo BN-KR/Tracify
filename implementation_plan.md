@@ -1,6 +1,6 @@
 ## 2026-10-15 — Authorized tracing roadmap
 
-- Owner review/merge of draft PRs #162 (auth), #163 (CSV), #164 (sorting), #166 (steps), plus SDK and saved-view drafts. Merge frontend stack in that order, using merge commits.
+- Owner review/merge of draft PRs #162 (auth), #163 (CSV), #164 (sorting), #166 (steps), SDK #167 (independent), and saved views #168 after #166. Merge frontend stack in that order, using merge commits.
 - Saved-view live verification requires an isolated Convex deployment; no production backend deployment from feature branches.
 - SDK registry publication is a separate owner-controlled release after review.
 
@@ -141,37 +141,13 @@ Each numbered capability becomes its own 1–3 day implementation issue or a sma
 6. [pending owner] Create and test the live one-time $1,000 Stripe Payment Link in the intended account; store the URL privately.
 7. [pending owner] Qualify the remaining account gap, personally send 10 initial messages per weekday plus follow-ups, run discovery, send same-day offers, collect payment before evidence, and deliver one review using the operating kit.
 
-# Cursor removal and fit verification — 2026-08-24
-
-
-# Product film pacing and SaaS cursor — 2026-08-24
-
-
-# Product film rebuild — 2026-08-22
-
-# Blog corpus cleanup — 2026-08-26
-
 # AI evaluation metrics editorial rebuild — 2026-08-26
 
-
 - [pending] Publish through the PR workflow after repository review permissions are available.
-
-
-# 17-post visibility content set — 2026-08-20
-
-
-# Motion Canvas product demo — 2026-08-21
-
-
-# Robots standards cleanup — 2026-08-13
-
 
 # Sitewide link audit — 2026-08-12
 
 3. [pending] Complete a clean production-build verification once the existing build finishes.
-
-# Sitewide SEO — 2026-08-11
-
 
 # tracify Strategic Implementation Plan
 
@@ -330,14 +306,8 @@ tracify is now positioned publicly as **agent observability for builders and ope
 
 ## Phase 1: Core Trace Viewer & Infrastructure (Weeks 1-4)
 
-### 1. Ingestion Pipeline & Environment [DONE]
-
-### 2. Onboarding & Dashboard Foundation [DONE]
-
 ### 3. Core Product: Trace Viewer [IN PROGRESS]
 The single most important UI in the product.
-
-### 4. Cost & Usage Dashboard [TODO]
 
 ### 4b. Reporting And Proof [IN PROGRESS]
 - [ ] **Report QA:** Verify report page with no data, normal runs, failed runs, and unavailable analytics fallback.
@@ -598,55 +568,10 @@ The single most important UI in the product.
 3. Turn the existing Sanity-backed blog into an editorial hub with featured stories, categories, article templates, RSS, and a working subscription path.
 4. Replace the three-card FAQ with an accessible accordion and a dedicated route or full FAQ index if content volume warrants it.
 5. Validate responsive behavior, keyboard accessibility, metadata/schema, and builds; measure the funnel with privacy-appropriate events.
-# Future 19 auth implementation — 2026-08-10
-
-# Better Auth dashboard production connection — 2026-08-10
-
-# Stable staging hostname — 2026-08-10
-
-# Better Auth Sentinel — 2026-08-10
-
-# Better Auth social OAuth credentials — 2026-08-10
-
-# Standard Tracify wordmark — 2026-08-10
-
-# Simplified auth layout — 2026-08-10
-
-# Development password reset — 2026-08-10
-
-
-# Responsive evaluation scoreboard — 2026-08-10
-
-
-# Official external logos — 2026-08-10
-
-
-# Public infrastructure disclosure — 2026-08-10
-
-
-# Dashboard-only admin access — 2026-08-10
-
-
-# Onboarding chrome and plain product branding — 2026-08-10
-
-
-# Onboarding API-key hashing configuration — 2026-08-10
-
-
-# Tracify API-key secret naming — 2026-08-10
-
-
-# Stripe documentation skills — 2026-08-11
-
 
 # Stripe subscription billing — 2026-08-11
 
 7. [pending] Roll the exposed live secret, add a replacement restricted key directly to Vercel, and run a live-mode checkout smoke test.
-# Future 19 public-site migration — 2026-08-11
-
-
-# Distinct Future 19 public-page compositions — 2026-08-11
-
 
 # Payload Neon initialization — 2026-08-12
 
@@ -663,52 +588,12 @@ The single most important UI in the product.
 2. Add an authenticated project-aware checkout page, including inline first-project creation. — Complete
 3. Preserve checkout redirects across email and social authentication. — Complete
 4. Verify lint/build, production environment, and deploy. — In progress
-# Dashboard onboarding escape and launch plan — 2026-08-12
-
-
-# Managed Payments checkout â€” 2026-08-13
-
-# Payload-to-Markdoc assessment — 2026-08-13
-
-# Payload-to-Markdoc migration — 2026-08-13
-
-# Tracify content-authoring skill — 2026-08-13
-
-
-# Markdoc blog release — 2026-08-13
-
-
-# Blog discovery and internal linking — 2026-08-13
-
-
-# Interactive Markdoc authoring rule — 2026-08-13
-
-
-# Agent Git workflow policy — 2026-08-13
-
-
-# Root robots.txt route — 2026-08-13
-
-
-# Payload CMS dashboard access â€” 2026-08-13
-
-
-# Admin hub â€” 2026-08-13
-
-# llms.txt and SEO audit — 2026-08-13
-
-# Product page depth and SEO hardening — 2026-08-13
-
-
-# Vercel preview deployment recovery — 2026-08-13
-
 
 # Page-specific site redesign — 2026-08-14
 
 7. [pending] Review staged scope, commit the feature branch, publish a draft PR, and verify Preview.
 
 # SEO release guardrails — 2026-08-14
-
 
 ## SAML login integration (2026-08-14)
 1. Install the official `@better-auth/sso` plugin.
@@ -726,9 +611,6 @@ The single most important UI in the product.
 - Keep persistent product-area navigation on the left.
 - Make quickstarts and product areas first-class overview sections.
 - Add an on-page rail and grouped all-guides index without copying reference branding or unsupported claims.
-
-# Docs navigation and AI handoff
-
 
 # EU/US regional cloud — 2026-08-15
 
@@ -783,26 +665,13 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 
 5. [follow-up] Run the authenticated browser smoke test over the high-risk dashboard visualization surfaces; the app browser runtime could not initialize during recovery.
 
-# gstack and safe PR merges — 2026-08-20
-
-
 # SDK publishing dry-run repair — 2026-08-20
 
 6. [follow-up] Configure npm and PyPI trusted publishers for tokenless future releases; npm staged publishing is now available because the package exists.
 
-# AI agent monitoring article polish — 2026-08-21
-
-
-# AI agent monitoring usability correction — 2026-08-22
-
-# Future content quality gate — 2026-08-24
-
-
 # Google Search Console indexing triage — 2026-08-24
 
 6. [pending] Merge/deploy through the production `origin/main` workflow, then validate the exact affected URLs and request reindexing in Search Console.
-# AI agent monitoring blog refinement — 2026-08-21
-
 
 # LLM tracing article refinement — 2026-08-25
 
@@ -891,7 +760,6 @@ Implemented the first slice: consent-gated analytics, a reusable consent utility
 ## Lead workflow completion audit — 2026-09-02
 
 The existing lead slice already covers Convex persistence, admin authorization, status transitions, assignment, notes, Redis rate limiting, deduplication, and non-fatal email delivery. This pass added aggregate request-size and JSON-object validation and expanded the inbox presentation of required lead metadata. Verification is pending because Node/npm are unavailable in the current shell.
-# Release-readiness disclosure update — 2026-09-02
 
 # SEO/AEO blog ideation — 2026-09-03
 
@@ -921,7 +789,6 @@ Use a v0.3.0 product release plus synchronized SDK patch/minor releases. Do not 
 ## Favicon candidates — 2026-09-04
 
 The first literal trace-path and pixel-`T` drafts were rejected as too busy and too close to a superhero-style badge. The refined candidates are a measured telemetry signal (`favicon-signal.svg`) and a restrained open trace loop (`favicon-open-trace.svg`), each with 16/32/48px PNG and ICO fallbacks. The signal mark is now the default multi-size app ICO; keep the open-trace version ready as the alternate.
-# Plane integration documentation — 2026-09-03
 
 # ERPNext integration — 2026-09-03
 

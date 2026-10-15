@@ -39,7 +39,7 @@ const EDGE_SEPARATOR = "\u2192";
 function currentUrlQuery(): TraceQuery {
   if (typeof window === "undefined") return {};
   const query: TraceQuery = {};
-  for (const [key, value] of new URLSearchParams(window.location.search)) if (value) query[key] = value.slice(0, key === "columns" ? 4096 : 200);
+  for (const [key, value] of new URLSearchParams(window.location.search)) if (value) query[key] = value.slice(0, key === "q" || key === "sort" ? 200 : 4096);
   return query;
 }
 
