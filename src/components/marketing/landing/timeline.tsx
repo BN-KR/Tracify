@@ -70,7 +70,9 @@ function Bar({ span, t, trackW, cell }: { span: Span; t: MotionValue<number>; tr
         )}
       </motion.div>
       {span.tone === "root" && (
-        <motion.span style={{ opacity: done }} className="pointer-events-none absolute -inset-2 border-2 border-[#f4d44d] shadow-[0_0_40px_6px_rgba(244,212,77,0.4)] motion-safe:animate-pulse" />
+        <motion.span style={{ opacity: done }} className="pointer-events-none absolute -inset-2">
+          <span className="block size-full border-2 border-[#f4d44d] shadow-[0_0_40px_6px_rgba(244,212,77,0.4)] motion-safe:animate-pulse" />
+        </motion.span>
       )}
       {span.note && (
         <motion.span
