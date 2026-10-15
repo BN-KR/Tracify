@@ -53,7 +53,7 @@ export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactN
           <motion.p initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f4d44d]">{modeCopy.marker}</motion.p>
           <motion.h1 initial={reduce ? false : { opacity: 0, clipPath: "inset(0 0 100% 0)" }} animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }} transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }} className="mt-4 max-w-xl font-pixel text-[clamp(2.6rem,5.2vw,5.4rem)] leading-[0.88] tracking-[-0.065em]">{modeCopy.title}</motion.h1>
           <p className="mt-5 max-w-md text-sm leading-6 text-white/65 sm:text-base sm:leading-7">{modeCopy.note}</p>
-          <PixelWaterfall rows={rows} loop className="mt-10 hidden max-w-lg lg:grid" />
+          <PixelWaterfall rows={rows} loop className="mt-10 hidden max-w-lg lg:grid [@media(max-height:860px)]:lg:hidden" />
         </div>
       </aside>
       <section className="flex flex-col px-5 py-6 sm:px-8 md:px-12">
