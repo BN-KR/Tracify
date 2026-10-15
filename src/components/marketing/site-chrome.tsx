@@ -1,8 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Footer } from "@/components/marketing/footer";
-import { Navbar } from "@/components/marketing/navbar";
 import { SiteAssistant } from "@/components/marketing/site-assistant";
 import { LandingFooter } from "@/components/marketing/landing/landing-footer";
 import { LandingNav } from "@/components/marketing/landing/landing-nav";
@@ -30,9 +28,10 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <Navbar />
+      <LandingNav solidAlways />
+      <div className="h-16 bg-[#090909]" aria-hidden="true" />
       {children}
-      <Footer />
+      <LandingFooter />
       <SiteAssistant />
     </>
   );

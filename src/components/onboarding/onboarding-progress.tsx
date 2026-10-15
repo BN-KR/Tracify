@@ -1,4 +1,4 @@
-const steps = [
+export const onboardingSteps = [
   { id: "project", label: "Create project" },
   { id: "api-key", label: "API key" },
   { id: "install", label: "Install SDK" },
@@ -6,22 +6,22 @@ const steps = [
   { id: "success", label: "First span" },
 ] as const;
 
-export type OnboardingStepId = (typeof steps)[number]["id"];
+export type OnboardingStepId = (typeof onboardingSteps)[number]["id"];
 
 export function OnboardingProgress({
   currentStep,
 }: {
   currentStep: OnboardingStepId;
 }) {
-  const activeIndex = steps.findIndex((step) => step.id === currentStep);
+  const activeIndex = onboardingSteps.findIndex((step) => step.id === currentStep);
 
   return (
     <div className="border-t border-current/25 pt-5">
       <div className="mb-4 text-[9px] uppercase tracking-[0.14em] opacity-55">
-        {activeIndex + 1} / {steps.length} {steps[activeIndex]?.label}
+        {activeIndex + 1} / {onboardingSteps.length} {onboardingSteps[activeIndex]?.label}
       </div>
       <ol className="grid grid-cols-5 gap-2">
-        {steps.map((step, index) => {
+        {onboardingSteps.map((step, index) => {
           const active = index === activeIndex;
           const complete = index < activeIndex;
 

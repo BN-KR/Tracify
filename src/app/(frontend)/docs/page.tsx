@@ -1,20 +1,80 @@
-import Link from "next/link";
 import { pageMetadata } from "@/lib/seo";
-import { ArrowRight, BookOpen, Braces, Check, Code2, Gauge, Layers3, ShieldCheck, Terminal } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import { getDocs } from "@/lib/markdoc-docs";
 import { DocsSearch } from "@/components/docs/docs-search";
-import { DocsSidebar } from "@/components/docs/docs-sidebar";
-import { FuturePage } from "@/components/marketing/future19-page";
+import { DocsJourney, DocsTerminal } from "@/components/docs/docs-experience";
+import { Reveal } from "@/components/marketing/landing/reveal";
 
 export const metadata = pageMetadata({ title: "Documentation", description: "Install the SDK, instrument an agent, and inspect the execution record.", path: "/docs" });
 
-const quickstarts = [["Start tracing", "Send your first useful run in under five minutes.", "quickstart", Terminal], ["TypeScript SDK", "Instrument Node.js, Next.js, or worker workloads.", "typescript", Code2], ["Python SDK", "Add tracing to a Python agent with a small decorator.", "python", BookOpen]] as const;
-const productAreas = [["Observability", "Trace runs, sessions, tools, costs, and failures.", "observability", Gauge], ["Prompt operations", "Version, resolve, cache, and connect prompts to traces.", "prompts", Braces], ["Evaluation", "Turn production evidence into measurable release gates.", "evaluation", Check], ["Platform", "Use APIs, exports, datasets, and deployment controls.", "api-platform", Layers3]] as const;
+const eyebrow = "font-mono text-[10px] uppercase tracking-[.16em] text-black/55";
 
 export default function DocsRootPage() {
   const docs = getDocs();
-  const navigationDocs = docs.map(({ slug, title, section }) => ({ slug, title, section }));
   const searchDocs = docs.map(({ slug, title, description, section, headings, bodyText, body, noindex }) => ({ slug, title, description, section, headings, bodyText, body, noindex }));
   const sections = [...new Set(docs.map((doc) => doc.section))];
-  return <FuturePage><div className="min-h-screen bg-[#f3f2ed] text-black"><div className="mx-auto max-w-[1440px] border-x border-b border-black"><div className="flex items-center justify-between gap-4 px-5 py-3 font-mono text-[9px] uppercase tracking-[.13em] sm:px-8"><span className="text-black/55">Tracify / Documentation</span><div className="flex gap-4"><Link href="/integrations">Integrations</Link><Link href="/status">System status</Link></div></div></div><div className="mx-auto grid max-w-[1440px] border-x border-b border-black lg:grid-cols-[250px_minmax(0,1fr)_190px]"><DocsSidebar docs={navigationDocs} /><main className="min-w-0"><div className="border-b border-black p-5 md:p-10"><DocsSearch docs={searchDocs} /><p className="mt-10 font-mono text-[9px] uppercase tracking-[.15em] text-black/55">Documentation / overview</p><h1 className="mt-6 max-w-3xl font-pixel text-[clamp(3.5rem,8vw,7.5rem)] leading-[.82] tracking-[-.08em]">Build agents<br/>you can explain.</h1><p className="mt-8 max-w-2xl text-lg leading-8 text-black/62">Trace decisions, measure outcomes, and promote the versions that prove themselves in production.</p><div className="mt-8 flex flex-wrap gap-3"><Link href="/docs/quickstart" className="inline-flex min-h-12 items-center gap-3 bg-black px-5 font-mono text-[9px] uppercase tracking-[.13em] text-white hover:bg-[#f4d44d] hover:text-black">Start tracing <ArrowRight className="size-4" /></Link><Link href="/docs/mcp-server" className="inline-flex min-h-12 items-center gap-3 border border-black px-5 font-mono text-[9px] uppercase tracking-[.13em] hover:bg-white">Install Docs MCP <ArrowRight className="size-4" /></Link></div></div><section id="quickstarts" className="border-b border-black p-5 md:p-10"><p className="font-mono text-[9px] uppercase tracking-[.14em] text-black/55">Get started</p><h2 className="mt-3 font-pixel text-5xl leading-[.86] tracking-[-.07em]">Choose your first job.</h2><div className="mt-8 grid border-l border-t border-black sm:grid-cols-3">{quickstarts.map(([title, body, slug, Icon]) => <Link key={slug} href={`/docs/${slug}`} className="group min-h-52 border-b border-r border-black bg-white p-5 hover:bg-[#f4d44d]"><Icon className="size-5" strokeWidth={1.4} /><h3 className="mt-12 font-pixel text-3xl leading-none tracking-[-.05em]">{title}</h3><p className="mt-3 text-sm leading-6 text-black/58">{body}</p></Link>)}</div></section><section id="areas" className="border-b border-black p-5 md:p-10"><p className="font-mono text-[9px] uppercase tracking-[.14em] text-black/55">Product areas</p><h2 className="mt-3 font-pixel text-5xl leading-[.86] tracking-[-.07em]">One operating record.<br/>Four ways to use it.</h2><div className="mt-8 grid border-l border-t border-black sm:grid-cols-2">{productAreas.map(([title, body, slug, Icon]) => <Link key={slug} href={`/docs/${slug}`} className="group min-h-56 border-b border-r border-black bg-white p-6 hover:bg-[#f4d44d]"><Icon className="size-5" strokeWidth={1.4} /><h3 className="mt-16 font-pixel text-4xl leading-none tracking-[-.06em]">{title}</h3><p className="mt-3 max-w-sm text-sm leading-6 text-black/58">{body}</p></Link>)}</div></section><section id="guides" className="p-5 md:p-10"><div className="flex items-end justify-between"><div><p className="font-mono text-[9px] uppercase tracking-[.14em] text-black/55">All guides</p><h2 className="mt-3 font-pixel text-5xl leading-[.86] tracking-[-.07em]">Read by intent.</h2></div><span className="font-mono text-[9px] text-black/55">{docs.length} chapters</span></div><div className="mt-8 space-y-10">{sections.map((section) => <div key={section}><div className="border-b border-black pb-3 font-mono text-[10px] uppercase tracking-[.14em]">{section}</div>{docs.filter((doc) => doc.section === section).map((doc) => <Link key={doc.slug} href={`/docs/${doc.slug}`} className="grid gap-2 border-b border-black/20 py-4 hover:bg-[#f4d44d] sm:grid-cols-[1fr_1.4fr_auto] sm:items-center"><span className="font-pixel text-2xl tracking-[-.04em]">{doc.title}</span><span className="text-sm leading-6 text-black/55">{doc.description}</span><ArrowRight className="hidden size-4 sm:block" /></Link>)}</div>)}</div></section></main><aside className="hidden border-l border-black bg-[#eceae3] p-5 xl:block"><div className="sticky top-6"><p className="font-mono text-[9px] uppercase tracking-[.14em] text-black/55">On this page</p><nav className="mt-5 space-y-4 border-l border-black/20 pl-4 text-sm"><a href="#quickstarts">Get started</a><a href="#areas">Product areas</a><a href="#guides">All guides</a></nav><div className="mt-20 border-t border-black pt-5"><ShieldCheck className="size-5" /><p className="mt-4 font-pixel text-2xl leading-none tracking-[-.05em]">Agent access</p><p className="mt-3 text-sm leading-6 text-black/55">Give an AI agent full read-only access to the public docs corpus.</p><Link href="/docs/mcp-server" className="mt-5 inline-flex font-mono text-[9px] uppercase tracking-[.12em] underline underline-offset-4">Install Docs MCP →</Link></div></div></aside></div></div></FuturePage>;
+
+  return (
+    <div className="bg-[#eceae3] text-black">
+      <section className="relative isolate overflow-hidden bg-[#090909] text-[#eceae3]">
+        <Image src="/images/reading/docs.png" alt="" fill priority unoptimized sizes="100vw" className="-z-10 object-cover opacity-45 [image-rendering:pixelated]" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#090909_10%,rgba(9,9,9,0.55)_60%,rgba(9,9,9,0.3)_100%)]" />
+        <div className="mx-auto grid min-h-[min(82svh,760px)] max-w-[1320px] items-center gap-12 px-5 py-20 md:px-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <p className="inline-flex items-center gap-2 border border-white/20 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70"><span className="bg-[#f4d44d] px-1.5 text-black">Docs</span> {docs.length} guides · TypeScript · Python</p>
+            <h1 className="mt-8 font-pixel text-[clamp(3.2rem,9vw,8.4rem)] leading-[0.88] tracking-[-0.07em]">Build agents you can <span className="text-[#f4d44d]">explain.</span></h1>
+            <p className="mt-7 max-w-[520px] text-base leading-7 text-white/70 md:text-lg md:leading-8">Trace decisions, measure outcomes, and promote the versions that prove themselves in production.</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/docs/quickstart" className="inline-flex min-h-12 items-center gap-3 bg-[#f4d44d] px-6 font-mono text-[11px] uppercase tracking-[.14em] text-black transition-colors hover:bg-white">Start tracing <ArrowRight className="size-4" /></Link>
+              <Link href="/docs/mcp-server" className="inline-flex min-h-12 items-center gap-3 border border-white/30 px-6 font-mono text-[11px] uppercase tracking-[.14em] transition-colors hover:border-[#f4d44d] hover:text-[#f4d44d]">Install Docs MCP <ArrowRight className="size-4" /></Link>
+            </div>
+          </div>
+          <DocsTerminal />
+        </div>
+      </section>
+
+      <div className="border-b border-black bg-[#eceae3] px-5 py-6 md:px-10">
+        <div className="mx-auto max-w-[1320px]"><DocsSearch docs={searchDocs} /></div>
+      </div>
+
+      <DocsJourney />
+
+      <section id="guides" className="scroll-mt-24 px-5 py-24 md:px-10 md:py-32">
+        <div className="mx-auto max-w-[1320px]">
+          <p className={eyebrow}>All guides</p>
+          <h2 className="mt-5 max-w-3xl font-pixel text-[clamp(2.6rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.07em]">Read by intent.</h2>
+          <div className="mt-14 grid gap-x-12 gap-y-12 md:grid-cols-2">
+            {sections.map((section, si) => (
+              <Reveal key={section} delay={(si % 2) * 0.06}>
+                <div>
+                  <div className="flex items-baseline justify-between border-b-2 border-black pb-3 font-mono text-[11px] uppercase tracking-[.14em]"><span>{section}</span><span className="text-black/50">{docs.filter((d) => d.section === section).length}</span></div>
+                  {docs.filter((doc) => doc.section === section).map((doc) => (
+                    <Link key={doc.slug} href={`/docs/${doc.slug}`} className="group block border-b border-black/20 py-4 transition-colors hover:bg-[#f4d44d] sm:px-3">
+                      <span className="flex items-center justify-between gap-3 font-pixel text-2xl tracking-[-.04em]">{doc.title}<ArrowRight className="size-4 shrink-0 transition-transform group-hover:translate-x-1" /></span>
+                      <span className="mt-1 block text-sm leading-6 text-black/65 group-hover:text-black">{doc.description}</span>
+                    </Link>
+                  ))}
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <aside className="bg-[#f4d44d]">
+        <div className="mx-auto flex max-w-[1320px] flex-col gap-5 px-5 py-12 md:flex-row md:items-center md:justify-between md:px-10 md:py-16">
+          <div className="flex items-start gap-4">
+            <ShieldCheck className="mt-1 size-7 shrink-0" strokeWidth={1.4} />
+            <div>
+              <p className="font-pixel text-[clamp(2rem,4vw,3.2rem)] leading-none tracking-[-.06em]">Give your AI agent the docs.</p>
+              <p className="mt-3 max-w-md text-sm leading-6">Read-only access to the whole public docs corpus, over MCP.</p>
+            </div>
+          </div>
+          <Link href="/docs/mcp-server" className="inline-flex min-h-12 items-center justify-center bg-black px-6 font-mono text-[11px] uppercase tracking-[.14em] text-[#eceae3] transition-colors hover:bg-white hover:text-black">Install Docs MCP →</Link>
+        </div>
+      </aside>
+    </div>
+  );
 }

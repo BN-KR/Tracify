@@ -1,5 +1,7 @@
 "use client";
 
+import { PageHeader } from "@/components/marketing/page-header";
+import { ClosingBand, HeaderAction } from "@/components/marketing/company/blocks";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -56,50 +58,57 @@ export default function DemoPage() {
     ["experiments", "Experiments"],
   ];
   return (
-    <div className="min-h-screen bg-[#eceae3] pt-[54px] text-black">
-      <main className="mx-auto max-w-[1240px] border-x border-black">
-        <div className="flex flex-col justify-between gap-8 border-b border-black bg-[#f4d44d] px-6 py-14 md:flex-row md:items-end md:px-10 md:py-20">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500">
-              Interactive demo project / support-agent
-            </p>
-            <h1 className="mt-5 max-w-3xl font-pixel text-5xl leading-[0.9] tracking-[-0.045em] md:text-7xl">
-              From trace to better answers.
-            </h1>
-            <p className="mt-6 max-w-2xl text-sm leading-7 text-black/60">
-              Explore the complete Tracify improvement loop with seeded data:
-              inspect a run, compare prompt versions, review quality, and
-              promote the change that wins.
-            </p>
+    <div className="overflow-x-clip bg-[#090909]">
+      <PageHeader
+        eyebrow="Interactive demo project / support-agent"
+        title="From trace to better answers."
+        lede="Explore the whole Tracify improvement loop with seeded data: inspect a run, compare prompt versions, review quality and promote the change that wins."
+        image="/images/company/demo-play.png"
+      >
+        <HeaderAction href="/sign-up">Create a project</HeaderAction>
+        <HeaderAction href="/playground" kind="secondary">Open the full playground</HeaderAction>
+      </PageHeader>
+
+      <section className="px-5 pb-24 pt-6 text-white md:px-10 md:pb-32">
+        <div className="mx-auto max-w-[1240px]">
+          <div className="border border-white/20 shadow-[10px_10px_0_#f4d44d]">
+            <div className="flex items-center justify-between border-b border-white/15 bg-[#111] px-4 py-3 font-mono text-[9px] uppercase tracking-[0.14em] text-white/50">
+              <span className="flex items-center gap-2"><span className="size-1.5 animate-pulse bg-[#f4d44d]" aria-hidden="true" />support-agent / seeded data</span>
+              <span>read only</span>
+            </div>
+            <div className="bg-black px-6 pb-16 pt-8 md:px-10">
+              <div role="tablist" aria-label="Demo sections" className="flex flex-wrap gap-2">
+                {tabs.map(([id, label]) => (
+                  <button
+                    key={id}
+                    role="tab"
+                    aria-selected={active === id}
+                    onClick={() => setActive(id)}
+                    className={
+                      active === id
+                        ? "border border-[#f4d44d] bg-[#f4d44d] px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-black"
+                        : "border border-zinc-800 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-zinc-400 hover:border-zinc-500"
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {active === "overview" ? <Overview /> : null}
+              {active === "prompts" ? <Prompts /> : null}
+              {active === "evaluation" ? <Evaluation /> : null}
+              {active === "datasets" ? <Datasets /> : null}
+              {active === "experiments" ? <Experiments /> : null}
+            </div>
           </div>
-          <Link
-            href="/sign-up"
-            className="inline-flex items-center gap-2 border border-black bg-black px-5 py-3 font-mono text-xs uppercase tracking-widest text-white hover:bg-white hover:text-black"
-          >
-            Create a project <ArrowRight className="size-4" />
-          </Link>
         </div>
-        <div className="bg-black px-6 pb-24 pt-8 text-white md:px-10"><div className="flex flex-wrap gap-2">
-          {tabs.map(([id, label]) => (
-            <button
-              key={id}
-              onClick={() => setActive(id)}
-              className={
-                active === id
-                  ? "border border-white bg-white px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-black"
-                  : "border border-zinc-800 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-zinc-500 hover:border-zinc-500"
-              }
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        {active === "overview" ? <Overview /> : null}
-        {active === "prompts" ? <Prompts /> : null}
-        {active === "evaluation" ? <Evaluation /> : null}
-        {active === "datasets" ? <Datasets /> : null}
-        {active === "experiments" ? <Experiments /> : null}</div>
-      </main>
+      </section>
+
+      <ClosingBand
+        title="Now try it on your agent."
+        body="Wrap your agent, run it, open the map. The free plan needs no card."
+        actions={[{ href: "/sign-up", label: "Start tracing free", primary: true }, { href: "/docs", label: "Read the docs" }]}
+      />
     </div>
   );
 }

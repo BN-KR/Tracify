@@ -66,3 +66,14 @@ Agents editing blog content must follow this sequence and leave evidence for eac
 If an item cannot be verified, the post is not finished. Explain the blocker or fix it before shipping.
 
 New posts must include exactly one purposeful interactive learning element at the point where it helps most. Use the approved trace scenario now; add a new centralized interaction type only when the topic genuinely requires it and its renderer, accessibility, and validation are implemented first. Do not use MDX or raw JSX. Interactive examples must be deterministic and local; never execute arbitrary code on the server or access secrets or production data.
+
+## Article template anatomy
+
+Every article renders through the same landing-style template in `src/app/(frontend)/blog/[slug]/page.tsx`:
+
+- Dark header with dithered artwork, category chips, author, date and reading time.
+- Full-width hero image, then a sticky left rail (section list that follows the reader, share buttons).
+- Body: the first paragraph renders as a large lede, `##` headings become the section list, blockquotes render as dark pull-quotes, and `**bold**` gets the yellow highlight.
+- End of article: a yellow "Watch your own agent think" call to action, the author card and related posts.
+
+Write for that rhythm: a strong first paragraph, short `##` sections, one pull-quote per major idea. No raw HTML.

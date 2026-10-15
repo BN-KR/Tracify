@@ -465,7 +465,68 @@ def ridges():
     render(c, "footer-ridges", px=3)
 
 
+# 16. STAIRS: four steps rising in isometric view, one lit, for the pricing page
+def pricing_stairs():
+    w, h = 1800, 1000
+    c = Canvas(w, h)
+    iso = lambda x, y, z: (w * 0.5 + (x - y) * 0.87, h * 0.66 + (x + y) * 0.5 - z)
+    floor_grid(c, w, h, gain=0.05, horizon=0.3)
+    W, D = 190, 190
+    heights = (60, 170, 320, 500)
+    for i, hg in enumerate(heights):
+        ox = (i - 1.5) * 300
+        hot = i == 1
+        layer = "accent" if hot else "base"
+        x0, y0 = ox - W / 2, -D / 2
+        t = np.linspace(0, 1, 500)
+        for z in (0, hg):
+            for a, b in ((t * W, 0 * t), (t * W, 0 * t + D), (0 * t, t * D), (0 * t + W, t * D)):
+                sx, sy = iso(x0 + a, y0 + b, z)
+                c.splat(sx, sy, 1.3 if z else 0.5, layer)
+        for ex, ey in ((0, 0), (W, 0), (0, D), (W, D)):
+            zz = np.linspace(0, hg, 400)
+            sx, sy = iso(np.full_like(zz, x0 + ex), np.full_like(zz, y0 + ey), zz)
+            c.splat(sx, sy, 0.7, layer)
+        gx, gy = np.meshgrid(np.linspace(0, W, 60), np.linspace(0, D, 60))
+        sx, sy = iso(x0 + gx.ravel(), y0 + gy.ravel(), np.full(gx.size, hg))
+        c.splat(sx, sy, 0.16 if hot else 0.07, layer)
+        for k in range(1, 6):
+            zz = hg * k / 6
+            a = np.linspace(0, W, 300)
+            sx, sy = iso(x0 + a, np.full_like(a, y0 + D), np.full_like(a, zz))
+            c.splat(sx, sy, 0.18, layer)
+        if hot:
+            sx, sy = iso(ox, 0, hg)
+            sphere_blob(c, sx, sy, 260, 0.014, "accent", 14000)
+    c.base, c.accent = glow(c.base, 1, 0.5, 4), glow(c.accent, 1, 1.2, 9)
+    render(c, "pricing-stairs", px=3)
+
+
+# 17. GATE: nested doorway frames glowing at the centre, for the checkout page
+def checkout_gate():
+    w, h = 1200, 1500
+    c = Canvas(w, h)
+    for i in range(1, 30):
+        z = 0.9 + i * 0.45
+        sw, sh = 560 / z, 760 / z
+        t = np.linspace(-1, 1, 1200)
+        layer = "accent" if i >= 22 else "base"
+        for xs, ys in ((t * sw, np.full_like(t, -sh)), (t * sw, np.full_like(t, sh)), (np.full_like(t, -sw), t * sh), (np.full_like(t, sw), t * sh)):
+            c.splat(w / 2 + xs, h * 0.52 + ys, 1.8 / z ** 0.5, layer)
+    yy, xx = np.mgrid[0:h, 0:w]
+    d = np.hypot((xx - w / 2) / 0.7, yy - h * 0.52)
+    c.accent += np.clip(1 - d / 190, 0, 1) ** 1.5 * 2.2
+    floor_grid(c, w, h, gain=0.04, horizon=0.52, cam_h=2.0)
+    c.base, c.accent = glow(c.base, 1, 0.5, 4), glow(c.accent, 1, 1.0, 9)
+    render(c, "checkout-gate", px=3)
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    for fn in (hero, capture, cost, failure, globe, horizon, uc_support, uc_research, uc_automation, uc_tools, logs_wall, map_flat, span_anatomy, tunnel, ridges):
-        fn()
+    import sys
+    all_fns = (hero, capture, cost, failure, globe, horizon, uc_support, uc_research, uc_automation, uc_tools, logs_wall, map_flat, span_anatomy, tunnel, ridges, pricing_stairs, checkout_gate)
+    # Pass function names to regenerate only those: python3 generate-landing-art.py pricing_stairs
+    wanted = set(sys.argv[1:])
+    for fn in all_fns:
+        if not wanted or fn.__name__ in wanted:
+            fn()

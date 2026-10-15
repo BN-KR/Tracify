@@ -144,8 +144,8 @@ export function WaitingStep() {
   return (
     <div>
       <OnboardingHeader
-        title="Waiting for your first span"
-        description="Run your agent. Tracify is listening on your project."
+        title="Run your agent once."
+        description="Tracify is listening. This page moves on by itself the second your first run arrives."
       />
       <div className="border border-black/15 bg-[#f3f2ed] p-4">
         <div className="mb-4 flex items-center gap-2 text-[#92400E]">

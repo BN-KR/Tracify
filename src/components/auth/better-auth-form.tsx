@@ -65,8 +65,8 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
 
   return (
     <div>
-      <h2 className="font-pixel text-4xl leading-none tracking-[-0.06em]">{mode === "sign-up" ? "Create your account" : "Sign in to tracify"}</h2>
-      <p className="mt-3 text-sm leading-6 text-black/55">{mode === "sign-up" ? "One account for traces, evaluations, and your team." : "Continue to your production observability workspace."}</p>
+      <h2 className="font-pixel text-4xl leading-none tracking-[-0.06em]">{mode === "sign-up" ? "Start debugging agents." : "Welcome back."}</h2>
+      <p className="mt-3 text-sm leading-6 text-black/55">{mode === "sign-up" ? "Free to start. Your first trace takes about five minutes." : "Your traces are right where you left them."}</p>
 
       <div className="mt-7 grid gap-2 sm:grid-cols-2">
         <SocialButton label="GitHub" disabled={pending} onClick={() => void continueWith("github")} icon={<GitHubMark />} />

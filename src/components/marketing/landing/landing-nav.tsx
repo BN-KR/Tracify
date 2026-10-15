@@ -65,7 +65,7 @@ function Logo() {
   );
 }
 
-export function LandingNav() {
+export function LandingNav({ solidAlways = false }: { solidAlways?: boolean }) {
   const reduce = useReducedMotion();
   const [active, setActive] = useState<MenuName | null>(null);
   const [mobile, setMobile] = useState(false);
@@ -97,7 +97,7 @@ export function LandingNav() {
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         onMouseLeave={() => setActive(null)}
       >
-        <div className={`border-b transition-colors duration-300 ${solid || active ? "border-white/15 bg-[#090909]/85 backdrop-blur-md" : "border-transparent bg-transparent"}`}>
+        <div className={`border-b transition-colors duration-300 ${solidAlways || solid || active ? "border-white/15 bg-[#090909]/85 backdrop-blur-md" : "border-transparent bg-transparent"}`}>
           <nav className="mx-auto flex h-[64px] max-w-[1440px] items-center justify-between px-5 md:px-8" aria-label="Main">
             <Logo />
             <ul className="hidden items-center gap-1 lg:flex">
