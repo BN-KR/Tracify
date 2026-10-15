@@ -55,14 +55,36 @@ const menus = {
 type MenuName = keyof typeof menus;
 const names = Object.keys(menus) as MenuName[];
 
+const bars = [
+  { x: 32, y: 32, w: 192 },
+  { x: 144, y: 104, w: 80 },
+  { x: 160, y: 176, w: 64 },
+];
+
+/** The three-bar cascade mark: a trace waterfall that also reads as a T. */
+export function CascadeMark({ className = "h-7 w-7" }: { className?: string }) {
+  return (
+    <svg viewBox="32 32 192 192" className={className} aria-hidden="true">
+      {bars.map((b, i) => (
+        <rect
+          key={i}
+          x={b.x}
+          y={b.y}
+          width={b.w}
+          height={48}
+          fill="#f4d44d"
+          className="origin-right transition-transform duration-300 [transform-box:fill-box] group-hover:scale-x-110"
+          style={{ transitionDelay: `${i * 60}ms` }}
+        />
+      ))}
+    </svg>
+  );
+}
+
 function Logo() {
   return (
-    <Link href="/" aria-label="Tracify home" className="group flex items-center gap-2">
-      <span className="grid size-7 grid-cols-3 grid-rows-3 gap-[2px]" aria-hidden="true">
-        {[1, 0, 1, 0, 1, 0, 1, 1, 1].map((on, i) => (
-          <span key={i} className={`transition-colors duration-300 ${on ? "bg-[#f4d44d]" : "bg-white/15 group-hover:bg-[#f4d44d]"}`} style={{ transitionDelay: `${i * 30}ms` }} />
-        ))}
-      </span>
+    <Link href="/" aria-label="Tracify home" className="group flex items-center gap-1.5">
+      <CascadeMark />
       <span className="font-pixel text-2xl tracking-[-0.06em] text-[#eceae3]">tracify</span>
     </Link>
   );

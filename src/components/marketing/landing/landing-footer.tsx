@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUp, ArrowUpRight } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { NewsletterCapture } from "@/components/marketing/newsletter-capture";
+import { CascadeMark } from "./landing-nav";
 
 const groups = [
   ["Product", [["Trace viewer", "/product/trace-viewer"], ["Cost dashboard", "/product/cost-dashboard"], ["Tool calls", "/product/tool-calls"], ["Pricing", "/pricing"], ["Integrations", "/integrations"]]],
@@ -52,7 +53,16 @@ export function LandingFooter() {
           </div>
         </div>
 
-        <div className="mt-16 flex select-none justify-between font-pixel text-[23vw] leading-[0.78] tracking-[-0.08em] lg:text-[22vw]" aria-hidden="true">
+        <div className="mt-16 flex select-none items-end justify-between font-pixel text-[19vw] leading-[0.78] tracking-[-0.08em] lg:text-[18vw]" aria-hidden="true">
+          <motion.span
+            className="group mb-[0.04em] inline-block"
+            initial={reduce ? false : { x: "-30%", opacity: 0 }}
+            whileInView={{ x: "0%", opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <CascadeMark className="size-[0.62em]" />
+          </motion.span>
           {word.map((ch, i) => (
             <motion.span
               key={i}
