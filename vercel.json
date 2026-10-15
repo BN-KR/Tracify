@@ -5,7 +5,7 @@
   "buildCommand": "node scripts/saved-view-preview-build.mjs",
   "git": {
     "deploymentEnabled": {
-      "main": true,
+      "main": false,
       "staging": true
     }
   }
