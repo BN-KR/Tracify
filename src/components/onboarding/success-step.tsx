@@ -12,8 +12,8 @@ export function SuccessStep({
   return (
     <div>
       <OnboardingHeader
-        title="First span received."
-        description="Your run is live. Click to inspect every step."
+        title="Your first trace is in."
+        description="Every step, tool call and token is mapped. Open it and see what your agent really did."
       />
       <div className="mb-6 border border-black/15 bg-[#f3f2ed] p-4 text-sm">
         <div className="mb-2 text-[#047857]">received</div>

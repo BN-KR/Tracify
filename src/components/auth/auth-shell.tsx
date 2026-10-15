@@ -12,8 +12,8 @@ import { getRegionForHostname, getTracifyRegion } from "@/lib/regions";
 type AuthMode = "sign-in" | "sign-up" | "forgot-password" | "reset-password" | "invitation" | "error";
 
 const copy = {
-  "sign-in": { img: "/images/landing/hero-graph.png", eyebrow: "Workspace access", title: "Pick up where the last run left off.", note: "Your traces, evaluations, and release evidence stay behind one authenticated boundary.", marker: "Known operator" },
-  "sign-up": { img: "/images/landing/capture-streams.png", eyebrow: "Create workspace", title: "See your first agent run as a map.", note: "Create the workspace now. Connect a project when you are ready to send evidence.", marker: "New workspace" },
+  "sign-in": { img: "/images/landing/hero-graph.png", eyebrow: "Workspace access", title: "Pick up where the last run left off.", note: "Pick the run that went wrong and follow it step by step, from the first prompt to the last tool call.", marker: "Known operator" },
+  "sign-up": { img: "/images/landing/capture-streams.png", eyebrow: "Create workspace", title: "See your first agent run as a map.", note: "Install the SDK, run your agent once, and watch every step appear as a map. No credit card.", marker: "New workspace" },
   "forgot-password": { img: "/images/landing/logs-wall.png", eyebrow: "Account recovery", title: "Locked out? Back in a minute.", note: "We send a time-limited recovery path without revealing whether an account exists.", marker: "Recovery channel" },
   "reset-password": { img: "/images/landing/horizon-sun.png", eyebrow: "New credentials", title: "New password. Same history.", note: "A successful reset invalidates existing sessions and restores a clean boundary.", marker: "Credential rotation" },
   invitation: { img: "/images/landing/globe-orbits.png", eyebrow: "Team invitation", title: "Join your team's traces.", note: "Accept the organization invitation to inspect and improve runs with the team.", marker: "Organization link" },

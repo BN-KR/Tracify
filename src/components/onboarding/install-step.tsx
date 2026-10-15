@@ -76,8 +76,8 @@ export function InstallStep() {
   return (
     <div>
       <OnboardingHeader
-        title="Install the SDK."
-        description={`Choose your runtime and connect it to Tracify ${region.shortName}.`}
+        title="Three lines to your first trace."
+        description={`Pick your runtime, paste the snippet and point it at Tracify ${region.shortName}.`}
       />
       <CodeCopyBlock label="Regional environment" value={`TRACIFY_REGION=${region.id}`} />
       <div className="mb-4 mt-4 border border-black/15 bg-white p-3 font-mono text-[10px] uppercase tracking-[0.1em] text-black/60">Ingest endpoint · {region.origin}/api/ingest</div>

@@ -108,8 +108,8 @@ export function ProjectStep() {
   return (
     <form onSubmit={onSubmit}>
       <OnboardingHeader
-        title="Create your first project."
-        description="A project holds your agents, runs, API keys, and traces."
+        title="Name the thing you're debugging."
+        description="One project per agent or product. Everything it does, every run, tool call and cost, lands here. Rename it any time."
       />
       <label
         htmlFor="project-name"
