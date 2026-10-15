@@ -249,6 +249,7 @@ export function StepsExplorer({
     return () => window.removeEventListener("keydown", keydown);
   }, []);
   const applyView = useCallback((next: Query) => {
+    setNow(Date.now());
     setQuery(next);
     setDraft(next.q ?? "");
   }, []);

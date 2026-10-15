@@ -253,7 +253,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     try { window.localStorage.setItem(COLUMN_STORAGE, JSON.stringify(next)); } catch {}
   }
 
-  const applyView = useCallback((next: TraceQuery, chosen: string[]) => { setQuery(next); setColumns(chosen.length ? chosen : DEFAULT_COLUMNS); setSearchDraft(next.q ?? ""); try { localStorage.setItem(COLUMN_STORAGE, JSON.stringify(chosen)); } catch {} }, []);
+  const applyView = useCallback((next: TraceQuery, chosen: string[]) => { setNow(Date.now()); setQuery(next); setColumns(chosen); setSearchDraft(next.q ?? ""); try { localStorage.setItem(COLUMN_STORAGE, JSON.stringify(chosen)); } catch {} }, []);
 
   /** Enter in the search box: `field:value` tokens become filters, the remaining words are the text search. */
   function submitSearch(text: string) {
@@ -382,7 +382,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             <button type="button" onClick={exportCsv} disabled={!rows.length || loading} className="ml-auto h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
             <SavedViews projectId={projectId} target="traces" query={query} columns={columns} onApply={applyView} />
             <ColumnsMenu projectId={projectId} rangeParams={rangeParams} columns={columns} onToggle={toggleColumn}
-              onReset={() => { setColumns(DEFAULT_COLUMNS); try { window.localStorage.removeItem(COLUMN_STORAGE); } catch {} }} />
+              onReset={() => { setColumns(DEFAULT_COLUMNS); update({ columns: JSON.stringify(DEFAULT_COLUMNS) }, false); try { window.localStorage.removeItem(COLUMN_STORAGE); } catch {} }} />
             </div>
           </div>
 
