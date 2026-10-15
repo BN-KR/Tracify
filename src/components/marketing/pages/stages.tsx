@@ -273,3 +273,126 @@ export function ChainStage({ p, count, rows, title, flagTag, meter }: StageProps
     </div>
   );
 }
+
+/* ---------- Evaluation: cases against evaluators, then a monitor ---------- */
+
+const evalRows = [
+  ["refund-policy-01", true, true, true],
+  ["refund-policy-02", true, false, true],
+  ["order-status-07", true, true, true],
+  ["escalation-03", false, true, false],
+  ["tone-check-11", true, true, true],
+] as const;
+
+export function EvalStage({ p, active }: StageProps) {
+  const shown = Math.min(evalRows.length, Math.floor(clamp(p * 2.2) * evalRows.length) + 1);
+  return (
+    <div>
+      <Head left="suite support-v12 · 3 evaluators" right={active === 2 ? "monitoring live traffic" : `${shown} / ${evalRows.length} cases`} />
+      {active < 2 ? (
+        <div className="border border-black/30">
+          <div className={`${mono} grid grid-cols-[1fr_repeat(3,64px)] border-b border-black/30 p-3 text-black/50`}>
+            <span>Case</span>
+            <span>Valid</span>
+            <span>Grounded</span>
+            <span>Policy</span>
+          </div>
+          {evalRows.slice(0, active === 0 ? 2 : shown).map(([name, ...r]) => (
+            <div key={name} className="grid grid-cols-[1fr_repeat(3,64px)] items-center border-b border-black/15 p-3 last:border-b-0">
+              <span className={`${mono} truncate`}>{name}</span>
+              {r.map((ok, i) => (
+                <span key={i} className={`${mono} w-fit px-2 py-1 ${ok ? "border border-black/30" : "bg-[#090909] text-[#f4d44d]"}`}>
+                  {ok ? "pass" : "fail"}
+                </span>
+              ))}
+            </div>
+          ))}
+          <p className="p-3 text-sm text-black/65">{active === 0 ? "Examples and expected outcomes that match the promise you ship." : "Open any failed cell for the evaluator's explanation and the linked trace."}</p>
+        </div>
+      ) : (
+        <div>
+          <div className="relative h-44 border-b border-l border-black/40">
+            {[82, 88, 91, 86, 78, 71, 69].map((v, i) => (
+              <div key={i} className={`absolute bottom-0 w-[9%] ${v < 80 ? "bg-[#090909]" : "bg-[#090909]/25"}`} style={{ left: `${4 + i * 13.5}%`, height: `${v * (clamp(p * 3 - 2 + 0.3 + i * 0.02) )}%` }} />
+            ))}
+            <div className="absolute inset-x-0 border-t-2 border-dashed border-black" style={{ bottom: "80%" }} />
+          </div>
+          <p className={`${mono} mt-3`}>Grounded score · threshold 80%</p>
+          <div className="mt-4 bg-[#090909] p-3 font-mono text-[11px] uppercase tracking-[0.1em] text-[#f4d44d]">Alert · average fell below 80% for 2 days</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------- Runtime control: a ceiling that observe mode only watches ---------- */
+
+const runCosts = [0.06, 0.11, 0.09, 0.31, 0.14, 0.07, 0.42, 0.1];
+
+export function ControlStage({ p, active }: StageProps) {
+  const ceiling = 0.25;
+  const enforce = active === 2;
+  return (
+    <div>
+      <Head left="policy · run ceiling $0.25" right={enforce ? "mode: enforce" : "mode: observe"} />
+      <div className="relative flex h-52 items-end gap-2 border-b border-black/40">
+        {runCosts.map((c, i) => {
+          const over = c > ceiling;
+          const shownCost = enforce && over ? ceiling : c;
+          const f = clamp(p * 2.4 - i * 0.1);
+          return (
+            <div key={i} className="flex flex-1 flex-col items-center justify-end">
+              <div className={`w-full transition-colors ${over ? (enforce ? "bg-[#f4d44d] outline outline-1 outline-black" : "bg-[#090909]") : "bg-[#090909]/25"}`} style={{ height: `${(shownCost / 0.45) * 200 * f}px` }} />
+            </div>
+          );
+        })}
+        <div className="absolute inset-x-0 border-t-2 border-dashed border-black" style={{ bottom: `${(ceiling / 0.45) * 200}px` }} />
+      </div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <div className="border border-black/30 p-3">
+          <p className={`${mono} text-black/50`}>{active === 0 ? "Baseline" : enforce ? "Blocked" : "Would have blocked"}</p>
+          <p className="mt-2 font-pixel text-4xl tracking-[-0.05em]">{active === 0 ? "$0.42 max" : "2 runs"}</p>
+        </div>
+        <div className="border border-black/30 p-3">
+          <p className={`${mono} text-black/50`}>Fallback chain</p>
+          <p className="mt-2 font-mono text-[11px] uppercase leading-5 tracking-[0.08em]">large model → fast model → stop</p>
+        </div>
+      </div>
+      <p className="mt-4 text-sm leading-6 text-black/65">{enforce ? "Enforcement is on. Runs that would cross the ceiling stop at it." : active === 1 ? "Observe mode changes nothing. It records what the policy would have done." : "Look at ordinary and worst-case runs before you pick a number."}</p>
+    </div>
+  );
+}
+
+/* ---------- Reports: a printable page that fills in ---------- */
+
+export function ReportStage({ p, active }: StageProps) {
+  const f = clamp(p * 1.6);
+  return (
+    <div>
+      <Head left="Project report · Oct 1 to Oct 14" right={active === 2 ? "print / save as PDF" : "operating record"} />
+      <div className="grid grid-cols-3 gap-3">
+        {[["Runs", Math.round(48200 * f).toLocaleString()], ["Spend", `$${Math.round(1840 * f).toLocaleString()}`], ["Failed", `${(2.1 * f).toFixed(1)}%`]].map(([k, v]) => (
+          <div key={k} className="border border-black/30 p-3">
+            <p className={`${mono} text-black/50`}>{k}</p>
+            <p className="mt-2 font-pixel text-3xl tracking-[-0.05em]">{v}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-5 space-y-3">
+        {[["Large model", 64], ["Fast model", 22], ["tool.search", 9], ["Other", 5]].map(([n, v], i) => (
+          <div key={n} className="grid grid-cols-[100px_1fr_36px] items-center gap-3">
+            <span className={`${mono} text-black/70`}>{n}</span>
+            <div className="h-4 bg-black/10">
+              <div className={`h-full origin-left ${i === 0 ? "bg-[#090909]" : "bg-[#090909]/35"}`} style={{ width: `${Number(v) * clamp(p * 2 - i * 0.12)}%` }} />
+            </div>
+            <span className={`${mono} text-right`}>{v}%</span>
+          </div>
+        ))}
+      </div>
+      <div className={`mt-5 border p-3 transition-colors ${active >= 1 ? "border-[#090909] bg-[#090909] text-[#eceae3]" : "border-black/30"}`}>
+        <p className={`${mono} ${active >= 1 ? "text-[#f4d44d]" : "text-black/50"}`}>Failure evidence</p>
+        <p className="mt-1 text-sm">run_c91d · empty search result at step 2 · release 2.14</p>
+      </div>
+    </div>
+  );
+}

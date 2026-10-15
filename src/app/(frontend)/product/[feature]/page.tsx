@@ -268,7 +268,7 @@ const productFeatures = {
 } as const satisfies Record<string, FeaturePage>;
 
 type Feature = keyof typeof productFeatures;
-const redesigned = ["trace-viewer", "cost-dashboard", "tool-calls", "llm-calls", "failures"];
+const redesigned = ["trace-viewer", "cost-dashboard", "tool-calls", "llm-calls", "failures", "evaluation-engine", "runtime-control", "reports"];
 const isNewProductPage = (s: string): s is ProductSlug => redesigned.includes(s);
 
 export function generateStaticParams() {

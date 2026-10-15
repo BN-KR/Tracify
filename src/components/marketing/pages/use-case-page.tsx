@@ -14,6 +14,7 @@ export type UseCaseData = {
 };
 
 type Cfg = {
+  lead: string;
   hero: string;
   band: string;
   eyebrow: string;
@@ -29,6 +30,7 @@ type Cfg = {
 
 const config: Record<string, Cfg> = {
   research: {
+    lead: "Research agents write fluent answers whether or not the evidence is there. Trace every search, source and claim so an unsupported statement is a flagged step, not a surprise.",
     hero: "/images/pages/research-hero.png",
     band: "/images/landing/uc-research.png",
     eyebrow: "Use case / Research agents",
@@ -53,6 +55,7 @@ const config: Record<string, Cfg> = {
     ],
   },
   support: {
+    lead: "A support agent gives one answer and hides a dozen decisions. See the account data it had, the policy it checked, the tool it was blocked from and why it escalated.",
     hero: "/images/pages/support-hero.png",
     band: "/images/landing/uc-support.png",
     eyebrow: "Use case / Support agents",
@@ -77,6 +80,7 @@ const config: Record<string, Cfg> = {
     ],
   },
   automation: {
+    lead: "Automations fail in the middle, retry, and sometimes do the same thing twice. Follow the whole chain, including retries, queues and fallbacks, to see what really ran.",
     hero: "/images/pages/automation-hero.png",
     band: "/images/landing/uc-automation.png",
     eyebrow: "Use case / Automation agents",
@@ -102,6 +106,7 @@ const config: Record<string, Cfg> = {
     ],
   },
   "tool-calling": {
+    lead: "Models pick tools, invent arguments and loop. Record every call with its payload, result and cost so a rejected schema or a runaway loop stands out immediately.",
     hero: "/images/pages/tool-loop-hero.png",
     band: "/images/landing/uc-tools.png",
     eyebrow: "Use case / Tool-calling agents",
@@ -146,7 +151,7 @@ export function UseCasePage({ slug, page }: { slug: string; page: UseCaseData })
   const steps = page.scene.map((t, i) => ({ title: t, body: c.steps[i] }));
   return (
     <>
-      <PageHero eyebrow={c.eyebrow} title={page.statement} lead={page.description} img={c.hero} facts={c.facts} primary={["Start tracing free", "/sign-up"]} secondary={["Read the docs", "/docs"]} />
+      <PageHero eyebrow={c.eyebrow} title={page.statement} lead={c.lead} img={c.hero} facts={c.facts} primary={["Start tracing free", "/sign-up"]} secondary={["Read the docs", "/docs"]} />
       <SignalTicker items={page.signals.map((s) => s.split(" — ")[0])} />
       <StickyStory kicker={c.kicker} heading={c.story} steps={steps} stage={(s) => <ChainStage {...s} rows={c.rows} title={page.title} flagTag={c.flagTag} meter={c.meter} />} />
       <CodeSection snippet={snippets[slug]} />

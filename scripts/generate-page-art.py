@@ -267,7 +267,71 @@ def tool_loop_hero():
     finish(c, "tool-loop-hero", 0.5, 1.2)
 
 
+# EVALUATION: a grid of test cases, a few failing, with a pass threshold
+def evaluation_hero():
+    w, h = 1400, 1000
+    c = Canvas(w, h)
+    cols, rows = 14, 9
+    for r in range(rows):
+        for k in range(cols):
+            x, y = 110 + k * 82, 150 + r * 86
+            fail = (r, k) in {(2, 3), (4, 9), (6, 5), (6, 6), (1, 11), (7, 2)}
+            layer = "accent" if fail else "base"
+            rect(c, x, y, x + 58, y + 58, 1.1, layer, fill=0.55 if fail else 0.1)
+            if not fail:
+                line(c, (x + 14, y + 30), (x + 25, y + 42), 1.2)
+                line(c, (x + 25, y + 42), (x + 45, y + 16), 1.2)
+            else:
+                line(c, (x + 16, y + 16), (x + 42, y + 42), 1.4, "accent")
+                line(c, (x + 42, y + 16), (x + 16, y + 42), 1.4, "accent")
+    line(c, (80, 835), (w - 60, 835), 0.9, "accent", n=2400)
+    finish(c, "evaluation-hero", 0.5, 1.2)
+
+
+# RUNTIME CONTROL: run costs climbing into a ceiling, one clamped
+def control_hero():
+    w, h = 1400, 1000
+    c = Canvas(w, h)
+    ceiling = 320
+    for i in range(22):
+        t = np.linspace(0, 1, 600)
+        x = 90 + t * (w - 200)
+        slope = RNG.uniform(380, 900)
+        y = 900 - slope * t ** 1.4 * (0.9 + 0.2 * RNG.random())
+        hot = i == 11
+        clamp = np.maximum(y, ceiling)
+        c.splat(x, clamp if not hot else np.maximum(y, ceiling + 6), 0.7 if not hot else 1.3, "accent" if hot else "base")
+        if hot:
+            over = y < ceiling
+            c.splat(x[over], y[over], 0.25, "accent")
+    for k in range(0, w - 160, 18):
+        line(c, (90 + k, ceiling), (100 + k, ceiling), 1.2, "accent")
+    for k in range(5):
+        rect(c, 900 + k * 70, 120 + k * 12, 950 + k * 70, 170 + k * 12, 0.9, "accent" if k == 2 else "base", fill=0.2)
+    finish(c, "control-hero", 0.5, 1.2)
+
+
+# REPORTS: a stack of printed pages with charts and rules
+def reports_hero():
+    w, h = 1400, 1000
+    c = Canvas(w, h)
+    for n in range(3):
+        ox, oy = 360 + n * 70, 90 + n * 50
+        hot = n == 2
+        rect(c, ox, oy, ox + 520, oy + 740, 1.2, "base", fill=0.06)
+        if not hot:
+            continue
+        for k in range(4):
+            bh = 60 + k * 45 + (k % 2) * 30
+            rect(c, ox + 50 + k * 90, oy + 330 - bh, ox + 110 + k * 90, oy + 330, 1.0, "accent" if k == 2 else "base", fill=0.5 if k == 2 else 0.15)
+        for k in range(9):
+            line(c, (ox + 50, oy + 400 + k * 30), (ox + 50 + RNG.uniform(240, 420), oy + 400 + k * 30), 0.7)
+        for k in range(3):
+            line(c, (ox + 50, oy + 60 + k * 26), (ox + 50 + 260 - k * 70, oy + 60 + k * 26), 1.2, "accent" if k == 0 else "base")
+    finish(c, "reports-hero")
+
+
 if __name__ == "__main__":
     os.makedirs(art.OUT, exist_ok=True)
-    for fn in (trace_hero, cost_hero, tools_hero, models_hero, failures_hero, research_hero, support_hero, automation_hero, tool_loop_hero):
+    for fn in (trace_hero, cost_hero, tools_hero, models_hero, failures_hero, research_hero, support_hero, automation_hero, tool_loop_hero, evaluation_hero, control_hero, reports_hero):
         fn()

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { Reveal } from "@/components/marketing/landing/reveal";
 
-export type Snippet = { title: string; lede: string; ts: string; py: string };
+export type Snippet = { title: string; lede: string; ts: string; py?: string };
 
 const imp = {
   ts: "npm install tracify-sdk",
@@ -14,7 +14,7 @@ const imp = {
 export function CodeSection({ snippet }: { snippet: Snippet }) {
   const [lang, setLang] = useState<"ts" | "py">("ts");
   const [copied, setCopied] = useState(false);
-  const code = snippet[lang];
+  const code = snippet[lang] ?? snippet.ts;
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(code);
@@ -37,7 +37,7 @@ export function CodeSection({ snippet }: { snippet: Snippet }) {
           <div className="bg-[#090909] text-[#eceae3]">
             <div className="flex items-center justify-between border-b border-white/15 px-4 py-3">
               <div className="flex gap-1" role="tablist" aria-label="Language">
-                {(["ts", "py"] as const).map((l) => (
+                {(snippet.py ? (["ts", "py"] as const) : (["ts"] as const)).map((l) => (
                   <button
                     key={l}
                     role="tab"
@@ -242,6 +242,36 @@ def charge_card(order):
 def run_order(order):
     charge_card(order)
     return fulfil(order)`,
+  },
+  "evaluation-engine": {
+    title: "Score a trace in one line.",
+    lede: "Attach a typed score or end-user feedback to any run. The same score shows up in suites, monitors and the review queue.",
+    ts: `import { TracifyClient } from "tracify-sdk";
+
+const client = new TracifyClient({ apiKey: process.env.TRACIFY_API_KEY, projectId: "your-project-id" });
+
+client.score(runId, "answer_quality", 0.92, { dataType: "numeric" });
+client.feedback(runId, true, { kind: "thumb", comment: "Helpful answer" });`,
+    py: `client = TracifyClient(project_id="your-project-id")
+
+client.score(run_id, "answer_quality", 0.92, data_type="numeric")
+client.feedback(run_id, True, kind="thumb", comment="Helpful answer")`,
+  },
+  "runtime-control": {
+    title: "Run the model call through a policy.",
+    lede: "orchestrate wraps a call with your fallback chain, retry policy and ceilings. Start in observe mode and switch to enforce when the numbers look right.",
+    ts: `const reply = await client.orchestrate({
+  model: "large-model",
+  input: question,
+  call: (model, signal) => callModel(model, question, { signal }),
+  policy: {
+    enforcementMode: "observe",
+    maxCostPerRun: 0.25,
+    fallbackChain: ["fast-model"],
+    retryPolicy: { maxAttempts: 2, backoffMs: 1000, backoffMultiplier: 2, retryableErrors: ["timeout", "rate_limit"] },
+    latencyBudgetMs: 8000,
+  },
+});`,
   },
   "tool-calling": {
     title: "See the arguments the model chose.",
