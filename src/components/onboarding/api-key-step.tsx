@@ -61,8 +61,8 @@ export function ApiKeyStep() {
   return (
     <div>
       <OnboardingHeader
-        title="Your API key."
-        description={`This key is shown once and belongs to Tracify ${region.shortName}. Copy it now and store it securely.`}
+        title="Your key to Tracify."
+        description={`This key is shown once and belongs to Tracify ${region.shortName}. Copy it now and keep it in your secrets manager, not in code.`}
       />
       {!initialized ? (
         <div className="border border-black/15 bg-[#f3f2ed] p-4 text-sm text-black/60">
