@@ -1,8 +1,9 @@
 import { CategoryPills } from "@/components/blog/category-pills";
 import { Pagination } from "@/components/blog/pagination";
 import { getReadingTime } from "@/components/blog/reading-time";
-import { FutureBand, FuturePage } from "@/components/marketing/future19-page";
-import { getCategoryOptions, getPostDate, getPublishedPosts } from "@/lib/markdoc-blog";
+import { Reveal } from "@/components/marketing/landing/reveal";
+import { PageHeader } from "@/components/marketing/page-header";
+import { getCategoryOptions, getPostDate, getPublishedPosts, type BlogPost } from "@/lib/markdoc-blog";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,6 +23,37 @@ function formatDate(date: string) {
   });
 }
 
+const positions = ["0% 0%", "100% 30%", "50% 100%", "20% 60%", "80% 90%", "60% 10%"];
+
+function Visual({ post, index, className }: { post: BlogPost; index: number; className: string }) {
+  return (
+    post.heroImage ? (
+      <div className={`relative overflow-hidden bg-[#090909] ${className}`}>
+        <Image
+          src={post.heroImage.card || post.heroImage.src}
+          alt={post.heroImage.alt || post.title}
+          fill
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          className="object-cover transition duration-700 group-hover:scale-[1.04]"
+        />
+      </div>
+    ) : (
+      <div className={`relative overflow-hidden bg-[#090909] ${className}`}>
+        <Image
+          src="/images/reading/blog.png"
+          alt=""
+          fill
+          unoptimized
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          className="scale-[1.6] object-cover opacity-90 transition duration-700 [image-rendering:pixelated] group-hover:scale-[1.75]"
+          style={{ objectPosition: positions[index % positions.length] }}
+        />
+        <span className="absolute bottom-4 left-4 bg-[#f4d44d] px-2 py-1 font-pixel text-2xl leading-none text-black">{String(index + 1).padStart(2, "0")}</span>
+      </div>
+    )
+  );
+}
+
 export default async function BlogPage({
   searchParams,
 }: {
@@ -35,98 +67,103 @@ export default async function BlogPage({
   ]);
   const allCategories = categoryOptions.map((option) => option.value);
 
+  const [lead, ...others] = posts;
+  const rest = others.slice(0, 6);
+  const archive = others.slice(6);
   return (
-    <FuturePage>
-      <header className="border-b border-black">
-        <div className="mx-auto max-w-[1240px] border-x border-black">
-          <div className="grid lg:grid-cols-[96px_1fr_260px]">
-            <div className="hidden border-r border-black bg-[#f4d44d] p-5 lg:flex lg:flex-col lg:justify-between">
-              <span className="font-mono text-[8px] uppercase tracking-[0.16em]">Field journal</span>
-              <span className="origin-bottom-left -rotate-90 whitespace-nowrap font-pixel text-5xl tracking-[-0.06em]">ISSUE 01</span>
-            </div>
-            <div className="flex flex-col justify-between gap-12 px-5 py-12 sm:px-8 md:px-10 md:py-16">
-              <div className="flex items-center justify-between border-b border-black pb-3 font-mono text-[8px] uppercase tracking-[0.14em]">
-                <span>Tracify editorial desk</span>
-                <span>{new Date().getFullYear()}</span>
-              </div>
-              <h1 className="max-w-3xl font-pixel text-[clamp(3rem,6vw,5.5rem)] leading-[0.88] tracking-[-0.055em]">Notes from inside the agent loop.</h1>
-              <p className="max-w-2xl border-l-8 border-[#f4d44d] pl-5 text-base leading-7 text-black/58">Engineering reports on traces, evaluations, production failures, and the human decisions around them.</p>
-            </div>
-            <aside className="grid border-t border-black lg:border-l lg:border-t-0">
-              <div className="flex items-center justify-center bg-black p-8 text-white">
-                <span className="font-pixel text-[9rem] leading-none tracking-[-0.1em] text-[#f4d44d]">{String(posts.length).padStart(2, "0")}</span>
-              </div>
-              <div className="flex items-end border-t border-black p-6">
-                <p className="font-mono text-[9px] uppercase leading-5 tracking-[0.13em] text-black/60">Published field notes<br />in the current view</p>
-              </div>
-            </aside>
-          </div>
-        </div>
-      </header>
+    <main className="min-h-screen bg-[#eceae3] text-black">
+      <PageHeader
+        eyebrow="The Tracify blog"
+        title="Notes from inside the agent loop."
+        lede="Engineering reports on traces, evaluations, production failures, and the human decisions around them."
+        image="/images/reading/blog.png"
+      >
+        <span className="border border-white/25 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/70">{posts.length} {posts.length === 1 ? "article" : "articles"}</span>
+        <Link href="/blog/rss.xml" className="border border-[#f4d44d] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#f4d44d] transition-colors hover:bg-[#f4d44d] hover:text-black">RSS feed</Link>
+      </PageHeader>
 
-      <FutureBand label="Filter the record">
-        <div className="border-x border-black px-5 py-5">
+      <div className="border-b border-black bg-[#eceae3]">
+        <div className="mx-auto max-w-[1240px] px-5 py-5 sm:px-8">
           {allCategories.length ? (
             <CategoryPills categories={allCategories} active={selectedCategories} />
           ) : (
-            <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/60">All field notes</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/60">All articles</p>
           )}
         </div>
-      </FutureBand>
+      </div>
 
-      <FutureBand label="Editorial signal board">
-        {!posts.length ? (
-          <div className="border-x border-black bg-[#f4d44d] p-10">
-            <p className="max-w-xl font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">The next field note is being prepared.</p>
+      <div className="mx-auto max-w-[1240px] px-5 py-12 sm:px-8 md:py-16">
+        {!lead ? (
+          <div className="bg-[#f4d44d] p-10">
+            <p className="max-w-xl font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">The next article is being written.</p>
           </div>
         ) : (
-          <div className="grid gap-px border-x border-black bg-black md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post, index) => {
-              const isLead = index === 0;
+          <>
+            <Reveal>
+              <Link href={`/blog/${lead.slug}`} className="group grid border border-black bg-[#090909] text-[#eceae3] lg:grid-cols-[1.25fr_1fr]">
+                <Visual post={lead} index={0} className="aspect-[16/10] lg:aspect-auto lg:min-h-[380px]" />
+                <div className="flex flex-col justify-between gap-10 p-6 md:p-10">
+                  <div>
+                    <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#f4d44d]">
+                      <span className="size-2 bg-[#f4d44d]" aria-hidden="true" />Latest
+                    </p>
+                    <h2 className="mt-5 text-balance font-pixel text-[clamp(2rem,4vw,3.4rem)] leading-[0.93] tracking-[-0.055em]">{lead.title}</h2>
+                    <p className="mt-5 line-clamp-4 text-base leading-7 text-white/65">{lead.excerpt}</p>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
+                    <span><time dateTime={getPostDate(lead)}>{formatDate(getPostDate(lead))}</time> · {getReadingTime(lead.plainText)} min read</span>
+                    <span className="bg-[#f4d44d] px-4 py-2 text-black transition-colors group-hover:bg-white">Read →</span>
+                  </div>
+                </div>
+              </Link>
+            </Reveal>
 
-              return (
-                <article key={post.id} className={`${isLead ? "lg:col-span-2" : ""} min-w-0 bg-[#eceae3]`}>
-                  <Link href={`/blog/${post.slug}`} className="group flex h-full flex-col">
-                    {post.heroImage ? (
-                      <div className={`relative overflow-hidden border-b border-black bg-black ${isLead ? "aspect-[16/7]" : "aspect-[16/10]"}`}>
-                        <Image
-                          src={post.heroImage.card || post.heroImage.src}
-                          alt={post.heroImage.alt || post.title}
-                          fill
-                          sizes={isLead ? "(min-width: 1024px) 66vw, (min-width: 768px) 100vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"}
-                          className="object-cover grayscale transition duration-500 group-hover:scale-[1.02] group-hover:grayscale-0"
-                        />
+            {rest.length ? (
+              <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {rest.map((post, i) => (
+                  <Reveal key={post.id} delay={(i % 3) * 0.06}>
+                    <Link href={`/blog/${post.slug}`} className="group flex h-full flex-col border border-black bg-[#eceae3] transition-colors hover:bg-[#fff4b5]">
+                      <Visual post={post} index={i + 1} className="aspect-[16/10] border-b border-black" />
+                      <div className="flex flex-1 flex-col p-5 md:p-6">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/60">
+                          <time dateTime={getPostDate(post)}>{formatDate(getPostDate(post))}</time> · {getReadingTime(post.plainText)} min
+                        </p>
+                        <h2 className="mt-4 line-clamp-3 text-balance font-pixel text-[1.7rem] leading-[0.96] tracking-[-0.05em]">{post.title}</h2>
+                        <p className="mt-3 line-clamp-3 text-sm leading-6 text-black/70">{post.excerpt}</p>
+                        <span className="mt-auto pt-6 font-mono text-[10px] uppercase tracking-[0.14em] underline-offset-4 group-hover:underline">Read article →</span>
                       </div>
-                    ) : (
-                      <div className={`${isLead ? "aspect-[16/7]" : "aspect-[16/10]"} flex items-end bg-black p-6 text-[#f4d44d]`}>
-                        <span className="font-pixel text-6xl leading-none">{String(index + 1).padStart(2, "0")}</span>
-                      </div>
-                    )}
+                    </Link>
+                  </Reveal>
+                ))}
+              </div>
+            ) : null}
 
-                    <div className={`flex flex-1 flex-col ${isLead ? "bg-[#f4d44d] p-6 md:p-8" : "p-6"}`}>
-                      <div className="flex items-center justify-between gap-4 font-mono text-[8px] uppercase tracking-[0.13em] text-black/60">
-                        <time dateTime={getPostDate(post)}>{formatDate(getPostDate(post))}</time>
-                        <span>{getReadingTime(post.plainText)} min</span>
-                      </div>
-                      <h2 className={`mt-5 line-clamp-3 font-pixel leading-[0.92] tracking-[-0.05em] ${isLead ? "max-w-3xl text-4xl md:text-5xl" : "text-3xl"}`}>
-                        {post.title}
-                      </h2>
-                      <p className="mt-4 line-clamp-3 text-sm leading-6 text-black/70">{post.excerpt}</p>
-                      <span className="mt-auto pt-6 font-mono text-[8px] uppercase tracking-[0.12em] group-hover:underline group-hover:underline-offset-4">Read field note ↗</span>
-                    </div>
-                  </Link>
-                </article>
-              );
-            })}
-          </div>
+            {archive.length ? (
+              <section className="mt-16" aria-labelledby="archive-heading">
+                <div className="flex items-end justify-between border-b-2 border-black pb-3">
+                  <h2 id="archive-heading" className="font-pixel text-[clamp(2rem,4vw,3rem)] leading-none tracking-[-0.055em]">Every article</h2>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/60">{archive.length} more</span>
+                </div>
+                <ul>
+                  {archive.map((post) => (
+                    <li key={post.id} className="border-b border-black/20">
+                      <Link href={`/blog/${post.slug}`} className="group grid gap-2 py-4 transition-colors hover:bg-[#f4d44d] sm:grid-cols-[130px_1fr_auto] sm:items-baseline sm:gap-6 sm:px-3">
+                        <time dateTime={getPostDate(post)} className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/60 group-hover:text-black">{formatDate(getPostDate(post))}</time>
+                        <span className="font-pixel text-xl leading-tight tracking-[-0.04em] md:text-2xl">{post.title}</span>
+                        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/60 group-hover:text-black">{getReadingTime(post.plainText)} min →</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            <div className="mt-10">
+              <Pagination hasOlder={false} hasNewer={false} categories={selectedCategories} />
+            </div>
+          </>
         )}
-
-        {posts.length ? (
-          <div className="border-x border-t border-black p-5">
-            <Pagination hasOlder={false} hasNewer={false} categories={selectedCategories} />
-          </div>
-        ) : null}
-      </FutureBand>
-    </FuturePage>
+      </div>
+    </main>
   );
 }

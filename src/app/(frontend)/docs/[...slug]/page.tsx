@@ -5,7 +5,7 @@ import { ArrowRight, ChevronLeft } from "lucide-react";
 import { DocsActions } from "@/components/docs/docs-actions";
 import { DocsSidebar } from "@/components/docs/docs-sidebar";
 import { MarkdocDoc } from "@/components/docs/markdoc-doc";
-import { FuturePage } from "@/components/marketing/future19-page";
+import Image from "next/image";
 import { getDoc, getDocs, getDocMarkdown } from "@/lib/markdoc-docs";
 
 export function generateStaticParams() {
@@ -29,36 +29,39 @@ export default async function DocsArticlePage({ params }: { params: Promise<{ sl
   const next = docs[index + 1];
 
   return (
-    <FuturePage>
-      <div className="min-h-screen bg-[#f3f2ed] text-black">
-        <div className="mx-auto grid max-w-[1440px] border-x border-b border-black lg:grid-cols-[250px_minmax(0,1fr)_200px]">
-          <DocsSidebar docs={navigationDocs} activeSlug={doc.slug} />
-          <main className="min-w-0 p-5 md:p-10 lg:p-14">
-            <Link href="/docs" className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[.13em] text-black/55 transition hover:text-black">
-              <ChevronLeft className="size-3" />All documentation
-            </Link>
-            <div className="mt-10 flex flex-col gap-6 border-b border-black pb-8 xl:flex-row xl:items-start xl:justify-between">
-              <div>
-                <p className="font-mono text-[9px] uppercase tracking-[.14em] text-black/55">{doc.section} / guide {String(doc.order).padStart(2, "0")}</p>
-                <h1 className="mt-6 max-w-3xl font-pixel text-[clamp(3.25rem,7vw,6.5rem)] leading-[.84] tracking-[-.07em]">{doc.title}</h1>
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-black/60">{doc.description}</p>
-              </div>
-              <div className="xl:hidden"><DocsActions markdown={markdown} installUrl="/docs/mcp-server" /></div>
-            </div>
-            <article className="docs-markdoc mt-10 max-w-3xl"><MarkdocDoc content={doc.content} /></article>
-            <div className="mt-16 grid max-w-3xl gap-px border-t border-black sm:grid-cols-2">{previous ? <Link href={`/docs/${previous.slug}`} className="flex items-center gap-3 border-b border-black py-6 transition-colors hover:bg-[#f4d44d]"><ChevronLeft className="size-5" /><span><span className="font-mono text-[9px] uppercase tracking-[.13em] text-black/55">Previous</span><span className="mt-2 block font-pixel text-2xl tracking-[-.05em]">{previous.title}</span></span></Link> : <span />}{next ? <Link href={`/docs/${next.slug}`} className="flex items-center justify-between border-b border-black py-6 text-right transition-colors hover:bg-[#f4d44d]"><span><span className="font-mono text-[9px] uppercase tracking-[.13em] text-black/55">Next</span><span className="mt-2 block font-pixel text-2xl tracking-[-.05em]">{next.title}</span></span><ArrowRight className="size-5" /></Link> : null}</div>
-          </main>
-          <aside className="hidden border-l border-black bg-[#eceae3] p-5 xl:block">
-            <div className="sticky top-6">
-              <p className="font-mono text-[9px] uppercase tracking-[.14em] text-black/55">Page actions</p>
-              <DocsActions markdown={markdown} installUrl="/docs/mcp-server" />
-              <p className="mt-12 font-mono text-[9px] uppercase tracking-[.14em] text-black/55">Agent access</p>
-              <p className="mt-3 text-sm leading-6 text-black/55">Install the read-only docs MCP server for full documentation retrieval.</p>
-              <Link href="/docs/mcp-server" className="mt-4 inline-flex font-mono text-[9px] uppercase tracking-[.12em] underline underline-offset-4">MCP setup →</Link>
-            </div>
-          </aside>
+    <div className="bg-[#eceae3] text-black">
+      <header className="relative isolate overflow-hidden bg-[#090909] text-[#eceae3]">
+        <Image src="/images/reading/docs.png" alt="" fill priority unoptimized sizes="100vw" className="-z-10 object-cover object-right opacity-40 [image-rendering:pixelated]" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#090909_35%,rgba(9,9,9,0.5)_100%)]" />
+        <div className="mx-auto max-w-[1440px] px-5 pb-10 pt-10 md:px-10 md:pb-14 md:pt-14">
+          <Link href="/docs" className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[.16em] text-[#f4d44d] transition-colors hover:text-white">
+            <ChevronLeft className="size-3" />All documentation
+          </Link>
+          <p className="mt-8 font-mono text-[10px] uppercase tracking-[.16em] text-white/55">{doc.section} / guide {String(doc.order).padStart(2, "0")}</p>
+          <h1 className="mt-4 max-w-4xl text-balance font-pixel text-[clamp(2.6rem,6vw,5.2rem)] leading-[.9] tracking-[-.06em]">{doc.title}</h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 md:text-lg">{doc.description}</p>
+          <div className="mt-6 text-white xl:hidden"><DocsActions markdown={markdown} installUrl="/docs/mcp-server" /></div>
         </div>
+      </header>
+      <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[250px_minmax(0,1fr)_220px]">
+        <DocsSidebar docs={navigationDocs} activeSlug={doc.slug} />
+        <main className="min-w-0 px-5 py-10 md:px-10 lg:px-14 lg:py-14">
+          <article className="docs-markdoc"><MarkdocDoc content={doc.content} /></article>
+          <div className="mt-16 grid max-w-3xl gap-4 sm:grid-cols-2">
+            {previous ? <Link href={`/docs/${previous.slug}`} className="group flex items-center gap-3 border border-black p-5 transition-colors hover:bg-[#f4d44d]"><ChevronLeft className="size-5 transition-transform group-hover:-translate-x-1" /><span><span className="font-mono text-[10px] uppercase tracking-[.14em] text-black/55">Previous</span><span className="mt-2 block font-pixel text-2xl tracking-[-.05em]">{previous.title}</span></span></Link> : <span />}
+            {next ? <Link href={`/docs/${next.slug}`} className="group flex items-center justify-between gap-3 border border-black bg-[#090909] p-5 text-right text-[#eceae3] transition-colors hover:bg-[#f4d44d] hover:text-black"><span><span className="font-mono text-[10px] uppercase tracking-[.14em] opacity-60">Next</span><span className="mt-2 block font-pixel text-2xl tracking-[-.05em]">{next.title}</span></span><ArrowRight className="size-5 transition-transform group-hover:translate-x-1" /></Link> : null}
+          </div>
+        </main>
+        <aside className="hidden border-l border-black/15 p-5 xl:block">
+          <div className="sticky top-24">
+            <p className="font-mono text-[10px] uppercase tracking-[.16em] text-black/55">Page actions</p>
+            <div className="mt-4"><DocsActions markdown={markdown} installUrl="/docs/mcp-server" /></div>
+            <p className="mt-12 font-mono text-[10px] uppercase tracking-[.16em] text-black/55">Agent access</p>
+            <p className="mt-3 text-sm leading-6 text-black/65">Install the read-only docs MCP server for full documentation retrieval.</p>
+            <Link href="/docs/mcp-server" className="mt-4 inline-flex font-mono text-[10px] uppercase tracking-[.14em] underline decoration-[#f4d44d] decoration-2 underline-offset-4 hover:bg-[#f4d44d]">MCP setup →</Link>
+          </div>
+        </aside>
       </div>
-    </FuturePage>
+    </div>
   );
 }

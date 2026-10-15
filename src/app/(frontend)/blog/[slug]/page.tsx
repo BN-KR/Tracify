@@ -134,42 +134,41 @@ export default async function BlogPostPage({
   const articleClassName = isMonitoringPost ? "blog-post--monitoring" : undefined;
 
   return (
-    <div className={`min-h-screen bg-[#eceae3] text-black ${isMonitoringPost ? "pt-[72px] md:pt-[76px]" : "pt-[54px]"}`}>
+    <div className="min-h-screen bg-[#eceae3] text-black">
       <ProgressBar />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(post)).replace(/</g, "\\u003c") }}
       />
-      <div className="mx-auto max-w-[1240px] border-x border-black">
-        <Link
-          href="/blog"
-          className="inline-block border-b border-r border-black bg-[#f4d44d] px-6 py-4 font-mono text-[9px] uppercase tracking-[0.13em] transition-colors hover:bg-black hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-black"
-        >
-          ← Back to blog
-        </Link>
-
-        <article className={articleClassName}>
-          <header className="border-b border-black px-6 py-10 md:px-10 md:py-12">
-            <div className="mb-4 flex items-center gap-3 font-mono text-[12px] text-black/55">
+      <article className={articleClassName}>
+        <header className="relative isolate overflow-hidden bg-[#090909] text-[#eceae3]">
+          <Image src="/images/reading/blog.png" alt="" fill priority unoptimized sizes="100vw" className="-z-10 object-cover object-right opacity-40 [image-rendering:pixelated]" />
+          <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#090909_30%,rgba(9,9,9,0.6)_70%,rgba(9,9,9,0.3)_100%)]" />
+          <div className="mx-auto max-w-[1240px] px-5 pb-12 pt-10 sm:px-8 md:pb-16 md:pt-14">
+            <Link href="/blog" className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#f4d44d] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f4d44d]">
+              ← All articles
+            </Link>
+            <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase tracking-[0.12em] text-white/60">
               <time dateTime={getPostDate(post)}>{formatDate(getPostDate(post))}</time>
-              <span>/</span>
+              <span aria-hidden="true">/</span>
               <span>{post.author}</span>
-              <span>/</span>
+              <span aria-hidden="true">/</span>
               <span>{getReadingTime(post.plainText)} min read</span>
             </div>
-
-            <h1 className="blog-post__title mt-6 max-w-4xl font-pixel text-5xl leading-[0.9] tracking-[-0.045em] md:text-7xl">{post.title}</h1>
-            <p className="mt-7 max-w-2xl text-base leading-7 text-black/58">{post.excerpt}</p>
+            <h1 className="blog-post__title mt-6 max-w-4xl text-balance font-pixel text-[clamp(2.6rem,6.5vw,5.8rem)] leading-[0.9] tracking-[-0.055em]">{post.title}</h1>
+            <p className="mt-7 max-w-2xl text-pretty text-base leading-7 text-white/70 md:text-lg md:leading-8">{post.excerpt}</p>
 
             {categories.length ? (
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-8 flex flex-wrap gap-2">
                 {categories.map((category) => (
-                  <span key={category} className="border border-black px-2 py-1 font-mono text-[8px] uppercase tracking-wider">{category}</span>
+                  <span key={category} className="border border-[#f4d44d] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[#f4d44d]">{category}</span>
                 ))}
               </div>
             ) : null}
-          </header>
+          </div>
+        </header>
 
+        <div className="mx-auto max-w-[1240px] border-x border-black">
           {heroUrl ? (
             <div className="relative min-h-[320px] overflow-hidden border-b border-black bg-black md:min-h-[520px]">
               <Image
@@ -205,8 +204,8 @@ export default async function BlogPostPage({
 
             {isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} currentSlug={post.slug} categories={post.categories} heading="Recommended posts" /> : null}
           </div>
-        </article>
-      </div>
+        </div>
+      </article>
     </div>
   );
 }

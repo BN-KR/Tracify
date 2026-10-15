@@ -4,11 +4,11 @@ import test from "node:test";
 
 const source = readFileSync("src/app/(frontend)/blog/page.tsx", "utf8");
 
-test("blog index uses a restrained responsive bento grid", () => {
+test("blog index uses a featured lead, a responsive grid and an archive list", () => {
   assert.match(source, /md:grid-cols-2/);
   assert.match(source, /lg:grid-cols-3/);
-  assert.match(source, /lg:col-span-2/);
-  assert.match(source, /aspect-\[16\/7\]/);
+  assert.match(source, /lg:grid-cols-\[1\.25fr_1fr\]/);
+  assert.match(source, /archive-heading/);
   assert.match(source, /aspect-\[16\/10\]/);
 });
 
