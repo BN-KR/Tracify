@@ -1,5 +1,8 @@
 # Project Memory
 
+## 2026-10-15 Search exclusions and comparisons — draft PR (branch `claude/search-exclusions-limits-csfvu6`)
+- Tracing search accepts `-env:dev` style exclusions (any facet; `-status:error` = healthy) and `latency|cost|tokens` with `>`, `>=`, `<`, `<=`, `=` (bounds inclusive; bare number = minimum; tokens take `k`/`m`). Exclusions travel as `not_<facet>` URL params and become `runId NOT IN (...)` in `traceListClauses`; `minTokens`/`maxTokens` are new HAVING filters. Max latency/cost already existed in the backend. Excluding a numeric field is rejected with a hint. Touches `tinybird.ts`/`trace-filters.ts` near the codex sort branch but in different hunks.
+
 ## 2026-10-14 Agent-scoped Flow map and finished latency — draft PR #150
 - Branch `codex/tracing-agent-map`, worktree `/home/orca/workspaces/Tracify-agent-map`, based on origin/main `209924a`. Draft PR: https://github.com/BN-KR/Tracify/pull/150. Verified runtime: `f3140cf`; EU preview https://tracify-cloud-eu-git-codex-tracing-agent-map-tracify-tech.vercel.app is Ready. Later verification notes do not change runtime code. Owner preview review before merge.
 - Map requires exactly one selected Trace name, in the UI and authenticated API. `src/lib/trace-flow.ts` shares canonical type/name aggregation, first-seen traversal, caller tool branches, counted return pairs, failure counts and arrow presentation with the detail Flow graph. Top-down ELK retains positions across updates. Node/arrow trace counts use distinct runs, including the union of return directions; filters resolve through the same Flow rules.
