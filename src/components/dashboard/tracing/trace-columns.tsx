@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { compactNumber, formatDuration, parseTime, relativeTime } from "./format";
 import { encodeValues } from "./facet-filter";
 
-import { COLUMN_DEFS, MAX_META_COLUMNS, GROUPS, metaColumn, isMetaColumn, metaKeysFor, type RowLike } from "@/lib/trace-columns";
+import { COLUMN_DEFS, MAX_META_COLUMNS, META_PREFIX, GROUPS, metaColumn, isMetaColumn, metaKeysFor, type RowLike } from "@/lib/trace-columns";
 export { COLUMN_DEFS, DEFAULT_COLUMNS, MAX_META_COLUMNS, columnLabel, extraIdsFor, isKnownColumn, metaKeysFor, orderColumns } from "@/lib/trace-columns";
 export type { TraceRowExtras } from "@/lib/trace-columns";
 
