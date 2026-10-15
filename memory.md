@@ -2141,3 +2141,9 @@
 - In-app create actions in `captured-workspace.tsx` now push `?view=create` directly, so normal clicks never hit a redirect.
 - Verified: build with placeholder Convex env, 307s for document and `RSC: 1` requests with query passthrough. Authenticated browser check still owed on a Vercel preview.
 - Pre-existing, unrelated: `src/lib/stripe.ts` pins `2026-08-26.dahlia`, which the locked `stripe@22.4.0` types reject, so `tsc`/`next build` fail on main with the committed lockfile.
+
+## 2026-10-15 — Project refresh stability, draft PR #162
+- `codex/project-loading-refresh`, `Tracify-loading`. Keep only a previously authorized same-project/same-viewer subtree during token/query refresh; clear on denial, errors, logout or identity/project changes. Initial JWT subject is a UI scope key, never an authorization grant. APIs/Convex retain their access checks.
+- Fourteen gate/auth tests pass, plus focused ESLint, full tsc and EU build. Ready preview https://tracify-cloud-eu-git-codex-project-loading-refresh-tracify-tech.vercel.app passed click 26/26, features 47/47 and live 7/7 (known Better Auth identify CORS only).
+- `scripts/project-refresh-regression.mjs`: 12 immediate menu/input retention checks across reloads, exactly one initial list request each; phone overflow check passes. Desktop/phone screenshots inspected under `/root/tracify-tools/shots-loading-refresh/`.
+- Included newly merged #165 search behavior in the base; its own code is not part of this auth PR's diff. Owner reviews/merges with a merge commit. Sessions page files untouched.
