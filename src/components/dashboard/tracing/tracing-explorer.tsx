@@ -1,4 +1,6 @@
 "use client";
+import { SavedViews } from "./saved-views";
+import { columnsFromUrl } from "@/lib/saved-view-state";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { stepLabel } from "./agent-map";
@@ -31,13 +33,13 @@ const COLUMN_STORAGE = "tracify.tracing.columns";
 const LIVE_STORAGE = "tracify.tracing.live";
 const ERRORS_STORAGE = "tracify.tracing.errorGroups";
 /** URL keys that change the view, not the data, so they are not sent to the API. */
-const VIEW_KEYS = ["range", "from", "to", "trace", "mode", "view"];
+const VIEW_KEYS = ["range", "from", "to", "trace", "mode", "view", "columns", "savedView"];
 const EDGE_SEPARATOR = "\u2192";
 
 function currentUrlQuery(): TraceQuery {
   if (typeof window === "undefined") return {};
   const query: TraceQuery = {};
-  for (const [key, value] of new URLSearchParams(window.location.search)) if (value) query[key] = value.slice(0, 200);
+  for (const [key, value] of new URLSearchParams(window.location.search)) if (value) query[key] = value.slice(0, key === "columns" ? 4096 : 200);
   return query;
 }
 
@@ -75,7 +77,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
   // Column choice lives in this browser's storage, which only exists after hydration.
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setColumns(readColumns()); }, []);
+  useEffect(() => { setColumns(columnsFromUrl(currentUrlQuery().columns) ?? readColumns()); }, []);
   // Phones start with the filter sidebar collapsed so the traces are visible first.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (window.matchMedia("(max-width: 767px)").matches) setFiltersOpen(false); }, []);
@@ -247,8 +249,11 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   function toggleColumn(id: string) {
     const next = columns.includes(id) ? columns.filter((column) => column !== id) : orderColumns([...columns, id]);
     setColumns(next);
+    update({ columns: JSON.stringify(next) }, false);
     try { window.localStorage.setItem(COLUMN_STORAGE, JSON.stringify(next)); } catch {}
   }
+
+  const applyView = useCallback((next: TraceQuery, chosen: string[]) => { setQuery(next); setColumns(chosen.length ? chosen : DEFAULT_COLUMNS); setSearchDraft(next.q ?? ""); try { localStorage.setItem(COLUMN_STORAGE, JSON.stringify(chosen)); } catch {} }, []);
 
   /** Enter in the search box: `field:value` tokens become filters, the remaining words are the text search. */
   function submitSearch(text: string) {
@@ -375,6 +380,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             {/* The right-hand controls belong to the list. In Chart they stay in place, hidden and unfocusable, so the row does not reflow. */}
             <div className={chartMode ? "invisible contents" : "contents"}>
             <button type="button" onClick={exportCsv} disabled={!rows.length || loading} className="ml-auto h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
+            <SavedViews projectId={projectId} target="traces" query={query} columns={columns} onApply={applyView} />
             <ColumnsMenu projectId={projectId} rangeParams={rangeParams} columns={columns} onToggle={toggleColumn}
               onReset={() => { setColumns(DEFAULT_COLUMNS); try { window.localStorage.removeItem(COLUMN_STORAGE); } catch {} }} />
             </div>

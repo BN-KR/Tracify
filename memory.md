@@ -2139,3 +2139,12 @@
 - In-app create actions in `captured-workspace.tsx` now push `?view=create` directly, so normal clicks never hit a redirect.
 - Verified: build with placeholder Convex env, 307s for document and `RSC: 1` requests with query passthrough. Authenticated browser check still owed on a Vercel preview.
 - Pre-existing, unrelated: `src/lib/stripe.ts` pins `2026-08-26.dahlia`, which the locked `stripe@22.4.0` types reject, so `tsc`/`next build` fail on main with the committed lockfile.
+
+## 2026-10-15 — Saved views implementation (draft, live backend verification pending)
+- Worktree `Tracify-views`, branch `codex/tracing-saved-views`, based on steps PR #166. Project-scoped Convex savedViews table, owner-only mutations, private/team visibility, shared links with membership checks; bounded indexed reads and server-normalized snapshots.
+- Traces and Steps have a Saved views menu; trace columns are URL-backed. Relative/fixed ranges, filters, sort and grouped mode are restored once. No production backend deployment performed: server has no Convex deployment credentials, and repo rules require merged code before production deployment. Owner was asked for an isolated preview backend; this remains the live-verification dependency.
+- Local Convex tests cover private/team access, owner-only update/delete, anonymous/foreign-project denial, rename and time-range persistence. The generated API declaration includes the new module; CLI codegen could not authenticate, so regenerate it with an authorized isolated deployment before release.
+
+- Follow-up: an anonymous local Convex backend successfully compiled and deployed the complete app at 00:34 UTC; CLI-generated API bindings are now regenerated. This gives actual schema/function deployment proof without touching production. Six Convex/state tests pass. An authenticated hosted preview still requires the owner’s isolated deployment.
+
+- Deployed local backend smoke passed actual create/read/private-ID/team-sharing/outsider-denial/owner-only-update/delete/rename/fixed-date/deletion persistence. Temporary local seed function removed. No hosted production data/schema changed.

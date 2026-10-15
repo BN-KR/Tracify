@@ -10,7 +10,7 @@ export default async function TracingPage({
   const { projectId } = await params;
   const raw = await searchParams;
   const initialQuery = Object.fromEntries(
-    Object.entries(raw).flatMap(([key, value]) => (typeof value === "string" && value ? [[key, value.slice(0, 200)]] : [])),
+    Object.entries(raw).flatMap(([key, value]) => (typeof value === "string" && value ? [[key, value.slice(0, key === "columns" ? 4096 : 200)]] : [])),
   );
   return <TracingExplorer projectId={projectId} initialQuery={initialQuery} />;
 }

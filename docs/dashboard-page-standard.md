@@ -201,3 +201,18 @@ Attach this evidence to the PR before asking for owner approval:
    - any counts the page shows for groups or map elements equal the filtered list totals;
    - screenshots at desktop (1440×900) and phone (390×844) widths, with no horizontal overflow.
 3. The owner has looked at the preview and approved it. Visual changes never merge without that.
+
+## Saved views
+
+Saved views are project-scoped records with a name, filters, sort, relative or fixed time range, and
+selected trace columns. Private views are visible only to their owner; explicitly shared views are
+readable by project members. Only the owner can edit or delete either kind. Enforce membership and
+visibility in every Convex operation, including direct shared links; a view ID never grants access.
+
+The Saved views menu supports saving a new view, updating/renaming the current view, sharing,
+copying a team link, and deleting. Changes to filters or columns show “Modified” without overwriting
+the saved record. Reopening restores the snapshot once. Relative ranges are resolved at reopen;
+fixed dates remain fixed. Do not save transient panel selection, pagination, or live refresh timestamps.
+Column choice travels in the URL so shared views and reloads reproduce it. Backend failures stay
+inside the menu and keep the analytics usable. No new backend function is required for ordinary
+Tracing/Steps loads until a view is requested.
