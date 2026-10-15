@@ -82,3 +82,19 @@ export function ClosingBand({
     </section>
   );
 }
+
+/** Row of hard facts directly under a page header, in the landing page's mono style. */
+export function StatStrip({ stats }: { stats: readonly (readonly [string, string])[] }) {
+  return (
+    <section aria-label="At a glance" className="border-y border-white/15 bg-[#090909] text-[#eceae3]">
+      <dl className="mx-auto grid max-w-[1320px] grid-cols-2 md:grid-cols-4">
+        {stats.map(([value, label], i) => (
+          <Reveal key={label} delay={i * 0.06} className="border-white/15 px-5 py-7 md:border-l md:first:border-l-0 md:px-8">
+            <dd className="font-pixel text-4xl leading-none tracking-[-0.06em] text-[#f4d44d] md:text-5xl">{value}</dd>
+            <dt className="mt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">{label}</dt>
+          </Reveal>
+        ))}
+      </dl>
+    </section>
+  );
+}

@@ -3,7 +3,7 @@ import { Activity, BellRing, DatabaseZap, RadioTower } from "lucide-react";
 import { RegionalStatusBoard } from "@/components/status/regional-status-board";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
-import { ClosingBand, CreamBand, Eyebrow, HeaderAction, SectionTitle } from "@/components/marketing/company/blocks";
+import { ClosingBand, CreamBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 
 export const metadata: Metadata = { title: "Status", description: "Current operational status for Tracify services.", alternates: { canonical: "/status" } };
 
@@ -32,6 +32,7 @@ export default function StatusPage() {
         <HeaderAction href="mailto:hello@tracify.tech?subject=Service%20incident">Report an incident</HeaderAction>
         <HeaderAction href="/security" kind="secondary">How we handle incidents</HeaderAction>
       </PageHeader>
+      <StatStrip stats={[["2","Surfaces probed live"],["EU","Region online"],["Manual","Review until monitors land"],["Human","Reply to every report"]]} />
 
       <RegionalStatusBoard />
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/marketing/page-header";
-import { ClosingBand, HeaderAction } from "@/components/marketing/company/blocks";
+import { ClosingBand, HeaderAction , StatStrip } from "@/components/marketing/company/blocks";
 import { GlossaryExplorer } from "@/components/marketing/company/glossary-explorer";
 
 type Term = {
@@ -123,6 +123,7 @@ export default function GlossaryPage() {
         <HeaderAction href="/demo">See the terms as live traces</HeaderAction>
         <HeaderAction href="/docs" kind="secondary">Read the docs</HeaderAction>
       </PageHeader>
+      <StatStrip stats={[[String(terms.length),"Terms defined"],["Quotable","One-paragraph answers"],["Linked","Related terms one click away"],["Free","No signup to read"]]} />
 
       <section className="bg-[#eceae3] px-5 pb-24 text-black md:px-10">
         <div className="mx-auto max-w-[1320px]"><GlossaryExplorer terms={terms} /></div>

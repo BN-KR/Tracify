@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
-import { ClosingBand, DarkBand, Eyebrow, HeaderAction, SectionTitle } from "@/components/marketing/company/blocks";
+import { ClosingBand, DarkBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 
 export const metadata = { title: "Changelog", description: "Product updates and release notes from the Tracify team.", alternates: { canonical: "/changelog" } };
 
@@ -36,6 +36,7 @@ export default function ChangelogPage() {
         <HeaderAction href="/roadmap">See what is next</HeaderAction>
         <HeaderAction href="/docs" kind="secondary">Read the docs</HeaderAction>
       </PageHeader>
+      <StatStrip stats={[[String(releases.length),"Entries in the log"],[latest?.code ?? "-","Latest release"],["Open","Every note, no filler"],["Plain","No inflated patch notes"]]} />
 
       <DarkBand>
         <Eyebrow>Release index</Eyebrow>

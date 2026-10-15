@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
-import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle } from "@/components/marketing/company/blocks";
+import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 import { ControlExplorer } from "@/components/marketing/company/control-explorer";
 
 export const metadata: Metadata = { title: "Security", description: "Learn how Tracify protects AI agent telemetry with encryption, project isolation, access controls, and incident response practices.", alternates: { canonical: "/security" } };
@@ -36,6 +36,7 @@ export default function SecurityPage() {
         <HeaderAction href="mailto:security@tracify.tech?subject=Tracify%20Security%20inquiry">Email security</HeaderAction>
         <HeaderAction href="/status" kind="secondary">See live status</HeaderAction>
       </PageHeader>
+      <StatStrip stats={[["TLS 1.3","In transit"],["AES-256","At rest"],["72 h","Breach notice"],["Ireland","EU region storage"]]} />
 
       <DarkBand>
         <Eyebrow>Control families / {controls.length}</Eyebrow>

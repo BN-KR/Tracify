@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
-import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle } from "@/components/marketing/company/blocks";
+import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 import { IntegrationGrid, type Integration } from "@/components/marketing/company/integration-grid";
 
 export const metadata: Metadata = {
@@ -47,6 +47,7 @@ export default function IntegrationsPage() {
         <HeaderAction href="/docs/api">Open the ingest reference</HeaderAction>
         <HeaderAction href="/docs" kind="secondary">Read the docs</HeaderAction>
       </PageHeader>
+      <StatStrip stats={[[String(integrations.length),"Adapters"],["OTLP","HTTP JSON ingest"],["2","SDKs: TypeScript, Python"],["~10","Lines to wrap an agent"]]} />
 
       <DarkBand>
         <Eyebrow>Adapters</Eyebrow>

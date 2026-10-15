@@ -3,7 +3,7 @@ import { ArrowUpRight, Mail, MessagesSquare, ShieldCheck } from "lucide-react";
 import { LeadForm } from "@/components/marketing/lead-form";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
-import { ClosingBand, CreamBand, DarkBand, Eyebrow, HeaderAction, SectionTitle } from "@/components/marketing/company/blocks";
+import { ClosingBand, CreamBand, DarkBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 import { CopyButton } from "@/components/marketing/company/copy-button";
 
 export const metadata: Metadata = {
@@ -72,6 +72,7 @@ export default function ContactPage() {
         <HeaderAction href={fitCallHref}>Book a fit call</HeaderAction>
         <HeaderAction href="/demo" kind="secondary">Inspect the demo first</HeaderAction>
       </PageHeader>
+      <StatStrip stats={[["20 min","Free fit call"],["1","Real failure, qualified"],["5 days","To one decision"],["Email","Subject pre-filled"]]} />
 
       <DarkBand>
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">

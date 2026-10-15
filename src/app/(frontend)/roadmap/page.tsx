@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/marketing/page-header";
-import { ClosingBand, DarkBand, Eyebrow, HeaderAction, SectionTitle } from "@/components/marketing/company/blocks";
+import { ClosingBand, DarkBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 import { RoadmapTrack } from "@/components/marketing/company/roadmap-track";
 
 export const metadata: Metadata = { title: "Roadmap", description: "A transparent view of Tracify product delivery.", alternates: { canonical: "/roadmap" } };
@@ -24,6 +24,7 @@ export default function RoadmapPage() {
         <HeaderAction href="/changelog">See what shipped</HeaderAction>
         <HeaderAction href="/contact" kind="secondary">Tell us what you need</HeaderAction>
       </PageHeader>
+      <StatStrip stats={[[String(sections[0].items.length),"Shipped capabilities"],[String(sections[1].items.length),"In progress"],[String(sections[2].items.length),"Planned"],[String(sections[3].items.length),"Enterprise phase"]]} />
 
       <DarkBand>
         <Eyebrow>Four stages</Eyebrow>
