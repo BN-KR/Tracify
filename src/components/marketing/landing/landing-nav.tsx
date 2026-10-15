@@ -208,7 +208,7 @@ export function LandingNav({ solidAlways = false }: { solidAlways?: boolean }) {
             aria-modal="true"
             aria-label="Menu"
           >
-            <Image src="/images/landing/nav-tunnel.png" alt="" fill unoptimized sizes="100vw" className={`object-cover opacity-50 ${art}`} />
+            <Image src="/images/landing/nav-tunnel.png" alt="" fill unoptimized sizes="100vw" className={`object-cover opacity-30 ${art}`} />
             <div className="relative flex min-h-full flex-col px-5 pb-10">
               <div className="flex h-[64px] items-center justify-between">
                 <Logo />

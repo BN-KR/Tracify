@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 export function ReadPlayhead({ sections }: { sections: readonly { id: string; title: string }[] }) {
   const [progress, setProgress] = useState(0);
   const [bounds, setBounds] = useState<number[]>([]);
+  const [navHidden, setNavHidden] = useState(false);
 
   useEffect(() => {
     const measure = () => {
@@ -19,7 +20,11 @@ export function ReadPlayhead({ sections }: { sections: readonly { id: string; ti
         return el ? Math.max(0, Math.min(1, (el.getBoundingClientRect().top + window.scrollY - 120) / total)) : 0;
       }));
     };
+    let lastY = window.scrollY;
     const onScroll = () => {
+      const y = window.scrollY;
+      setNavHidden(y > 400 && y > lastY);
+      lastY = y;
       const total = document.documentElement.scrollHeight - window.innerHeight;
       if (total > 0) setProgress(Math.min(1, window.scrollY / total));
     };
@@ -36,7 +41,7 @@ export function ReadPlayhead({ sections }: { sections: readonly { id: string; ti
 
   const pct = Math.round(progress * 100);
   return (
-    <div className="fixed inset-x-0 top-16 z-40 border-b border-white/10 bg-[#090909]/95 backdrop-blur-sm" role="navigation" aria-label="Reading progress">
+    <div className={`fixed inset-x-0 z-40 border-b border-white/10 bg-[#090909]/95 backdrop-blur-sm transition-[top] duration-300 ${navHidden ? "top-0" : "top-16"}`} role="navigation" aria-label="Reading progress">
       <div className="relative mx-auto flex h-7 max-w-[1440px] items-center gap-3 px-5 md:px-8">
         <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-[#f4d44d]">{String(pct).padStart(2, "0")}%</span>
         <div className="relative h-2 flex-1 bg-white/10">

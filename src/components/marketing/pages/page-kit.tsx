@@ -350,7 +350,7 @@ export function Faq({ items }: { items: readonly { q: string; a: string }[] }) {
 export function EndCta({ heading, links }: { heading: string; links: readonly (readonly [string, string])[] }) {
   return (
     <section className="relative isolate overflow-hidden bg-[#090909] px-5 py-24 text-[#eceae3] md:px-8 md:py-36">
-      <Image src="/images/landing/footer-ridges.png" alt="" fill unoptimized sizes="100vw" className="-z-10 object-cover object-bottom opacity-40 [image-rendering:pixelated]" />
+      <Image src="/images/landing/nav-tunnel.png" alt="" fill unoptimized sizes="100vw" className="-z-10 object-cover object-center opacity-40 [image-rendering:pixelated]" />
       <div className="mx-auto max-w-[1440px]">
         <Reveal>
           <p className="max-w-5xl font-pixel text-[clamp(3rem,8vw,7.4rem)] leading-[0.84] tracking-[-0.07em]">{heading}</p>
