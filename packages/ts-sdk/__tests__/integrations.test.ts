@@ -47,6 +47,7 @@ const eventStream = (events: any[], anthropic = false) =>
       .join("") + (anthropic ? "" : "data: [DONE]\n\n"),
     { headers: { "content-type": "text/event-stream" } },
   );
+describe("standalone span integration",()=>{it("keeps provider calls in their manually opened root",async()=>{const ai=wrapOpenAI(new OpenAI({apiKey:"fake",fetch:async()=>json(completion)}),{client:telemetry});await span("manual",()=>ai.chat.completions.create({model:"test-model",messages:[]}),{root:true,client:telemetry});expect(records).toHaveLength(2);expect(records[0].runId).toBe(records[1].runId);expect(records[0].parentSpanId).toBe(records[1].spanId);expect(records[0].runId).not.toBe("unknown");});});
 describe("official SDK provider wrappers", () => {
   it("preserves OpenAI response helpers and records measured usage once", async () => {
     const original = new OpenAI({

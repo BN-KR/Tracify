@@ -444,7 +444,8 @@ function defaultClient() {
 async function span(name, fn, options = {}) {
     const step = new Step(name, options.type ?? 'span', options.input, options.metadata);
     const parent = stepContext.getStore();
-    const runId = options.runId || parent?.runId || currentRunId();
+    const inheritedRun = options.runId || parent?.runId || currentRunId();
+    const runId = inheritedRun === "unknown" ? createId() : inheritedRun;
     const started = Date.now();
     const finish = (error) => {
         const failed = error !== undefined;

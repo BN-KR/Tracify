@@ -560,7 +560,8 @@ function defaultClient() {
 export async function span<T>(name: string, fn: (step: Step) => T | Promise<T>, options: StepOptions = {}): Promise<T> {
   const step = new Step(name, options.type ?? 'span', options.input, options.metadata);
   const parent = stepContext.getStore();
-  const runId = options.runId || parent?.runId || currentRunId();
+  const inheritedRun = options.runId || parent?.runId || currentRunId();
+  const runId = inheritedRun === "unknown" ? createId() : inheritedRun;
   const started = Date.now();
   const finish = (error?: unknown) => {
     const failed = error !== undefined;
