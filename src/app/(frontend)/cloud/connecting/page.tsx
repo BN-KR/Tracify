@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { LoaderCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { TRACIFY_REGIONS, parseTracifyRegion } from "@/lib/regions";
 
@@ -18,5 +17,5 @@ export default function CloudConnectingPage() {
     return () => window.clearTimeout(timer);
   }, [intent, next, regionId]);
 
-  return <main className="flex min-h-screen items-center justify-center bg-[#101010] p-6 text-white"><div role="status" aria-live="polite" className="max-w-lg text-center"><LoaderCircle className="mx-auto size-8 animate-spin text-[#f4d44d]" /><p className="mt-5 font-pixel text-4xl tracking-[-0.05em]">Connecting to {region.name} cloud…</p><p className="mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-white/50">Preparing your regional handoff</p></div></main>;
+  return <main className="flex min-h-screen items-center justify-center bg-[#090909] p-6 text-[#eceae3]"><div role="status" aria-live="polite" className="max-w-lg text-center"><div className="mx-auto flex w-24 flex-col items-end gap-1.5" aria-hidden="true">{[100, 68, 36].map((w, i) => <span key={w} className="h-3 animate-pulse bg-[#f4d44d]" style={{ width: `${w}%`, animationDelay: `${i * 0.18}s` }} />)}</div><p className="mt-8 font-pixel text-5xl tracking-[-0.05em]">Connecting to {region.name} cloud…</p><p className="mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-white/50">Preparing your regional handoff</p></div></main>;
 }

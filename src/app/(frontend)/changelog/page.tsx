@@ -1,10 +1,93 @@
-import { CalendarClock, GitCommitHorizontal } from "lucide-react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { PageHeader } from "@/components/marketing/page-header";
+import { Reveal } from "@/components/marketing/landing/reveal";
+import { ClosingBand, DarkBand, Eyebrow, HeaderAction, SectionTitle } from "@/components/marketing/company/blocks";
 
 export const metadata = { title: "Changelog", description: "Product updates and release notes from the Tracify team.", alternates: { canonical: "/changelog" } };
 
 const releaseSource = readFileSync(resolve(process.cwd(), "docs/releases.md"), "utf8");
-const changes = [...releaseSource.matchAll(/^## \[(.+?)\](?: — (\d{4}-\d{2}-\d{2}))?\n([\s\S]*?)(?=^## |$)/gm)].map((match) => ({ code: match[1], date: match[2] ?? "Unreleased", title: match[1] === "Unreleased" ? "Next release" : `Release ${match[1]}`, kind: match[1] === "Unreleased" ? "Planned" : "Product", items: [...match[3].matchAll(/^- (.+)$/gm)].map((item) => item[1]) }));
 
-export default function ChangelogPage(){return <main className="min-h-screen bg-[#eceae3] pt-[54px] text-black"><header className="border-b border-black bg-black text-white"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[1fr_380px]"><div className="p-6 sm:p-8 md:p-10 md:py-16 lg:border-r lg:border-white/20"><div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.15em] text-white/45"><GitCommitHorizontal className="size-4"/>Release record</div><h1 className="mt-10 max-w-5xl font-pixel text-[clamp(3.5rem,8vw,8rem)] leading-[0.8] tracking-[-0.08em]">What changed, and when.</h1><p className="mt-8 max-w-xl text-base leading-7 text-white/58">A chronological product record without inflated patch notes.</p></div><aside className="flex flex-col justify-between border-t border-white/20 bg-[#f4d44d] p-6 text-black lg:border-t-0 lg:p-8"><div className="flex justify-between font-mono text-[9px] uppercase tracking-[0.14em]"><span>Latest registered</span><span>{changes[0].date}</span></div><div className="my-16"><CalendarClock className="size-10" strokeWidth={1.2}/><strong className="mt-6 block font-pixel text-8xl tracking-[-0.08em]">{changes[0].code}</strong></div><p className="border-t border-black pt-4 font-mono text-[9px] uppercase tracking-[0.12em]">{changes[0].kind} release</p></aside></div></header><section className="border-b border-black"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[280px_1fr]"><aside className="border-black bg-[#d9d5ca] p-6 lg:border-r lg:p-8"><div className="sticky top-[86px]"><p className="font-mono text-[9px] uppercase tracking-[0.15em]">Release index</p><ol className="mt-8 divide-y divide-black border-y border-black">{changes.map(change=><li key={change.code}><a href={`#release-${change.code}`} className="flex min-h-16 items-center justify-between font-mono text-[9px] uppercase tracking-[0.12em]"><span>{change.code}</span><span>{change.date}</span></a></li>)}</ol></div></aside><div>{changes.map((change,index)=><article id={`release-${change.code}`} key={change.code} className="scroll-mt-20 border-b border-black last:border-b-0"><div className="grid lg:grid-cols-[190px_1fr]"><div className={`flex min-h-40 flex-col justify-between border-black p-6 lg:border-r ${index===0?"bg-[#f4d44d]":"bg-white/30"}`}><span className="font-mono text-[9px] uppercase tracking-[0.13em]">{change.kind}</span><strong className="font-pixel text-6xl tracking-[-0.07em]">{change.code}</strong><time className="font-mono text-[8px] uppercase tracking-[0.12em]">{change.date}</time></div><div className="p-6 md:p-9"><h2 className="font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">{change.title}</h2><ol className="mt-9 divide-y divide-black/20 border-y border-black/20">{change.items.map((item,itemIndex)=><li key={item} className="grid min-h-16 grid-cols-[46px_1fr] items-center text-sm leading-6"><span className="font-mono text-[8px] text-black/35">0{itemIndex+1}</span>{item}</li>)}</ol></div></div></article>)}</div></div></section></main>}
+const releases = [...releaseSource.matchAll(/^## \[(.+?)\](?: — (\d{4}-\d{2}-\d{2}))?\n([\s\S]*?)(?=^## |(?![\s\S]))/gm)].map((match) => {
+  const groups = [...match[3].matchAll(/^### (.+)\n([\s\S]*?)(?=^### |(?![\s\S]))/gm)]
+    .map((g) => ({
+      name: g[1],
+      items: [...g[2].matchAll(/^- (.+)$/gm)].map((i) => i[1]).filter((text) => !/^none\.?$/i.test(text.trim())),
+    }))
+    .filter((g) => g.items.length > 0);
+  return { code: match[1], date: match[2] ?? "Unreleased", groups };
+});
+
+function formatDate(date: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
+}
+
+export default function ChangelogPage() {
+  const latest = releases.find((r) => r.code !== "Unreleased") ?? releases[0];
+  return (
+    <div className="overflow-x-clip bg-[#090909]">
+      <PageHeader
+        eyebrow={`Release record / latest ${latest?.code ?? ""}`}
+        title="What changed, and when."
+        lede="A chronological product record, taken straight from the release log. No inflated patch notes."
+        image="/images/company/changelog-strata.png"
+      >
+        <HeaderAction href="/roadmap">See what is next</HeaderAction>
+        <HeaderAction href="/docs" kind="secondary">Read the docs</HeaderAction>
+      </PageHeader>
+
+      <DarkBand>
+        <Eyebrow>Release index</Eyebrow>
+        <SectionTitle>Every release, newest first.</SectionTitle>
+        <nav aria-label="Releases" className="mt-8 flex flex-wrap gap-2">
+          {releases.map((r) => (
+            <a key={r.code} href={`#release-${r.code}`} className="border border-white/25 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/75 hover:border-[#f4d44d] hover:text-[#f4d44d]">
+              {r.code}
+            </a>
+          ))}
+        </nav>
+
+        <ol className="relative mt-14 grid gap-6 pl-8 md:pl-12">
+          <span className="absolute bottom-0 left-[7px] top-0 w-0.5 bg-white/20 md:left-[11px]" aria-hidden="true" />
+          {releases.map((release, i) => (
+            <Reveal key={release.code}>
+              <li id={`release-${release.code}`} className="relative scroll-mt-24">
+                <span className={`absolute -left-[31px] top-9 size-4 md:-left-[47px] md:size-6 ${i === 0 ? "bg-[#f4d44d]" : "border-2 border-[#f4d44d] bg-[#090909]"}`} aria-hidden="true" />
+                <article className={`grid gap-8 border p-7 md:grid-cols-[240px_1fr] md:p-10 ${release.code === "Unreleased" ? "border-white/20 bg-[#111] [background-image:radial-gradient(rgba(244,212,77,0.14)_1px,transparent_1px)] [background-size:12px_12px]" : i === 0 || (latest && release.code === latest.code) ? "border-[#f4d44d] bg-[#f4d44d] text-black" : "border-white/15 bg-[#111]"}`}>
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.14em] opacity-60">{release.code === "Unreleased" ? "In progress" : "Released"}</p>
+                    <h3 className="mt-3 font-pixel text-[clamp(3rem,6vw,4.5rem)] leading-none tracking-[-0.07em]">{release.code}</h3>
+                    {release.code !== "Unreleased" && <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] opacity-70">{formatDate(release.date)}</p>}
+                  </div>
+                  <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
+                    {release.groups.length === 0 && <p className="text-sm opacity-60">Nothing recorded yet.</p>}
+                    {release.groups.map((group) => (
+                      <section key={group.name}>
+                        <h4 className="border-b border-current/30 pb-2 font-mono text-[10px] uppercase tracking-[0.16em] opacity-70">{group.name}</h4>
+                        <ul className="mt-3 space-y-3">
+                          {group.items.map((item) => (
+                            <li key={item} className="flex gap-3 text-sm leading-6">
+                              <span className="mt-2 size-1.5 shrink-0 bg-current" aria-hidden="true" />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    ))}
+                  </div>
+                </article>
+              </li>
+            </Reveal>
+          ))}
+        </ol>
+      </DarkBand>
+
+      <ClosingBand
+        title="Ship with eyes open."
+        body="Start tracing in a few minutes. The free plan needs no card."
+        actions={[{ href: "/sign-up", label: "Start tracing free", primary: true }, { href: "/docs", label: "Read the docs" }]}
+      />
+    </div>
+  );
+}
