@@ -55,7 +55,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   // Next.js syncs our history.replaceState calls into its router and can remount this page with the search
   // params it was first rendered with. The live URL is authoritative in the browser: merging stale server
   // params back in would resurrect removed filters or map mode after Show traces.
-  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "24h", ...(typeof window === "undefined" ? initialQuery : currentUrlQuery()) }));
+  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "90d", ...(typeof window === "undefined" ? initialQuery : currentUrlQuery()) }));
   const [data, setData] = useState<ListResponse | null>(null);
   const [facets, setFacets] = useState<FacetCounts>({});
   const [settledKey, setSettledKey] = useState<string | null>(null);
@@ -337,7 +337,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             placeholder="Search text, or filter: model:gpt-5  status:error  latency:>2s" />
           {query.q ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => { setSearchDraft(""); update({ q: "" }); }}>Clear</button> : <kbd className="hidden rounded border border-[#262C35] px-1.5 font-mono text-[10px] text-[#6B7380] sm:block" aria-hidden="true">/</kbd>}
         </form>
-        <TimeRangePicker range={query.range ?? "24h"} from={query.from ? Number(query.from) : undefined} to={query.to ? Number(query.to) : undefined} now={now}
+        <TimeRangePicker range={query.range ?? "90d"} from={query.from ? Number(query.from) : undefined} to={query.to ? Number(query.to) : undefined} now={now}
           onPreset={(id) => { setNow(Date.now()); update({ range: id, from: "", to: "" }); }}
           onCustom={(from, to) => { const current = Date.now(); setNow(current); update({ from: String(from), to: String(Math.min(to, current)) }); }}
           onReset={() => update({ from: "", to: "" })} />

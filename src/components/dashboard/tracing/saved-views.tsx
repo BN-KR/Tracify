@@ -51,8 +51,14 @@ export function SavedViews({
       signal: controller.signal,
     })
       .then(async (r) => {
-        if (!r.ok)
-          throw Error("Saved views are unavailable. Try again shortly.");
+        if (!r.ok) {
+          const body = (await r.json().catch(() => null)) as {
+            error?: string;
+          } | null;
+          throw Error(
+            body?.error ?? "Saved views are unavailable. Try again shortly.",
+          );
+        }
         return r.json() as Promise<View[]>;
       })
       .then((rows) => {
