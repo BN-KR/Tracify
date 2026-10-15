@@ -494,7 +494,7 @@ const EXTRA_COLUMNS: Record<string, { sql: string; numeric?: boolean }> = {
   firstErrorType: { sql: `argMinIf(errorType, createdAt, ${IS_ERROR})` },
   firstErrorMessage: { sql: `substring(argMinIf(errorMessage, createdAt, ${IS_ERROR}), 1, 200)` },
   tools: { sql: `arrayStringConcat(arraySlice(arraySort(groupUniqArrayIf(toolName, toolName != '')), 1, 6), ', ')` },
-  models: { sql: `arrayStringConcat(arraySlice(arraySort(groupUniqArrayIf(modelId, modelId != '')), 1, 4), ', ')` },
+  models: { sql: `arrayStringConcat(arraySlice(arraySort(groupUniqArrayIf(spans.modelId, spans.modelId != '')), 1, 4), ', ')` },
   rootType: { sql: `anyIf(${STEP_TYPE}, parentSpanId = '')` },
 };
 export const EXTRA_COLUMN_IDS = Object.keys(EXTRA_COLUMNS);
@@ -784,7 +784,7 @@ export async function traceFilterOptions(projectId: string, fromMs: number, toMs
   const rows = await tinybirdRows<Record<string, string[]>>(`
     SELECT
       arraySlice(groupUniqArrayIf(traceName, traceName != ''), 1, 200) AS traceName,
-      arraySlice(groupUniqArrayIf(modelId, modelId != ''), 1, 200) AS modelId,
+      arraySlice(groupUniqArrayIf(spans.modelId, spans.modelId != ''), 1, 200) AS modelId,
       arraySlice(groupUniqArrayIf(environment, environment != ''), 1, 50) AS environment,
       arraySlice(groupUniqArrayIf(release, release != ''), 1, 100) AS release,
       arraySlice(groupUniqArrayIf(endUserId, endUserId != ''), 1, 200) AS endUserId,

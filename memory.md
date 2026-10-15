@@ -2139,3 +2139,7 @@
 - In-app create actions in `captured-workspace.tsx` now push `?view=create` directly, so normal clicks never hit a redirect.
 - Verified: build with placeholder Convex env, 307s for document and `RSC: 1` requests with query passthrough. Authenticated browser check still owed on a Vercel preview.
 - Pre-existing, unrelated: `src/lib/stripe.ts` pins `2026-08-26.dahlia`, which the locked `stripe@22.4.0` types reject, so `tsc`/`next build` fail on main with the committed lockfile.
+
+## 2026-10-15 — Every-column trace sorting, draft PR #164
+- Branch `codex/tracing-all-column-sort`, worktree `Tracify-sort`, stacked on selected-column CSV #163. All 32 built-ins plus safe metadata keys sort in SQL before LIMIT/OFFSET; stable runId ties and accessible direction indicators. Optional sort aggregates run without requiring their visible column. Metadata extraction matches displayed first nonempty values.
+- Local allow-list/CSV tests, focused lint, full tsc and EU build pass. Cumulative steps preview passes feature/click/live suites. Exhaustive live sorting proof caught a ClickHouse alias collision for Models; qualify raw spans.modelId in its aggregate. Final exhaustive proof remains required on the corrected Ready preview.

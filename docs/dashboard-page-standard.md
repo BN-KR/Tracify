@@ -201,3 +201,16 @@ Attach this evidence to the PR before asking for owner approval:
    - any counts the page shows for groups or map elements equal the filtered list totals;
    - screenshots at desktop (1440×900) and phone (390×844) widths, with no horizontal overflow.
 3. The owner has looked at the preview and approved it. Visual changes never merge without that.
+
+## Export and sorting
+
+CSV exports exactly the selected columns in displayed order, including optional aggregates and metadata.
+Headers state UTC, milliseconds or USD where relevant. Keep full IDs, numeric precision and zeroes;
+missing values are blank. Preserve CSV quoting and formula-injection protection. Export only the current
+page and disable it until the requested optional values have arrived.
+
+Every trace header is sortable, including text, identifiers, optional aggregates and metadata. Sort the
+entire filtered result in ClickHouse before pagination, use a stable run ID tie-breaker, and show direction
+with `aria-sort`. Numeric fields sort numerically; metadata sorts as the displayed string. SQL expressions
+come from a fixed allow-list. Qualify raw fields when a selected aggregate shares their name, to avoid
+ClickHouse substituting another aggregate alias into the sort expression.
