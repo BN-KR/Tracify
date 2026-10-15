@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { PixelWaterfall, type WaterfallRow } from "@/components/auth/pixel-waterfall";
+import { DitherField } from "@/components/auth/dither-field";
 import { StepArtwork } from "@/components/onboarding/step-artwork";
 import { BrandLogo } from "@/components/brand-logo";
 
@@ -54,7 +55,8 @@ export function OnboardingShell({
           <PixelWaterfall rows={rows} className="mt-8 max-w-md" />
         </div>
       </aside>
-      <section className="flex items-center px-5 py-10 sm:px-8 md:px-12 md:py-16">
+      <section className="relative isolate flex items-center overflow-hidden px-5 py-10 sm:px-8 md:px-12 md:py-16">
+        <DitherField />
         <div className="mx-auto w-full max-w-[720px] border border-black bg-white text-black shadow-[8px_8px_0_#f4d44d]">
           <div className="border-b border-black/15 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.15em] text-black/50">Setup / {presentation.code} of 05</div>
           <div className="p-6 md:p-8">

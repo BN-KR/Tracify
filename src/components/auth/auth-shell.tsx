@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { BrandLogo } from "@/components/brand-logo";
+import { DitherField } from "@/components/auth/dither-field";
 import { TracePreview } from "@/components/auth/trace-preview";
 import { getRegionForHostname, getTracifyRegion } from "@/lib/regions";
 
@@ -48,7 +49,8 @@ export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactN
           <div className="mt-10 hidden lg:block [@media(max-height:820px)]:hidden"><TracePreview /></div>
         </div>
       </aside>
-      <section className="flex flex-col px-5 py-6 sm:px-8 md:px-12">
+      <section className="relative isolate flex flex-col overflow-hidden px-5 py-6 sm:px-8 md:px-12">
+        <DitherField />
         <div className="flex justify-end">
           <Link href={`/cloud?next=/${mode === "sign-up" ? "sign-up" : "sign-in"}`} className="inline-flex min-h-11 items-center font-mono text-[9px] uppercase tracking-[0.14em] hover:text-black/55">{region.flag} {region.shortName} region · Change</Link>
         </div>
