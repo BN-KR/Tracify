@@ -22,9 +22,15 @@ export async function GET(request: NextRequest, { params }: Context) {
       if (view) list.unshift(view);
     }
     return NextResponse.json(list);
-  } catch {
+  } catch (error) {
+    // Convex is deployed by hand, so a new site can run before its backend.
+    const notDeployed = /Could not find public function/i.test(String(error));
     return NextResponse.json(
-      { error: "Saved views are unavailable. Try again shortly." },
+      {
+        error: notDeployed
+          ? "Saved views are not set up on the server yet. The backend needs a one-time update."
+          : "Saved views are unavailable. Try again shortly.",
+      },
       { status: 503 },
     );
   }
