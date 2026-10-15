@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
@@ -275,7 +276,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ feature: string }> }): Promise<Metadata> {
   const { feature } = await params;
   const page = productFeatures[feature as Feature];
-  return page ? { title: page.title, description: page.description, alternates: { canonical: `/product/${feature}` } } : { title: "Product" };
+  return page ? pageMetadata({ title: page.title, description: page.description, path: `/product/${feature}` }) : { title: "Product" };
 }
 
 function ProductBreadcrumb({ title, slug }: { title: string; slug: string }) {

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { FutureAction, FutureBand, FutureMasthead, FuturePage } from "@/components/marketing/future19-page";
 
@@ -85,12 +85,7 @@ const terms: readonly Term[] = [
   },
 ] as const;
 
-export const metadata: Metadata = {
-  title: "AI Observability Glossary — Tracify",
-  description:
-    "Plain-language definitions of LLM observability, AI agent tracing, spans, tool calls, and agent evaluation terms used across the Tracify platform.",
-  alternates: { canonical: "/glossary" },
-};
+export const metadata = pageMetadata({ title: "AI observability glossary", description: "Plain-language definitions of LLM observability, AI agent tracing, spans, tool calls, and agent evaluation terms used across the Tracify platform.", path: "/glossary" });
 
 function GlossarySchema() {
   const data = {

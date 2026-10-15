@@ -1,14 +1,9 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowUpRight, Mail, MessagesSquare, ShieldCheck } from "lucide-react";
 import { LeadForm } from "@/components/marketing/lead-form";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description:
-    "Book an Agent Failure Fit Call or talk to Tracify about agent observability, security, and deployment.",
-  alternates: { canonical: "/contact" },
-};
+export const metadata = pageMetadata({ title: "Contact", description: "Book an Agent Failure Fit Call or talk to Tracify about agent observability, security, and deployment.", path: "/contact" });
 
 const fitCallSubject = "Agent Failure Fit Call";
 const fitCallBody = `Hi Tracify,

@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { Database, Eye, LockKeyhole, SlidersHorizontal } from "lucide-react";
 
-export const metadata: Metadata = { title: "Privacy policy", description: "Tracify privacy policy and information about how we handle data.", alternates: { canonical: "/privacy" } };
+export const metadata = pageMetadata({ title: "Privacy policy", description: "Tracify privacy policy: what data we collect, how telemetry is protected, and how to manage analytics preferences.", path: "/privacy" });
 
 const sections = [
   { title: "Overview", body: "This policy explains how Tracify collects, uses, and safeguards information when you use the agent observability platform.", bullets: [] },

@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { ArrowRight, CircleDotDashed, Flag, Gauge, Rocket } from "lucide-react";
 import { FutureAction } from "@/components/marketing/future19-page";
 
-export const metadata: Metadata = { title: "Roadmap", description: "A transparent view of Tracify product delivery.", alternates: { canonical: "/roadmap" } };
+export const metadata = pageMetadata({ title: "Roadmap", description: "A transparent view of what Tracify has shipped, what is in progress, and what is planned for AI agent observability.", path: "/roadmap" });
 
 const sections = [
   { status: "Shipped", code: "NOW", title: "Observe and control the runs you have today", icon: Gauge, tone: "bg-[#f4d44d]", items: ["Trace and run inspection", "Cost, model, and tool analytics", "Project reports and Slack alerts", "Runtime retry, fallback, latency, and cost policies", "Python and TypeScript instrumentation", "OpenTelemetry ingestion"] },

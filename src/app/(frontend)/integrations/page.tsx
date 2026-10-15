@@ -1,13 +1,9 @@
 import Link from "next/link";
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { ArrowUpRight, PlugZap } from "lucide-react";
 import { getThirdPartyBrand, ThirdPartyLogo } from "@/components/third-party-logo";
 
-export const metadata: Metadata = {
-  title: "AI agent integrations",
-  description: "Connect Tracify with OpenTelemetry, OpenAI, Anthropic, LangChain, CrewAI, Vercel AI SDK, Slack, and more.",
-  alternates: { canonical: "/integrations" },
-};
+export const metadata = pageMetadata({ title: "AI agent integrations", description: "Connect Tracify with OpenTelemetry, OpenAI, Anthropic, LangChain, CrewAI, Vercel AI SDK, Slack, and more.", path: "/integrations" });
 
 type Integration = { name: string; description: string; badge?: string; category: string };
 

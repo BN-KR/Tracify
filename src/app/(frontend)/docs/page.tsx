@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
 import { ArrowRight, BookOpen, Braces, Check, Code2, Gauge, Layers3, ShieldCheck, Terminal } from "lucide-react";
 import { getDocs } from "@/lib/markdoc-docs";
 import { DocsSearch } from "@/components/docs/docs-search";
 import { DocsSidebar } from "@/components/docs/docs-sidebar";
 import { FuturePage } from "@/components/marketing/future19-page";
 
-export const metadata = { title: "Documentation", description: "Install the SDK, instrument an agent, and inspect the execution record.", alternates: { canonical: "/docs" } };
+export const metadata = pageMetadata({ title: "Documentation", description: "Install the SDK, instrument an agent, and inspect the execution record.", path: "/docs" });
 
 const quickstarts = [["Start tracing", "Send your first useful run in under five minutes.", "quickstart", Terminal], ["TypeScript SDK", "Instrument Node.js, Next.js, or worker workloads.", "typescript", Code2], ["Python SDK", "Add tracing to a Python agent with a small decorator.", "python", BookOpen]] as const;
 const productAreas = [["Observability", "Trace runs, sessions, tools, costs, and failures.", "observability", Gauge], ["Prompt operations", "Version, resolve, cache, and connect prompts to traces.", "prompts", Braces], ["Evaluation", "Turn production evidence into measurable release gates.", "evaluation", Check], ["Platform", "Use APIs, exports, datasets, and deployment controls.", "api-platform", Layers3]] as const;

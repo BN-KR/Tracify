@@ -1,8 +1,9 @@
 import { CalendarClock, GitCommitHorizontal } from "lucide-react";
+import { pageMetadata } from "@/lib/seo";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-export const metadata = { title: "Changelog", description: "Product updates and release notes from the Tracify team.", alternates: { canonical: "/changelog" } };
+export const metadata = pageMetadata({ title: "Changelog", description: "Product updates and release notes from the Tracify team.", path: "/changelog" });
 
 const releaseSource = readFileSync(resolve(process.cwd(), "docs/releases.md"), "utf8");
 const changes = [...releaseSource.matchAll(/^## \[(.+?)\](?: — (\d{4}-\d{2}-\d{2}))?\n([\s\S]*?)(?=^## |$)/gm)].map((match) => ({ code: match[1], date: match[2] ?? "Unreleased", title: match[1] === "Unreleased" ? "Next release" : `Release ${match[1]}`, kind: match[1] === "Unreleased" ? "Planned" : "Product", items: [...match[3].matchAll(/^- (.+)$/gm)].map((item) => item[1]) }));

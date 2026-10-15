@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { FileCheck2, Scale } from "lucide-react";
 
-export const metadata: Metadata = { title: "Terms of service", description: "Tracify terms of service.", alternates: { canonical: "/terms" } };
+export const metadata = pageMetadata({ title: "Terms of service", description: "The terms that apply when you use the Tracify AI agent observability platform, its SDKs, and its APIs.", path: "/terms" });
 
 const clauses = [
   { title: "Acceptance", body: "By accessing or using Tracify, you agree to these Terms of Service and applicable laws. If you do not agree, you may not use the service." },

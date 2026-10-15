@@ -1,18 +1,14 @@
 import { CategoryPills } from "@/components/blog/category-pills";
+import { pageMetadata } from "@/lib/seo";
 import { Pagination } from "@/components/blog/pagination";
 import { getReadingTime } from "@/components/blog/reading-time";
 import { FutureBand, FuturePage } from "@/components/marketing/future19-page";
 import { getCategoryOptions, getPostDate, getPublishedPosts } from "@/lib/markdoc-blog";
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
 export const revalidate = 60;
-export const metadata: Metadata = {
-  title: "Blog",
-  description: "Engineering insights, agent patterns, and production AI from the Tracify team.",
-  alternates: { canonical: "/blog" },
-};
+export const metadata = pageMetadata({ title: "Blog", description: "Engineering insights, agent patterns, and production AI from the Tracify team.", path: "/blog" });
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString("en-US", {
