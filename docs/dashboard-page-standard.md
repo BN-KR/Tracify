@@ -214,3 +214,9 @@ entire filtered result in ClickHouse before pagination, use a stable run ID tie-
 with `aria-sort`. Numeric fields sort numerically; metadata sorts as the displayed string. SQL expressions
 come from a fixed allow-list. Qualify raw fields when a selected aggregate shares their name, to avoid
 ClickHouse substituting another aggregate alias into the sort expression.
+## Selected-column CSV export
+
+Export the visible page using exactly its selected columns and their display order, including optional
+aggregates and metadata. Use explicit UTC/ms/USD headers, full IDs, raw numeric precision and zeroes;
+missing values stay blank. Tags use unambiguous JSON. Keep quoting, embedded-newline handling and
+spreadsheet-formula protection. Disable export while optional column values are loading.
