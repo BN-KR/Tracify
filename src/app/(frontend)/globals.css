@@ -784,6 +784,14 @@
 .tracify-cloud-shell:has(.captured-workspace) .captured-reference-brand i{display:block;width:14px;height:10px;background:linear-gradient(155deg,#f24b42 0 25%,#36a8e6 25% 48%,#f2cf3a 48% 70%,#3fc48b 70%);clip-path:polygon(0 50%,25% 0,52% 42%,78% 0,100% 50%,78% 100%,52% 58%,25% 100%)}
 .tracify-cloud-shell:has(.captured-workspace) .tracify-shell-sidebar a:hover,.tracify-cloud-shell:has(.captured-workspace) .tracify-shell-sidebar button:hover{color:#fff}
 
+/* Pricing estimator sliders: square thumb, pixel track, brand colors only. */
+.pricing-range { -webkit-appearance: none; appearance: none; height: 44px; background: transparent; cursor: pointer; }
+.pricing-range::-webkit-slider-runnable-track { height: 6px; background: rgba(236,234,227,.2); }
+.pricing-range::-moz-range-track { height: 6px; background: rgba(236,234,227,.2); }
+.pricing-range::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 28px; margin-top: -11px; background: #f4d44d; border: 2px solid #090909; border-radius: 0; }
+.pricing-range::-moz-range-thumb { width: 16px; height: 24px; background: #f4d44d; border: 2px solid #090909; border-radius: 0; }
+.pricing-range:focus-visible { outline: 2px solid #f4d44d; outline-offset: 2px; }
+
 @layer components {
   .docs-markdoc .blog-code-block { margin-block: 1.5rem; overflow: hidden; border: 1px solid #090909; border-left: 4px solid #f4d44d; background: #090909; box-shadow: 6px 6px 0 rgb(0 0 0 / 10%); }
   .docs-markdoc .blog-code-block__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid rgb(255 255 255 / 15%); padding: 0.55rem 0.9rem; color: #f4d44d; font-family: var(--font-geist-mono), monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; }
