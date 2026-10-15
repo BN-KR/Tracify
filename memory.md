@@ -2139,3 +2139,7 @@
 - In-app create actions in `captured-workspace.tsx` now push `?view=create` directly, so normal clicks never hit a redirect.
 - Verified: build with placeholder Convex env, 307s for document and `RSC: 1` requests with query passthrough. Authenticated browser check still owed on a Vercel preview.
 - Pre-existing, unrelated: `src/lib/stripe.ts` pins `2026-08-26.dahlia`, which the locked `stripe@22.4.0` types reject, so `tsc`/`next build` fail on main with the committed lockfile.
+
+## 2026-10-15 — Selected-column CSV, draft PR #163
+- `codex/tracing-selected-csv`, `Tracify-csv`, stacked on auth #162. Pure shared column definitions and CSV helpers export selected built-ins/metadata in display order, with explicit units, exact numeric values/full IDs, blanks for missing data and existing formula/quote protection.
+- Five CSV tests cover all 32 built-ins, metadata, zeroes/precision, missing values, quotes/newlines/formulas. Focused lint, full tsc and EU build passed. The cumulative Ready steps preview passes 47 feature checks including the new CSV header contract, 26 click checks and seven live-update checks. Exhaustive selected-column browser/download proof is being recorded with sorting.

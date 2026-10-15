@@ -1,18 +1,8 @@
-## Tracing roadmap — authorized 2026-10-14
+## 2026-10-15 — Authorized tracing roadmap
 
-- Fix project loading refresh flash in an isolated authentication PR; verify auth boundaries and no remounts.
-- Export selected columns, including metadata, in a separate PR.
-- Sort every trace column across all matching records in a separate PR.
-- Add OpenAI/Anthropic and LangGraph SDK integrations with streaming/error/usage tests.
-- Add a real cross-trace steps table with server sorting and filters.
-- Add named persistent views with filters, columns, range and team sharing.
-- Draft previews and verification for each; owner merges, using merge commits. Do not edit Sessions page files.
-
-## 2026-10-14 — Agent map: owner preview review
-
-- [pending owner] Review draft PR #150 and its Ready EU preview before merge. Implementation and verification are recorded in `memory.md`.
-
-# Langfuse parity-plus product epic — 2026-09-03
+- Owner review/merge of draft PRs #162 (auth), #163 (CSV), #164 (sorting), #166 (steps), plus SDK and saved-view drafts. Merge frontend stack in that order, using merge commits.
+- Saved-view live verification requires an isolated Convex deployment; no production backend deployment from feature branches.
+- SDK registry publication is a separate owner-controlled release after review.
 
 ## Google Analytics 4 — 2026-09-15
 
@@ -22,47 +12,12 @@
 
 ## Captured dashboard integration hardening — 2026-09-08
 
-- [completed] Make the shared dashboard shell usable on mobile with an overlay sidebar, backdrop dismissal, and close-on-navigation behavior.
-- [completed] Make `/dashboard` auth-safe and route email sign-in through the same callback readiness state machine as OAuth.
-- [completed] Make Playwright use an isolated managed port so verification cannot silently exercise a stale server.
-- [completed] Preserve captured visual structure while making Settings tabs deep-linkable and action controls reachable during navigation transitions.
-- [completed] Remove the Settings hydration/consent interaction flake, remove the shell hydration mismatch, and rerun the complete 9-test route and interaction contract (9/9 passed, including mobile/keyboard coverage).
-- [completed] Re-run the public smoke suite after the final build changes (3/3 passed: product surfaces, consent persistence, and safe sign-in routing).
-- [completed] Run the content/public internal-link integrity suite (27/27 passed).
-- [completed] Route supported captured Build actions into existing authenticated workflows; retain modal boundaries only for unsupported operations and all Sandbox writes.
-- [completed] Verify all 14 captured Sandbox surfaces at 390px: 14/14 returned 200, no horizontal overflow, and no page errors.
-- [completed] Add and pass a unique internal-link destination contract across all 14 captured Sandbox surfaces (1/1).
-- [completed] Fix the captured workspace hydration marker and verify the complete 10-test account-access contract (10/10 passed), including consent-safe navigation and persisted tracing controls.
-- [completed] Commit the implementation and newly created live adapters cleanly (`43e670a`, `45b5e25`, `b9f4444`, `55befa5`); unrelated scratch/archive files remain excluded.
-- [completed] Push the implementation branch to PR #106; GitGuardian, activation, adapter, and primary Vercel checks passed. EU Vercel remained pending at handoff.
 - [pending owner] Run provider-backed signed-in workflows with EU credentials; these cannot be verified from the public/local deterministic Sandbox.
-- [completed] Remove the invalid Tracing-level Create new action and verify the read-only create boundary on Datasets; targeted account-access interaction test passes.
-- [completed] Re-run the final production build after the captured Tracing changes; all 211 routes compile and generate successfully.
-- [completed] Fix captured Tracing filter state/URL synchronization, align the browser contract with the populated fixture, and add the dedicated mobile-aware Sessions surface.
-- [completed] Run a clean isolated production build for the final captured workspace commit; all 211 routes compile, type-check, and generate successfully.
-- [completed] Run the complete 10-test account-access contract against an isolated EU-configured production build; all route, link, filter, detail, read-only, auth-safety, and mobile/keyboard checks pass.
-- [completed] Run the 14-surface captured viewport matrix at six desktop, tablet, and mobile sizes; all six responsive runs pass against the isolated EU production build.
-- [completed] Align populated Sandbox trace input/output values with the captured reference’s visible content while retaining deterministic read-only behavior.
-- [completed] Rebuild and verify the updated populated Tracing surface after the reference-content change; production build and targeted interaction check pass.
 
 ## Captured Tracify dashboard implementation — 2026-09-08
 
 ### Current implementation slice
 
-- [completed] Add dense Tracing table/chart behavior with presets, environment/search filtering, selectable columns, filter-rail search, trace navigation, and empty-state pagination.
-- [completed] Add populated Session detail layout with chronological events, input/output views, linked traces, scores, and dataset action boundary.
-- [completed] Add populated Dashboards and Scores surfaces with selection/layout controls, metric widgets, score filtering, and score summaries.
-- [completed] Re-run the production build after the parity additions; compilation, TypeScript, and generation of all 211 routes passed.
-- [completed] Add Prompt Management and Evaluators captured-depth surfaces with editor tabs, prompt selection, evaluator filters, run/status columns, and action boundaries.
-- [completed] Add Datasets, Human Annotation, Alerts, and Settings captured-depth surfaces with search, queue/status filters, review actions, alert cards, and functional settings tabs.
-- [completed] Warm the local Sandbox route matrix and verify HTTP 200 for primary surfaces and nested session detail; first-request compilation latency is isolated from subsequent route behavior.
-- [completed] Re-run the account-access Playwright contract after warming the local app.
-- [completed] Extend the browser contract for prompt, dataset, and settings interactions and verify it locally.
-- [completed] Add rows-per-page controls to the remaining generic collection tables so Users and Experiments retain the captured table affordances.
-- [completed] Restart the stale local dev process and verify the captured tracing surface in-browser after recompilation; the intended controls and dense table are rendered.
-- [completed] Make generic collection pagination functional and rerun TypeScript, focused ESLint, and the 9-test account-access browser contract.
-- [completed] Match the populated Home grid to the localhost:4173 reference composition and verify the complete widget set in the local browser.
-- [completed] Migrate authenticated Build Tracing to the captured renderer through a real Convex project/run adapter with loading and empty states.
 - [pending] Wire the captured-depth Sandbox controls to the equivalent authenticated Build state and verify nested detail routes end to end.
 
 Implementation contract:
@@ -183,27 +138,14 @@ Each numbered capability becomes its own 1–3 day implementation issue or a sma
 
 # First-customer execution — 2026-09-02
 
-1. [completed] Make the offer sellable: qualification-only contact CTA, seeded-demo failure CTA, valid SDK quickstarts, first-party documentation link, and no inactive connection button.
-2. [completed] Make the review deliverable: customer scope, report template, evidence boundary, retention/deletion record, discovery/close scripts, follow-up cadence, demo script, and objection taxonomy.
-3. [completed] Build the editable execution workbook from current public sources with 50 candidate accounts, 100 contact slots, founder/technical-owner profiles where public, outreach drafts, daily funnel formulas, and stop rules.
-4. [completed] Apply an evidence threshold to prospect research: 15 accounts are Qualified by public filters, 28 remain Watch, and 7 are Disqualified. Do not inflate the qualified count or infer incidents/frameworks that are not public.
-5. [completed] Verify focused lint, both local SDK examples, public route status, the email actions, the seeded demo, desktop/mobile layout, and unchanged $19/$39 pricing. Record the unrelated existing production TypeScript blocker separately.
 6. [pending owner] Create and test the live one-time $1,000 Stripe Payment Link in the intended account; store the URL privately.
 7. [pending owner] Qualify the remaining account gap, personally send 10 initial messages per weekday plus follow-ups, run discovery, send same-day offers, collect payment before evidence, and deliver one review using the operating kit.
-8. [completed] Publish draft PR #75 from `codex/first-customer-review`.
-9. [completed] Inspect PR #75 hosted checks and squash-merge it into `main` as `1cc8f88`. Record the unrelated comparison-blog framework failure separately and do not deploy as part of this merge.
 
 # Cursor removal and fit verification — 2026-08-24
 
-- [completed] Remove the shared cursor component, scene cursor paths, click timing, and cursor CSS.
-- [completed] Render and visually inspect each scene at its densest content state.
-- [completed] Render the replacement MP4 and inspect representative frames extracted from the encoded file for clipping or overflow.
 
 # Product film pacing and SaaS cursor — 2026-08-24
 
-- [completed] Re-time each scene around the core interaction and shorten transitions to 15 frames.
-- [completed] Animate a cursor path and click ring through the homepage, run list, trace inspector, replay, and release gate.
-- [completed] Run lint/build, inspect representative stills, render the final MP4, probe its streams, and inspect extracted encoded frames.
 
 # Product film rebuild — 2026-08-22
 
@@ -211,53 +153,25 @@ Each numbered capability becomes its own 1–3 day implementation issue or a sma
 
 # AI evaluation metrics editorial rebuild — 2026-08-26
 
-- [completed] Replace repetitive H3/paragraph cadence with visual decision-led modules.
-- [completed] Add worked release comparison, three-layer gates, and reader checklist.
-- [completed] Verify localhost response, Markdoc output, tests, build, and diff hygiene.
 
-- [completed] Audit every published post for visuals, code, callouts, emphasis, FAQ placement, and word count.
-- [completed] Remove repeated generated prose from the remaining articles.
-- [completed] Run content tests, diff hygiene, and production build.
 - [pending] Publish through the PR workflow after repository review permissions are available.
 
-- [completed] Extract the public homepage and demo-page design tokens, typography, panel geometry, and interaction language.
-- [completed] Archive the old Motion Canvas project and scaffold a clean Remotion composition.
-- [completed] Build four connected scenes using the actual Tracify visual system and product workflow.
-- [completed] Render and inspect representative frames, then produce and probe the final MP4.
 
 # 17-post visibility content set — 2026-08-20
 
-1. [completed] Read the project memory, content map, quality bar, interactive-content rules, and blog README.
-2. [completed] Inventory the existing published corpus and choose 17 keyword-led topics with distinct reader jobs.
-3. [completed] Add 17 Markdoc articles, natural internal links, code examples, and the future-agent writing workflow article.
-4. [completed] Add and centrally register a deterministic `<trace-scenario>` interaction for articles where reader-controlled state improves the lesson.
-5. [completed] Run the complete content test suite.
-6. [completed] Complete the production build with the Webpack path and a temporary Node worker-thread verification setting, then remove the temporary setting.
 
 # Motion Canvas product demo — 2026-08-21
 
-- [completed] Study the Bufferhead Motion Canvas reference and current Tracify trace/evaluation surfaces.
-- [completed] Replace the card-based draft with a graph-led animation that keeps the execution system alive across scene changes.
-- [completed] Build the Motion Canvas project and render the H.264 MP4 with the FFmpeg exporter.
-- [completed] Visually inspect representative MP4 frames and correct graph leakage, multiline text, panel-safe anchors, the selected-span right-edge marker, opening graph framing, signal timing, and final timing.
 
 # Robots standards cleanup — 2026-08-13
 
-1. [completed] Keep canonical-host signals in redirects, canonical URLs, and sitemap rather than robots.txt.
 
 # Sitewide link audit — 2026-08-12
 
-1. [completed] Compare internal navigational URLs against concrete and dynamic route definitions.
-2. [completed] Repair stale documentation and dashboard resource destinations.
 3. [pending] Complete a clean production-build verification once the existing build finishes.
 
 # Sitewide SEO — 2026-08-11
 
-5. [completed] Standardize sitemap, robots, JSON-LD, RSS, and canonical URLs on `www.tracify.tech`.
-1. [completed] Establish a single canonical domain and indexation policy.
-2. [completed] Add structured data and page-level metadata for public route families.
-3. [completed] Make the sitemap enumerate all intended public routes.
-4. [completed] Verify generated metadata routes and build output.
 
 # tracify Strategic Implementation Plan
 
@@ -417,99 +331,35 @@ tracify is now positioned publicly as **agent observability for builders and ope
 ## Phase 1: Core Trace Viewer & Infrastructure (Weeks 1-4)
 
 ### 1. Ingestion Pipeline & Environment [DONE]
-- [x] Clerk Auth Integration
-- [x] Convex Schema & Mutations (`projects`, `agentRuns`)
-- [x] Tinybird `spans.datasource` Configuration
-- [x] Inngest `processSpan` Function
-- [x] `POST /api/ingest` Ingestion Route
-- [x] End-to-end Verification (curl -> Tinybird -> Convex)
 
 ### 2. Onboarding & Dashboard Foundation [DONE]
-- [x] Premium Landing Page (Hero, Features, Pricing)
-- [x] Dashboard Shell & Grouped Sidebar
-- [x] Multi-step Onboarding Flow
-- [x] One-time API Key Generation & Management
-- [x] Route-state hardening for zero-project users: `/dashboard` and `/onboarding` now resolve real Convex project state, and `/dashboard/[projectId]` validates route params before project-scoped queries mount.
-- [x] Local dev auth recovery: Clerk now has the required `convex` JWT template and Convex dev contains a seeded project for the current local Clerk user.
-- [x] Dashboard shell ownership hardened: only `src/app/dashboard/layout.tsx` renders `DashboardShell`; project child pages render content only, preventing duplicate sidebars while keeping project ids in workspace URLs.
-- [x] Project management foundation: `/dashboard/[projectId]/manage` shows Convex-saved project stats and requires exact project-name plus `DELETE` confirmation before destructive project removal.
-- [x] Custom 404 fallback: `src/app/not-found.tsx` provides branded actions back to Dashboard/Home for unmatched routes.
-- [x] Production auth recovery: Clerk production now has JWT template `convex`, and Convex prod `focused-otter-289` has current functions/auth config deployed.
-- [x] Convex/Clerk auth runbook: `docs/troubleshooting-convex-clerk-auth.md` documents the missing JWT-template culprit, dev/prod comparison checklist, and recovery commands.
 
 ### 3. Core Product: Trace Viewer [IN PROGRESS]
 The single most important UI in the product.
-- [x] **Runs List Page:** Live-updating paginated table at `/dashboard/[projectId]/runs` with status filtering, page controls, and exact indexed runId lookup.
-- [x] **Run Detail Page:** Timeline view at `/dashboard/[projectId]/runs/[runId]` with guarded run lookup, cached span loading, and clear refresh failure state.
-- [x] **Run Cancellation Control:** Running saved run summaries can be marked `cancelled` from the runs table or trace viewer after a two-step confirmation; terminal states are preserved against later summary upserts.
-- [x] **Clickable Breadcrumbs:** Dashboard topbar breadcrumbs now link back to the active project overview and parent section routes, replacing the separate runs-detail back button.
-- [x] **Tinybird Pipes:** Added local endpoint pipe definitions for `spans_by_run` and `recent_runs_summary`; deploy/endpoint validation remains as the next operational step.
-- [x] **Span Detail Cards:** Expandable input/output viewers now include copy controls, error spans auto-expand, and the trace viewer includes a latency overview plus model/tool summary panel.
 
 ### 4. Cost & Usage Dashboard [TODO]
-- [x] **Usage Statistics:** Added lightweight `/dashboard/[projectId]/costs` total spend and saved expensive-run summaries.
-- [x] **Cost Visualisation:** Added Recharts cost-over-time chart with 7d / 30d / 90d controls and Tinybird-unavailable fallback copy.
-- [x] **Model Breakdown:** Moved model cost breakdown off Overview and onto `/costs` where the decision doc says it belongs.
-- [x] **Immediate Saved Totals:** Overview and Costs use Convex saved run summaries for top-level spend/span totals so newly ingested runs update immediately even if Tinybird analytics is delayed.
-- [x] **Tinybird Query Format:** Analytics SQL helpers append `FORMAT JSON` so Tinybird returns parseable JSON for cost charts and model breakdowns.
-- [x] **Demo Data Seeding:** Added a local historical seed script that sends previous-day telemetry through `/api/ingest` for realistic dashboard chart testing.
-- [x] **Analytics Auto-Refresh:** Overview and Costs poll stats every 4 seconds while visible so charts/model breakdowns update without a full page refresh.
-- [x] **Hybrid Realtime Refresh:** Overview and Costs now trigger immediate debounced stats refetches when Convex saved run summaries change, while retaining 4-second polling as an efficient fallback.
-- [x] **Low-Query Analytics Refresh:** Overview and Costs now use a Convex-backed analytics cache with a 10-minute TTL, 24-hour stale fallback, Tinybird daily read budget guard, and manual refresh controls instead of 4-second Tinybird polling.
-- [x] **Redis Analytics Cache:** Stats and run-span API routes now use Redis as a server-side cache after access verification, returning fresh cache before analytics reads and stale cache before empty fallbacks.
-- [x] **Cached Trace Spans:** Run span timelines now cache Tinybird results in Convex, use long-lived cache for terminal runs, and require explicit refresh for running traces after the short cache window.
-- [x] **Client-Side Durations:** Runs table and trace viewer durations tick from Convex timestamps via a client clock, so visible seconds update without analytics network calls.
-- [x] **Runs Pagination:** Dashboard runs table now uses a Convex paginated query with project access checks, bounded total-count lookup, rows-per-page controls, Prev/Next navigation, and a `Page X of Y` indicator.
-- [x] **Alerts Popup:** Alerts now live in a topbar bell popup with recent alert links instead of occupying primary sidebar navigation; the old alerts route redirects to overview.
-- [x] **Unread Alerts:** Alerts support optional `readAt` state, the bell badge counts unread items only, unread rows are visually stronger, and the popup includes a guarded `Read all` action.
-- [x] **Always-Visible Analytics Charts:** Overview and Costs now render saved-run fallback series or a zero baseline when analytics data is empty, and range/refresh controls are right-aligned without outage copy.
-- [x] **Savings Impact Chart:** Costs graph now compares actual spend to a peak-day baseline with shaded avoided-spend area and impact cards.
-- [x] **Savings Demo Pattern:** Added `seed:savings` to generate expensive unoptimized days followed by cheaper optimized days, and savings copy now shows `$0.00` when there is no computed saving.
-- [x] **Spend-First Cards:** Overview and Costs keep spend as the main card value and show potential savings as secondary card copy/sub-metrics.
-- [x] **Overview Range Controls:** Dashboard Overview supports 1d/7d/30d/90d switching and displays total potential savings for the selected period.
-- [x] **Range-Scoped Totals:** Overview and Costs use Tinybird range totals when available; Convex saved totals are only a fallback when analytics is unavailable.
-- [x] **Tool Cost Breakdown:** Stats API/cache now includes Tinybird-backed top tool costs for reports and future operator views.
-- [x] **Honest Billing Surface:** `/dashboard/[projectId]/billing` now shows real Convex saved usage and current `planTier`, with beta access/contact states instead of fake checkout actions.
 
 ### 4b. Reporting And Proof [IN PROGRESS]
-- [x] **Project Metadata:** Added optional `clientName` and `reportNotes` fields to project settings for stakeholder-facing reports.
-- [x] **Reports Route:** Added `/dashboard/[projectId]/reports` with print-friendly run totals, failed runs, total cost, span count, top models/tools, recent alerts, and notable failed traces.
 - [ ] **Report QA:** Verify report page with no data, normal runs, failed runs, and unavailable analytics fallback.
 - [ ] **Export Decision:** Keep browser print as the first delivery path; defer PDF export until beta users ask for it.
 
 ### 4c. Marketing And Pricing Honesty [IN PROGRESS]
-- [x] **Landing Positioning:** Hero and use-case copy now describe agent observability for production AI workflows and explicitly cover developers, startups, agencies, internal teams, and operators.
-- [x] **Pricing Page:** Added `/pricing` with Free, Pro, Team, and Enterprise beta states. Checkout is intentionally disabled until Stripe is connected.
-- [x] **Claim Cleanup:** Landing pricing and marketing navigation no longer advertise replay, evals, email alerts, self-hosting, runtime controls, or PDF export as working product features.
 - [ ] **Screenshots:** Replace abstract marketing visuals with real dashboard/report screenshots.
 
 ### 4d. Beta Smoke Tests [IN PROGRESS]
-- [x] **Smoke Script:** Added `npm run smoke:beta` for missing API key, invalid API key, invalid payload, report/billing route reachability, and optional valid-span/Convex-run checks.
 - [ ] **Full Smoke Run:** Execute with `TRACIFY_SMOKE_API_KEY` and `TRACIFY_SMOKE_PROJECT_ID` against local and production-like environments.
 - [ ] **Alert Smoke:** Add a deterministic threshold alert verification once test project configuration can be safely controlled by script.
 
 ### 5. Alerting & Notifications [TODO]
-- [x] **Alert Inngest Function:** Triggers on `tracify/alert.triggered` and logs alerts to Convex.
-- [x] **Slack Webhook Integration:** Project settings save a validated Slack webhook and can send an admin-gated test alert.
-- [x] **Alerts UI:** Topbar popup shows recent alerts, unread state, read-all, and read-on-click behavior.
-- [x] **Duplicate Guard:** Convex alert creation deduplicates repeated alerts for the same project/run/type event.
 - [ ] **Email Alerts:** Deferred until an email provider is configured.
 
 ### 7. Settings, Teams, and RBAC [IN PROGRESS]
-- [x] **Settings Validation:** Client and Convex validation for name, cost, duration, stall, and Slack webhook values.
-- [x] **Sensitive Mutations:** Project settings, API key rotation, and project deletion require project owner, configured app admin, or Clerk org admin access.
-- [x] **Comments Authorization:** Trace comments require developer/admin style access; comment listing is project-access guarded and bounded.
-- [x] **Team Members:** Settings member list uses Clerk organization memberships instead of placeholder users.
 - [ ] **Organization Switching:** Add explicit Clerk organization switching in the dashboard topbar/sidebar.
 - [ ] **Viewer UI Guards:** Hide or disable settings/API-key/destructive controls for viewer roles once role claims are confirmed in the active JWT template.
 
 ### 6. Production SDKs [POLISHING]
 - [ ] **Python SDK:** Wrap `@trace_agent` decorator logic and publish to PyPI. Package metadata now builds as distribution `tracify`, docs use `pip install tracify-sdk`, the `tracify` import package re-exports the legacy SDK, and local import smoke test passes; upload is pending a PyPI API token.
 - [ ] **TS SDK:** Formalise `tracify` and publish to npm. Build packaging is fixed, app/docs install snippets now use `npm install tracify-sdk`, and publish is blocked only on npm 2FA/token requirements.
-- [x] **Documentation:** Quickstart/install surfaces now consistently use `pip install tracify-sdk` and `npm install tracify-sdk`, including SDK READMEs, dashboard docs, marketing CTA, and design specs.
-- [x] **PM Handoff Summary:** Added `docs/project-manager-project-summary.md` with detailed product, architecture, function, deployment, and open-work inventory.
-- [x] **Manual API Key Issuance:** Added admin-gated Convex `projects:createProjectForUser` for creating a project and one-time API key for a target Clerk user without bypassing the hashed-key storage model.
-- [x] **Local User Install Test:** Verified the published `tracify` npm package can send a span through local Next.js/Inngest/Convex dev after aligning `.env.local` with the Convex dev API-key hash secret.
 
 ---
 
@@ -549,23 +399,12 @@ The single most important UI in the product.
 - **UI Audit:** Ensure 0px radius and monochrome high-contrast styling remains consistent.
 
 ### Competitive Product Surface [DONE]
-- [x] Product detail pages now cover the currently shipped tracing, analytics, reporting, failure, tool/LLM call, and runtime-control capabilities.
-- [x] Public roadmap, contact, and status routes establish an honest delivery and enterprise-contact surface.
-- [x] Runtime control is reachable at `/dashboard/[projectId]/control` through the new dashboard Control group.
 - [ ] Continue the planned program with canonical telemetry/session data, search, redaction, datasets/evaluations, prompt management, and enterprise deployment in separately verifiable milestones.
 
 ### Observe Foundation: Sessions and Search [DONE]
-- [x] Canonical optional session context is accepted by native and OTLP ingestion and both SDKs.
-- [x] Convex stores bounded session summaries and links saved runs by session.
-- [x] Tinybird-backed trace search supports bounded metadata, status, cost, latency, and time-window filters.
-- [x] Dashboard exposes Sessions, session detail, and Trace Search under Observe.
 - [ ] Next: ingestion-time redaction and object-storage references for large/multimodal payloads.
 
 ## Evaluation Engine Integration (2026-08-06)
-- [x] Online/offline evaluators, guardrail templates, typed scores, feedback, human review, and trace-linked quality panels.
-- [x] Regression suites expose release-gate metrics and safe prompt-version promotion.
-- [x] Monitor state tracks both threshold breaches and recovery alerts.
-- [x] Numeric evaluation scores have a Tinybird datasource and hourly time-series query path.
 - [ ] Production validation remains: configure the internal secret and deploy the Tinybird datasource in the active workspace.
 ## Dashboard Feedback States (2026-08-07)
 - Added a reusable empty-state primitive with explanatory copy and optional recovery/onboarding action.
@@ -761,141 +600,61 @@ The single most important UI in the product.
 5. Validate responsive behavior, keyboard accessibility, metadata/schema, and builds; measure the funnel with privacy-appropriate events.
 # Future 19 auth implementation — 2026-08-10
 
-1. [completed] Translate the production Future 19 marketing system into a dedicated auth shell.
-2. [completed] Rebuild email/password and Google/GitHub OAuth forms with accessible interaction states.
-3. [completed] Add password recovery, reset, provider-error, and invitation pages.
-4. [completed] Extend Better Auth's Convex configuration for GitHub and managed reset emails.
-5. [completed] Run type, lint, diff, browser, and production-build verification.
 # Better Auth dashboard production connection — 2026-08-10
 
-1. [completed] Confirm the dashboard plugin exists in the Convex-hosted auth configuration.
-2. [completed] Replace `BETTER_AUTH_API_KEY` in the production Convex deployment.
-3. [completed] Deploy the production Convex backend and Better Auth component.
-4. [completed] Deploy the application to Vercel production and wait for Ready.
-5. [completed] Confirm the canonical custom domain resolves to the new deployment.
 # Stable staging hostname — 2026-08-10
 
-1. [completed] Resolve the current production deployment and Vercel domain ownership.
-2. [completed] Assign `tracifytech.vercel.app` as an alias of the live deployment.
-3. [completed] Trust the staging origin in Better Auth and deploy Convex production.
 # Better Auth Sentinel — 2026-08-10
 
-1. [completed] Add `sentinel()` beside the dashboard plugin on the auth server.
-2. [completed] Add `sentinelClient()` with the project identify endpoint.
-3. [completed] Configure production environment variables in Convex and Vercel.
-4. [completed] Verify types/lint and deploy Convex plus Vercel production.
-5. [completed] Point canonical and stable staging hostnames at the Ready build.
 # Better Auth social OAuth credentials — 2026-08-10
 
-1. [completed] Audit local Google/GitHub credential availability.
-2. [completed] Reuse the existing Google OAuth pair in both Convex environments.
-3. [completed] Confirm the auth server and UI already invoke both provider IDs.
-4. [completed] Configure the supplied GitHub OAuth App credentials in both Convex environments and deploy production.
 # Standard Tracify wordmark — 2026-08-10
 
-1. [completed] Capture the canonical Future 19 navbar logo treatment.
-2. [completed] Build a reusable accessible `BrandLogo` component.
-3. [completed] Adopt it across every production product-shell wordmark location.
-4. [completed] Run static checks and compare the auth header visually in-browser.
 # Simplified auth layout — 2026-08-10
 
-1. [completed] Remove the shared Future 19 intro/benefits region.
-2. [completed] Convert the auth body to a centered single-card layout.
-3. [completed] Verify all shared auth routes through static checks and browser QA.
 # Development password reset — 2026-08-10
 
-1. [completed] Confirm the reset handler exists in Better Auth configuration.
-2. [completed] Sync the current functions to development Convex.
-3. [completed] Verify the direct development reset endpoint succeeds without affecting a real account.
 
 # Responsive evaluation scoreboard — 2026-08-10
 
-1. [completed] Preserve the desktop comparison table from the `md` breakpoint upward.
-2. [completed] Add a compact stacked candidate comparison below `md`.
-3. [completed] Validate the section and document widths in a 375px browser viewport.
 
 # Official external logos — 2026-08-10
 
-1. [completed] Inventory external-brand visuals on public pages.
-2. [completed] Introduce a shared registry of official SVG/image sources.
-3. [completed] Replace homepage stand-ins and add matching integration-directory marks.
-4. [completed] Run lint, TypeScript, and browser image-load checks.
 
 # Public infrastructure disclosure — 2026-08-10
 
-1. [completed] Remove the Platform category from the customer-facing integration index.
-2. [completed] Retain only product compatibility and standards information.
-3. [completed] Verify the affected public section does not contain provider names.
 
 # Dashboard-only admin access — 2026-08-10
 
-1. [completed] Replace public Admin navigation with session-aware account actions.
-2. [completed] Create a shared owner-email allowlist for dashboard visibility and server access.
-3. [completed] Add the private Admin destination to the dashboard sidebar only.
-4. [completed] Validate lint, TypeScript, diff hygiene, and public navigation output.
 
 # Onboarding chrome and plain product branding — 2026-08-10
 
-1. [completed] Exclude `/onboarding` from the shared marketing shell.
-2. [completed] Add an explicit highlighted/plain option to the shared brand component.
-3. [completed] Use the plain mark in dashboard and onboarding application shells.
-4. [completed] Validate TypeScript and browser structure on the onboarding project route.
 
 # Onboarding API-key hashing configuration — 2026-08-10
 
-1. [completed] Identify which Convex deployment is missing the HMAC secret.
-2. [completed] Configure a cryptographically random secret only where missing.
-3. [completed] Verify development and preserve the existing production secret.
 
 # Tracify API-key secret naming — 2026-08-10
 
-1. [completed] Rename all runtime references to `TRACIFY_API_KEY_HASH_SECRET`.
-2. [completed] Copy each deployment's existing value to the new name without exposing it.
-3. [completed] Deploy Convex development and production against the new variable.
-4. [completed] Remove the obsolete Convex variables and verify static checks.
 
 # Stripe documentation skills — 2026-08-11
 
-1. [completed] Install the skills published through `https://docs.stripe.com`.
 
 # Stripe subscription billing — 2026-08-11
 
-1. [completed] Install Stripe CLI 1.45.2, agent tooling, and Projects plugin 0.32.0.
-2. [completed] Model flat-rate Pro and Team subscriptions with monthly and annual prices.
-3. [completed] Implement hosted Checkout, Customer Portal, signed webhook verification, and Convex state sync.
-4. [completed] Configure and verify the test-mode Stripe catalog and portal.
-5. [completed] Confirm Stripe KYC/account activation and configure the live catalog, portal, webhook, Vercel billing values, and production Convex sync.
-6. [completed] Push the verified release branch and deploy the application to Vercel production.
 7. [pending] Roll the exposed live secret, add a replacement restricted key directly to Vercel, and run a live-mode checkout smoke test.
 # Future 19 public-site migration — 2026-08-11
 
-1. [completed] Establish composable Future 19 page primitives and typographic rules.
-2. [completed] Replace generic marketing grids with route-specific editorial compositions.
-3. [completed] Preserve dynamic content, metadata, and existing interactions.
-4. [completed] Validate desktop/mobile rendering, accessibility-oriented semantics, TypeScript, lint, and production build.
 
 # Distinct Future 19 public-page compositions — 2026-08-11
 
-1. [completed] Identify the shared masthead and repeated section patterns across previously migrated routes.
-2. [completed] Recompose editorial, commercial, documentation, feature, use-case, operational, and legal pages around distinct page-specific concepts.
-3. [completed] Exercise representative static and dynamic routes at desktop and mobile widths.
-4. [completed] Pass focused ESLint, TypeScript, and diff-hygiene checks without modifying unrelated concurrent work.
 
 # Payload Neon initialization — 2026-08-12
 
-1. [completed] Configure the dedicated Neon connection for local development and Vercel.
-2. [completed] Install Neon’s official database-management agent skills.
-3. [completed] Generate the initial Payload schema migration.
-4. [completed] Apply the migration and verify it is recorded in Neon.
-5. [completed] Confirm the Payload posts endpoint responds successfully.
 6. [pending] Let the owner create the first administrator credentials at `/cms`.
 7. [pending] Review, commit, and deploy the integrated worktree safely.
-8. [completed] Add a dashboard Content entry for allowlisted administrators and enforce the same allowlist at `/cms`.
 
 # Unified production release — 2026-08-12
 
-1. [completed] Audit the branch history and mixed worktree for the requested recent-chat scope.
-2. [completed] Stage SEO, public-site, Payload blog/CMS, Stripe, Site 1/dashboard, Neon, and admin-access changes while excluding scratch artifacts.
 3. [pending] Commit the unified release and push its branch.
 4. [pending] Fast-forward `main`, push it, and verify Vercel's Git-backed production deployment.
 ## Direct pricing checkout (2026-08-12)
@@ -906,124 +665,50 @@ The single most important UI in the product.
 4. Verify lint/build, production environment, and deploy. — In progress
 # Dashboard onboarding escape and launch plan — 2026-08-12
 
-1. [completed] Identify the setup re-entry paths in onboarding and dashboard navigation.
-2. [completed] Make "Skip" an explicit durable preference.
-3. [completed] Replace setup-oriented overview actions with a dashboard-native Launch plan.
-4. [completed] Verify, commit, and push to `main` (`410ebfc`).
 
 # Managed Payments checkout â€” 2026-08-13
 
-1. [completed] Add the exact Stripe product creation command from the supplied blueprint.
-2. [completed] Apply `managed_payments[enabled]=true` and the required preview API version to Checkout Session creation.
-3. [completed] Verify the API change and product command with focused tests, linting, TypeScript, and diff checks.
 # Payload-to-Markdoc assessment — 2026-08-13
 
-1. [completed] Review supplied Markdoc material and the repository-specific Next.js constraints.
-2. [completed] Map the Payload-backed content model and all public consumers.
-3. [completed] Separate renderer migration effort from CMS/editorial feature replacement effort.
-4. [completed] Produce a repository-specific schedule and recommendation.
 # Payload-to-Markdoc migration — 2026-08-13
 
-1. [completed] Audit and export the 10 Payload drafts plus their category, tag, SEO, and image metadata.
-2. [completed] Build the validated Markdoc filesystem repository and React rendering boundary with red-green tests.
-3. [completed] Move every public blog consumer from Payload queries to Markdoc files.
-4. [completed] Remove Payload CMS routes, runtime configuration, generated schema/types, dependencies, scripts, and navigation.
-5. [completed] Validate the content corpus, TypeScript, focused lint, diff hygiene, production build, public feeds, CMS removal, and draft privacy.
 # Tracify content-authoring skill — 2026-08-13
 
-1. [completed] Identify baseline failures in writing quality and storage selection.
-2. [completed] Initialize a discoverable project-local skill with UI metadata.
-3. [completed] Add a concise authoring workflow, exact storage map, and separate blog/documentation quality bar.
-4. [completed] Add reusable Markdoc blog and internal Markdown document examples.
-5. [completed] Validate the skill package and register it in repository-wide agent instructions.
 
 # Markdoc blog release — 2026-08-13
 
-1. [completed] Publish the AI agent observability guide.
-2. [completed] Remove the post-level newsletter CTA and refine the author signature.
-3. [completed] Run content tests, focused lint, TypeScript, diff hygiene, and production build.
-4. [completed] Commit, merge, push, verify Vercel, confirm no obsolete Payload variables remain, and restart localhost.
 
 # Blog discovery and internal linking — 2026-08-13
 
-1. [completed] Add a tested contextual internal-link contract.
-2. [completed] Replace generic link blocks with natural anchored links in all published articles.
-3. [completed] Pressure-test and update the future-agent writing skill and template.
-4. [completed] Build a restrained three/two/one-column bento grid and remove the page-level newsletter.
-5. [completed] Production and responsive layout-contract verification pass; commit `1717d19` is live and verified.
 
 # Interactive Markdoc authoring rule — 2026-08-13
 
-1. [completed] Define a right-interaction/right-article decision matrix.
-2. [completed] Specify safe centralized Markdoc and React implementation boundaries.
-3. [completed] Update the authoring skill, quality bar, publishing README, and AGENTS rules.
-4. [completed] Validate instructions, 14 content/UI tests, and the 80-page production build.
 
 # Agent Git workflow policy — 2026-08-13
 
-1. [completed] Make `codex/<description>` plus draft PR the default workflow.
-2. [completed] Limit direct `main` pushes to explicit, low-risk content fixes with passing checks.
-3. [completed] Require staged-diff review and exclusion of scratch or unrelated changes.
 
 # Root robots.txt route — 2026-08-13
 
-1. [completed] Move `robots.ts` from the `(frontend)` route group to the App Router root.
-2. [completed] Verify the generated route in a fresh production build.
-3. [completed] Commit, merge, and deploy the isolated fix; live `/robots.txt` and `/sitemap.xml` both return HTTP 200.
 
 # Payload CMS dashboard access â€” 2026-08-13
 
-1. [completed] Trace the live dashboard and Payload authorization paths.
-2. [completed] Correct the owner email and share the server-side authorization result with the dashboard shell.
-3. [completed] Commit, deploy to Vercel production, and verify the authenticated live experience.
 
 # Admin hub â€” 2026-08-13
 
-1. [completed] Consolidate the dashboard's private navigation under one Admin entry.
-2. [completed] Add the access-controlled `/admin` choice page for the library and Payload CMS.
-3. [completed] Verify the production deployment and live authorized flow.
 # llms.txt and SEO audit — 2026-08-13
 
-1. [completed] Compare the public discovery surface with the llms.txt proposal and current Google guidance.
-2. [completed] Add a curated `/llms.txt` with canonical documentation, product, guide, and policy links.
-3. [completed] Add a content contract test and repository maintenance rules.
-4. [completed] Verify content tests, the production build, and staged scope.
 # Product page depth and SEO hardening — 2026-08-13
 
-1. [completed] Audit all product routes, source-backed capabilities, and Next.js metadata conventions.
-2. [completed] Use comparable observability sites to inform information architecture without copying claims or visual design.
-3. [completed] Build nine feature-specific product narratives and visual instruments without changing the landing page.
-4. [completed] Correct sitemap freshness and enrich blog/product structured data.
-5. [completed] Complete production verification, record the result, and publish the branch.
 
 # Vercel preview deployment recovery — 2026-08-13
 
-1. [completed] Read the failed deployment logs and identify the missing Preview configuration.
-2. [completed] Compare Vercel Preview variable names with the application auth configuration.
-3. [completed] Configure `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` for Preview using the isolated development deployment.
-4. [completed] Redeploy the exact failed commit and verify build completion plus final `READY` state.
-5. [completed] Record the durable staging requirement in repository documentation.
 
 # Page-specific site redesign — 2026-08-14
 
-1. [completed] Inventory in-scope routes and isolate the shared masthead/band repetition.
-2. [completed] Capture desktop and mobile evidence and select the mobile Section Switchboard direction.
-3. [completed] Implement and visually verify large mobile accordion and destination buttons.
-4. [completed] Assign and implement a distinct page-purpose composition for every in-scope public route.
-   - [completed] Pricing decision canvas.
-   - [completed] Integrations connection map.
-   - [completed] Four use-case-specific layouts.
-   - [completed] Product, operational, company, and legal routes.
-5. [completed] Recompose onboarding and auth routes around their individual tasks.
-6. [completed] Run route-coverage, responsive, interaction, accessibility, lint, type, content, and build gates.
 7. [pending] Review staged scope, commit the feature branch, publish a draft PR, and verify Preview.
 
 # SEO release guardrails — 2026-08-14
 
-1. [completed] Capture why commits pushed after PR #5 merged were absent from `main`.
-2. [completed] Define public-page SEO checks and explicit indexability rules.
-3. [completed] Define commit-ancestry, clean-tree, Vercel-project, production-alias, IndexNow, and Ahrefs verification gates.
-4. [completed] Register the checklist in `AGENTS.md` and durable project memory.
 
 ## SAML login integration (2026-08-14)
 1. Install the official `@better-auth/sso` plugin.
@@ -1044,23 +729,12 @@ The single most important UI in the product.
 
 # Docs navigation and AI handoff
 
-1. [completed] Make the documentation taxonomy available as a responsive, categorized sidebar.
-2. [completed] Add article-level Markdown copy and ChatGPT/Claude handoff controls with concise supporting copy.
-3. [completed] Implement a public read-only MCP surface for listing, searching, and reading the full documentation corpus.
-4. [completed] Run final checks, inspect the scoped diff, and publish the follow-up through draft PR #13.
 
 # EU/US regional cloud — 2026-08-15
 
-1. [completed] Establish one-codebase/two-region invariants and a pre-auth region selector.
-2. [completed] Bind new API keys, SDK hosts, ingestion, auth origins, and billing metadata to EU or US.
-3. [completed] Provision isolated Convex deployments and deploy a region-reporting health route to each.
-4. [completed] Provision two Vercel projects and apply matching production and preview environment configuration; Git automation remains disconnected until merged release readiness.
-5. [completed] Attach the requested regional hostnames and record the authoritative DNS records still required.
-5a. [completed] Add regional Redis-backed project ingestion quotas and explicit retry responses.
 6. [in progress] Provision independent Tinybird, Redis, and Inngest resources; current provider credentials do not permit unattended workspace creation.
 7. [pending] Configure regional OAuth callbacks and Stripe webhook signing secrets.
 8. [pending] Verify DNS/TLS, deep health, authentication, onboarding, ingestion isolation, wrong-region rejection, and dashboards in both regions.
-9. [completed] Complete build/type/content/SDK gates, browser-check the selector, and publish draft PR #14.
 
 # EU-first regional launch revision — 2026-08-16
 
@@ -1074,18 +748,14 @@ The single most important UI in the product.
 
 Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 
-1. [completed] PR #17 restricts the public selector to EU via an `available` flag in
    `src/lib/regions.ts`, rejects dormant regions server-side in `/api/region/select`, and filters
    the status board. The US implementation stays defined and routable but unadvertised.
-2. [completed] Rebuilt the EU stateful services in genuinely EU regions after discovering that
    GCP `europe-west2` is London, UK — not the EU. Tinybird workspace recreated as
    `tracify_eu_west1` (AWS eu-west-1) with all four datafiles deployed; Redis moved to Upstash
    (primary eu-west-1, TLS) because Redis Cloud's free tier gates TLS behind a paid plan.
    Every region verified by IP against the provider's published ranges.
-3. [completed] `eu.cloud.tracify.tech` DNS via CNAME to `5ee7be47305fd6c5.vercel-dns-017.com`,
    TLS issued, Google/GitHub callbacks registered, EU Stripe webhook
    `we_1U5YRMV05QqKbrt9FFuI0zWx` created with its signing secret set.
-4. [completed] Merged `091d9da` and deployed it to both `tracify-cloud-eu` and the marketing
    `tracify` project from a clean detached worktree. `/api/health/region` returns 200 with all
    four dependencies healthy, which also proved the two write-only Vercel values
    (`TINYBIRD_TOKEN`, `REDIS_URL`) are correct.
@@ -1111,194 +781,100 @@ Supersedes the 2026-08-16 revision above; items 1-4 there are now complete.
 
 # PR #19 conflict recovery — 2026-08-20
 
-1. [completed] Reproduce the conflicting PR in an isolated detached worktree.
-2. [completed] Rebase its four commits onto current `origin/main` and resolve the planning-file conflict without restoring stale infrastructure instructions.
-3. [completed] Compare old and rebased commit ranges and run TypeScript, content, diff-hygiene, focused lint, and production-build gates.
-4. [completed] Obtain explicit authorization, update the existing PR branch with an exact force-with-lease, and verify GitHub mergeability/checks.
 5. [follow-up] Run the authenticated browser smoke test over the high-risk dashboard visualization surfaces; the app browser runtime could not initialize during recovery.
 
 # gstack and safe PR merges — 2026-08-20
 
-1. [completed] Install Bun and gstack 1.68.2 outside the repository.
-2. [completed] Register namespaced gstack skills for Codex and Claude Code with telemetry, auto-upgrades, update checks, team mode, and plan-tune hooks disabled.
-3. [completed] Review PR #23's `.tinyb` fallback, validate its real file shape and failure behavior, and squash-merge it as `3e656e1`.
-4. [completed] Rebase the validated PR #19 series plus tracking updates onto the new `origin/main`, then push with an exact force-with-lease.
-5. [completed] Merge PR #19 only after GitHub reports it mergeable and all GitGuardian/Vercel checks succeed; `origin/main` contains squash commit `1a5555f`.
 
 # SDK publishing dry-run repair — 2026-08-20
 
-1. [completed] Confirm `tracify-sdk` is absent from npm and PyPI and the publishing workflow had never run.
-2. [completed] Trigger a non-publishing workflow dry run. Python tests and distributions pass; npm fails because `vitest` is not installed.
-3. [completed] Install dependencies from the standalone `packages/ts-sdk` package in CI and verify its build, 27 tests, and tarball.
-4. [completed] Validate that `NPM_TOKEN` belongs to intended npm owner `tracifytech`; enforce that owner through `EXPECTED_NPM_USER`.
-5. [completed] First-publish `tracify-sdk@0.2.0` to PyPI through CI and npm through the owner's interactive 2FA session, then clean-install and import both public artifacts.
 6. [follow-up] Configure npm and PyPI trusted publishers for tokenless future releases; npm staged publishing is now available because the package exists.
 
 # AI agent monitoring article polish — 2026-08-21
 
-1. [completed] Compare the supplied Semrush guide, ROI-framework, and prompt-library structures and extract reusable editorial patterns without copying their branding or wording.
-2. [completed] Add a reusable static `runthrough` Markdoc component and apply six checkpoints only to the monitoring article.
-3. [completed] Close the TOC by default, use the Tracify yellow progress bar, render `C:\` before monitoring H2 headings, and harden focus/overflow/reduced-motion styles.
-4. [completed] Rework the article's latter sections into layered H3/H4 hierarchy, add visual evidence throughout, distribute contextual links, and remove the standalone link list.
-5. [completed] Codify definitive-guide, decision-framework, practical-library, tutorial, and comparison archetypes in the required authoring workflow.
-6. [completed] Verify content contracts, changed-file lint, diff hygiene, the full 116-route production build, and a local 200 rendered response containing six runthroughs, five FAQ accordions, and a closed TOC.
 
 # AI agent monitoring usability correction — 2026-08-22
 
-1. [completed] Remove the `C:\\MONITOR` runthrough cards and restore a restrained `/` H2 marker.
-2. [completed] Turn the strongest operational guidance into inline decision notes and remove the useless pseudo-alert sample.
-3. [completed] Preserve only adaptable YAML/JSON examples, identify their languages correctly, and render them in neutral dark-gray scroll containers.
-4. [completed] Wrap native tables in accessible, focusable overflow regions and prevent page-level mobile overflow or mid-word splitting.
-5. [completed] Fix article top spacing and Back to blog contrast, then render three recommended article cards at the bottom.
-6. [completed] Verify link density, content contracts, focused lint, diff hygiene, responsive browser behavior, and the full production build.
 # Future content quality gate — 2026-08-24
 
-1. [completed] Increase completed-item strikethrough decoration opacity in the dashboard launch plan.
-2. [completed] Make the future-agent content workflow explicit and mandatory in both the writing skill and blog publishing README.
-3. [completed] Run content, focused lint, full lint, build, diff, and rendered-style verification; content/focused checks pass, while full lint and build report unrelated pre-existing repository issues.
 
 # Google Search Console indexing triage — 2026-08-24
 
-1. [completed] Audit robots, sitemap, redirects, and canonical metadata against the reported categories.
-2. [completed] Add explicit canonicals for intentionally noindex utility/preview routes.
-3. [completed] Run the content validation suite and live sitemap/status checks.
-4. [completed] Exclude archived video source from TypeScript and complete the production build.
-5. [completed] Deploy the exact commit to a clean Vercel Preview and verify the changed route metadata.
 6. [pending] Merge/deploy through the production `origin/main` workflow, then validate the exact affected URLs and request reindexing in Search Console.
 # AI agent monitoring blog refinement — 2026-08-21
 
-1. [completed] Inspect the single article, Markdoc contract, shared TOC, code renderer, and page styles.
-2. [completed] Add full-article structure, FAQ accordion, scoped background/code treatment, and mobile-safe TOC/overflow rules.
-3. [completed] Validate Markdoc/content tests, focused ESLint, local response status, and diff hygiene; browser runtime initialization remains unavailable.
 
 # LLM tracing article refinement — 2026-08-25
 
-1. [completed] Establish a clean `codex/blog-llm-tracing-format` worktree from `origin/main`.
-2. [completed] Replace duplicated article sections with a concise reader/job/outcome/boundary structure and truthful tracing examples.
-3. [completed] Verify content contracts, internal links, FAQ count, image inventory, image HTTP status, and diff scope.
 4. [pending] Run the full build and rendered desktop/mobile route checks with the required Convex environment configured, then open a focused PR.
 
 # LLM observability metrics refinement — 2026-08-25
 
-1. [completed] Establish a clean branch from the merged LLM tracing baseline.
-2. [completed] Replace duplicated article sections with an outcome-led metric selection and response framework.
-3. [completed] Verify Markdoc contracts, links, interaction, image, build, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
 # AI agent regression testing guide refinement — 2026-08-25
 
-1. [completed] Establish a clean branch from the merged production-debugging baseline.
-2. [completed] Replace appended legacy sections with a production-trace regression and release-gate guide.
-3. [completed] Verify Markdoc contracts, links, interaction, image inventory, build, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
 # Production debugging guide refinement — 2026-08-25
 
-1. [completed] Establish a clean branch from the merged RAG-evaluation baseline.
-2. [completed] Replace duplicated article sections with a production incident reconstruction and verification guide.
-3. [completed] Verify Markdoc contracts, links, interaction, image inventory, build, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
 # RAG evaluation guide refinement — 2026-08-25
 
-1. [completed] Establish a clean branch from the merged testing-guide baseline.
-2. [completed] Replace appended legacy sections with a retrieval, groundedness, usefulness, and release-gate guide.
-3. [completed] Verify Markdoc contracts, links, interaction, image inventory, build, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
 # AI agent testing guide refinement — 2026-08-25
 
-1. [completed] Establish a clean branch from the merged observability-guide baseline.
-2. [completed] Replace duplicated article sections with a layered testing and production-feedback guide.
-3. [completed] Verify Markdoc contracts, links, interaction, image inventory, build, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
 # AI agent observability guide refinement — 2026-08-25
 
-1. [completed] Establish a clean branch from the merged reliability-guide baseline.
-2. [completed] Replace duplicated article sections with an outcome-led observability and evidence model.
-3. [completed] Verify Markdoc contracts, links, interaction, image inventory, build, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
 # AI agent reliability guide refinement — 2026-08-25
 
-1. [completed] Establish a clean branch from the merged evaluation-guide baseline.
-2. [completed] Replace duplicated article sections with a failure taxonomy, bounded retry, guardrail, and recovery guide.
-3. [completed] Verify Markdoc contracts, links, interaction, image inventory, build, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
 # AI agent evaluation guide refinement — 2026-08-25
 
-1. [completed] Establish a clean branch from the merged production-readiness baseline.
-2. [completed] Replace duplicated article sections with a representative-evidence and release-gate evaluation guide.
-3. [completed] Verify Markdoc contracts, links, interaction, image inventory, build, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
 # Production-ready AI agents article refinement — 2026-08-25
 
-1. [completed] Establish a clean branch from the merged architecture baseline.
-2. [completed] Replace duplicated article sections with a measurable production-readiness and stewardship guide.
-3. [completed] Verify Markdoc contracts, links, interaction, image, build, lint result, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
 # AI agent architecture article refinement — 2026-08-25
 
-1. [completed] Establish a clean branch from the merged latency baseline.
-2. [completed] Replace duplicated article sections with a contract-and-boundary architecture guide.
-3. [completed] Verify Markdoc contracts, links, interaction, image, build, lint result, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
 # LLM latency article refinement — 2026-08-25
 
-1. [completed] Establish a clean branch from the merged metrics baseline.
-2. [completed] Replace duplicated article sections with an outcome-led latency measurement and optimization sequence.
-3. [completed] Verify Markdoc contracts, links, interaction, image, build, lint result, and diff evidence.
 4. [pending] Publish the branch, inspect the rendered preview at desktop/mobile widths, and merge after hosted checks pass.
 
 # Long-form blog corpus enforcement — 2026-08-26
 
-1. [completed] Add the 3,000–10,000 hard validator gate and document the 4,000–8,000 editorial target for every agent and future post.
-2. [completed] Expand every published article below 4,000 body words with operational, evidence-led sections while preserving frontmatter and links.
-3. [completed] Verify the full 35-post count audit, framework/link/Markdoc tests, build, and diff hygiene.
 4. [in_progress] Create branch/commit, open PR, inspect hosted checks, and merge after release verification.
 
 # AI evaluation metrics editorial and UX rebuild — 2026-08-26
 
-1. [completed] Rebuild the article hierarchy, teaching sequence, callouts, FAQ, and ending while preserving route, metadata, anchors, publication state, and the 3,000–10,000 contract.
-2. [completed] Centralize the editorial panel renderer and dynamic related-post selector, with tests for curated order, category/recency fallback, self/draft/missing exclusion, and deduplication.
-3. [completed] Add two project-bound lower-half visuals plus a unique article-specific hero, card-specific selection contrast, and deliberate highlight pacing; verify desktop and 390px rendering with no page overflow.
-4. [completed] Pass 20 content tests, 3 related-post tests, focused ESLint, media/route HTTP checks, and `git diff --check`; record the unrelated dashboard TypeScript blocker encountered after successful production compilation.
-5. [completed] Update the future-agent contract so hero and teaching visuals must be compositionally unique to each article, with no cross-post reuse or recolor-only variants.
 6. [pending] Keep the pass local and uncommitted until visual approval, then force-add the ignored media assets and create the requested focused PR.
 
 # Reusable Tracify blog-quality skill — 2026-08-26
 
-1. [completed] Keep one canonical automatically triggered skill and define `ai-evaluation-metrics` as a quality benchmark rather than a copyable article template.
-2. [completed] Add a reusable editorial blueprint and new-post scaffold with visual pacing requirements spanning the opening, midpoint, lower half, action ending, and five-item FAQ.
-3. [completed] Implement a targeted validator with clear issue codes and a regression test proving that the benchmark passes while an intentionally poor post fails.
-4. [completed] Wire the gate into package scripts, `AGENTS.md`, the writing skill, skill UI metadata, and the publishing README.
-5. [completed] Run the strict article gate, 22 content tests, focused lint, skill validation, build compilation/typecheck, and diff checks; preserve unrelated known blockers as separate evidence.
 6. [pending] Force-add ignored `.agents` additions and media assets, then include them in the focused article/renderer/skill PR after approval.
 
 # Rename project blog skill — 2026-08-26
 
-1. [completed] Rename the folder, skill frontmatter ID, heading, UI display name, and default `$skill` prompt to `tracify-blog-tool`.
-2. [completed] Redirect all active repository instructions and validation commands to `.agents/skills/tracify-blog-tool/`.
-3. [completed] Validate the renamed skill package, parse its UI metadata, and rerun its strict article gate and 22-test content suite.
 4. [pending] Force-add the renamed skill directory when preparing the focused PR because the local repository exclude rule hides new `.agents` paths.
 # 2026-09-02 — Trust-first lifecycle implementation
 
 Implemented the first slice: consent-gated analytics, a reusable consent utility/banner, real contact lead submission endpoint, Convex lead and note storage with admin authorization, and a Resend-compatible email adapter that logs safely when `RESEND_API_KEY` is absent. Remaining verification is Convex codegen plus lint/type/build checks; the current Windows shell cannot locate Node.
 # EU deployment readiness audit — 2026-09-02
 
-- [x] Inventory regional providers and code paths; verify dormant US remains unavailable.
-- [x] Probe public EU health, region selection, ingest, OTLP, security, and status surfaces.
-- [x] Document evidence-backed residency limits and provider-owner follow-up actions.
 - [ ] Owner: restore/verify EU Redis, configure EU Stripe billing variables, and decide on an EU queue replacement if strict processing residency is required.
 # Activation path follow-up — 2026-09-02
 
-1. [completed] Inspect landing, demo, pricing, contact, signup, quickstart, SDKs, and dashboard start state.
-2. [completed] Correct quickstart navigation and authenticated first-trace/demo handoffs.
 3. [pending] Verify focused contracts, lint/typecheck, and desktop/mobile routes.
 ## Consent analytics verification (2026-09-02)
 
@@ -1317,15 +893,9 @@ Implemented the first slice: consent-gated analytics, a reusable consent utility
 The existing lead slice already covers Convex persistence, admin authorization, status transitions, assignment, notes, Redis rate limiting, deduplication, and non-fatal email delivery. This pass added aggregate request-size and JSON-object validation and expanded the inbox presentation of required lead metadata. Verification is pending because Node/npm are unavailable in the current shell.
 # Release-readiness disclosure update — 2026-09-02
 
-- [completed] Reconciled public privacy and security disclosures with the current regional architecture: EU storage in Ireland, Stripe as the separate billing processor, and Inngest Cloud span-event processing in US infrastructure. Analytics copy now matches the approved-by-default consent behavior.
 # SEO/AEO blog ideation — 2026-09-03
 
-1. [completed] Inspect canonical editorial requirements and existing published slugs.
-2. [completed] Identify durable topic gaps across agent operations, evaluation, reliability, security, and buyer education.
-3. [completed] Produce 10 detailed briefs with primary queries, question targets, article archetype, outline, evidence, interaction, and conversion path.
 ## Email sender configuration
-- [x] Use a personal verified sender identity for transactional mail.
-- [x] Document `RESEND_API_KEY`, `EMAIL_FROM`, and `EMAIL_REPLY_TO` in the local environment template.
 - [ ] Owner adds the Resend API key and verifies `kb@tracify.tech`/`tracify.tech` in Vercel and Resend.
 # 2026-09-03 — Langfuse parity and release operating model
 
@@ -1361,14 +931,10 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 - Do not claim end-to-end completion until a customer-provided ERPNext sandbox is tested successfully.
 - Added the initial REST client boundary in `src/lib/erpnext.ts`; next code work is credential storage, project authorization, delivery wiring, and settings UI.
 
-1. [completed] Keep Plane content separate from Tracify's own self-hosting guide.
-2. [completed] Add a canonical `/docs/plane-integration` Markdoc page grounded in Plane's developer documentation.
 3. [pending] Validate the documentation route and content contracts.
 
 # Private Plane workspace — 2026-09-03
 
-1. [completed] Define Plane as an internal project-management system for Tracify.
-2. [completed] Remove the erroneous public integration page and document the isolated VPS architecture.
 3. [pending] Provision and harden the VPS, configure a Cloudflare Tunnel for `plane.tracify.tech`, Cloudflare Access/MFA, SMTP, backups, and the private Tracify workspace.
 # Explore / Build playground and site assistant — 2026-09-04
 
@@ -1392,9 +958,6 @@ The first literal trace-path and pixel-`T` drafts were rejected as too busy and 
 
 # 2026-09-05 — EU cloud TLS regression
 
-1. [completed] Reproduce the public failure and identify the failing layer.
-2. [completed] Confirm the Cloudflare record and Vercel deployment are otherwise configured.
-3. [completed] Test the owner-selected DNS-only/Vercel path; curl succeeds but Chrome still rejects the Vercel TLS handshake.
 4. [pending] Resolve Vercel custom-domain TLS renegotiation or migrate to a one-level hostname covered by the free certificate.
 
 # Langfuse clone surface — 2026-09-06
@@ -1406,47 +969,14 @@ Latest parity pass (2026-09-08): corrected visible captured-workspace labels and
 
 # Langfuse empty dashboard parity — 2026-09-06
 
-1. [completed] Read the supplied handoff and inspect the captured empty-home reference.
-2. [completed] Add a maintainable React overview component with dark cards, empty chart states, controls, and responsive behavior.
-3. [completed] Connect the empty-project branch to the existing project route and preserve the populated overview path.
-4. [completed] Add a scoped dark shell/sidebar treatment and Tracify-native navigation links.
-5. [completed] Run focused ESLint, TypeScript, and diff hygiene checks; remove stale generated references created by the existing dev server.
-6. [completed] Restore local Convex startup with a backwards-compatible legacy lead-record schema adjustment; new lead writes still populate both delivery fields.
-7. [completed] Compare a clean isolated preview against the captured desktop reference and verify tab/model controls change state.
 8. [pending] Repeat the comparison through the authenticated production route once the local browser session has a usable project identity.
 
 # Tracify dashboard feature parity — 2026-09-06
 
-1. [completed] Apply the dark Tracify cloud shell and shared selectors across dashboard routes.
-2. [completed] Add a local populated tracing surface with search, filters, table/chart modes, columns, and seeded trace metadata.
-3. [completed] Add the populated tracing surface with search, filters, table/chart modes, columns, and seeded trace metadata.
-4. [completed] Add the operations surface with Sessions, Users, Alerts, search, and alert severity filtering.
 5. [pending] Replace seeded preview data with authenticated Convex-backed trace/session/user data and carry the feature treatment through the remaining dashboard modules.
 6. [in progress] Finish route-by-route parity for dashboards, users, scores, evaluators, human annotation, and settings using authenticated project data; navigation, Scores, Users, and the authenticated Operations route are now exposed.
 7. [pending] Run matching-viewport visual review across the captured route set and fix remaining layout/interaction mismatches.
 8. [in progress] Match dashboard editor controls and remaining captured interaction details before the final route audit.
-9. [completed] Add an interactive dashboard widget library and clone feedback to the project Dashboards route.
-10. [completed] Add direct Evaluators and Human Annotation project routes to match the captured navigation destinations.
-11. [completed] Keep command-menu navigation aligned with the expanded dashboard destination set.
-12. [completed] Make project settings tab query navigation functional for sidebar deep links.
-13. [completed] Add secondary project-settings navigation covering the captured settings destinations and mapping each to an existing Tracify workflow.
-14. [completed] Add the organization workspace route with live organization/project selection and project creation entry point.
-15. [completed] Add real New organization creation to the workspace screen.
-16. [completed] Add a first-class Tracing project route and align navigation with the captured destination name.
-17. [completed] Add a first-class Prompt Management project route and preserve the Prompts compatibility route.
-18. [completed] Connect project overview metrics to authenticated Convex summary/evaluation queries without changing the captured empty-state layout.
-19. [completed] Connect the overview's model, user-consumption, and latency summaries to the existing project-stats API.
-20. [completed] Add compact live model and end-user breakdowns inside the overview panels.
-21. [completed] Render selected dashboard-editor widgets in the overview after Add Widget.
-22. [completed] Persist dashboard-editor widget selection per project for repeatable workspace behavior.
-23. [completed] Add removal controls so persisted dashboard widgets can be edited down as well as added.
-24. [completed] Add a dedicated LLM Connections settings workflow with safe masked local metadata handling.
-25. [completed] Add functional overview filter controls matching the captured dashboard toolbar.
-26. [completed] Add a dedicated Model Definitions settings workflow with editable provider pricing metadata.
-27. [completed] Add a dedicated Scores Configs settings workflow with editable score thresholds.
-28. [completed] Add a dedicated MCP & CLI settings workflow with copyable developer-access snippets.
-29. [completed] Add a dedicated Exports settings workflow backed by live trace filtering and CSV export.
-30. [completed] Add a dedicated project-scoped Notifications settings workflow.
 31. Move the regional cloud switcher into the dashboard top bar before the remaining dashboard selectors; preserve the cloud-directory destination and verify it on both local hosts.
 32. Add a dedicated Batch Actions settings surface using the existing run selection/export workflow and enable the already-implemented Notifications tab.
 33. Add a real project-scoped audit log table, record settings/API-key changes, and expose a dedicated Audit Logs settings page.
@@ -1498,20 +1028,8 @@ Latest parity pass (2026-09-08): corrected visible captured-workspace labels and
 79. Add a reversible Tracify-branded dashboard presentation layer with legacy/v2 preview controls while preserving existing functionality.
 80. Keep the Explore and region choices as separate steps, carry a stable simulated user ID into the playground URL, and verify the production Vercel and Convex deployments before release.
 81. Fix the Better Auth/Convex callback race, preserve the immersive playground return query through sign-in, and align regional Better Auth host resolution.
-81. [completed] Stabilize direct project-route empty states so invalid or inaccessible IDs never render project-specific Convex queries before authentication and route validation.
-82. [completed] Decouple the deterministic Explore Playground simulator from the stale regional `sandbox` deployment while preserving scenario, filter, alert, and trace-detail interactions.
-83. [completed] Verify the corrected EU Vercel environment binding, production build, TypeScript, focused lint, and 6-case account-access browser contract.
-84. [completed] Add the missing EU Vercel Production `CONVEX_SITE_URL`, confirm the merged main deployment is Ready on `eu.cloud.tracify.tech`, and smoke-test the live Playground controls.
 
-85. [completed] Migrate authenticated Build Sessions list and detail routes to the captured localhost:4173 workspace renderer with live Convex records.
-86. [completed] Migrate authenticated Build Costs to a first-class captured surface backed by live project trace costs.
-87. [completed] Migrate authenticated Build Prompt Management presentation to the captured prompt collection using live prompt/version data.
-88. [completed] Wire captured prompt editor actions to the existing prompt mutations; create, rename, and version-save actions now persist through Convex.
-89. [completed] Migrate authenticated Evaluators, Datasets, and Scores presentations to the captured renderer with live Convex records.
-90. [completed] Restore captured prompt/evaluation action wiring and migrate Alerts and Settings while preserving existing mutations.
-91. [completed] Migrate authenticated Alerts and Settings presentation to the captured renderer with live project data.
 92. [in progress] Restore action wiring for captured evaluation/admin controls and run the full authenticated route/interactions verification matrix; prompt, evaluator, dataset, alert, dashboard, settings, annotation, and session actions are now connected.
-93. [completed] Fix captured tracing record links to render detail views and verify the filter/detail/read-only interaction path.
 94. [next] Run the complete account-access contract and final Build route/button audit after the latest parity changes.
 
 ## Explore/Build parity spec — 2026-09-08

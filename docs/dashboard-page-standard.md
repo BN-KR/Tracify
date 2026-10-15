@@ -201,3 +201,10 @@ Attach this evidence to the PR before asking for owner approval:
    - any counts the page shows for groups or map elements equal the filtered list totals;
    - screenshots at desktop (1440×900) and phone (390×844) widths, with no horizontal overflow.
 3. The owner has looked at the preview and approved it. Visual changes never merge without that.
+
+## Selected-column CSV export
+
+Export the visible page using exactly its selected columns and their display order, including optional
+aggregates and metadata. Use explicit UTC/ms/USD headers, full IDs, raw numeric precision and zeroes;
+missing values stay blank. Tags use unambiguous JSON. Keep quoting, embedded-newline handling and
+spreadsheet-formula protection. Disable export while optional column values are loading.
