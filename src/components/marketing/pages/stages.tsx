@@ -130,7 +130,7 @@ const calls = [
 ];
 
 export function ToolStage({ p, active, count }: StageProps) {
-  const local = clamp(p * count - active) * 1.6;
+  const local = clamp(p * count - active) * 1.6 + 0.4;
   const c = calls[active];
   const shown = c.code.slice(0, Math.floor(c.code.length * clamp(local)));
   return (

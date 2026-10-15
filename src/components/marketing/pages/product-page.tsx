@@ -1,6 +1,7 @@
 "use client";
 
 import { ArtBand, CapabilityGrid, EndCta, Faq, PageHero, SignalTicker, StickyStory } from "./page-kit";
+import { CodeSection, snippets } from "./code-section";
 import { CostStage, FailureStage, ModelStage, ToolStage, TraceStage } from "./stages";
 
 export type ProductPageData = {
@@ -97,6 +98,7 @@ export function ProductPage({ slug, page }: { slug: ProductSlug; page: ProductPa
       <PageHero eyebrow={c.eyebrow} title={c.headline} lead={page.description} img={c.hero} facts={c.facts} primary={["Start tracing free", "/sign-up"]} secondary={["Read the docs", "/docs"]} />
       <SignalTicker items={c.ticker} />
       <StickyStory kicker={c.kicker} heading={c.story} steps={page.workflow} stage={(s) => <Stage {...s} />} />
+      <CodeSection snippet={snippets[slug]} />
       <CapabilityGrid heading={page.outcome} items={page.details} />
       <ArtBand img={c.band} label="Who it is for" statement={c.statement} aside={page.bestFor} />
       <Faq items={page.faq} />

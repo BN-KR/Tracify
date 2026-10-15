@@ -1,6 +1,7 @@
 "use client";
 
 import { ArtBand, CapabilityGrid, EndCta, PageHero, SignalTicker, StickyStory } from "./page-kit";
+import { CodeSection, snippets } from "./code-section";
 import { ChainStage, type ChainRow, type Meter } from "./stages";
 
 export type UseCaseData = {
@@ -148,6 +149,7 @@ export function UseCasePage({ slug, page }: { slug: string; page: UseCaseData })
       <PageHero eyebrow={c.eyebrow} title={page.statement} lead={page.description} img={c.hero} facts={c.facts} primary={["Start tracing free", "/sign-up"]} secondary={["Read the docs", "/docs"]} />
       <SignalTicker items={page.signals.map((s) => s.split(" — ")[0])} />
       <StickyStory kicker={c.kicker} heading={c.story} steps={steps} stage={(s) => <ChainStage {...s} rows={c.rows} title={page.title} flagTag={c.flagTag} meter={c.meter} />} />
+      <CodeSection snippet={snippets[slug]} />
       <ArtBand img={c.band} label="The failure to catch" statement={page.failure} aside={page.description} />
       <CapabilityGrid heading="What Tracify watches." items={signals} />
       <EndCta heading={c.cta} links={all.filter(([, h]) => !h.endsWith(slug))} />
