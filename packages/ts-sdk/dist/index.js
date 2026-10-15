@@ -1,7 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.decision = exports.toolCall = exports.llmCall = exports.TracifyClient = exports.TRACIFY_REGION_HOSTS = void 0;
+exports.TracifyLangGraphHandler = exports.wrapAnthropic = exports.wrapOpenAI = exports.decision = exports.toolCall = exports.llmCall = exports.Step = exports.TracifyClient = exports.MAX_PAYLOAD_CHARS = exports.TRACIFY_REGION_HOSTS = void 0;
+exports.currentRunId = currentRunId;
+exports.currentTraceContext = currentTraceContext;
+exports.integrationPayload = integrationPayload;
+exports.currentSpanId = currentSpanId;
+exports.span = span;
+exports.observe = observe;
 exports.traceAgent = traceAgent;
+const node_async_hooks_1 = require("node:async_hooks");
 exports.TRACIFY_REGION_HOSTS = {
     eu: "https://eu.cloud.tracify.tech",
     us: "https://us.cloud.tracify.tech",
@@ -18,6 +25,46 @@ function apiKeyRegion(apiKey) {
     if (apiKey.startsWith("tracify_sk_live_"))
         return "eu";
     return undefined;
+}
+/**
+ * The current run and step for this async call chain. AsyncLocalStorage keeps concurrent runs apart, so steps
+ * from two agents running at once never land in each other's trace.
+ */
+const stepContext = new node_async_hooks_1.AsyncLocalStorage();
+function currentRunId() {
+    return stepContext.getStore()?.runId || process.env.TRACIFY_CURRENT_RUN_ID || 'unknown';
+}
+function currentTraceContext() { return stepContext.getStore(); }
+function integrationPayload(value) { return payload(value); }
+function currentSpanId() {
+    return stepContext.getStore()?.spanId;
+}
+exports.MAX_PAYLOAD_CHARS = 10000;
+const SECRET_PATTERNS = [
+    /\bbearer\s+[a-z0-9._~+/=-]{12,}/gi,
+    /\b(?:sk|pk|rk)[-_](?:live|test|proj|ant)?[-_]?[A-Za-z0-9_-]{16,}/g,
+    /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g,
+];
+const SECRET_FIELD = /((?:api[_-]?key|password|secret|token)["']?\s*[:=]\s*["']?)[^\s"',}]{6,}/gi;
+/** Serialise an input or output, remove obvious secrets and cap its size. */
+function payload(value) {
+    if (value === undefined || value === null)
+        return '';
+    let text;
+    if (typeof value === 'string')
+        text = value;
+    else {
+        try {
+            text = JSON.stringify(value);
+        }
+        catch {
+            text = String(value);
+        }
+    }
+    for (const pattern of SECRET_PATTERNS)
+        text = text.replace(pattern, '[redacted]');
+    text = text.replace(SECRET_FIELD, '$1[redacted]');
+    return text.length > exports.MAX_PAYLOAD_CHARS ? `${text.slice(0, exports.MAX_PAYLOAD_CHARS)}… [truncated ${text.length - exports.MAX_PAYLOAD_CHARS} chars]` : text;
 }
 function createId() {
     if (globalThis.crypto?.randomUUID) {
@@ -93,20 +140,25 @@ class TracifyClient {
     async ingest(data) {
         if (!this.apiKey)
             return;
+        const context = stepContext.getStore();
+        const spanId = data.spanId || createId();
+        const parentSpanId = data.parentSpanId || (context?.spanId && context.spanId !== spanId ? context.spanId : undefined);
         const span = {
-            spanId: data.spanId || createId(),
-            runId: data.runId || process.env.TRACIFY_CURRENT_RUN_ID || 'unknown',
+            ...data,
+            spanId,
+            runId: data.runId || currentRunId(),
+            traceName: data.traceName ?? context?.traceName,
+            parentSpanId,
             createdAt: data.createdAt || new Date().toISOString(),
             metadata: data.metadata || {},
-            input: typeof data.input === 'string' ? data.input : JSON.stringify(data.input || ''),
-            output: typeof data.output === 'string' ? data.output : JSON.stringify(data.output || ''),
+            input: payload(data.input),
+            output: payload(data.output),
             release: data.release ?? this.release,
             environment: data.environment ?? this.environment,
             deploymentId: data.metadata?.deploymentId ?? this.deploymentId,
             sessionId: data.sessionId ?? this.sessionId,
             endUserId: data.endUserId ?? this.endUserId,
             tags: data.tags ?? this.tags,
-            ...data,
         };
         try {
             fetch(this.ingestUrl, {
@@ -118,7 +170,7 @@ class TracifyClient {
                 body: JSON.stringify(span),
             }).catch(err => console.warn('Tracify Warning: Failed to ingest span:', err));
         }
-        catch (e) {
+        catch {
             // Ignore errors in telemetry
         }
     }
@@ -187,7 +239,7 @@ class TracifyClient {
     }
     async orchestrate(options) {
         const { policy, call, model, input, calculateCost, runId: explicitRunId } = options;
-        const runId = explicitRunId || process.env.TRACIFY_CURRENT_RUN_ID || createId();
+        const runId = explicitRunId || stepContext.getStore()?.runId || process.env.TRACIFY_CURRENT_RUN_ID || createId();
         const allModels = [model, ...policy.fallbackChain.filter((m) => m !== model)];
         let lastError = null;
         for (let modelIndex = 0; modelIndex < allModels.length; modelIndex++) {
@@ -350,39 +402,109 @@ class TracifyClient {
     }
 }
 exports.TracifyClient = TracifyClient;
-function traceAgent(func, config = {}) {
-    const client = new TracifyClient(config);
-    return (async (...args) => {
-        const runId = createId();
-        const startTime = Date.now();
-        process.env.TRACIFY_CURRENT_RUN_ID = runId;
+/** A step in progress. Set its output and anything it measured before it ends. */
+class Step {
+    constructor(name, type, input, metadata) {
+        this.name = name;
+        this.type = type;
+        this.input = input;
+        this.id = createId();
+        this.fields = {};
+        this.metadata = { ...(metadata ?? {}) };
+    }
+    setOutput(output) {
+        this.output = output;
+        return this;
+    }
+    /** Record what the step measured; anything not listed goes into metadata. */
+    set({ model, inputTokens, outputTokens, costUsd, ...metadata }) {
+        if (model !== undefined)
+            this.fields.modelId = model;
+        if (inputTokens !== undefined)
+            this.fields.inputTokens = inputTokens;
+        if (outputTokens !== undefined)
+            this.fields.outputTokens = outputTokens;
+        if (costUsd !== undefined)
+            this.fields.costUsd = costUsd;
+        Object.assign(this.metadata, metadata);
+        return this;
+    }
+}
+exports.Step = Step;
+let defaultClientInstance;
+function defaultClient() {
+    return (defaultClientInstance ?? (defaultClientInstance = new TracifyClient()));
+}
+/**
+ * Record one step of the agent. Steps started inside `fn` become its children, so the trace shows which step
+ * called which. The step ends when `fn` settles; its return value is the output unless one was set.
+ *
+ *     const docs = await span("search-docs", (step) => search(query), { type: "tool", input: query });
+ */
+async function span(name, fn, options = {}) {
+    const step = new Step(name, options.type ?? 'span', options.input, options.metadata);
+    const parent = stepContext.getStore();
+    const runId = options.runId || parent?.runId || currentRunId();
+    const started = Date.now();
+    const finish = (error) => {
+        const failed = error !== undefined;
+        (options.client ?? parent?.client ?? defaultClient()).ingest({
+            spanId: step.id,
+            runId,
+            parentSpanId: options.root ? undefined : parent?.spanId,
+            spanType: options.root ? (failed ? 'error' : 'run_end') : step.type,
+            toolName: step.name,
+            input: step.input,
+            output: failed ? (error instanceof Error ? error.message : String(error)) : step.output,
+            latencyMs: Date.now() - started,
+            costUsd: 0,
+            createdAt: new Date(started).toISOString(),
+            metadata: options.root ? { ...step.metadata, stepType: step.type } : step.metadata,
+            ...step.fields,
+            ...(failed ? {
+                errorType: error instanceof Error ? error.name : 'Error',
+                errorMessage: payload(error instanceof Error ? error.message : String(error)),
+            } : {}),
+        });
+    };
+    return stepContext.run({ runId, spanId: step.id, traceName: options.root ? name : parent?.traceName, client: options.client ?? parent?.client }, async () => {
         try {
-            const result = await func(...args);
-            const latencyMs = Date.now() - startTime;
-            client.ingest({
-                spanType: 'run_end',
-                output: result,
-                latencyMs,
-                costUsd: 0,
-            });
+            const result = await fn(step);
+            if (step.output === undefined)
+                step.setOutput(result);
+            finish();
             return result;
         }
-        catch (e) {
-            const latencyMs = Date.now() - startTime;
-            client.ingest({
-                spanType: 'error',
-                output: e instanceof Error ? e.message : String(e),
-                latencyMs,
-                costUsd: 0,
-            });
-            throw e;
+        catch (error) {
+            finish(error ?? new Error('Unknown error'));
+            throw error;
         }
     });
 }
-const defaultClient = new TracifyClient();
-const llmCall = (data) => defaultClient.ingest({ ...data, spanType: 'llm_call' });
+/** Wrap a function so each call is recorded as a step, with its arguments and result. */
+function observe(fn, options = {}) {
+    const name = options.name || fn.name || 'step';
+    return (...args) => span(name, () => fn(...args), { ...options, input: options.captureInput === false ? undefined : args });
+}
+/**
+ * Wrap an agent's entry point. Each call is one trace: a new run id, and a root step that every step recorded
+ * inside it hangs from. The root is sent as run_end (or error) when the call settles.
+ */
+function traceAgent(func, config = {}) {
+    const client = new TracifyClient(config);
+    const name = config.name || func.name || 'agent';
+    return ((...args) => span(name, () => func(...args), { type: 'agent', client, runId: createId(), root: true }));
+}
+/** Record a finished model call. It is attached to the step it was made in. */
+const llmCall = (data) => defaultClient().ingest({ ...data, spanType: 'llm_call' });
 exports.llmCall = llmCall;
-const toolCall = (data) => defaultClient.ingest({ ...data, spanType: 'tool_call' });
+/** Record a finished tool call. It is attached to the step it was made in. */
+const toolCall = (data) => defaultClient().ingest({ ...data, spanType: 'tool_call' });
 exports.toolCall = toolCall;
-const decision = (data) => defaultClient.ingest({ ...data, spanType: 'decision' });
+const decision = (data) => defaultClient().ingest({ ...data, spanType: 'decision' });
 exports.decision = decision;
+var providers_1 = require("./integrations/providers");
+Object.defineProperty(exports, "wrapOpenAI", { enumerable: true, get: function () { return providers_1.wrapOpenAI; } });
+Object.defineProperty(exports, "wrapAnthropic", { enumerable: true, get: function () { return providers_1.wrapAnthropic; } });
+var langgraph_1 = require("./integrations/langgraph");
+Object.defineProperty(exports, "TracifyLangGraphHandler", { enumerable: true, get: function () { return langgraph_1.TracifyLangGraphHandler; } });

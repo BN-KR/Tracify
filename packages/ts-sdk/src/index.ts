@@ -104,11 +104,14 @@ export interface OrchestrateOptions<T> {
  * The current run and step for this async call chain. AsyncLocalStorage keeps concurrent runs apart, so steps
  * from two agents running at once never land in each other's trace.
  */
-const stepContext = new AsyncLocalStorage<{ runId: string; spanId?: string }>();
+const stepContext = new AsyncLocalStorage<{ runId: string; spanId?: string; traceName?: string; client?: TracifyClient }>();
 
 export function currentRunId() {
   return stepContext.getStore()?.runId || process.env.TRACIFY_CURRENT_RUN_ID || 'unknown';
 }
+
+export function currentTraceContext() { return stepContext.getStore(); }
+export function integrationPayload(value: unknown) { return payload(value); }
 
 export function currentSpanId() {
   return stepContext.getStore()?.spanId;
@@ -228,6 +231,7 @@ export class TracifyClient {
       ...data,
       spanId,
       runId: data.runId || currentRunId(),
+      traceName: data.traceName ?? context?.traceName,
       parentSpanId,
       createdAt: data.createdAt || new Date().toISOString(),
       metadata: data.metadata || {},
@@ -250,7 +254,7 @@ export class TracifyClient {
         },
         body: JSON.stringify(span),
       }).catch(err => console.warn('Tracify Warning: Failed to ingest span:', err));
-    } catch (e) {
+    } catch {
       // Ignore errors in telemetry
     }
   }
@@ -560,7 +564,7 @@ export async function span<T>(name: string, fn: (step: Step) => T | Promise<T>, 
   const started = Date.now();
   const finish = (error?: unknown) => {
     const failed = error !== undefined;
-    (options.client ?? defaultClient()).ingest({
+    (options.client ?? parent?.client ?? defaultClient()).ingest({
       spanId: step.id,
       runId,
       parentSpanId: options.root ? undefined : parent?.spanId,
@@ -579,7 +583,7 @@ export async function span<T>(name: string, fn: (step: Step) => T | Promise<T>, 
       } : {}),
     });
   };
-  return stepContext.run({ runId, spanId: step.id }, async () => {
+  return stepContext.run({ runId, spanId: step.id, traceName: options.root ? name : parent?.traceName, client: options.client ?? parent?.client }, async () => {
     try {
       const result = await fn(step);
       if (step.output === undefined) step.setOutput(result);
@@ -622,3 +626,6 @@ export const toolCall = (data: Omit<SpanData, 'spanType'>) =>
 
 export const decision = (data: Omit<SpanData, 'spanType'>) =>
   defaultClient().ingest({ ...data, spanType: 'decision' });
+
+export { wrapOpenAI, wrapAnthropic, type IntegrationOptions } from "./integrations/providers";
+export { TracifyLangGraphHandler } from "./integrations/langgraph";

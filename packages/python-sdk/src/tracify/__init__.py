@@ -28,6 +28,9 @@ import requests as _requests_fallback
 _current_run: "contextvars.ContextVar[Optional[str]]" = contextvars.ContextVar("tracify_run", default=None)
 _current_span: "contextvars.ContextVar[Optional[str]]" = contextvars.ContextVar("tracify_span", default=None)
 
+_current_client = contextvars.ContextVar("tracify_client", default=None)
+_current_trace = contextvars.ContextVar("tracify_trace", default=None)
+
 MAX_PAYLOAD_CHARS = 10_000
 _SECRET_PATTERNS = [
     re.compile(r"(?i)\bbearer\s+[a-z0-9._~+/=-]{12,}"),
@@ -290,6 +293,7 @@ class TracifyClient:
         }
         if not span.get("runId"):
             span["runId"] = current_run_id()
+        span.setdefault("traceName", _current_trace.get())
         parent = current_span_id()
         if not span.get("parentSpanId") and parent and parent != span["spanId"]:
             span["parentSpanId"] = parent
@@ -551,6 +555,8 @@ def _client(client: Optional[TracifyClient]) -> TracifyClient:
     global _default_client
     if client is not None:
         return client
+    if _current_client.get() is not None:
+        return _current_client.get()
     if _default_client is None:
         _default_client = TracifyClient()
     return _default_client
@@ -595,7 +601,11 @@ def span(name: str, type: str = "span", input: Any = None, metadata: Optional[Di
     """
     current = Span(name, type, input, metadata)
     if fields: current.set(**fields)
+    if not run_id and current_run_id() == "unknown":
+        run_id = str(uuid.uuid4())
     run_token = _current_run.set(run_id) if run_id else None
+    client_token = _current_client.set(_client(client))
+    trace_token = _current_trace.set(name if root else _current_trace.get())
     span_token = _current_span.set(current.id)
     started = time.time()
     error: Optional[BaseException] = None
@@ -625,6 +635,8 @@ def span(name: str, type: str = "span", input: Any = None, metadata: Optional[Di
         finally:
             if run_token is not None:
                 _current_run.reset(run_token)
+            _current_client.reset(client_token)
+            _current_trace.reset(trace_token)
 
 
 def observe(name: Optional[str] = None, type: str = "span", capture_input: bool = True, capture_output: bool = True,
@@ -735,3 +747,10 @@ def tool_call(tool_name: str, input_data: Any, output_data: Any, latency_ms: int
         traceName=trace_name or "",
         metadata=metadata or {},
     )
+
+from .integrations import wrap_openai, wrap_anthropic
+
+def langgraph_callback(**options):
+    """Create a LangGraph callback; install tracify-sdk[langgraph] first."""
+    from .langgraph import TracifyCallbackHandler
+    return TracifyCallbackHandler(**options)

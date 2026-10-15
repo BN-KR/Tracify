@@ -108,3 +108,44 @@ Prompt responses are cached for 60 seconds by default. Use `cache_ttl_seconds=0`
 ## License
 
 MIT
+
+## Provider integrations (next release)
+
+Install the optional provider/framework extras you use: `pip install 'tracify-sdk[openai,anthropic,langgraph]'`.
+Set `TRACIFY_API_KEY` and the existing regional configuration.
+
+```python
+import tracify
+from openai import OpenAI, AsyncOpenAI
+from anthropic import Anthropic
+
+openai = tracify.wrap_openai(OpenAI())
+anthropic = tracify.wrap_anthropic(Anthropic())
+async_openai = tracify.wrap_openai(AsyncOpenAI())
+# Existing create calls keep their provider response types and exceptions.
+reply = openai.responses.create(model=MODEL, input="Hello")
+with anthropic.messages.stream(model=MODEL, max_tokens=100,
+        messages=[{"role": "user", "content": "Hello"}]) as stream:
+    for text in stream.text_stream:
+        print(text, end="")
+
+# Add a callback to a compiled LangGraph invocation.
+graph.invoke(inputs, config={"callbacks": [tracify.langgraph_callback()]})
+```
+
+Wrap sync or async clients once. Supported: OpenAI chat completions and Responses `create` APIs,
+including streams; Anthropic messages `create`/`stream` and beta equivalents, including sync/async
+context managers, text streams and final messages. Close streams when stopping early. Raw response
+resources and unsupported convenience methods are passed through without instrumentation.
+
+Calls inside `trace_agent`/`span` inherit their run/parent and custom client. Standalone calls receive
+an independent completed root. LangGraph callbacks preserve graph/node/tool/model parent IDs and
+concurrent runs. Avoid using both framework model callbacks and a provider wrapper for the same call.
+Provider packages remain optional; newer framework extras may require a newer Python than the core SDK.
+
+Options: `client=custom_client`, `name="my-agent"`, `capture_input=False`, `capture_output=False`.
+Existing redaction/size caps apply. Records include model, tokens, latency, TTFT, failures and raw usage
+metadata. Costs default to zero with `costKnown=False`; supply
+`calculate_cost=lambda usage: ...` with your own current provider rate card. The callback receives
+`provider`, `model`, `input_tokens`, `output_tokens`, and raw `usage` (including cache details).
+Missing usage is not estimated. Telemetry failures do not change provider results or exceptions.
