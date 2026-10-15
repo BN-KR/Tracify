@@ -21,10 +21,12 @@ function makePolicy(overrides: Partial<RuntimePolicy> = {}): RuntimePolicy {
 }
 
 function makeClient(): TracifyClient {
-  return new TracifyClient({
+  const client = new TracifyClient({
     apiKey: "test-key",
     host: "http://localhost:9999",
   });
+  vi.spyOn(client, "ingest").mockResolvedValue(undefined);
+  return client;
 }
 
 describe("regional cloud configuration", () => {

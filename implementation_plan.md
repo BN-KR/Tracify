@@ -4,6 +4,8 @@
 - Saved-view live verification requires an isolated Convex deployment; no production backend deployment from feature branches.
 - SDK registry publication is a separate owner-controlled release after review.
 
+# Langfuse parity-plus product epic — 2026-09-03
+
 ## Google Analytics 4 — 2026-09-15
 
 - Implemented the consent-aware GA4 tag, environment contract, cookie-policy disclosure, and deterministic browser coverage.

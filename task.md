@@ -4,6 +4,8 @@
 - Saved-view live verification requires an isolated Convex deployment; no production backend deployment from feature branches.
 - SDK registry publication is a separate owner-controlled release after review.
 
+# 2026-09-02 — First-customer execution
+
 ## 2026-09-15 — Google Analytics 4
 
 - [pending owner] Verify a production GA4 page view if not yet confirmed; PR #121 is merged (c88a4c6).
