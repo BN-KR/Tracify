@@ -32,16 +32,19 @@ function Pulse({ state }: { state: RegionState }) {
 
 export function RegionalStatusBoard() {
   const [states, setStates] = useState<Record<TracifyRegionId, RegionState>>({ eu: "checking", us: "checking" });
+  const [ms, setMs] = useState<Partial<Record<TracifyRegionId, number>>>({});
 
   useEffect(() => {
     const controllers = getAvailableRegions().map((region) => {
       const controller = new AbortController();
+      const started = performance.now();
       const timeout = window.setTimeout(() => controller.abort(), 5000);
       fetch(`${region.origin}/api/health/region`, { cache: "no-store", signal: controller.signal })
         .then(async (response) => {
           const body = await response.json() as { ok?: boolean; region?: string };
           const operational = response.ok && body.ok === true && body.region === region.id;
           setStates((current) => ({ ...current, [region.id]: operational ? "operational" : "unavailable" }));
+          if (operational) setMs((current) => ({ ...current, [region.id]: Math.round(performance.now() - started) }));
         })
         .catch(() => setStates((current) => ({ ...current, [region.id]: "unavailable" })))
         .finally(() => window.clearTimeout(timeout));
@@ -69,7 +72,7 @@ export function RegionalStatusBoard() {
                   </div>
                   <span className={`inline-flex items-center gap-2 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] ${state === "operational" ? "bg-[#f4d44d] text-black" : "border border-white/25 text-white/70"}`} role="status">
                     {state === "operational" && <span className="size-1.5 animate-pulse bg-black" aria-hidden="true" />}
-                    {label}
+                    {label}{state === "operational" && ms[region.id] !== undefined ? ` · ${ms[region.id]} ms` : ""}
                   </span>
                 </div>
                 <div className="mt-8 border-t border-white/15 pt-6"><Pulse state={state} /></div>

@@ -5,6 +5,7 @@ import { Reveal } from "@/components/marketing/landing/reveal";
 import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 import { ControlExplorer } from "@/components/marketing/company/control-explorer";
 
+import { RedactionDemo } from "@/components/marketing/company/redaction-demo";
 export const metadata: Metadata = { title: "Security", description: "Learn how Tracify protects AI agent telemetry with encryption, project isolation, access controls, and incident response practices.", alternates: { canonical: "/security" } };
 
 const controls = [
@@ -44,6 +45,17 @@ export default function SecurityPage() {
         <div className="mt-14"><ControlExplorer controls={controls} /></div>
       </DarkBand>
 
+      <DarkBand className="border-t border-white/15">
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <Eyebrow>Try it / runs in your browser</Eyebrow>
+            <SectionTitle>Paste a secret. Watch it vanish.</SectionTitle>
+          </div>
+          <p className="max-w-sm text-base leading-7 text-white/65">This is the same redaction rule set Tracify applies to inputs and outputs. Edit the text on the left. Nothing you type leaves this page.</p>
+        </div>
+        <div className="mt-12"><RedactionDemo /></div>
+      </DarkBand>
+
       <CreamBand>
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
@@ -69,6 +81,26 @@ export default function SecurityPage() {
           ))}
         </ol>
       </CreamBand>
+
+      <DarkBand>
+        <Eyebrow>Plain limits</Eyebrow>
+        <SectionTitle>What we will not claim.</SectionTitle>
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
+          {[
+            ["No end-to-end EU residency", "Storage is in Ireland, but queued span events pass through Inngest in the US. We say so instead of rounding up."],
+            ["No silent behavior changes", "Runtime policies are observe-first. Cost ceilings are checked server-side and fail open, so monitoring never quietly breaks production traffic."],
+            ["No keys in plaintext", "Project keys are shown once at creation. After that only the hash exists on our side."],
+          ].map(([t, body], i) => (
+            <Reveal key={t} delay={i * 0.08}>
+              <div className="h-full border border-white/15 bg-[#111] p-7">
+                <span className="font-pixel text-5xl leading-none text-[#f4d44d]">0{i + 1}</span>
+                <h3 className="mt-8 font-pixel text-3xl leading-none tracking-[-0.05em]">{t}</h3>
+                <p className="mt-3 text-sm leading-6 text-white/60">{body}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </DarkBand>
 
       <ClosingBand
         title="Found something? Tell us first."

@@ -6,6 +6,7 @@ import { Reveal } from "@/components/marketing/landing/reveal";
 import { ClosingBand, CreamBand, DarkBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 import { CopyButton } from "@/components/marketing/company/copy-button";
 
+import { FitCheck } from "@/components/marketing/company/fit-check";
 export const metadata: Metadata = {
   title: "Contact",
   description:
@@ -113,6 +114,17 @@ export default function ContactPage() {
           })}
         </div>
       </DarkBand>
+
+      <CreamBand>
+        <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <Eyebrow dark={false}>Ten-second check</Eyebrow>
+            <SectionTitle>Is this a fit?</SectionTitle>
+            <p className="mt-6 max-w-md text-base leading-7 text-black/65">Tick what is true. Nothing is sent anywhere. It just tells you whether the call is worth your twenty minutes.</p>
+          </div>
+          <FitCheck href={fitCallHref} />
+        </div>
+      </CreamBand>
 
       <CreamBand>
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">

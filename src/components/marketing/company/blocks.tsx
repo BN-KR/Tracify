@@ -76,7 +76,7 @@ export function ClosingBand({
           ))}
         </div>
       </Reveal>
-      <Reveal className="relative -mx-5 mt-4 aspect-[2/1] max-h-[420px] md:-mx-10" delay={0.15}>
+      <Reveal className="relative -mx-5 mt-4 h-[clamp(220px,30vw,420px)] md:-mx-10" delay={0.15}>
         <Image src="/images/landing/horizon-sun.png" alt="" fill unoptimized sizes="100vw" className={`object-cover object-top ${art}`} />
       </Reveal>
     </section>

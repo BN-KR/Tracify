@@ -86,6 +86,7 @@ const terms: readonly Term[] = [
   },
 ] as const;
 
+import { SpanAnatomy } from "@/components/marketing/company/span-anatomy";
 export const metadata: Metadata = {
   title: "AI Observability Glossary — Tracify",
   description:
@@ -125,8 +126,13 @@ export default function GlossaryPage() {
       </PageHeader>
       <StatStrip stats={[[String(terms.length),"Terms defined"],["Quotable","One-paragraph answers"],["Linked","Related terms one click away"],["Free","No signup to read"]]} />
 
-      <section className="bg-[#eceae3] px-5 pb-24 text-black md:px-10">
-        <div className="mx-auto max-w-[1320px]"><GlossaryExplorer terms={terms} /></div>
+      <section className="bg-[#eceae3] px-5 pb-24 pt-20 text-black md:px-10">
+        <div className="mx-auto max-w-[1320px]">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/50">Start with the picture</p>
+          <h2 className="mt-5 max-w-3xl font-pixel text-[clamp(2.4rem,5.5vw,4.5rem)] leading-[0.92] tracking-[-0.07em]">Most of these words are one trace.</h2>
+          <div className="mb-20 mt-10"><SpanAnatomy /></div>
+          <GlossaryExplorer terms={terms} />
+        </div>
       </section>
 
       <ClosingBand

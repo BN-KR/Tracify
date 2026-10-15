@@ -4,6 +4,7 @@ import { Reveal } from "@/components/marketing/landing/reveal";
 import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 import { IntegrationGrid, type Integration } from "@/components/marketing/company/integration-grid";
 
+import { CodeTabs } from "@/components/marketing/company/code-tabs";
 export const metadata: Metadata = {
   title: "AI agent integrations",
   description: "Connect Tracify with OpenTelemetry, OpenAI, Anthropic, LangChain, CrewAI, Vercel AI SDK, Slack, and more.",
@@ -31,7 +32,7 @@ const integrations: Integration[] = [
 
 const steps = [
   ["Point", "Set the OTLP endpoint and your project key. Nothing else is required."],
-  ["Run", "Use any OTel-instrumented library, or wrap your agent with the TypeScript or Python SDK."],
+  ["Run", "Use any OTel-instrumented library, wrap your agent with the TypeScript or Python SDK, or post spans over plain HTTP."],
   ["Read", "Spans arrive as one trace per run, with cost, tokens and failures attached."],
 ] as const;
 
@@ -74,15 +75,7 @@ export default function IntegrationsPage() {
               ))}
             </ol>
           </div>
-          <Reveal>
-            <div className="border border-black bg-[#090909] text-[#eceae3] shadow-[8px_8px_0_#f4d44d]">
-              <div className="flex items-center justify-between border-b border-white/15 px-4 py-3 font-mono text-[9px] uppercase tracking-[0.14em] text-white/45">
-                <span>.env</span>
-                <span className="text-[#f4d44d]">OTLP / HTTP JSON</span>
-              </div>
-              <pre className="overflow-x-auto p-6 font-mono text-[12px] leading-7 md:p-8"><code><span className="text-[#f4d44d]">TRACIFY_OTLP_ENDPOINT</span>={"\n"}https://tracify.tech/api/otel{"\n\n"}<span className="text-[#f4d44d]">TRACIFY_API_KEY</span>={"\n"}tracify_sk_live_...</code></pre>
-            </div>
-          </Reveal>
+          <Reveal><CodeTabs /></Reveal>
         </div>
       </CreamBand>
 
