@@ -68,7 +68,7 @@ export function Hero() {
 
   return (
     <section
-      className="relative isolate min-h-[calc(100svh-54px)] overflow-hidden bg-[#090909] text-[#eceae3]"
+      className="relative isolate min-h-[100svh] overflow-hidden bg-[#090909] text-[#eceae3]"
       onPointerMove={(e) => {
         if (reduce) return;
         const r = e.currentTarget.getBoundingClientRect();
@@ -95,7 +95,7 @@ export function Hero() {
       </motion.div>
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_bottom,#090909_0%,#090909_38%,rgba(9,9,9,0.75)_58%,rgba(9,9,9,0)_80%)]" />
 
-      <div className="mx-auto flex max-w-[1320px] flex-col items-center px-5 pt-16 text-center md:pt-24">
+      <div className="mx-auto flex max-w-[1320px] flex-col items-center px-5 pt-32 text-center md:pt-40">
         <motion.p
           initial={reduce ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

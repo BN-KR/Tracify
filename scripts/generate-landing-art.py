@@ -262,7 +262,210 @@ def horizon():
     render(c, "horizon-sun", px=3)
 
 
+# 7-10. USE CASES
+def uc_support():
+    w, h = 1000, 1250
+    c = Canvas(w, h)
+    y = 120
+    for i in range(7):
+        left = i % 2 == 0
+        bw = RNG.uniform(380, 620)
+        bh = RNG.uniform(90, 150)
+        x0 = 90 if left else w - 90 - bw
+        t = np.linspace(0, 1, 900)
+        layer = "accent" if i == 4 else "base"
+        for xs, ys in ((x0 + t * bw, np.full_like(t, y)), (x0 + t * bw, np.full_like(t, y + bh)),
+                       (np.full_like(t, x0), y + t * bh), (np.full_like(t, x0 + bw), y + t * bh)):
+            c.splat(xs, ys, 1.0, layer)
+        for r in range(int(bh // 34)):
+            lw = bw * RNG.uniform(0.4, 0.85)
+            xx = np.linspace(x0 + 28, x0 + 28 + lw, 500)
+            c.splat(xx, np.full_like(xx, y + 34 + r * 30), 0.5, layer)
+        if layer == "accent":
+            sphere_blob(c, x0 + bw / 2, y + bh / 2, bw * 0.7, 0.012, "accent", 9000)
+        y += bh + 50
+    c.base, c.accent = glow(c.base, 1, 0.5, 4), glow(c.accent, 1, 1.2, 9)
+    render(c, "uc-support", px=3)
+
+
+def uc_research():
+    w, h = 1000, 1250
+    c = Canvas(w, h)
+    n = 30000
+    arm = RNG.integers(0, 3, n)
+    r = RNG.exponential(170, n)
+    th = r / 90 + arm * 2.094 + RNG.normal(0, 0.25, n)
+    c.splat(w / 2 + r * np.cos(th), h / 2 + r * np.sin(th) * 0.8, 0.35)
+    tt = np.linspace(0, 1, 2000)
+    rr = 40 + tt * 420
+    th2 = rr / 90 + 0.4
+    c.splat(w / 2 + rr * np.cos(th2), h / 2 + rr * np.sin(th2) * 0.8, 3, "accent")
+    sphere_blob(c, w / 2, h / 2, 60, 0.1, "accent", 3000)
+    c.base, c.accent = glow(c.base, 1, 0.8, 5), glow(c.accent, 1, 1.1, 8)
+    render(c, "uc-research", px=3)
+
+
+def uc_automation():
+    w, h = 1000, 1250
+    c = Canvas(w, h)
+    for row in range(6):
+        for col in range(4):
+            x, y = 170 + col * 220, 160 + row * 190
+            t = np.linspace(0, 2 * np.pi, 900)
+            teeth = 1 + 0.12 * (np.sin(t * 10) > 0)
+            hot = (row, col) == (3, 2)
+            layer = "accent" if hot else "base"
+            c.splat(x + 62 * teeth * np.cos(t), y + 62 * teeth * np.sin(t), 0.9, layer)
+            c.splat(x + 18 * np.cos(t), y + 18 * np.sin(t), 0.9, layer)
+            if col < 3:
+                xx = np.linspace(x + 75, x + 145, 200)
+                c.splat(xx, np.full_like(xx, y), 0.6)
+            if hot:
+                a = np.linspace(0.3, 2 * np.pi - 0.3, 900)
+                c.splat(x + 110 * np.cos(a), y + 110 * np.sin(a), 2, "accent")
+                sphere_blob(c, x, y, 140, 0.02, "accent", 8000)
+    c.base, c.accent = glow(c.base, 1, 0.5, 4), glow(c.accent, 1, 1.2, 9)
+    render(c, "uc-automation", px=3)
+
+
+def uc_tools():
+    w, h = 1000, 1250
+    c = Canvas(w, h)
+    cx, cy = w / 2, h / 2
+    t = np.linspace(0, 2 * np.pi, 1500)
+    c.splat(cx + 90 * np.cos(t), cy + 90 * np.sin(t), 1.5)
+    sphere_blob(c, cx, cy, 80, 0.05, "base", 3000)
+    for k in range(10):
+        a = k / 10 * 2 * np.pi + 0.2
+        L = RNG.uniform(260, 400)
+        hot = k == 3
+        layer = "accent" if hot else "base"
+        rr = np.linspace(100, L if not hot else L * 0.55, 600)
+        c.splat(cx + rr * np.cos(a), cy + rr * np.sin(a), 0.9, layer)
+        if hot:
+            rr2 = np.linspace(L * 0.68, L, 300)
+            c.splat(cx + rr2 * np.cos(a), cy + rr2 * np.sin(a), 0.9, layer)
+            sphere_blob(c, cx + L * 0.6 * np.cos(a), cy + L * 0.6 * np.sin(a), 90, 0.03, "accent", 6000)
+        ex, ey = cx + L * np.cos(a), cy + L * np.sin(a)
+        sq = np.linspace(-26, 26, 300)
+        for xs, ys in ((sq, np.full_like(sq, -26)), (sq, np.full_like(sq, 26)), (np.full_like(sq, -26), sq), (np.full_like(sq, 26), sq)):
+            c.splat(ex + xs, ey + ys, 1.2, layer)
+    c.base, c.accent = glow(c.base, 1, 0.5, 4), glow(c.accent, 1, 1.2, 9)
+    render(c, "uc-tools", px=3)
+
+
+# 11. LOGS WALL: what debugging looks like without a trace
+def logs_wall():
+    w, h = 1600, 1000
+    c = Canvas(w, h)
+    y = 20
+    while y < h:
+        x = 20
+        while x < w:
+            seg = RNG.uniform(10, 120)
+            xx = np.linspace(x, x + seg, int(seg * 2))
+            c.splat(xx, np.full_like(xx, y), RNG.uniform(0.25, 0.8))
+            x += seg + RNG.uniform(6, 22)
+        y += 16
+    c.base = glow(c.base, 1, 0.2, 3)
+    render(c, "logs-wall", px=2)
+
+
+# 12. MAP FLAT: the same run, as a clean top-down map
+def map_flat():
+    w, h = 1600, 1000
+    c = Canvas(w, h)
+    nodes = {"a": (190, 500), "b": (520, 500), "c": (850, 260), "d": (850, 740), "e": (1150, 500), "f": (1420, 500)}
+    for a, b in (("a", "b"), ("b", "c"), ("b", "d"), ("c", "e"), ("d", "e"), ("e", "f")):
+        (x0, y0), (x1, y1) = nodes[a], nodes[b]
+        x0, x1 = x0 + 122, x1 - 122
+        t = np.linspace(0, 1, 1500)
+        xm = (x0 + x1) / 2
+        xs = (1 - t) ** 3 * x0 + 3 * (1 - t) ** 2 * t * xm + 3 * (1 - t) * t * t * xm + t ** 3 * x1
+        ys = (1 - t) ** 3 * y0 + 3 * (1 - t) ** 2 * t * y0 + 3 * (1 - t) * t * t * y1 + t ** 3 * y1
+        c.splat(xs, ys, 0.9)
+    for k, (x, y) in nodes.items():
+        layer = "accent" if k == "f" else "base"
+        t = np.linspace(-1, 1, 900)
+        for xs, ys in ((t * 120, np.full_like(t, -50)), (t * 120, np.full_like(t, 50)), (np.full_like(t, -120), t * 50), (np.full_like(t, 120), t * 50)):
+            c.splat(x + xs, y + ys, 1.4, layer)
+        gx, gy = np.meshgrid(np.linspace(-120, 120, 90), np.linspace(-50, 50, 36))
+        c.splat(x + gx.ravel(), y + gy.ravel(), 0.05 if layer == "base" else 0.35, layer)
+        if layer == "accent":
+            sphere_blob(c, x, y, 300, 0.012, "accent", 12000)
+    c.base, c.accent = glow(c.base, 1, 0.5, 4), glow(c.accent, 1, 1.2, 9)
+    render(c, "map-flat", px=2)
+
+
+# 13. SPAN ANATOMY: one step exploded into layers
+def span_anatomy():
+    w, h = 1200, 1300
+    c = Canvas(w, h)
+    iso = lambda x, y, z: (w / 2 + (x - y) * 0.87, z + (x + y) * 0.5)
+    S = 300
+    for i in range(5):
+        z0 = 230 + i * 190
+        layer = "accent" if i == 2 else "base"
+        t = np.linspace(-S, S, 1400)
+        for xs, ys in ((t, np.full_like(t, -S)), (t, np.full_like(t, S)), (np.full_like(t, -S), t), (np.full_like(t, S), t)):
+            sx, sy = iso(xs, ys, z0)
+            c.splat(sx, sy, 1.2, layer)
+        gx, gy = np.meshgrid(np.linspace(-S, S, 70), np.linspace(-S, S, 70))
+        sx, sy = iso(gx.ravel(), gy.ravel(), z0)
+        c.splat(sx, sy, 0.08 if layer == "base" else 0.3, layer)
+        for _ in range(3):
+            lx = RNG.uniform(-S * 0.8, S * 0.2)
+            ly = RNG.uniform(-S * 0.7, S * 0.7)
+            ll = np.linspace(lx, lx + RNG.uniform(120, 360), 500)
+            sx, sy = iso(ll, np.full_like(ll, ly), z0)
+            c.splat(sx, sy, 0.7, layer)
+    for corner in ((-S, -S), (S, -S), (-S, S), (S, S)):
+        zz = np.linspace(230, 230 + 4 * 190, 1200)
+        sx, sy = iso(np.full_like(zz, corner[0]), np.full_like(zz, corner[1]), zz)
+        c.splat(sx, sy, 0.25)
+    c.base, c.accent = glow(c.base, 1, 0.5, 4), glow(c.accent, 1, 1.0, 9)
+    render(c, "span-anatomy", px=3)
+
+
+# 14. TUNNEL: perspective corridor of frames, for the mobile menu
+def tunnel():
+    w, h = 1000, 1600
+    c = Canvas(w, h)
+    for i in range(1, 40):
+        z = i * 0.6
+        sw, sh = 520 / z, 820 / z
+        t = np.linspace(-1, 1, 1200)
+        layer = "accent" if i == 7 else "base"
+        for xs, ys in ((t * sw, np.full_like(t, -sh)), (t * sw, np.full_like(t, sh)), (np.full_like(t, -sw), t * sh), (np.full_like(t, sw), t * sh)):
+            c.splat(w / 2 + xs, h / 2 + ys, 1.6 / z ** 0.5, layer)
+    for a in np.linspace(0, 2 * np.pi, 16, endpoint=False):
+        rr = np.linspace(10, 1100, 1500)
+        c.splat(w / 2 + rr * np.cos(a) * 0.65, h / 2 + rr * np.sin(a), 0.15)
+    c.base, c.accent = glow(c.base, 1, 0.5, 4), glow(c.accent, 1, 1.0, 9)
+    render(c, "nav-tunnel", px=3)
+
+
+# 15. RIDGES: stacked ridgelines for the footer
+def ridges():
+    w, h = 2000, 900
+    c = Canvas(w, h)
+    x = np.linspace(0, w, 4000)
+    for i in range(38):
+        base = 250 + i * 17
+        amp = 170 * np.exp(-((x - w * (0.35 + 0.3 * math.sin(i))) / 260) ** 2) + 50 * np.exp(-((x - w * 0.72) / 180) ** 2)
+        noise = sum(RNG.uniform(4, 14) * np.sin(x / RNG.uniform(20, 90) + RNG.uniform(0, 6)) for _ in range(4))
+        y = base - amp * (0.5 + 0.5 * math.sin(i * 0.35)) - noise * (amp / 200)
+        # hide the ridges behind this one (Joy Division style occlusion)
+        cols = np.clip(np.interp(np.arange(w), x, y), 0, h)
+        hidden = np.arange(h)[:, None] > cols[None, :] + 2
+        c.base[hidden] = 0
+        c.accent[hidden] = 0
+        c.splat(x, y, 0.9, "accent" if i == 21 else "base")
+    c.base, c.accent = glow(c.base, 1, 0.4, 3), glow(c.accent, 1, 1.2, 8)
+    render(c, "footer-ridges", px=3)
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    for fn in (hero, capture, cost, failure, globe, horizon):
+    for fn in (hero, capture, cost, failure, globe, horizon, uc_support, uc_research, uc_automation, uc_tools, logs_wall, map_flat, span_anatomy, tunnel, ridges):
         fn()

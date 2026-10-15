@@ -5,7 +5,7 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#eceae3] pt-[54px] text-black">
+    <div className="min-h-screen bg-[#090909]">
       <main id="main-content">
         <LandingPage />
       </main>

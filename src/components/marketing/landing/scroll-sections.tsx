@@ -98,7 +98,7 @@ export function Story() {
             ))}
           </div>
           <div className="hidden lg:block">
-            <div className="sticky top-[calc(54px+10vh)] aspect-[7/5] w-full overflow-hidden border border-white/20">
+            <div className="sticky top-[calc(64px+10vh)] aspect-[7/5] w-full overflow-hidden border border-white/20">
               <AnimatePresence mode="popLayout">
                 <motion.div
                   key={active}

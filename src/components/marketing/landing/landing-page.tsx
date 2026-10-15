@@ -5,6 +5,7 @@ import { Hero } from "./hero";
 import { Reveal, Ticker } from "./reveal";
 import { ProductWindow, Statement, Story } from "./scroll-sections";
 import { Bento } from "./bento";
+import { Anatomy, BeforeAfter, UseCases } from "./more-sections";
 import { PricingSection } from "./pricing-section";
 
 const faqs = [
@@ -24,9 +25,12 @@ export function LandingPage() {
       </section>
 
       <Statement />
+      <BeforeAfter />
       <Story />
       <ProductWindow />
+      <Anatomy />
       <Bento />
+      <UseCases />
       <PricingSection />
 
       <section className="border-t-2 border-black bg-[#eceae3] px-5 pb-24 text-black md:px-10">
