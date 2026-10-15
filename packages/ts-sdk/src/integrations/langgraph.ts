@@ -1,3 +1,4 @@
+import { currentTraceContext } from "../index";
 import {
   observation,
   type Observation,
@@ -21,13 +22,15 @@ export class TracifyLangGraphHandler {
   ) {
     if (this.runs.has(id)) return;
     const ancestor = parent ? this.runs.get(parent) : undefined;
+    const context = currentTraceContext();
+    const outer = !ancestor && context?.runId && context.runId !== "unknown" ? context : undefined;
     this.runs.set(
       id,
       observation("langgraph", model, input, this.options, {
-        runId: ancestor?.runId ?? id,
-        parentSpanId: ancestor?.id,
+        runId: ancestor?.runId ?? outer?.runId ?? id,
+        parentSpanId: ancestor?.id ?? outer?.spanId,
         spanId: id,
-        root: !ancestor,
+        root: !ancestor && !outer,
         type,
         name,
       }),

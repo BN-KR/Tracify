@@ -306,6 +306,8 @@ class TracifyClient:
         span.setdefault("sessionId", self.session_id)
         span.setdefault("endUserId", self.end_user_id)
         span.setdefault("tags", self.tags)
+        # Optional unset fields must be omitted: ingestion rejects JSON null for strings.
+        span = {key: value for key, value in span.items() if value is not None}
         self._send_span(span)
 
     def get_prompt(self, name: str, environment: str = "production", cache_ttl_seconds: float = 60, fallback: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

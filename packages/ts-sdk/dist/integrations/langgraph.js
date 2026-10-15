@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TracifyLangGraphHandler = void 0;
+const index_1 = require("../index");
 const observation_1 = require("./observation");
 /** Structural LangChain/LangGraph callback handler; no mandatory framework dependency for SDK users. */
 class TracifyLangGraphHandler {
@@ -16,11 +17,13 @@ class TracifyLangGraphHandler {
         if (this.runs.has(id))
             return;
         const ancestor = parent ? this.runs.get(parent) : undefined;
+        const context = (0, index_1.currentTraceContext)();
+        const outer = !ancestor && context?.runId && context.runId !== "unknown" ? context : undefined;
         this.runs.set(id, (0, observation_1.observation)("langgraph", model, input, this.options, {
-            runId: ancestor?.runId ?? id,
-            parentSpanId: ancestor?.id,
+            runId: ancestor?.runId ?? outer?.runId ?? id,
+            parentSpanId: ancestor?.id ?? outer?.spanId,
             spanId: id,
-            root: !ancestor,
+            root: !ancestor && !outer,
             type,
             name,
         }));

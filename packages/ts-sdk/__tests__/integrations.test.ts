@@ -266,3 +266,5 @@ describe("real LangGraph callbacks", () => {
     ).toBe(true);
   });
 });
+
+describe("LangGraph inside a manual root",()=>{it("inherits the enclosing run and parent",async()=>{const handler=new TracifyLangGraphHandler({client:telemetry});await span("outer",()=>{handler.handleChainStart({}, {}, "graph-id");handler.handleChainEnd({},"graph-id");},{client:telemetry,root:true});expect(records).toHaveLength(2);expect(records[0].runId).toBe(records[1].runId);expect(records[0].parentSpanId).toBe(records[1].spanId);expect(records[0].spanType).toBe("agent");});});

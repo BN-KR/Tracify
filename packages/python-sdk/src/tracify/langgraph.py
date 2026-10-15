@@ -5,6 +5,7 @@ try:
 except ImportError as error:
     raise ImportError("Install tracify-sdk[langgraph] to use LangGraph tracing") from error
 from .integrations import Observation, _dict
+from . import current_run_id, current_span_id
 
 
 class TracifyCallbackHandler(BaseCallbackHandler):
@@ -18,7 +19,8 @@ class TracifyCallbackHandler(BaseCallbackHandler):
         with self.lock:
             if run_id in self.runs: return
             parent = self.runs.get(parent_run_id)
-            self.runs[run_id] = Observation("langgraph", model, inputs, self.options, dict(run_id=parent.data["runId"] if parent else str(run_id), span_id=str(run_id), parent_span_id=parent.data["spanId"] if parent else None, root=parent is None, type=kind, name=name))
+            outer = not parent and current_run_id() != "unknown"
+            self.runs[run_id] = Observation("langgraph", model, inputs, self.options, dict(run_id=parent.data["runId"] if parent else current_run_id() if outer else str(run_id), span_id=str(run_id), parent_span_id=parent.data["spanId"] if parent else current_span_id() if outer else None, root=parent is None and not outer, type=kind, name=name))
     def _end(self, run_id, output=None, error=None):
         with self.lock: run = self.runs.pop(run_id, None)
         if run: run.finish(output, error)

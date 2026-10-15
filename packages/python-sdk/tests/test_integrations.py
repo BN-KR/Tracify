@@ -98,3 +98,20 @@ def test_real_langgraph_nodes_and_tools():
     assert rows['lookup']['spanType']=='tool_call' and rows['lookup']['parentSpanId']==rows['answer']['spanId']
     assert len({s['runId'] for s in recorder.sent})==1 and any(s['spanType']=='run_end' for s in recorder.sent)
     assert not handler.runs
+
+
+def test_optional_unset_fields_are_omitted_for_ingestion():
+    recorder=Recorder()
+    recorder.ingest(spanType="llm_call",input="hi",output="ok",parentSpanId=None,traceName=None)
+    assert all(value is not None for value in recorder.sent[0].values())
+    assert "parentSpanId" not in recorder.sent[0] and "sessionId" not in recorder.sent[0]
+
+
+def test_langgraph_inside_a_manual_root_uses_its_context():
+    recorder=Recorder(); handler=tracify.langgraph_callback(client=recorder)
+    with tracify.span('outer',root=True,client=recorder):
+        handler.on_chain_start({}, {}, run_id='graph-id', name='graph')
+        handler.on_chain_end({}, run_id='graph-id')
+    child,root=recorder.sent
+    assert child['runId']==root['runId'] and child['parentSpanId']==root['spanId']
+    assert child['spanType']=='agent' and root['spanType']=='run_end'
