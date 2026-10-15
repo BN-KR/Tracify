@@ -20,6 +20,11 @@ export default function TermsPage() {
       description="The ground rules for using Tracify, written to be read."
       updated="16 May 2026"
       summary="Use Tracify to observe your agents, stay within your plan and the law, and know the service is provided as it is."
+      highlights={[
+        { label: "Use", title: "Observe your agents.", body: "Use Tracify within your plan and the law." },
+        { label: "No reverse engineering", title: "Keep the notices.", body: "Do not reverse engineer the service or remove proprietary notices." },
+        { label: "As is", title: "Provided as it is.", body: "No implied warranties, with liability limited as the law permits." },
+      ]}
       sections={clauses}
     />
   );

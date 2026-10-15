@@ -19,6 +19,11 @@ export default function CookiePolicyPage() {
       description="What Tracify keeps in your browser, and what you can switch off."
       updated="16 May 2026"
       summary="We keep only what login and security need. Analytics is optional and you can turn it off whenever you like without losing anything."
+      highlights={[
+        { label: "Necessary", title: "Login and security.", body: "A small amount of storage keeps you signed in and the app working." },
+        { label: "Optional", title: "Analytics you can turn off.", body: "Google Analytics 4 measures page views, and only while analytics is enabled." },
+        { label: "Never", title: "No ad tracking.", body: "Advertising storage and ad personalization stay disabled." },
+      ]}
       sections={sections}
       contact={{ label: "More detail", title: "Read how we handle data overall.", href: "/privacy", action: "Privacy policy" }}
     />

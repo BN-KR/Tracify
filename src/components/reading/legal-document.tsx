@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type React from "react";
 import { Reveal } from "@/components/marketing/landing/reveal";
 import { LegalToc } from "./legal-toc";
 import { PageHeader } from "@/components/marketing/page-header";
@@ -19,6 +20,8 @@ export function LegalDocument({
   description,
   updated,
   summary,
+  highlights,
+  extra,
   sections,
   contact,
 }: {
@@ -28,6 +31,8 @@ export function LegalDocument({
   description: string;
   updated: string;
   summary: string;
+  highlights?: readonly { label: string; title: string; body: string }[];
+  extra?: React.ReactNode;
   sections: readonly LegalSection[];
   contact?: { label: string; title: string; href: string; action: string };
 }) {
@@ -37,6 +42,26 @@ export function LegalDocument({
         <span className="border border-white/25 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/70">Updated {updated}</span>
         <span className="border border-white/25 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/70">{sections.length} sections</span>
       </PageHeader>
+
+      {highlights?.length ? (
+        <section className="bg-[#090909] px-5 py-16 text-[#eceae3] md:px-10 md:py-24" aria-label="Key points">
+          <div className="mx-auto max-w-[1320px]">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">The short version</p>
+            <div className="mt-8 grid gap-px bg-white/15 md:grid-cols-3">
+              {highlights.map((h, i) => (
+                <Reveal key={h.title} delay={i * 0.08}>
+                  <div className="group h-full bg-[#090909] p-7 transition-colors hover:bg-[#f4d44d] hover:text-black md:p-9">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#f4d44d] group-hover:text-black">{h.label}</p>
+                    <p className="mt-10 font-pixel text-[clamp(1.8rem,3vw,2.6rem)] leading-[0.95] tracking-[-0.055em]">{h.title}</p>
+                    <p className="mt-4 text-sm leading-6 text-white/65 group-hover:text-black">{h.body}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+      {extra}
 
       <div className="mx-auto grid max-w-[1240px] gap-12 px-5 py-14 sm:px-8 md:py-20 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-16">
         <aside className="lg:sticky lg:top-28 lg:self-start">
