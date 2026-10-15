@@ -1,6 +1,6 @@
 "use client";
 
-import { ArtBand, CapabilityGrid, EndCta, Faq, PageHero, SignalTicker, StickyStory } from "./page-kit";
+import { ArtBand, CapabilityGrid, EndCta, Faq, PageHero, SignalTicker, StickyStory, type CapsVariant, type HeroVariant, type StoryLook } from "./page-kit";
 import { CodeSection, snippets } from "./code-section";
 import { ControlStage, CostStage, EvalStage, FailureStage, ModelStage, ReportStage, ToolStage, TraceStage } from "./stages";
 
@@ -144,19 +144,36 @@ const names: Record<string, [string, string]> = {
   reports: ["Project reports", "/product/reports"],
 };
 
+type Look = { hero: HeroVariant; story: StoryLook; caps: CapsVariant; order: readonly ("story" | "code" | "caps" | "band" | "faq")[]; band?: { flip?: boolean; dark?: boolean } };
+
+const looks: Record<ProductSlug, Look> = {
+  "trace-viewer": { hero: "split", story: { side: "right" }, caps: "cards", order: ["story", "code", "caps", "band", "faq"] },
+  "cost-dashboard": { hero: "full", story: { side: "left", tone: "yellow" }, caps: "rows", order: ["story", "caps", "band", "code", "faq"], band: { flip: true, dark: true } },
+  "tool-calls": { hero: "paper", story: { side: "stack" }, caps: "sticky", order: ["code", "story", "band", "caps", "faq"] },
+  "llm-calls": { hero: "left", story: { side: "right", tone: "yellow" }, caps: "cards", order: ["story", "band", "code", "caps", "faq"], band: { flip: true } },
+  failures: { hero: "full", story: { side: "stack" }, caps: "rows", order: ["story", "caps", "code", "band", "faq"], band: { dark: true } },
+  "evaluation-engine": { hero: "paper", story: { side: "left" }, caps: "sticky", order: ["story", "caps", "code", "band", "faq"], band: { flip: true } },
+  "runtime-control": { hero: "left", story: { side: "stack", tone: "yellow" }, caps: "rows", order: ["code", "story", "caps", "band", "faq"], band: { dark: true } },
+  reports: { hero: "split", story: { side: "left" }, caps: "sticky", order: ["story", "band", "caps", "faq"], band: { flip: true } },
+};
+
 export function ProductPage({ slug, page }: { slug: ProductSlug; page: ProductPageData }) {
   const c = config[slug];
+  const look = looks[slug];
   const Stage = c.Stage;
   const others = (Object.keys(names) as string[]).filter((k) => k !== slug).slice(0, 4).map((k) => names[k]);
+  const blocks = {
+    story: <StickyStory key="story" kicker={c.kicker} heading={c.story} steps={page.workflow} look={look.story} stage={(s) => <Stage {...s} />} />,
+    code: snippets[slug] ? <CodeSection key="code" snippet={snippets[slug]} /> : null,
+    caps: <CapabilityGrid key="caps" heading={c.outcome} items={page.details} variant={look.caps} />,
+    band: <ArtBand key="band" img={c.band} label="Who it is for" statement={c.statement} aside={page.bestFor} {...look.band} />,
+    faq: <Faq key="faq" items={page.faq} />,
+  };
   return (
     <>
-      <PageHero eyebrow={c.eyebrow} title={c.headline} lead={c.lead} img={c.hero} facts={c.facts} primary={["Start tracing free", "/sign-up"]} secondary={["Read the docs", "/docs"]} />
+      <PageHero eyebrow={c.eyebrow} title={c.headline} lead={c.lead} img={c.hero} facts={c.facts} primary={["Start tracing free", "/sign-up"]} secondary={["Read the docs", "/docs"]} variant={look.hero} />
       <SignalTicker items={c.ticker} />
-      <StickyStory kicker={c.kicker} heading={c.story} steps={page.workflow} stage={(s) => <Stage {...s} />} />
-      {snippets[slug] ? <CodeSection snippet={snippets[slug]} /> : null}
-      <CapabilityGrid heading={c.outcome} items={page.details} />
-      <ArtBand img={c.band} label="Who it is for" statement={c.statement} aside={page.bestFor} />
-      <Faq items={page.faq} />
+      {look.order.map((k) => blocks[k])}
       <EndCta heading="See your own runs like this." links={others} />
     </>
   );

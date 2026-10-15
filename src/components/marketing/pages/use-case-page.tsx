@@ -1,6 +1,6 @@
 "use client";
 
-import { ArtBand, CapabilityGrid, EndCta, PageHero, SignalTicker, StickyStory } from "./page-kit";
+import { ArtBand, CapabilityGrid, EndCta, PageHero, SignalTicker, StickyStory, type CapsVariant, type HeroVariant, type StoryLook } from "./page-kit";
 import { CodeSection, snippets } from "./code-section";
 import { ChainStage, type ChainRow, type Meter } from "./stages";
 
@@ -142,21 +142,32 @@ const all: [string, string][] = [
   ["Tool-calling agents", "/use-cases/tool-calling"],
 ];
 
+const looks: Record<string, { hero: HeroVariant; story: StoryLook; caps: CapsVariant; order: readonly ("story" | "code" | "band" | "caps")[]; band?: { flip?: boolean; dark?: boolean } }> = {
+  research: { hero: "paper", story: { side: "right" }, caps: "sticky", order: ["story", "code", "band", "caps"] },
+  support: { hero: "left", story: { side: "stack", tone: "yellow" }, caps: "rows", order: ["band", "story", "caps", "code"], band: { dark: true } },
+  automation: { hero: "full", story: { side: "left" }, caps: "cards", order: ["story", "caps", "band", "code"], band: { flip: true } },
+  "tool-calling": { hero: "split", story: { side: "stack" }, caps: "sticky", order: ["code", "story", "band", "caps"], band: { dark: true, flip: true } },
+};
+
 export function UseCasePage({ slug, page }: { slug: string; page: UseCaseData }) {
   const c = config[slug];
+  const look = looks[slug];
   const signals = page.signals.map((s) => {
     const [title, ...rest] = s.split(" — ");
     return { title, body: rest.join(" — ") || "Recorded on every run, so it can be searched, compared and alerted on." };
   });
   const steps = page.scene.map((t, i) => ({ title: t, body: c.steps[i] }));
+  const blocks = {
+    story: <StickyStory key="story" kicker={c.kicker} heading={c.story} steps={steps} look={look.story} stage={(s) => <ChainStage {...s} rows={c.rows} title={page.title} flagTag={c.flagTag} meter={c.meter} />} />,
+    code: <CodeSection key="code" snippet={snippets[slug]} />,
+    band: <ArtBand key="band" img={c.band} label="The failure to catch" statement={page.failure} aside={page.description} {...look.band} />,
+    caps: <CapabilityGrid key="caps" heading="What Tracify watches." items={signals} variant={look.caps} />,
+  };
   return (
     <>
-      <PageHero eyebrow={c.eyebrow} title={page.statement} lead={c.lead} img={c.hero} facts={c.facts} primary={["Start tracing free", "/sign-up"]} secondary={["Read the docs", "/docs"]} />
+      <PageHero eyebrow={c.eyebrow} title={page.statement} lead={c.lead} img={c.hero} facts={c.facts} primary={["Start tracing free", "/sign-up"]} secondary={["Read the docs", "/docs"]} variant={look.hero} />
       <SignalTicker items={page.signals.map((s) => s.split(" — ")[0])} />
-      <StickyStory kicker={c.kicker} heading={c.story} steps={steps} stage={(s) => <ChainStage {...s} rows={c.rows} title={page.title} flagTag={c.flagTag} meter={c.meter} />} />
-      <CodeSection snippet={snippets[slug]} />
-      <ArtBand img={c.band} label="The failure to catch" statement={page.failure} aside={page.description} />
-      <CapabilityGrid heading="What Tracify watches." items={signals} />
+      {look.order.map((k) => blocks[k])}
       <EndCta heading={c.cta} links={all.filter(([, h]) => !h.endsWith(slug))} />
     </>
   );
