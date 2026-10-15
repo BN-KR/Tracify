@@ -109,7 +109,7 @@ function Panel({ index }: { index: number }) {
       <Screen title="1 · install">
         <div className="space-y-3">
           <CopyLine text="npm install tracify-sdk" />
-          <CopyLine text="pip install tracify" />
+          <CopyLine text="pip install tracify-sdk" />
           <p className="pt-2 font-mono text-[11px] uppercase tracking-[0.12em] text-white/45">.env</p>
           <pre className="font-mono text-[13px] text-white/80">TRACIFY_API_KEY=tracify_sk_live_…</pre>
         </div>
