@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseCost, parseLatency, parseSearch, replaceToken, splitToken, tokenAt, tokenize } from "./trace-search";
+import { comparisonBound, parseCost, parseLatency, parseSearch, parseTokens, replaceToken, splitToken, tokenAt, tokenize } from "./trace-search";
 
 describe("tokenize", () => {
   it("splits on whitespace and keeps quoted runs together", () => {
@@ -34,6 +34,26 @@ describe("parseSearch", () => {
   it("keeps an incomplete token and an unknown field as text", () => {
     expect(parseSearch("name: foo:bar").text).toBe("name: foo:bar");
   });
+  it("reads a leading minus as an exclusion", () => {
+    const parsed = parseSearch('-env:dev -model:"gpt 4" tool:search');
+    expect(parsed.filters.map((filter) => [filter.field.key, filter.kind === "facet" ? filter.negate : null, filter.value])).toEqual([["environment", true, "dev"], ["modelId", true, "gpt 4"], ["toolName", false, "search"]]);
+  });
+  it("turns an excluded status into the opposite status and rejects excluded numbers", () => {
+    expect(parseSearch("-status:error").filters).toMatchObject([{ kind: "status", value: "healthy" }]);
+    expect(parseSearch("-status:healthy").filters).toMatchObject([{ kind: "status", value: "error" }]);
+    expect(parseSearch("-status:all").errors).toHaveLength(1);
+    expect(parseSearch("-latency:>2s").errors).toHaveLength(1);
+  });
+  it("keeps a hyphenated word and an unknown excluded field as text", () => {
+    expect(parseSearch("-1 well-known -foo:bar").text).toBe("-1 well-known -foo:bar");
+  });
+  it("reads minimums, maximums and exact values for latency, cost and tokens", () => {
+    const parsed = parseSearch("latency:<2s latency:>=500ms cost:<=0.5 cost:0.01 tokens:<5k tokens:=200");
+    expect(parsed.errors).toEqual([]);
+    expect(parsed.filters.map((filter) => filter.kind === "facet" || filter.kind === "status" ? null : [filter.kind, filter.bound, filter.value])).toEqual([
+      ["latency", "max", 2000], ["latency", "min", 500], ["cost", "max", 0.5], ["cost", "min", 0.01], ["tokens", "max", 5000], ["tokens", "exact", 200],
+    ]);
+  });
   it("reports unusable values and applies nothing for them", () => {
     const parsed = parseSearch("latency:fast status:maybe cost:free");
     expect(parsed.filters).toEqual([]);
@@ -45,6 +65,13 @@ describe("numbers", () => {
   it("reads latency with units", () => {
     expect([">2s", ">=500ms", "1.5s", "250", "2m"].map(parseLatency)).toEqual([2000, 500, 1500, 250, 120000]);
     expect(parseLatency("fast")).toBeNull();
+  });
+  it("reads tokens with k and m suffixes", () => {
+    expect([">5k", "<=1200", "1.5m", "=7"].map(parseTokens)).toEqual([5000, 1200, 1_500_000, 7]);
+    expect(parseTokens("lots")).toBeNull();
+  });
+  it("tells the comparison direction", () => {
+    expect(["<2s", "<=2s", ">2s", ">=2s", "2s", "=2s"].map(comparisonBound)).toEqual(["max", "max", "min", "min", "min", "exact"]);
   });
   it("reads cost with or without a dollar sign", () => {
     expect([">0.01", "$0.5", "2"].map(parseCost)).toEqual([0.01, 0.5, 2]);
