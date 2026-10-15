@@ -102,7 +102,7 @@ export function Hero() {
           transition={{ delay: 0.2 }}
           className="inline-flex items-center gap-2 border border-white/20 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70"
         >
-          <span className="bg-[#f4d44d] px-1.5 text-black">New</span> TypeScript SDK v0.3.0 · nested steps
+          <span className="bg-[#f4d44d] px-1.5 text-black">New</span> TypeScript SDK v0.4.0 · OpenAI, Anthropic and LangGraph
         </motion.p>
         <motion.h1
           initial={reduce ? false : { opacity: 0, y: 30 }}
