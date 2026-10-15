@@ -113,7 +113,3 @@ Git automation was intentionally disconnected from both regional Vercel projects
 As of 2026-08-19 the EU project has a real production deployment on `main` (commit `091d9da`, deployed manually with `vercel deploy --prod` and a locally written `.vercel/project.json`), so the first-deployment misclassification can no longer occur and Git may safely be reconnected. `eu.cloud.tracify.tech` is attached and now resolves via CNAME to `5ee7be47305fd6c5.vercel-dns-017.com` rather than the legacy `76.76.21.21` A record. Note that an earlier claim that both regional domains were already attached was wrong — the EU domain was attached only on 2026-08-19, and the US domain remains unattached by design.
 
 Regional deploy-key files are local operator artifacts under the ignored `scratch/tracify-regional/` directory. They must never be committed. Rotate them if that directory leaves the trusted workstation. Values are also stored as sensitive Vercel environment variables for production and preview.
-
-## EU preview builds
-
-`vercel.json` runs `scripts/vercel-ignore-build.mjs`. The EU project (`tracify-cloud-eu`) only builds `main` and branches named `preview/...`; all other branches are skipped to save the shared daily Vercel build allowance. The marketing project (`tracify`) still builds every branch. To get a dashboard preview, push your branch as `preview/<name>`. Revert by removing `ignoreCommand` from `vercel.json`.

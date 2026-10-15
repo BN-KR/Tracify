@@ -8,6 +8,5 @@
       "main": true,
       "staging": true
     }
-  },
-  "ignoreCommand": "node scripts/vercel-ignore-build.mjs"
+  }
 }
