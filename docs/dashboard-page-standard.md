@@ -212,3 +212,21 @@ not matching traces. Trace context links retain compatible filters. All table co
 pagination, with stable ID ties; summary totals cover the complete matching set. CSV exports the current
 page and mode with raw millisecond/USD values. Relative ranges poll with the access cache, hidden-tab
 skip and back-off; paused/fixed ranges do not poll. Keep layout changes from reusing stale table cells.
+## Export and sorting
+
+CSV exports exactly the selected columns in displayed order, including optional aggregates and metadata.
+Headers state UTC, milliseconds or USD where relevant. Keep full IDs, numeric precision and zeroes;
+missing values are blank. Preserve CSV quoting and formula-injection protection. Export only the current
+page and disable it until the requested optional values have arrived.
+
+Every trace header is sortable, including text, identifiers, optional aggregates and metadata. Sort the
+entire filtered result in ClickHouse before pagination, use a stable run ID tie-breaker, and show direction
+with `aria-sort`. Numeric fields sort numerically; metadata sorts as the displayed string. SQL expressions
+come from a fixed allow-list. Qualify raw fields when a selected aggregate shares their name, to avoid
+ClickHouse substituting another aggregate alias into the sort expression.
+## Selected-column CSV export
+
+Export the visible page using exactly its selected columns and their display order, including optional
+aggregates and metadata. Use explicit UTC/ms/USD headers, full IDs, raw numeric precision and zeroes;
+missing values stay blank. Tags use unambiguous JSON. Keep quoting, embedded-newline handling and
+spreadsheet-formula protection. Disable export while optional column values are loading.

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { stepLabel } from "./agent-map";
 import { traceCsv } from "@/lib/trace-csv";
-import { parseSearch } from "@/lib/trace-search";
+import { EXCLUDE_PREFIX, parseSearch } from "@/lib/trace-search";
 import { SearchBox } from "./search-box";
 import { RANGES, TimeRangePicker } from "./time-range-picker";
 import { ColumnsMenu, DEFAULT_COLUMNS, columnLabel, extraCell, extraIdsFor, isKnownColumn, metaKeysFor, orderColumns, type TraceRowExtras } from "./trace-columns";
@@ -258,10 +258,17 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     const patch: TraceQuery = { q: parsed.text };
     for (const filter of parsed.filters) {
       if (filter.kind === "facet") {
-        const current = decodeValues(patch[filter.field.key] ?? query[filter.field.key]);
-        if (!current.includes(filter.value)) patch[filter.field.key] = encodeValues([...current, filter.value]);
+        // A value is either included or excluded: adding it on one side removes it from the other.
+        const [add, drop] = filter.negate ? [`${EXCLUDE_PREFIX}${filter.field.key}`, filter.field.key] : [filter.field.key, `${EXCLUDE_PREFIX}${filter.field.key}`];
+        const current = decodeValues(patch[add] ?? query[add]);
+        if (!current.includes(filter.value)) patch[add] = encodeValues([...current, filter.value]);
+        const other = decodeValues(patch[drop] ?? query[drop]).filter((value) => value !== filter.value);
+        patch[drop] = encodeValues(other);
       } else if (filter.kind === "status") patch.status = filter.value === "all" ? "" : filter.value;
-      else patch[filter.field.key] = String(filter.value);
+      else {
+        if (filter.bound !== "max") patch[filter.field.key] = String(filter.value);
+        if (filter.bound !== "min") patch[filter.field.maxKey!] = String(filter.value);
+      }
     }
     setSearchDraft(parsed.text);
     update(patch);
@@ -294,9 +301,17 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
       const values = decodeValues(query[field.key]);
       return { key: field.key, label: `${field.label}: ${values.length > 2 ? `${values.slice(0, 2).join(", ")} +${values.length - 2}` : values.join(", ")}` };
     }),
+    ...FACETS.filter((field) => query[`${EXCLUDE_PREFIX}${field.key}`]).map((field) => {
+      const values = decodeValues(query[`${EXCLUDE_PREFIX}${field.key}`]);
+      return { key: `${EXCLUDE_PREFIX}${field.key}`, label: `${field.label} not: ${values.length > 2 ? `${values.slice(0, 2).join(", ")} +${values.length - 2}` : values.join(", ")}` };
+    }),
     ...(query.status && query.status !== "all" ? [{ key: "status", label: query.status === "error" ? "Errors only" : "Healthy only" }] : []),
     ...(query.minLatencyMs ? [{ key: "minLatencyMs", label: `Latency ≥ ${formatDuration(Number(query.minLatencyMs))}` }] : []),
+    ...(query.maxLatencyMs ? [{ key: "maxLatencyMs", label: `Latency ≤ ${formatDuration(Number(query.maxLatencyMs))}` }] : []),
     ...(query.minCostUsd ? [{ key: "minCostUsd", label: `Cost ≥ ${formatCost(Number(query.minCostUsd))}` }] : []),
+    ...(query.maxCostUsd ? [{ key: "maxCostUsd", label: `Cost ≤ ${formatCost(Number(query.maxCostUsd))}` }] : []),
+    ...(query.minTokens ? [{ key: "minTokens", label: `Tokens ≥ ${compactNumber(Number(query.minTokens))}` }] : []),
+    ...(query.maxTokens ? [{ key: "maxTokens", label: `Tokens ≤ ${compactNumber(Number(query.maxTokens))}` }] : []),
     ...(query.errorGroup ? [{ key: "errorGroup", label: `Error: ${activeGroupLabel}` }] : []),
     ...(query.node ? [{ key: "node", label: `Step: ${stepLabel(query.node)}` }] : []),
     ...(query.edge ? [{ key: "edge", label: `Path: ${query.edge.split(EDGE_SEPARATOR).map(stepLabel).join(" → ")}` }] : []),
