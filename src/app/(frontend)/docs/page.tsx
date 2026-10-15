@@ -4,6 +4,7 @@ import { getDocs } from "@/lib/markdoc-docs";
 import { DocsSearch } from "@/components/docs/docs-search";
 import { DocsSidebar } from "@/components/docs/docs-sidebar";
 import { PageHeader } from "@/components/marketing/page-header";
+import { FirstTraceSteps } from "@/components/docs/first-trace-steps";
 import { Reveal } from "@/components/marketing/landing/reveal";
 
 export const metadata = { title: "Documentation", description: "Install the SDK, instrument an agent, and inspect the execution record.", alternates: { canonical: "/docs" } };
@@ -36,7 +37,14 @@ export default function DocsRootPage() {
         <main className="min-w-0 px-5 py-12 md:px-10 md:py-16">
           <DocsSearch docs={searchDocs} />
 
-          <section id="quickstarts" className="mt-14 scroll-mt-24">
+          <section id="first-trace" className="mt-14 scroll-mt-24">
+            <p className={eyebrow}>Zero to first trace</p>
+            <h2 className="mt-3 font-pixel text-[clamp(2.2rem,5vw,3.6rem)] leading-[.9] tracking-[-.06em]">Three steps. Five minutes.</h2>
+            <div className="mt-8"><FirstTraceSteps /></div>
+            <Link href="/docs/quickstart" className="mt-5 inline-flex font-mono text-[11px] uppercase tracking-[.14em] underline decoration-[#f4d44d] decoration-2 underline-offset-4 hover:bg-[#f4d44d]">Full quickstart →</Link>
+          </section>
+
+          <section id="quickstarts" className="mt-20 scroll-mt-24">
             <p className={eyebrow}>Get started</p>
             <h2 className="mt-3 font-pixel text-[clamp(2.2rem,5vw,3.6rem)] leading-[.9] tracking-[-.06em]">Choose your first job.</h2>
             <div className="mt-8 grid gap-4 sm:grid-cols-3">

@@ -783,3 +783,28 @@
 .tracify-cloud-shell:has(.captured-workspace) .captured-reference-brand{display:inline-flex;align-items:center;gap:4px;color:#f0f0f0;font:600 15px/1 var(--font-geist-sans),Arial,sans-serif;letter-spacing:-.04em}
 .tracify-cloud-shell:has(.captured-workspace) .captured-reference-brand i{display:block;width:14px;height:10px;background:linear-gradient(155deg,#f24b42 0 25%,#36a8e6 25% 48%,#f2cf3a 48% 70%,#3fc48b 70%);clip-path:polygon(0 50%,25% 0,52% 42%,78% 0,100% 50%,78% 100%,52% 58%,25% 100%)}
 .tracify-cloud-shell:has(.captured-workspace) .tracify-shell-sidebar a:hover,.tracify-cloud-shell:has(.captured-workspace) .tracify-shell-sidebar button:hover{color:#fff}
+
+@layer components {
+  .docs-markdoc .blog-code-block { margin-block: 1.5rem; overflow: hidden; border: 1px solid #090909; border-left: 4px solid #f4d44d; background: #090909; box-shadow: 6px 6px 0 rgb(0 0 0 / 10%); }
+  .docs-markdoc .blog-code-block__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid rgb(255 255 255 / 15%); padding: 0.55rem 0.9rem; color: #f4d44d; font-family: var(--font-geist-mono), monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .docs-markdoc .blog-code-block__toolbar button { display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid rgb(255 255 255 / 30%); padding: 0.3rem 0.55rem; color: #fff; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .docs-markdoc .blog-code-block__toolbar button:hover { background: #f4d44d; color: #000; }
+  .docs-markdoc .blog-code-block pre { margin: 0; border: 0; border-left: 0; overflow-x: auto; background: transparent; padding: 1rem 1.1rem; color: #f5f5f2; font-size: 0.8rem; line-height: 1.7; }
+  .docs-markdoc .blog-code-block pre code { background: transparent; padding: 0; color: inherit; }
+}
+
+@layer components {
+  .blog-post__body .markdoc-blog-richtext { max-width: none; font-size: 1.08rem; color: rgb(0 0 0 / 78%); }
+  .blog-post__body .markdoc-blog-richtext > p:first-child { font-size: 1.3rem; line-height: 1.7; color: #090909; }
+  .blog-post__body .markdoc-blog-richtext > p:first-child::first-line { font-weight: 600; }
+  .blog-post__body .markdoc-blog-richtext h2 { font-family: var(--font-geist-pixel), monospace; letter-spacing: -0.045em; line-height: 0.98; }
+  .blog-post__body .markdoc-blog-richtext blockquote { border: 1px solid #090909; border-left: 8px solid #f4d44d; background: #090909; color: #eceae3; padding: 1.4rem 1.6rem; font-size: 1.15rem; }
+  .blog-post__body .markdoc-blog-richtext blockquote p { margin: 0; color: #eceae3; }
+  .blog-post__body .markdoc-blog-richtext a { text-decoration-color: #f4d44d; text-decoration-thickness: 3px; }
+  .blog-post__body .markdoc-blog-richtext a:hover { background: #f4d44d; }
+  .blog-post__body .markdoc-blog-richtext h2::before { left: -1.6rem; }
+}
+@layer components {
+  .blog-post__body .markdoc-blog-richtext blockquote strong, .blog-post__body .markdoc-blog-richtext blockquote mark { background: none; color: #f4d44d; }
+  .blog-post__body .markdoc-blog-richtext blockquote a { color: #f4d44d; }
+}

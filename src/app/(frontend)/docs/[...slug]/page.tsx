@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight, ChevronLeft } from "lucide-react";
 import { DocsActions } from "@/components/docs/docs-actions";
 import { DocsSidebar } from "@/components/docs/docs-sidebar";
+import { LegalToc } from "@/components/reading/legal-toc";
 import { MarkdocDoc } from "@/components/docs/markdoc-doc";
 import Image from "next/image";
 import { getDoc, getDocs, getDocMarkdown } from "@/lib/markdoc-docs";
@@ -46,7 +47,7 @@ export default async function DocsArticlePage({ params }: { params: Promise<{ sl
       <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[250px_minmax(0,1fr)_220px]">
         <DocsSidebar docs={navigationDocs} activeSlug={doc.slug} />
         <main className="min-w-0 px-5 py-10 md:px-10 lg:px-14 lg:py-14">
-          <article className="docs-markdoc"><MarkdocDoc content={doc.content} /></article>
+          <article><MarkdocDoc content={doc.content} /></article>
           <div className="mt-16 grid max-w-3xl gap-4 sm:grid-cols-2">
             {previous ? <Link href={`/docs/${previous.slug}`} className="group flex items-center gap-3 border border-black p-5 transition-colors hover:bg-[#f4d44d]"><ChevronLeft className="size-5 transition-transform group-hover:-translate-x-1" /><span><span className="font-mono text-[10px] uppercase tracking-[.14em] text-black/55">Previous</span><span className="mt-2 block font-pixel text-2xl tracking-[-.05em]">{previous.title}</span></span></Link> : <span />}
             {next ? <Link href={`/docs/${next.slug}`} className="group flex items-center justify-between gap-3 border border-black bg-[#090909] p-5 text-right text-[#eceae3] transition-colors hover:bg-[#f4d44d] hover:text-black"><span><span className="font-mono text-[10px] uppercase tracking-[.14em] opacity-60">Next</span><span className="mt-2 block font-pixel text-2xl tracking-[-.05em]">{next.title}</span></span><ArrowRight className="size-5 transition-transform group-hover:translate-x-1" /></Link> : null}
@@ -54,9 +55,10 @@ export default async function DocsArticlePage({ params }: { params: Promise<{ sl
         </main>
         <aside className="hidden border-l border-black/15 p-5 xl:block">
           <div className="sticky top-24">
+            {doc.headings.filter((h) => h.level === 2).length > 1 ? <div className="mb-10 max-h-[45vh] overflow-y-auto"><LegalToc items={doc.headings.filter((h) => h.level === 2).map((h) => ({ id: h.id, title: h.title }))} /></div> : null}
             <p className="font-mono text-[10px] uppercase tracking-[.16em] text-black/55">Page actions</p>
             <div className="mt-4"><DocsActions markdown={markdown} installUrl="/docs/mcp-server" /></div>
-            <p className="mt-12 font-mono text-[10px] uppercase tracking-[.16em] text-black/55">Agent access</p>
+            <p className="mt-10 font-mono text-[10px] uppercase tracking-[.16em] text-black/55">Agent access</p>
             <p className="mt-3 text-sm leading-6 text-black/65">Install the read-only docs MCP server for full documentation retrieval.</p>
             <Link href="/docs/mcp-server" className="mt-4 inline-flex font-mono text-[10px] uppercase tracking-[.14em] underline decoration-[#f4d44d] decoration-2 underline-offset-4 hover:bg-[#f4d44d]">MCP setup →</Link>
           </div>

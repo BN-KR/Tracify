@@ -1,3 +1,5 @@
+import { ArticleCta } from "@/components/blog/article-cta";
+import { LegalToc } from "@/components/reading/legal-toc";
 import { AuthorBio } from "@/components/blog/author-bio";
 import { MarkdocRichText } from "@/components/blog/markdoc-rich-text";
 import { BlogTableOfContents } from "@/components/blog/blog-table-of-contents";
@@ -129,6 +131,7 @@ export default async function BlogPostPage({
 
   const categories = post.categories;
   const tags = post.tags;
+  const tocItems = post.headings.filter((h) => h.level === 2).map((h) => ({ id: h.id, title: h.text }));
   const heroUrl = post.heroImage?.hero || post.heroImage?.src;
   const isMonitoringPost = post.slug === "ai-agent-monitoring";
   const articleClassName = isMonitoringPost ? "blog-post--monitoring" : undefined;
@@ -181,28 +184,40 @@ export default async function BlogPostPage({
             </div>
           ) : null}
 
-          <div className="blog-post__body mx-auto max-w-[820px] px-6 py-12 md:px-10 md:py-16">
-            <BlogTableOfContents headings={post.headings} />
-            <MarkdocRichText content={post.content} />
-
-            <div className="mt-12 flex flex-col gap-6 border-t border-black/20 pt-8">
-              <ShareButtons title={post.title} />
-              <AuthorBio author={post.author} />
-            </div>
-
-            {!isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} currentSlug={post.slug} categories={post.categories} /> : null}
-
-            {tags.length ? (
-              <div className="mt-12 border-t border-black/20 pt-8">
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <span key={tag} className="border border-black/20 px-2 py-1 font-mono text-[11px] text-black/60">#{tag}</span>
-                  ))}
+          <div className="blog-post__body mx-auto grid max-w-[1100px] gap-10 px-6 py-12 md:px-10 md:py-16 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-14">
+            <aside className="hidden lg:block">
+              <div className="sticky top-24">
+                {tocItems.length > 2 ? <LegalToc items={tocItems} /> : null}
+                <div className="mt-8 border-t border-black/20 pt-6">
+                  <ShareButtons title={post.title} />
                 </div>
               </div>
-            ) : null}
+            </aside>
+            <div className="min-w-0">
+              <div className="lg:hidden"><BlogTableOfContents headings={post.headings} /></div>
+              <MarkdocRichText content={post.content} />
 
-            {isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} currentSlug={post.slug} categories={post.categories} heading="Recommended posts" /> : null}
+              <ArticleCta />
+
+              <div className="mt-12 flex flex-col gap-6 border-t border-black/20 pt-8">
+                <div className="lg:hidden"><ShareButtons title={post.title} /></div>
+                <AuthorBio author={post.author} />
+              </div>
+
+              {!isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} currentSlug={post.slug} categories={post.categories} /> : null}
+
+              {tags.length ? (
+                <div className="mt-12 border-t border-black/20 pt-8">
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <span key={tag} className="border border-black/20 px-2 py-1 font-mono text-[11px] text-black/60">#{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} currentSlug={post.slug} categories={post.categories} heading="Recommended posts" /> : null}
+            </div>
           </div>
         </div>
       </article>

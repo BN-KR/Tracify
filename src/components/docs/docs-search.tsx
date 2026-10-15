@@ -1,13 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { searchDocs, type SearchableDoc } from "@/lib/docs-search";
 
 type SearchDoc = SearchableDoc;
 
 export function DocsSearch({ docs }: { docs: SearchDoc[] }) {
   const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const typing = /input|textarea|select/i.test((event.target as HTMLElement | null)?.tagName ?? "");
+      if ((event.key === "k" && (event.metaKey || event.ctrlKey)) || (event.key === "/" && !typing)) {
+        event.preventDefault();
+        inputRef.current?.focus();
+      }
+      if (event.key === "Escape") setQuery("");
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const matches = useMemo(() => searchDocs(docs, query, 5), [docs, query]);
-  return <div className="relative border border-black bg-white p-4 md:p-5"><label htmlFor="docs-search" className="sr-only">Search documentation</label><div className="flex items-center gap-3"><span aria-hidden className="font-mono text-[10px] text-black/55">/</span><input id="docs-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search documentation" className="min-w-0 flex-1 bg-transparent font-mono text-xs outline-none placeholder:text-black/55" /></div>{query.trim() && <div className="absolute inset-x-0 top-full z-10 border border-black bg-[#f3f2ed] shadow-[8px_8px_0_#111]" role="listbox">{matches.length ? matches.map((doc) => <Link key={doc.slug} href={`/docs/${doc.slug}`} role="option" className="block border-t border-black p-4 hover:bg-[#f4d44d]"><p className="font-mono text-[10px] uppercase tracking-[.08em]">{doc.title} <span className="text-black/45">/ {doc.section}</span></p><p className="mt-1 text-xs leading-5 text-black/55">{doc.excerpt}</p></Link>) : <p className="border-t border-black p-4 text-sm text-black/55">No documentation matches.</p>}</div>}</div>;
+  return <div className="relative border border-black bg-white p-4 md:p-5"><label htmlFor="docs-search" className="sr-only">Search documentation</label><div className="flex items-center gap-3"><span aria-hidden className="font-mono text-[10px] text-black/55">/</span><input ref={inputRef} id="docs-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search documentation" className="min-w-0 flex-1 bg-transparent font-mono text-xs outline-none placeholder:text-black/55" /><kbd className="hidden border border-black/30 px-1.5 py-0.5 font-mono text-[10px] text-black/55 sm:inline">⌘K</kbd></div>{query.trim() && <div className="absolute inset-x-0 top-full z-10 border border-black bg-[#f3f2ed] shadow-[8px_8px_0_#111]" role="listbox">{matches.length ? matches.map((doc) => <Link key={doc.slug} href={`/docs/${doc.slug}`} role="option" className="block border-t border-black p-4 hover:bg-[#f4d44d]"><p className="font-mono text-[10px] uppercase tracking-[.08em]">{doc.title} <span className="text-black/45">/ {doc.section}</span></p><p className="mt-1 text-xs leading-5 text-black/55">{doc.excerpt}</p></Link>) : <p className="border-t border-black p-4 text-sm text-black/55">No documentation matches.</p>}</div>}</div>;
 }

@@ -1,7 +1,8 @@
 import { CategoryPills } from "@/components/blog/category-pills";
 import { Pagination } from "@/components/blog/pagination";
 import { getReadingTime } from "@/components/blog/reading-time";
-import { Reveal } from "@/components/marketing/landing/reveal";
+import { BlogArchive } from "@/components/blog/blog-archive";
+import { Reveal, Ticker } from "@/components/marketing/landing/reveal";
 import { PageHeader } from "@/components/marketing/page-header";
 import { getCategoryOptions, getPostDate, getPublishedPosts, type BlogPost } from "@/lib/markdoc-blog";
 import type { Metadata } from "next";
@@ -82,6 +83,10 @@ export default async function BlogPage({
         <Link href="/blog/rss.xml" className="border border-[#f4d44d] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#f4d44d] transition-colors hover:bg-[#f4d44d] hover:text-black">RSS feed</Link>
       </PageHeader>
 
+      <div className="overflow-hidden border-b border-black bg-[#090909] py-4 text-[#eceae3]">
+        <Ticker items={allCategories.length ? allCategories.map((c) => c.replace(/-/g, " ")) : ["traces", "evals", "failures"]} />
+      </div>
+
       <div className="border-b border-black bg-[#eceae3]">
         <div className="mx-auto max-w-[1240px] px-5 py-5 sm:px-8">
           {allCategories.length ? (
@@ -123,7 +128,10 @@ export default async function BlogPage({
                 {rest.map((post, i) => (
                   <Reveal key={post.id} delay={(i % 3) * 0.06}>
                     <Link href={`/blog/${post.slug}`} className="group flex h-full flex-col border border-black bg-[#eceae3] transition-colors hover:bg-[#fff4b5]">
-                      <Visual post={post} index={i + 1} className="aspect-[16/10] border-b border-black" />
+                      <div className="relative">
+                        <Visual post={post} index={i + 1} className="aspect-[16/10] border-b border-black" />
+                        {post.categories[0] ? <span className="absolute right-3 top-3 bg-[#f4d44d] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-black">{post.categories[0]}</span> : null}
+                      </div>
                       <div className="flex flex-1 flex-col p-5 md:p-6">
                         <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/60">
                           <time dateTime={getPostDate(post)}>{formatDate(getPostDate(post))}</time> · {getReadingTime(post.plainText)} min
@@ -139,23 +147,16 @@ export default async function BlogPage({
             ) : null}
 
             {archive.length ? (
-              <section className="mt-16" aria-labelledby="archive-heading">
-                <div className="flex items-end justify-between border-b-2 border-black pb-3">
-                  <h2 id="archive-heading" className="font-pixel text-[clamp(2rem,4vw,3rem)] leading-none tracking-[-0.055em]">Every article</h2>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/60">{archive.length} more</span>
-                </div>
-                <ul>
-                  {archive.map((post) => (
-                    <li key={post.id} className="border-b border-black/20">
-                      <Link href={`/blog/${post.slug}`} className="group grid gap-2 py-4 transition-colors hover:bg-[#f4d44d] sm:grid-cols-[130px_1fr_auto] sm:items-baseline sm:gap-6 sm:px-3">
-                        <time dateTime={getPostDate(post)} className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/60 group-hover:text-black">{formatDate(getPostDate(post))}</time>
-                        <span className="font-pixel text-xl leading-tight tracking-[-0.04em] md:text-2xl">{post.title}</span>
-                        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/60 group-hover:text-black">{getReadingTime(post.plainText)} min →</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
+              <BlogArchive
+                items={archive.map((post) => ({
+                  slug: post.slug!,
+                  title: post.title,
+                  date: getPostDate(post),
+                  label: formatDate(getPostDate(post)),
+                  minutes: getReadingTime(post.plainText),
+                  categories: post.categories,
+                }))}
+              />
             ) : null}
 
             <div className="mt-10">
