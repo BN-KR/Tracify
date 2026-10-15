@@ -942,7 +942,7 @@ const STEP_SORT: Record<string, string> = { startedAt: "createdAt", name: "name"
 export function validStepSort(value?: string | null) { return value && Object.hasOwn(STEP_SORT, value) ? value : "startedAt"; }
 function stepsWhere(projectId: string, filters: TraceListFilters, excluding?: FacetKey) {
   // Step filters apply to actual steps, not all siblings of a matching trace.
-  const { where } = traceListClauses(projectId, { ...filters, facets: {}, query: undefined, status: "all", minLatencyMs: undefined, maxLatencyMs: undefined, minCostUsd: undefined, maxCostUsd: undefined });
+  const { where } = traceListClauses(projectId, { ...filters, facets: {}, query: undefined, status: "all", minTokens: undefined, maxTokens: undefined, minLatencyMs: undefined, maxLatencyMs: undefined, minCostUsd: undefined, maxCostUsd: undefined });
   const clauses = [where];
   for (const key of FACET_KEYS) {const values=filters.facets?.[key];if(key!==excluding && values?.length)clauses.push(facetCondition(key,values));}
   if(filters.query) {const q=sqlString(filters.query);clauses.push(`(${["spanId","runId","traceName","toolName","modelId","input","output","errorMessage"].map(column=>`positionCaseInsensitive(${column}, '${q}') > 0`).join(" OR ")})`);}
@@ -952,6 +952,8 @@ function stepsWhere(projectId: string, filters: TraceListFilters, excluding?: Fa
   if(filters.maxLatencyMs!==undefined)clauses.push(`latencyMs <= ${Number(filters.maxLatencyMs)}`);
   if(filters.minCostUsd!==undefined)clauses.push(`costUsd >= ${Number(filters.minCostUsd)}`);
   if(filters.maxCostUsd!==undefined)clauses.push(`costUsd <= ${Number(filters.maxCostUsd)}`);
+  if(filters.minTokens!==undefined)clauses.push(`inputTokens + outputTokens >= ${Number(filters.minTokens)}`);
+  if(filters.maxTokens!==undefined)clauses.push(`inputTokens + outputTokens <= ${Number(filters.maxTokens)}`);
   return clauses.join(" AND ");
 }
 export async function traceSteps(projectId: string, filters: TraceListFilters, grouped = false, withFacets = false) {

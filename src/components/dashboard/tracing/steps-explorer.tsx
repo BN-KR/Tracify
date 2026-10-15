@@ -36,7 +36,7 @@ const FIELDS = [
 ];
 const VIEW_KEYS = new Set(["range", "from", "to", "trace", "step", "view"]);
 const control =
-  "h-8 rounded border border-[#262C35] bg-[#111418] px-2 text-xs text-[#C9CED6]";
+  "h-8 rounded border border-[#262C35] bg-[#111418] px-2 text-xs text-[#C9CED6] aria-pressed:bg-[#21262E] aria-pressed:text-[#E6E9EE]";
 const BASE_COLUMNS = [
   { key: "startedAt", label: "Start time" },
   { key: "name", label: "Step" },
@@ -83,6 +83,7 @@ export function StepsExplorer({
   const [live, setLive] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [fresh, setFresh] = useState(new Set<string>());
+  const latestData = useRef<Result | null>(null);
   const requestId = useRef(0),
     pending = useRef(false),
     search = useRef<HTMLInputElement>(null);
@@ -140,6 +141,7 @@ export function StepsExplorer({
       })
       .then((body) => {
         if (id === requestId.current) {
+          latestData.current = body;
           setData(body);
           setFacets(body.facets ?? []);
           setError(null);
@@ -160,6 +162,7 @@ export function StepsExplorer({
   }, [url, key, attempt]);
   useEffect(() => {
     if (!live || query.from || query.to) return;
+    const controller = new AbortController();
     let stopped = false,
       delay = 5000;
     let timer: ReturnType<typeof setTimeout>;
@@ -179,17 +182,18 @@ export function StepsExplorer({
         try {
           const response = await fetch(`${url}?${params}`, {
             cache: "no-store",
+            signal: controller.signal,
           });
           if (!response.ok) throw Error("poll");
           const body = (await response.json()) as Result;
           if (!stopped && id === requestId.current) {
             setError(null);
-            setData((current) => {
-              const changed =
-                JSON.stringify(current?.rows) !== JSON.stringify(body.rows) ||
-                JSON.stringify(current?.stats) !== JSON.stringify(body.stats);
-              delay = changed ? 5000 : Math.min(delay * 2, 60000);
-              if (!changed) return current;
+            const current = latestData.current;
+            const changed =
+              JSON.stringify(current?.rows) !== JSON.stringify(body.rows) ||
+              JSON.stringify(current?.stats) !== JSON.stringify(body.stats);
+            delay = changed ? 5000 : Math.min(delay * 2, 60000);
+            if (changed) {
               const old = new Set(current?.rows.map((r) => r.spanId));
               setFresh(
                 new Set(
@@ -198,11 +202,13 @@ export function StepsExplorer({
                     .map((r) => r.spanId),
                 ),
               );
-              return body;
-            });
+              latestData.current = body;
+              setData(body);
+            }
           }
         } catch {
           delay = Math.min(delay * 2, 60000);
+          if (!stopped && id === requestId.current) setError("Live step updates are temporarily unavailable. Retrying…");
         } finally {
           if (id === requestId.current) pending.current = false;
         }
@@ -212,6 +218,7 @@ export function StepsExplorer({
     timer = setTimeout(tick, delay);
     return () => {
       stopped = true;
+      controller.abort();
       clearTimeout(timer);
     };
   }, [live, query.from, query.to, query.range, key, url]);
@@ -250,6 +257,8 @@ export function StepsExplorer({
           "maxLatencyMs",
           "minCostUsd",
           "maxCostUsd",
+          "minTokens",
+          "maxTokens",
         ].includes(k),
     );
   const view: TraceView = TRACE_VIEWS.some((v) => v.id === query.view)
@@ -412,6 +421,8 @@ export function StepsExplorer({
                 ["maxLatencyMs", "Max latency (ms)"],
                 ["minCostUsd", "Min cost ($)"],
                 ["maxCostUsd", "Max cost ($)"],
+                ["minTokens", "Min tokens"],
+                ["maxTokens", "Max tokens"],
               ].map(([id, label]) => (
                 <label key={id} className="min-w-0 text-[10px] text-[#8B93A1]">
                   {label}
@@ -530,7 +541,10 @@ export function StepsExplorer({
               ["Total cost", formatCost(data?.stats.totalCostUsd)],
               ["Tokens", compactNumber(data?.stats.tokens ?? 0)],
             ].map(([label, v]) => (
-              <div key={label} className="bg-[#0E1115] px-3 py-2">
+              <div
+                key={label}
+                className={`bg-[#0E1115] px-3 py-2 ${label === "Tokens" ? "col-span-2 sm:col-span-1" : ""}`}
+              >
                 <p className="text-xs text-[#8B93A1]">{label}</p>
                 <p className="font-mono">{data ? v : "—"}</p>
               </div>
@@ -564,7 +578,10 @@ export function StepsExplorer({
                 </p>
               </div>
             ) : (
-              <table key={grouped ? "grouped" : "individual"} className="mt-3 w-full min-w-[850px] border-separate border-spacing-0">
+              <table
+                key={grouped ? "grouped" : "individual"}
+                className="mt-3 w-full min-w-[850px] border-separate border-spacing-0"
+              >
                 <caption className="sr-only">
                   {grouped
                     ? "Steps grouped across traces"
@@ -654,7 +671,7 @@ export function StepsExplorer({
                               className="font-mono text-xs"
                               title={String(value(r, c.key))}
                             >
-                              {value(r, c.key) || "—"}
+                              {value(r, c.key) === "" ? "—" : value(r, c.key)}
                             </span>
                           )}
                         </td>
