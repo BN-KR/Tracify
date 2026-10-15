@@ -2,6 +2,8 @@
 
 ## Tracing roadmap authorized 2026-10-14 (in progress)
 - User authorized all five recommended priorities: loading flash; CSV and sorting; OpenAI/Anthropic then LangGraph integrations; cross-trace steps table; saved views. Start base main `fcafb74` after #160/#161 merged, no open PRs. Auth isolated on `codex/project-loading-refresh` in `/home/orca/workspaces/Tracify-loading`. Sessions page files remain out of scope.
+## 2026-10-15 Search exclusions and comparisons — draft PR (branch `claude/search-exclusions-limits-csfvu6`)
+- Tracing search accepts `-env:dev` style exclusions (any facet; `-status:error` = healthy) and `latency|cost|tokens` with `>`, `>=`, `<`, `<=`, `=` (bounds inclusive; bare number = minimum; tokens take `k`/`m`). Exclusions travel as `not_<facet>` URL params and become `runId NOT IN (...)` in `traceListClauses`; `minTokens`/`maxTokens` are new HAVING filters. Max latency/cost already existed in the backend. Excluding a numeric field is rejected with a hint. Touches `tinybird.ts`/`trace-filters.ts` near the codex sort branch but in different hunks.
 
 ## 2026-10-14 Agent-scoped Flow map and finished latency — draft PR #150
 - Branch `codex/tracing-agent-map`, worktree `/home/orca/workspaces/Tracify-agent-map`, based on origin/main `209924a`. Draft PR: https://github.com/BN-KR/Tracify/pull/150. Verified runtime: `f3140cf`; EU preview https://tracify-cloud-eu-git-codex-tracing-agent-map-tracify-tech.vercel.app is Ready. Later verification notes do not change runtime code. Owner preview review before merge.
