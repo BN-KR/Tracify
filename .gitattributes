@@ -1,0 +1,2 @@
+# GitHub language bar: blog posts use the .mdoc extension (Markdoc), which GitHub mistakes for Roff man pages.
+*.mdoc linguist-language=Markdown
