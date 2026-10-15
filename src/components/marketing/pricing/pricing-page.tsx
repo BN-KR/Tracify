@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Plus } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
 import { pricingCheckoutHref, type BillingInterval } from "@/lib/billing-links";
@@ -180,6 +180,55 @@ function Estimator({ value, onChange }: { value: EstimateState; onChange: (v: Es
   );
 }
 
+const sampleRun = [
+  ["AGENT", "support-agent", "the run itself"],
+  ["LLM", "chat", "412 tokens"],
+  ["TOOL", "order.lookup", "140 ms"],
+  ["TOOL", "docs.search", "0 results"],
+  ["LLM", "chat · retry", "$0.0187"],
+  ["TOOL", "refund.issue", "502 error"],
+] as const;
+
+/** One run, counted row by row, so "what is a span" is something you watch instead of read. */
+function SpanCounter() {
+  const reduce = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.4 });
+  const [count, setN] = useState(0);
+  const n = reduce ? sampleRun.length : count;
+  useEffect(() => {
+    if (!inView || reduce) return;
+    const id = window.setInterval(() => setN((v) => (v >= sampleRun.length ? v : v + 1)), 450);
+    return () => window.clearInterval(id);
+  }, [inView, reduce]);
+  return (
+    <section className="border-y-2 border-black bg-[#eceae3] px-5 py-24 text-black md:px-10 md:py-32" aria-labelledby="span-title">
+      <div className="mx-auto grid max-w-[1320px] items-center gap-14 lg:grid-cols-2">
+        <Reveal>
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/50">What you pay for</p>
+          <h2 id="span-title" className="mt-5 font-pixel text-[clamp(2.6rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.07em]">One step, one span.</h2>
+          <p className="mt-6 max-w-md text-base leading-7 text-black/70">Every model call, tool call and retrieval your agent makes is one span. A run with six steps is six spans, retries and failures included. That is the whole meter. No seats-times-features maze, no per-trace surprise.</p>
+        </Reveal>
+        <div ref={ref} className="border-2 border-black bg-[#090909] font-mono text-[11px] text-[#eceae3]">
+          <div className="flex items-center justify-between border-b border-white/15 px-4 py-3 text-[9px] uppercase tracking-[0.14em] text-white/55">
+            <span>run_9f3a</span>
+            <span className="flex items-center gap-2 text-[#f4d44d]"><span className="font-pixel text-2xl normal-case tracking-[-0.05em]" aria-live="polite">{n}</span>{n === 1 ? "span" : "spans"} counted</span>
+          </div>
+          <ul className="px-4 py-3">
+            {sampleRun.map(([kind, name, meta], i) => (
+              <li key={name} className={`grid grid-cols-[48px_1fr_auto] items-center gap-3 border-b border-white/10 py-3 last:border-0 transition-opacity duration-300 ${i < n ? "opacity-100" : "opacity-15"} ${meta === "502 error" ? "text-[#f4d44d]" : ""}`}>
+                <span className="text-[9px] tracking-[0.1em] text-white/55">{kind}</span>
+                <span>{name}</span>
+                <span className="text-white/45">{meta}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const rows: ReadonlyArray<readonly [string, string, string, string]> = [
   ["Spans / month", "50k", "500k", "2m"],
   ["Retention", "7 days", "30 days", "90 days"],
@@ -275,7 +324,7 @@ export function PricingPage() {
 
   return (
     <div className="overflow-x-clip bg-[#090909]">
-      <PageHeader eyebrow="Pricing" title="Pay for steps. Not for surprises." lede="Free to start, no card. Plans grow with the spans your agents record each month." image="/images/landing/pricing-stairs.png">
+      <PageHeader eyebrow="Pricing" title="Pay for steps. Not for surprises." lede="Free to start, no card. One span is one step your agent takes. Pick the plan that covers a month of them." image="/images/landing/pricing-stairs.png">
         <BillingToggle interval={interval} onChange={setInterval} dark />
       </PageHeader>
 
@@ -306,6 +355,7 @@ export function PricingPage() {
         </div>
       </section>
 
+      <SpanCounter />
       <Estimator value={estimate ?? { slider: 40, steps: 8 }} onChange={setEstimate} />
       <Compare interval={interval} />
       <Faq />
