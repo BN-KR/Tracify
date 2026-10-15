@@ -77,7 +77,7 @@ export function StepsExplorer({
   initialQuery: Query;
 }) {
   const [query, setQuery] = useState<Query>(() => ({
-    range: "24h",
+    range: "90d",
     ...(typeof window === "undefined"
       ? initialQuery
       : Object.fromEntries(new URLSearchParams(window.location.search))),
@@ -353,7 +353,7 @@ export function StepsExplorer({
           onApply={applyView}
         />
         <TimeRangePicker
-          range={query.range ?? "24h"}
+          range={query.range ?? "90d"}
           from={query.from ? Number(query.from) : undefined}
           to={query.to ? Number(query.to) : undefined}
           now={now}
