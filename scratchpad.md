@@ -683,3 +683,5 @@
 - **Routes:**
     - `/sign-in` → `src/app/(auth)/sign-in/[[...sign-in]]/page.tsx`
     - `/sign-up` → `src/app/(auth)/sign-up/[[...sign-up]]/page.tsx`
+
+<!-- deploy-trigger test -->
