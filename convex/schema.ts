@@ -61,6 +61,13 @@ export default defineSchema({
     .index("by_stripeSubscriptionId", ["stripeSubscriptionId"])
     .index("by_apiKeyHash", ["apiKeyHash"]),
 
+  savedViews: defineTable({
+    projectId: v.id("projects"), ownerId: v.string(), name: v.string(),
+    target: v.union(v.literal("traces"), v.literal("steps")), shared: v.boolean(),
+    query: v.record(v.string(), v.string()), columns: v.array(v.string()), updatedAt: v.number(),
+  }).index("by_projectId_and_ownerId", ["projectId", "ownerId"])
+    .index("by_projectId_and_shared", ["projectId", "shared"]),
+
   agentRuns: defineTable({
     runId: v.string(),
     status: v.union(

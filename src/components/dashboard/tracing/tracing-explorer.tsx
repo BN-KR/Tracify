@@ -1,7 +1,10 @@
 "use client";
+import { SavedViews } from "./saved-views";
+import { columnsFromUrl } from "@/lib/saved-view-state";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { stepLabel } from "./agent-map";
+import { traceCsv } from "@/lib/trace-csv";
 import { EXCLUDE_PREFIX, parseSearch } from "@/lib/trace-search";
 import { SearchBox } from "./search-box";
 import { RANGES, TimeRangePicker } from "./time-range-picker";
@@ -10,7 +13,7 @@ import { TraceCharts, TracesOverTime, type ChartBucket } from "./trace-charts";
 import { ErrorGroupsPanel, errorGroupLabel, type ErrorGroups } from "./error-groups";
 import { FACETS, FacetGroup, decodeValues, encodeValues, type FacetCounts } from "./facet-filter";
 import { TRACE_VIEWS, TracePanel, type TraceView } from "./trace-panel";
-import { compactNumber, downloadFile, formatCost, formatDuration, formatTime, parseTime, previewText, relativeTime, toCsv } from "./format";
+import { compactNumber, downloadFile, formatCost, formatDuration, formatTime, parseTime, previewText, relativeTime } from "./format";
 
 type TraceRow = TraceRowExtras & {
   runId: string; traceName: string; startedAt: string; durationMs: number; spanCount: number; errorCount: number;
@@ -30,13 +33,13 @@ const COLUMN_STORAGE = "tracify.tracing.columns";
 const LIVE_STORAGE = "tracify.tracing.live";
 const ERRORS_STORAGE = "tracify.tracing.errorGroups";
 /** URL keys that change the view, not the data, so they are not sent to the API. */
-const VIEW_KEYS = ["range", "from", "to", "trace", "mode", "view"];
+const VIEW_KEYS = ["range", "from", "to", "trace", "mode", "view", "columns", "savedView"];
 const EDGE_SEPARATOR = "\u2192";
 
 function currentUrlQuery(): TraceQuery {
   if (typeof window === "undefined") return {};
   const query: TraceQuery = {};
-  for (const [key, value] of new URLSearchParams(window.location.search)) if (value) query[key] = value.slice(0, 200);
+  for (const [key, value] of new URLSearchParams(window.location.search)) if (value) query[key] = value.slice(0, key === "q" || key === "sort" ? 200 : 4096);
   return query;
 }
 
@@ -74,7 +77,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
   // Column choice lives in this browser's storage, which only exists after hydration.
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setColumns(readColumns()); }, []);
+  useEffect(() => { setColumns(columnsFromUrl(currentUrlQuery().columns) ?? readColumns()); }, []);
   // Phones start with the filter sidebar collapsed so the traces are visible first.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (window.matchMedia("(max-width: 767px)").matches) setFiltersOpen(false); }, []);
@@ -246,8 +249,11 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   function toggleColumn(id: string) {
     const next = columns.includes(id) ? columns.filter((column) => column !== id) : orderColumns([...columns, id]);
     setColumns(next);
+    update({ columns: JSON.stringify(next) }, false);
     try { window.localStorage.setItem(COLUMN_STORAGE, JSON.stringify(next)); } catch {}
   }
+
+  const applyView = useCallback((next: TraceQuery, chosen: string[]) => { setNow(Date.now()); setQuery(next); setColumns(chosen); setSearchDraft(next.q ?? ""); try { localStorage.setItem(COLUMN_STORAGE, JSON.stringify(chosen)); } catch {} }, []);
 
   /** Enter in the search box: `field:value` tokens become filters, the remaining words are the text search. */
   function submitSearch(text: string) {
@@ -287,13 +293,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   }
 
   function exportCsv() {
-    const header = ["trace_id", "start_time_utc", "trace_name", "status", "errors", "latency_ms", "cost_usd", "input_tokens", "output_tokens", "model", "user", "session", "environment", "release", "tags", "input", "output"];
-    const body = rows.map((row) => [
-      row.runId, new Date(parseTime(row.startedAt)).toISOString(), row.traceName, Number(row.errorCount) > 0 ? "error" : "ok", Number(row.errorCount),
-      Number(row.durationMs), Number(row.totalCostUsd), Number(row.inputTokens), Number(row.outputTokens), row.modelId, row.endUserId,
-      row.sessionId, row.environment, row.release, (row.tags ?? []).join(" "), previewText(row.inputPreview), previewText(row.outputPreview),
-    ]);
-    downloadFile(`traces-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.csv`, toCsv(header, body), "text/csv;charset=utf-8");
+    downloadFile(`traces-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.csv`, traceCsv(columns, rows), "text/csv;charset=utf-8");
   }
 
   function sortBy(sort: string) {
@@ -378,6 +378,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
         <section className="flex min-w-0 flex-[999_1_560px] flex-col">
           <div className="flex flex-wrap items-center gap-1.5 px-4 pt-3">
+            <a href={`/dashboard/${encodeURIComponent(projectId)}/steps?${new URLSearchParams(Object.fromEntries(Object.entries(query).filter(([key]) => !["trace", "view", "mode", "page"].includes(key))))}`} className="h-7 border border-[#262C35] px-2.5 py-1 text-xs text-[#C9CED6] hover:text-white">Steps</a>
             <div role="group" aria-label="Show traces as" className="flex max-w-full flex-wrap rounded-md border border-[#262C35] p-0.5 text-xs">
               {([["", "List"], ["chart", "Chart"]] as const).map(([mode, label]) => {
                 const active = chartMode === (mode === "chart");
@@ -393,9 +394,10 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             {activeFilters.length ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => update(Object.fromEntries(activeFilters.map((f) => [f.key, ""])))}>Clear all</button> : null}
             {/* The right-hand controls belong to the list. In Chart they stay in place, hidden and unfocusable, so the row does not reflow. */}
             <div className={chartMode ? "invisible contents" : "contents"}>
-            <button type="button" onClick={exportCsv} disabled={!rows.length} className="ml-auto h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
+            <button type="button" onClick={exportCsv} disabled={!rows.length || loading} className="ml-auto h-7 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-40" title="Download the traces on this page as CSV">Export CSV</button>
+            <SavedViews projectId={projectId} target="traces" query={query} columns={columns} onApply={applyView} />
             <ColumnsMenu projectId={projectId} rangeParams={rangeParams} columns={columns} onToggle={toggleColumn}
-              onReset={() => { setColumns(DEFAULT_COLUMNS); try { window.localStorage.removeItem(COLUMN_STORAGE); } catch {} }} />
+              onReset={() => { setColumns(DEFAULT_COLUMNS); update({ columns: JSON.stringify(DEFAULT_COLUMNS) }, false); try { window.localStorage.removeItem(COLUMN_STORAGE); } catch {} }} />
             </div>
           </div>
 
@@ -429,7 +431,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                   <tr className="text-left text-xs text-[#8B93A1]">
                     {columns.map((id) => {
                       const label = columnLabel(id);
-                      const sortKey = id === "startedAt" ? "startedAt" : id === "latency" ? "latency" : id === "cost" ? "cost" : null;
+                      const sortKey = id;
                       const active = sortKey && (query.sort ?? "startedAt") === sortKey;
                       return (
                         <th key={id} scope="col" className="border-b border-[#1F242C] px-2.5 py-1.5 font-medium" aria-sort={active ? ((query.dir ?? "desc") === "asc" ? "ascending" : "descending") : undefined}>

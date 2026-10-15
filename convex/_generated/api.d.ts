@@ -31,6 +31,7 @@ import type * as prompts from "../prompts.js";
 import type * as resilience from "../resilience.js";
 import type * as retention from "../retention.js";
 import type * as sandbox from "../sandbox.js";
+import type * as savedViews from "../savedViews.js";
 import type * as sessions from "../sessions.js";
 
 import type {
@@ -63,6 +64,7 @@ declare const fullApi: ApiFromModules<{
   resilience: typeof resilience;
   retention: typeof retention;
   sandbox: typeof sandbox;
+  savedViews: typeof savedViews;
   sessions: typeof sessions;
 }>;
 

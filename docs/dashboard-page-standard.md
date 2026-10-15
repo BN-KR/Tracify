@@ -170,6 +170,14 @@ show “N running” when excluded and a dash when none finished. Other summary 
 Use exact ClickHouse percentiles with the same range and filters as the list. Long durations use
 `2d 1h` or `3h 12m`, rather than thousands of minutes.
 
+## Project authorization refresh
+
+The project gate may retain an already-authorized page during a bounded Convex token/query refresh.
+Scope that grant to project and viewer/organization; never show an unverified project on first load.
+Logout, identity or project changes, explicit access denial and auth errors clear the grant immediately.
+Keep children mounted for a same-identity refresh so open menus, draft input and initial requests survive.
+An initial token's subject is only a cache key, not an authorization check; Convex and API access checks remain authoritative.
+
 ## States
 
 - Loading, empty and error states are designed, not blank. Empty explains why (filters vs. no data)
@@ -193,3 +201,46 @@ Attach this evidence to the PR before asking for owner approval:
    - any counts the page shows for groups or map elements equal the filtered list totals;
    - screenshots at desktop (1440×900) and phone (390×844) widths, with no horizontal overflow.
 3. The owner has looked at the preview and approved it. Visual changes never merge without that.
+
+## Saved views
+
+Saved views are project-scoped records with a name, filters, sort, relative or fixed time range, and
+selected trace columns. Private views are visible only to their owner; explicitly shared views are
+readable by project members. Only the owner can edit or delete either kind. Enforce membership and
+visibility in every Convex operation, including direct shared links; a view ID never grants access.
+
+The Saved views menu supports saving a new view, updating/renaming the current view, sharing,
+copying a team link, and deleting. Changes to filters or columns show “Modified” without overwriting
+the saved record. Reopening restores the snapshot once. Relative ranges are resolved at reopen;
+fixed dates remain fixed. Do not save transient panel selection, pagination, or live refresh timestamps.
+Column choice travels in the URL so shared views and reloads reproduce it. Backend failures stay
+inside the menu and keep the analytics usable. No new backend function is required for ordinary
+Tracing/Steps loads until a view is requested.
+## Cross-trace steps
+
+Steps is a separate project page linked from Tracing and the sidebar. All steps shows individual spans;
+Group by step aggregates canonical step type plus name across matching spans, with calls, errors,
+p50/p95 latency, tokens and total cost. Group rows open an example; individual rows open the exact step.
+Filters and text search apply to the step itself. Facet counts exclude their own field and count steps,
+not matching traces. Trace context links retain compatible filters. All table columns sort in SQL before
+pagination, with stable ID ties; summary totals cover the complete matching set. CSV exports the current
+page and mode with raw millisecond/USD values. Relative ranges poll with the access cache, hidden-tab
+skip and back-off; paused/fixed ranges do not poll. Keep layout changes from reusing stale table cells.
+## Export and sorting
+
+CSV exports exactly the selected columns in displayed order, including optional aggregates and metadata.
+Headers state UTC, milliseconds or USD where relevant. Keep full IDs, numeric precision and zeroes;
+missing values are blank. Preserve CSV quoting and formula-injection protection. Export only the current
+page and disable it until the requested optional values have arrived.
+
+Every trace header is sortable, including text, identifiers, optional aggregates and metadata. Sort the
+entire filtered result in ClickHouse before pagination, use a stable run ID tie-breaker, and show direction
+with `aria-sort`. Numeric fields sort numerically; metadata sorts as the displayed string. SQL expressions
+come from a fixed allow-list. Qualify raw fields when a selected aggregate shares their name, to avoid
+ClickHouse substituting another aggregate alias into the sort expression.
+## Selected-column CSV export
+
+Export the visible page using exactly its selected columns and their display order, including optional
+aggregates and metadata. Use explicit UTC/ms/USD headers, full IDs, raw numeric precision and zeroes;
+missing values stay blank. Tags use unambiguous JSON. Keep quoting, embedded-newline handling and
+spreadsheet-formula protection. Disable export while optional column values are loading.

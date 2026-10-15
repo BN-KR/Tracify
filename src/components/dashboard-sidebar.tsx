@@ -33,7 +33,7 @@ export function DashboardSidebar() {
     <Sidebar className="border-r border-border bg-black">
       <SidebarHeader className="border-b border-border h-16 flex items-center justify-center px-6">
         <div className="flex w-full items-center text-white">
-          <BrandLogo className="text-lg" highlighted={false} />
+          <BrandLogo className="text-lg" />
         </div>
       </SidebarHeader>
 
