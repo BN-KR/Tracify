@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import { Footer } from "@/components/marketing/footer";
 import { Navbar } from "@/components/marketing/navbar";
 import { SiteAssistant } from "@/components/marketing/site-assistant";
+import { LandingFooter } from "@/components/marketing/landing/landing-footer";
+import { LandingNav } from "@/components/marketing/landing/landing-nav";
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -14,6 +16,17 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   const isAuth = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/accept-invitation", "/auth/error"].some((route) => pathname.startsWith(route));
 
   if (isDashboard || isPlayground || isOnboarding || isAuth || isCloudDirectory) return <>{children}</>;
+
+  if (pathname === "/") {
+    return (
+      <>
+        <LandingNav />
+        {children}
+        <LandingFooter />
+        <SiteAssistant />
+      </>
+    );
+  }
 
   return (
     <>
