@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, ArrowUpRight, Menu, X } from "lucide-react";
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "framer-motion";
+import { TracifyMark } from "@/components/brand/tracify-mark";
 import { authClient } from "@/lib/auth-client";
 
 const art = "[image-rendering:pixelated]";
@@ -55,38 +56,10 @@ const menus = {
 type MenuName = keyof typeof menus;
 const names = Object.keys(menus) as MenuName[];
 
-// Drawn on the wordmark's own pixel grid: 19 pixels tall, from the top of the
-// "t" to the baseline, so the mark and the letters share one grid.
-const bars = [
-  { x: 0, y: 0, w: 19 },
-  { x: 10, y: 7, w: 9 },
-  { x: 12, y: 14, w: 7 },
-];
-
-/** The three-bar cascade mark: a trace waterfall that also reads as a T. */
-export function CascadeMark({ className = "h-7 w-7" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 19 19" className={className} shapeRendering="crispEdges" aria-hidden="true">
-      {bars.map((b, i) => (
-        <rect
-          key={i}
-          x={b.x}
-          y={b.y}
-          width={b.w}
-          height={5}
-          fill="#f4d44d"
-          className="origin-right transition-transform duration-300 [transform-box:fill-box] group-hover:scale-x-110"
-          style={{ transitionDelay: `${i * 60}ms` }}
-        />
-      ))}
-    </svg>
-  );
-}
-
 function Logo() {
   return (
-    <Link href="/" aria-label="Tracify home" className="group flex items-baseline gap-[0.08em] font-pixel text-2xl">
-      <CascadeMark className="block size-[0.75em] translate-y-[0.03em]" />
+    <Link href="/" aria-label="Tracify home" className="flex items-baseline gap-[0.12em] font-pixel text-2xl">
+      <TracifyMark className="block translate-y-[0.03em]" />
       <span className="tracking-[-0.06em] text-[#eceae3]">tracify</span>
     </Link>
   );

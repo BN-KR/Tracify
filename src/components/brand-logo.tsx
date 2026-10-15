@@ -1,23 +1,12 @@
+import { TracifyMark } from "@/components/brand/tracify-mark";
 import { cn } from "@/lib/utils";
 
-/** Canonical Tracify wordmark. Keep every product-shell logo on this component. */
-export function BrandLogo({
-  className,
-  highlighted = true,
-}: {
-  className?: string;
-  highlighted?: boolean;
-}) {
+/** Canonical Tracify logo (icon + name). Keep every product-shell logo on this component. */
+export function BrandLogo({ className }: { className?: string }) {
   return (
-    <span
-      aria-label="Tracify"
-      className={cn(
-        "relative isolate inline-block px-1 font-pixel text-2xl leading-none tracking-[-0.06em]",
-        highlighted && "before:absolute before:-inset-x-1 before:bottom-0.5 before:-z-10 before:h-[68%] before:-rotate-1 before:skew-x-[-7deg] before:bg-[#f4d44d]/80 before:content-['']",
-        className,
-      )}
-    >
-      tracify
+    <span aria-label="Tracify" className={cn("inline-flex items-baseline gap-[0.12em] font-pixel text-2xl leading-none", className)}>
+      <TracifyMark className="block translate-y-[0.03em]" />
+      <span className="tracking-[-0.06em]">tracify</span>
     </span>
   );
 }

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowUp, ArrowUpRight } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { NewsletterCapture } from "@/components/marketing/newsletter-capture";
-import { CascadeMark } from "./landing-nav";
+import { TracifyMark } from "@/components/brand/tracify-mark";
 
 const groups = [
   ["Product", [["Trace viewer", "/product/trace-viewer"], ["Cost dashboard", "/product/cost-dashboard"], ["Tool calls", "/product/tool-calls"], ["Pricing", "/pricing"], ["Integrations", "/integrations"]]],
@@ -61,7 +61,7 @@ export function LandingFooter() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <CascadeMark className="block size-[0.65em]" />
+            <TracifyMark className="block h-[0.65em]" />
           </motion.span>
           {word.map((ch, i) => (
             <motion.span
