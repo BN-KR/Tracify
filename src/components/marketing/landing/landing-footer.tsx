@@ -53,15 +53,15 @@ export function LandingFooter() {
           </div>
         </div>
 
-        <div className="mt-16 flex select-none items-end justify-between font-pixel text-[19vw] leading-[0.78] tracking-[-0.08em] lg:text-[18vw]" aria-hidden="true">
+        <div className="mt-16 flex select-none items-baseline justify-between font-pixel text-[19vw] leading-[0.78] tracking-[-0.08em] lg:text-[18vw]" aria-hidden="true">
           <motion.span
-            className="group mb-[0.04em] inline-block"
+            className="inline-block"
             initial={reduce ? false : { x: "-30%", opacity: 0 }}
             whileInView={{ x: "0%", opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <CascadeMark className="size-[0.62em]" />
+            <CascadeMark className="block size-[0.65em]" />
           </motion.span>
           {word.map((ch, i) => (
             <motion.span
