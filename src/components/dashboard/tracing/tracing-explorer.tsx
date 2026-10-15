@@ -409,7 +409,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                   <tr className="text-left text-xs text-[#8B93A1]">
                     {columns.map((id) => {
                       const label = columnLabel(id);
-                      const sortKey = id === "startedAt" ? "startedAt" : id === "latency" ? "latency" : id === "cost" ? "cost" : null;
+                      const sortKey = id;
                       const active = sortKey && (query.sort ?? "startedAt") === sortKey;
                       return (
                         <th key={id} scope="col" className="border-b border-[#1F242C] px-2.5 py-1.5 font-medium" aria-sort={active ? ((query.dir ?? "desc") === "asc" ? "ascending" : "descending") : undefined}>

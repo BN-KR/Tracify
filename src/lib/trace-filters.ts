@@ -1,3 +1,4 @@
+import { validTraceSort } from "./trace-sort";
 import { FACET_KEYS, type TraceListFilters } from "@/lib/tinybird";
 
 const MAX_RANGE_MS = 90 * 24 * 60 * 60 * 1000;
@@ -51,7 +52,7 @@ export function parseTraceFilters(searchParams: URLSearchParams, now = Date.now(
     errorGroup: /^[0-9a-f]{16}$/.test(searchParams.get("errorGroup") ?? "") ? searchParams.get("errorGroup")! : undefined,
     node: stepKey(text(searchParams.get("node"))),
     edge: edge(searchParams.get("edge")),
-    sort: sort === "latency" || sort === "cost" ? sort : "startedAt",
+    sort: validTraceSort(sort),
     direction: searchParams.get("dir") === "asc" ? "asc" : "desc",
     page: optionalNumber(searchParams.get("page")),
     pageSize: optionalNumber(searchParams.get("pageSize")),

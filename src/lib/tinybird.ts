@@ -1,3 +1,4 @@
+import { validTraceSort, TRACE_SORT_FIELDS } from "./trace-sort";
 import { TYPE_ALIASES } from "@/components/dashboard/tracing/format";
 import { flowGraph, collapseFlowReturns, flowPairId, median, type FlowEdge, type FlowStep } from "./trace-flow";
 /**
@@ -374,7 +375,7 @@ export type TraceListFilters = {
   edge?: { from: string; to: string };
   /** Internal: matching ids resolved through the same Flow rules as the drawing. */
   flowRunIds?: string[];
-  sort?: "startedAt" | "latency" | "cost";
+  sort?: string;
   direction?: "asc" | "desc";
   page?: number;
   pageSize?: number;
@@ -492,8 +493,8 @@ const EXTRA_COLUMNS: Record<string, { sql: string; numeric?: boolean }> = {
   timeouts: { sql: `countIf(timedOut)`, numeric: true },
   firstErrorType: { sql: `argMinIf(errorType, createdAt, ${IS_ERROR})` },
   firstErrorMessage: { sql: `substring(argMinIf(errorMessage, createdAt, ${IS_ERROR}), 1, 200)` },
-  tools: { sql: `arrayStringConcat(arraySlice(groupUniqArrayIf(toolName, toolName != ''), 1, 6), ', ')` },
-  models: { sql: `arrayStringConcat(arraySlice(groupUniqArrayIf(modelId, modelId != ''), 1, 4), ', ')` },
+  tools: { sql: `arrayStringConcat(arraySlice(arraySort(groupUniqArrayIf(toolName, toolName != '')), 1, 6), ', ')` },
+  models: { sql: `arrayStringConcat(arraySlice(arraySort(groupUniqArrayIf(modelId, modelId != '')), 1, 4), ', ')` },
   rootType: { sql: `anyIf(${STEP_TYPE}, parentSpanId = '')` },
 };
 export const EXTRA_COLUMN_IDS = Object.keys(EXTRA_COLUMNS);
@@ -505,6 +506,11 @@ export function metadataKey(value: string) {
   return META_KEY.test(value) ? value : null;
 }
 
+function metadataValueSql(key: string) {
+  const value = `substring(replaceRegexpAll(JSONExtractRaw(metadata, '${sqlString(key)}'), '^"|"$', ''), 1, 200)`;
+  return `argMinIf(${value}, tuple(createdAt, spanId), JSONExtractRaw(metadata, '${sqlString(key)}') != '')`;
+}
+
 export type ListOptions = { extras?: string[]; meta?: string[] };
 
 /** One page of traces (one row per run) plus the total matching count. */
@@ -512,9 +518,13 @@ export async function listTraces(projectId: string, filters: TraceListFilters, o
   const { where, having } = traceListClauses(projectId, filters);
   const pageSize = Math.min(Math.max(Math.floor(filters.pageSize ?? 50), 10), 200);
   const page = Math.max(Math.floor(filters.page ?? 0), 0);
-  const sortColumn = filters.sort === "latency" ? "durationMs" : filters.sort === "cost" ? "totalCostUsd" : "startedAt";
+  const sort = validTraceSort(filters.sort);
+  const extra = EXTRA_COLUMNS[sort];
+  const meta = sort.startsWith("meta:") ? metadataKey(sort.slice(5)) : null;
+  const expression = extra?.sql ?? (meta ? metadataValueSql(meta) : null);
+  const sortColumn = expression ? "sortValue" : TRACE_SORT_FIELDS[sort] ?? "startedAt";
   const direction = filters.direction === "asc" ? "ASC" : "DESC";
-  const grouped = `SELECT ${TRACE_AGGREGATE} FROM spans WHERE ${where} GROUP BY runId ${having}`;
+  const grouped = `SELECT ${TRACE_AGGREGATE}${expression ? `, ${expression} AS sortValue` : ""} FROM spans WHERE ${where} GROUP BY runId ${having}`;
   const [rows, totals] = await Promise.all([
     tinybirdRows<TraceListRow>(`${grouped} ORDER BY ${sortColumn} ${direction}, runId LIMIT ${pageSize} OFFSET ${page * pageSize}`),
     tinybirdRows<{ total: number }>(`SELECT count() AS total FROM (${grouped})`),
@@ -529,7 +539,7 @@ async function withExtraColumns(projectId: string, filters: TraceListFilters, ro
   const selects = [
     ...extras.map((id) => `${EXTRA_COLUMNS[id]!.sql} AS x_${id}`),
     // The first non-empty value of the key on any step of the trace, unquoted and capped.
-    ...keys.map((key, index) => `argMinIf(substring(replaceRegexpAll(JSONExtractRaw(metadata, '${sqlString(key)}'), '^"|"$', ''), 1, 200), createdAt, JSONExtractRaw(metadata, '${sqlString(key)}') != '') AS m_${index}`),
+    ...keys.map((key, index) => `${metadataValueSql(key)} AS m_${index}`),
   ];
   const runIds = rows.map((row) => `'${sqlString(row.runId)}'`).join(",");
   const found = await tinybirdRows<Record<string, string | number>>(`
