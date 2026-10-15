@@ -3,7 +3,8 @@ import { LegalToc } from "@/components/reading/legal-toc";
 import { AuthorBio } from "@/components/blog/author-bio";
 import { MarkdocRichText } from "@/components/blog/markdoc-rich-text";
 import { BlogTableOfContents } from "@/components/blog/blog-table-of-contents";
-import { ProgressBar } from "@/components/blog/progress-bar";
+import { ReadPlayhead } from "@/components/reading/read-playhead";
+import { PostArt } from "@/components/reading/post-art";
 import { RelatedPosts } from "@/components/blog/related-posts";
 import { ShareButtons } from "@/components/blog/share-buttons";
 import { getReadingTime } from "@/components/blog/reading-time";
@@ -131,6 +132,9 @@ export default async function BlogPostPage({
 
   const categories = post.categories;
   const tags = post.tags;
+  const all = await getPublishedPosts();
+  const at = all.findIndex((p) => p.slug === post.slug);
+  const next = all[at + 1] ?? all[0];
   const tocItems = post.headings.filter((h) => h.level === 2).map((h) => ({ id: h.id, title: h.text }));
   const heroUrl = post.heroImage?.hero || post.heroImage?.src;
   const isMonitoringPost = post.slug === "ai-agent-monitoring";
@@ -138,16 +142,16 @@ export default async function BlogPostPage({
 
   return (
     <div className="min-h-screen bg-[#eceae3] text-black">
-      <ProgressBar />
+      <ReadPlayhead sections={tocItems} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(post)).replace(/</g, "\\u003c") }}
       />
       <article className={articleClassName}>
         <header className="relative isolate overflow-hidden bg-[#090909] text-[#eceae3]">
-          <Image src="/images/reading/blog.png" alt="" fill priority unoptimized sizes="100vw" className="-z-10 object-cover object-right opacity-40 [image-rendering:pixelated]" />
-          <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#090909_30%,rgba(9,9,9,0.6)_70%,rgba(9,9,9,0.3)_100%)]" />
-          <div className="mx-auto max-w-[1240px] px-5 pb-12 pt-10 sm:px-8 md:pb-16 md:pt-14">
+          <PostArt seed={post.slug} className="absolute inset-0 -z-10 size-full opacity-60" />
+          <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#090909_28%,rgba(9,9,9,0.55)_70%,rgba(9,9,9,0.15)_100%),linear-gradient(to_top,#090909_0%,transparent_35%)]" />
+          <div className="mx-auto flex min-h-[72svh] max-w-[1240px] flex-col justify-end px-5 pb-14 pt-24 sm:px-8 md:pb-20">
             <Link href="/blog" className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#f4d44d] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f4d44d]">
               ← All articles
             </Link>
@@ -158,7 +162,7 @@ export default async function BlogPostPage({
               <span aria-hidden="true">/</span>
               <span>{getReadingTime(post.plainText)} min read</span>
             </div>
-            <h1 className="blog-post__title mt-6 max-w-4xl text-balance font-pixel text-[clamp(2.6rem,6.5vw,5.8rem)] leading-[0.9] tracking-[-0.055em]">{post.title}</h1>
+            <h1 className="blog-post__title mt-6 max-w-4xl text-balance font-pixel text-[clamp(2.8rem,7.5vw,6.8rem)] leading-[0.88] tracking-[-0.065em]">{post.title}</h1>
             <p className="mt-7 max-w-2xl text-pretty text-base leading-7 text-white/70 md:text-lg md:leading-8">{post.excerpt}</p>
 
             {categories.length ? (
@@ -220,6 +224,18 @@ export default async function BlogPostPage({
             </div>
           </div>
         </div>
+
+        {next && next.slug !== post.slug ? (
+          <Link href={`/blog/${next.slug}`} className="group relative isolate block overflow-hidden bg-[#090909] text-[#eceae3]">
+            <PostArt seed={next.slug!} className="absolute inset-0 -z-10 size-full opacity-50 transition duration-700 group-hover:scale-105 group-hover:opacity-80" />
+            <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#090909_30%,transparent)]" />
+            <div className="mx-auto max-w-[1240px] px-5 py-20 sm:px-8 md:py-28">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f4d44d]">Next in the loop</p>
+              <p className="mt-5 max-w-3xl text-balance font-pixel text-[clamp(2.2rem,5vw,4.6rem)] leading-[0.92] tracking-[-0.06em]">{next.title}</p>
+              <span className="mt-8 inline-block bg-[#f4d44d] px-5 py-3 font-mono text-[11px] uppercase tracking-[0.14em] text-black transition-colors group-hover:bg-white">Keep reading →</span>
+            </div>
+          </Link>
+        ) : null}
       </article>
     </div>
   );

@@ -4,9 +4,10 @@ import { notFound } from "next/navigation";
 import { ArrowRight, ChevronLeft } from "lucide-react";
 import { DocsActions } from "@/components/docs/docs-actions";
 import { DocsSidebar } from "@/components/docs/docs-sidebar";
+import { PostArt } from "@/components/reading/post-art";
+import { ReadPlayhead } from "@/components/reading/read-playhead";
 import { LegalToc } from "@/components/reading/legal-toc";
 import { MarkdocDoc } from "@/components/docs/markdoc-doc";
-import Image from "next/image";
 import { getDoc, getDocs, getDocMarkdown } from "@/lib/markdoc-docs";
 
 export function generateStaticParams() {
@@ -31,15 +32,16 @@ export default async function DocsArticlePage({ params }: { params: Promise<{ sl
 
   return (
     <div className="bg-[#eceae3] text-black">
+      <ReadPlayhead sections={doc.headings.filter((h) => h.level === 2).map((h) => ({ id: h.id, title: h.title }))} />
       <header className="relative isolate overflow-hidden bg-[#090909] text-[#eceae3]">
-        <Image src="/images/reading/docs.png" alt="" fill priority unoptimized sizes="100vw" className="-z-10 object-cover object-right opacity-40 [image-rendering:pixelated]" />
+        <PostArt seed={doc.slug} className="absolute inset-0 -z-10 size-full opacity-55" />
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#090909_35%,rgba(9,9,9,0.5)_100%)]" />
-        <div className="mx-auto max-w-[1440px] px-5 pb-10 pt-10 md:px-10 md:pb-14 md:pt-14">
+        <div className="mx-auto flex min-h-[48svh] max-w-[1440px] flex-col justify-end px-5 pb-12 pt-20 md:px-10 md:pb-16">
           <Link href="/docs" className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[.16em] text-[#f4d44d] transition-colors hover:text-white">
             <ChevronLeft className="size-3" />All documentation
           </Link>
           <p className="mt-8 font-mono text-[10px] uppercase tracking-[.16em] text-white/55">{doc.section} / guide {String(doc.order).padStart(2, "0")}</p>
-          <h1 className="mt-4 max-w-4xl text-balance font-pixel text-[clamp(2.6rem,6vw,5.2rem)] leading-[.9] tracking-[-.06em]">{doc.title}</h1>
+          <h1 className="mt-4 max-w-4xl text-balance font-pixel text-[clamp(2.8rem,7vw,6.2rem)] leading-[.88] tracking-[-.065em]">{doc.title}</h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 md:text-lg">{doc.description}</p>
           <div className="mt-6 text-white xl:hidden"><DocsActions markdown={markdown} installUrl="/docs/mcp-server" /></div>
         </div>
