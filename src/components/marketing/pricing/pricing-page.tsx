@@ -59,7 +59,7 @@ function PlanCard({ plan, interval, featured, recommended }: { plan: Plan; inter
         </AnimatePresence>
         <span className={`pb-2 font-mono text-[10px] uppercase ${muted}`}>/ mo</span>
       </div>
-      <p className={`mt-1 h-4 font-mono text-[9px] uppercase ${muted}`}>{interval === "annual" && plan.monthly ? `billed annually · ${formatPrice(monthlyPrice(plan, interval) * 12)}/yr` : ""}</p>
+      <p className={`mt-1 h-4 font-mono text-[9px] uppercase ${muted}`}>{interval === "annual" && plan.monthly ? `${formatPrice(monthlyPrice(plan, interval) * 12)}/yr · you save ${formatPrice(plan.monthly * 12 - monthlyPrice(plan, interval) * 12)}` : ""}</p>
       <CapacityMeter limit={plan.spanLimit} dark={featured} />
       <p className={`mt-2 font-mono text-[10px] uppercase tracking-[0.1em] ${muted}`}>{plan.spans} spans / month</p>
       <ul className="mt-6 grid gap-2.5 text-sm">
@@ -132,6 +132,14 @@ function Estimator({ value, onChange }: { value: EstimateState; onChange: (v: Es
                 <output htmlFor="steps-per-run" className="font-pixel text-3xl normal-case tracking-[-0.05em] text-[#eceae3]">{steps}</output>
               </div>
               <input id="steps-per-run" type="range" min={1} max={40} value={steps} onChange={(e) => setSteps(Number(e.target.value))} className="pricing-range mt-4 w-full" aria-valuetext={`${steps} steps per run`} />
+            </div>
+
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Quick examples">
+              {([["Side project", 20, 5], ["Support bot", 55, 8], ["Busy product", 80, 20]] as const).map(([label, sl, st]) => (
+                <button key={label} type="button" onClick={() => onChange({ slider: sl, steps: st })} className="min-h-11 border border-white/30 px-4 font-mono text-[10px] uppercase tracking-[0.12em] hover:bg-[#f4d44d] hover:text-black">
+                  {label}
+                </button>
+              ))}
             </div>
 
             <div className="border-t border-white/15 pt-8">
@@ -330,6 +338,10 @@ export function PricingPage() {
 
       <section id="plans" className="bg-[#eceae3] px-5 py-20 text-black md:px-10 md:py-28">
         <div className="mx-auto max-w-[1320px]">
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/55">{interval === "annual" ? "Annual billing, 20% off every paid plan" : "Switch to annual and save 20%"}</p>
+            <BillingToggle interval={interval} onChange={setInterval} />
+          </div>
           <div className="grid gap-[2px] border-2 border-black bg-black md:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => (
               <PlanCard key={plan.id} plan={plan} interval={interval} featured={plan.id === "pro"} recommended={recommended === plan.id} />

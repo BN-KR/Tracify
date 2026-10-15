@@ -142,15 +142,15 @@ export default function PricingCheckoutPage() {
               </div>
             </div>
           ) : !projects?.length ? (
-            <div className="mt-8 border-t border-black/20 pt-6">
+            <form className="mt-8 border-t border-black/20 pt-6" onSubmit={(event) => { event.preventDefault(); void createProjectAndCheckout(); }}>
               <p className="text-sm leading-6 text-black/70">We will create it here and send you straight to Stripe, no onboarding detour.</p>
               <label htmlFor="new-checkout-project" className="mt-6 block font-mono text-[10px] uppercase tracking-[0.14em] text-black/55">Project name</label>
-              <input id="new-checkout-project" value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="production-agents" className="mt-2 h-14 w-full border-2 border-black bg-white px-4 font-mono text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f4d44d]" />
+              <input id="new-checkout-project" autoFocus autoComplete="off" required value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="production-agents" className="mt-2 h-14 w-full border-2 border-black bg-white px-4 font-mono text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f4d44d]" />
               {error ? <p role="alert" className="mt-4 border-2 border-black bg-[#fff4b5] p-3 text-sm">{error}</p> : null}
-              <button type="button" onClick={() => void createProjectAndCheckout()} disabled={pending || !projectName.trim()} className={buttonClass}>
+              <button type="submit" disabled={pending || !projectName.trim()} className={buttonClass}>
                 {pending ? "Preparing checkout…" : "Create project and pay"}<ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
               </button>
-            </div>
+            </form>
           ) : (
             <div className="mt-8 border-t border-black/20 pt-6">
               <p className="text-sm leading-6 text-black/70">Choose the project this subscription should cover.</p>
@@ -165,6 +165,11 @@ export default function PricingCheckoutPage() {
             </div>
           )}
 
+          <ol className="mt-10 grid gap-3 border-t border-black/20 pt-6 font-mono text-[10px] uppercase leading-5 tracking-[0.1em] text-black/65">
+            <li>1. You pay on Stripe&apos;s secure page.</li>
+            <li>2. You land on your project&apos;s billing page.</li>
+            <li>3. Send your first trace. The docs are one click away.</li>
+          </ol>
           <p className="mt-8 text-xs leading-5 text-black/55">{signedIn ? "You will pay on Stripe. Card details never touch Tracify." : "Payments are handled by Stripe."}</p>
           <Link href="/pricing" className="mt-6 inline-block font-mono text-[10px] uppercase tracking-[0.12em] text-black/60 underline underline-offset-4 hover:text-black">← Back to pricing</Link>
         </div>
