@@ -33,3 +33,7 @@ git push origin staging
 Each push updates the staging Preview. Review its Vercel URL or assigned staging domain. When approved, open a PR from `staging` to `main`; merging it creates the production deployment.
 
 Both public Convex endpoints are required during the Next.js build. A missing `NEXT_PUBLIC_CONVEX_URL` makes `ConvexReactClient` fail during prerendering; a missing `NEXT_PUBLIC_CONVEX_SITE_URL` makes the Better Auth server integration fail while Next.js collects route data. Keep both variables scoped to Preview and point them at the isolated development or staging Convex deployment rather than production.
+
+## Production deploys are manual
+
+`vercel.json` sets `git.deploymentEnabled.main` to `false`, so merging to `main` no longer triggers a production deployment on either Vercel project (`tracify`, `tracify-cloud-eu`). Preview deployments for other branches are unchanged. To update production, open the project in Vercel and redeploy the latest `main` commit (or create a production deployment from `main`).
