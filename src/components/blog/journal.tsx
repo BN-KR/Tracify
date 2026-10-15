@@ -52,7 +52,7 @@ export function JournalHero({ posts, total }: { posts: JournalPost[]; total: num
         <Image src="/images/reading/blog.png" alt="" fill priority unoptimized sizes="100vw" className="object-cover opacity-55 [image-rendering:pixelated]" />
       </motion.div>
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#090909_8%,rgba(9,9,9,0.6)_55%,rgba(9,9,9,0.2)_100%)]" />
-      <div className="mx-auto grid min-h-[calc(100svh-64px)] max-w-[1320px] items-center gap-12 px-5 py-20 md:px-8 lg:grid-cols-[1.15fr_0.85fr]">
+      <div className="mx-auto grid min-h-[min(82svh,760px)] max-w-[1320px] items-center gap-12 px-5 py-20 md:px-8 lg:grid-cols-[1.15fr_0.85fr]">
         <div>
           <motion.p initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="inline-flex items-center gap-2 border border-white/20 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70">
             <span className="bg-[#f4d44d] px-1.5 text-black">{total}</span> field notes on running agents
@@ -109,10 +109,10 @@ export function TopicStory({ topics }: { topics: JournalTopic[] }) {
         <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">Start with a question</p>
         <h2 className="mt-5 max-w-3xl font-pixel text-[clamp(2.6rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.07em]">Pick the problem you have today.</h2>
 
-        <div className="mt-16 grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="mt-12 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             {topics.map((t, i) => (
-              <motion.div key={t.name} onViewportEnter={() => setActive(i)} viewport={{ amount: 0.6 }} className="flex flex-col justify-center border-t border-white/15 py-12 lg:min-h-[78vh]">
+              <motion.div key={t.name} onViewportEnter={() => setActive(i)} viewport={{ amount: 0.6 }} className="flex flex-col justify-center border-t border-white/15 py-8 lg:min-h-[46vh]">
                 <span className={`font-mono text-sm transition-colors ${active === i ? "text-[#f4d44d]" : "text-white/35"}`}>{String(i + 1).padStart(2, "0")} / {String(topics.length).padStart(2, "0")} · {t.count} articles</span>
                 <h3 className="mt-5 font-pixel text-[clamp(2rem,4vw,3.4rem)] capitalize leading-none tracking-[-0.06em]">{pretty(t.name)}</h3>
                 <ul className="mt-8 space-y-1">

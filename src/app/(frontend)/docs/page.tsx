@@ -20,7 +20,7 @@ export default function DocsRootPage() {
       <section className="relative isolate overflow-hidden bg-[#090909] text-[#eceae3]">
         <Image src="/images/reading/docs.png" alt="" fill priority unoptimized sizes="100vw" className="-z-10 object-cover opacity-45 [image-rendering:pixelated]" />
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#090909_10%,rgba(9,9,9,0.55)_60%,rgba(9,9,9,0.3)_100%)]" />
-        <div className="mx-auto grid min-h-[calc(100svh-64px)] max-w-[1320px] items-center gap-12 px-5 py-20 md:px-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="mx-auto grid min-h-[min(82svh,760px)] max-w-[1320px] items-center gap-12 px-5 py-20 md:px-8 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <p className="inline-flex items-center gap-2 border border-white/20 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70"><span className="bg-[#f4d44d] px-1.5 text-black">Docs</span> {docs.length} guides · TypeScript · Python</p>
             <h1 className="mt-8 font-pixel text-[clamp(3.2rem,9vw,8.4rem)] leading-[0.88] tracking-[-0.07em]">Build agents you can <span className="text-[#f4d44d]">explain.</span></h1>

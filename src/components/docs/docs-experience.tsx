@@ -170,10 +170,10 @@ export function DocsJourney() {
       <div className="mx-auto max-w-[1320px]">
         <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">The path</p>
         <h2 className="mt-5 max-w-3xl font-pixel text-[clamp(2.6rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.07em]">From npm install to release gate.</h2>
-        <div className="mt-16 grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="mt-12 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="min-w-0">
             {chapters.map((c, i) => (
-              <motion.div key={c.n} onViewportEnter={() => setActive(i)} viewport={{ amount: 0.6 }} className="flex flex-col justify-center border-t border-white/15 py-12 lg:min-h-[70vh]">
+              <motion.div key={c.n} onViewportEnter={() => setActive(i)} viewport={{ amount: 0.6 }} className="flex flex-col justify-center border-t border-white/15 py-8 lg:min-h-[44vh]">
                 <span className={`font-mono text-sm transition-colors ${active === i ? "text-[#f4d44d]" : "text-white/35"}`}>{c.n} / 04</span>
                 <h3 className="mt-5 font-pixel text-[clamp(2rem,4vw,3.4rem)] leading-none tracking-[-0.06em]">{c.title}</h3>
                 <p className="mt-5 max-w-md text-base leading-7 text-white/65">{c.body}</p>
