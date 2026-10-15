@@ -1,15 +1,14 @@
 ## 2026-10-15 — Authorized tracing roadmap
 
-- Owner review/merge of draft PRs #162 (auth), #163 (CSV), #164 (sorting), #166 (steps), plus SDK and saved-view drafts. Merge frontend stack in that order, using merge commits.
+- Owner review/merge of draft PRs #162 (auth), #163 (CSV), #164 (sorting), #166 (steps), SDK #167 (independent), and saved views #168 after #166. Merge frontend stack in that order, using merge commits.
 - Saved-view live verification requires an isolated Convex deployment; no production backend deployment from feature branches.
 - SDK registry publication is a separate owner-controlled release after review.
-
 
 # 2026-09-02 — First-customer execution
 
 ## 2026-09-15 — Google Analytics 4
 
-- [pending] Merge PR #121 after checks, then verify the production deployment contains the intended commit and that GA4 receives a live page view.
+- [pending owner] Verify a production GA4 page view if not yet confirmed; PR #121 is merged (c88a4c6).
 
 ## 2026-09-08 — Site linking and mobile hardening
 
@@ -29,30 +28,9 @@ Current verification gap: provider-backed authenticated journeys still require a
 - [pending owner] Verify public contact channels and one current trigger for the 15 Qualified accounts, then personally send outreach. Continue research until 50 accounts meet the full qualification gate; do not count Watch accounts as qualified.
 - [pending owner] Execute the 30-day funnel: 100 personalized sends, 5 calls, 2 written offers, 1 payment, and 1 delivered evidence-backed review.
 
-# 2026-08-24 — Cursor removal and fit verification
-
-
-# 2026-08-24 — Product film pacing and SaaS cursor
-
-
-# 2026-08-22 — Product film rebuilt from scratch
-
-# 2026-08-26 — Blog corpus cleanup
-
 # 2026-08-26 — AI evaluation metrics editorial rebuild
 
-
 - [pending] Open and merge the PR; deployment requires the merged commit on `main`.
-
-
-# 2026-08-20 — 17-post visibility content set
-
-## 2026-08-21 — AI agent monitoring article refinement
-
-
-
-# 2026-08-21 — Motion Canvas product demo
-
 
 # ⚠ PENDING — needs BN-KR on their own machine (updated 2026-08-16)
 
@@ -362,15 +340,9 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 
 ---
 
-# Robots standards cleanup — 2026-08-13
-
-
 # Sitewide link audit — 2026-08-12
 
 4. [pending] Re-run the production build after the currently active Next.js build releases `.next/lock`.
-
-# Sitewide SEO — 2026-08-11
-
 
 # tracify Execution Task List
 
@@ -379,16 +351,10 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 - [ ] Set the Better Auth dashboard server URL to `https://www.tracify.tech` with path `/api/auth`
 - [ ] Add the Google OAuth callback `https://www.tracify.tech/api/auth/callback/google`
 
-## Current Phase: Phase 2 - Distribution & Teams (Milestone 5)
-
 ## Dashboard Excellence Program
 - [ ] Add environment selector once environment becomes a project-level source of truth
 - [ ] Make Trace Viewer the flagship debugging workflow
 - [ ] Unify Search, Sessions, Costs, Evaluation, and collaboration workflows
-
-### 1. Teams & RBAC
-
-### Evaluation Engine Integration [IN PROGRESS]
 
 ### 2. Marketing & Distribution
 - [ ] Update Landing Page with real dashboard screenshots
@@ -403,120 +369,25 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 
 ## Completed Tasks
 
-### Project Onboarding Stability [COMPLETED]
-
-### Milestone 4: Advanced Features & SDKs [COMPLETED]
-
-### Milestone 3: Core Trace Viewer & Product [COMPLETED]
-
-### Milestone 2: Onboarding & Dashboard Shell [COMPLETED]
-
-### Milestone 1: Environment & Pipeline [COMPLETED]
-
-### Phase 0: Foundations [COMPLETED]
-
-### Competitive Product Surface [COMPLETED]
-
-### Observe Foundation: Sessions and Search [COMPLETED]
-
 ### Evaluation Engine Integration (2026-08-06)
 - [ ] Production rollout validation: configure `EVALUATION_INTERNAL_SECRET`, deploy Tinybird datasource, and run beta smoke tests with production credentials.
-### Dashboard Excellence: Feedback States [COMPLETED]
-### Dashboard Excellence: Runs Triage Views [COMPLETED]
-### Dashboard Excellence: Server-backed Runs Filters [COMPLETED]
-### Dashboard Excellence: Runs Bulk Export [COMPLETED]
-### Dashboard Excellence: Search Saved Queries [COMPLETED]
-### Dashboard Excellence: Trace Handoff Feedback [COMPLETED]
-### Dashboard Excellence: Improve Lifecycle Navigation [COMPLETED]
-### Dashboard Excellence: Alert Review States [COMPLETED]
-### Dashboard Excellence: Sidebar Keyboard Shortcut [COMPLETED]
-### Dashboard Excellence: Quality Gate and Navigation Audit [COMPLETED]
 ### Dashboard Excellence: Visual QA and Trace Context Links [IN PROGRESS]
 - [ ] Repeat desktop/mobile visual QA with an authenticated project session.
-### Dashboard Excellence: Active Project Shortcut [COMPLETED]
-### Dashboard Excellence: Alerts URL State [COMPLETED]
-### Dashboard Excellence: Alert Grouping [COMPLETED]
-### Dashboard Excellence: Runs Accessibility Hardening [COMPLETED]
 ### Dashboard Excellence: Repository Lint Audit [IN PROGRESS]
 - [ ] Resolve the broader repository lint debt outside the dashboard scope.
-### Dashboard Excellence: Runs Empty State [COMPLETED]
-### Dashboard Excellence: Shared Empty-State Focus [COMPLETED]
-### Dashboard Excellence: Run Environment and Release Filters [COMPLETED]
-### Dashboard Excellence: Runs Context Visibility [COMPLETED]
-### Dashboard Excellence: Cost Breakdown Actions [COMPLETED]
-### Dashboard Excellence: Overview Evaluation Quality [COMPLETED]
-### Dashboard Excellence: Route-Aware Time Context (COMPLETED)
-### Dashboard Excellence: Overview Scope-Preserving Links (COMPLETED)
-### Dashboard Excellence: Topbar Time Context (COMPLETED)
-### Dashboard Excellence: Trace Annotation Action (COMPLETED)
-### Dashboard Excellence: Alert Resolve Safeguard (COMPLETED)
-### Dashboard Excellence: Overview Alert Action (COMPLETED)
-### Dashboard Excellence: Shared Contracts (COMPLETED)
-### Dashboard Excellence: Alert Filter Semantics (COMPLETED)
-### Dashboard Excellence: Trace Action Focus States (COMPLETED)
-### Dashboard Excellence: Overview Range Semantics (COMPLETED)
-### Dashboard Excellence: Explicit Environment Context (COMPLETED)
 ### Dashboard Excellence: Critical Route Validation (COMPLETED)
 - [ ] Complete authenticated visual QA once a usable Clerk session is available.
-### Dashboard Excellence: Accessibility Sweep (COMPLETED)
-### Dashboard Excellence: Overview Quality Trend (COMPLETED)
-### Dashboard Excellence: Overview Run Failure Trend (COMPLETED)
-### Dashboard Excellence: Alert Recommended Actions (COMPLETED)
-### Dashboard Excellence: Shell Icon Accessibility (COMPLETED)
-### Dashboard Excellence: Overview URL Time Range [COMPLETED]
-### Project Skill: Hog Release Notes [COMPLETED]
-### PostHog Environment Configuration [COMPLETED]
 ### Marketing Surface Refresh [PLANNED]
 - [ ] Upgrade the blog to an editorial resource hub backed by production-ready publishing and subscription behavior.
 - [ ] Expand the homepage FAQ into an accessible, searchable answer set connected to docs and contact.
-# 2026-08-10 — Future 19 Better Auth pages
-
-# 2026-08-10 — Connect Better Auth Infrastructure production dashboard
-
-# 2026-08-10 — Enable stable staging hostname
-
-# 2026-08-10 — Enable Better Auth Sentinel
 
 # 2026-08-10 — Reuse social OAuth credentials
 
 - [ ] Add GitHub credentials after a GitHub OAuth App client ID and secret are available.
-# 2026-08-10 — Standardize Tracify logos
-
-# 2026-08-10 — Remove auth intro panel
-
-# 2026-08-10 — Enable localhost password reset
-
-
-# 2026-08-10 — Fix mobile evaluation scoreboard
-
-
-# 2026-08-10 — Standardize external brand logos
-
-
-# 2026-08-10 — Remove infrastructure disclosure
-
-
-# 2026-08-10 — Move admin access into dashboard
-
-
-# 2026-08-10 — Focus onboarding and dashboard branding
-
-
-# 2026-08-10 — Fix onboarding API-key secret
-
-
-# 2026-08-10 — Rename API-key secret to Tracify
-
-
-# 2026-08-11 — Install Stripe documentation skills
-
 
 # 2026-08-11 — Stripe subscription billing
 
 - [ ] Roll the exposed live secret and add a replacement restricted key to Vercel to enable checkout.
-
-# 2026-08-11 — Make migrated public pages visually distinct
-
 
 # 2026-08-12 — Initialize Payload on Neon
 
@@ -532,45 +403,9 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 
 - [ ] Confirm production Stripe server credential and production deployment.
 
-## Managed Payments checkout (2026-08-13)
-
-
-## Root robots.txt route (2026-08-13)
-
-
-## Payload CMS dashboard access (2026-08-13)
-
-
-## Admin hub (2026-08-13)
-
-# Dashboard onboarding escape and launch plan — 2026-08-12
-
-# Payload-to-Markdoc assessment — 2026-08-13
-
 # Payload-to-Markdoc migration — 2026-08-13
 
 - [ ] Resolve the repository's 19 unrelated pre-existing full-lint errors in a separate cleanup task.
-# Tracify content-authoring skill — 2026-08-13
-
-
-# Markdoc blog release — 2026-08-13
-
-
-# Blog discovery and internal linking — 2026-08-13
-
-
-# Interactive Markdoc authoring rule — 2026-08-13
-
-
-# Agent Git workflow policy — 2026-08-13
-
-# llms.txt and SEO audit — 2026-08-13
-
-# Product page depth and SEO hardening — 2026-08-13
-
-
-# Vercel preview deployment recovery — 2026-08-13
-
 
 # Page-specific site redesign — 2026-08-14
 
@@ -582,8 +417,6 @@ Diagnosed 2026-08-16 while trying to preview the dashboard locally:
 
 ## SAML login
 - [ ] Register each customer IdP provider with issuer, domain, entry point, certificate, and SAML mapping in the target Convex deployment.
-# Documentation migration follow-up
-
 
 # EU/US regional cloud — 2026-08-15
 
@@ -615,12 +448,6 @@ Follow-ups still open:
 # PR #19 light-theme rebase recovery — 2026-08-20
 
 - [ ] Complete a follow-up authenticated visual sweep of Overview charts, Trace Viewer waterfall, Costs charts, Evaluation, and Resilience; the in-app browser runtime could not initialize in this session, so merge safety relied on the earlier authenticated audit plus local and preview build gates.
-
-# AI agent monitoring article polish — 2026-08-21
-
-
-# AI agent monitoring usability correction — 2026-08-22
-
 
 # LLM tracing article refinement — 2026-08-25
 
@@ -669,11 +496,6 @@ Follow-ups still open:
 # LLM latency article refinement — 2026-08-25
 
 4. [pending] Open the focused PR, verify rendered preview HTML and hosted checks, then merge only after all required checks pass.
-# Future content quality gate — 2026-08-24
-
-
-## 2026-08-26 canonical blog refinement prompt
-
 
 # AI evaluation metrics editorial and UX rebuild — 2026-08-26
 
@@ -682,8 +504,6 @@ Follow-ups still open:
 # Reusable Tracify blog-quality skill — 2026-08-26
 
 5. [pending] Force-add the locally ignored skill files and article PNGs when preparing the already-planned focused PR.
-
-# Rename project blog skill — 2026-08-26
 
 # 2026-09-02 — Trust-first lifecycle implementation
 
@@ -705,7 +525,6 @@ Follow-ups still open:
 # Lead workflow completion audit
 
 - [ ] Run Node-backed lint, typecheck, tests, Convex codegen, and build when the bundled runtime is available.
-# Release-readiness disclosure update — 2026-09-02
 
 # 2026-09-03 — SEO/AEO blog ideation
 
@@ -718,7 +537,6 @@ Follow-ups still open:
 # 2026-09-03 — Release log and Microsoft 365 discovery
 
 - [pending owner] Supply SharePoint site URL and Microsoft 365 connector/authentication for direct upload or synchronization.
-# Plane integration documentation — 2026-09-03
 
 # ERPNext integration — 2026-09-03
 
@@ -741,7 +559,6 @@ Follow-ups still open:
 # Langfuse clone surface — 2026-09-06
 
 Latest parity pass: visible captured-workspace branding and accent cleanup completed on 2026-09-08. The static reference is now available at `https://tracify-dashboard-reference.vercel.app/pages/023.html`; implementation viewport comparison remains pending until the local app server is available.
-
 
 # Langfuse empty dashboard parity — 2026-09-06
 

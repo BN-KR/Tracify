@@ -69,6 +69,7 @@ export function observation(
     usage(raw: Record<string, unknown> = {}, actualModel = model) {
       data.modelId = actualModel;
       data.inputTokens = Number(raw.input_tokens ?? raw.prompt_tokens ?? 0);
+      if (provider === "anthropic") data.inputTokens += Number(raw.cache_creation_input_tokens ?? 0) + Number(raw.cache_read_input_tokens ?? 0);
       data.outputTokens = Number(
         raw.output_tokens ?? raw.completion_tokens ?? 0,
       );

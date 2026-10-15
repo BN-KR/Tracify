@@ -113,7 +113,7 @@ Prompt responses are cached for 60 seconds by default. Pass `{ cacheTtlMs: 0, fa
 
 MIT
 
-## Provider integrations (next release)
+## Provider integrations (0.4.0, unreleased)
 
 Wrap an existing client once. Its normal calls, typed results, streaming chunks and errors keep working.
 Provider packages are optional; install the providers you use. Node.js is required (async context propagation).
@@ -157,3 +157,6 @@ cache breakdown in metadata. **Prices are not guessed:** cost defaults to zero w
 `metadata.costKnown=false`. Supply `calculateCost({provider, model, inputTokens, outputTokens, usage})`
 using your own current rate card to record USD cost. Missing provider usage remains unknown, not an
 estimated token count. None of these wrappers publishes your key or changes provider billing.
+
+Anthropic total input tokens include uncached input plus cache reads and cache writes; the original
+usage breakdown remains in metadata for rate-card calculations. See the [provider’s token breakdown](https://platform.claude.com/docs/en/build-with-claude/prompt-caching).

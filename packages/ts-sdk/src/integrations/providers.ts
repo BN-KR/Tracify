@@ -19,7 +19,7 @@ function capture(obs: Observation, value: Value) {
   if (value.type === "message_start")
     obs.usage(value.message?.usage, value.message?.model);
   if (value.type === "message_delta" && value.usage)
-    obs.usage({ ...(obs.data.metadata?.usage ?? {}), ...value.usage });
+    obs.usage({ ...(obs.data.metadata?.usage ?? {}), ...Object.fromEntries(Object.entries(value.usage).filter(([,value])=>value != null)) });
   const finishReason =
     value.choices?.[0]?.finish_reason ??
     value.delta?.stop_reason ??

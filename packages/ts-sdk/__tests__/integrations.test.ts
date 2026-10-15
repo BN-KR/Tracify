@@ -184,7 +184,7 @@ describe("official SDK provider wrappers", () => {
           content: [],
           stop_reason: null,
           stop_sequence: null,
-          usage: { input_tokens: 20, output_tokens: 0 },
+          usage: { input_tokens: 20, output_tokens: 0, cache_creation_input_tokens: 10, cache_read_input_tokens: 30 },
         },
       },
       {
@@ -201,7 +201,7 @@ describe("official SDK provider wrappers", () => {
       {
         type: "message_delta",
         delta: { stop_reason: "end_turn", stop_sequence: null },
-        usage: { output_tokens: 5 },
+        usage: { input_tokens: null, cache_creation_input_tokens: null, cache_read_input_tokens: null, output_tokens: 5 },
       },
       { type: "message_stop" },
     ];
@@ -220,7 +220,7 @@ describe("official SDK provider wrappers", () => {
     const message = await stream.finalMessage();
     await stream.done();
     expect(message.content).toEqual([{ type: "text", text: "ok" }]);
-    expect(records[0]).toMatchObject({ inputTokens: 20, outputTokens: 5 });
+    expect(records[0]).toMatchObject({ inputTokens: 60, outputTokens: 5 });
   });
   it("is idempotent and telemetry failures never affect the provider", async () => {
     const bad = new TracifyClient();
@@ -268,3 +268,5 @@ describe("real LangGraph callbacks", () => {
 });
 
 describe("LangGraph inside a manual root",()=>{it("inherits the enclosing run and parent",async()=>{const handler=new TracifyLangGraphHandler({client:telemetry});await span("outer",()=>{handler.handleChainStart({}, {}, "graph-id");handler.handleChainEnd({},"graph-id");},{client:telemetry,root:true});expect(records).toHaveLength(2);expect(records[0].runId).toBe(records[1].runId);expect(records[0].parentSpanId).toBe(records[1].spanId);expect(records[0].spanType).toBe("agent");});});
+
+describe("Anthropic cache token accounting",()=>{it("includes cache reads/writes in total input while preserving raw usage",async()=>{const usage={input_tokens:8,output_tokens:3,cache_creation_input_tokens:20,cache_read_input_tokens:30};const client=wrapAnthropic(new Anthropic({apiKey:"fake",fetch:async()=>json({id:"msg",type:"message",role:"assistant",model:"test-model",content:[{type:"text",text:"ok"}],stop_reason:"end_turn",stop_sequence:null,usage})}),{client:telemetry});await client.messages.create({model:"test-model",max_tokens:20,messages:[]});expect(records[0].inputTokens).toBe(58);expect(records[0].metadata.usage).toMatchObject(usage);});});

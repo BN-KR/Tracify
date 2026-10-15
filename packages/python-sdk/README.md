@@ -109,7 +109,7 @@ Prompt responses are cached for 60 seconds by default. Use `cache_ttl_seconds=0`
 
 MIT
 
-## Provider integrations (next release)
+## Provider integrations (0.4.0, unreleased)
 
 Install the optional provider/framework extras you use: `pip install 'tracify-sdk[openai,anthropic,langgraph]'`.
 Set `TRACIFY_API_KEY` and the existing regional configuration.
@@ -149,3 +149,6 @@ metadata. Costs default to zero with `costKnown=False`; supply
 `calculate_cost=lambda usage: ...` with your own current provider rate card. The callback receives
 `provider`, `model`, `input_tokens`, `output_tokens`, and raw `usage` (including cache details).
 Missing usage is not estimated. Telemetry failures do not change provider results or exceptions.
+
+Anthropic total input tokens include uncached input plus cache reads and cache writes; the original
+usage breakdown remains in metadata for rate-card calculations. See the [provider’s token breakdown](https://platform.claude.com/docs/en/build-with-claude/prompt-caching).

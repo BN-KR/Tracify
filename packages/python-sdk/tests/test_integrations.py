@@ -50,7 +50,7 @@ def streaming_transport(events, anthropic=False):
 def chat_events():
     return [dict(id='a',object='chat.completion.chunk',created=1,model='test-model',choices=[dict(index=0,delta=dict(content='hello'),finish_reason=None)]),dict(id='a',object='chat.completion.chunk',created=1,model='test-model',choices=[],usage=dict(prompt_tokens=8,completion_tokens=3,total_tokens=11))]
 def message_events():
-    return [dict(type='message_start',message=dict(MESSAGE,content=[],usage=dict(input_tokens=8,output_tokens=0))),dict(type='content_block_start',index=0,content_block=dict(type='text',text='')),dict(type='content_block_delta',index=0,delta=dict(type='text_delta',text='hello')),dict(type='content_block_stop',index=0),dict(type='message_delta',delta=dict(stop_reason='end_turn',stop_sequence=None),usage=dict(output_tokens=3)),dict(type='message_stop')]
+    return [dict(type='message_start',message=dict(MESSAGE,content=[],usage=dict(input_tokens=8,output_tokens=0,cache_creation_input_tokens=20,cache_read_input_tokens=30))),dict(type='content_block_start',index=0,content_block=dict(type='text',text='')),dict(type='content_block_delta',index=0,delta=dict(type='text_delta',text='hello')),dict(type='content_block_stop',index=0),dict(type='message_delta',delta=dict(stop_reason='end_turn',stop_sequence=None),usage=dict(input_tokens=None,cache_creation_input_tokens=None,cache_read_input_tokens=None,output_tokens=3)),dict(type='message_stop')]
 
 def test_openai_stream_usage_and_close():
     recorder=Recorder(); raw=OpenAI(api_key='test',http_client=httpx.Client(transport=streaming_transport(chat_events())))
@@ -69,7 +69,7 @@ def test_anthropic_helper_final_message_and_usage():
         assert ''.join(stream.text_stream)=='hello'
         assert stream.get_final_message().content[0].text=='hello'
     row=llms(recorder)[0]
-    assert row['inputTokens']==8 and row['outputTokens']==3 and 'ttftMs' in row
+    assert row['inputTokens']==58 and row['outputTokens']==3 and 'ttftMs' in row
     raw.close()
 
 @pytest.mark.asyncio
@@ -78,7 +78,7 @@ async def test_async_anthropic_and_stream():
     async with tracify.wrap_anthropic(raw,client=recorder).messages.stream(model='test-model',messages=[],max_tokens=10) as stream:
         assert ''.join([text async for text in stream.text_stream])=='hello'
         assert (await stream.get_final_message()).content[0].text=='hello'
-    assert llms(recorder)[0]['inputTokens']==8 and llms(recorder)[0]['outputTokens']==3
+    assert llms(recorder)[0]['inputTokens']==58 and llms(recorder)[0]['outputTokens']==3
     await raw.close()
 
 def test_real_langgraph_nodes_and_tools():
@@ -115,3 +115,12 @@ def test_langgraph_inside_a_manual_root_uses_its_context():
     child,root=recorder.sent
     assert child['runId']==root['runId'] and child['parentSpanId']==root['spanId']
     assert child['spanType']=='agent' and root['spanType']=='run_end'
+
+
+def test_anthropic_cache_reads_and_writes_are_counted():
+    recorder=Recorder(); body=dict(MESSAGE,usage=dict(input_tokens=8,output_tokens=3,cache_creation_input_tokens=20,cache_read_input_tokens=30))
+    raw=Anthropic(api_key='test',http_client=httpx.Client(transport=transport(body)))
+    tracify.wrap_anthropic(raw,client=recorder).messages.create(model='test-model',max_tokens=20,messages=[])
+    row=llms(recorder)[0]
+    assert row['inputTokens']==58 and row['metadata']['usage']['input_tokens']==8
+    raw.close()

@@ -35,6 +35,8 @@ class Observation:
         usage = _dict(raw)
         self.data["modelId"] = model or self.data["modelId"]
         self.data["inputTokens"] = int(usage.get("input_tokens", usage.get("prompt_tokens", 0)) or 0)
+        if self.data["metadata"]["provider"] == "anthropic":
+            self.data["inputTokens"] += int(usage.get("cache_creation_input_tokens", 0) or 0) + int(usage.get("cache_read_input_tokens", 0) or 0)
         self.data["outputTokens"] = int(usage.get("output_tokens", usage.get("completion_tokens", 0)) or 0)
         self.data["metadata"]["usage"] = usage
         calculate = self.options.get("calculate_cost")
@@ -58,7 +60,7 @@ class Observation:
             self.data.setdefault("ttftMs", int((time.time() - self.started) * 1000))
             self.text = (self.text + text)[:10000]
         if event.get("type") == "message_delta" and event.get("usage"):
-            self.usage(dict(self.data["metadata"].get("usage", {}), **event["usage"]))
+            self.usage(dict(self.data["metadata"].get("usage", {}), **{key: value for key, value in event["usage"].items() if value is not None}))
         reason = (choices[0].get("finish_reason") if choices else None) or (delta.get("stop_reason") if isinstance(delta, dict) else None) or result.get("stop_reason")
         if reason: self.data["metadata"]["finishReason"] = reason
         if event.get("type") in ("error", "response.failed"):
