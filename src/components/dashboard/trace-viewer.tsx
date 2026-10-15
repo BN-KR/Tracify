@@ -35,6 +35,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CancelRunButton } from "./cancel-run-button";
 import { useNow } from "@/hooks/use-now";
 import { captureAnalytics } from "@/lib/analytics";
+import { criticalPath, type CriticalPathResult } from "@/lib/trace-critical-path";
 
 const isPostHogConfigured = Boolean(
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
@@ -152,6 +153,17 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
     : now - new Date(run.startedAt).getTime();
   const traceContext = safeSpans.find((span) => span.traceName || span.environment || span.release || span.sessionId) ?? safeSpans[0];
   const spanSummary = buildSpanSummary(safeSpans);
+  const path = criticalPath(
+    safeSpans.map((span) => ({
+      spanId: span.spanId,
+      parentSpanId: span.parentSpanId,
+      spanType: span.spanType,
+      label: span.modelId || span.toolName || span.spanType,
+      startMs: Date.parse(span.createdAt),
+      latencyMs: span.latencyMs,
+      costUsd: span.costUsd,
+    })),
+  );
   const firstErrorIndex = safeSpans.findIndex((span) => span.spanType === "error" || Boolean(span.errorMessage));
   const activeReplayIndex = Math.min(replayIndex, Math.max(0, safeSpans.length - 1));
   const replaySpan = safeSpans[activeReplayIndex];
@@ -261,7 +273,18 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
 
       <SpanOverview spans={safeSpans} />
       <TraceQualityPanel projectId={projectId} runId={runId} />
-      <LatencyWaterfall spans={safeSpans} />
+      <CriticalPathPanel
+        path={path}
+        onSelect={(spanId) => {
+          const index = safeSpans.findIndex((span) => span.spanId === spanId);
+          if (index < 0) return;
+          selectSpan(index);
+          window.requestAnimationFrame(() => {
+            document.getElementById(`trace-span-${spanId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+        }}
+      />
+      <LatencyWaterfall spans={safeSpans} pathSpanIds={path.pathSpanIds} />
 
       <div className="border border-border bg-muted/10 p-4 space-y-4">
         <div className="flex items-center justify-between gap-3">
@@ -469,7 +492,50 @@ function SpanOverview({ spans }: { spans: SpanRow[] }) {
   );
 }
 
-function LatencyWaterfall({ spans }: { spans: SpanRow[] }) {
+function CriticalPathPanel({ path, onSelect }: { path: CriticalPathResult; onSelect: (spanId: string) => void }) {
+  if (!path.path.length) return null;
+  const pct = (value: number) => `${Math.round(value * 100)}%`;
+  return (
+    <div className="border border-border bg-muted/10 p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">Critical path</div>
+          <div className="mt-1 font-mono text-[11px] text-black/60">
+            The spans that set this run&apos;s duration. Speed these up to shorten the run.
+          </div>
+        </div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">
+          {path.path.length} steps · {formatDuration(Math.round(path.wallClockMs))} total
+        </div>
+      </div>
+      <div className="mb-4 grid grid-cols-3 gap-3">
+        <MiniMetric label="Working" value={`${formatDuration(Math.round(path.busyMs))} · ${pct(path.busyMs / path.wallClockMs)}`} />
+        <MiniMetric label="Waiting between steps" value={`${formatDuration(Math.round(path.idleMs))} · ${pct(path.idleMs / path.wallClockMs)}`} />
+        <MiniMetric label="Parallelism" value={`${path.parallelism.toFixed(1)}×`} />
+      </div>
+      <div className="font-mono text-[9px] uppercase tracking-widest text-black/55">Top bottlenecks</div>
+      <ol className="mt-2 space-y-1.5">
+        {path.bottlenecks.map((entry, index) => (
+          <li key={entry.spanId}>
+            <button
+              type="button"
+              onClick={() => onSelect(entry.spanId)}
+              className="grid w-full grid-cols-[18px_minmax(0,1fr)_64px_56px_40px] items-center gap-2 border border-transparent px-1 py-1 text-left font-mono text-[11px] text-black/70 hover:border-black/20 hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+            >
+              <span className="text-black/45">{index + 1}</span>
+              <span className="truncate text-black">{entry.label}</span>
+              <span className="text-right">{formatDuration(Math.round(entry.latencyMs))}</span>
+              <span className="text-right">{formatCurrency(entry.costUsd)}</span>
+              <span className="text-right text-black">{pct(entry.share)}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+function LatencyWaterfall({ spans, pathSpanIds }: { spans: SpanRow[]; pathSpanIds: Set<string> }) {
   if (!spans.length) return null;
   const start = Math.min(...spans.map((span) => Date.parse(span.createdAt)).filter(Number.isFinite));
   const end = Math.max(...spans.map((span) => Date.parse(span.createdAt) + Math.max(0, span.latencyMs)).filter(Number.isFinite));
@@ -478,7 +544,7 @@ function LatencyWaterfall({ spans }: { spans: SpanRow[] }) {
     <div className="border border-border bg-muted/10 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">Latency waterfall</div>
-        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">wall-clock span overlap</div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-black/55">wall-clock span overlap · <span className="text-black">outlined = critical path</span></div>
       </div>
       <div className="space-y-1.5">
         {spans.map((span) => {
@@ -489,7 +555,7 @@ function LatencyWaterfall({ spans }: { spans: SpanRow[] }) {
             <div key={span.spanId} className="grid grid-cols-[110px_minmax(0,1fr)] items-center gap-2">
               <span className="truncate font-mono text-[9px] text-black/55">{span.modelId || span.toolName || span.spanType}</span>
               <div className="relative h-3 bg-black/10">
-                <div className={cn("absolute h-full", getSpanTypeConfig(span.spanType).segment)} style={{ left: `${left}%`, width: `${width}%` }} title={`${formatDuration(span.latencyMs)} from ${span.createdAt}`} />
+                <div className={cn("absolute h-full", getSpanTypeConfig(span.spanType).segment, pathSpanIds.has(span.spanId) && "outline outline-2 outline-offset-1 outline-black")} style={{ left: `${left}%`, width: `${width}%` }} title={`${formatDuration(span.latencyMs)} from ${span.createdAt}`} />
               </div>
             </div>
           );
