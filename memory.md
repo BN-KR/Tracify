@@ -2139,3 +2139,8 @@
 - In-app create actions in `captured-workspace.tsx` now push `?view=create` directly, so normal clicks never hit a redirect.
 - Verified: build with placeholder Convex env, 307s for document and `RSC: 1` requests with query passthrough. Authenticated browser check still owed on a Vercel preview.
 - Pre-existing, unrelated: `src/lib/stripe.ts` pins `2026-08-26.dahlia`, which the locked `stripe@22.4.0` types reject, so `tsc`/`next build` fail on main with the committed lockfile.
+
+## 2026-10-15 — Cross-trace steps, draft PR #166
+- `codex/tracing-steps-table`, worktree `Tracify-steps`, stacked on sorting #164. Authenticated `/steps` API and page, individual and canonical type/name grouped modes, 11 server sorts, direct step facets/search/errors/latency/cost, complete-set metrics, current-page CSV, exact-step detail links and live polling with back-off/access cache. No Sessions page edits.
+- Initial Ready EU preview: https://tracify-cloud-eu-git-codex-tracing-steps-table-tracify-tech.vercel.app. Direct ClickHouse proof matches all/tool/cost/latency-filter totals and costs; all 11 sorts succeed in both modes/directions. Full feature suite passes 47 checks after correcting obsolete CSV assertions and resetting the long-tree filter before error-group checks. Click suite 26/26 and live suite 7/7; known Better Auth identify CORS only.
+- Screenshots inspected under `/root/tracify-tools/shots-steps/`; initial capture exposed stale presentation during mode changes. Follow-up keys tables per mode, hides mismatched old-mode rows, and adds Steps to the actual project sidebar. Final preview/screenshot verification follows this commit. Server proof script `/root/tracify-tools/steps-data-proof.mjs`.

@@ -1,0 +1,10 @@
+import { beforeEach, expect, test, vi } from "vitest";
+vi.stubEnv("CLICKHOUSE_URL","https://analytics.example");
+vi.stubEnv("CLICKHOUSE_USER","test");vi.stubEnv("CLICKHOUSE_PASSWORD","test");
+vi.mock("@/components/dashboard/tracing/format",()=>({TYPE_ALIASES:{tool_call:"tool",llm_call:"llm"}}));
+const {traceSteps,validStepSort}=await import("./tinybird");
+const statements:string[]=[];
+beforeEach(()=>{statements.length=0;vi.stubGlobal("fetch",vi.fn(async(_url,init)=>{statements.push(String(init.body));return Response.json({data:[]});}));});
+test("step sort accepts only known identifiers",()=>{expect(validStepSort("p95")).toBe("p95");expect(validStepSort("cost DESC; DROP TABLE spans")).toBe("startedAt");});
+test("step filters and paging are evaluated in SQL before results return",async()=>{await traceSteps("project",{fromMs:1000,toMs:2000,sort:"cost",direction:"asc",page:2,pageSize:25,status:"error",minLatencyMs:10,maxCostUsd:.2,facets:{toolName:["lookup"]}});expect(statements[0]).toContain("ORDER BY costUsd ASC, runId, spanId LIMIT 25 OFFSET 50");expect(statements[0]).toContain("latencyMs >= 10");expect(statements[0]).toContain("costUsd <= 0.2");expect(statements[0]).toContain("toolName IN ('lookup')");});
+test("groups use canonical kind/name and aggregate before paging",async()=>{await traceSteps("project",{fromMs:1000,toMs:2000,sort:"calls"},true);expect(statements[0]).toContain("GROUP BY type,name");expect(statements[0]).toContain("count() AS calls");expect(statements[0]).toContain("quantileExact(0.95)(source.latencyMs)");expect(statements[0]).toContain("source.spanType");expect(statements[0]).toContain("ORDER BY calls DESC");});
