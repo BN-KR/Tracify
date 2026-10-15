@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { PixelWaterfall, type WaterfallRow } from "@/components/auth/pixel-waterfall";
+import { StepArtwork } from "@/components/onboarding/step-artwork";
 import { BrandLogo } from "@/components/brand-logo";
 
 const stepPresentation = {
@@ -49,7 +50,8 @@ export function OnboardingShell({
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f4d44d]">Step {activeIndex + 1} of {onboardingSteps.length}</p>
           <h1 className="mt-4 font-pixel text-[clamp(2.4rem,4.6vw,4.4rem)] leading-[0.9] tracking-[-0.065em]">{presentation.label}</h1>
           <p className="mt-5 max-w-md font-sans text-sm leading-6 text-white/65 sm:text-base sm:leading-7">{presentation.note}</p>
-          <PixelWaterfall rows={rows} className="mt-9 max-w-md" />
+          <div className="mt-8 hidden lg:block [@media(max-height:820px)]:hidden"><StepArtwork step={currentStep} /></div>
+          <PixelWaterfall rows={rows} className="mt-8 max-w-md" />
         </div>
       </aside>
       <section className="flex items-center px-5 py-10 sm:px-8 md:px-12 md:py-16">

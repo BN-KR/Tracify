@@ -6,7 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { BrandLogo } from "@/components/brand-logo";
-import { PixelWaterfall, type WaterfallRow } from "@/components/auth/pixel-waterfall";
+import { TracePreview } from "@/components/auth/trace-preview";
 import { getRegionForHostname, getTracifyRegion } from "@/lib/regions";
 
 type AuthMode = "sign-in" | "sign-up" | "forgot-password" | "reset-password" | "invitation" | "error";
@@ -20,14 +20,6 @@ const copy = {
   error: { img: "/images/landing/failure-shatter.png", eyebrow: "Authentication status", title: "That sign-in didn't go through.", note: "The workspace remains protected. Review the status and return through a valid sign-in path.", marker: "Boundary event" },
 };
 
-
-const rows: WaterfallRow[] = [
-  { label: "request", start: 0, width: 100 },
-  { label: "plan", start: 4, width: 22 },
-  { label: "search_docs", start: 24, width: 38 },
-  { label: "llm.call", start: 30, width: 60 },
-  { label: "write_reply", start: 66, width: 30 },
-];
 
 export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactNode }) {
   const modeCopy = copy[mode];
@@ -53,7 +45,7 @@ export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactN
           <motion.p initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f4d44d]">{modeCopy.marker}</motion.p>
           <motion.h1 initial={reduce ? false : { opacity: 0, clipPath: "inset(0 0 100% 0)" }} animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }} transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }} className="mt-4 max-w-xl font-pixel text-[clamp(2.6rem,5.2vw,5.4rem)] leading-[0.88] tracking-[-0.065em]">{modeCopy.title}</motion.h1>
           <p className="mt-5 max-w-md text-sm leading-6 text-white/65 sm:text-base sm:leading-7">{modeCopy.note}</p>
-          <PixelWaterfall rows={rows} loop className="mt-10 hidden max-w-lg lg:grid [@media(max-height:860px)]:lg:hidden" />
+          <div className="mt-10 hidden lg:block [@media(max-height:820px)]:hidden"><TracePreview /></div>
         </div>
       </aside>
       <section className="flex flex-col px-5 py-6 sm:px-8 md:px-12">
