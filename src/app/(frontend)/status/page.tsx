@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { Activity, BellRing, DatabaseZap, RadioTower } from "lucide-react";
 import { RegionalStatusBoard } from "@/components/status/regional-status-board";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
 import { ClosingBand, CreamBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 
-export const metadata: Metadata = { title: "Status", description: "Current operational status for Tracify services.", alternates: { canonical: "/status" } };
+export const metadata = pageMetadata({ title: "Status", description: "Current operational status for Tracify services, including ingestion, dashboards, and regional health checks.", path: "/status" });
 
 const services = [
   { name: "Dashboard + authentication", owner: "Application", icon: Activity },

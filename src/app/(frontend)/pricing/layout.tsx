@@ -1,10 +1,6 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Pricing",
-  description: "Explore Tracify pricing for AI agent observability, evaluation, cost monitoring, and reliability workflows.",
-  alternates: { canonical: "/pricing" },
-};
+export const metadata = pageMetadata({ title: "Pricing", description: "Explore Tracify pricing for AI agent observability, evaluation, cost monitoring, and reliability workflows.", path: "/pricing" });
 
 export default function PricingLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return children;

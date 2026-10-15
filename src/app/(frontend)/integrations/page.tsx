@@ -1,15 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
 import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 import { IntegrationGrid, type Integration } from "@/components/marketing/company/integration-grid";
 
 import { CodeTabs } from "@/components/marketing/company/code-tabs";
-export const metadata: Metadata = {
-  title: "AI agent integrations",
-  description: "Connect Tracify with OpenTelemetry, OpenAI, Anthropic, LangChain, CrewAI, Vercel AI SDK, Slack, and more.",
-  alternates: { canonical: "/integrations" },
-};
+export const metadata = pageMetadata({ title: "AI agent integrations", description: "Connect Tracify with OpenTelemetry, OpenAI, Anthropic, LangChain, CrewAI, Vercel AI SDK, Slack, and more.", path: "/integrations" });
 
 const integrations: Integration[] = [
   { name: "OpenTelemetry (OTLP)", description: "Ingest spans through the standard OTLP HTTP JSON protocol. Any OTel-instrumented library or exporter works out of the box.", badge: "Native", category: "Tracing" },

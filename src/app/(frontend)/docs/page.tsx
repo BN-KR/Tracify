@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
@@ -6,7 +7,7 @@ import { DocsSearch } from "@/components/docs/docs-search";
 import { DocsJourney, DocsTerminal } from "@/components/docs/docs-experience";
 import { Reveal } from "@/components/marketing/landing/reveal";
 
-export const metadata = { title: "Documentation", description: "Install the SDK, instrument an agent, and inspect the execution record.", alternates: { canonical: "/docs" } };
+export const metadata = pageMetadata({ title: "Documentation", description: "Install the SDK, instrument an agent, and inspect the execution record.", path: "/docs" });
 
 const eyebrow = "font-mono text-[10px] uppercase tracking-[.16em] text-black/55";
 

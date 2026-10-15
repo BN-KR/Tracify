@@ -1,10 +1,11 @@
+import { pageMetadata } from "@/lib/seo";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
 import { ClosingBand, DarkBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 
-export const metadata = { title: "Changelog", description: "Product updates and release notes from the Tracify team.", alternates: { canonical: "/changelog" } };
+export const metadata = pageMetadata({ title: "Changelog", description: "Product updates and release notes from the Tracify team.", path: "/changelog" });
 
 const releaseSource = readFileSync(resolve(process.cwd(), "docs/releases.md"), "utf8");
 

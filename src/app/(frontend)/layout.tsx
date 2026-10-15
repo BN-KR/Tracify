@@ -29,14 +29,14 @@ export const metadata: Metadata = {
     description: "Trace every decision, tool call, cost, quality signal, and deployment change in one debugging timeline.",
     type: "website",
     siteName: "Tracify",
-    url: "/",
     locale: "en_US",
   },
   twitter: { card: "summary_large_image", title: "Tracify | AI agent observability and evaluation", description: "Agent observability for traces, cost, quality, prompts, and alerts." },
 };
 
 const structuredData = [
-  { "@context": "https://schema.org", "@type": "Organization", name: "Tracify", url: "https://www.tracify.tech", logo: "https://www.tracify.tech/icon.png" },
+  { "@context": "https://schema.org", "@type": "Organization", name: "Tracify", url: "https://www.tracify.tech", logo: "https://www.tracify.tech/logo.png" },
+  { "@context": "https://schema.org", "@type": "WebSite", name: "Tracify", url: "https://www.tracify.tech", description: "AI agent observability and evaluation." },
   { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Tracify", applicationCategory: "DeveloperApplication", operatingSystem: "Web", url: "https://www.tracify.tech", description: "AI agent observability and evaluation for tracing failures, cost, quality, prompts, and releases.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
 ];
 

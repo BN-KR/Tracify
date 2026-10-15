@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { LegalDocument } from "@/components/reading/legal-document";
 
-export const metadata: Metadata = { title: "Cookie Policy", description: "How Tracify uses necessary storage and optional analytics.", alternates: { canonical: "/cookie-policy" } };
+export const metadata = pageMetadata({ title: "Cookie policy", description: "How Tracify uses necessary storage and optional analytics, and how to change your cookie preferences at any time.", path: "/cookie-policy" });
 
 const sections = [
   { id: "overview", title: "What we store", body: "Tracify uses a small amount of necessary storage for authentication, security, and core application behavior. We use optional analytics to understand whether onboarding and product workflows are useful." },

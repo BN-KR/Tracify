@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
@@ -6,7 +6,7 @@ import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle ,
 import { ControlExplorer } from "@/components/marketing/company/control-explorer";
 
 import { RedactionDemo } from "@/components/marketing/company/redaction-demo";
-export const metadata: Metadata = { title: "Security", description: "Learn how Tracify protects AI agent telemetry with encryption, project isolation, access controls, and incident response practices.", alternates: { canonical: "/security" } };
+export const metadata = pageMetadata({ title: "Security", description: "Learn how Tracify protects AI agent telemetry with encryption, project isolation, access controls, and incident response practices.", path: "/security" });
 
 const controls = [
   { title: "Encryption", icon: "lock", summary: "TLS 1.3 in transit and AES-256 at rest.", items: ["API keys are hashed before storage.", "Plaintext project keys are shown once."] },

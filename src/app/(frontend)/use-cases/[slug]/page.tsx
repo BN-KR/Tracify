@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { UseCasePage as UseCaseView } from "@/components/marketing/pages/use-case-page";
 
@@ -12,7 +13,7 @@ const useCases = {
 type Slug = keyof typeof useCases;
 
 export function generateStaticParams() { return Object.keys(useCases).map((slug) => ({ slug })); }
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> { const { slug } = await params; const page = useCases[slug as Slug]; return page ? { title: `${page.title} observability`, description: page.description, alternates: { canonical: `/use-cases/${slug}` } } : {}; }
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> { const { slug } = await params; const page = useCases[slug as Slug]; return page ? pageMetadata({ title: `${page.title} observability`, description: page.description, path: `/use-cases/${slug}` }) : {}; }
 
 export default async function UseCasePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

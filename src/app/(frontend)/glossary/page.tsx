@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { PageHeader } from "@/components/marketing/page-header";
 import { ClosingBand, HeaderAction , StatStrip } from "@/components/marketing/company/blocks";
 import { GlossaryExplorer } from "@/components/marketing/company/glossary-explorer";
@@ -87,12 +87,7 @@ const terms: readonly Term[] = [
 ] as const;
 
 import { SpanAnatomy } from "@/components/marketing/company/span-anatomy";
-export const metadata: Metadata = {
-  title: "AI Observability Glossary — Tracify",
-  description:
-    "Plain-language definitions of LLM observability, AI agent tracing, spans, tool calls, and agent evaluation terms used across the Tracify platform.",
-  alternates: { canonical: "/glossary" },
-};
+export const metadata = pageMetadata({ title: "AI observability glossary", description: "Plain-language definitions of LLM observability, AI agent tracing, spans, tool calls, and agent evaluation terms used across the Tracify platform.", path: "/glossary" });
 
 function GlossarySchema() {
   const data = {

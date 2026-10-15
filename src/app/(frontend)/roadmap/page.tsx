@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { PageHeader } from "@/components/marketing/page-header";
 import { ClosingBand, DarkBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 import { RoadmapTrack } from "@/components/marketing/company/roadmap-track";
 
-export const metadata: Metadata = { title: "Roadmap", description: "A transparent view of Tracify product delivery.", alternates: { canonical: "/roadmap" } };
+export const metadata = pageMetadata({ title: "Roadmap", description: "A transparent view of what Tracify has shipped, what is in progress, and what is planned for AI agent observability.", path: "/roadmap" });
 
 const sections = [
   { status: "Shipped", code: "NOW", title: "Observe and control the runs you have today", items: ["Trace and run inspection", "Cost, model, and tool analytics", "Project reports and Slack alerts", "Runtime retry, fallback, latency, and cost policies", "Python and TypeScript instrumentation", "OpenTelemetry ingestion"] },

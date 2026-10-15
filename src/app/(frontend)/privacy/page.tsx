@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { LegalDocument } from "@/components/reading/legal-document";
 import { Reveal } from "@/components/marketing/landing/reveal";
 
-export const metadata: Metadata = { title: "Privacy policy", description: "Tracify privacy policy and information about how we handle data.", alternates: { canonical: "/privacy" } };
+export const metadata = pageMetadata({ title: "Privacy policy", description: "Tracify privacy policy: what data we collect, how telemetry is protected, and how to manage analytics preferences.", path: "/privacy" });
 
 const sections = [
   { id: "overview", title: "Overview", body: "This policy explains how Tracify collects, uses, and safeguards information when you use the agent observability platform.", bullets: [] },

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL, breadcrumbJsonLd, jsonLdString, pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, ChevronLeft } from "lucide-react";
@@ -16,7 +17,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
   const doc = getDoc((await params).slug?.[0] ?? "");
-  return doc ? { title: doc.title, description: doc.description, alternates: { canonical: `/docs/${doc.slug}` } } : {};
+  return doc ? pageMetadata({ title: doc.title, description: doc.description, path: `/docs/${doc.slug}` }) : {};
 }
 
 export default async function DocsArticlePage({ params }: { params: Promise<{ slug: string[] }> }) {
@@ -30,8 +31,14 @@ export default async function DocsArticlePage({ params }: { params: Promise<{ sl
   const previous = docs[index - 1];
   const next = docs[index + 1];
 
+  const structuredData = [
+    breadcrumbJsonLd([{ name: "Tracify", path: "/" }, { name: "Docs", path: "/docs" }, { name: doc.title, path: `/docs/${doc.slug}` }]),
+    { "@context": "https://schema.org", "@type": "TechArticle", headline: doc.title, description: doc.description, mainEntityOfPage: `${SITE_URL}/docs/${doc.slug}`, publisher: { "@type": "Organization", name: "Tracify", url: SITE_URL } },
+  ];
+
   return (
     <div className="bg-[#eceae3] text-black">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(structuredData) }} />
       <ReadPlayhead sections={doc.headings.filter((h) => h.level === 2).map((h) => ({ id: h.id, title: h.title }))} />
       <header className="relative isolate overflow-hidden bg-[#090909] text-[#eceae3]">
         <PostArt seed={doc.slug} className="absolute inset-0 -z-10 size-full opacity-55" />

@@ -1,17 +1,13 @@
+import { pageMetadata } from "@/lib/seo";
 import { JournalHero, TopicStory, TraceArchive, type JournalPost } from "@/components/blog/journal";
 import { getReadingTime } from "@/components/blog/reading-time";
 import { Reveal } from "@/components/marketing/landing/reveal";
 import { PostArt } from "@/components/reading/post-art";
 import { getCategoryOptions, getPostDate, getPublishedPosts } from "@/lib/markdoc-blog";
-import type { Metadata } from "next";
 import Link from "next/link";
 
 export const revalidate = 60;
-export const metadata: Metadata = {
-  title: "Blog",
-  description: "Engineering insights, agent patterns, and production AI from the Tracify team.",
-  alternates: { canonical: "/blog" },
-};
+export const metadata = pageMetadata({ title: "Blog", description: "Engineering insights, agent patterns, and production AI from the Tracify team.", path: "/blog" });
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
