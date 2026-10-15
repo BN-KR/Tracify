@@ -216,3 +216,13 @@ fixed dates remain fixed. Do not save transient panel selection, pagination, or 
 Column choice travels in the URL so shared views and reloads reproduce it. Backend failures stay
 inside the menu and keep the analytics usable. No new backend function is required for ordinary
 Tracing/Steps loads until a view is requested.
+## Cross-trace steps
+
+Steps is a separate project page linked from Tracing and the sidebar. All steps shows individual spans;
+Group by step aggregates canonical step type plus name across matching spans, with calls, errors,
+p50/p95 latency, tokens and total cost. Group rows open an example; individual rows open the exact step.
+Filters and text search apply to the step itself. Facet counts exclude their own field and count steps,
+not matching traces. Trace context links retain compatible filters. All table columns sort in SQL before
+pagination, with stable ID ties; summary totals cover the complete matching set. CSV exports the current
+page and mode with raw millisecond/USD values. Relative ranges poll with the access cache, hidden-tab
+skip and back-off; paused/fixed ranges do not poll. Keep layout changes from reusing stale table cells.
