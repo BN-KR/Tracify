@@ -44,27 +44,29 @@ files={
 os.makedirs('public/logos/dissolve',exist_ok=True)
 for n,s in files.items(): open('public/logos/dissolve/'+n,'w').write(s)
 
-# Raster icons: solid bars wherever a browser may shrink them to tab size
-# (favicon, icon.png); the dissolve only on the home-screen app icon.
+# Raster icons. The tab icon is drawn natively at each size (no resampling),
+# with a transparent background, using the same dissolve as the logo.
 from PIL import Image
-def raster(size, dither, bg, fg):
-    im=Image.new('RGB',(66,66),bg); px=im.load()
-    for x,y in icon_cells(dither): px[x+8,y+14]=fg
-    return im.resize((size,size),Image.NEAREST)
-def solid_small(n):
-    # hand-snapped to whole pixels so 16px and 32px stay sharp
-    im=Image.new('RGBA',(n,n),(9,9,9,255)); px=im.load()
-    u=n/16
-    y=1
-    for i,(gap,h,w) in enumerate([(0,4,14),(1,4,7),(1,4,5)]):
-        y+=gap
-        for yy in range(round(y*u),round((y+h)*u)):
-            for xx in range(round((15-w)*u),round(15*u)): px[xx,yy]=(244,212,77,255)
-        y+=h
-    return im
 yellow=(244,212,77); black=(9,9,9)
-raster(512,False,black,yellow).save('src/app/(frontend)/icon.png')
-raster(180,True,black,yellow).save('src/app/(frontend)/apple-icon.png')
-ico=[solid_small(n) for n in (16,32,48)]
+def raster(size, bg, fg):
+    im=Image.new('RGB',(66,66),bg); px=im.load()
+    for x,y in icon_cells(): px[x+8,y+14]=fg
+    return im.resize((size,size),Image.NEAREST)
+def tab_icon(n):
+    k=n/50
+    h=max(3,round(10*k)); g=max(1,round(4*k))
+    widths=[n,round(26*k),round(18*k)]
+    top=(n-(3*h+2*g))//2
+    im=Image.new('RGBA',(n,n),(0,0,0,0)); px=im.load()
+    for i,w in enumerate(widths):
+        x0=n-w; y0=top+i*(h+g)
+        for y in range(y0,y0+h):
+            for x in range(x0,n):
+                f=(x-x0+0.5)/w
+                if B[y%4][x%4]/16 < f*1.9-0.15: px[x,y]=yellow+(255,)
+    return im
+raster(180,black,yellow).save('src/app/(frontend)/apple-icon.png')
+ico=[tab_icon(n) for n in (16,32,48)]
 for p in ('src/app/favicon.ico','src/app/(frontend)/favicon.ico'):
     ico[2].save(p,sizes=[(16,16),(32,32),(48,48)],append_images=ico[:2])
+for n,im in zip((16,32,48),ico): im.save(f'public/logos/dissolve/tracify-tab-icon-{n}.png')

@@ -4,21 +4,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, MoveHorizontal } from "lucide-react";
-import { motion, useMotionValue, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from "framer-motion";
 
 const art = "[image-rendering:pixelated]";
 
 /* ---------- Before / after: logs vs the map ---------- */
 
 export function BeforeAfter() {
-  const [pos, setPos] = useState(46);
+  const reduce = useReducedMotion();
   const box = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
+  // Until someone grabs the handle, scrolling sweeps it from logs to map.
+  const [userPos, setUserPos] = useState<number | null>(null);
+  const [autoPos, setAutoPos] = useState(100);
+  const pos = userPos ?? (reduce ? 46 : autoPos);
+  const { scrollYProgress } = useScroll({ target: box, offset: ["start 0.85", "end 0.35"] });
+  useMotionValueEvent(scrollYProgress, "change", (v) => setAutoPos(100 - Math.min(1, Math.max(0, v)) * 88));
 
   function moveTo(clientX: number) {
     const r = box.current?.getBoundingClientRect();
     if (!r) return;
-    setPos(Math.min(100, Math.max(0, ((clientX - r.left) / r.width) * 100)));
+    setUserPos(Math.min(100, Math.max(0, ((clientX - r.left) / r.width) * 100)));
   }
 
   return (
@@ -29,7 +35,7 @@ export function BeforeAfter() {
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">Before / after</p>
             <h2 className="mt-5 max-w-3xl font-pixel text-[clamp(2.6rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.07em]">Same run. Two ways to read it.</h2>
           </div>
-          <p className="max-w-sm text-base leading-7 text-white/65">Drag the handle. On the left, the run as a wall of logs. On the right, the same run as Tracify draws it, with the failing step lit up.</p>
+          <p className="max-w-sm text-base leading-7 text-white/65">Scroll, or drag the handle. On the left, the run as a wall of logs. On the right, the same run as Tracify draws it, with the failing step lit up.</p>
         </div>
 
         <div
@@ -59,7 +65,7 @@ export function BeforeAfter() {
             min={0}
             max={100}
             value={Math.round(pos)}
-            onChange={(e) => setPos(Number(e.target.value))}
+            onChange={(e) => setUserPos(Number(e.target.value))}
             aria-label="Compare plain logs with the Tracify map"
             className="absolute inset-x-0 bottom-0 h-8 w-full cursor-ew-resize opacity-0"
           />

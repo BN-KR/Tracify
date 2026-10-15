@@ -9,9 +9,21 @@ import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform, typ
 function Word({ word, progress, range }: { word: string; progress: MotionValue<number>; range: [number, number] }) {
   const opacity = useTransform(progress, range, [0.14, 1]);
   const accent = word.startsWith("*");
+  // Accent words get a black block that wipes in behind them, so the yellow
+  // stays readable on the cream background.
+  const wipe = useTransform(progress, range, [0, 1]);
+  const color = useTransform(progress, range, ["#090909", "#f4d44d"]);
+  if (accent) {
+    return (
+      <motion.span style={{ opacity, color }} className="relative inline-block px-[0.11em]">
+        <motion.span style={{ scaleX: wipe }} className="absolute inset-x-0 -bottom-[0.06em] top-[0.02em] -z-10 origin-left bg-[#090909]" aria-hidden="true" />
+        {word.slice(1)}
+      </motion.span>
+    );
+  }
   return (
-    <motion.span style={{ opacity }} className={`mr-[0.22em] inline-block ${accent ? "text-[#f4d44d]" : ""}`}>
-      {accent ? word.slice(1) : word}
+    <motion.span style={{ opacity }} className="mr-[0.22em] inline-block">
+      {word}
     </motion.span>
   );
 }
@@ -28,10 +40,10 @@ export function Statement() {
     <section className="bg-[#eceae3] px-5 py-28 md:px-10 md:py-40">
       <div ref={ref} className="mx-auto max-w-[1200px]">
         <p className="mb-10 font-mono text-[10px] uppercase tracking-[0.18em] text-black/50">Why it matters</p>
-        <p className="font-pixel text-[clamp(2.2rem,5.6vw,5.2rem)] leading-[1.02] tracking-[-0.06em] text-black">
+        <p className="relative isolate font-pixel text-[clamp(2.2rem,5.6vw,5.2rem)] leading-[1.02] tracking-[-0.06em] text-black">
           {reduce
             ? words.map((w, i) => (
-                <span key={i} className={`mr-[0.22em] ${w.startsWith("*") ? "bg-black text-[#f4d44d]" : ""}`}>
+                <span key={i} className={w.startsWith("*") ? "bg-black px-[0.11em] text-[#f4d44d]" : "mr-[0.22em]"}>
                   {w.replace("*", "")}
                 </span>
               ))

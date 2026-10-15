@@ -6,6 +6,7 @@ import { Reveal, Ticker } from "./reveal";
 import { ProductWindow, Statement, Story } from "./scroll-sections";
 import { Bento } from "./bento";
 import { Anatomy, BeforeAfter, UseCases } from "./more-sections";
+import { Timeline } from "./timeline";
 import { PricingSection } from "./pricing-section";
 
 const faqs = [
@@ -27,6 +28,7 @@ export function LandingPage() {
       <Statement />
       <BeforeAfter />
       <Story />
+      <Timeline />
       <ProductWindow />
       <Anatomy />
       <Bento />

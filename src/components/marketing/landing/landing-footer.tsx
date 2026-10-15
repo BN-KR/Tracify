@@ -53,7 +53,7 @@ export function LandingFooter() {
           </div>
         </div>
 
-        <div className="mt-16 flex select-none items-baseline justify-between font-pixel text-[19vw] leading-[0.78] tracking-[-0.08em] lg:text-[18vw]" aria-hidden="true">
+        <div className="mt-16 flex select-none items-baseline justify-between pb-[0.2em] font-pixel text-[19vw] leading-[0.78] tracking-[-0.08em] lg:text-[18vw]" aria-hidden="true">
           <motion.span
             className="inline-block"
             initial={reduce ? false : { x: "-30%", opacity: 0 }}
@@ -78,7 +78,7 @@ export function LandingFooter() {
           ))}
         </div>
 
-        <div className="flex flex-col gap-4 border-t border-white/15 py-6 font-mono text-[10px] uppercase tracking-[0.14em] text-white/50 md:flex-row md:items-center md:justify-between">
+        <div className="relative z-10 flex flex-col gap-4 border-t border-white/15 py-6 font-mono text-[10px] uppercase tracking-[0.14em] text-white/50 md:flex-row md:items-center md:justify-between">
           <span>© {new Date().getFullYear()} Tracify</span>
           <div className="flex flex-wrap gap-5">
             <Link href="/privacy" className="hover:text-white">Privacy</Link>
