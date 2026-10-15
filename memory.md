@@ -2,6 +2,8 @@
 
 ## Tracing roadmap authorized 2026-10-14 (in progress)
 - User authorized all five recommended priorities: loading flash; CSV and sorting; OpenAI/Anthropic then LangGraph integrations; cross-trace steps table; saved views. Start base main `fcafb74` after #160/#161 merged, no open PRs. Auth isolated on `codex/project-loading-refresh` in `/home/orca/workspaces/Tracify-loading`. Sessions page files remain out of scope.
+## 2026-10-15 Search exclusions and comparisons — draft PR (branch `claude/search-exclusions-limits-csfvu6`)
+- Tracing search accepts `-env:dev` style exclusions (any facet; `-status:error` = healthy) and `latency|cost|tokens` with `>`, `>=`, `<`, `<=`, `=` (bounds inclusive; bare number = minimum; tokens take `k`/`m`). Exclusions travel as `not_<facet>` URL params and become `runId NOT IN (...)` in `traceListClauses`; `minTokens`/`maxTokens` are new HAVING filters. Max latency/cost already existed in the backend. Excluding a numeric field is rejected with a hint. Touches `tinybird.ts`/`trace-filters.ts` near the codex sort branch but in different hunks.
 
 ## 2026-10-14 Agent-scoped Flow map and finished latency — draft PR #150
 - Branch `codex/tracing-agent-map`, worktree `/home/orca/workspaces/Tracify-agent-map`, based on origin/main `209924a`. Draft PR: https://github.com/BN-KR/Tracify/pull/150. Verified runtime: `f3140cf`; EU preview https://tracify-cloud-eu-git-codex-tracing-agent-map-tracify-tech.vercel.app is Ready. Later verification notes do not change runtime code. Owner preview review before merge.
@@ -2143,3 +2145,8 @@
 ## 2026-10-15 — Selected-column CSV, draft PR #163
 - `codex/tracing-selected-csv`, `Tracify-csv`, stacked on auth #162. Pure shared column definitions and CSV helpers export selected built-ins/metadata in display order, with explicit units, exact numeric values/full IDs, blanks for missing data and existing formula/quote protection.
 - Five CSV tests cover all 32 built-ins, metadata, zeroes/precision, missing values, quotes/newlines/formulas. Focused lint, full tsc and EU build passed. The cumulative Ready steps preview passes 47 feature checks including the new CSV header contract, 26 click checks and seven live-update checks. Exhaustive selected-column browser/download proof is being recorded with sorting.
+## 2026-10-15 — Project refresh stability, draft PR #162
+- `codex/project-loading-refresh`, `Tracify-loading`. Keep only a previously authorized same-project/same-viewer subtree during token/query refresh; clear on denial, errors, logout or identity/project changes. Initial JWT subject is a UI scope key, never an authorization grant. APIs/Convex retain their access checks.
+- Fourteen gate/auth tests pass, plus focused ESLint, full tsc and EU build. Ready preview https://tracify-cloud-eu-git-codex-project-loading-refresh-tracify-tech.vercel.app passed click 26/26, features 47/47 and live 7/7 (known Better Auth identify CORS only).
+- `scripts/project-refresh-regression.mjs`: 12 immediate menu/input retention checks across reloads, exactly one initial list request each; phone overflow check passes. Desktop/phone screenshots inspected under `/root/tracify-tools/shots-loading-refresh/`.
+- Included newly merged #165 search behavior in the base; its own code is not part of this auth PR's diff. Owner reviews/merges with a merge commit. Sessions page files untouched.
