@@ -9,6 +9,10 @@ Use the documentation for implementation details and the blog for explanatory gu
 - [Documentation overview](https://www.tracify.tech/docs): Start here to install Tracify and send an agent trace.
 - [TypeScript SDK](https://www.tracify.tech/docs/typescript): TypeScript installation and instrumentation guidance.
 - [Python SDK](https://www.tracify.tech/docs/python): Python installation and instrumentation guidance.
+- [OpenAI, Anthropic and LangGraph](https://www.tracify.tech/docs/provider-integrations): Wrap provider clients to record model calls, tokens, latency and errors.
+- [What is in a trace](https://www.tracify.tech/docs/trace-anatomy): The fields on every run and span.
+- [Feedback and scores](https://www.tracify.tech/docs/feedback-and-scores): Attach end-user feedback and typed scores to traces.
+- [Troubleshoot your first trace](https://www.tracify.tech/docs/troubleshooting): Fix missing runs, zero cost and duplicate calls.
 - [API reference](https://www.tracify.tech/docs/api): Tracify API concepts and endpoints.
 - [Evaluation](https://www.tracify.tech/docs/evaluation): Guidance for evaluating agent behavior and quality.
 - [Integrations](https://www.tracify.tech/docs/integrations): Implementation guidance for supported integrations.
