@@ -1,7 +1,10 @@
+import { ArticleCta } from "@/components/blog/article-cta";
+import { LegalToc } from "@/components/reading/legal-toc";
 import { AuthorBio } from "@/components/blog/author-bio";
 import { MarkdocRichText } from "@/components/blog/markdoc-rich-text";
 import { BlogTableOfContents } from "@/components/blog/blog-table-of-contents";
-import { ProgressBar } from "@/components/blog/progress-bar";
+import { ReadPlayhead } from "@/components/reading/read-playhead";
+import { PostArt } from "@/components/reading/post-art";
 import { RelatedPosts } from "@/components/blog/related-posts";
 import { ShareButtons } from "@/components/blog/share-buttons";
 import { getReadingTime } from "@/components/blog/reading-time";
@@ -129,47 +132,50 @@ export default async function BlogPostPage({
 
   const categories = post.categories;
   const tags = post.tags;
+  const all = await getPublishedPosts();
+  const at = all.findIndex((p) => p.slug === post.slug);
+  const next = all[at + 1] ?? all[0];
+  const tocItems = post.headings.filter((h) => h.level === 2).map((h) => ({ id: h.id, title: h.text }));
   const heroUrl = post.heroImage?.hero || post.heroImage?.src;
   const isMonitoringPost = post.slug === "ai-agent-monitoring";
   const articleClassName = isMonitoringPost ? "blog-post--monitoring" : undefined;
 
   return (
-    <div className={`min-h-screen bg-[#eceae3] text-black ${isMonitoringPost ? "pt-[72px] md:pt-[76px]" : "pt-[54px]"}`}>
-      <ProgressBar />
+    <div className="min-h-screen bg-[#eceae3] text-black">
+      <ReadPlayhead sections={tocItems} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(post)).replace(/</g, "\\u003c") }}
       />
-      <div className="mx-auto max-w-[1240px] border-x border-black">
-        <Link
-          href="/blog"
-          className="inline-block border-b border-r border-black bg-[#f4d44d] px-6 py-4 font-mono text-[9px] uppercase tracking-[0.13em] transition-colors hover:bg-black hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-black"
-        >
-          ← Back to blog
-        </Link>
-
-        <article className={articleClassName}>
-          <header className="border-b border-black px-6 py-10 md:px-10 md:py-12">
-            <div className="mb-4 flex items-center gap-3 font-mono text-[12px] text-black/55">
+      <article className={articleClassName}>
+        <header className="relative isolate overflow-hidden bg-[#090909] text-[#eceae3]">
+          <PostArt seed={post.slug} className="absolute inset-0 -z-10 size-full opacity-60" />
+          <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#090909_28%,rgba(9,9,9,0.55)_70%,rgba(9,9,9,0.15)_100%),linear-gradient(to_top,#090909_0%,transparent_35%)]" />
+          <div className="mx-auto flex min-h-[72svh] max-w-[1240px] flex-col justify-end px-5 pb-14 pt-24 sm:px-8 md:pb-20">
+            <Link href="/blog" className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#f4d44d] transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f4d44d]">
+              ← All articles
+            </Link>
+            <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase tracking-[0.12em] text-white/60">
               <time dateTime={getPostDate(post)}>{formatDate(getPostDate(post))}</time>
-              <span>/</span>
+              <span aria-hidden="true">/</span>
               <span>{post.author}</span>
-              <span>/</span>
+              <span aria-hidden="true">/</span>
               <span>{getReadingTime(post.plainText)} min read</span>
             </div>
-
-            <h1 className="blog-post__title mt-6 max-w-4xl font-pixel text-5xl leading-[0.9] tracking-[-0.045em] md:text-7xl">{post.title}</h1>
-            <p className="mt-7 max-w-2xl text-base leading-7 text-black/58">{post.excerpt}</p>
+            <h1 className="blog-post__title mt-6 max-w-4xl text-balance font-pixel text-[clamp(2.8rem,7.5vw,6.8rem)] leading-[0.88] tracking-[-0.065em]">{post.title}</h1>
+            <p className="mt-7 max-w-2xl text-pretty text-base leading-7 text-white/70 md:text-lg md:leading-8">{post.excerpt}</p>
 
             {categories.length ? (
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-8 flex flex-wrap gap-2">
                 {categories.map((category) => (
-                  <span key={category} className="border border-black px-2 py-1 font-mono text-[8px] uppercase tracking-wider">{category}</span>
+                  <span key={category} className="border border-[#f4d44d] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[#f4d44d]">{category}</span>
                 ))}
               </div>
             ) : null}
-          </header>
+          </div>
+        </header>
 
+        <div className="mx-auto max-w-[1240px] border-x border-black">
           {heroUrl ? (
             <div className="relative min-h-[320px] overflow-hidden border-b border-black bg-black md:min-h-[520px]">
               <Image
@@ -182,31 +188,55 @@ export default async function BlogPostPage({
             </div>
           ) : null}
 
-          <div className="blog-post__body mx-auto max-w-[820px] px-6 py-12 md:px-10 md:py-16">
-            <BlogTableOfContents headings={post.headings} />
-            <MarkdocRichText content={post.content} />
-
-            <div className="mt-12 flex flex-col gap-6 border-t border-black/20 pt-8">
-              <ShareButtons title={post.title} />
-              <AuthorBio author={post.author} />
-            </div>
-
-            {!isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} currentSlug={post.slug} categories={post.categories} /> : null}
-
-            {tags.length ? (
-              <div className="mt-12 border-t border-black/20 pt-8">
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <span key={tag} className="border border-black/20 px-2 py-1 font-mono text-[11px] text-black/60">#{tag}</span>
-                  ))}
+          <div className="blog-post__body mx-auto grid max-w-[1100px] gap-10 px-6 py-12 md:px-10 md:py-16 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-14">
+            <aside className="hidden lg:block">
+              <div className="sticky top-24">
+                {tocItems.length > 2 ? <LegalToc items={tocItems} /> : null}
+                <div className="mt-8 border-t border-black/20 pt-6">
+                  <ShareButtons title={post.title} />
                 </div>
               </div>
-            ) : null}
+            </aside>
+            <div className="min-w-0">
+              <div className="lg:hidden"><BlogTableOfContents headings={post.headings} /></div>
+              <MarkdocRichText content={post.content} />
 
-            {isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} currentSlug={post.slug} categories={post.categories} heading="Recommended posts" /> : null}
+              <ArticleCta />
+
+              <div className="mt-12 flex flex-col gap-6 border-t border-black/20 pt-8">
+                <div className="lg:hidden"><ShareButtons title={post.title} /></div>
+                <AuthorBio author={post.author} />
+              </div>
+
+              {!isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} currentSlug={post.slug} categories={post.categories} /> : null}
+
+              {tags.length ? (
+                <div className="mt-12 border-t border-black/20 pt-8">
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <span key={tag} className="border border-black/20 px-2 py-1 font-mono text-[11px] text-black/60">#{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {isMonitoringPost ? <RelatedPosts posts={post.relatedPosts} currentSlug={post.slug} categories={post.categories} heading="Recommended posts" /> : null}
+            </div>
           </div>
-        </article>
-      </div>
+        </div>
+
+        {next && next.slug !== post.slug ? (
+          <Link href={`/blog/${next.slug}`} className="group relative isolate block overflow-hidden bg-[#090909] text-[#eceae3]">
+            <PostArt seed={next.slug!} className="absolute inset-0 -z-10 size-full opacity-50 transition duration-700 group-hover:scale-105 group-hover:opacity-80" />
+            <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#090909_30%,transparent)]" />
+            <div className="mx-auto max-w-[1240px] px-5 py-20 sm:px-8 md:py-28">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f4d44d]">Next in the loop</p>
+              <p className="mt-5 max-w-3xl text-balance font-pixel text-[clamp(2.2rem,5vw,4.6rem)] leading-[0.92] tracking-[-0.06em]">{next.title}</p>
+              <span className="mt-8 inline-block bg-[#f4d44d] px-5 py-3 font-mono text-[11px] uppercase tracking-[0.14em] text-black transition-colors group-hover:bg-white">Keep reading →</span>
+            </div>
+          </Link>
+        ) : null}
+      </article>
     </div>
   );
 }

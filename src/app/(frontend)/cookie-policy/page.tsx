@@ -1,3 +1,31 @@
 import type { Metadata } from "next";
-export const metadata: Metadata = { title: "Cookie Policy", description: "How Tracify uses necessary storage and optional analytics." };
-export default function CookiePolicyPage() { return <main className="min-h-screen bg-[#eceae3] px-6 pb-20 pt-32 text-black"><article className="mx-auto max-w-3xl"><p className="font-mono text-[10px] uppercase tracking-widest text-black/55">Privacy / cookies</p><h1 className="mt-8 font-pixel text-6xl leading-none tracking-[-0.06em]">Cookie policy</h1><p className="mt-8 text-lg leading-8 text-black/70">Tracify uses a small amount of necessary storage for authentication, security, and core application behavior. We use optional analytics to understand whether onboarding and product workflows are useful.</p><h2 className="mt-14 border-t border-black pt-6 font-pixel text-3xl">Your choices</h2><p className="mt-4 leading-7 text-black/70">Analytics is enabled by default, but you can turn it off at any time using the privacy preferences control. Turning analytics off does not affect signup, trace ingestion, dashboards, or support.</p><h2 className="mt-10 border-t border-black pt-6 font-pixel text-3xl">Analytics providers</h2><p className="mt-4 leading-7 text-black/70">When analytics is enabled, Tracify uses Google Analytics 4, provided by Google LLC, to measure page views and understand site usage. Advertising storage and ad personalization remain disabled. Google Analytics is not loaded when analytics is rejected before page load, and withdrawing consent sends a denied analytics-storage signal.</p><h2 className="mt-10 border-t border-black pt-6 font-pixel text-3xl">Necessary storage</h2><p className="mt-4 leading-7 text-black/70">Authentication sessions, security controls, and saved application state may be required for Tracify to work. These cannot be disabled through the optional consent controls.</p><p className="mt-12 text-sm text-black/55">For broader data-handling details, read our <a className="underline" href="/privacy">Privacy Policy</a>.</p></article></main>; }
+import { LegalDocument } from "@/components/reading/legal-document";
+
+export const metadata: Metadata = { title: "Cookie Policy", description: "How Tracify uses necessary storage and optional analytics.", alternates: { canonical: "/cookie-policy" } };
+
+const sections = [
+  { id: "overview", title: "What we store", body: "Tracify uses a small amount of necessary storage for authentication, security, and core application behavior. We use optional analytics to understand whether onboarding and product workflows are useful." },
+  { id: "choices", title: "Your choices", body: "Analytics is enabled by default, but you can turn it off at any time using the privacy preferences control. Turning analytics off does not affect signup, trace ingestion, dashboards, or support." },
+  { id: "analytics", title: "Analytics providers", body: "When analytics is enabled, Tracify uses Google Analytics 4, provided by Google LLC, to measure page views and understand site usage. Advertising storage and ad personalization remain disabled. Google Analytics is not loaded when analytics is rejected before page load, and withdrawing consent sends a denied analytics-storage signal." },
+  { id: "necessary", title: "Necessary storage", body: "Authentication sessions, security controls, and saved application state may be required for Tracify to work. These cannot be disabled through the optional consent controls." },
+] as const;
+
+export default function CookiePolicyPage() {
+  return (
+    <LegalDocument
+      current="/cookie-policy"
+      eyebrow="Cookie policy"
+      title="Small storage. Your call."
+      description="What Tracify keeps in your browser, and what you can switch off."
+      updated="16 May 2026"
+      summary="We keep only what login and security need. Analytics is optional and you can turn it off whenever you like without losing anything."
+      highlights={[
+        { label: "Necessary", title: "Login and security.", body: "A small amount of storage keeps you signed in and the app working." },
+        { label: "Optional", title: "Analytics you can turn off.", body: "Google Analytics 4 measures page views, and only while analytics is enabled." },
+        { label: "Never", title: "No ad tracking.", body: "Advertising storage and ad personalization stay disabled." },
+      ]}
+      sections={sections}
+      contact={{ label: "More detail", title: "Read how we handle data overall.", href: "/privacy", action: "Privacy policy" }}
+    />
+  );
+}

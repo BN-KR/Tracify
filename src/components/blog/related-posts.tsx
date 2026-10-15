@@ -24,7 +24,7 @@ export function RelatedPosts({
 
   return (
     <div className="mt-12 border-t border-black/20 pt-8">
-      <h3 className="mb-6 font-mono text-[16px] font-bold text-black">{heading}</h3>
+      <h3 className="mb-6 font-pixel text-3xl leading-none tracking-[-0.05em] text-black">{heading}</h3>
       <div className="grid gap-4 md:grid-cols-3">
         {related.map((post) => {
           const image = post.heroImage?.card || post.heroImage?.src;
@@ -32,14 +32,14 @@ export function RelatedPosts({
             <Link
               key={post.id}
               href={`/blog/${post.slug}`}
-              className="flex flex-col gap-3 border border-black bg-white/35 p-4 transition-colors hover:bg-[#f4d44d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+              className="group flex flex-col gap-3 border border-black bg-[#090909] p-4 text-[#eceae3] transition-colors hover:bg-[#f4d44d] hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
             >
               {image ? (
                 <div className="relative aspect-video overflow-hidden border border-black">
-                  <Image src={image} alt="" fill sizes="(min-width: 768px) 240px, 100vw" className="object-cover grayscale" />
+                  <Image src={image} alt="" fill sizes="(min-width: 768px) 240px, 100vw" className="object-cover transition duration-500 group-hover:scale-105" />
                 </div>
               ) : null}
-              <span className="font-mono text-[13px] leading-snug text-black">{post.title}</span>
+              <span className="font-pixel text-xl leading-[1.05] tracking-[-0.04em]">{post.title}</span>
             </Link>
           );
         })}
