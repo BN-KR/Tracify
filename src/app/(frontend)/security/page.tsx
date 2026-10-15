@@ -1,16 +1,115 @@
 import type { Metadata } from "next";
-import { Globe2, KeyRound, Layers3, LockKeyhole, ServerCog, ShieldCheck, Siren, UserRoundCog } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { PageHeader } from "@/components/marketing/page-header";
+import { Reveal } from "@/components/marketing/landing/reveal";
+import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
+import { ControlExplorer } from "@/components/marketing/company/control-explorer";
 
+import { RedactionDemo } from "@/components/marketing/company/redaction-demo";
 export const metadata: Metadata = { title: "Security", description: "Learn how Tracify protects AI agent telemetry with encryption, project isolation, access controls, and incident response practices.", alternates: { canonical: "/security" } };
 
 const controls = [
-  { title: "Encryption", icon: LockKeyhole, summary: "TLS 1.3 in transit and AES-256 at rest.", items: ["API keys are hashed before storage.", "Plaintext project keys are shown once."] },
-  { title: "Data isolation", icon: Layers3, summary: "Telemetry is scoped to the project derived from the authenticated key.", items: ["No cross-project query path.", "Cost counters remain project-specific."] },
-  { title: "Data residency", icon: Globe2, summary: "EU region accounts, traces, and cache are stored in Ireland; Inngest Cloud currently processes queued span events in the United States.", items: ["Convex, Tinybird, and Redis for the EU region are hosted in Ireland.", "Inngest receives queued span events in US infrastructure, so Tracify does not claim end-to-end EU residency.", "Email, phone, card, SSN, and API-key redaction is applied before queued events leave the EU."] },
-  { title: "Access control", icon: UserRoundCog, summary: "Better Auth sessions and Convex authorization protect workspace data.", items: ["Encrypted OAuth tokens and CSRF protection.", "Organization roles are enforced at the data layer."] },
-  { title: "Runtime enforcement", icon: ServerCog, summary: "Observe-first policies keep monitoring from silently changing production behavior.", items: ["Cost ceilings are evaluated server-side.", "Fail-open behavior protects production traffic."] },
-  { title: "Infrastructure", icon: ShieldCheck, summary: "Convex, Tinybird, Inngest, and Redis have explicit jobs in the data path.", items: ["Durable event processing and retry semantics.", "Ephemeral cache and rate-limit state stay separate."] },
-  { title: "Incident response", icon: Siren, summary: "A documented response path governs investigation and customer notification.", items: ["Affected users are notified within 72 hours.", "Security reviews run on a recurring schedule."] },
+  { title: "Encryption", icon: "lock", summary: "TLS 1.3 in transit and AES-256 at rest.", items: ["API keys are hashed before storage.", "Plaintext project keys are shown once."] },
+  { title: "Data isolation", icon: "layers", summary: "Telemetry is scoped to the project derived from the authenticated key.", items: ["No cross-project query path.", "Cost counters remain project-specific."] },
+  { title: "Data residency", icon: "globe", summary: "EU region accounts, traces, and cache are stored in Ireland; Inngest Cloud currently processes queued span events in the United States.", items: ["Convex, Tinybird, and Redis for the EU region are hosted in Ireland.", "Inngest receives queued span events in US infrastructure, so Tracify does not claim end-to-end EU residency.", "Email, phone, card, SSN, and API-key redaction is applied before queued events leave the EU."] },
+  { title: "Access control", icon: "user", summary: "Better Auth sessions and Convex authorization protect workspace data.", items: ["Encrypted OAuth tokens and CSRF protection.", "Organization roles are enforced at the data layer."] },
+  { title: "Runtime enforcement", icon: "server", summary: "Observe-first policies keep monitoring from silently changing production behavior.", items: ["Cost ceilings are evaluated server-side.", "Fail-open behavior protects production traffic."] },
+  { title: "Infrastructure", icon: "shield", summary: "Convex, Tinybird, Inngest, and Redis have explicit jobs in the data path.", items: ["Durable event processing and retry semantics.", "Ephemeral cache and rate-limit state stay separate."] },
+  { title: "Incident response", icon: "siren", summary: "A documented response path governs investigation and customer notification.", items: ["Affected users are notified within 72 hours.", "Security reviews run on a recurring schedule."] },
 ] as const;
 
-export default function SecurityPage(){return <main className="min-h-screen bg-[#eceae3] pt-[54px] text-black"><header className="border-b border-black bg-black text-white"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[1fr_360px]"><div className="p-6 sm:p-8 md:p-10 md:py-16 lg:border-r lg:border-white/20"><div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.15em] text-[#f4d44d]"><ShieldCheck className="size-4"/>Security dossier</div><h1 className="mt-10 max-w-5xl font-pixel text-[clamp(3.5rem,8vw,8rem)] leading-[0.8] tracking-[-0.08em]">Trust is a system of controls.</h1><p className="mt-8 max-w-2xl text-base leading-7 text-white/58">How agent telemetry is isolated, encrypted, governed, and investigated across the operating record.</p></div><aside className="border-t border-white/20 bg-[#f4d44d] p-6 text-black lg:border-t-0 lg:p-8"><KeyRound className="size-11" strokeWidth={1.2}/><p className="mt-24 font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">Evidence for every boundary.</p><div className="mt-10 border-t border-black pt-4 font-mono text-[9px] uppercase tracking-[0.12em]">Control families / {controls.length}</div></aside></div></header><section className="border-b border-black"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[260px_1fr]"><aside className="border-black bg-[#d9d5ca] p-6 lg:border-r lg:p-8"><div className="sticky top-[86px]"><p className="font-mono text-[9px] uppercase tracking-[0.15em]">Control index</p><ol className="mt-8 divide-y divide-black border-y border-black">{controls.map((control,index)=><li key={control.title} className="flex min-h-14 items-center justify-between font-mono text-[8px] uppercase tracking-[0.1em]"><span>0{index+1}</span><span>{control.title}</span></li>)}</ol></div></aside><div>{controls.map((control,index)=>{const Icon=control.icon;return <article key={control.title} className="grid border-b border-black last:border-b-0 md:grid-cols-[100px_260px_1fr]"><div className="flex items-center justify-between border-black p-5 md:flex-col md:border-r"><span className="font-pixel text-4xl text-black/18">0{index+1}</span><Icon className="size-6" strokeWidth={1.25}/></div><div className="border-t border-black p-6 md:border-r md:border-t-0"><h2 className="font-pixel text-4xl tracking-[-0.055em]">{control.title}</h2><p className="mt-5 text-sm leading-6 text-black/62">{control.summary}</p></div><ul className="border-t border-black md:border-t-0">{control.items.map(item=><li key={item} className="flex min-h-20 items-center border-b border-black/20 px-6 text-sm last:border-b-0">{item}</li>)}</ul></article>})}</div></div></section><a href="mailto:security@tracify.tech" className="flex min-h-24 items-center justify-between bg-black px-5 font-mono text-[9px] uppercase tracking-[0.13em] text-[#f4d44d] hover:bg-[#f4d44d] hover:text-black md:px-10"><span>Report a vulnerability</span><span>security@tracify.tech</span></a></main>}
+const path = [
+  ["Your agent", "The SDK or OTLP exporter sends spans with a project key. Plaintext keys are shown once and stored hashed."],
+  ["Redaction", "Email, phone, card, SSN and API-key patterns are removed before queued events leave the EU region."],
+  ["Queue", "Inngest Cloud processes queued span events in the United States, which is why we do not claim end-to-end EU residency."],
+  ["Storage", "Convex, Tinybird and Redis for the EU region are hosted in Ireland, scoped to the project that owns the key."],
+] as const;
+
+export default function SecurityPage() {
+  return (
+    <div className="overflow-x-clip bg-[#090909]">
+      <PageHeader
+        eyebrow="Security dossier"
+        title="Trust is a system of controls."
+        lede="How agent telemetry is isolated, encrypted, governed and investigated, with the limits stated as plainly as the strengths."
+        image="/images/company/security-boundaries.png"
+      >
+        <HeaderAction href="mailto:security@tracify.tech?subject=Tracify%20Security%20inquiry">Email security</HeaderAction>
+        <HeaderAction href="/status" kind="secondary">See live status</HeaderAction>
+      </PageHeader>
+      <StatStrip stats={[["TLS 1.3","In transit"],["AES-256","At rest"],["72 h","Breach notice"],["Ireland","EU region storage"]]} />
+
+      <DarkBand>
+        <Eyebrow>Control families / {controls.length}</Eyebrow>
+        <SectionTitle>Seven boundaries. Pick one.</SectionTitle>
+        <div className="mt-14"><ControlExplorer controls={controls} /></div>
+      </DarkBand>
+
+      <DarkBand className="border-t border-white/15">
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <Eyebrow>Try it / runs in your browser</Eyebrow>
+            <SectionTitle>Paste a secret. Watch it vanish.</SectionTitle>
+          </div>
+          <p className="max-w-sm text-base leading-7 text-white/65">This is the same redaction rule set Tracify applies to inputs and outputs. Edit the text on the left. Nothing you type leaves this page.</p>
+        </div>
+        <div className="mt-12"><RedactionDemo /></div>
+      </DarkBand>
+
+      <CreamBand>
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <Eyebrow dark={false}>Where a span goes</Eyebrow>
+            <SectionTitle>Follow one span through the system.</SectionTitle>
+          </div>
+          <p className="max-w-sm text-base leading-7 text-black/65">Four hops, each with a named job. The US queue hop is real, so it is on the diagram.</p>
+        </div>
+        <ol className="mt-14 grid gap-0 border-y-2 border-black md:grid-cols-4">
+          {path.map(([title, body], i) => (
+            <Reveal key={title} delay={i * 0.1}>
+              <li className={`relative flex h-full min-h-[300px] flex-col justify-between p-6 md:border-r-2 md:border-black md:last:border-r-0 ${i === 2 ? "bg-[#f4d44d]" : i === 3 ? "bg-black text-[#eceae3]" : ""}`}>
+                <div className="flex items-start justify-between">
+                  <span className="font-pixel text-6xl leading-none">0{i + 1}</span>
+                  {i < 3 && <ArrowRight className="hidden size-6 md:block" aria-hidden="true" />}
+                </div>
+                <div>
+                  <h3 className="font-pixel text-3xl leading-none tracking-[-0.05em]">{title}</h3>
+                  <p className={`mt-3 text-sm leading-6 ${i === 3 ? "text-white/65" : "text-black/70"}`}>{body}</p>
+                </div>
+              </li>
+            </Reveal>
+          ))}
+        </ol>
+      </CreamBand>
+
+      <DarkBand>
+        <Eyebrow>Plain limits</Eyebrow>
+        <SectionTitle>What we will not claim.</SectionTitle>
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
+          {[
+            ["No end-to-end EU residency", "Storage is in Ireland, but queued span events pass through Inngest in the US. We say so instead of rounding up."],
+            ["No silent behavior changes", "Runtime policies are observe-first. Cost ceilings are checked server-side and fail open, so monitoring never quietly breaks production traffic."],
+            ["No keys in plaintext", "Project keys are shown once at creation. After that only the hash exists on our side."],
+          ].map(([t, body], i) => (
+            <Reveal key={t} delay={i * 0.08}>
+              <div className="h-full border border-white/15 bg-[#111] p-7">
+                <span className="font-pixel text-5xl leading-none text-[#f4d44d]">0{i + 1}</span>
+                <h3 className="mt-8 font-pixel text-3xl leading-none tracking-[-0.05em]">{t}</h3>
+                <p className="mt-3 text-sm leading-6 text-white/60">{body}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </DarkBand>
+
+      <ClosingBand
+        title="Found something? Tell us first."
+        body="Responsible disclosure goes straight to the people who can fix it. Affected users are notified within 72 hours."
+        actions={[
+          { href: "mailto:security@tracify.tech?subject=Tracify%20Security%20inquiry", label: "Email security", primary: true },
+          { href: "/contact", label: "Other questions" },
+        ]}
+      />
+    </div>
+  );
+}

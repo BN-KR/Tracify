@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { FutureAction, FutureBand, FutureMasthead, FuturePage } from "@/components/marketing/future19-page";
+import { PageHeader } from "@/components/marketing/page-header";
+import { ClosingBand, HeaderAction , StatStrip } from "@/components/marketing/company/blocks";
+import { GlossaryExplorer } from "@/components/marketing/company/glossary-explorer";
 
 type Term = {
   slug: string;
@@ -85,6 +86,7 @@ const terms: readonly Term[] = [
   },
 ] as const;
 
+import { SpanAnatomy } from "@/components/marketing/company/span-anatomy";
 export const metadata: Metadata = {
   title: "AI Observability Glossary — Tracify",
   description:
@@ -111,62 +113,33 @@ function GlossarySchema() {
 
 export default function GlossaryPage() {
   return (
-    <FuturePage>
+    <div className="overflow-x-clip bg-[#090909]">
       <GlossarySchema />
-      <FutureMasthead
+      <PageHeader
         eyebrow="Reference / definitions"
         title="AI observability glossary"
-        description="Short, direct definitions for the terms used across agent tracing, LLM observability, and evaluation — written to be quoted, not just read."
+        lede="Short, direct definitions for the terms used across agent tracing, LLM observability and evaluation, written to be quoted, not just read."
+        image="/images/company/glossary-text.png"
+      >
+        <HeaderAction href="/demo">See the terms as live traces</HeaderAction>
+        <HeaderAction href="/docs" kind="secondary">Read the docs</HeaderAction>
+      </PageHeader>
+      <StatStrip stats={[[String(terms.length),"Terms defined"],["Quotable","One-paragraph answers"],["Linked","Related terms one click away"],["Free","No signup to read"]]} />
+
+      <section className="bg-[#eceae3] px-5 pb-24 pt-20 text-black md:px-10">
+        <div className="mx-auto max-w-[1320px]">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/50">Start with the picture</p>
+          <h2 className="mt-5 max-w-3xl font-pixel text-[clamp(2.4rem,5.5vw,4.5rem)] leading-[0.92] tracking-[-0.07em]">Most of these words are one trace.</h2>
+          <div className="mb-20 mt-10"><SpanAnatomy /></div>
+          <GlossaryExplorer terms={terms} />
+        </div>
+      </section>
+
+      <ClosingBand
+        title="Definitions are the start."
+        body="Open a real trace and watch these terms move."
+        actions={[{ href: "/demo", label: "Open the demo", primary: true }, { href: "/blog/what-is-ai-observability", label: "What is AI observability?" }]}
       />
-      <FutureBand label="Terms">
-        <div className="divide-y divide-black border-x border-black">
-          {terms.map((t) => (
-            <article key={t.slug} id={t.slug} className="scroll-mt-24 p-6 md:p-10">
-              <h2 className="font-pixel text-3xl leading-none tracking-[-0.04em] md:text-4xl">{t.term}</h2>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-black/75">{t.definition}</p>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-black/55">{t.expansion}</p>
-              {t.related.length > 0 ? (
-                <div className="mt-5 flex flex-wrap gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-black/45">
-                  <span>Related:</span>
-                  {t.related.map((slug) => (
-                    <Link key={slug} href={`/glossary#${slug}`} className="underline decoration-[#d1af18] decoration-2 underline-offset-4 hover:text-black">
-                      {terms.find((x) => x.slug === slug)?.term ?? slug}
-                    </Link>
-                  ))}
-                </div>
-              ) : null}
-            </article>
-          ))}
-        </div>
-      </FutureBand>
-      <FutureBand tone="ink" label="Go deeper">
-        <div className="grid border-x border-white/20 md:grid-cols-[1fr_360px]">
-          <div className="p-7 md:p-10">
-            <p className="max-w-3xl font-pixel text-5xl leading-[0.9] tracking-[-0.055em] md:text-7xl">
-              See these terms as live traces, not just definitions.
-            </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <FutureAction href="/demo" inverted>
-                Open the demo
-              </FutureAction>
-              <FutureAction href="/docs" inverted>
-                Read the docs
-              </FutureAction>
-            </div>
-          </div>
-          <nav aria-label="Related reading" className="border-t border-white/20 md:border-l md:border-t-0">
-            <Link href="/product/trace-viewer" className="flex min-h-24 items-center px-6 font-mono text-[9px] uppercase tracking-[0.12em] border-b border-white/20 hover:bg-[#f4d44d] hover:text-black">
-              Trace viewer
-            </Link>
-            <Link href="/blog/what-is-ai-observability" className="flex min-h-24 items-center px-6 font-mono text-[9px] uppercase tracking-[0.12em] border-b border-white/20 hover:bg-[#f4d44d] hover:text-black">
-              What is AI observability?
-            </Link>
-            <Link href="/blog/llm-tracing-explained" className="flex min-h-24 items-center px-6 font-mono text-[9px] uppercase tracking-[0.12em] hover:bg-[#f4d44d] hover:text-black">
-              LLM tracing explained
-            </Link>
-          </nav>
-        </div>
-      </FutureBand>
-    </FuturePage>
+    </div>
   );
 }
