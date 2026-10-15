@@ -143,11 +143,16 @@ export function Timeline() {
           <div className="relative mt-5 md:mt-8">
             <div className="flex md:gap-6">
               <div className="hidden w-[200px] shrink-0 md:block" />
-              <div className="flex flex-1 justify-between border-b border-white/15 pb-2 font-mono text-[10px] text-white/40">
-                {[0, 1, 2, 3].map((s) => (
-                  <span key={s}>{s}s</span>
+              <div className="relative h-5 flex-1 border-b border-white/15 font-mono text-[10px] text-white/40">
+                {[0, 1, 2, 3, T].map((s, i, all) => (
+                  <span
+                    key={s}
+                    className="absolute top-0"
+                    style={{ left: `${(s / T) * 100}%`, transform: i === 0 ? "none" : i === all.length - 1 ? "translateX(-100%)" : "translateX(-50%)" }}
+                  >
+                    {s}s
+                  </span>
                 ))}
-                <span>{T}s</span>
               </div>
             </div>
 
