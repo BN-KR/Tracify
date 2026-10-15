@@ -363,10 +363,15 @@ export type TraceListFilters = {
   status?: "all" | "error" | "healthy";
   /** Checkbox filters: a trace matches when one of its steps has any of the chosen values (per field). */
   facets?: Partial<Record<FacetKey, string[]>>;
+  /** Exclusions: a trace is dropped when one of its steps has any of these values (per field). */
+  excludeFacets?: Partial<Record<FacetKey, string[]>>;
   minLatencyMs?: number;
   maxLatencyMs?: number;
   minCostUsd?: number;
   maxCostUsd?: number;
+  /** Input plus output tokens of the whole trace. */
+  minTokens?: number;
+  maxTokens?: number;
   /** Traces containing an error from this group (id from traceErrorGroups). */
   errorGroup?: string;
   /** Traces containing this agent-map step ("tool:<name>" or "model:<id>"). */
@@ -424,6 +429,10 @@ function traceListClauses(projectId: string, filters: TraceListFilters) {
     const values = filters.facets?.[key];
     if (values?.length) where.push(`runId IN (SELECT runId FROM spans WHERE ${rangeScope(projectId, filters)} AND ${facetCondition(key, values)})`);
   }
+  for (const key of FACET_KEYS) {
+    const values = filters.excludeFacets?.[key];
+    if (values?.length) where.push(`runId NOT IN (SELECT runId FROM spans WHERE ${rangeScope(projectId, filters)} AND ${facetCondition(key, values)})`);
+  }
   if (filters.query) {
     const value = sqlString(filters.query);
     where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND (positionCaseInsensitive(runId, '${value}') > 0 OR positionCaseInsensitive(traceName, '${value}') > 0 OR positionCaseInsensitive(input, '${value}') > 0 OR positionCaseInsensitive(output, '${value}') > 0))`);
@@ -440,6 +449,8 @@ function traceListClauses(projectId: string, filters: TraceListFilters) {
   if (filters.maxLatencyMs !== undefined) having.push(`durationMs <= ${Number(filters.maxLatencyMs)}`);
   if (filters.minCostUsd !== undefined) having.push(`totalCostUsd >= ${Number(filters.minCostUsd)}`);
   if (filters.maxCostUsd !== undefined) having.push(`totalCostUsd <= ${Number(filters.maxCostUsd)}`);
+  if (filters.minTokens !== undefined) having.push(`inputTokens + outputTokens >= ${Number(filters.minTokens)}`);
+  if (filters.maxTokens !== undefined) having.push(`inputTokens + outputTokens <= ${Number(filters.maxTokens)}`);
   return { where: where.join(" AND "), having: having.length ? `HAVING ${having.join(" AND ")}` : "" };
 }
 
@@ -450,7 +461,7 @@ const ERROR_COUNT_EXPR = `countIf(${IS_ERROR})`;
 
 /** Run ids of every trace matching the filters, for queries that aggregate steps instead of traces. */
 function matchingRunIds(where: string, having: string) {
-  return `SELECT runId FROM (SELECT runId, ${DURATION_EXPR} AS durationMs, ${ERROR_COUNT_EXPR} AS errorCount, sum(costUsd) AS totalCostUsd FROM spans WHERE ${where} GROUP BY runId ${having})`;
+  return `SELECT runId FROM (SELECT runId, ${DURATION_EXPR} AS durationMs, ${ERROR_COUNT_EXPR} AS errorCount, sum(costUsd) AS totalCostUsd, sum(inputTokens) AS inputTokens, sum(outputTokens) AS outputTokens FROM spans WHERE ${where} GROUP BY runId ${having})`;
 }
 
 const TRACE_AGGREGATE = `
