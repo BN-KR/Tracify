@@ -47,11 +47,11 @@ export function DitherField({ className = "" }: { className?: string }) {
         for (let x = 0; x < w; x++) {
           const nx = x / w;
           let v = ny * 0.95 - 0.12 + (1 - nx) * 0.18;
-          v += 0.26 * Math.sin(nx * 6 + t * 0.5 + ny * 3) + 0.12 * Math.sin(nx * 15 - t * 0.7);
+          v += 0.26 * Math.sin(nx * 6 + t * 0.08 + ny * 3) + 0.12 * Math.sin(nx * 15 - t * 0.1);
           if (mouse.x >= 0) {
             const dx = x - mouse.x;
             const dy = y - mouse.y;
-            v += 0.5 * Math.exp(-(dx * dx + dy * dy) / 260);
+            v += 0.0 * Math.exp(-(dx * dx + dy * dy) / 260);
           }
           const th = (BAYER[y & 3][x & 3] + 0.5) / 16;
           if (v <= th) continue;
@@ -69,7 +69,7 @@ export function DitherField({ className = "" }: { className?: string }) {
     }
 
     const loop = (now: number) => {
-      if (now - last > 50) {
+      if (now - last > 120) {
         draw(now);
         last = now;
       }

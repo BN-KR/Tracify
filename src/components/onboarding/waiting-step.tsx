@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AlertTriangle, Check, Loader2, Send } from "lucide-react";
 import { captureAnalytics } from "@/lib/analytics";
 import { authClient } from "@/lib/auth-client";
@@ -19,6 +20,7 @@ const PROJECT_NAME_STORAGE_KEY = "tracify.onboarding.projectName";
 const FALLBACK_PROJECT_NAME = "research-agent-prod";
 
 export function WaitingStep() {
+  const router = useRouter();
   const [elapsed, setElapsed] = useState(0);
   const [health, setHealth] = useState<"checking" | "healthy" | "unavailable">("checking");
   const [probeState, setProbeState] = useState<"idle" | "sending" | "accepted" | "failed">("idle");
@@ -36,6 +38,15 @@ export function WaitingStep() {
     projectId ? { projectId: projectId as Id<"projects"> } : "skip",
   );
   const updateProgress = useMutation(api.projects.updateOnboardingProgress);
+  const recentRuns = useQuery(
+    api.agentRuns.listByProject,
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
+  );
+  // The built-in test span is a real run, so it must never count as "your agent connected".
+  const realFirstRun = useMemo(
+    () => (recentRuns ?? []).filter((run) => !run.runId.startsWith("onboarding-")).at(-1) ?? null,
+    [recentRuns],
+  );
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -56,27 +67,23 @@ export function WaitingStep() {
   }, []);
 
   useEffect(() => {
-    if (!onboardingState?.hasReceivedFirstSpan || !onboardingState.firstRunId) {
-      return;
-    }
-    window.location.assign(
-      `/onboarding/success?projectId=${onboardingState.projectId}&runId=${onboardingState.firstRunId}`,
-    );
-    void updateProgress({ projectId: onboardingState.projectId, step: "success" });
-  }, [onboardingState, updateProgress]);
+    if (!realFirstRun || !projectId) return;
+    void updateProgress({ projectId: projectId as Id<"projects">, step: "success" });
+    router.push(`/onboarding/success?projectId=${projectId}&runId=${realFirstRun.runId}`);
+  }, [realFirstRun, projectId, updateProgress, router]);
 
   useEffect(() => {
-    if (!onboardingState?.hasReceivedFirstSpan || capturedFirstTrace.current) return;
+    if (!realFirstRun || !onboardingState || capturedFirstTrace.current) return;
     capturedFirstTrace.current = true;
     if (session?.user.email) {
-      void fetch("/api/lifecycle/first-trace", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: session.user.email, name: session.user.name, projectId: onboardingState.projectId, runId: onboardingState.firstRunId }) }).catch(() => undefined);
+      void fetch("/api/lifecycle/first-trace", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: session.user.email, name: session.user.name, projectId: onboardingState.projectId, runId: realFirstRun.runId }) }).catch(() => undefined);
     }
     captureAnalytics("first_trace_received", {
       elapsed_seconds: elapsed,
       source: probeState === "accepted" ? "onboarding_probe" : "agent",
       region: region.id,
     });
-  }, [elapsed, onboardingState, probeState, region.id, session?.user.email, session?.user.name]);
+  }, [elapsed, onboardingState, realFirstRun, probeState, region.id, session?.user.email, session?.user.name]);
 
   useEffect(() => () => clearOneTimeApiKey(), []);
 
@@ -125,7 +132,7 @@ export function WaitingStep() {
         throw new Error(body.error || `Ingest returned HTTP ${response.status}`);
       }
       setProbeState("accepted");
-      setProbeMessage("The ingest endpoint accepted a test span. Keep this page open while it reaches the trace viewer.");
+      setProbeMessage("Your key and our servers work. This was only a test, so we are still waiting for a real run from your agent.");
       captureAnalytics("onboarding_probe_accepted", { region: region.id });
     } catch (error) {
       const message = error instanceof Error ? error.message : "The test span could not be sent.";
@@ -144,37 +151,29 @@ export function WaitingStep() {
   return (
     <div>
       <OnboardingHeader
-        title="Run your agent once."
-        description="Tracify is listening. This page moves on by itself the second your first run arrives."
+        title="Now run your agent."
+        description="Start it the way you normally do. The second your first run arrives, this page lights up on its own."
       />
-      <div className="border border-black/15 bg-[#f3f2ed] p-4">
-        <div className="mb-4 flex items-center gap-2 text-[#92400E]">
-          <span className="size-2 animate-mono-pulse bg-[#B45309]" />
-          <span className="text-[13px]">listening</span>
+      <div className="relative overflow-hidden border border-black bg-[#090909] p-6 text-[#eceae3]">
+        <div className="flex items-center gap-5">
+          <div className="relative size-16 shrink-0" aria-hidden="true">
+            {[0, 1, 2].map((n) => (
+              <span key={n} className="absolute inset-0 animate-ping border border-[#f4d44d] motion-reduce:animate-none" style={{ animationDelay: `${n * 0.7}s`, animationDuration: "2.4s" }} />
+            ))}
+            <span className="absolute inset-[38%] bg-[#f4d44d]" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#f4d44d]">listening · {elapsed}s</p>
+            <p className="mt-1 truncate font-pixel text-2xl tracking-[-0.05em]">{projectName}</p>
+            <p className="mt-1 truncate font-mono text-[11px] text-white/45">{keyDisplay}</p>
+          </div>
         </div>
-        <dl className="grid gap-3 text-sm sm:grid-cols-3">
-          <div>
-            <dt className="text-[11px] uppercase tracking-wide text-black/55">
-              Project
-            </dt>
-            <dd className="mt-1 text-black/70">{projectName}</dd>
-          </div>
-          <div>
-            <dt className="text-[11px] uppercase tracking-wide text-black/55">
-              API key
-            </dt>
-            <dd className="mt-1 text-black/70">{keyDisplay}</dd>
-          </div>
-          <div>
-            <dt className="text-[11px] uppercase tracking-wide text-black/55">
-              Status
-            </dt>
-            <dd className="mt-1 text-[#92400E]">listening</dd>
-          </div>
-        </dl>
       </div>
 
-      <div className="mt-5 border border-black/15 bg-white p-4">
+      <details className="group mt-5 border border-black/15 bg-[#f3f2ed]">
+        <summary className="cursor-pointer list-none px-4 py-3 font-mono text-[10px] uppercase tracking-[0.14em] text-black/60 marker:hidden hover:text-black">+ Not seeing anything? Check the connection</summary>
+        <div className="border-t border-black/10">
+      <div className="bg-white p-4">
         <div className="flex items-center justify-between gap-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/55">Connection diagnostics</p>
           <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-black/45">{elapsed}s</span>
@@ -191,6 +190,9 @@ export function WaitingStep() {
         </button>
         {probeMessage ? <p className={`mt-3 text-sm leading-6 ${probeState === "failed" ? "text-[#92400E]" : "text-black/60"}`}>{probeMessage}</p> : null}
       </div>
+
+        </div>
+      </details>
 
       {!projectId ? (
         <div className="mt-5 border border-black/15 bg-[#f3f2ed] p-4 font-sans text-sm leading-6 text-black/60">
@@ -212,6 +214,7 @@ export function WaitingStep() {
           Use the test span above to separate a Tracify connection problem from an agent setup problem. If it is accepted, your SDK or agent is the next place to inspect.
         </div>
       ) : null}
+      <button type="button" onClick={() => router.push(projectId ? `/dashboard/${projectId}` : "/dashboard")} className="mt-6 block font-mono text-[11px] uppercase tracking-[0.12em] text-black/55 underline underline-offset-4 hover:text-black">Skip for now, I&apos;ll connect later</button>
       {elapsed >= 120 ? (
         <a
           href="mailto:support@tracify.tech"
