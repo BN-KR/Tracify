@@ -3,7 +3,6 @@
 import { ConvexBetterAuthProvider, type AuthClient } from "@convex-dev/better-auth/react";
 import { ConvexReactClient } from "convex/react";
 import { useEffect, useRef } from "react";
-import posthog from "posthog-js";
 import { authClient } from "@/lib/auth-client";
 import { AuthIdentityProvider } from "@/components/auth/auth-identity";
 import { CONSENT_EVENT, readConsent } from "@/lib/consent";
@@ -13,6 +12,10 @@ import { CONSENT_EVENT, readConsent } from "@/lib/consent";
 // environment variables are not configured yet.
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
+
+// posthog-js is large and only needed once someone has consented and signed in,
+// so it loads on demand instead of inside every page bundle.
+const loadPostHog = () => import("posthog-js").then((module) => module.default);
 
 const isPostHogConfigured = Boolean(
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
@@ -27,7 +30,7 @@ function PostHogIdentity() {
   useEffect(() => {
     const handleConsent = (event: Event) => {
       if (!(event as CustomEvent<{ analytics: boolean }>).detail.analytics) {
-        posthog.reset();
+        void loadPostHog().then((posthog) => posthog.reset());
         identifiedUserId.current = null;
       }
     };
@@ -38,19 +41,19 @@ function PostHogIdentity() {
 
     if (!user) {
       if (identifiedUserId.current) {
-        posthog.reset();
+        void loadPostHog().then((posthog) => posthog.reset());
         identifiedUserId.current = null;
       }
       return () => window.removeEventListener(CONSENT_EVENT, handleConsent);
     }
 
-    if (identifiedUserId.current && identifiedUserId.current !== user.id) {
-      posthog.reset();
-    }
-
-    posthog.identify(user.id, {
-      ...(user.email ? { email: user.email } : {}),
-      ...(user.name ? { name: user.name } : {}),
+    const switchedUser = Boolean(identifiedUserId.current && identifiedUserId.current !== user.id);
+    void loadPostHog().then((posthog) => {
+      if (switchedUser) posthog.reset();
+      posthog.identify(user.id, {
+        ...(user.email ? { email: user.email } : {}),
+        ...(user.name ? { name: user.name } : {}),
+      });
     });
     identifiedUserId.current = user.id;
     return () => window.removeEventListener(CONSENT_EVENT, handleConsent);
