@@ -73,6 +73,13 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     // URL before proxying to Convex, and allowedHosts rejects every unknown host.
     trustedProxyHeaders: true,
   },
+  // Stay signed in for 30 days. Each visit older than a day silently extends the
+  // session, so active users are never asked to sign in again. The cookie is
+  // persistent (not a browser-session cookie), so closing the tab keeps you in.
+  session: {
+    expiresIn: 60 * 60 * 24 * 30,
+    updateAge: 60 * 60 * 24,
+  },
   rateLimit: {
     enabled: true,
     storage: "database",
@@ -106,6 +113,9 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     convex({
       authConfig,
       jwt: {
+        // The short-lived Convex token is renewed from the 30 day session. One hour
+        // (default is 15 minutes) keeps a sleeping or backgrounded tab signed in.
+        expirationSeconds: 60 * 60,
         definePayload: async ({ user, session }) => {
           const organizationId = "activeOrganizationId" in session
             ? session.activeOrganizationId ?? undefined
