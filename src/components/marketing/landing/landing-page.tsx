@@ -7,6 +7,7 @@ import { ProductWindow, Statement, Story } from "./scroll-sections";
 import { Bento } from "./bento";
 import { Anatomy, BeforeAfter, UseCases } from "./more-sections";
 import { Timeline } from "./timeline";
+import { LiveDemo } from "./live-demo";
 import { PricingSection } from "./pricing-section";
 import { SmoothScroll } from "./smooth-scroll";
 
@@ -32,6 +33,7 @@ export function LandingPage() {
       <Story />
       <Timeline />
       <ProductWindow />
+      <LiveDemo />
       <Anatomy />
       <Bento />
       <UseCases />
