@@ -5,7 +5,7 @@ import { useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { compactNumber, formatCost } from "@/components/dashboard/tracing/format";
 
-const tabs = ["Overview", "Users", "Projects", "Usage", "Alerts", "Activity"] as const;
+const tabs = ["Overview", "Users", "Projects", "Billing", "Usage", "Alerts", "Leads", "Activity", "Audit"] as const;
 type Tab = (typeof tabs)[number];
 
 const ago = (ms: number | string) => {
@@ -26,6 +26,19 @@ function Stat({ label, value, sub }: { label: string; value: string | number; su
       {sub ? <div className="font-mono text-[10px] text-[#8B93A1]">{sub}</div> : null}
     </div>
   );
+}
+
+function csvCell(v: unknown) {
+  const t = String(v ?? "");
+  return /^[=+\-@\t\r]/.test(t) ? `'${t}` : t;
+}
+function downloadCsv(name: string, head: string[], rows: unknown[][]) {
+  const body = [head, ...rows].map((r) => r.map((c) => `"${csvCell(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([body], { type: "text/csv" }));
+  a.download = `tracify-${name}-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function Table({ head, rows, empty }: { head: string[]; rows: React.ReactNode[][]; empty: string }) {
@@ -67,6 +80,22 @@ export function AdminView({ data }: { data: AdminData | undefined }) {
   const [tab, setTab] = useState<Tab>("Overview");
   const [search, setSearch] = useState("");
   const q = search.trim().toLowerCase();
+  function exportTab() {
+    if (!data) return;
+    const d = data;
+    const sets: Record<string, [string[], unknown[][]]> = {
+      Users: [["name", "email", "verified", "signed up"], d.users.map((u) => [u.name, u.email, u.verified, new Date(u.signedUpAt).toISOString()])],
+      Projects: [["project", "plan", "subscription", "api key", "created"], d.projects.map((p) => [p.name, p.plan, p.subscription, p.hasApiKey, new Date(p.createdAt).toISOString()])],
+      Billing: [["project", "plan", "subscription", "renews", "cancelling"], d.projects.map((p) => [p.name, p.plan, p.subscription, p.periodEnd ? new Date(p.periodEnd).toISOString() : "", p.cancelling])],
+      Usage: [["project", "runs 7d", "steps", "failed", "cost usd"], d.usage.map((u) => [u.project, u.runs, u.spans, u.failed, u.costUsd])],
+      Alerts: [["project", "type", "message", "state", "triggered"], d.alerts.map((a) => [a.project, a.type, a.message, a.state, a.triggeredAt])],
+      Leads: [["name", "email", "company", "intent", "status", "source", "created"], d.leads.map((l) => [l.name, l.email, l.company, l.intent, l.status, l.source, new Date(l.createdAt).toISOString()])],
+      Activity: [["run", "project", "model", "status", "steps", "cost usd", "started"], d.recentRuns.map((r) => [r.runId, r.project, r.model, r.status, r.spans, r.costUsd, r.startedAt])],
+      Audit: [["actor", "action", "summary", "project", "when"], d.audit.map((a) => [a.actor, a.action, a.summary, a.project, new Date(a.createdAt).toISOString()])],
+    };
+    const set = sets[tab] ?? sets.Users;
+    downloadCsv((sets[tab] ? tab : "Users").toLowerCase(), set[0], set[1]);
+  }
 
   return (
     <div className="min-h-screen bg-[#0B0D10] font-sans text-[#E6E9EE]">
@@ -76,6 +105,10 @@ export function AdminView({ data }: { data: AdminData | undefined }) {
         <span className="ml-auto flex items-center gap-2 font-mono text-[11px] text-[#5BE3A0]">
           <span className="h-1.5 w-1.5 animate-pulse bg-[#5BE3A0]" /> Live
         </span>
+        <button type="button" onClick={() => exportTab()} disabled={!data}
+          className="h-8 border border-[#262C35] bg-[#0E1115] px-3 font-mono text-[11px] uppercase tracking-wider text-[#E6E9EE] hover:border-[#F4D44D] disabled:opacity-40">
+          Export CSV
+        </button>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -96,7 +129,7 @@ export function AdminView({ data }: { data: AdminData | undefined }) {
 
       {data === undefined ? <p className="p-6 text-[13px] text-[#8B93A1]">Loading…</p> : (
         <main className="space-y-4 p-4">
-          <section className="grid grid-cols-2 border border-[#1F242C] bg-[#0E1115] md:grid-cols-4 xl:grid-cols-8">
+          <section className="grid grid-cols-2 border border-[#1F242C] bg-[#0E1115] md:grid-cols-4 xl:grid-cols-9">
             <Stat label="Users" value={data.totals.users} sub={`${data.totals.verifiedUsers} verified`} />
             <Stat label="Signups 7d" value={data.totals.signups7d} />
             <Stat label="Projects" value={data.totals.projects} sub={`${data.totals.projectsWithKey} with API key`} />
@@ -104,6 +137,7 @@ export function AdminView({ data }: { data: AdminData | undefined }) {
             <Stat label="Runs 24h" value={compactNumber(data.totals.runs24h)} sub={`${compactNumber(data.totals.runs7d)} in 7d`} />
             <Stat label="Steps 7d" value={compactNumber(data.totals.spans7d)} />
             <Stat label="Cost 24h" value={formatCost(data.totals.cost24hUsd)} sub={`${formatCost(data.totals.cost7dUsd)} in 7d`} />
+            <Stat label="New leads" value={data.newLeads} />
             <Stat label="Open alerts" value={data.totals.activeAlerts} sub={`${data.totals.alertRules} rules · ${data.totals.failed7d} failed runs 7d`} />
           </section>
           {data.capped.users || data.capped.projects || data.capped.runs ? (
@@ -138,6 +172,21 @@ export function AdminView({ data }: { data: AdminData | undefined }) {
           {tab === "Projects" && (
             <Table head={["Project", "Plan", "Subscription", "API key", "Last key use", "Created"]} empty="No matching projects."
               rows={data.projects.filter((p) => !q || p.name.toLowerCase().includes(q)).map((p) => [p.name, p.plan, dim(p.subscription ?? "—"), p.hasApiKey ? pill("active", "ok") : pill("none", "mute"), dim(p.lastKeyUseAt ? ago(p.lastKeyUseAt) : "never"), dim(ago(p.createdAt))])} />
+          )}
+
+          {tab === "Billing" && (
+            <Table head={["Project", "Plan", "Subscription", "Renews", "Cancelling"]} empty="No matching projects."
+              rows={data.projects.filter((p) => p.plan !== "free" || p.subscription).filter((p) => !q || p.name.toLowerCase().includes(q)).map((p) => [p.name, p.plan, dim(p.subscription ?? "—"), dim(p.periodEnd ? abs(p.periodEnd) : "—"), p.cancelling ? pill("yes", "warn") : dim("no")])} />
+          )}
+
+          {tab === "Leads" && (
+            <Table head={["Name", "Email", "Company", "Intent", "Status", "Source", "Received"]} empty="No matching leads."
+              rows={data.leads.filter((l) => !q || `${l.name} ${l.email} ${l.company ?? ""} ${l.intent}`.toLowerCase().includes(q)).map((l) => [l.name, l.email, l.company ?? "—", dim(l.intent), pill(l.status, l.status === "new" ? "warn" : "mute"), dim(l.source), dim(ago(l.createdAt))])} />
+          )}
+
+          {tab === "Audit" && (
+            <Table head={["Who", "Action", "What", "Project", "When"]} empty="No audit entries."
+              rows={data.audit.filter((a) => !q || `${a.actor} ${a.action} ${a.summary} ${a.project}`.toLowerCase().includes(q)).map((a) => [a.actor, mono(a.action), <span key="s" className="line-clamp-1 max-w-md">{a.summary}</span>, a.project, dim(ago(a.createdAt))])} />
           )}
 
           {tab === "Usage" && (

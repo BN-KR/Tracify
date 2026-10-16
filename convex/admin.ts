@@ -4,6 +4,8 @@ import { components } from "./_generated/api";
 // Built-in owner account. More admins come from the same environment variables
 // the lead inbox already uses (TRACIFY_LIBRARY_ADMIN_EMAILS, TRACIFY_ADMIN_USER_IDS).
 const BUILT_IN_ADMIN_EMAILS = ["kristofferbon@gmail.com"];
+// Every verified address on these domains is an admin.
+const ADMIN_DOMAINS = ["tracify.tech"];
 const CAP = 500;
 
 type AuthUser = { id?: string; _id?: string; name: string; email: string; emailVerified: boolean; createdAt: number };
@@ -21,7 +23,7 @@ async function requireAdmin(ctx: QueryCtx) {
   if (!identity) throw new Error("Admin access required");
   const email = identity.email?.toLowerCase();
   const emails = [...BUILT_IN_ADMIN_EMAILS, ...list("TRACIFY_LIBRARY_ADMIN_EMAILS").map((x) => x.toLowerCase())];
-  const allowed = list("TRACIFY_ADMIN_USER_IDS").includes(identity.subject) || (!!email && emails.includes(email));
+  const allowed = list("TRACIFY_ADMIN_USER_IDS").includes(identity.subject) || (!!email && (emails.includes(email) || ADMIN_DOMAINS.some((d) => email.endsWith("@" + d))));
   if (!allowed || !email) throw new Error("Admin access required");
   const account = (await ctx.runQuery(components.betterAuth.adapter.findOne, {
     model: "user",
@@ -61,6 +63,9 @@ export const overview = query({
       hasApiKey: p.apiKeyStatus === "active",
       lastKeyUseAt: p.apiKeyLastUsedAt ?? null,
       createdAt: p.createdAt ?? p._creationTime,
+      periodEnd: p.subscriptionCurrentPeriodEnd ?? null,
+      cancelling: p.cancelAtPeriodEnd ?? false,
+      owner: p.clerkUserId ?? p.clerkOrgId ?? null,
     }));
     const nameById = new Map(projectDocs.map((p) => [p._id as string, p.name]));
 
@@ -79,11 +84,22 @@ export const overview = query({
       .sort((a, b) => b.runs - a.runs).slice(0, 25);
 
     const alertDocs = await ctx.db.query("alerts").order("desc").take(100);
-    const alerts = alertDocs.slice(0, 40).map((a) => ({
+    const alerts = alertDocs.map((a) => ({
       id: a._id, type: a.type, message: a.message, state: a.state ?? "active",
       project: nameById.get(a.projectId) ?? "Deleted project", triggeredAt: a.triggeredAt,
     }));
     const ruleDocs = await ctx.db.query("alertRules").order("desc").take(CAP);
+
+    const leadDocs = await ctx.db.query("leadSubmissions").withIndex("by_createdAt").order("desc").take(CAP);
+    const leads = leadDocs.map((l) => ({
+      id: l._id, name: l.name, email: l.email, company: l.company ?? null, intent: l.intent,
+      status: l.status, source: l.sourcePath, createdAt: l.createdAt,
+    }));
+    const auditDocs = await ctx.db.query("auditLogs").order("desc").take(200);
+    const audit = auditDocs.map((a) => ({
+      id: a._id, actor: a.actorEmail ?? a.actorId, action: a.action, summary: a.summary,
+      project: nameById.get(a.projectId) ?? "Deleted project", createdAt: a.createdAt,
+    }));
 
     const planCounts: Record<string, number> = { free: 0, pro: 0, team: 0, enterprise: 0 };
     for (const p of projects) planCounts[p.plan] = (planCounts[p.plan] ?? 0) + 1;
@@ -112,8 +128,11 @@ export const overview = query({
         alertRules: ruleDocs.length,
       },
       planCounts,
-      users: users.slice(0, 100),
-      projects: projects.slice(0, 100),
+      leads,
+      newLeads: leads.filter((l) => l.status === "new").length,
+      audit,
+      users,
+      projects,
       usage,
       alerts,
       recentRuns,
