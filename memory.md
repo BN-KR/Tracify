@@ -2200,3 +2200,9 @@
 - Added `/compare` hub + `/compare/[slug]` (Langfuse, LangSmith, Helicone, Arize Phoenix, Braintrust, Datadog), `/integrations/[slug]` (OpenAI, Anthropic, LangGraph, OpenTelemetry, CrewAI, Vercel AI SDK) and `/glossary/[term]` (27 terms in `src/lib/glossary.ts`). Content lives in `src/lib/seo-pages.ts`; competitor claims are kept high level on purpose.
 - robots.ts names AI crawlers explicitly; `/llms-full.txt` serves docs + glossary + comparisons as plain text; llms.txt and sitemap list the new pages; Organization schema has sameAs.
 - Not done: more use-case pages (bespoke art, needs a design-preview PR), best-tools listicle, Search Console/Bing, backlinks.
+
+## 2026-10-16 Cost budgets + weekly summary (branch `claude/project-thread-bh6ufi`)
+- Alerts page now has three tabs: Alert rules, Cost budgets, Weekly summary (`src/components/dashboard/alerts/alerts-sections.tsx`).
+- Convex: `costBudgets` + `weeklySummaries` tables, `convex/budgets.ts` (15 min cron, warns once at the chosen % and once when over, per UTC week/month), `convex/weeklySummary.ts` (Monday 08:00 UTC cron, week claimed before sending so it never double-sends), shared sending in `convex/notify.ts`, pure maths in `convex/spendMetrics.ts`.
+- Needs a manual Convex deploy. Email needs `RESEND_API_KEY` (and optionally `EMAIL_FROM`, `SITE_URL`) in the backend env; without it emails are skipped and logged, Slack/webhook still work.
+- `convex/_generated/api.d.ts` was hand-edited (codegen needs a deployment); re-run `npx convex codegen` when convenient.
