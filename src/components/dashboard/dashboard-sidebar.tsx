@@ -333,11 +333,6 @@ export function DashboardSidebar({
             <ChevronsRight className="size-4" />
           </button>
         ) : null}
-        {isCollapsed ? (
-          <div className="mb-3">
-            <ProjectSwitcher isCollapsed previewProjectName={previewProjectName} synthetic={isSynthetic} />
-          </div>
-        ) : null}
         <div className="flex w-full flex-1 flex-col items-center gap-1 px-1.5">
           {railGroups.map((group) => {
             const Icon = group.icon;
@@ -362,7 +357,8 @@ export function DashboardSidebar({
           })}
         </div>
         {isCollapsed ? (
-          <div className="mt-3">
+          <div className="mt-3 flex flex-col items-center gap-2">
+            <ProjectSwitcher isCollapsed previewProjectName={previewProjectName} synthetic={isSynthetic} />
             <SidebarAccountMenu isCollapsed synthetic={isSynthetic} />
           </div>
         ) : null}
@@ -382,10 +378,6 @@ export function DashboardSidebar({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logos/dissolve/tracify-name-on-dark.svg" alt="tracify" height={22} className="block h-[22px] w-auto" />
             </Link>
-          </div>
-
-          <div className={cn("p-3 pb-2", isSynthetic && "captured-sidebar-project")}>
-            <ProjectSwitcher isCollapsed={false} previewProjectName={previewProjectName} synthetic={isSynthetic} />
           </div>
 
           {isSynthetic ? (
@@ -412,6 +404,9 @@ export function DashboardSidebar({
           </nav>
 
           <div className="border-t border-white/10">
+            <div className={cn("p-3", isSynthetic && "captured-sidebar-project")}>
+              <ProjectSwitcher isCollapsed={false} previewProjectName={previewProjectName} synthetic={isSynthetic} />
+            </div>
             {!isSynthetic ? (
               <Link
                 href={alertsHref}
