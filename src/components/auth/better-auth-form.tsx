@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { parseEntryIntent, safeRelativePath } from "@/lib/navigation-context";
@@ -18,6 +18,16 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const requestedPath = searchParams.get("redirect") || searchParams.get("redirect_url");
   const callbackPath = safeRelativePath(requestedPath, mode === "sign-up" ? "/onboarding" : "/dashboard");
   const intent = parseEntryIntent(searchParams.get("intent"));
+
+  // Already signed in (the login cookie lasts 30 days): skip the form and go straight in.
+  const { data: session } = authClient.useSession();
+  const alreadySignedIn = Boolean(session?.user);
+  useEffect(() => {
+    if (!alreadySignedIn) return;
+    const target = new URL(callbackPath, window.location.origin);
+    if (intent) target.searchParams.set("intent", intent);
+    window.location.replace(`${target.pathname}${target.search}${target.hash}`);
+  }, [alreadySignedIn, callbackPath, intent]);
 
   function absolute(path: string) {
     return new URL(path, window.location.origin).toString();
@@ -62,6 +72,8 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
       setError(result.error.message || `${provider === "github" ? "GitHub" : "Google"} sign-in failed.`);
     }
   }
+
+  if (alreadySignedIn) return null;
 
   return (
     <div>
