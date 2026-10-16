@@ -80,7 +80,7 @@ export function AlertsWorkspace({ projectId }: { projectId: string }) {
       ) : rules.length === 0 ? (
         <div className="m-4 border border-[#1F242C] bg-[#0E1115] p-8 text-center">
           <p className="text-[15px] font-semibold">No alert rules yet</p>
-          <p className="mx-auto mt-1 max-w-md text-[#8B93A1]">Get an email when failed runs, spend or speed go over a limit. Rules are checked every 5 minutes.</p>
+          <p className="mx-auto mt-1 max-w-md text-[#8B93A1]">Get told by email, Slack or webhook when failed runs, spend or speed go over a limit. Rules are checked every 5 minutes.</p>
           <button type="button" onClick={() => setCreating(true)} className="mt-4 h-8 bg-[#F4D44D] px-4 font-bold text-[#090909]">Create your first rule</button>
         </div>
       ) : (
@@ -108,7 +108,7 @@ export function AlertsWorkspace({ projectId }: { projectId: string }) {
                         <div className="mb-1 mt-1.5 flex items-baseline gap-2.5"><span className="font-mono text-xl font-bold" style={{ color: rule.status === "paused" ? "#6B7380" : color }}>{config.format(rule.value)}</span><span className="font-mono text-[11px] text-[#6B7380]">limit {config.condition(rule.threshold, rule.windowMinutes).replace("> ", "")}</span></div>
                         <AlertChart series={rule.series} threshold={rule.threshold} color={rule.status === "paused" ? "#3A4250" : color} label={`${rule.name}, last 24 hours`} />
                         <div className="mt-2 flex items-center justify-between text-[11px] text-[#6B7380]">
-                          <span className="font-mono">✉ {rule.emailTo.length} {rule.emailTo.length === 1 ? "address" : "addresses"}</span>
+                          <span className="font-mono">{destinations(rule)}</span>
                           <RuleActions rule={rule} confirming={confirmingDelete === rule._id} onToggle={() => void setEnabled({ ruleId: rule._id, enabled: !rule.enabled })} onAskDelete={() => setConfirmingDelete(rule._id)} onCancelDelete={() => setConfirmingDelete(null)} onDelete={() => { void remove({ ruleId: rule._id }); setConfirmingDelete(null); }} />
                         </div>
                       </article>
@@ -146,7 +146,7 @@ export function AlertsWorkspace({ projectId }: { projectId: string }) {
                 </div>
               ))}
               <div className="mt-5 text-[11px] tracking-[0.08em] text-[#6B7380]">COMING SOON</div>
-              <p className="mt-1 text-[12px] text-[#8B93A1]">Slack, webhooks and quality-score rules.</p>
+              <p className="mt-1 text-[12px] text-[#8B93A1]">Quality-score rules.</p>
             </aside>
           </div>
         </>
@@ -154,6 +154,14 @@ export function AlertsWorkspace({ projectId }: { projectId: string }) {
       {creating ? <AlertRuleForm projectId={projectId} defaultEmail={session?.user?.email ?? ""} onClose={() => setCreating(false)} /> : null}
     </div>
   );
+}
+
+function destinations(rule: { emailTo: string[]; hasSlack: boolean; webhookHost?: string }) {
+  const parts: string[] = [];
+  if (rule.emailTo.length) parts.push(`✉ ${rule.emailTo.length}`);
+  if (rule.hasSlack) parts.push("Slack");
+  if (rule.webhookHost) parts.push("Webhook");
+  return parts.join(" · ") || "No destination";
 }
 
 function RuleActions({ rule, confirming, onToggle, onAskDelete, onCancelDelete, onDelete }: { rule: { name: string; enabled: boolean }; confirming: boolean; onToggle: () => void; onAskDelete: () => void; onCancelDelete: () => void; onDelete: () => void }) {
