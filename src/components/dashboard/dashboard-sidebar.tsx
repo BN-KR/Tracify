@@ -5,7 +5,6 @@ import {
   BarChart3,
   BookOpen,
   CircleHelp,
-  ChevronsLeft,
   ChevronsRight,
   Eye,
   Plus,
@@ -309,8 +308,6 @@ export function DashboardSidebar({
     window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(!isCollapsed));
   }
 
-  const CollapseIcon = isCollapsed ? ChevronsRight : ChevronsLeft;
-  const collapseLabel = isCollapsed ? "Expand sidebar" : "Collapse sidebar";
 
   return (
     <aside
@@ -380,20 +377,11 @@ export function DashboardSidebar({
 
       {showPanel && panelGroup ? (
         <div className="flex min-w-0 flex-1 flex-col bg-[#0f0f0f]">
-          <div className="flex h-12 items-center justify-between border-b border-white/10 pl-4 pr-2">
+          <div className="flex h-12 items-center border-b border-white/10 px-4">
             <Link href={projectDashboardHref} aria-label="Tracify dashboard">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logos/dissolve/tracify-name-on-dark.svg" alt="tracify" height={22} className="block h-[22px] w-auto" />
             </Link>
-            <button
-              type="button"
-              aria-label={`${collapseLabel} (Ctrl+\\)`}
-              title={`${collapseLabel} · Ctrl+\\`}
-              onClick={toggleCollapsed}
-              className="flex size-7 items-center justify-center text-[#8d8d8d] outline-none hover:bg-[#181818] hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55"
-            >
-              <CollapseIcon className="size-4" />
-            </button>
           </div>
 
           <div className={cn("p-3 pb-2", isSynthetic && "captured-sidebar-project")}>
