@@ -816,3 +816,13 @@
   .blog-post__body .markdoc-blog-richtext blockquote strong, .blog-post__body .markdoc-blog-richtext blockquote mark { background: none; color: #f4d44d; }
   .blog-post__body .markdoc-blog-richtext blockquote a { color: #f4d44d; }
 }
+
+/* Dashboard menus (project, account, alerts...) are portaled out of the shell, so style them dark here. */
+body:has(.tracify-cloud-shell) [role="menu"]{background:#121212;color:#d6d6d6;border:1px solid #2c2c2c;box-shadow:0 14px 32px rgba(0,0,0,.55)}
+body:has(.tracify-cloud-shell) [role="menu"] [role="menuitem"]{color:#d6d6d6}
+body:has(.tracify-cloud-shell) [role="menu"] [role="menuitem"][data-highlighted],body:has(.tracify-cloud-shell) [role="menu"] [role="menuitem"]:hover{background:#1c1c1c;color:#fff}
+body:has(.tracify-cloud-shell) [role="menu"] [role="separator"]{background:#2c2c2c}
+body:has(.tracify-cloud-shell) [role="menu"] [class*="text-black/55"]{color:#8b8b8b}
+body:has(.tracify-cloud-shell) [role="menu"] [class*="text-black"]{color:#e6e6e6}
+body:has(.tracify-cloud-shell) [role="menu"] [class*="bg-[#f3f2ed]"],body:has(.tracify-cloud-shell) [role="menu"] [class*="bg-white"]{background:#1b1b1b}
+body:has(.tracify-cloud-shell) [role="menu"] [class*="border-black"]{border-color:#3a3a3a}
