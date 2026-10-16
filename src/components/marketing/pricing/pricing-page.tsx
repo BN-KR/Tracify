@@ -260,15 +260,15 @@ function Compare({ interval }: { interval: BillingInterval }) {
           <h2 id="compare-title" className="mt-5 font-pixel text-[clamp(2.6rem,6vw,5.5rem)] leading-[0.92] tracking-[-0.07em]">Every plan, side by side.</h2>
         </Reveal>
         <div className="mt-12 overflow-x-auto border-2 border-black">
-          <table className="w-full min-w-[720px] border-collapse text-left">
+          <table className="w-full border-collapse text-left md:min-w-[720px]">
             <caption className="sr-only">Plan comparison</caption>
             <thead>
               <tr className="bg-black text-[#eceae3]">
-                <th scope="col" className="p-5 font-mono text-[10px] font-normal uppercase tracking-[0.14em] text-white/55">Capability</th>
+                <th scope="col" className="p-2.5 font-mono text-[8px] font-normal uppercase tracking-[0.1em] text-white/55 md:p-5 md:text-[10px] md:tracking-[0.14em]">Capability</th>
                 {plans.map((plan) => (
-                  <th key={plan.id} scope="col" className={`border-l border-white/20 p-5 ${plan.id === "pro" ? "bg-[#f4d44d] text-black" : ""}`}>
-                    <span className="block font-pixel text-3xl tracking-[-0.05em]">{plan.name}</span>
-                    <span className="mt-1 block font-mono text-[10px] font-normal uppercase tracking-[0.1em] opacity-60">{formatPrice(monthlyPrice(plan, interval))} / mo</span>
+                  <th key={plan.id} scope="col" className={`border-l border-white/20 p-2 md:p-5 ${plan.id === "pro" ? "bg-[#f4d44d] text-black" : ""}`}>
+                    <span className="block font-pixel text-base tracking-[-0.05em] md:text-3xl">{plan.name}</span>
+                    <span className="mt-1 block font-mono text-[8px] font-normal uppercase tracking-[0.04em] opacity-60 md:text-[10px] md:tracking-[0.1em]">{formatPrice(monthlyPrice(plan, interval))}<span className="hidden md:inline"> / mo</span></span>
                   </th>
                 ))}
               </tr>
@@ -276,10 +276,10 @@ function Compare({ interval }: { interval: BillingInterval }) {
             <tbody>
               {rows.map((row) => (
                 <tr key={row[0]} className="group border-t border-black/25 hover:bg-[#f4d44d]/40">
-                  <th scope="row" className="p-5 text-sm font-medium">{row[0]}</th>
+                  <th scope="row" className="p-2.5 text-xs font-medium leading-4 md:p-5 md:text-sm md:leading-normal">{row[0]}</th>
                   {row.slice(1).map((cell, i) => (
-                    <td key={i} className={`border-l border-black/25 p-5 font-mono text-[11px] uppercase tracking-[0.06em] ${cell === "—" ? "text-black/30" : ""}`}>
-                      {cell === "Included" ? <span className="flex items-center gap-2"><span className="size-2 bg-black" />Included</span> : cell}
+                    <td key={i} className={`border-l border-black/25 p-2 font-mono text-[9px] uppercase tracking-[0.02em] md:p-5 md:text-[11px] md:tracking-[0.06em] ${cell === "—" ? "text-black/30" : ""}`}>
+                      {cell === "Included" ? <span className="flex items-center gap-2"><span className="size-2 bg-black" /><span className="sr-only md:not-sr-only">Included</span></span> : cell}
                     </td>
                   ))}
                 </tr>
