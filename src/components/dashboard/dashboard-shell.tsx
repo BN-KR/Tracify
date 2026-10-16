@@ -8,8 +8,8 @@ import { DashboardSidebar } from "./dashboard-sidebar";
 const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
 const LEGACY_COLLAPSED_STORAGE_KEY = "tracify:dashboard-sidebar";
 
-const COLLAPSED_WIDTH = 48;
-const EXPANDED_WIDTH = 184;
+const COLLAPSED_WIDTH = 72;
+const EXPANDED_WIDTH = 296;
 type DashboardTheme = "legacy" | "tracify-v2";
 
 export function DashboardShell({
