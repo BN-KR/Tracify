@@ -2181,3 +2181,8 @@
 
 ## 2026-10-15 Pricing and checkout redesign — draft PR (branch `claude/project-thread-7pyfz3`, stacked on #177 shared nav/footer)
 - `/pricing` rebuilt: PageHeader with dithered stairs art, plan grid with pixel capacity meters, a runs-per-day x steps-per-run span estimator that highlights the fitting plan, comparison table, accordion FAQ, horizon CTA. `/pricing/checkout` is now a split page (plan summary over dithered gate art, 3-step account/project/pay flow); checkout logic and Stripe call are unchanged. Plan data lives in `src/lib/pricing-plans.ts`; the landing pricing teaser still mirrors it by hand. New art functions `pricing_stairs`/`checkout_gate` in `scripts/generate-landing-art.py` (pass function names to regenerate only those).
+
+## 2026-10-16 Alerts rules and email — draft PR (branch `claude/project-thread-ydgats`)
+- New `alertRules` table, `convex/alertRules.ts` (overview, preview, create, pause, delete), a 5-minute check in `convex/crons.ts`, and email through Resend. Metrics: failed runs, spend, p95 speed, minutes without runs. A rule opens one alert when it crosses its limit and resolves it on recovery. Four Convex tests pass; ESLint and tsc are clean on the changed files.
+- `/dashboard/[projectId]/alerts` is now `src/components/dashboard/alerts/` (Cards | List, new-rule box with 7-day preview, history). A boundary shows a calm message if the backend functions are not deployed yet.
+- Convex `_generated/api.d.ts` was edited by hand because no deployment was available for codegen; run `npx convex codegen` against a real deployment to confirm. Needs the manual Convex deploy and `RESEND_API_KEY` (and optionally `EMAIL_FROM`) in the Convex environment before emails send.

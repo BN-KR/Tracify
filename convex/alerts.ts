@@ -10,7 +10,7 @@ function getOrgId(identity: unknown) {
     : undefined;
 }
 
-function canAccessProject(
+export function canAccessProject(
   project: Doc<"projects">,
   identity: { subject: string; tokenIdentifier: string },
 ) {

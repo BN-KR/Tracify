@@ -1,3 +1,8 @@
+## 2026-10-16 — Alerts rules (draft PR)
+
+- [pending owner] Run the manual Convex deploy for jovial-owl-711, then set `RESEND_API_KEY` and `EMAIL_FROM` in that Convex deployment's environment so alert emails send.
+- [pending owner] Review the alerts page on a Ready preview with a real project; the page needs the deployed backend to show data.
+
 ## 2026-10-15 — Authorized tracing roadmap
 
 - Owner review/merge of draft PRs #162 (auth), #163 (CSV), #164 (sorting), #166 (steps), SDK #167 (independent), and saved views #168 after #166. Merge frontend stack in that order, using merge commits.
