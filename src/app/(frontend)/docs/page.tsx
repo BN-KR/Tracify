@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { getDocs } from "@/lib/markdoc-docs";
-import { DocsSearch } from "@/components/docs/docs-search";
+import { DocsSidebar } from "@/components/docs/docs-sidebar";
 import { DocsJourney, DocsTerminal } from "@/components/docs/docs-experience";
 import { Reveal } from "@/components/marketing/landing/reveal";
 
@@ -13,7 +13,7 @@ const eyebrow = "font-mono text-[10px] uppercase tracking-[.16em] text-black/55"
 
 export default function DocsRootPage() {
   const docs = getDocs();
-  const searchDocs = docs.map(({ slug, title, description, section, headings, bodyText, body, noindex }) => ({ slug, title, description, section, headings, bodyText, body, noindex }));
+  const navigationDocs = docs.map(({ slug, title, section }) => ({ slug, title, section }));
   const sections = [...new Set(docs.map((doc) => doc.section))];
 
   return (
@@ -35,11 +35,11 @@ export default function DocsRootPage() {
         </div>
       </section>
 
-      <div className="border-b border-black bg-[#eceae3] px-5 py-6 md:px-10">
-        <div className="mx-auto max-w-[1320px]"><DocsSearch docs={searchDocs} /></div>
-      </div>
-
       <DocsJourney />
+
+      <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[250px_minmax(0,1fr)]">
+      <DocsSidebar docs={navigationDocs} />
+      <div className="min-w-0">
 
       <section id="guides" className="scroll-mt-24 px-5 py-24 md:px-10 md:py-32">
         <div className="mx-auto max-w-[1320px]">
@@ -62,6 +62,8 @@ export default function DocsRootPage() {
           </div>
         </div>
       </section>
+      </div>
+      </div>
 
       <aside className="bg-[#f4d44d]">
         <div className="mx-auto flex max-w-[1320px] flex-col gap-5 px-5 py-12 md:flex-row md:items-center md:justify-between md:px-10 md:py-16">
