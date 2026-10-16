@@ -4,6 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 
 import { DashboardSidebar } from "./dashboard-sidebar";
+import { DashboardSlimTopbar } from "./dashboard-slim-topbar";
 
 const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
 const LEGACY_COLLAPSED_STORAGE_KEY = "tracify:dashboard-sidebar";
@@ -126,6 +127,7 @@ export function DashboardShell({
         <main
           className={`h-svh pb-0 overflow-y-auto scrollbar-hide ${isDashboardRoute ? "bg-[#101010] p-0" : "bg-[#eceae3] p-4 lg:p-6"}`}
         >
+          {isDashboardRoute && !synthetic ? <DashboardSlimTopbar /> : null}
           {children}
         </main>
       </div>

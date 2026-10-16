@@ -8,6 +8,7 @@ import {
   BookOpen,
   Bell,
   ChevronRight,
+  PanelLeft,
   UserPen,
   LogOut,
   Settings,
@@ -124,6 +125,15 @@ export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
       </span>
 
       <div className="flex min-w-0 items-center gap-4">
+        <button
+          type="button"
+          aria-label="Toggle sidebar (Ctrl+\\)"
+          title="Toggle sidebar · Ctrl+\\"
+          onClick={() => window.dispatchEvent(new Event("tracify:toggle-sidebar"))}
+          className="flex size-8 shrink-0 items-center justify-center text-black/60 outline-none hover:bg-[#e8e6df] hover:text-black focus-visible:ring-2 focus-visible:ring-black"
+        >
+          <PanelLeft className="size-4" />
+        </button>
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-black/55">
           <div className="flex items-center gap-2 overflow-hidden">
             <Link

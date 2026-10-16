@@ -28,9 +28,9 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ProjectSwitcher } from "@/components/dashboard/project-switcher";
+import { SidebarAccountMenu } from "@/components/dashboard/sidebar-account-menu";
 import { usePathname, useParams, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { getTracifyRegion } from "@/lib/regions";
 
 type RailId = "observe" | "analyze" | "improve" | "operate" | "manage" | "help";
 
@@ -118,8 +118,6 @@ export function DashboardSidebar({
           : `${projectDashboardHref}/${liveView}`,
     [isSynthetic, projectDashboardHref],
   );
-
-  const region = getTracifyRegion();
 
   const dynamicGroups = useMemo<NavGroup[]>(() => {
     if (isSynthetic || projectId) {
@@ -327,6 +325,22 @@ export function DashboardSidebar({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logos/dissolve/tracify-icon.svg" alt="" width={44} height={44} className="block size-11" />
         </Link>
+        {isCollapsed ? (
+          <button
+            type="button"
+            aria-label="Expand sidebar (Ctrl+\\)"
+            title="Expand sidebar · Ctrl+\\"
+            onClick={toggleCollapsed}
+            className="mb-3 flex size-9 items-center justify-center border border-white/20 !text-[#f4d44d] outline-none hover:!bg-[#181818] focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55"
+          >
+            <ChevronsRight className="size-4" />
+          </button>
+        ) : null}
+        {isCollapsed ? (
+          <div className="mb-3">
+            <ProjectSwitcher isCollapsed previewProjectName={previewProjectName} synthetic={isSynthetic} />
+          </div>
+        ) : null}
         <div className="flex w-full flex-1 flex-col items-center gap-1 px-1.5">
           {railGroups.map((group) => {
             const Icon = group.icon;
@@ -350,6 +364,11 @@ export function DashboardSidebar({
             );
           })}
         </div>
+        {isCollapsed ? (
+          <div className="mt-3">
+            <SidebarAccountMenu isCollapsed synthetic={isSynthetic} />
+          </div>
+        ) : null}
         {helpOpen && helpGroup ? (
           <div className="absolute bottom-3 left-[calc(100%+6px)] z-40 w-52 border-2 border-[#f4d44d] bg-[#090909] py-1 shadow-none">
             {helpGroup.items.map((item) => (
@@ -393,17 +412,6 @@ export function DashboardSidebar({
             <div className="mt-0.5 font-mono text-[11px] text-white/40">{panelGroup.blurb}</div>
           </div>
 
-          <button
-            type="button"
-            aria-label="Go to"
-            onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}
-            className="mx-3 mb-2 flex h-9 items-center gap-2 border border-white/15 px-2.5 text-left font-mono text-[12px] !text-[#a0a0a0] outline-none transition-colors hover:border-white/40 hover:!text-white focus-visible:border-white/55"
-          >
-            <Search className="size-4 shrink-0" />
-            <span className="truncate">Jump to…</span>
-            <kbd className="ml-auto whitespace-nowrap border border-white/20 px-1.5 py-0.5 text-[9px] leading-none text-white/50">Ctrl K</kbd>
-          </button>
-
           <nav className="min-h-0 flex-1 overflow-y-auto py-1 scrollbar-hide" aria-label={panelGroup.label}>
             {panelGroup.items.map((item) => (
               <PanelLink
@@ -426,14 +434,9 @@ export function DashboardSidebar({
                 New alert
               </Link>
             ) : null}
-            <a
-              href={`${MARKETING_ORIGIN}/cloud`}
-              className="flex h-10 items-center gap-3 border-t border-white/10 px-4 font-mono text-[10px] uppercase tracking-[0.12em] !text-[#8d8d8d] outline-none hover:bg-[#181818] hover:!text-white"
-              aria-label={`${region.name} cloud region. Open region directory`}
-            >
-              <Globe2 className="size-4 shrink-0" />
-              {region.flag} {region.shortName} cloud · Switch
-            </a>
+            <div className="border-t border-white/10">
+              <SidebarAccountMenu synthetic={isSynthetic} />
+            </div>
           </div>
         </div>
       ) : null}
