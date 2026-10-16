@@ -1,5 +1,8 @@
 # Project Memory
 
+## 2026-10-16 SDK safety and framework helpers — draft PR (branch `claude/project-thread-tetqg9`)
+- Both SDKs (0.4.0 base, NOT published, no version bump): `sampleRate`/`sample_rate` (per-run, stable hash, errors kept), `redact` (pii, patterns, custom fn), `TracifyError` with a plain `hint`, `onError`/`on_error`, key/host/region checks and one-time messages for 401/403/429/5xx/network. New `tracifyMiddleware` (Vercel AI SDK) and `traceTools`/`trace_tools` helpers, plus `templates/` starters in each package. Tests: `safety.test.ts`, `test_safety.py`. Release waits for owner.
+
 ## Tracing roadmap authorized 2026-10-14 (in progress)
 - User authorized all five recommended priorities: loading flash; CSV and sorting; OpenAI/Anthropic then LangGraph integrations; cross-trace steps table; saved views. Start base main `fcafb74` after #160/#161 merged, no open PRs. Auth isolated on `codex/project-loading-refresh` in `/home/orca/workspaces/Tracify-loading`. Sessions page files remain out of scope.
 ## 2026-10-15 Search exclusions and comparisons — draft PR (branch `claude/search-exclusions-limits-csfvu6`)

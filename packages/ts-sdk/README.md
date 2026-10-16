@@ -160,3 +160,27 @@ estimated token count. None of these wrappers publishes your key or changes prov
 
 Anthropic total input tokens include uncached input plus cache reads and cache writes; the original
 usage breakdown remains in metadata for rate-card calculations. See the [provider’s token breakdown](https://platform.claude.com/docs/en/build-with-claude/prompt-caching).
+
+## Framework one-liners
+
+```ts
+import { wrapLanguageModel } from "ai";
+import { tracifyMiddleware, traceTools } from "tracify-sdk";
+
+const model = wrapLanguageModel({ model: openai("gpt-4o"), middleware: tracifyMiddleware() }); // Vercel AI SDK
+const tools = traceTools({ searchDocs, sendEmail });   // any functions or { execute } tool objects
+```
+
+OpenAI (`wrapOpenAI`), Anthropic (`wrapAnthropic`) and LangGraph (`TracifyLangGraphHandler`) work as before. Copy-paste starters live in [`templates/`](./templates).
+
+## Sampling, redaction and clearer errors
+
+```ts
+const tracify = new TracifyClient({
+  sampleRate: 0.1,                 // record about 1 in 10 runs; each run is kept or dropped whole
+  redact: { pii: true, patterns: [/ACME-\d{6}/] },   // mask emails, phones, card numbers and your own patterns
+  onError: (error) => log(error.message),            // problems come with a plain-language fix (error.hint)
+});
+```
+
+Spans that report an error are kept even when their run was not sampled (`keepErrors: false` turns that off). Secrets such as bearer tokens and API keys are always removed.
