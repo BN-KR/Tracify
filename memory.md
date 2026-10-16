@@ -2136,3 +2136,6 @@
 - In-app create actions in `captured-workspace.tsx` now push `?view=create` directly, so normal clicks never hit a redirect.
 - Verified: build with placeholder Convex env, 307s for document and `RSC: 1` requests with query passthrough. Authenticated browser check still owed on a Vercel preview.
 - Pre-existing, unrelated: `src/lib/stripe.ts` pins `2026-08-26.dahlia`, which the locked `stripe@22.4.0` types reject, so `tsc`/`next build` fail on main with the committed lockfile.
+
+## 2026-10-16 Compare page (draft PR, branch `claude/project-thread-rfvu3q`)
+- `/dashboard/[projectId]/compare` is now a real page (it used to redirect into Tracing). Tab "Two runs": pick two runs, totals with % change, similar failures bundled across both runs, steps lined up side by side (`src/lib/trace-diff.ts`, vitest). Tab "Models and releases": runs grouped by main model or release with failure rate, avg cost, median/p95 latency; "best" badges ignore groups under 5 runs. API: `/api/projects/[projectId]/traces/compare?by=model|release` (`traceGroupComparison` in `tinybird.ts`). Prompt version is not in the analytics table (only Convex), so prompts are compared through the release field for now. Error groups in Tracing were already shipped and are untouched. Checked with mocked data only, not yet against real traces.
