@@ -1,5 +1,6 @@
 "use client";
 import { SavedViews } from "./saved-views";
+import { DEMO_BASE_PATH, DEMO_PROJECT_ID } from "@/lib/demo/demo-config";
 import { columnsFromUrl } from "@/lib/saved-view-state";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -378,7 +379,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
         <section className="flex min-w-0 flex-[999_1_560px] flex-col">
           <div className="flex flex-wrap items-center gap-1.5 px-4 pt-3">
-            <a href={`/dashboard/${encodeURIComponent(projectId)}/steps?${new URLSearchParams(Object.fromEntries(Object.entries(query).filter(([key]) => !["trace", "view", "mode", "page"].includes(key))))}`} className="h-7 border border-[#262C35] px-2.5 py-1 text-xs text-[#C9CED6] hover:text-white">Steps</a>
+            {projectId === DEMO_PROJECT_ID ? null : <a href={`/dashboard/${encodeURIComponent(projectId)}/steps?${new URLSearchParams(Object.fromEntries(Object.entries(query).filter(([key]) => !["trace", "view", "mode", "page"].includes(key))))}`} className="h-7 border border-[#262C35] px-2.5 py-1 text-xs text-[#C9CED6] hover:text-white">Steps</a>}
             <div role="group" aria-label="Show traces as" className="flex max-w-full flex-wrap rounded-md border border-[#262C35] p-0.5 text-xs">
               {([["", "List"], ["chart", "Chart"]] as const).map(([mode, label]) => {
                 const active = chartMode === (mode === "chart");
@@ -423,7 +424,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
               <div className="my-10 rounded-lg border border-dashed border-[#262C35] p-8 text-center">
                 <p className="font-medium">No traces in this range</p>
                 <p className="mt-2 text-sm text-[#8B93A1]">{activeFilters.length || query.q ? "Try removing a filter or widening the time range." : "Send traces with the Tracify SDK and they appear here within seconds."}</p>
-                {activeFilters.length || query.q ? <button type="button" className="mt-4 rounded-md bg-[#F4D44D] px-4 py-2 text-sm font-medium text-[#0B0D10]" onClick={() => { setSearchDraft(""); update({ ...Object.fromEntries(activeFilters.map((f) => [f.key, ""])), q: "", range: "30d" }); }}>Clear filters and show 30 days</button> : <a className="mt-4 inline-block rounded-md bg-[#F4D44D] px-4 py-2 text-sm font-medium text-[#0B0D10]" href={`/dashboard/${projectId}/quickstart`}>Open quickstart</a>}
+                {activeFilters.length || query.q ? <button type="button" className="mt-4 rounded-md bg-[#F4D44D] px-4 py-2 text-sm font-medium text-[#0B0D10]" onClick={() => { setSearchDraft(""); update({ ...Object.fromEntries(activeFilters.map((f) => [f.key, ""])), q: "", range: "30d" }); }}>Clear filters and show 30 days</button> : <a className="mt-4 inline-block rounded-md bg-[#F4D44D] px-4 py-2 text-sm font-medium text-[#0B0D10]" href={projectId === DEMO_PROJECT_ID ? `${DEMO_BASE_PATH}` : `/dashboard/${projectId}/quickstart`}>{projectId === DEMO_PROJECT_ID ? "Back to the overview" : "Open quickstart"}</a>}
               </div>
             ) : (
               <table className="mt-3 w-full min-w-[900px] border-separate border-spacing-0 text-[13px]">

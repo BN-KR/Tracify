@@ -2200,3 +2200,9 @@
 - Added `/compare` hub + `/compare/[slug]` (Langfuse, LangSmith, Helicone, Arize Phoenix, Braintrust, Datadog), `/integrations/[slug]` (OpenAI, Anthropic, LangGraph, OpenTelemetry, CrewAI, Vercel AI SDK) and `/glossary/[term]` (27 terms in `src/lib/glossary.ts`). Content lives in `src/lib/seo-pages.ts`; competitor claims are kept high level on purpose.
 - robots.ts names AI crawlers explicitly; `/llms-full.txt` serves docs + glossary + comparisons as plain text; llms.txt and sitemap list the new pages; Organization schema has sameAs.
 - Not done: more use-case pages (bespoke art, needs a design-preview PR), best-tools listicle, Search Console/Bing, backlinks.
+
+## 2026-10-16 Public demo project (draft PR, branch `claude/project-thread-c6f532`)
+- `/demo/project` (Overview, Tracing, Costs) is a read-only, no-sign-up demo of the real dashboard. It runs the real Tracing page against a generated "support-agent" project: ~500 runs/day for 90 days, deterministic per 5-minute slot, so new runs keep appearing live. A built-in story: release v1.14.0 made `issue_refund` time out, v1.14.1 fixed it.
+- Data lives in `src/lib/demo/` (generator + in-memory twins of the analytics queries). The API answers from literal `api/projects/demo/*` routes, which win over `[projectId]`; nothing touches Convex or the analytics backend. Saved views return an empty list and refuse saves.
+- Pages are `noindex` and hidden from the marketing navbar chrome (like the dashboard). The landing hero, nav menu, "try the live demo" card and `/demo` page now link to it. Locked sidebar items (Alerts, Prompts, Evaluation, Datasets) link to sign-up.
+- `vitest.config.ts` now maps `@/` to `src/` so tests can import app code.

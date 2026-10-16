@@ -65,8 +65,8 @@ export default function DemoPage() {
         lede="Explore the whole Tracify improvement loop with seeded data: inspect a run, compare prompt versions, review quality and promote the change that wins."
         image="/images/company/demo-play.png"
       >
-        <HeaderAction href="/sign-up">Create a project</HeaderAction>
-        <HeaderAction href="/playground" kind="secondary">Open the full playground</HeaderAction>
+        <HeaderAction href="/demo/project">Open the demo project</HeaderAction>
+        <HeaderAction href="/sign-up" kind="secondary">Create a project</HeaderAction>
       </PageHeader>
 
       <section className="px-5 pb-24 pt-6 text-white md:px-10 md:pb-32">
