@@ -29,6 +29,7 @@ import type * as experiments from "../experiments.js";
 import type * as http from "../http.js";
 import type * as leads from "../leads.js";
 import type * as notificationPreferences from "../notificationPreferences.js";
+import type * as projectData from "../projectData.js";
 import type * as projects from "../projects.js";
 import type * as prompts from "../prompts.js";
 import type * as resilience from "../resilience.js";
@@ -65,6 +66,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   leads: typeof leads;
   notificationPreferences: typeof notificationPreferences;
+  projectData: typeof projectData;
   projects: typeof projects;
   prompts: typeof prompts;
   resilience: typeof resilience;

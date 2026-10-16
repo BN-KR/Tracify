@@ -1,5 +1,8 @@
 # Project Memory
 
+## 2026-10-16 Data export and project deletion — draft PR (branch `claude/project-thread-suo63z`)
+- Settings > Data tab (replaces the placeholder Exports tab): "Download all data" streams one JSON file via `/api/projects/[id]/export` (Convex tables paged through `projectData.exportPage`, plus spans and scores from analytics; no API key hash, billing ids or webhook URLs). "Delete this project" needs the exact name plus DELETE, goes through `/api/projects/[id]/delete`: clears analytics rows first, then `projects.deleteProject`, which removes the project and schedules `projectData.purgeBatch` to clear every project table in batches. Needs a manual Convex deploy. Analytics delete needs a Tinybird token that can delete rows (ClickHouse uses ALTER TABLE DELETE).
+
 ## Tracing roadmap authorized 2026-10-14 (in progress)
 - User authorized all five recommended priorities: loading flash; CSV and sorting; OpenAI/Anthropic then LangGraph integrations; cross-trace steps table; saved views. Start base main `fcafb74` after #160/#161 merged, no open PRs. Auth isolated on `codex/project-loading-refresh` in `/home/orca/workspaces/Tracify-loading`. Sessions page files remain out of scope.
 ## 2026-10-15 Search exclusions and comparisons — draft PR (branch `claude/search-exclusions-limits-csfvu6`)
