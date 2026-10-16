@@ -77,8 +77,7 @@ jobs:
       - name: Run the test suite
         working-directory: packages/python-sdk
         run: |
-          python -m pip install pytest
-          python -m pip install -e .
+          python -m pip install -e ".[test]"
           python -m pytest -q
       - name: Build a clean distribution
         working-directory: packages/python-sdk

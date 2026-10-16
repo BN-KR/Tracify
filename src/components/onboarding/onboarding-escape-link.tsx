@@ -68,7 +68,7 @@ export function OnboardingEscapeLink({
     }
   }, [searchParams]);
 
-  const label = returnPath ? "Back" : "Dashboard";
+  const label = returnPath ? "Back" : "Skip setup";
   const destination =
     returnPath || (projectId ? `/dashboard/${projectId}` : "/dashboard");
 
@@ -100,7 +100,7 @@ export function OnboardingEscapeLink({
       <button
         type="button"
         onClick={onNavigate}
-        className="absolute left-4 top-4 font-mono text-[13px] text-black/55 outline-none transition-colors hover:text-black focus-visible:outline focus-visible:outline-1 focus-visible:outline-black/55"
+        className="absolute right-5 top-3 z-10 font-mono text-[11px] uppercase tracking-[0.12em] text-black underline-offset-4 hover:underline sm:right-8 outline-none transition-colors hover:text-black focus-visible:outline focus-visible:outline-1 focus-visible:outline-black/55"
       >
         {label}
       </button>
@@ -119,7 +119,7 @@ export function OnboardingEscapeLink({
             >
               API key not copied.
             </h2>
-            <p className="mt-3 font-sans text-sm leading-6 text-black/60">
+            <p className="mt-3 font-sans text-sm leading-6 text-black">
               This key is shown once. If you leave now, you will need to rotate
               the key later.
             </p>

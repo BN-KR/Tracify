@@ -1,14 +1,31 @@
-import type { Metadata } from "next";
-import { FileCheck2, Scale } from "lucide-react";
+import { pageMetadata } from "@/lib/seo";
+import { LegalDocument } from "@/components/reading/legal-document";
 
-export const metadata: Metadata = { title: "Terms of service", description: "Tracify terms of service.", alternates: { canonical: "/terms" } };
+export const metadata = pageMetadata({ title: "Terms of service", description: "The terms that apply when you use the Tracify AI agent observability platform, its SDKs, and its APIs.", path: "/terms" });
 
 const clauses = [
-  { title: "Acceptance", body: "By accessing or using Tracify, you agree to these Terms of Service and applicable laws. If you do not agree, you may not use the service." },
-  { title: "Use license", body: "You may use the platform for agent observability. You may not reverse engineer the service, remove proprietary notices, violate applicable law, or exceed the limits of your plan." },
-  { title: "Disclaimer", body: "Tracify is provided on an 'as is' basis without implied warranties of merchantability, fitness for a particular purpose, or non-infringement." },
-  { title: "Limitations", body: "To the extent permitted by law, Tracify and its suppliers are not liable for indirect damages, loss of data, profit, or business interruption arising from use of the service." },
-  { title: "Governing law", body: "These terms are governed by the laws of the jurisdiction in which Tracify operates, subject to the courts with applicable jurisdiction." },
+  { id: "acceptance", title: "Acceptance", body: "By accessing or using Tracify, you agree to these Terms of Service and applicable laws. If you do not agree, you may not use the service." },
+  { id: "use-license", title: "Use license", body: "You may use the platform for agent observability. You may not reverse engineer the service, remove proprietary notices, violate applicable law, or exceed the limits of your plan." },
+  { id: "disclaimer", title: "Disclaimer", body: "Tracify is provided on an 'as is' basis without implied warranties of merchantability, fitness for a particular purpose, or non-infringement." },
+  { id: "limitations", title: "Limitations", body: "To the extent permitted by law, Tracify and its suppliers are not liable for indirect damages, loss of data, profit, or business interruption arising from use of the service." },
+  { id: "governing-law", title: "Governing law", body: "These terms are governed by the laws of the jurisdiction in which Tracify operates, subject to the courts with applicable jurisdiction." },
 ] as const;
 
-export default function TermsPage(){return <main className="min-h-screen bg-[#eceae3] pt-[54px] text-black"><header className="border-b border-black bg-black text-white"><div className="mx-auto grid max-w-[1440px] lg:grid-cols-[1fr_360px]"><div className="p-6 sm:p-8 md:p-10 md:py-16 lg:border-r lg:border-white/20"><div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.15em] text-[#f4d44d]"><FileCheck2 className="size-4"/>Working agreement</div><h1 className="mt-10 max-w-6xl font-pixel text-[clamp(3.5rem,8vw,8rem)] leading-[0.8] tracking-[-0.08em]">The rules of the relationship.</h1><p className="mt-8 max-w-2xl text-base leading-7 text-white/58">The service terms as a numbered agreement ledger.</p></div><aside className="border-t border-white/20 bg-[#f4d44d] p-6 text-black lg:border-t-0 lg:p-8"><Scale className="size-11" strokeWidth={1.2}/><p className="mt-24 font-pixel text-5xl leading-[0.9] tracking-[-0.06em]">Effective 16 May 2026.</p><div className="mt-10 border-t border-black pt-4 font-mono text-[9px] uppercase tracking-[0.12em]">Clauses / {clauses.length}</div></aside></div></header><section className="border-b border-black"><div className="mx-auto max-w-[1440px]">{clauses.map((clause,index)=><article key={clause.title} className={`grid border-b border-black last:border-b-0 md:grid-cols-[120px_300px_1fr] ${index===1?"bg-[#f4d44d]":index===3?"bg-black text-white":""}`}><div className="flex min-h-28 items-center justify-center border-black font-pixel text-5xl opacity-20 md:border-r">0{index+1}</div><h2 className="border-t border-current p-6 font-pixel text-4xl tracking-[-0.055em] md:border-r md:border-t-0 md:p-8">{clause.title}</h2><p className="border-t border-current p-6 text-sm leading-7 opacity-65 md:border-t-0 md:p-8">{clause.body}</p></article>)}</div></section></main>}
+export default function TermsPage() {
+  return (
+    <LegalDocument
+      current="/terms"
+      eyebrow="Terms of service"
+      title="The rules of the relationship."
+      description="The ground rules for using Tracify, written to be read."
+      updated="16 May 2026"
+      summary="Use Tracify to observe your agents, stay within your plan and the law, and know the service is provided as it is."
+      highlights={[
+        { label: "Use", title: "Observe your agents.", body: "Use Tracify within your plan and the law." },
+        { label: "No reverse engineering", title: "Keep the notices.", body: "Do not reverse engineer the service or remove proprietary notices." },
+        { label: "As is", title: "Provided as it is.", body: "No implied warranties, with liability limited as the law permits." },
+      ]}
+      sections={clauses}
+    />
+  );
+}

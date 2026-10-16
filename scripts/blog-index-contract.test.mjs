@@ -4,12 +4,10 @@ import test from "node:test";
 
 const source = readFileSync("src/app/(frontend)/blog/page.tsx", "utf8");
 
-test("blog index uses a restrained responsive bento grid", () => {
-  assert.match(source, /md:grid-cols-2/);
-  assert.match(source, /lg:grid-cols-3/);
-  assert.match(source, /lg:col-span-2/);
-  assert.match(source, /aspect-\[16\/7\]/);
-  assert.match(source, /aspect-\[16\/10\]/);
+test("blog index composes the journal hero, topic story and trace archive", () => {
+  assert.match(source, /JournalHero/);
+  assert.match(source, /TopicStory/);
+  assert.match(source, /TraceArchive/);
 });
 
 test("blog index keeps newsletter signup in the global footer only", () => {

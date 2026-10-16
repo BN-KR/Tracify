@@ -1,3 +1,4 @@
+import { validTraceSort, TRACE_SORT_FIELDS } from "./trace-sort";
 import { TYPE_ALIASES } from "@/components/dashboard/tracing/format";
 import { flowGraph, collapseFlowReturns, flowPairId, median, type FlowEdge, type FlowStep } from "./trace-flow";
 /**
@@ -362,10 +363,15 @@ export type TraceListFilters = {
   status?: "all" | "error" | "healthy";
   /** Checkbox filters: a trace matches when one of its steps has any of the chosen values (per field). */
   facets?: Partial<Record<FacetKey, string[]>>;
+  /** Exclusions: a trace is dropped when one of its steps has any of these values (per field). */
+  excludeFacets?: Partial<Record<FacetKey, string[]>>;
   minLatencyMs?: number;
   maxLatencyMs?: number;
   minCostUsd?: number;
   maxCostUsd?: number;
+  /** Input plus output tokens of the whole trace. */
+  minTokens?: number;
+  maxTokens?: number;
   /** Traces containing an error from this group (id from traceErrorGroups). */
   errorGroup?: string;
   /** Traces containing this agent-map step ("tool:<name>" or "model:<id>"). */
@@ -374,7 +380,7 @@ export type TraceListFilters = {
   edge?: { from: string; to: string };
   /** Internal: matching ids resolved through the same Flow rules as the drawing. */
   flowRunIds?: string[];
-  sort?: "startedAt" | "latency" | "cost";
+  sort?: string;
   direction?: "asc" | "desc";
   page?: number;
   pageSize?: number;
@@ -423,6 +429,10 @@ function traceListClauses(projectId: string, filters: TraceListFilters) {
     const values = filters.facets?.[key];
     if (values?.length) where.push(`runId IN (SELECT runId FROM spans WHERE ${rangeScope(projectId, filters)} AND ${facetCondition(key, values)})`);
   }
+  for (const key of FACET_KEYS) {
+    const values = filters.excludeFacets?.[key];
+    if (values?.length) where.push(`runId NOT IN (SELECT runId FROM spans WHERE ${rangeScope(projectId, filters)} AND ${facetCondition(key, values)})`);
+  }
   if (filters.query) {
     const value = sqlString(filters.query);
     where.push(`runId IN (SELECT runId FROM spans WHERE projectId = '${sqlString(projectId)}' AND (positionCaseInsensitive(runId, '${value}') > 0 OR positionCaseInsensitive(traceName, '${value}') > 0 OR positionCaseInsensitive(input, '${value}') > 0 OR positionCaseInsensitive(output, '${value}') > 0))`);
@@ -439,6 +449,8 @@ function traceListClauses(projectId: string, filters: TraceListFilters) {
   if (filters.maxLatencyMs !== undefined) having.push(`durationMs <= ${Number(filters.maxLatencyMs)}`);
   if (filters.minCostUsd !== undefined) having.push(`totalCostUsd >= ${Number(filters.minCostUsd)}`);
   if (filters.maxCostUsd !== undefined) having.push(`totalCostUsd <= ${Number(filters.maxCostUsd)}`);
+  if (filters.minTokens !== undefined) having.push(`inputTokens + outputTokens >= ${Number(filters.minTokens)}`);
+  if (filters.maxTokens !== undefined) having.push(`inputTokens + outputTokens <= ${Number(filters.maxTokens)}`);
   return { where: where.join(" AND "), having: having.length ? `HAVING ${having.join(" AND ")}` : "" };
 }
 
@@ -449,7 +461,7 @@ const ERROR_COUNT_EXPR = `countIf(${IS_ERROR})`;
 
 /** Run ids of every trace matching the filters, for queries that aggregate steps instead of traces. */
 function matchingRunIds(where: string, having: string) {
-  return `SELECT runId FROM (SELECT runId, ${DURATION_EXPR} AS durationMs, ${ERROR_COUNT_EXPR} AS errorCount, sum(costUsd) AS totalCostUsd FROM spans WHERE ${where} GROUP BY runId ${having})`;
+  return `SELECT runId FROM (SELECT runId, ${DURATION_EXPR} AS durationMs, ${ERROR_COUNT_EXPR} AS errorCount, sum(costUsd) AS totalCostUsd, sum(inputTokens) AS inputTokens, sum(outputTokens) AS outputTokens FROM spans WHERE ${where} GROUP BY runId ${having})`;
 }
 
 const TRACE_AGGREGATE = `
@@ -492,8 +504,8 @@ const EXTRA_COLUMNS: Record<string, { sql: string; numeric?: boolean }> = {
   timeouts: { sql: `countIf(timedOut)`, numeric: true },
   firstErrorType: { sql: `argMinIf(errorType, createdAt, ${IS_ERROR})` },
   firstErrorMessage: { sql: `substring(argMinIf(errorMessage, createdAt, ${IS_ERROR}), 1, 200)` },
-  tools: { sql: `arrayStringConcat(arraySlice(groupUniqArrayIf(toolName, toolName != ''), 1, 6), ', ')` },
-  models: { sql: `arrayStringConcat(arraySlice(groupUniqArrayIf(modelId, modelId != ''), 1, 4), ', ')` },
+  tools: { sql: `arrayStringConcat(arraySlice(arraySort(groupUniqArrayIf(toolName, toolName != '')), 1, 6), ', ')` },
+  models: { sql: `arrayStringConcat(arraySlice(arraySort(groupUniqArrayIf(spans.modelId, spans.modelId != '')), 1, 4), ', ')` },
   rootType: { sql: `anyIf(${STEP_TYPE}, parentSpanId = '')` },
 };
 export const EXTRA_COLUMN_IDS = Object.keys(EXTRA_COLUMNS);
@@ -505,6 +517,11 @@ export function metadataKey(value: string) {
   return META_KEY.test(value) ? value : null;
 }
 
+function metadataValueSql(key: string) {
+  const value = `substring(replaceRegexpAll(JSONExtractRaw(metadata, '${sqlString(key)}'), '^"|"$', ''), 1, 200)`;
+  return `argMinIf(${value}, tuple(createdAt, spanId), JSONExtractRaw(metadata, '${sqlString(key)}') != '')`;
+}
+
 export type ListOptions = { extras?: string[]; meta?: string[] };
 
 /** One page of traces (one row per run) plus the total matching count. */
@@ -512,9 +529,13 @@ export async function listTraces(projectId: string, filters: TraceListFilters, o
   const { where, having } = traceListClauses(projectId, filters);
   const pageSize = Math.min(Math.max(Math.floor(filters.pageSize ?? 50), 10), 200);
   const page = Math.max(Math.floor(filters.page ?? 0), 0);
-  const sortColumn = filters.sort === "latency" ? "durationMs" : filters.sort === "cost" ? "totalCostUsd" : "startedAt";
+  const sort = validTraceSort(filters.sort);
+  const extra = EXTRA_COLUMNS[sort];
+  const meta = sort.startsWith("meta:") ? metadataKey(sort.slice(5)) : null;
+  const expression = extra?.sql ?? (meta ? metadataValueSql(meta) : null);
+  const sortColumn = expression ? "sortValue" : TRACE_SORT_FIELDS[sort] ?? "startedAt";
   const direction = filters.direction === "asc" ? "ASC" : "DESC";
-  const grouped = `SELECT ${TRACE_AGGREGATE} FROM spans WHERE ${where} GROUP BY runId ${having}`;
+  const grouped = `SELECT ${TRACE_AGGREGATE}${expression ? `, ${expression} AS sortValue` : ""} FROM spans WHERE ${where} GROUP BY runId ${having}`;
   const [rows, totals] = await Promise.all([
     tinybirdRows<TraceListRow>(`${grouped} ORDER BY ${sortColumn} ${direction}, runId LIMIT ${pageSize} OFFSET ${page * pageSize}`),
     tinybirdRows<{ total: number }>(`SELECT count() AS total FROM (${grouped})`),
@@ -529,7 +550,7 @@ async function withExtraColumns(projectId: string, filters: TraceListFilters, ro
   const selects = [
     ...extras.map((id) => `${EXTRA_COLUMNS[id]!.sql} AS x_${id}`),
     // The first non-empty value of the key on any step of the trace, unquoted and capped.
-    ...keys.map((key, index) => `argMinIf(substring(replaceRegexpAll(JSONExtractRaw(metadata, '${sqlString(key)}'), '^"|"$', ''), 1, 200), createdAt, JSONExtractRaw(metadata, '${sqlString(key)}') != '') AS m_${index}`),
+    ...keys.map((key, index) => `${metadataValueSql(key)} AS m_${index}`),
   ];
   const runIds = rows.map((row) => `'${sqlString(row.runId)}'`).join(",");
   const found = await tinybirdRows<Record<string, string | number>>(`
@@ -774,7 +795,7 @@ export async function traceFilterOptions(projectId: string, fromMs: number, toMs
   const rows = await tinybirdRows<Record<string, string[]>>(`
     SELECT
       arraySlice(groupUniqArrayIf(traceName, traceName != ''), 1, 200) AS traceName,
-      arraySlice(groupUniqArrayIf(modelId, modelId != ''), 1, 200) AS modelId,
+      arraySlice(groupUniqArrayIf(spans.modelId, spans.modelId != ''), 1, 200) AS modelId,
       arraySlice(groupUniqArrayIf(environment, environment != ''), 1, 50) AS environment,
       arraySlice(groupUniqArrayIf(release, release != ''), 1, 100) AS release,
       arraySlice(groupUniqArrayIf(endUserId, endUserId != ''), 1, 200) AS endUserId,
@@ -932,4 +953,43 @@ export async function traceGroupComparison(projectId: string, filters: TraceList
     key: String(row.key), runs: Number(row.runs), failedRuns: Number(row.failedRuns), avgCostUsd: Number(row.avgCostUsd),
     p50DurationMs: Number(row.p50DurationMs), p95DurationMs: Number(row.p95DurationMs), avgSteps: Number(row.avgSteps),
   }));
+export type StepListRow = {
+  spanId: string; runId: string; name: string; type: string; traceName: string; modelId: string; createdAt: string;
+  latencyMs: number; costUsd: number; inputTokens: number; outputTokens: number; errorType: string; errorMessage: string;
+  calls: number; errors: number; p50LatencyMs: number; p95LatencyMs: number;
+};
+const STEP_SORT: Record<string, string> = { startedAt: "createdAt", name: "name", type: "type", trace: "traceName", model: "modelId", latency: "latencyMs", cost: "costUsd", tokens: "inputTokens + outputTokens", errors: "errors", calls: "calls", p95: "p95LatencyMs" };
+export function validStepSort(value?: string | null) { return value && Object.hasOwn(STEP_SORT, value) ? value : "startedAt"; }
+function stepsWhere(projectId: string, filters: TraceListFilters, excluding?: FacetKey) {
+  // Step filters apply to actual steps, not all siblings of a matching trace.
+  const { where } = traceListClauses(projectId, { ...filters, facets: {}, query: undefined, status: "all", minTokens: undefined, maxTokens: undefined, minLatencyMs: undefined, maxLatencyMs: undefined, minCostUsd: undefined, maxCostUsd: undefined });
+  const clauses = [where];
+  for (const key of FACET_KEYS) {const values=filters.facets?.[key];if(key!==excluding && values?.length)clauses.push(facetCondition(key,values));}
+  if(filters.query) {const q=sqlString(filters.query);clauses.push(`(${["spanId","runId","traceName","toolName","modelId","input","output","errorMessage"].map(column=>`positionCaseInsensitive(${column}, '${q}') > 0`).join(" OR ")})`);}
+  if(filters.status==="error")clauses.push(IS_ERROR);
+  if(filters.status==="healthy")clauses.push(`NOT ${IS_ERROR}`);
+  if(filters.minLatencyMs!==undefined)clauses.push(`latencyMs >= ${Number(filters.minLatencyMs)}`);
+  if(filters.maxLatencyMs!==undefined)clauses.push(`latencyMs <= ${Number(filters.maxLatencyMs)}`);
+  if(filters.minCostUsd!==undefined)clauses.push(`costUsd >= ${Number(filters.minCostUsd)}`);
+  if(filters.maxCostUsd!==undefined)clauses.push(`costUsd <= ${Number(filters.maxCostUsd)}`);
+  if(filters.minTokens!==undefined)clauses.push(`inputTokens + outputTokens >= ${Number(filters.minTokens)}`);
+  if(filters.maxTokens!==undefined)clauses.push(`inputTokens + outputTokens <= ${Number(filters.maxTokens)}`);
+  return clauses.join(" AND ");
+}
+export async function traceSteps(projectId: string, filters: TraceListFilters, grouped = false, withFacets = false) {
+  const where=stepsWhere(projectId,filters), page=Math.max(0,Math.floor(filters.page??0)), pageSize=Math.min(200,Math.max(10,Math.floor(filters.pageSize??50)));
+  const sort=validStepSort(filters.sort), dir=filters.direction==="asc"?"ASC":"DESC";
+  const qualify = (sql: string) => sql.replace(/\b(spanType|errorType|toolName|modelId|traceName)\b/g, "source.$1");
+  const query=grouped ? `SELECT ${qualify(STEP_TYPE)} AS type, ${qualify(STEP_NAME)} AS name, argMin(source.spanId, tuple(source.createdAt,source.spanId)) AS spanId, argMin(source.runId, tuple(source.createdAt,source.spanId)) AS runId,
+    any(source.traceName) AS traceName, any(source.modelId) AS modelId, min(source.createdAt) AS createdAt, count() AS calls, countIf(${qualify(IS_ERROR)}) AS errors, quantileExact(0.5)(source.latencyMs) AS latencyMs,
+    latencyMs AS p50LatencyMs, quantileExact(0.95)(source.latencyMs) AS p95LatencyMs, sum(source.costUsd) AS costUsd, sum(source.inputTokens) AS inputTokens, sum(source.outputTokens) AS outputTokens, '' AS errorType, '' AS errorMessage
+    FROM (SELECT * FROM spans WHERE ${where}) AS source GROUP BY type,name` : `SELECT spanId,runId,${STEP_TYPE} AS type,${STEP_NAME} AS name,traceName,modelId,createdAt,latencyMs,costUsd,inputTokens,outputTokens,errorType,substring(errorMessage,1,280) AS errorMessage,1 AS calls,toUInt8(${IS_ERROR}) AS errors,latencyMs AS p50LatencyMs,latencyMs AS p95LatencyMs FROM spans WHERE ${where}`;
+  const facetKeys: FacetKey[]=["traceName","spanType","toolName","modelId","environment","errorType"];
+  const [rows,totals,stats,facets]=await Promise.all([
+    tinybirdRows<StepListRow>(`SELECT * FROM (${query}) ORDER BY ${STEP_SORT[sort]} ${dir}, runId, spanId LIMIT ${pageSize} OFFSET ${page*pageSize}`),
+    tinybirdRows<{total:number}>(`SELECT count() AS total FROM (${query})`),
+    tinybirdRows<{steps:number; errors:number; totalCostUsd:number; p50LatencyMs:number; tokens:number}>(`SELECT count() AS steps,countIf(${IS_ERROR}) AS errors,sum(costUsd) AS totalCostUsd,quantileExact(0.5)(latencyMs) AS p50LatencyMs,sum(inputTokens+outputTokens) AS tokens FROM spans WHERE ${where}`),
+    withFacets ? tinybirdRows<{field:FacetKey;value:string;steps:number}>(facetKeys.map(key=>`SELECT '${key}' AS field, ${key} AS value, count() AS steps FROM spans WHERE ${stepsWhere(projectId,filters,key)} AND ${key} != '' GROUP BY value ORDER BY steps DESC,value LIMIT 100`).join(" UNION ALL ")) : Promise.resolve(null),
+  ]);
+  return {rows:rows.map(row=>({...row,...Object.fromEntries(["latencyMs","costUsd","inputTokens","outputTokens","calls","errors","p50LatencyMs","p95LatencyMs"].map(key=>[key,Number(row[key as keyof StepListRow]??0)]))})),total:Number(totals[0]?.total??0),stats:Object.fromEntries(Object.entries(stats[0]??{}).map(([k,v])=>[k,Number(v)])),facets,page,pageSize,grouped};
 }

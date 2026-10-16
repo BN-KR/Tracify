@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { parseEntryIntent, safeRelativePath } from "@/lib/navigation-context";
@@ -18,6 +18,16 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const requestedPath = searchParams.get("redirect") || searchParams.get("redirect_url");
   const callbackPath = safeRelativePath(requestedPath, mode === "sign-up" ? "/onboarding" : "/dashboard");
   const intent = parseEntryIntent(searchParams.get("intent"));
+
+  // Already signed in (the login cookie lasts 30 days): skip the form and go straight in.
+  const { data: session } = authClient.useSession();
+  const alreadySignedIn = Boolean(session?.user);
+  useEffect(() => {
+    if (!alreadySignedIn) return;
+    const target = new URL(callbackPath, window.location.origin);
+    if (intent) target.searchParams.set("intent", intent);
+    window.location.replace(`${target.pathname}${target.search}${target.hash}`);
+  }, [alreadySignedIn, callbackPath, intent]);
 
   function absolute(path: string) {
     return new URL(path, window.location.origin).toString();
@@ -63,10 +73,12 @@ export function BetterAuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
     }
   }
 
+  if (alreadySignedIn) return null;
+
   return (
     <div>
-      <h2 className="font-pixel text-4xl leading-none tracking-[-0.06em]">{mode === "sign-up" ? "Create your account" : "Sign in to tracify"}</h2>
-      <p className="mt-3 text-sm leading-6 text-black/55">{mode === "sign-up" ? "One account for traces, evaluations, and your team." : "Continue to your production observability workspace."}</p>
+      <h2 className="font-pixel text-4xl leading-none tracking-[-0.06em]">{mode === "sign-up" ? "Start debugging agents." : "Welcome back."}</h2>
+      <p className="mt-3 text-sm leading-6 text-black/55">{mode === "sign-up" ? "Free to start. Your first trace takes about five minutes." : "Your traces are right where you left them."}</p>
 
       <div className="mt-7 grid gap-2 sm:grid-cols-2">
         <SocialButton label="GitHub" disabled={pending} onClick={() => void continueWith("github")} icon={<GitHubMark />} />

@@ -112,3 +112,51 @@ Prompt responses are cached for 60 seconds by default. Pass `{ cacheTtlMs: 0, fa
 ## License
 
 MIT
+
+## Provider integrations (0.4.0, unreleased)
+
+Wrap an existing client once. Its normal calls, typed results, streaming chunks and errors keep working.
+Provider packages are optional; install the providers you use. Node.js is required (async context propagation).
+
+```ts
+import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
+import { wrapOpenAI, wrapAnthropic, TracifyLangGraphHandler, traceAgent } from "tracify-sdk";
+
+const openai = wrapOpenAI(new OpenAI());
+const anthropic = wrapAnthropic(new Anthropic());
+// Existing calls now record model, input/output, latency, tokens, TTFT and provider errors.
+const reply = await openai.responses.create({ model: process.env.OPENAI_MODEL!, input: "Hello" });
+const stream = await anthropic.messages.create({
+  model: process.env.ANTHROPIC_MODEL!, max_tokens: 100,
+  messages: [{ role: "user", content: "Hello" }], stream: true,
+});
+for await (const event of stream) { /* existing handling */ }
+
+// For LangGraph, pass one reusable handler in the graph invocation config.
+await graph.invoke(input, { callbacks: [new TracifyLangGraphHandler()] });
+```
+
+Use `TRACIFY_API_KEY` and the existing region/host configuration. Pass `{ client }` for a custom
+`TracifyClient`. Calls inside `traceAgent`/`span` inherit the current run and parent; standalone provider
+calls get a completed root, so unrelated requests never share an `unknown` run. LangGraph callbacks
+record graph/node/tool/model parent relationships. Use either framework model callbacks or a wrapped
+provider for each model call to avoid recording that call twice.
+
+Supported APIs: OpenAI `chat.completions.create`, `responses.create`, and their `.stream()` helpers;
+Anthropic `messages.create`, `messages.stream`, and beta messages equivalents. Async iteration and
+helper event/final-result APIs are observed. OpenAI `.withResponse()` retains headers/request IDs;
+`.asResponse()` remains unparsed and records request timing only. Stream conversion helpers such as
+`.tee()` and `.toReadableStream()` are passed through and do not observe consumption: iterate the
+wrapped stream for complete usage/TTFT. Explicit `stream_options.include_usage: false` is respected.
+Cancel/abort records partial output once; telemetry failure never replaces the provider's result or error.
+
+Payloads use the SDK's existing redaction and size caps. Disable capture with
+`{ captureInput: false, captureOutput: false }`. Provider usage is stored exactly as returned, including
+cache breakdown in metadata. **Prices are not guessed:** cost defaults to zero with
+`metadata.costKnown=false`. Supply `calculateCost({provider, model, inputTokens, outputTokens, usage})`
+using your own current rate card to record USD cost. Missing provider usage remains unknown, not an
+estimated token count. None of these wrappers publishes your key or changes provider billing.
+
+Anthropic total input tokens include uncached input plus cache reads and cache writes; the original
+usage breakdown remains in metadata for rate-card calculations. See the [provider’s token breakdown](https://platform.claude.com/docs/en/build-with-claude/prompt-caching).

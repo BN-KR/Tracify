@@ -1,6 +1,6 @@
 {
   "name": "tracify-sdk",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Observability, runtime enforcement, and tracing for AI agents.",
   "homepage": "https://tracify.tech",
   "repository": {
@@ -29,7 +29,11 @@
   "license": "MIT",
   "sideEffects": false,
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.134.0",
+    "@langchain/core": "^1.2.17",
+    "@langchain/langgraph": "^1.5.0",
     "@types/node": "^20.0.0",
+    "openai": "^7.34.0",
     "typescript": "^5.0.0",
     "vitest": "^4.1.10"
   }

@@ -30,6 +30,9 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       "tracify.tech",
       "tracifytech.vercel.app",
       "*.tracify-tech.vercel.app",
+      // Vercel branch previews: <project>-git-<branch>-tracify-tech.vercel.app
+      "tracify-git-*-tracify-tech.vercel.app",
+      "tracify-cloud-eu-git-*-tracify-tech.vercel.app",
       "localhost:*",
       "127.0.0.1:*",
     ],
@@ -64,6 +67,8 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     "https://www.tracify.tech",
     "https://tracify.tech",
     "https://*.tracify-tech.vercel.app",
+    "https://tracify-git-*-tracify-tech.vercel.app",
+    "https://tracify-cloud-eu-git-*-tracify-tech.vercel.app",
     "http://localhost:3000",
     "http://localhost:4000",
     "https://tracifytech.vercel.app",
@@ -72,6 +77,13 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     // The Next.js auth handler overwrites these headers from the actual request
     // URL before proxying to Convex, and allowedHosts rejects every unknown host.
     trustedProxyHeaders: true,
+  },
+  // Stay signed in for 30 days. Each visit older than a day silently extends the
+  // session, so active users are never asked to sign in again. The cookie is
+  // persistent (not a browser-session cookie), so closing the tab keeps you in.
+  session: {
+    expiresIn: 60 * 60 * 24 * 30,
+    updateAge: 60 * 60 * 24,
   },
   rateLimit: {
     enabled: true,
@@ -106,6 +118,9 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     convex({
       authConfig,
       jwt: {
+        // The short-lived Convex token is renewed from the 30 day session. One hour
+        // (default is 15 minutes) keeps a sleeping or backgrounded tab signed in.
+        expirationSeconds: 60 * 60,
         definePayload: async ({ user, session }) => {
           const organizationId = "activeOrganizationId" in session
             ? session.activeOrganizationId ?? undefined

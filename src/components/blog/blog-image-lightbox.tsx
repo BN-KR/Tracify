@@ -66,6 +66,8 @@ export function BlogImage({
       <img
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         {...props}
         onClick={handleClick}
         className="w-full cursor-pointer border border-black hover:opacity-75"

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { captureAnalytics } from "@/lib/analytics";
 
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
+import { publishOnboardingDraft } from "@/components/onboarding/onboarding-draft";
 import { setOneTimeApiKey } from "@/lib/onboarding-client-state";
 import { ConvexAuthState } from "@/components/auth/convex-auth-state";
 import { useConvexAuthReadiness } from "@/hooks/use-convex-auth-readiness";
@@ -44,12 +45,12 @@ export function ProjectStep() {
     }
 
     if (isConvexLoading) {
-      setError("Convex auth is still initializing. Try again in a moment.");
+      setError("Still getting your account ready. Try again in a moment.");
       return;
     }
 
     if (!isAuthenticated) {
-      setError("Authentication is still initializing. Try again in a moment.");
+      setError("Still getting your account ready. Try again in a moment.");
       return;
     }
 
@@ -66,7 +67,7 @@ export function ProjectStep() {
       window.sessionStorage.setItem(PROJECT_ID_STORAGE_KEY, result.projectId);
       window.sessionStorage.setItem(PROJECT_NAME_STORAGE_KEY, result.name);
       window.localStorage.setItem(LAST_PROJECT_STORAGE_KEY, result.projectId);
-      window.location.assign("/onboarding/api-key");
+      router.push("/onboarding/api-key");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Project creation failed.",
@@ -79,7 +80,7 @@ export function ProjectStep() {
   if (isSessionPending) {
     return (
       <div className="border border-black/15 bg-[#f3f2ed] px-4 py-3 font-mono text-[13px] text-black/55">
-        Loading authentication...
+        Checking your sign-in...
       </div>
     );
   }
@@ -97,10 +98,7 @@ export function ProjectStep() {
   if (isConvexLoading || !isAuthenticated) {
     return (
       <div className="border border-black/15 bg-[#f3f2ed] px-4 py-3 font-mono text-[13px] text-black/55">
-        Preparing project creation...
-        <span className="ml-2 opacity-50">
-          (Auth: {isAuthenticated ? "Connected" : "Waiting"} | Sync: {isConvexLoading ? "Loading" : "Ready"})
-        </span>
+        Getting your workspace ready...
       </div>
     );
   }
@@ -108,8 +106,8 @@ export function ProjectStep() {
   return (
     <form onSubmit={onSubmit}>
       <OnboardingHeader
-        title="Create your first project."
-        description="A project holds your agents, runs, API keys, and traces."
+        title="Name your first project."
+        description="Pick a name for the agent or product you want to see inside. You can rename it any time."
       />
       <label
         htmlFor="project-name"
@@ -120,10 +118,22 @@ export function ProjectStep() {
       <input
         id="project-name"
         value={name}
-        onChange={(event) => setName(event.target.value)}
+        onChange={(event) => { setName(event.target.value); publishOnboardingDraft({ name: event.target.value }); }}
         placeholder="research-agent-prod"
-        className="h-11 w-full border border-black/15 bg-[#e4e1d8] px-3 font-mono text-sm text-black outline-none transition-colors placeholder:text-black/55 focus:border-[#999999]"
+        className="h-14 w-full border border-black bg-[#f3f2ed] px-4 font-mono text-base text-black outline-none transition-colors placeholder:text-black/55 focus:bg-white focus:shadow-[4px_4px_0_#f4d44d]"
       />
+      <div className="mt-3 flex flex-wrap gap-2" aria-label="Name ideas">
+        {["support-agent", "research-agent", "my-first-agent"].map((idea) => (
+          <button
+            key={idea}
+            type="button"
+            onClick={() => { setName(idea); publishOnboardingDraft({ name: idea }); }}
+            className="border border-black/20 px-2.5 py-1.5 font-mono text-[11px] text-black/65 transition-colors hover:border-black hover:bg-[#f4d44d] hover:text-black"
+          >
+            {idea}
+          </button>
+        ))}
+      </div>
       {error ? <p className="mt-3 text-sm text-[#EF4444]">{error}</p> : null}
 
       <div className="mt-6 flex flex-wrap items-center gap-4">
@@ -131,16 +141,16 @@ export function ProjectStep() {
           type="submit"
           variant="default"
           disabled={!name.trim() || isCreating}
-          className="h-10 px-4 uppercase"
+          className="h-12 px-6 uppercase"
         >
-          {isCreating ? "Creating..." : "Create project"}
+          {isCreating ? "Creating..." : "Create project →"}
         </Button>
         <button
           type="button"
           onClick={() => router.push("/dashboard")}
           className="h-10 font-mono text-[11px] text-black/60 transition-colors hover:text-black focus-visible:outline focus-visible:outline-1 focus-visible:outline-black/55"
         >
-          Set up later
+          Skip for now
         </button>
       </div>
     </form>

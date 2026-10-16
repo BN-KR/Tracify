@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { RefreshCw } from "lucide-react";
+import { BrandLoader } from "@/components/brand/brand-loader";
 
 export function ConvexAuthState({
   mode,
@@ -11,7 +12,7 @@ export function ConvexAuthState({
   redirectPath?: string;
 }) {
   if (mode === "loading") {
-    return <div className="px-6 py-6 font-mono text-sm text-black/55" role="status" aria-live="polite">Preparing secure workspace access…</div>;
+    return <BrandLoader label="Preparing your workspace" />;
   }
 
   return (

@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { Activity, BellRing, DatabaseZap, RadioTower } from "lucide-react";
 import { RegionalStatusBoard } from "@/components/status/regional-status-board";
+import { PageHeader } from "@/components/marketing/page-header";
+import { Reveal } from "@/components/marketing/landing/reveal";
+import { ClosingBand, CreamBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 
-export const metadata: Metadata = { title: "Status", description: "Current operational status for Tracify services.", alternates: { canonical: "/status" } };
+export const metadata = pageMetadata({ title: "Status", description: "Current operational status for Tracify services, including ingestion, dashboards, and regional health checks.", path: "/status" });
 
 const services = [
   { name: "Dashboard + authentication", owner: "Application", icon: Activity },
@@ -11,12 +14,81 @@ const services = [
   { name: "Notifications + runtime policies", owner: "Operations", icon: BellRing },
 ] as const;
 
+const protocol = [
+  ["Send the affected surface", "Tell us which page, API or SDK call misbehaved."],
+  ["Include the time window", "A rough start and end time is enough."],
+  ["Receive a human reply", "A person answers, not a form acknowledgement."],
+] as const;
+
 export default function StatusPage() {
-  return <main className="min-h-screen bg-[#eceae3] pt-[54px] text-black">
-    <header className="border-b border-black bg-black text-white"><div className="mx-auto max-w-[1440px]"><div className="grid lg:grid-cols-[1fr_380px]"><div className="p-6 sm:p-8 md:p-10 md:py-16 lg:border-r lg:border-white/20"><div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.16em] text-[#f4d44d]"><RadioTower className="size-4" />Public operations channel</div><h1 className="mt-10 max-w-5xl font-pixel text-[clamp(3.5rem,8vw,8rem)] leading-[0.8] tracking-[-0.08em]">Status must be earned by evidence.</h1><p className="mt-8 max-w-2xl text-base leading-7 text-white/58">A direct view of the surfaces required to ingest, inspect, and act on agent telemetry.</p></div><aside className="flex flex-col justify-between border-t border-white/20 bg-[#f4d44d] p-6 text-black lg:border-t-0 lg:p-8"><div className="flex justify-between font-mono text-[9px] uppercase tracking-[0.14em]"><span>Current declaration</span><span>Beta</span></div><div className="my-16"><Activity className="size-12" strokeWidth={1.2} /><p className="mt-6 font-pixel text-6xl leading-none tracking-[-0.07em]">Monitoring connection in progress.</p></div><p className="border-t border-black pt-5 text-sm leading-6 text-black/65">Automated uptime history is not yet public. Support remains the honest source of truth.</p></aside></div></div></header>
-    <RegionalStatusBoard />
-    <section className="border-b border-black"><div className="mx-auto max-w-[1440px]"><div className="grid border-b border-black px-5 py-4 font-mono text-[9px] uppercase tracking-[0.15em] text-black/50 sm:grid-cols-[1fr_auto]"><span>Service board</span><span>Manual review / current</span></div><div className="grid lg:grid-cols-4">{services.map((service,index)=>{const Icon=service.icon;return <article key={service.name} className="flex min-h-80 flex-col justify-between border-b border-r border-black p-6 lg:border-b-0"><div className="flex items-start justify-between"><span className="font-pixel text-5xl text-black/18">0{index+1}</span><Icon className="size-6" strokeWidth={1.25}/></div><div><p className="font-mono text-[8px] uppercase tracking-[0.13em] text-black/40">{service.owner}</p><h2 className="mt-4 font-pixel text-4xl leading-[0.92] tracking-[-0.055em]">{service.name}</h2></div><div className="border border-black bg-[#f4d44d] p-3 font-mono text-[8px] uppercase tracking-[0.11em]">Monitor link pending</div></article>})}</div></div></section>
-    <section className="border-b border-black bg-[#d9d5ca]"><div className="mx-auto grid max-w-[1440px] md:grid-cols-[320px_1fr]"><div className="border-black p-6 md:border-r md:p-8"><p className="font-mono text-[9px] uppercase tracking-[0.15em]">Incident protocol</p><p className="mt-20 font-pixel text-4xl leading-[0.92] tracking-[-0.055em]">See a problem before the board does?</p></div><div className="grid sm:grid-cols-3">{["Send the affected surface", "Include the time window", "Receive a human reply"].map((step,index)=><div key={step} className="min-h-52 border-b border-r border-black p-6"><span className="font-pixel text-4xl text-black/18">0{index+1}</span><p className="mt-16 font-mono text-[10px] uppercase tracking-[0.11em]">{step}</p></div>)}</div></div></section>
-    <a href="mailto:hello@tracify.tech?subject=Service incident" className="flex min-h-24 items-center justify-between bg-black px-5 font-mono text-[10px] uppercase tracking-[0.14em] text-[#f4d44d] hover:bg-[#f4d44d] hover:text-black md:px-10"><span>Report an incident</span><span>hello@tracify.tech</span></a>
-    </main>;
+  return (
+    <div className="overflow-x-clip bg-[#090909]">
+      <PageHeader
+        eyebrow="Public operations channel / Beta"
+        title="Status, earned by evidence."
+        lede="A direct view of the surfaces needed to ingest, inspect and act on agent telemetry. Automated uptime history is not public yet, so support stays the honest source of truth."
+        image="/images/company/status-pulse.png"
+      >
+        <HeaderAction href="mailto:hello@tracify.tech?subject=Service%20incident">Report an incident</HeaderAction>
+        <HeaderAction href="/security" kind="secondary">How we handle incidents</HeaderAction>
+      </PageHeader>
+      <StatStrip stats={[["2","Surfaces probed live"],["EU","Region online"],["Manual","Review until monitors land"],["Human","Reply to every report"]]} />
+
+      <RegionalStatusBoard />
+
+      <CreamBand>
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <Eyebrow dark={false}>Service board / manual review</Eyebrow>
+            <SectionTitle>Four surfaces we watch.</SectionTitle>
+          </div>
+          <p className="max-w-sm text-base leading-7 text-black/65">Monitor links are still being connected. Until then each card says so instead of showing a green light we have not earned.</p>
+        </div>
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {services.map((service, i) => {
+            const Icon = service.icon;
+            return (
+              <Reveal key={service.name} delay={i * 0.07}>
+                <article className="flex h-full min-h-[320px] flex-col justify-between border border-black bg-white p-6">
+                  <div className="flex items-start justify-between">
+                    <span className="font-pixel text-6xl leading-none text-black/20">0{i + 1}</span>
+                    <Icon className="size-6" strokeWidth={1.3} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/45">{service.owner}</p>
+                    <h3 className="mt-3 font-pixel text-3xl leading-[0.95] tracking-[-0.055em]">{service.name}</h3>
+                    <p className="mt-6 inline-block bg-[#f4d44d] px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em]">Monitor link pending</p>
+                  </div>
+                </article>
+              </Reveal>
+            );
+          })}
+        </div>
+      </CreamBand>
+
+      <section className="bg-[#090909] px-5 py-20 text-[#eceae3] md:px-10 md:py-28">
+        <div className="mx-auto max-w-[1320px]">
+          <Eyebrow>Incident protocol</Eyebrow>
+          <SectionTitle>See a problem before the board does?</SectionTitle>
+          <ol className="mt-14 grid gap-4 md:grid-cols-3">
+            {protocol.map(([title, body], i) => (
+              <Reveal key={title} delay={i * 0.08}>
+                <li className="h-full min-h-[240px] border border-white/15 bg-[#111] p-7">
+                  <span className="font-pixel text-6xl leading-none text-[#f4d44d]">0{i + 1}</span>
+                  <h3 className="mt-10 font-pixel text-3xl leading-none tracking-[-0.05em]">{title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-white/60">{body}</p>
+                </li>
+              </Reveal>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <ClosingBand
+        title="Tell us. We will answer."
+        body="Email the affected surface and time window to hello@tracify.tech."
+        actions={[{ href: "mailto:hello@tracify.tech?subject=Service%20incident", label: "Report an incident", primary: true }, { href: "/contact", label: "Other contact options" }]}
+      />
+    </div>
+  );
 }

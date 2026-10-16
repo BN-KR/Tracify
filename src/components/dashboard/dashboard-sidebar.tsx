@@ -4,13 +4,13 @@ import {
   Activity,
   BarChart3,
   BookOpen,
-  ChevronDown,
+  CircleHelp,
+  Eye,
+  Plus,
   FileText,
   Database,
   LayoutDashboard,
   SlidersHorizontal,
-  PanelLeftClose,
-  PanelLeftOpen,
   Search,
   MessageSquareText,
   PhoneCall,
@@ -25,16 +25,22 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { ProjectSwitcher } from "@/components/dashboard/project-switcher";
+import { SidebarAccountMenu } from "@/components/dashboard/sidebar-account-menu";
 import { usePathname, useParams, useSearchParams } from "next/navigation";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { getTracifyRegion } from "@/lib/regions";
+
+type RailId = "observe" | "analyze" | "improve" | "operate" | "manage" | "help";
+
+const RAIL_ORDER: RailId[] = ["observe", "analyze", "improve", "operate", "manage", "help"];
+const RAIL_META: Record<RailId, { label: string; blurb: string; icon: React.ComponentType<{ className?: string; strokeWidth?: number }> }> = {
+  observe: { label: "Observe", blurb: "every run, step and user", icon: Eye },
+  analyze: { label: "Analyze", blurb: "costs, reports, comparisons", icon: BarChart3 },
+  improve: { label: "Improve", blurb: "prompts, tests, scoring", icon: FlaskConical },
+  operate: { label: "Operate", blurb: "alerts, rules, automation", icon: Zap },
+  manage: { label: "Manage", blurb: "project, team, billing", icon: Settings2 },
+  help: { label: "Help", blurb: "guides and support", icon: CircleHelp },
+};
 
 type GroupId = "primary" | "observe" | "analyze" | "improve" | "operate" | "manage" | "resources";
 
@@ -51,10 +57,10 @@ type NavGroup = {
   items: NavItem[];
 };
 
-const GROUP_STORAGE_KEY = "tracify:dashboard-sidebar-groups";
 const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
-const COLLAPSED_WIDTH = 48;
-const EXPANDED_WIDTH = 184;
+const COLLAPSED_WIDTH = 72;
+const EXPANDED_WIDTH = 296;
+const RAIL_WIDTH = 72;
 const MARKETING_ORIGIN = "https://www.tracify.tech";
 
 function isActivePath(pathname: string, href: string, projectId: string, isPreview = false, currentSearch = "") {
@@ -111,8 +117,6 @@ export function DashboardSidebar({
     [isSynthetic, projectDashboardHref],
   );
 
-  const region = getTracifyRegion();
-
   const dynamicGroups = useMemo<NavGroup[]>(() => {
     if (isSynthetic || projectId) {
       return [
@@ -129,6 +133,7 @@ export function DashboardSidebar({
           label: "Observability",
           items: [
             { title: "Tracing", icon: Activity, href: workspaceHref("tracing") },
+            ...(!isSynthetic ? [{ title: "Steps", icon: Activity, href: workspaceHref("steps") }] : []),
             { title: "Explore", icon: Zap, href: workspaceHref("explore") },
             { title: "Sessions", icon: Activity, href: workspaceHref("sessions") },
             { title: "Users", icon: Users, href: workspaceHref("users") },
@@ -177,6 +182,7 @@ export function DashboardSidebar({
           { title: "Home", icon: LayoutDashboard, href: isSynthetic ? syntheticHref("home") : projectDashboardHref },
           { title: "Dashboards", icon: LayoutDashboard, href: isSynthetic ? syntheticHref("dashboards") : projectId ? `/dashboard/${projectId}/dashboards` : "/dashboard/dashboards" },
           { title: "Tracing", icon: Activity, href: isSynthetic ? syntheticHref("tracing") : projectId ? `/dashboard/${projectId}/tracing` : "/dashboard/runs" },
+          ...(!isSynthetic && projectId ? [{ title: "Steps", icon: Activity, href: `/dashboard/${projectId}/steps` }] : []),
           { title: "Sessions", icon: Activity, href: isSynthetic ? syntheticHref("sessions") : projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions" },
           { title: "Users", icon: Users, href: isSynthetic ? syntheticHref("users") : projectId ? `/dashboard/${projectId}/users` : "/dashboard/users" },
           { title: "Search", icon: Search, href: isSynthetic ? syntheticHref("search") : projectId ? `/dashboard/${projectId}/search` : "/dashboard/search" },
@@ -187,8 +193,9 @@ export function DashboardSidebar({
         label: "Analyze",
         items: [
           { title: "Costs", icon: BarChart3, href: isSynthetic ? syntheticHref("costs") : projectId ? `/dashboard/${projectId}/costs` : "/dashboard/costs" },
+          { title: "Comparisons", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/comparisons` : "/dashboard/comparisons" },
           { title: "Reports", icon: FileText, href: isSynthetic ? syntheticHref("reports") : projectId ? `/dashboard/${projectId}/reports` : "/dashboard/reports" },
-          { title: "Compare", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare" },
+          { title: "Compare runs", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare" },
           { title: "Investigation", icon: Search, href: isSynthetic ? syntheticHref("investigate") : projectId ? `/dashboard/${projectId}/investigate` : "/dashboard/investigate" },
         ],
       },
@@ -245,36 +252,32 @@ export function DashboardSidebar({
         ],
       },
     ];
-  }, [canAccessContent, isSynthetic, projectDashboardHref]);
+  }, [canAccessContent, isSynthetic, projectDashboardHref, projectId, workspaceHref]);
 
-  const [openGroups, setOpenGroups] = useState<Record<GroupId, boolean>>(() => {
-    if (typeof window === "undefined") {
-      return { primary: true, observe: true, analyze: true, improve: true, operate: true, manage: true, resources: true };
+  const railGroups = useMemo(() => {
+    const byRail = new Map<RailId, NavItem[]>();
+    for (const group of dynamicGroups) {
+      const railId = group.id === "primary" ? "observe" : group.id === "resources" ? "help" : group.id;
+      byRail.set(railId, [...(byRail.get(railId) ?? []), ...group.items]);
     }
-    const stored = window.localStorage.getItem(GROUP_STORAGE_KEY);
-    const defaults: Record<GroupId, boolean> = {
-      primary: true,
-      observe: true,
-      analyze: true,
-      improve: true,
-      operate: true,
-      manage: true,
-      resources: true,
-    };
-    if (!stored) return defaults;
-    try {
-      return { ...defaults, ...(JSON.parse(stored) as Partial<Record<GroupId, boolean>>) };
-    } catch {
-      return defaults;
-    }
-  });
+    return RAIL_ORDER.filter((id) => byRail.has(id)).map((id) => ({ id, ...RAIL_META[id], items: byRail.get(id) ?? [] }));
+  }, [dynamicGroups]);
 
-  const showExpandedContent = !isCollapsed;
-  const visualWidth = showExpandedContent ? EXPANDED_WIDTH : COLLAPSED_WIDTH;
+  const currentSearch = searchParams.toString();
+  const activeRailId = railGroups.find(
+    (group) => group.id !== "help" && group.items.some((item) => isActivePath(pathname, item.href, projectId, Boolean(projectIdOverride), currentSearch)),
+  )?.id;
+  // Picks and the help popup are tied to the page they were made on, so navigating resets them.
+  const [picked, setPicked] = useState<{ id: RailId | "help-open"; path: string } | null>(null);
+  const pickedGroup = picked && picked.path === pathname && picked.id !== "help-open" ? picked.id : null;
+  const helpOpen = picked?.path === pathname && picked.id === "help-open";
+  const panelGroupId: RailId = pickedGroup ?? activeRailId ?? "observe";
+  const panelGroup = railGroups.find((group) => group.id === panelGroupId && group.id !== "help") ?? railGroups[0];
 
-  function toggleCollapsed() {
-    onCollapsedChange(!isCollapsed);
-  }
+  const showPanel = !isCollapsed || isMobileOpen;
+  const visualWidth = showPanel ? EXPANDED_WIDTH : COLLAPSED_WIDTH;
+  const helpGroup = railGroups.find((group) => group.id === "help");
+  const alertsHref = workspaceHref("alerts");
 
   useEffect(() => {
     function onShellToggle() {
@@ -288,278 +291,141 @@ export function DashboardSidebar({
     return () => window.removeEventListener("tracify:toggle-sidebar", onShellToggle);
   }, [isCollapsed, onCollapsedChange, onMobileToggle]);
 
-  function expandSidebar(groupId?: GroupId) {
-    if (groupId) {
-      setOpenGroups((current) => {
-        if (current[groupId]) return current;
-        const next = { ...current, [groupId]: true };
-        window.localStorage.setItem(GROUP_STORAGE_KEY, JSON.stringify(next));
-        return next;
-      });
+  function pickGroup(id: RailId) {
+    if (id === "help") {
+      setPicked(helpOpen ? null : { id: "help-open", path: pathname });
+      return;
     }
+    setPicked({ id, path: pathname });
     if (isCollapsed) {
       onCollapsedChange(false);
       window.localStorage.setItem(COLLAPSED_STORAGE_KEY, "false");
     }
   }
 
-  function toggleGroup(id: GroupId) {
-    setOpenGroups((current) => {
-      const next = { ...current, [id]: !current[id] };
-      window.localStorage.setItem(GROUP_STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  }
-
-  const collapseLabel = isCollapsed ? "Expand sidebar" : "Collapse sidebar";
-  const CollapseIcon = isCollapsed ? PanelLeftOpen : PanelLeftClose;
-
   return (
     <aside
       className={cn(
-        "tracify-shell-sidebar fixed inset-y-0 left-0 z-30 flex flex-col border-r border-white/10 bg-[#0f0f0f] text-white transition-[width,transform] duration-150 ease-out motion-reduce:transition-none",
+        "tracify-shell-sidebar fixed inset-y-0 left-0 z-30 flex border-r border-white/10 bg-[#0b0b0b] text-white transition-[width,transform] duration-150 ease-out motion-reduce:transition-none",
         isMobileOpen && "is-mobile-open",
       )}
       style={{ width: visualWidth }}
     >
-      <div
-        className={cn(
-          "flex h-11 items-center border-b border-white/10",
-          showExpandedContent ? "justify-between px-4" : "justify-center px-0",
-        )}
-      >
-        {showExpandedContent ? (
-          <Link
-            href={projectDashboardHref}
-            aria-label="Tracify dashboard"
-            className="text-white focus-visible:outline-1 focus-visible:outline-offset-4"
-          >
-            <span className="captured-reference-brand"><i aria-hidden="true" />tracify</span>
-          </Link>
-        ) : null}
-
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                variant="ghost"
-                aria-label={collapseLabel}
-                onClick={toggleCollapsed}
-                className="size-7 text-white/70 hover:bg-white/10 hover:text-white"
+      <div className="relative flex shrink-0 flex-col items-center border-r border-white/10 bg-[#050505] py-3" style={{ width: RAIL_WIDTH }}>
+        <Link href={projectDashboardHref} aria-label="Tracify dashboard" className="mb-3 block">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logos/dissolve/tracify-icon.svg" alt="" width={44} height={44} className="block size-11" />
+        </Link>
+        <div className="flex w-full flex-1 flex-col items-center gap-1 px-1.5">
+          {railGroups.map((group) => {
+            const Icon = group.icon;
+            const isActive = group.id === "help" ? helpOpen : showPanel ? group.id === panelGroup?.id : group.id === activeRailId;
+            return (
+              <button
+                key={group.id}
+                type="button"
+                aria-label={group.label}
+                aria-pressed={isActive}
+                onClick={() => pickGroup(group.id)}
+                className={cn(
+                  "flex w-full flex-col items-center gap-1 py-2 font-mono text-[10px] outline-none transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55",
+                  group.id === "help" && "mt-auto",
+                  isActive ? "!bg-[#f4d44d] !text-[#090909]" : "!text-[#8d8d8d] hover:!text-white",
+                )}
               >
-                <CollapseIcon className="size-4" />
-              </Button>
-            }
-          />
-          <TooltipContent
-            side="right"
-            className="rounded-none border border-white/15 bg-[#171717] font-mono text-xs text-white/70 shadow-none"
-          >
-            {collapseLabel} · Ctrl+\
-          </TooltipContent>
-        </Tooltip>
+                <Icon className="size-[18px]" strokeWidth={1.7} />
+                {group.label}
+              </button>
+            );
+          })}
+        </div>
+        {isCollapsed ? (
+          <div className="mt-3 flex flex-col items-center gap-2">
+            <ProjectSwitcher isCollapsed previewProjectName={previewProjectName} synthetic={isSynthetic} />
+            <SidebarAccountMenu isCollapsed synthetic={isSynthetic} />
+          </div>
+        ) : null}
+        {helpOpen && helpGroup ? (
+          <div className="absolute bottom-3 left-[calc(100%+6px)] z-40 w-52 border-2 border-[#f4d44d] bg-[#090909] py-1 shadow-none">
+            {helpGroup.items.map((item) => (
+              <PanelLink key={item.title} item={item} isActive={false} onNavClick={() => { setPicked(null); onMobileClose?.(); }} />
+            ))}
+          </div>
+        ) : null}
       </div>
 
-      <div className={cn("border-b border-white/10 p-3", isSynthetic && "captured-sidebar-project")}>
-        <ProjectSwitcher isCollapsed={!showExpandedContent} previewProjectName={previewProjectName} synthetic={isSynthetic} />
-      </div>
+      {showPanel && panelGroup ? (
+        <div className="flex min-w-0 flex-1 flex-col bg-[#0f0f0f]">
+          <div className="flex h-12 items-center border-b border-white/10 px-4">
+            <Link href={projectDashboardHref} aria-label="Tracify dashboard">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logos/dissolve/tracify-name-on-dark.svg" alt="tracify" height={22} className="block h-[22px] w-auto" />
+            </Link>
+          </div>
 
-      {isSynthetic && showExpandedContent ? (
-        <div className="captured-sidebar-context border-b border-white/10">
-          <Link href="/playground" className="captured-sidebar-context-link is-demo">↗ <span>Use Demo App</span></Link>
-          <a href={`${MARKETING_ORIGIN}/cloud`} className="captured-sidebar-context-link">⊞ <span>Your Orgs</span></a>
+          {isSynthetic ? (
+            <div className="captured-sidebar-context border-y border-white/10">
+              <Link href="/playground" className="captured-sidebar-context-link is-demo">↗ <span>Use Demo App</span></Link>
+              <a href={`${MARKETING_ORIGIN}/cloud`} className="captured-sidebar-context-link">⊞ <span>Your Orgs</span></a>
+            </div>
+          ) : null}
+
+          <div className="px-4 pb-2 pt-3">
+            <div className="font-mono text-[17px] font-semibold text-white">{panelGroup.label}</div>
+            <div className="mt-0.5 font-mono text-[11px] text-white/40">{panelGroup.blurb}</div>
+          </div>
+
+          <nav className="min-h-0 flex-1 overflow-y-auto py-1 scrollbar-hide" aria-label={panelGroup.label}>
+            {panelGroup.items.map((item) => (
+              <PanelLink
+                key={item.title}
+                item={item}
+                isActive={isActivePath(pathname, item.href, projectId, Boolean(projectIdOverride), currentSearch)}
+                onNavClick={() => onMobileClose?.()}
+              />
+            ))}
+          </nav>
+
+          <div className="border-t border-white/10">
+            <div className={cn("p-3", isSynthetic && "captured-sidebar-project")}>
+              <ProjectSwitcher isCollapsed={false} previewProjectName={previewProjectName} synthetic={isSynthetic} />
+            </div>
+            {!isSynthetic ? (
+              <Link
+                href={alertsHref}
+                onClick={() => onMobileClose?.()}
+                className="flex h-10 items-center gap-3 px-4 font-mono text-[12px] !text-[#bdbdbd] outline-none hover:bg-[#181818] hover:!text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55"
+              >
+                <Plus className="size-4" />
+                New alert
+              </Link>
+            ) : null}
+            <div className="border-t border-white/10">
+              <SidebarAccountMenu synthetic={isSynthetic} />
+            </div>
+          </div>
         </div>
       ) : null}
-
-      <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4 scrollbar-hide">
-        <button
-          type="button"
-          aria-label="Go to"
-          onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}
-          className={cn(
-            "mb-4 flex h-8 w-full items-center gap-2 border border-transparent px-2 text-left font-mono text-[12px] text-white/70 transition-colors hover:border-white/15 hover:bg-white/10 hover:text-white",
-            !showExpandedContent && "justify-center px-0",
-          )}
-        >
-          <Search className="size-4 shrink-0" />
-          {showExpandedContent ? (
-            <>
-              <span className="truncate">Go to...</span>
-              <kbd className="ml-auto border border-white/15 px-1.5 py-0.5 text-[9px] leading-none text-white/50">Ctrl K</kbd>
-            </>
-          ) : null}
-        </button>
-
-        {dynamicGroups.map((group) => (
-          <SidebarGroup
-            key={group.id}
-            group={group}
-            showExpandedContent={showExpandedContent}
-            isOpen={openGroups[group.id]}
-            pathname={pathname}
-            currentSearch={searchParams.toString()}
-            projectId={projectId}
-            isPreview={Boolean(projectIdOverride)}
-            onToggle={() => toggleGroup(group.id)}
-            onNavClick={(href) => {
-              const navGroup = dynamicGroups.find((g) => g.items.some((item) => item.href === href));
-              expandSidebar(navGroup?.id);
-              onMobileClose?.();
-            }}
-          />
-        ))}
-      </nav>
-
-      {isSynthetic ? (
-        <button
-          type="button"
-          className={cn(
-            "captured-sidebar-account flex min-h-12 items-center border-t border-white/10 px-3 text-left text-white/70 hover:bg-white/10 hover:text-white",
-            showExpandedContent ? "gap-2" : "justify-center",
-          )}
-          aria-label="Kristoffer Bon account menu"
-          onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}
-        >
-          <span className="captured-sidebar-avatar" aria-hidden="true">KB</span>
-          {showExpandedContent ? (
-            <span className="captured-sidebar-account-copy min-w-0">
-              <span className="truncate">Kristoffer Bon</span>
-              <span className="truncate">kristoffer.bon@gmail.com</span>
-            </span>
-          ) : null}
-          {showExpandedContent ? <ChevronDown className="ml-auto size-3 shrink-0 text-white/45" /> : null}
-        </button>
-      ) : (
-        <a
-          href={`${MARKETING_ORIGIN}/cloud`}
-          className={cn(
-            "flex min-h-12 items-center border-t border-white/10 px-4 text-white/55 hover:bg-white/10 hover:text-white",
-            showExpandedContent ? "gap-3" : "justify-center",
-          )}
-          aria-label={`${region.name} cloud region. Open region directory`}
-        >
-          <Globe2 className="size-4 shrink-0" />
-          {showExpandedContent ? (
-            <span className="font-mono text-[10px] uppercase tracking-[0.12em]">
-              {region.flag} {region.shortName} cloud · Switch
-            </span>
-          ) : null}
-        </a>
-      )}
     </aside>
   );
 }
 
-function SidebarGroup({
-  group,
-  showExpandedContent,
-  isOpen,
-  pathname,
-  currentSearch,
-  projectId,
-  isPreview,
-  onToggle,
-  onNavClick,
-}: {
-  group: NavGroup;
-  showExpandedContent: boolean;
-  isOpen: boolean;
-  pathname: string;
-  currentSearch: string;
-  projectId: string;
-  isPreview: boolean;
-  onToggle: () => void;
-  onNavClick: (href: string) => void;
-}) {
-  const hasActiveItem = group.items.some(
-    (item) => isActivePath(pathname, item.href, projectId, isPreview, currentSearch),
-  );
-  const isVisuallyOpen = isOpen || hasActiveItem;
-  const visibleItems = useMemo(
-    () => (!showExpandedContent || isVisuallyOpen ? group.items : []),
-    [group.items, showExpandedContent, isVisuallyOpen],
-  );
-
-  return (
-    <div className="mb-5">
-      {showExpandedContent && group.label ? (
-        <button
-          type="button"
-          onClick={onToggle}
-          className="mb-2 flex h-7 w-full items-center justify-between px-2 text-left font-mono text-[11px] uppercase tracking-wide text-white/40 outline-none transition-colors hover:text-white/70 focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55"
-        >
-          <span>{group.label}</span>
-          <ChevronDown
-            className={cn(
-              "size-3 transition-transform duration-150 motion-reduce:transition-none",
-              !isVisuallyOpen && "-rotate-90",
-            )}
-          />
-        </button>
-      ) : null}
-      <div
-        className={cn(
-          "overflow-hidden transition-[max-height,opacity] duration-150 motion-reduce:transition-none",
-          visibleItems.length ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
-        )}
-      >
-        <div className="space-y-1">
-          {visibleItems.map((item) => (
-            <NavLink
-              key={item.title}
-              item={item}
-              showExpandedContent={showExpandedContent}
-              isActive={isActivePath(pathname, item.href, projectId, isPreview, currentSearch)}
-              onNavClick={() => onNavClick(item.href)}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function NavLink({
-  item,
-  showExpandedContent,
-  isActive,
-  onNavClick,
-}: {
-  item: NavItem;
-  showExpandedContent: boolean;
-  isActive: boolean;
-  onNavClick: () => void;
-}) {
-  const Icon = item.icon;
+function PanelLink({ item, isActive, onNavClick }: { item: NavItem; isActive: boolean; onNavClick: () => void }) {
   const className = cn(
-    "flex h-9 items-center border-l-2 border-transparent px-2 font-mono text-[13px] font-normal text-white/55 outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55",
-    showExpandedContent ? "gap-2" : "justify-center",
-    isActive && "border-l-white bg-white/10 text-white hover:bg-white/10",
+    "relative flex h-9 items-center gap-3 px-4 font-mono text-[13px] outline-none transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55",
+    isActive
+      ? "!bg-[#1c1c1c] font-semibold !text-white before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-[#f4d44d]"
+      : "!text-[#a0a0a0] hover:!bg-[#181818] hover:!text-white",
   );
-
   const content = (
     <>
-      <Icon className="size-4 shrink-0" />
-      {showExpandedContent ? <span className="truncate">{item.title}</span> : null}
+      <span className="truncate">{item.title}</span>
+      {item.external ? <span className="ml-auto text-[11px] opacity-50">↗</span> : null}
     </>
   );
-  const link = item.external ? (
-    <a href={item.href} className={className} aria-label={item.title} onClick={onNavClick}>{content}</a>
+  return item.external ? (
+    <a href={item.href} className={className} onClick={onNavClick}>{content}</a>
   ) : (
-    <Link href={item.href} className={className} aria-label={item.title} onClick={onNavClick}>{content}</Link>
-  );
-
-  if (showExpandedContent) return link;
-
-  return (
-    <Tooltip>
-      <TooltipTrigger render={link} />
-      <TooltipContent
-        side="right"
-        className="rounded-none border border-white/15 bg-[#171717] font-mono text-xs text-white/70 shadow-none"
-      >
-        {item.title}
-      </TooltipContent>
-    </Tooltip>
+    <Link href={item.href} className={className} aria-current={isActive ? "page" : undefined} onClick={onNavClick}>{content}</Link>
   );
 }

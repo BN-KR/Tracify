@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandLoader } from "@/components/brand/brand-loader";
 import { useEffect } from "react";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
@@ -42,17 +43,7 @@ export function DashboardHomeRouter() {
   }
 
   if (auth.status === "loading" || (isAuthenticated && projects === undefined)) {
-    return (
-      <div className="flex flex-col gap-6">
-        <DashboardTopbar
-          title="Dashboard"
-          description="Checking workspace state."
-        />
-        <div className="px-6 pb-10 font-mono text-sm text-black/55">
-          {auth.status === "loading" ? "Preparing workspace access..." : "Loading projects..."}
-        </div>
-      </div>
-    );
+    return <BrandLoader label="Loading your workspace" />;
   }
 
   if (auth.status === "unauthenticated") {

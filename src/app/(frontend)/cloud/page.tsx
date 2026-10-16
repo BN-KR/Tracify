@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Globe2, ShieldCheck } from "lucide-react";
 
-import { BrandLogo } from "@/components/brand-logo";
+import { CloudShell } from "@/components/cloud/cloud-shell";
 import { RegionOptions } from "@/components/cloud/region-options";
 import { getAvailableRegions } from "@/lib/regions";
 
@@ -16,24 +15,28 @@ export const metadata: Metadata = {
 export default function CloudRegionPage() {
   const regions = getAvailableRegions();
   return (
-    <main className="min-h-screen bg-[#eceae3] text-black selection:bg-[#f4d44d]">
-      <header className="flex h-[54px] items-center justify-between border-b border-black px-5 md:px-8">
-        <Link href="https://www.tracify.tech" aria-label="Tracify home"><BrandLogo /></Link>
-        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/45">Cloud directory / step 01 of 02</span>
-      </header>
-      <div className="mx-auto grid min-h-[calc(100vh-54px)] max-w-[1440px] lg:grid-cols-[minmax(320px,0.72fr)_minmax(0,1.28fr)]">
-        <aside className="flex flex-col justify-between border-b border-black bg-black p-6 text-white sm:p-8 md:p-10 lg:border-b-0 lg:border-r">
-          <div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.15em] text-white/45"><span>Regional cloud</span><Globe2 className="size-5 text-[#f4d44d]" /></div>
-          <div className="my-14 lg:my-0"><h1 className="max-w-3xl font-pixel text-[clamp(4rem,7vw,7.5rem)] leading-[0.8] tracking-[-0.075em]">Choose your region.</h1><p className="mt-8 max-w-xl text-base leading-7 text-white/60">First choose where Tracify runs. You will choose Sandbox or Build on the selected regional cloud.</p></div>
-          <div className="border-t border-white/20 pt-5 text-xs leading-6 text-white/55">Regions are isolated. Choosing another region does not move an existing account or its data.</div>
-        </aside>
-        <section className="flex items-center px-5 py-10 sm:px-8 md:px-12 lg:px-16"><div className="w-full max-w-3xl">
-          <div className="mb-7 grid gap-4 border-y border-black py-5 sm:grid-cols-2"><Fact icon={ShieldCheck} label="Regional boundary" /><Fact icon={Globe2} label="Sandbox and Build" /></div>
-          <RegionOptions regions={regions} next="/cloud/mode" intent="build" />
-        </div></section>
+    <CloudShell
+      step="step 01 of 02"
+      eyebrow="Regional cloud"
+      title="Choose your region."
+      body="First choose where Tracify runs. Next you pick Sandbox or Build on that regional cloud."
+      image="/images/company/region-link.png"
+      footer={<p className="text-xs leading-6 text-white/55">Regions are isolated. Choosing another region does not move an existing account or its data.</p>}
+    >
+      <div className="mb-6 grid gap-4 border-y border-white/20 py-5 sm:grid-cols-2">
+        <Fact icon={ShieldCheck} label="Regional boundary" />
+        <Fact icon={Globe2} label="Sandbox and Build" />
       </div>
-    </main>
+      <RegionOptions regions={regions} next="/cloud/mode" intent="build" />
+    </CloudShell>
   );
 }
 
-function Fact({ icon: Icon, label }: { icon: typeof Globe2; label: string }) { return <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.12em]"><Icon className="size-4" /><span>{label}</span></div>; }
+function Fact({ icon: Icon, label }: { icon: typeof Globe2; label: string }) {
+  return (
+    <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.14em] text-white/75">
+      <Icon className="size-4 text-[#f4d44d]" aria-hidden="true" />
+      <span>{label}</span>
+    </div>
+  );
+}

@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { BrandLoader } from "@/components/brand/brand-loader";
+import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 
 import { api } from "convex/_generated/api";
+import { useAuthIdentity } from "@/components/auth/auth-identity";
+import { projectGateState, type ProjectGateMemory } from "@/lib/project-gate-state";
 import { ConvexAuthState } from "@/components/auth/convex-auth-state";
 import { useConvexAuthReadiness } from "@/hooks/use-convex-auth-readiness";
 
@@ -26,8 +29,14 @@ export function ProjectRouteGate({
     isAuthenticated ? { projectId } : "skip",
   );
 
+  const identity = useAuthIdentity();
+  const [memory, setMemory] = useState<ProjectGateMemory>(null);
+  const gate = projectGateState(memory, { projectId, identity, auth: auth.status, route: routeState });
+  // Adjust before committing children, so a scope change cannot briefly display the previous project/account.
+  if (gate.memory !== memory) setMemory(gate.memory);
+
   useEffect(() => {
-    if (auth.status === "unauthenticated") {
+    if (auth.status === "unauthenticated" || routeState?.status === "unauthenticated") {
       const returnPath = `${window.location.pathname}${window.location.search}`;
       router.replace(`/sign-in?redirect_url=${encodeURIComponent(returnPath)}`);
       return;
@@ -54,12 +63,10 @@ export function ProjectRouteGate({
     return <ConvexAuthState mode="error" redirectPath={returnPath} />;
   }
 
-  if (auth.status === "loading" || !isAuthenticated || routeState === undefined) {
-    return (
-      <div className="px-6 py-6 font-mono text-sm text-black/55">
-        Loading project...
-      </div>
-    );
+  if (gate.show) return <>{children}</>;
+
+  if (auth.status === "loading" || !isAuthenticated || routeState === undefined || routeState.status === "unauthenticated" || !identity) {
+    return <BrandLoader label="Loading project" />;
   }
 
   if (routeState.status === "no_projects") {
@@ -84,7 +91,7 @@ export function ProjectRouteGate({
     );
   }
 
-  return <>{children}</>;
+  return null;
 }
 
 function RouteStatePanel({

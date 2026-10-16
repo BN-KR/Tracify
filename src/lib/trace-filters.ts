@@ -1,3 +1,5 @@
+import { validTraceSort } from "./trace-sort";
+import { EXCLUDE_PREFIX } from "@/lib/trace-search";
 import { FACET_KEYS, type TraceListFilters } from "@/lib/tinybird";
 
 const MAX_RANGE_MS = 90 * 24 * 60 * 60 * 1000;
@@ -44,14 +46,17 @@ export function parseTraceFilters(searchParams: URLSearchParams, now = Date.now(
     query: text(searchParams.get("q")),
     status: status === "error" || status === "healthy" ? status : "all",
     facets: Object.fromEntries(FACET_KEYS.map((key) => [key, facetValues(searchParams.get(key))]).filter(([, values]) => values)),
+    excludeFacets: Object.fromEntries(FACET_KEYS.map((key) => [key, facetValues(searchParams.get(`${EXCLUDE_PREFIX}${key}`))]).filter(([, values]) => values)),
     minLatencyMs: optionalNumber(searchParams.get("minLatencyMs")),
     maxLatencyMs: optionalNumber(searchParams.get("maxLatencyMs")),
     minCostUsd: optionalNumber(searchParams.get("minCostUsd")),
     maxCostUsd: optionalNumber(searchParams.get("maxCostUsd")),
+    minTokens: optionalNumber(searchParams.get("minTokens")),
+    maxTokens: optionalNumber(searchParams.get("maxTokens")),
     errorGroup: /^[0-9a-f]{16}$/.test(searchParams.get("errorGroup") ?? "") ? searchParams.get("errorGroup")! : undefined,
     node: stepKey(text(searchParams.get("node"))),
     edge: edge(searchParams.get("edge")),
-    sort: sort === "latency" || sort === "cost" ? sort : "startedAt",
+    sort: validTraceSort(sort),
     direction: searchParams.get("dir") === "asc" ? "asc" : "desc",
     page: optionalNumber(searchParams.get("page")),
     pageSize: optionalNumber(searchParams.get("pageSize")),

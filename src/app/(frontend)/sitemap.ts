@@ -1,5 +1,7 @@
 import { getPostDate, getPublishedPosts } from "@/lib/markdoc-blog";
 import { getDocs } from "@/lib/markdoc-docs";
+import { comparisons, integrationPages } from "@/lib/seo-pages";
+import { glossaryTerms } from "@/lib/glossary";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -27,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/status`, changeFrequency: "daily", priority: 0.5 },
     { url: `${baseUrl}/contact`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/privacy`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/cookie-policy`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/terms`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/changelog`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${baseUrl}/demo`, changeFrequency: "monthly", priority: 0.6 },
@@ -35,6 +38,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...documentation.map((slug) => ({ url: `${baseUrl}/docs/${slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
     ...productFeatures.map((slug) => ({ url: `${baseUrl}/product/${slug}`, changeFrequency: "monthly" as const, priority: 0.8 })),
     ...useCases.map((slug) => ({ url: `${baseUrl}/use-cases/${slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
+    { url: `${baseUrl}/compare`, changeFrequency: "monthly", priority: 0.8 },
+    ...comparisons.map((c) => ({ url: `${baseUrl}/compare/${c.slug}`, changeFrequency: "monthly" as const, priority: 0.8 })),
+    ...integrationPages.map((p) => ({ url: `${baseUrl}/integrations/${p.slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
+    ...glossaryTerms.map((t) => ({ url: `${baseUrl}/glossary/${t.slug}`, changeFrequency: "monthly" as const, priority: 0.6 })),
     ...blogPosts,
   ];
 }

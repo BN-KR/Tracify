@@ -88,6 +88,16 @@ export interface OrchestrateOptions<T> {
     calculateCost?: (result: T, model: string) => number;
     runId?: string;
 }
+export declare function currentRunId(): string;
+export declare function currentTraceContext(): {
+    runId: string;
+    spanId?: string;
+    traceName?: string;
+    client?: TracifyClient;
+} | undefined;
+export declare function integrationPayload(value: unknown): string;
+export declare function currentSpanId(): string | undefined;
+export declare const MAX_PAYLOAD_CHARS = 10000;
 export declare class TracifyClient {
     protected apiKey: string;
     protected host: string;
@@ -130,7 +140,60 @@ export declare class TracifyClient {
     private checkCost;
     orchestrate<T>(options: OrchestrateOptions<T>): Promise<T>;
 }
-export declare function traceAgent<T extends (...args: any[]) => Promise<any>>(func: T, config?: TracifyConfig): T;
+export type StepType = 'agent' | 'llm' | 'tool' | 'retrieval' | 'span' | (string & {});
+/** A step in progress. Set its output and anything it measured before it ends. */
+export declare class Step {
+    readonly name: string;
+    readonly type: StepType;
+    readonly input?: unknown | undefined;
+    readonly id: string;
+    output: unknown;
+    metadata: Record<string, any>;
+    fields: Partial<Pick<SpanData, 'modelId' | 'inputTokens' | 'outputTokens' | 'costUsd'>>;
+    constructor(name: string, type: StepType, input?: unknown | undefined, metadata?: Record<string, any>);
+    setOutput(output: unknown): this;
+    /** Record what the step measured; anything not listed goes into metadata. */
+    set({ model, inputTokens, outputTokens, costUsd, ...metadata }: {
+        model?: string;
+        inputTokens?: number;
+        outputTokens?: number;
+        costUsd?: number;
+        [key: string]: any;
+    }): this;
+}
+export interface StepOptions {
+    type?: StepType;
+    input?: unknown;
+    metadata?: Record<string, any>;
+    client?: TracifyClient;
+    /** Start a new run with this id (used by traceAgent). */
+    runId?: string;
+    /** Send this step as the run's end (run_end or error), which marks the run completed or failed. */
+    root?: boolean;
+}
+/**
+ * Record one step of the agent. Steps started inside `fn` become its children, so the trace shows which step
+ * called which. The step ends when `fn` settles; its return value is the output unless one was set.
+ *
+ *     const docs = await span("search-docs", (step) => search(query), { type: "tool", input: query });
+ */
+export declare function span<T>(name: string, fn: (step: Step) => T | Promise<T>, options?: StepOptions): Promise<T>;
+/** Wrap a function so each call is recorded as a step, with its arguments and result. */
+export declare function observe<A extends any[], R>(fn: (...args: A) => R | Promise<R>, options?: StepOptions & {
+    name?: string;
+    captureInput?: boolean;
+}): (...args: A) => Promise<R>;
+/**
+ * Wrap an agent's entry point. Each call is one trace: a new run id, and a root step that every step recorded
+ * inside it hangs from. The root is sent as run_end (or error) when the call settles.
+ */
+export declare function traceAgent<T extends (...args: any[]) => Promise<any>>(func: T, config?: TracifyConfig & {
+    name?: string;
+}): T;
+/** Record a finished model call. It is attached to the step it was made in. */
 export declare const llmCall: (data: Omit<SpanData, "spanType">) => Promise<void>;
+/** Record a finished tool call. It is attached to the step it was made in. */
 export declare const toolCall: (data: Omit<SpanData, "spanType">) => Promise<void>;
 export declare const decision: (data: Omit<SpanData, "spanType">) => Promise<void>;
+export { wrapOpenAI, wrapAnthropic, type IntegrationOptions } from "./integrations/providers";
+export { TracifyLangGraphHandler } from "./integrations/langgraph";
