@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
 import { DitherField } from "@/components/auth/dither-field";
 import { BrandLogo } from "@/components/brand-logo";
 import { getRegionForHostname, getTracifyRegion } from "@/lib/regions";
@@ -30,22 +31,32 @@ export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactN
   const region = getTracifyRegion(regionId);
 
   return (
-    <main className="relative isolate flex min-h-svh flex-col bg-[#dcd9ce] text-black selection:bg-[#f4d44d]">
-      <DitherField className="opacity-10" />
-      <header className="flex items-center justify-between px-5 py-5 sm:px-8">
-        <Link href="/" aria-label="Tracify home" className="active-press focus-visible:outline-2 focus-visible:outline-offset-4"><BrandLogo className="text-black" /></Link>
-        <div className="flex items-center gap-6 font-mono text-[10px] uppercase tracking-[0.14em] text-black/60">
-          <Link href={`/cloud?next=/${mode === "sign-up" ? "sign-up" : "sign-in"}`} className="inline-flex min-h-11 items-center hover:text-black">{region.flag} {region.shortName} region · Change</Link>
-          <Link href="https://www.tracify.tech" className="active-press hidden min-h-11 items-center gap-2 hover:text-black sm:flex">Back to site <ArrowUpRight className="size-3.5" /></Link>
+    <main className="grid min-h-svh bg-[#f4d44d] text-black selection:bg-[#090909] selection:text-[#f4d44d] lg:grid-cols-[minmax(380px,0.85fr)_minmax(0,1fr)]">
+      <aside className="relative isolate flex min-h-[220px] flex-col justify-between overflow-hidden bg-[#090909] p-6 text-[#eceae3] sm:p-8 md:p-10 lg:min-h-svh">
+        <Image src={modeCopy.img} alt="" fill priority unoptimized sizes="(min-width:1024px) 45vw, 100vw" className="-z-10 object-cover opacity-30 [image-rendering:pixelated]" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,#090909_10%,rgba(9,9,9,0.88)_55%,rgba(9,9,9,0.65)_100%)]" />
+        <div className="flex items-center justify-between">
+          <Link href="/" aria-label="Tracify home" className="active-press focus-visible:outline-2 focus-visible:outline-offset-4"><BrandLogo className="text-[#eceae3]" /></Link>
+          <Link href="https://www.tracify.tech" className="active-press hidden min-h-11 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/60 hover:text-white sm:flex">Back to site <ArrowUpRight className="size-3.5" /></Link>
         </div>
-      </header>
-      <div className="flex flex-1 items-center justify-center px-5 pb-12 pt-2 sm:px-8">
-        <div className="dark-card w-full max-w-[480px] border border-black bg-[#090909] text-[#eceae3] shadow-[0_32px_64px_-32px_rgba(9,9,9,0.7)]">
-          <div className="h-[3px] bg-[#f4d44d]" />
-          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 font-mono text-[9px] uppercase tracking-[0.14em] text-white/50 md:px-8"><span>{modeCopy.eyebrow}</span><span>{region.shortName}</span></div>
-          <div className="p-5 md:p-8">{children}</div>
+        <div className="mt-10 lg:mt-0">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f4d44d]">{modeCopy.marker}</p>
+          <h1 className="mt-4 max-w-xl font-pixel text-[clamp(2.2rem,4vw,3.8rem)] leading-[0.88] tracking-[-0.065em]">{modeCopy.title}</h1>
         </div>
-      </div>
+      </aside>
+      <section className="relative isolate flex flex-col overflow-hidden px-5 py-6 sm:px-8 md:px-12">
+        <DitherField vivid />
+        <div className="flex justify-end">
+          <Link href={`/cloud?next=/${mode === "sign-up" ? "sign-up" : "sign-in"}`} className="inline-flex min-h-11 items-center font-mono text-[10px] uppercase tracking-[0.14em] text-black hover:text-black/60">{region.flag} {region.shortName} region · Change</Link>
+        </div>
+        <div className="flex flex-1 items-center justify-center py-8">
+          <div className="dark-card w-full max-w-[480px] border border-black bg-[#090909] text-[#eceae3] shadow-[8px_8px_0_#090909]">
+            <div className="h-[3px] bg-[#f4d44d]" />
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 font-mono text-[9px] uppercase tracking-[0.14em] text-white/50 md:px-8"><span>{modeCopy.eyebrow}</span><span>{region.shortName}</span></div>
+            <div className="p-5 md:p-8">{children}</div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
