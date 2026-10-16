@@ -5,6 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
+import { DitherField } from "@/components/auth/dither-field";
 import { BrandLogo } from "@/components/brand-logo";
 import { getRegionForHostname, getTracifyRegion } from "@/lib/regions";
 
@@ -46,6 +47,7 @@ export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactN
         </div>
       </aside>
       <section className="relative isolate flex flex-col overflow-hidden px-5 py-6 sm:px-8 md:px-12">
+        <DitherField className="opacity-30" />
         <div className="flex justify-end">
           <Link href={`/cloud?next=/${mode === "sign-up" ? "sign-up" : "sign-in"}`} className="inline-flex min-h-11 items-center font-mono text-[9px] uppercase tracking-[0.14em] hover:text-black/55">{region.flag} {region.shortName} region · Change</Link>
         </div>

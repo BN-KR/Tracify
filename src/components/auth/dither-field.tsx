@@ -28,6 +28,7 @@ export function DitherField({ className = "" }: { className?: string }) {
     let raf = 0;
     let last = 0;
     const mouse = { x: -1, y: -1 };
+    const eased = { x: -1, y: -1, k: 0 };
 
     const resize = () => {
       const r = canvas.getBoundingClientRect();
@@ -48,10 +49,10 @@ export function DitherField({ className = "" }: { className?: string }) {
           const nx = x / w;
           let v = ny * 0.95 - 0.12 + (1 - nx) * 0.18;
           v += 0.26 * Math.sin(nx * 6 + t * 0.08 + ny * 3) + 0.12 * Math.sin(nx * 15 - t * 0.1);
-          if (mouse.x >= 0) {
-            const dx = x - mouse.x;
-            const dy = y - mouse.y;
-            v += 0.0 * Math.exp(-(dx * dx + dy * dy) / 260);
+          if (eased.k > 0.01) {
+            const dx = x - eased.x;
+            const dy = y - eased.y;
+            v += 0.22 * eased.k * Math.exp(-(dx * dx + dy * dy) / 420);
           }
           const th = (BAYER[y & 3][x & 3] + 0.5) / 16;
           if (v <= th) continue;
@@ -69,7 +70,13 @@ export function DitherField({ className = "" }: { className?: string }) {
     }
 
     const loop = (now: number) => {
-      if (now - last > 120) {
+      if (now - last > 40) {
+        if (mouse.x >= 0) {
+          if (eased.x < 0) { eased.x = mouse.x; eased.y = mouse.y; }
+          eased.x += (mouse.x - eased.x) * 0.06;
+          eased.y += (mouse.y - eased.y) * 0.06;
+          eased.k += (1 - eased.k) * 0.05;
+        }
         draw(now);
         last = now;
       }

@@ -7,6 +7,7 @@ import { OnboardingBackButton } from "@/components/onboarding/onboarding-back-bu
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { DitherField } from "@/components/auth/dither-field";
 import { StepArtwork } from "@/components/onboarding/step-artwork";
 import { BrandLogo } from "@/components/brand-logo";
 
@@ -50,6 +51,7 @@ export function OnboardingShell({
       <Suspense fallback={null}>
         <OnboardingEscapeLink currentStep={currentStep} />
       </Suspense>
+        <DitherField className="opacity-30" />
         <header className="flex flex-wrap items-start justify-between gap-x-8 gap-y-5">
           <Link href="/" aria-label="Tracify home"><BrandLogo className="text-black" /></Link>
           <PixelStepper activeIndex={activeIndex} />
