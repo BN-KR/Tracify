@@ -8,6 +8,7 @@ import { components } from "../_generated/api";
 import type { DataModel } from "../_generated/dataModel";
 import authConfig from "../auth.config";
 import schema from "./schema";
+import { ac, roles } from "./roles";
 
 export const authComponent = createClient<DataModel, typeof schema>(
   components.betterAuth,
@@ -108,6 +109,8 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
   },
   plugins: [
     organization({
+      ac,
+      roles,
       organizationLimit: 10,
       membershipLimit: 100,
       invitationExpiresIn: 60 * 60 * 24 * 7,

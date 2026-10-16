@@ -2200,3 +2200,9 @@
 - Added `/compare` hub + `/compare/[slug]` (Langfuse, LangSmith, Helicone, Arize Phoenix, Braintrust, Datadog), `/integrations/[slug]` (OpenAI, Anthropic, LangGraph, OpenTelemetry, CrewAI, Vercel AI SDK) and `/glossary/[term]` (27 terms in `src/lib/glossary.ts`). Content lives in `src/lib/seo-pages.ts`; competitor claims are kept high level on purpose.
 - robots.ts names AI crawlers explicitly; `/llms-full.txt` serves docs + glossary + comparisons as plain text; llms.txt and sitemap list the new pages; Organization schema has sameAs.
 - Not done: more use-case pages (bespoke art, needs a design-preview PR), best-tools listicle, Search Console/Bing, backlinks.
+
+## 2026-10-16 Teams and sharing (branch `claude/project-thread-uzz5wa`)
+- Public share links: `sharedTraces` table, `convex/sharedTraces.ts` (create/revoke/getForRun, public `resolve` by token), public page `/share/[token]` (read-only, noindex, no user ids/metadata/stack traces). `/share` is allowed on the cloud host in `src/proxy.ts` and has no marketing chrome.
+- Run notes: `comments.createRunNote/listRunNotes/remove` (stored under spanId `run:<runId>`), panel in the trace viewer.
+- Roles: added a read-only `viewer` role (`convex/betterAuth/roles.ts`, used by server and client auth config). Members screen: change role, remove, pending invites with copy/cancel. Invite emails are not sent; links are copied by hand.
+- Needs a manual Convex deploy (schema, functions, auth config).
