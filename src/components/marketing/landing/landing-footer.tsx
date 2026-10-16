@@ -53,7 +53,7 @@ export function LandingFooter() {
           </div>
         </div>
 
-        <div className="mt-16 flex select-none items-baseline justify-between pb-[0.2em] font-pixel text-[19vw] leading-[0.78] tracking-[-0.08em] lg:text-[18vw]" aria-hidden="true">
+        <div className="mt-16 flex select-none items-baseline justify-between pb-[0.2em] font-pixel text-[16vw] leading-[0.78] tracking-[-0.08em] lg:text-[18vw]" aria-hidden="true">
           <motion.span
             className="inline-block"
             initial={reduce ? false : { x: "-30%", opacity: 0 }}
