@@ -8,6 +8,7 @@ import { Bento } from "./bento";
 import { Anatomy, BeforeAfter, UseCases } from "./more-sections";
 import { Timeline } from "./timeline";
 import { PricingSection } from "./pricing-section";
+import { SmoothScroll } from "./smooth-scroll";
 
 const faqs = [
   ["What is a span?", "One recorded step in a run: a model call, a tool call, a retrieval. Plans are sized by spans per month."],
@@ -19,6 +20,7 @@ const faqs = [
 export function LandingPage() {
   return (
     <div className="overflow-x-clip bg-[#090909]">
+      <SmoothScroll />
       <Hero />
 
       <section className="border-y border-white/15 bg-[#090909] py-6 text-[#eceae3]" aria-label="Works with">
