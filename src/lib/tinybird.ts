@@ -953,6 +953,8 @@ export async function traceGroupComparison(projectId: string, filters: TraceList
     key: String(row.key), runs: Number(row.runs), failedRuns: Number(row.failedRuns), avgCostUsd: Number(row.avgCostUsd),
     p50DurationMs: Number(row.p50DurationMs), p95DurationMs: Number(row.p95DurationMs), avgSteps: Number(row.avgSteps),
   }));
+}
+
 export type StepListRow = {
   spanId: string; runId: string; name: string; type: string; traceName: string; modelId: string; createdAt: string;
   latencyMs: number; costUsd: number; inputTokens: number; outputTokens: number; errorType: string; errorMessage: string;
