@@ -127,9 +127,37 @@ export default defineSchema({
     state: v.optional(v.union(v.literal("active"), v.literal("resolved"), v.literal("muted"))),
     readAt: v.optional(v.number()),
     projectId: v.id("projects"),
+    ruleId: v.optional(v.id("alertRules")),
   })
     .index("by_projectId", ["projectId"])
-    .index("by_runId", ["runId"]),
+    .index("by_runId", ["runId"])
+    .index("by_ruleId", ["ruleId"]),
+
+  // Rules that Tracify checks on a schedule (convex/crons.ts). A breach opens an alert and emails `emailTo`.
+  alertRules: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    metric: v.union(
+      v.literal("failed_runs"),
+      v.literal("cost_usd"),
+      v.literal("slow_p95_seconds"),
+      v.literal("minutes_without_runs"),
+    ),
+    threshold: v.number(),
+    windowMinutes: v.number(),
+    environment: v.optional(v.string()),
+    emailTo: v.array(v.string()),
+    enabled: v.boolean(),
+    state: v.union(v.literal("ok"), v.literal("firing")),
+    lastValue: v.optional(v.number()),
+    lastCheckedAt: v.optional(v.number()),
+    lastFiredAt: v.optional(v.number()),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_enabled", ["enabled"]),
 
   automations: defineTable({
     projectId: v.id("projects"),
