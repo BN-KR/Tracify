@@ -22,6 +22,7 @@ Use the documentation for implementation details and the blog for explanatory gu
 ## Compare and learn
 
 - [Compare Tracify with other tools](https://www.tracify.tech/compare): Tracify vs Langfuse, LangSmith, Helicone, Arize Phoenix, Braintrust and Datadog.
+- [Free AI agent cost estimator](https://www.tracify.tech/tools/ai-cost-estimator): Estimate cost per run, per finished task and per month from traffic and token counts.
 - [Glossary](https://www.tracify.tech/glossary): Short definitions of agent observability terms, one page per term.
 - [Trace OpenAI calls](https://www.tracify.tech/integrations/openai), [Anthropic](https://www.tracify.tech/integrations/anthropic), [LangGraph](https://www.tracify.tech/integrations/langgraph), [OpenTelemetry](https://www.tracify.tech/integrations/opentelemetry): Setup pages per integration.
 - [Full text for AI](https://www.tracify.tech/llms-full.txt): Docs, glossary, comparisons and integrations as one plain-text file.

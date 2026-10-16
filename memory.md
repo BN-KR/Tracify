@@ -1,5 +1,11 @@
 # Project Memory
 
+## 2026-10-16 Growth pass — draft PR (branch `claude/project-thread-bq73n8`)
+- New public tool `/tools/ai-cost-estimator` (pure maths in `src/lib/cost-estimator.ts`, tested by `npm run test:tools`; runs in the browser, share link puts numbers in the URL, example prices are round placeholders, never a provider list). Added to sitemap and `public/llms.txt`.
+- Newsletter: existing `NewsletterCapture` (posts to `/api/leads`, intent `newsletter`) now takes a `source` and sends it with any saved referral code in the lead `campaign` field (`newsletter-blog|ref:anna`). `NewsletterPanel` sits after the blog CTA, at the end of docs articles and on the estimator. No backend change, no Convex deploy needed.
+- Referral: `?ref=code` is remembered in localStorage (`tracify.ref`) by `ReferralCapture` in the root layout; `/refer` builds a link. It is only attributed on newsletter/contact leads for now, not on sign-ups. There is no reward scheme (owner has not decided one).
+- Three blog posts: `how-to-estimate-ai-agent-costs`, `how-to-track-llm-token-usage`, `trace-langgraph-agents` (hand-made SVG visuals in `public/media`). Launch drafts for Product Hunt and Hacker News live in the shared project files under `growth/`, nothing posted.
+
 ## Tracing roadmap authorized 2026-10-14 (in progress)
 - User authorized all five recommended priorities: loading flash; CSV and sorting; OpenAI/Anthropic then LangGraph integrations; cross-trace steps table; saved views. Start base main `fcafb74` after #160/#161 merged, no open PRs. Auth isolated on `codex/project-loading-refresh` in `/home/orca/workspaces/Tracify-loading`. Sessions page files remain out of scope.
 ## 2026-10-15 Search exclusions and comparisons — draft PR (branch `claude/search-exclusions-limits-csfvu6`)
