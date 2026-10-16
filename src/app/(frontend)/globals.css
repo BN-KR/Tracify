@@ -831,3 +831,23 @@ body:has(.tracify-cloud-shell) [role="menu"] [class*="text-black/55"]{color:#8b8
 body:has(.tracify-cloud-shell) [role="menu"] [class*="text-black"]{color:#e6e6e6}
 body:has(.tracify-cloud-shell) [role="menu"] [class*="bg-[#f3f2ed]"],body:has(.tracify-cloud-shell) [role="menu"] [class*="bg-white"]{background:#1b1b1b}
 body:has(.tracify-cloud-shell) [role="menu"] [class*="border-black"]{border-color:#3a3a3a}
+
+/* Dark card theme: the auth and onboarding forms are written with black-on-white
+   utilities; inside .dark-card they render light-on-black with yellow accents. */
+.dark-card [class*="text-black"]{color:#eceae3}
+.dark-card [class*="text-black/"]{color:rgba(236,234,227,.62)}
+.dark-card [class*="text-[#92400E]"]{color:#f4d44d}
+.dark-card [class*="bg-white"],.dark-card [class*="bg-[#f7f6f1]"],.dark-card [class*="bg-[#f3f2ed]"],.dark-card [class*="bg-[#e4e1d8]"]{background-color:#151515}
+.dark-card [class*="border-black"]{border-color:rgba(236,234,227,.2)}
+.dark-card [class*="bg-black/"]{background-color:rgba(236,234,227,.18)}
+.dark-card input:focus{background-color:#1c1c1c;border-color:#f4d44d}
+.dark-card input::placeholder{color:rgba(236,234,227,.4)}
+.dark-card button[class*="bg-black"],.dark-card a[class*="bg-black"]{background-color:#f4d44d;color:#090909;border-color:#f4d44d}
+.dark-card button[class*="bg-black"]:hover:not(:disabled),.dark-card a[class*="bg-black"]:hover{background-color:#fff4b5;color:#090909}
+.dark-card button[class*="bg-black"]:disabled{background-color:rgba(236,234,227,.08);color:rgba(236,234,227,.6);border-color:rgba(236,234,227,.25)}
+.dark-card button[class*="bg-white"]:hover,.dark-card [class*="hover:bg-[#f4d44d]"]:hover{background-color:#f4d44d;color:#090909}
+.dark-card [class~="bg-[#f4d44d]"]{background-color:#f4d44d;color:#090909}
+.dark-card [class~="bg-[#f4d44d]"] *{color:#090909}
+.dark-card [class*="bg-[#090909]"],.dark-card [class*="bg-[#050505]"]{background-color:#050505}
+.dark-card [class*="bg-[#090909]"] *{color:inherit}
+.dark-card [class~="bg-[#f4d44d]"] [class*="text-[#f4d44d]"]{color:#f4d44d}

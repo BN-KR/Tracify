@@ -82,7 +82,7 @@ export function StepArtwork({ step }: { step: OnboardingStepId }) {
   const name = draft.name?.trim() || "your-project";
 
   return (
-    <div className="w-full max-w-xl border border-white/20 bg-[#090909]/75 font-mono text-[#eceae3] backdrop-blur-sm">
+    <div className="w-full max-w-xl border border-white/20 bg-[#090909] font-mono text-[#eceae3] backdrop-blur-sm">
       <div className="flex items-center justify-between border-b border-white/15 px-4 py-3 text-[10px] uppercase tracking-[0.14em] text-white/55">
         <span className="flex items-center gap-2"><span className="size-2 bg-[#f4d44d]" aria-hidden="true" />tracify / {name}</span>
         <span className="text-white/35">live preview</span>

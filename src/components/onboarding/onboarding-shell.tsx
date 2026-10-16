@@ -27,8 +27,8 @@ function PixelStepper({ activeIndex }: { activeIndex: number }) {
         const active = i === activeIndex;
         return (
           <li key={step.id} className="min-w-0 flex-1" aria-current={active ? "step" : undefined}>
-            <div className={`h-2 ${done ? "bg-black" : active ? "animate-mono-pulse bg-[#f4d44d] outline outline-1 outline-black" : "bg-black/15"}`} />
-            <p className={`mt-1.5 hidden truncate font-mono text-[9px] uppercase tracking-[0.1em] sm:block ${active ? "text-black" : done ? "text-black/60" : "text-black/30"}`}>{step.label}</p>
+            <div className={`h-2 ${done ? "bg-black" : active ? "animate-mono-pulse bg-[#fff4b5] outline outline-2 outline-black" : "bg-black/20"}`} />
+            <p className={`mt-1.5 hidden truncate font-mono text-[9px] uppercase tracking-[0.1em] sm:block ${active ? "text-black" : done ? "text-black/70" : "text-black/45"}`}>{step.label}</p>
           </li>
         );
       })}
@@ -46,21 +46,32 @@ export function OnboardingShell({
   const presentation = stepPresentation[currentStep];
   const activeIndex = onboardingSteps.findIndex((step) => step.id === currentStep);
   return (
-    <main className="relative grid min-h-svh bg-[#f4f2ec] font-mono text-black lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)]">
+    <main className="relative grid min-h-svh bg-[#f4d44d] font-mono text-black lg:grid-cols-[minmax(380px,0.85fr)_minmax(0,1.15fr)]">
+      <aside className="relative isolate order-first flex min-h-[200px] flex-col justify-between overflow-hidden bg-[#090909] p-6 text-[#eceae3] sm:p-8 md:p-10 lg:min-h-svh">
+        <Image key={presentation.img} src={`/images/landing/${presentation.img}.png`} alt="" fill priority unoptimized sizes="(min-width:1024px) 45vw, 100vw" className="-z-10 object-cover opacity-30 [image-rendering:pixelated]" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,#090909_10%,rgba(9,9,9,0.88)_55%,rgba(9,9,9,0.65)_100%)]" />
+        <div className="flex items-start justify-between gap-6">
+          <Link href="/" aria-label="Tracify home"><BrandLogo className="text-[#eceae3]" /></Link>
+          <span className="font-pixel text-5xl leading-none tracking-[-0.08em] text-[#f4d44d] lg:text-7xl">{presentation.code}</span>
+        </div>
+        <div className="mt-6 lg:mt-14">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f4d44d]">Step {activeIndex + 1} of {onboardingSteps.length}</p>
+          <h2 className="mt-4 font-pixel text-[clamp(2rem,3.6vw,3.2rem)] leading-[0.9] tracking-[-0.06em]">{presentation.label}</h2>
+          <p className="mt-4 max-w-sm font-sans text-sm leading-6 text-white/65 sm:text-base sm:leading-7">{presentation.note}</p>
+          <div className="mt-8 hidden lg:block [@media(max-height:820px)]:hidden"><StepArtwork step={currentStep} /></div>
+        </div>
+      </aside>
       <section className="relative isolate flex flex-col overflow-hidden px-5 pb-12 pt-12 sm:px-8 md:px-12 lg:min-h-svh">
-      <Suspense fallback={null}>
-        <OnboardingEscapeLink currentStep={currentStep} />
-      </Suspense>
-        <DitherField className="opacity-30" />
-        <header className="flex flex-wrap items-start justify-between gap-x-8 gap-y-5">
-          <Link href="/" aria-label="Tracify home"><BrandLogo className="text-black" /></Link>
-          <PixelStepper activeIndex={activeIndex} />
-        </header>
-        <div className="mx-auto mt-10 flex w-full max-w-[680px] flex-1 flex-col justify-center lg:mt-0">
-          <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-black/55">Step {activeIndex + 1} of {onboardingSteps.length} · about 2 minutes total</p>
-          <div className="border border-black/80 bg-white text-black shadow-[0_1px_0_rgba(0,0,0,0.04),0_24px_48px_-24px_rgba(9,9,9,0.35)]">
-            <div className="flex items-center justify-between border-b border-black/10 px-6 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-black/50 md:px-9">
-              <span className="flex items-center gap-2"><span className="size-2 bg-[#f4d44d] outline outline-1 outline-black" aria-hidden="true" />{presentation.label}</span>
+        <Suspense fallback={null}>
+          <OnboardingEscapeLink currentStep={currentStep} />
+        </Suspense>
+        <DitherField vivid />
+        <PixelStepper activeIndex={activeIndex} />
+        <div className="mx-auto mt-10 flex w-full max-w-[680px] flex-1 flex-col justify-center">
+          <div className="dark-card border border-black bg-[#090909] text-[#eceae3] shadow-[8px_8px_0_#090909]">
+            <div className="h-[3px] bg-[#f4d44d]" />
+            <div className="flex items-center justify-between border-b border-white/10 px-6 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50 md:px-9">
+              <span>{presentation.label}</span>
               <span>{presentation.code} / 05</span>
             </div>
             <div className="p-6 md:p-9">
@@ -70,18 +81,6 @@ export function OnboardingShell({
           </div>
         </div>
       </section>
-      <aside className="relative isolate order-first m-3 flex min-h-[200px] flex-col justify-between overflow-hidden border border-black bg-[#090909] p-6 text-[#eceae3] shadow-[6px_6px_0_#f4d44d] sm:m-4 sm:p-8 md:p-10 lg:order-none lg:m-5 lg:min-h-[calc(100svh-2.5rem)]">
-        <Image key={presentation.img} src={`/images/landing/${presentation.img}.png`} alt="" fill priority unoptimized sizes="(min-width:1024px) 40vw, 100vw" className="-z-10 object-cover opacity-30 [image-rendering:pixelated]" />
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,#090909_8%,rgba(9,9,9,0.65)_55%,rgba(9,9,9,0.3)_100%)]" />
-        <div className="flex items-start justify-between gap-6">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f4d44d]">{presentation.label}</p>
-          <span className="font-pixel text-6xl leading-none tracking-[-0.08em] text-[#f4d44d] lg:text-8xl">{presentation.code}</span>
-        </div>
-        <div className="mt-6 lg:mt-14">
-          <p className="max-w-sm font-sans text-sm leading-6 text-white/70 sm:text-base sm:leading-7">{presentation.note}</p>
-          <div className="mt-8 hidden lg:block"><StepArtwork step={currentStep} /></div>
-        </div>
-      </aside>
     </main>
   );
 }

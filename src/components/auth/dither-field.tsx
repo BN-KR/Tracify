@@ -15,7 +15,7 @@ const CELL = 8;
  * bottom, fading to sparse dark pixels toward the top, and it bulges toward the
  * pointer. Draws once (no motion) when the visitor prefers reduced motion.
  */
-export function DitherField({ className = "" }: { className?: string }) {
+export function DitherField({ className = "", vivid = false }: { className?: string; vivid?: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -57,11 +57,11 @@ export function DitherField({ className = "" }: { className?: string }) {
           const th = (BAYER[y & 3][x & 3] + 0.5) / 16;
           if (v <= th) continue;
           if (v > 0.85) {
-            ctx.fillStyle = "#f4d44d";
+            ctx.fillStyle = vivid ? "#fff4b5" : "#f4d44d";
             ctx.globalAlpha = 1;
           } else {
             ctx.fillStyle = "#090909";
-            ctx.globalAlpha = 0.16 + Math.min(0.5, v * 0.5);
+            ctx.globalAlpha = vivid ? 0.1 + Math.min(0.3, v * 0.3) : 0.16 + Math.min(0.5, v * 0.5);
           }
           ctx.fillRect(x * CELL, y * CELL, CELL - 1, CELL - 1);
         }
@@ -100,7 +100,7 @@ export function DitherField({ className = "" }: { className?: string }) {
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", onMove);
     };
-  }, []);
+  }, [vivid]);
 
   return <canvas ref={ref} aria-hidden="true" className={`absolute inset-0 -z-10 size-full ${className}`} />;
 }
