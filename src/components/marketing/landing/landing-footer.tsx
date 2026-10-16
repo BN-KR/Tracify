@@ -20,7 +20,7 @@ export function LandingFooter() {
   const reduce = useReducedMotion();
   return (
     <footer className="relative isolate overflow-hidden bg-[#090909] text-[#eceae3]">
-      <div className="relative h-[34vw] max-h-[520px] min-h-[220px]">
+      <div className="relative h-[14vw] max-h-[220px] min-h-[90px]">
         <Image src="/images/landing/footer-ridges.png" alt="" fill unoptimized sizes="100vw" className="object-cover object-bottom [image-rendering:pixelated]" />
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#090909_0%,rgba(9,9,9,0)_35%,rgba(9,9,9,0)_70%,#090909_100%)]" />
       </div>
