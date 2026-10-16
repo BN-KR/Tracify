@@ -252,7 +252,7 @@ def horizon():
     c = Canvas(w, h)
     floor_grid(c, w, h, gain=0.2, horizon=0.55)
     yy, xx = np.mgrid[0:h, 0:w]
-    cx, cy, r = w / 2, h * 0.55, 330
+    cx, cy, r = w / 2, h * 0.625, 330
     d = np.hypot(xx - cx, yy - cy)
     sun = np.clip(1 - d / r, 0, 1) * (yy < cy)
     bands = (np.sin((yy - cy) * 0.12 * (1 + (cy - yy) / 200)) > -0.2) | (yy < cy - 160)
