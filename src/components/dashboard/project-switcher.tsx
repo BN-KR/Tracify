@@ -125,7 +125,7 @@ export function ProjectSwitcher({
   }
 
   return (
-    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -147,9 +147,10 @@ export function ProjectSwitcher({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align="start"
-        side={isCollapsed ? "right" : "bottom"}
+        align={isCollapsed ? "end" : "start"}
+        side={isCollapsed ? "right" : "top"}
         sideOffset={isCollapsed ? 12 : 6}
+        collisionPadding={8}
         className="w-72 max-h-[70vh] overflow-y-auto"
       >
         {synthetic ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 
 import { DashboardSidebar } from "./dashboard-sidebar";
@@ -126,6 +127,19 @@ export function DashboardShell({
         <main
           className={`h-svh pb-0 overflow-y-auto scrollbar-hide ${isDashboardRoute ? "bg-[#101010] p-0" : "bg-[#eceae3] p-4 lg:p-6"}`}
         >
+          {isDashboardRoute && !synthetic ? (
+            <div className="tracify-collapse-anchor relative h-0">
+              <button
+                type="button"
+                aria-label={isCollapsed ? "Open sidebar (Ctrl+\\)" : "Collapse sidebar (Ctrl+\\)"}
+                title={isCollapsed ? "Open sidebar · Ctrl+\\" : "Collapse sidebar · Ctrl+\\"}
+                onClick={() => window.dispatchEvent(new Event("tracify:toggle-sidebar"))}
+                className="absolute left-2 top-2.5 z-10 flex size-7 items-center justify-center !text-[#8d8d8d] outline-none hover:!bg-[#181818] hover:!text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55"
+              >
+                {isCollapsed && !isMobileViewport ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
+              </button>
+            </div>
+          ) : null}
           {children}
         </main>
       </div>

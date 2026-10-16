@@ -42,7 +42,7 @@ export function SidebarAccountMenu({
   const billingHref = projectId ? `/dashboard/${projectId}/billing` : "/dashboard/billing";
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -64,7 +64,7 @@ export function SidebarAccountMenu({
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" side={isCollapsed ? "right" : "top"} sideOffset={8} className="w-64">
+      <DropdownMenuContent align={isCollapsed ? "end" : "start"} side={isCollapsed ? "right" : "top"} collisionPadding={8} sideOffset={8} className="w-64">
         <DropdownMenuLabel className="flex flex-col gap-0.5 px-2 py-2 normal-case !text-[#dedede]">
           <span className="truncate text-[12px]">{name}</span>
           <span className="truncate text-[10px] opacity-55">{email}</span>
