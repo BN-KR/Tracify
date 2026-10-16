@@ -18,13 +18,14 @@ type PageMetadataInput = {
  * every public page ships the full set the SEO release checklist requires.
  */
 export function pageMetadata({ title, description, path, image, type = "website" }: PageMetadataInput): Metadata {
-  const images = image ? [{ url: image }] : undefined;
+  const card = image ?? ogImageUrl({ title, kicker: kickerForPath(path) });
+  const images = [{ url: card, width: 1200, height: 630, alt: `${title} | ${SITE_NAME}` }];
   return {
     title,
     description,
     alternates: { canonical: path },
     openGraph: { title: `${title} | ${SITE_NAME}`, description, url: path, siteName: SITE_NAME, locale: "en_US", type, images },
-    twitter: { card: "summary_large_image", title: `${title} | ${SITE_NAME}`, description, images: image ? [image] : undefined },
+    twitter: { card: "summary_large_image", title: `${title} | ${SITE_NAME}`, description, images: [card] },
   };
 }
 
@@ -59,4 +60,26 @@ export function faqJsonLd(items: ReadonlyArray<{ q: string; a: string }>) {
 /** Serialises JSON-LD safely for an inline script tag. */
 export function jsonLdString(data: unknown) {
   return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+
+/**
+ * Share-card URL for a page. Rendered by `/og` in the Dissolve style (ink, cream, yellow
+ * pixel bars) with the page's own title on it.
+ */
+export function ogImageUrl({ title, kicker, sub, kind }: { title: string; kicker?: string; sub?: string; kind?: "home" | "page" | "blog" }) {
+  const query = new URLSearchParams({ title });
+  if (kicker) query.set("kicker", kicker);
+  if (sub) query.set("sub", sub);
+  if (kind) query.set("kind", kind);
+  return `/og?${query.toString()}`;
+}
+
+/** Picks a share-card label from the route so each page type reads differently. */
+export function kickerForPath(path: string) {
+  if (path.startsWith("/blog")) return "Blog";
+  if (path.startsWith("/docs")) return "Documentation";
+  if (path.startsWith("/product")) return "Product";
+  if (path.startsWith("/use-cases")) return "Use case";
+  if (path.startsWith("/pricing")) return "Pricing";
+  return "AI agent observability";
 }

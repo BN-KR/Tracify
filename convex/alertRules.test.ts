@@ -61,3 +61,22 @@ test("preview reports how often a rule would have fired", async () => {
   expect(result?.fires).toBeGreaterThanOrEqual(1);
   expect(result?.series).toHaveLength(70);
 });
+
+test("Slack and webhook destinations are validated, hidden from the page and returned when a rule fires", async () => {
+  const { t, projectId, owner } = await setup();
+  const base = { projectId, ...rule, emailTo: [] as string[] };
+  await expect(owner.mutation(api.alertRules.create, base)).rejects.toThrow(/at least one/i);
+  await expect(owner.mutation(api.alertRules.create, { ...base, slackUrl: "https://evil.example.com/services/x" })).rejects.toThrow(/slack/i);
+  await expect(owner.mutation(api.alertRules.create, { ...base, webhookUrl: "http://example.com/hook" })).rejects.toThrow(/https/i);
+  await expect(owner.mutation(api.alertRules.create, { ...base, webhookUrl: "https://127.0.0.1/hook" })).rejects.toThrow(/public/i);
+  await expect(owner.mutation(api.alertRules.create, { ...base, webhookUrl: "https://localhost/hook" })).rejects.toThrow(/public/i);
+
+  const slackUrl = "https://hooks.slack.com/services/T000/B000/secret";
+  const ruleId = await owner.mutation(api.alertRules.create, { ...base, slackUrl, webhookUrl: "https://hooks.example.com/tracify" });
+  const listed = (await owner.query(api.alertRules.overview, { projectId }))?.rules[0];
+  expect(JSON.stringify(listed)).not.toContain("secret");
+  expect(listed).toMatchObject({ hasSlack: true, webhookHost: "hooks.example.com" });
+
+  await addRuns(t, projectId as never, "failed", 3);
+  expect(await t.mutation(internal.alertRules.evaluate, { ruleId })).toMatchObject({ fired: true, emailTo: [], slackUrl, webhookUrl: "https://hooks.example.com/tracify" });
+});
