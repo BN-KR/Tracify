@@ -49,19 +49,19 @@ export function LandingPage() {
       </section>
 
       <section className="overflow-hidden bg-[#090909] px-5 pt-28 text-center text-[#eceae3] md:px-10 md:pt-36">
-        <Reveal>
+        <Reveal className="relative z-10">
           <h2 className="mx-auto max-w-5xl font-pixel text-[clamp(3rem,9vw,8rem)] leading-[0.88] tracking-[-0.08em]">Stop guessing. Start seeing.</h2>
           <p className="mx-auto mt-6 max-w-md text-base leading-7 text-white/70">Wrap your agent, run it, open the map. The free plan needs no card.</p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <Link href="/sign-up" className="group inline-flex items-center gap-3 bg-[#f4d44d] px-8 py-5 font-mono text-[11px] uppercase tracking-[0.14em] text-black hover:bg-white">
               Start tracing free <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
             </Link>
-            <Link href="/docs" className="inline-flex items-center border border-white/40 px-8 py-5 font-mono text-[11px] uppercase tracking-[0.14em] hover:bg-white hover:text-black">
+            <Link href="/docs" className="inline-flex items-center border border-white/40 bg-[#090909] px-8 py-5 font-mono text-[11px] uppercase tracking-[0.14em] hover:bg-white hover:text-black">
               Read the docs
             </Link>
           </div>
         </Reveal>
-        <Reveal className="relative -mx-5 mt-4 aspect-[2/1] md:-mx-10" delay={0.15}>
+        <Reveal className="relative -mx-5 -mt-[16vw] aspect-[2/1] md:-mx-10" delay={0.15}>
           <Image src="/images/landing/horizon-sun.png" alt="" fill unoptimized sizes="100vw" className="object-cover [image-rendering:pixelated]" />
         </Reveal>
       </section>
