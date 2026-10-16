@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandLoader } from "@/components/brand/brand-loader";
 import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
@@ -65,11 +66,7 @@ export function ProjectRouteGate({
   if (gate.show) return <>{children}</>;
 
   if (auth.status === "loading" || !isAuthenticated || routeState === undefined || routeState.status === "unauthenticated" || !identity) {
-    return (
-      <div className="px-6 py-6 font-mono text-sm text-black/55">
-        Loading project...
-      </div>
-    );
+    return <BrandLoader label="Loading project" />;
   }
 
   if (routeState.status === "no_projects") {

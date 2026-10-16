@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { captureAnalytics } from "@/lib/analytics";
 import { useMutation } from "convex/react";
 import { api } from "convex/_generated/api";
@@ -8,6 +9,7 @@ import type { Id } from "convex/_generated/dataModel";
 
 import { CodeCopyBlock } from "@/components/onboarding/code-copy-block";
 import { OnboardingHeader } from "@/components/onboarding/onboarding-shell";
+import { publishOnboardingDraft } from "@/components/onboarding/onboarding-draft";
 import { getDeploymentRegion, getTracifyRegion } from "@/lib/regions";
 
 const isPostHogConfigured = Boolean(
@@ -68,6 +70,7 @@ TRACIFY_API_KEY=your_key_here`,
 };
 
 export function InstallStep() {
+  const router = useRouter();
   const updateProgress = useMutation(api.projects.updateOnboardingProgress);
   const [tab, setTab] = useState<keyof typeof snippets>("python");
   const active = snippets[tab];
@@ -76,21 +79,21 @@ export function InstallStep() {
   return (
     <div>
       <OnboardingHeader
-        title="Three lines to your first trace."
-        description={`Pick your runtime, paste the snippet and point it at Tracify ${region.shortName}.`}
+        title="Paste, run, done."
+        description={`Pick how you build, copy the lines below into your agent, then run it once. It sends to Tracify ${region.shortName}.`}
       />
-      <CodeCopyBlock label="Regional environment" value={`TRACIFY_REGION=${region.id}`} />
+      <CodeCopyBlock label="0 · Point at your region" value={`TRACIFY_REGION=${region.id}`} />
       <div className="mb-4 mt-4 border border-black/15 bg-white p-3 font-mono text-[10px] uppercase tracking-[0.1em] text-black/60">Ingest endpoint · {region.origin}/api/ingest</div>
       <div className="mb-4 grid border border-black/15 sm:grid-cols-3">
         {Object.entries(snippets).map(([key, snippet]) => (
           <button
             key={key}
             type="button"
-            onClick={() => setTab(key as keyof typeof snippets)}
+            onClick={() => { setTab(key as keyof typeof snippets); publishOnboardingDraft({ runtime: key }); }}
             className={
               key === tab
-                ? "h-10 flex-1 bg-black text-[13px] text-white"
-                : "h-10 flex-1 bg-[#f3f2ed] text-[13px] text-black/55 transition-colors hover:bg-[#f3f2ed] hover:text-black/70"
+                ? "h-12 flex-1 bg-[#f4d44d] font-mono text-[12px] uppercase tracking-[0.08em] text-black"
+                : "h-12 flex-1 bg-[#f3f2ed] font-mono text-[12px] uppercase tracking-[0.08em] text-black/55 transition-colors hover:bg-[#f3f2ed] hover:text-black/70"
             }
           >
             {snippet.label}
@@ -112,9 +115,9 @@ export function InstallStep() {
         </>
       ) : (
         <>
-          <CodeCopyBlock label="Install command" value={active.install} />
+          <CodeCopyBlock label="1 · Install" value={active.install} />
           <div className="mt-4">
-            <CodeCopyBlock label="Example" value={active.code} multiline />
+            <CodeCopyBlock label="2 · Add to your agent" value={active.code} multiline />
           </div>
         </>
       )}
@@ -127,11 +130,11 @@ export function InstallStep() {
           window.sessionStorage.setItem(INSTALL_READY_STORAGE_KEY, "true");
           const projectId = window.sessionStorage.getItem("tracify.onboarding.projectId");
           if (projectId) void updateProgress({ projectId: projectId as Id<"projects">, step: "waiting", sdk: tab === "python" ? "python" : "typescript" });
-          window.location.assign("/onboarding/waiting");
+          router.push("/onboarding/waiting");
         }}
-        className="mt-6 h-10 border border-black bg-black px-4 text-[13px] text-white transition-colors hover:bg-[#CCCCCC]"
+        className="mt-8 h-12 border border-black bg-black px-6 font-mono text-[12px] uppercase tracking-[0.1em] text-white transition-colors hover:bg-[#f4d44d] hover:text-black"
       >
-        I&apos;m ready
+        I added it, listen for my run →
       </button>
     </div>
   );

@@ -5,9 +5,8 @@ import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { BrandLogo } from "@/components/brand-logo";
 import { DitherField } from "@/components/auth/dither-field";
-import { TracePreview } from "@/components/auth/trace-preview";
+import { BrandLogo } from "@/components/brand-logo";
 import { getRegionForHostname, getTracifyRegion } from "@/lib/regions";
 
 type AuthMode = "sign-in" | "sign-up" | "forgot-password" | "reset-password" | "invitation" | "error";
@@ -34,23 +33,21 @@ export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactN
   const region = getTracifyRegion(regionId);
 
   return (
-    <main className="grid min-h-svh bg-[#eceae3] text-black selection:bg-[#f4d44d] lg:grid-cols-[minmax(420px,1.05fr)_minmax(0,1fr)]">
-      <aside className="relative isolate flex min-h-[340px] flex-col justify-between overflow-hidden bg-[#090909] p-6 text-[#eceae3] sm:p-8 md:p-10 lg:min-h-svh">
-        <Image src={modeCopy.img} alt="" fill priority unoptimized sizes="(min-width:1024px) 55vw, 100vw" className="-z-10 object-cover opacity-55 [image-rendering:pixelated]" />
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,#090909_8%,rgba(9,9,9,0.78)_55%,rgba(9,9,9,0.4)_100%)]" />
+    <main className="grid min-h-svh bg-[#f4f2ec] text-black selection:bg-[#f4d44d] lg:grid-cols-[minmax(380px,0.85fr)_minmax(0,1fr)]">
+      <aside className="relative isolate m-3 flex min-h-[260px] flex-col justify-between overflow-hidden border border-black bg-[#090909] p-6 text-[#eceae3] shadow-[6px_6px_0_#f4d44d] sm:m-4 sm:p-8 md:p-10 lg:m-5 lg:min-h-[calc(100svh-2.5rem)]">
+        <Image src={modeCopy.img} alt="" fill priority unoptimized sizes="(min-width:1024px) 55vw, 100vw" className="-z-10 object-cover opacity-30 [image-rendering:pixelated]" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,#090909_10%,rgba(9,9,9,0.88)_55%,rgba(9,9,9,0.65)_100%)]" />
         <div className="flex items-center justify-between">
           <Link href="/" aria-label="Tracify home" className="active-press focus-visible:outline-2 focus-visible:outline-offset-4"><BrandLogo className="text-[#eceae3]" /></Link>
           <Link href="https://www.tracify.tech" className="active-press hidden min-h-11 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/60 hover:text-white sm:flex">Back to site <ArrowUpRight className="size-3.5" /></Link>
         </div>
         <div className="mt-16 lg:mt-0">
           <motion.p initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f4d44d]">{modeCopy.marker}</motion.p>
-          <motion.h1 initial={reduce ? false : { opacity: 0, clipPath: "inset(0 0 100% 0)" }} animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }} transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }} className="mt-4 max-w-xl font-pixel text-[clamp(2.6rem,5.2vw,5.4rem)] leading-[0.88] tracking-[-0.065em]">{modeCopy.title}</motion.h1>
-          <p className="mt-5 max-w-md text-sm leading-6 text-white/65 sm:text-base sm:leading-7">{modeCopy.note}</p>
-          <div className="mt-10 hidden lg:block [@media(max-height:820px)]:hidden"><TracePreview /></div>
+          <motion.h1 initial={reduce ? false : { opacity: 0, clipPath: "inset(0 0 100% 0)" }} animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }} transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }} className="mt-4 max-w-xl font-pixel text-[clamp(2.2rem,4vw,3.8rem)] leading-[0.88] tracking-[-0.065em]">{modeCopy.title}</motion.h1>
         </div>
       </aside>
       <section className="relative isolate flex flex-col overflow-hidden px-5 py-6 sm:px-8 md:px-12">
-        <DitherField />
+        <DitherField className="opacity-30" />
         <div className="flex justify-end">
           <Link href={`/cloud?next=/${mode === "sign-up" ? "sign-up" : "sign-in"}`} className="inline-flex min-h-11 items-center font-mono text-[9px] uppercase tracking-[0.14em] hover:text-black/55">{region.flag} {region.shortName} region · Change</Link>
         </div>
