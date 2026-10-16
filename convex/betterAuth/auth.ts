@@ -30,6 +30,9 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       "tracify.tech",
       "tracifytech.vercel.app",
       "*.tracify-tech.vercel.app",
+      // Vercel branch previews: <project>-git-<branch>-tracify-tech.vercel.app
+      "tracify-git-*-tracify-tech.vercel.app",
+      "tracify-cloud-eu-git-*-tracify-tech.vercel.app",
       "localhost:*",
       "127.0.0.1:*",
     ],
@@ -64,6 +67,8 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     "https://www.tracify.tech",
     "https://tracify.tech",
     "https://*.tracify-tech.vercel.app",
+    "https://tracify-git-*-tracify-tech.vercel.app",
+    "https://tracify-cloud-eu-git-*-tracify-tech.vercel.app",
     "http://localhost:3000",
     "http://localhost:4000",
     "https://tracifytech.vercel.app",
