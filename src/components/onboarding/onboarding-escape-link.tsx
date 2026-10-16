@@ -100,7 +100,7 @@ export function OnboardingEscapeLink({
       <button
         type="button"
         onClick={onNavigate}
-        className="absolute right-5 top-3 z-10 font-mono text-[11px] uppercase tracking-[0.12em] text-black/55 underline-offset-4 hover:underline sm:right-8 outline-none transition-colors hover:text-black focus-visible:outline focus-visible:outline-1 focus-visible:outline-black/55"
+        className="absolute right-5 top-3 z-10 font-mono text-[11px] uppercase tracking-[0.12em] text-black/60 underline-offset-4 hover:underline sm:right-8 outline-none transition-colors hover:text-black focus-visible:outline focus-visible:outline-1 focus-visible:outline-black/55"
       >
         {label}
       </button>
