@@ -61,7 +61,7 @@ export function LandingPage() {
             </Link>
           </div>
         </Reveal>
-        <Reveal className="relative -mx-5 -mt-[16vw] aspect-[2/1] md:-mx-10" delay={0.15}>
+        <Reveal className="relative -mx-5 -mt-[28vw] aspect-square md:-mx-10 md:-mt-[16vw] md:aspect-[2/1]" delay={0.15}>
           <Image src="/images/landing/horizon-sun.png" alt="" fill unoptimized sizes="100vw" className="object-cover [image-rendering:pixelated]" />
         </Reveal>
       </section>
