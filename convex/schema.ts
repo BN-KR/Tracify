@@ -147,6 +147,8 @@ export default defineSchema({
     windowMinutes: v.number(),
     environment: v.optional(v.string()),
     emailTo: v.array(v.string()),
+    slackUrl: v.optional(v.string()),
+    webhookUrl: v.optional(v.string()),
     enabled: v.boolean(),
     state: v.union(v.literal("ok"), v.literal("firing")),
     lastValue: v.optional(v.number()),

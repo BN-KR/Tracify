@@ -5,7 +5,6 @@ import {
   BarChart3,
   BookOpen,
   CircleHelp,
-  ChevronsRight,
   Eye,
   Plus,
   FileText,
@@ -194,6 +193,7 @@ export function DashboardSidebar({
         label: "Analyze",
         items: [
           { title: "Costs", icon: BarChart3, href: isSynthetic ? syntheticHref("costs") : projectId ? `/dashboard/${projectId}/costs` : "/dashboard/costs" },
+          { title: "Comparisons", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/comparisons` : "/dashboard/comparisons" },
           { title: "Reports", icon: FileText, href: isSynthetic ? syntheticHref("reports") : projectId ? `/dashboard/${projectId}/reports` : "/dashboard/reports" },
           { title: "Trace Compare", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare" },
           { title: "Investigation", icon: Search, href: isSynthetic ? syntheticHref("investigate") : projectId ? `/dashboard/${projectId}/investigate` : "/dashboard/investigate" },
@@ -303,12 +303,6 @@ export function DashboardSidebar({
     }
   }
 
-  function toggleCollapsed() {
-    onCollapsedChange(!isCollapsed);
-    window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(!isCollapsed));
-  }
-
-
   return (
     <aside
       className={cn(
@@ -322,17 +316,6 @@ export function DashboardSidebar({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logos/dissolve/tracify-icon.svg" alt="" width={44} height={44} className="block size-11" />
         </Link>
-        {isCollapsed ? (
-          <button
-            type="button"
-            aria-label="Expand sidebar (Ctrl+\\)"
-            title="Expand sidebar · Ctrl+\\"
-            onClick={toggleCollapsed}
-            className="mb-3 flex size-9 items-center justify-center border border-white/20 !text-[#f4d44d] outline-none hover:!bg-[#181818] focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55"
-          >
-            <ChevronsRight className="size-4" />
-          </button>
-        ) : null}
         <div className="flex w-full flex-1 flex-col items-center gap-1 px-1.5">
           {railGroups.map((group) => {
             const Icon = group.icon;

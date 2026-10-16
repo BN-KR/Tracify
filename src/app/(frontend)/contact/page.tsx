@@ -123,7 +123,7 @@ export default function ContactPage() {
 
       <CreamBand>
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
+          <div className="min-w-0">
             <Eyebrow dark={false}>Before the call</Eyebrow>
             <SectionTitle>Four things make the call count.</SectionTitle>
             <p className="mt-6 max-w-md text-base leading-7 text-black/65">Short answers are fine. Skip anything you cannot share; sanitized staging data is always enough.</p>
@@ -132,7 +132,7 @@ export default function ContactPage() {
                 <span>Email template</span>
                 <CopyButton text={fitCallBody} label="Copy template" className="text-black hover:text-black/60" />
               </div>
-              <pre className="overflow-x-auto p-4 font-mono text-[11px] leading-6 text-black/75">{fitCallBody}</pre>
+              <pre className="overflow-x-auto whitespace-pre-wrap break-words p-4 font-mono text-[11px] leading-6 text-black/75 md:whitespace-pre">{fitCallBody}</pre>
             </div>
           </div>
           <ol className="border-t border-black">

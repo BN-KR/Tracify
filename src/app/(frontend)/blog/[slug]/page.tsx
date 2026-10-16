@@ -15,6 +15,7 @@ import {
   getPublishedPosts,
   type BlogPost,
 } from "@/lib/markdoc-blog";
+import { ogImageUrl } from "@/lib/seo";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,7 +40,7 @@ export async function generateMetadata({
 
   const metaTitle = post.seo?.metaTitle || `${post.title} — Tracify Blog`;
   const metaDescription = post.seo?.metaDescription || post.excerpt;
-  const image = post.seo.image?.og || post.seo.image?.src || post.heroImage?.og || post.heroImage?.src;
+  const image = ogImageUrl({ title: post.title, kicker: "Blog", sub: post.author ? `By ${post.author}` : undefined, kind: "blog" });
 
   return {
     title: metaTitle,
@@ -50,13 +51,13 @@ export async function generateMetadata({
       type: "article",
       publishedTime: getPostDate(post),
       authors: post.author ? [post.author] : undefined,
-      images: image ? [{ url: image }] : undefined,
+      images: [{ url: image, width: 1200, height: 630, alt: post.title }],
     },
     twitter: {
       card: "summary_large_image",
       title: metaTitle,
       description: metaDescription,
-      images: image ? [{ url: image }] : undefined,
+      images: [image],
     },
     alternates: {
       canonical: post.seo?.canonicalUrl || `/blog/${slug}`,
