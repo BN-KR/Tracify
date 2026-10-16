@@ -17,6 +17,28 @@ const MAX_RULES_PER_PROJECT = 25;
 const MAX_RUNS_SCANNED = 2000;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** Slack incoming webhooks only live on hooks.slack.com. */
+function cleanSlackUrl(raw: string | undefined) {
+  const value = raw?.trim();
+  if (!value) return undefined;
+  let url: URL;
+  try { url = new URL(value); } catch { throw new Error("That Slack link doesn't look right"); }
+  if (url.protocol !== "https:" || url.hostname !== "hooks.slack.com" || !url.pathname.startsWith("/services/")) throw new Error("Paste a Slack incoming webhook link (starts with https://hooks.slack.com/services/)");
+  return url.toString();
+}
+
+/** Any public https address. Local and private addresses are refused so a rule cannot poke at internal services. */
+function cleanWebhookUrl(raw: string | undefined) {
+  const value = raw?.trim();
+  if (!value) return undefined;
+  let url: URL;
+  try { url = new URL(value); } catch { throw new Error("That webhook link doesn't look right"); }
+  const host = url.hostname.toLowerCase();
+  const privateHost = host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".internal") || host.includes(":") || /^\d+\.\d+\.\d+\.\d+$/.test(host) || !host.includes(".");
+  if (url.protocol !== "https:" || privateHost || url.username || url.password) throw new Error("Webhook links must be public https addresses");
+  return url.toString();
+}
+
 async function requireProject(ctx: QueryCtx, projectId: Id<"projects">) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) throw new Error("Authentication required");
@@ -44,8 +66,10 @@ export const overview = query({
     const history = await ctx.db.query("alerts").withIndex("by_projectId", (q) => q.eq("projectId", projectId)).order("desc").take(30);
     return {
       now,
-      rules: rules.map((rule) => ({
+      rules: rules.map(({ slackUrl, webhookUrl, ...rule }) => ({
         ...rule,
+        hasSlack: Boolean(slackUrl),
+        webhookHost: webhookUrl ? new URL(webhookUrl).hostname : undefined,
         value: metricAt(runs, rule.metric, rule.windowMinutes, now, rule.environment),
         series: metricSeries(runs, rule.metric, rule.windowMinutes, now, rule.environment),
       })),
@@ -86,6 +110,8 @@ export const create = mutation({
     windowMinutes: v.number(),
     environment: v.optional(v.string()),
     emailTo: v.array(v.string()),
+    slackUrl: v.optional(v.string()),
+    webhookUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { identity } = await requireProject(ctx, args.projectId);
@@ -93,7 +119,10 @@ export const create = mutation({
     if (!name) throw new Error("Give the rule a name");
     if (!Number.isFinite(args.threshold) || args.threshold < 0) throw new Error("Limit must be zero or more");
     const emailTo = [...new Set(args.emailTo.map((email) => email.trim().toLowerCase()).filter(Boolean))].slice(0, 10);
-    if (emailTo.length === 0 || emailTo.some((email) => !EMAIL_PATTERN.test(email))) throw new Error("Add at least one valid email");
+    if (emailTo.some((email) => !EMAIL_PATTERN.test(email))) throw new Error("One of the email addresses isn't valid");
+    const slackUrl = cleanSlackUrl(args.slackUrl);
+    const webhookUrl = cleanWebhookUrl(args.webhookUrl);
+    if (emailTo.length === 0 && !slackUrl && !webhookUrl) throw new Error("Choose at least one way to be told: email, Slack or a webhook");
     const existing = await ctx.db.query("alertRules").withIndex("by_projectId", (q) => q.eq("projectId", args.projectId)).take(MAX_RULES_PER_PROJECT + 1);
     if (existing.length >= MAX_RULES_PER_PROJECT) throw new Error(`A project can have up to ${MAX_RULES_PER_PROJECT} rules`);
     const now = Date.now();
@@ -105,6 +134,8 @@ export const create = mutation({
       windowMinutes: Math.min(Math.max(Math.round(args.windowMinutes), 5), 1440),
       environment: args.environment?.trim().slice(0, 80) || undefined,
       emailTo,
+      slackUrl,
+      webhookUrl,
       enabled: true,
       state: "ok",
       createdBy: identity.subject,
@@ -142,7 +173,7 @@ export const enabledRuleIds = internalQuery({
 /** Checks one rule. Opens an alert when it first goes over its limit and closes it when it recovers. */
 export const evaluate = internalMutation({
   args: { ruleId: v.id("alertRules") },
-  handler: async (ctx, { ruleId }): Promise<{ fired: true; message: string; emailTo: string[]; name: string } | { fired: false }> => {
+  handler: async (ctx, { ruleId }): Promise<{ fired: true; message: string; emailTo: string[]; slackUrl?: string; webhookUrl?: string; name: string; metric: string; value: number; threshold: number; projectId: string } | { fired: false }> => {
     const rule = await ctx.db.get(ruleId);
     if (!rule || !rule.enabled) return { fired: false };
     const now = Date.now();
@@ -154,7 +185,7 @@ export const evaluate = internalMutation({
       const message = describeBreach(rule, value);
       await ctx.db.patch(ruleId, { state: "firing", lastFiredAt: now });
       await ctx.db.insert("alerts", { projectId: rule.projectId, ruleId, runId: `rule:${ruleId}:${now}`, type: rule.metric, message, triggeredAt: new Date(now).toISOString(), state: "active" });
-      return { fired: true, message, emailTo: rule.emailTo, name: rule.name };
+      return { fired: true, message, emailTo: rule.emailTo, slackUrl: rule.slackUrl, webhookUrl: rule.webhookUrl, name: rule.name, metric: rule.metric, value, threshold: rule.threshold, projectId: rule.projectId };
     }
     if (!over && rule.state === "firing") {
       await ctx.db.patch(ruleId, { state: "ok" });
@@ -169,6 +200,16 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char] as string);
 }
 
+/** One failed destination must not stop the others, so errors are logged and swallowed. */
+async function postJson(kind: string, url: string, body: unknown) {
+  try {
+    const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "Tracify-Alerts/1.0" }, body: JSON.stringify(body), redirect: "manual", signal: AbortSignal.timeout(10_000) });
+    if (!response.ok) console.error(`[alerts] ${kind} returned`, response.status);
+  } catch (error) {
+    console.error(`[alerts] ${kind} failed`, error);
+  }
+}
+
 export const checkAll = internalAction({
   args: {},
   handler: async (ctx) => {
@@ -179,19 +220,36 @@ export const checkAll = internalAction({
       try {
         const result = await ctx.runMutation(internal.alertRules.evaluate, { ruleId });
         if (!result.fired) continue;
-        if (!apiKey) { console.info("[alerts] rule fired, no RESEND_API_KEY set, email skipped", result.name); continue; }
-        const response = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json", "Idempotency-Key": `alert-${ruleId}-${Date.now()}` },
-          body: JSON.stringify({
-            from,
-            to: result.emailTo,
-            subject: `Tracify alert: ${result.name}`,
-            text: `${result.message}\n\nOpen your Tracify dashboard to see what happened.`,
-            html: `<p>${escapeHtml(result.message)}</p><p>Open your Tracify dashboard to see what happened.</p>`,
-          }),
-        });
-        if (!response.ok) console.error("[alerts] email provider returned", response.status);
+        const sends: Promise<void>[] = [];
+        if (result.emailTo.length > 0) {
+          sends.push((async () => {
+            if (!apiKey) { console.info("[alerts] rule fired, no RESEND_API_KEY set, email skipped", result.name); return; }
+            const response = await fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json", "Idempotency-Key": `alert-${ruleId}-${Date.now()}` },
+              body: JSON.stringify({
+                from,
+                to: result.emailTo,
+                subject: `Tracify alert: ${result.name}`,
+                text: `${result.message}\n\nOpen your Tracify dashboard to see what happened.`,
+                html: `<p>${escapeHtml(result.message)}</p><p>Open your Tracify dashboard to see what happened.</p>`,
+              }),
+            });
+            if (!response.ok) console.error("[alerts] email provider returned", response.status);
+          })());
+        }
+        if (result.slackUrl) sends.push(postJson("slack", result.slackUrl, { text: `:rotating_light: *${result.name}*\n${result.message}` }));
+        if (result.webhookUrl) {
+          sends.push(postJson("webhook", result.webhookUrl, {
+            event: "alert.fired",
+            rule: { id: ruleId, name: result.name, metric: result.metric, threshold: result.threshold },
+            value: result.value,
+            message: result.message,
+            projectId: result.projectId,
+            firedAt: new Date().toISOString(),
+          }));
+        }
+        await Promise.all(sends);
       } catch (error) {
         console.error("[alerts] rule check failed", ruleId, error);
       }
