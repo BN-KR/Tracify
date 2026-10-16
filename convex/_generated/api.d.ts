@@ -9,6 +9,8 @@
  */
 
 import type * as agentRuns from "../agentRuns.js";
+import type * as alertMetrics from "../alertMetrics.js";
+import type * as alertRules from "../alertRules.js";
 import type * as alerts from "../alerts.js";
 import type * as analyticsCache from "../analyticsCache.js";
 import type * as annotations from "../annotations.js";
@@ -18,6 +20,7 @@ import type * as automations from "../automations.js";
 import type * as billing from "../billing.js";
 import type * as comments from "../comments.js";
 import type * as costCounters from "../costCounters.js";
+import type * as crons from "../crons.js";
 import type * as dashboards from "../dashboards.js";
 import type * as evaluation from "../evaluation.js";
 import type * as evaluationEngine from "../evaluationEngine.js";
@@ -42,6 +45,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   agentRuns: typeof agentRuns;
+  alertMetrics: typeof alertMetrics;
+  alertRules: typeof alertRules;
   alerts: typeof alerts;
   analyticsCache: typeof analyticsCache;
   annotations: typeof annotations;
@@ -51,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   billing: typeof billing;
   comments: typeof comments;
   costCounters: typeof costCounters;
+  crons: typeof crons;
   dashboards: typeof dashboards;
   evaluation: typeof evaluation;
   evaluationEngine: typeof evaluationEngine;
