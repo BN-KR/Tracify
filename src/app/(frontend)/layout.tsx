@@ -3,6 +3,7 @@ import { getToken } from "@/lib/auth-server";
 import { SiteChrome } from "@/components/marketing/site-chrome";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Metadata } from "next";
+import { ogImageUrl } from "@/lib/seo";
 import { Geist, Geist_Mono } from "next/font/google";
 import { GeistPixelSquare } from "geist/font/pixel";
 import "./globals.css";
@@ -30,8 +31,9 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Tracify",
     locale: "en_US",
+    images: [{ url: ogImageUrl({ title: "Every agent run, on the record.", kicker: "AI agent observability", sub: "Traces, cost, quality and alerts in one place.", kind: "home" }), width: 1200, height: 630, alt: "Tracify | AI agent observability" }],
   },
-  twitter: { card: "summary_large_image", title: "Tracify | AI agent observability and evaluation", description: "Agent observability for traces, cost, quality, prompts, and alerts." },
+  twitter: { card: "summary_large_image", title: "Tracify | AI agent observability and evaluation", description: "Agent observability for traces, cost, quality, prompts, and alerts.", images: [ogImageUrl({ title: "Every agent run, on the record.", kicker: "AI agent observability", sub: "Traces, cost, quality and alerts in one place.", kind: "home" })] },
 };
 
 const structuredData = [
