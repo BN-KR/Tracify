@@ -19,6 +19,13 @@ Use the documentation for implementation details and the blog for explanatory gu
 - [Self-hosting](https://www.tracify.tech/docs/self-hosting): Self-hosting guidance and constraints.
 - [Docs MCP server](https://www.tracify.tech/api/docs/mcp): Read-only Model Context Protocol server exposing Tracify's documentation as structured resources for MCP-compatible agent clients.
 
+## Compare and learn
+
+- [Compare Tracify with other tools](https://www.tracify.tech/compare): Tracify vs Langfuse, LangSmith, Helicone, Arize Phoenix, Braintrust and Datadog.
+- [Glossary](https://www.tracify.tech/glossary): Short definitions of agent observability terms, one page per term.
+- [Trace OpenAI calls](https://www.tracify.tech/integrations/openai), [Anthropic](https://www.tracify.tech/integrations/anthropic), [LangGraph](https://www.tracify.tech/integrations/langgraph), [OpenTelemetry](https://www.tracify.tech/integrations/opentelemetry): Setup pages per integration.
+- [Full text for AI](https://www.tracify.tech/llms-full.txt): Docs, glossary, comparisons and integrations as one plain-text file.
+
 ## Product
 
 - [Product overview](https://www.tracify.tech/): Tracify's core agent observability and evaluation capabilities.

@@ -47,7 +47,7 @@ export const metadata: Metadata = {
 };
 
 const structuredData = [
-  { "@context": "https://schema.org", "@type": "Organization", name: "Tracify", url: "https://www.tracify.tech", logo: "https://www.tracify.tech/logo.png" },
+  { "@context": "https://schema.org", "@type": "Organization", name: "Tracify", url: "https://www.tracify.tech", logo: "https://www.tracify.tech/logo.png", sameAs: ["https://github.com/BN-KR/Tracify", "https://www.npmjs.com/search?q=tracify", "https://pypi.org/search/?q=tracify"] },
   { "@context": "https://schema.org", "@type": "WebSite", name: "Tracify", url: "https://www.tracify.tech", description: "AI agent observability and evaluation." },
   { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Tracify", applicationCategory: "DeveloperApplication", operatingSystem: "Web", url: "https://www.tracify.tech", description: "AI agent observability and evaluation for tracing failures, cost, quality, prompts, and releases.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
 ];

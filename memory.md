@@ -2195,3 +2195,8 @@
 ## 2026-10-16 Collapse button moved into the page header (draft PR)
 - The sidebar collapse button no longer sits next to the tracify name. `dashboard-shell.tsx` renders a zero-height anchor at the top of `<main>` with the toggle (Ctrl+\ and `tracify:toggle-sidebar` unchanged); `globals.css` shifts the first page `h1` and `.tracify-dashboard-topbar` right to make room, so every page gets it automatically. Pages with their own toggle (captured workspace, empty overview) hide the shell one. The rail `»` expand button stays in the collapsed strip. No top bar.
 - Project switcher moved to the bottom of the sidebar panel (above New alert/Account) and, when collapsed, to the bottom of the rail above the account avatar. Menus use `modal={false}` so opening them no longer locks scroll or shifts the sidebar; the switcher opens upward (collapsed: to the right). Same on the account menu.
+
+## 2026-10-16 SEO + AI search pass (branch `claude/project-thread-4ta1tq`)
+- Added `/compare` hub + `/compare/[slug]` (Langfuse, LangSmith, Helicone, Arize Phoenix, Braintrust, Datadog), `/integrations/[slug]` (OpenAI, Anthropic, LangGraph, OpenTelemetry, CrewAI, Vercel AI SDK) and `/glossary/[term]` (27 terms in `src/lib/glossary.ts`). Content lives in `src/lib/seo-pages.ts`; competitor claims are kept high level on purpose.
+- robots.ts names AI crawlers explicitly; `/llms-full.txt` serves docs + glossary + comparisons as plain text; llms.txt and sitemap list the new pages; Organization schema has sameAs.
+- Not done: more use-case pages (bespoke art, needs a design-preview PR), best-tools listicle, Search Console/Bing, backlinks.
