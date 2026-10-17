@@ -31,6 +31,7 @@ import type * as experiments from "../experiments.js";
 import type * as http from "../http.js";
 import type * as leads from "../leads.js";
 import type * as notificationPreferences from "../notificationPreferences.js";
+import type * as projectData from "../projectData.js";
 import type * as notify from "../notify.js";
 import type * as projects from "../projects.js";
 import type * as prompts from "../prompts.js";
@@ -73,6 +74,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   leads: typeof leads;
   notificationPreferences: typeof notificationPreferences;
+  projectData: typeof projectData;
   notify: typeof notify;
   projects: typeof projects;
   prompts: typeof prompts;

@@ -995,3 +995,29 @@ export async function traceSteps(projectId: string, filters: TraceListFilters, g
   ]);
   return {rows:rows.map(row=>({...row,...Object.fromEntries(["latencyMs","costUsd","inputTokens","outputTokens","calls","errors","p50LatencyMs","p95LatencyMs"].map(key=>[key,Number(row[key as keyof StepListRow]??0)]))})),total:Number(totals[0]?.total??0),stats:Object.fromEntries(Object.entries(stats[0]??{}).map(([k,v])=>[k,Number(v)])),facets,page,pageSize,grouped};
 }
+
+/** One page of raw rows for a project data export, oldest first. */
+export async function exportAnalyticsPage(table: "spans" | "evaluation_scores", projectId: string, offset: number, limit = 2000) {
+  const order = table === "spans" ? "createdAt, spanId" : "createdAt, scoreId";
+  const res = await analyticsSql(`SELECT * FROM ${table} WHERE projectId = '${sqlString(projectId)}' ORDER BY ${order} LIMIT ${Math.floor(limit)} OFFSET ${Math.floor(offset)}`);
+  if (!res.ok) throw new Error(`Analytics export failed: ${res.status}`);
+  return ((await res.json()).data ?? []) as Record<string, unknown>[];
+}
+
+/** Permanently removes every analytics row that belongs to a project. */
+export async function deleteProjectAnalytics(projectId: string) {
+  const condition = `projectId = '${sqlString(projectId)}'`;
+  for (const table of ["spans", "evaluation_scores"] as const) {
+    const res = CLICKHOUSE_URL
+      ? await fetch(`${CLICKHOUSE_URL}/?${new URLSearchParams({ database: CLICKHOUSE_DATABASE })}`, {
+          method: "POST", headers: clickhouseHeaders(), body: `ALTER TABLE ${table} DELETE WHERE ${condition}`, cache: "no-store",
+        })
+      : await fetch(`${TINYBIRD_HOST}/v0/datasources/${table}/delete`, {
+          method: "POST",
+          headers: { ...getHeaders(), "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ delete_condition: condition }),
+          cache: "no-store",
+        });
+    if (!res.ok) throw new Error(`Could not delete ${table}: ${res.status}`);
+  }
+}

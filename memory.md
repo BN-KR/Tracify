@@ -1,5 +1,7 @@
 # Project Memory
 
+## 2026-10-16 Data export and project deletion — draft PR (branch `claude/project-thread-suo63z`)
+- Settings > Data tab (replaces the placeholder Exports tab): "Download all data" streams one JSON file via `/api/projects/[id]/export` (Convex tables paged through `projectData.exportPage`, plus spans and scores from analytics; no API key hash, billing ids or webhook URLs). "Delete this project" needs the exact name plus DELETE, goes through `/api/projects/[id]/delete`: clears analytics rows first, then `projects.deleteProject`, which removes the project and schedules `projectData.purgeBatch` to clear every project table in batches. Needs a manual Convex deploy. Analytics delete needs a Tinybird token that can delete rows (ClickHouse uses ALTER TABLE DELETE).
 ## 2026-10-16 SDK safety and framework helpers — draft PR (branch `claude/project-thread-tetqg9`)
 - Both SDKs (0.4.0 base, NOT published, no version bump): `sampleRate`/`sample_rate` (per-run, stable hash, errors kept), `redact` (pii, patterns, custom fn), `TracifyError` with a plain `hint`, `onError`/`on_error`, key/host/region checks and one-time messages for 401/403/429/5xx/network. New `tracifyMiddleware` (Vercel AI SDK) and `traceTools`/`trace_tools` helpers, plus `templates/` starters in each package. Tests: `safety.test.ts`, `test_safety.py`. Release waits for owner.
 ## 2026-10-16 Ask AI on traces — draft PR (branch `claude/project-thread-n3qyyc`)

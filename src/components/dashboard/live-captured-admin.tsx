@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { CapturedWorkspace } from "@/features/dashboard-workspace/components/captured-workspace";
+import { ProjectDataControls } from "@/components/dashboard/project-data-controls";
 import { sandboxWorkspace } from "@/features/dashboard-workspace/sandbox-data";
 
 export function LiveCapturedAdmin({ projectId, section }: { projectId: string; section: "alerts" | "settings" }) {
@@ -24,5 +25,5 @@ export function LiveCapturedAdmin({ projectId, section }: { projectId: string; s
   async function changeAlertState(input: { alertId: string; state: "active" | "resolved" | "muted" }) {
     await updateAlertState({ alertId: input.alertId as Id<"alerts">, state: input.state });
   }
-  return <CapturedWorkspace workspace={workspace} segments={[section]} onAlertCreate={section === "alerts" ? saveAlert : undefined} onAlertStateChange={section === "alerts" ? changeAlertState : undefined} onProjectSettingsSave={section === "settings" ? saveSettings : undefined} />;
+  return <CapturedWorkspace workspace={workspace} segments={[section]} onAlertCreate={section === "alerts" ? saveAlert : undefined} onAlertStateChange={section === "alerts" ? changeAlertState : undefined} onProjectSettingsSave={section === "settings" ? saveSettings : undefined} dataPanel={section === "settings" ? <ProjectDataControls projectId={projectId} projectName={project.name} /> : undefined} />;
 }

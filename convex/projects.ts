@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { action, mutation, query } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
@@ -85,7 +85,7 @@ function isAdmin(identity: { subject: string; tokenIdentifier: string }) {
   return adminIds.includes(identity.subject);
 }
 
-function canAccessProject(
+export function canAccessProject(
   project: Doc<"projects">,
   identity: { subject: string; tokenIdentifier: string },
 ) {
@@ -94,7 +94,7 @@ function canAccessProject(
   return project.clerkUserId === identity.subject;
 }
 
-function canAdminProject(
+export function canAdminProject(
   project: Doc<"projects">,
   identity: { subject: string; tokenIdentifier: string },
 ) {
@@ -828,31 +828,10 @@ export const deleteProject = mutation({
       throw new Error("Project deletion confirmation did not match");
     }
 
-    const runs = await ctx.db
-      .query("agentRuns")
-      .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
-      .take(1000);
-    for (const run of runs) {
-      await ctx.db.delete(run._id);
-    }
-
-    const alerts = await ctx.db
-      .query("alerts")
-      .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
-      .take(1000);
-    for (const alert of alerts) {
-      await ctx.db.delete(alert._id);
-    }
-
-    const comments = await ctx.db
-      .query("comments")
-      .withIndex("by_projectId", (q) => q.eq("projectId", projectId))
-      .take(1000);
-    for (const comment of comments) {
-      await ctx.db.delete(comment._id);
-    }
-
+    // Removing the project first stops ingestion at once (its API key no longer resolves).
+    // The rest of its data is cleared in batches so large projects never hit a transaction limit.
     await ctx.db.delete(projectId);
+    await ctx.scheduler.runAfter(0, internal.projectData.purgeBatch, { projectId });
   },
 });
 
