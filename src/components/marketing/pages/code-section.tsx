@@ -273,6 +273,140 @@ client.feedback(run_id, True, kind="thumb", comment="Helpful answer")`,
   },
 });`,
   },
+  coding: {
+    title: "Record every edit and every test run.",
+    lede: "Wrap the plan, each edit and the test run in spans, and a failing change points straight back to the step that caused it.",
+    ts: `import { span, traceAgent } from "tracify-sdk";
+
+export const fixBug = traceAgent(async (task: string) => {
+  const patch = await span("write-patch", () => writePatch(task), { type: "llm", input: task });
+  const result = await span("run-tests", () => runTests(patch), { type: "tool" });
+  return result.passed ? patch : span("retry", () => writePatch(task, result.errors), { type: "llm" });
+}, { environment: "production" });`,
+    py: `import tracify
+
+@tracify.trace_agent(environment="production")
+def fix_bug(task):
+    with tracify.span("write-patch", type="llm", input=task):
+        patch = write_patch(task)
+    with tracify.span("run-tests", type="tool"):
+        result = run_tests(patch)
+    if result.passed:
+        return patch
+    with tracify.span("retry", type="llm"):
+        return write_patch(task, result.errors)`,
+  },
+  rag: {
+    title: "Make retrieval a step you can read.",
+    lede: "Record the retrieval as its own span and the trace shows which chunks the model was given, next to the answer it wrote.",
+    ts: `import { span, traceAgent } from "tracify-sdk";
+
+export const answer = traceAgent(async (question: string) => {
+  const chunks = await span("retrieve", () => vectorSearch(question, 8), { type: "retrieval", input: question });
+  return span("generate", () => writeAnswer(question, chunks), { type: "llm" });
+}, { environment: "production" });`,
+    py: `import tracify
+
+@tracify.trace_agent(environment="production")
+def answer(question):
+    with tracify.span("retrieve", type="retrieval", input=question):
+        chunks = vector_search(question, 8)
+    with tracify.span("generate", type="llm"):
+        return write_answer(question, chunks)`,
+  },
+  voice: {
+    title: "Time every turn of the call.",
+    lede: "Put speech recognition, the model and speech output in separate spans and the slow part of a turn is obvious.",
+    ts: `import { span, traceAgent } from "tracify-sdk";
+
+export const handleTurn = traceAgent(async (audio: Buffer) => {
+  const text = await span("transcribe", () => speechToText(audio), { type: "tool" });
+  const reply = await span("think", () => callModel(text), { type: "llm", input: text });
+  return span("speak", () => textToSpeech(reply), { type: "tool" });
+}, { environment: "production" });`,
+    py: `import tracify
+
+@tracify.trace_agent(environment="production")
+def handle_turn(audio):
+    with tracify.span("transcribe", type="tool"):
+        text = speech_to_text(audio)
+    with tracify.span("think", type="llm", input=text):
+        reply = call_model(text)
+    with tracify.span("speak", type="tool"):
+        return text_to_speech(reply)`,
+  },
+  browser: {
+    title: "Turn every click into a span.",
+    lede: "Wrap the actions your browser agent takes and a stuck or repeated step shows up in the trace with its timing.",
+    ts: `import { observe, traceAgent } from "tracify-sdk";
+
+const click = observe(async function click(selector: string) {
+  return page.click(selector);
+}, { type: "tool" });
+
+export const bookTable = traceAgent(async (request: string) => {
+  const plan = await planSteps(request);
+  for (const step of plan.steps) await click(step.selector);
+});`,
+    py: `import tracify
+
+@tracify.observe(type="tool")
+def click(selector):
+    return page.click(selector)
+
+@tracify.trace_agent()
+def book_table(request):
+    plan = plan_steps(request)
+    for step in plan.steps:
+        click(step.selector)`,
+  },
+  "multi-agent": {
+    title: "Keep every agent in one trace.",
+    lede: "Run each agent inside the same traced run and a handoff is just another span, so a dropped one is easy to spot.",
+    ts: `import { span, traceAgent } from "tracify-sdk";
+
+export const run = traceAgent(async (goal: string) => {
+  const plan = await span("planner", () => planner(goal), { type: "llm", input: goal });
+  const results = await Promise.all(plan.tasks.map((task) => span("worker", () => worker(task), { type: "llm" })));
+  return span("reviewer", () => reviewer(results), { type: "llm" });
+}, { environment: "production" });`,
+    py: `import tracify
+
+@tracify.trace_agent(environment="production")
+def run(goal):
+    with tracify.span("planner", type="llm", input=goal):
+        plan = planner(goal)
+    results = []
+    for task in plan.tasks:
+        with tracify.span("worker", type="llm"):
+            results.append(worker(task))
+    with tracify.span("reviewer", type="llm"):
+        return reviewer(results)`,
+  },
+  mcp: {
+    title: "Record every server call.",
+    lede: "Wrap the call to an MCP tool and its arguments, result and timing are recorded, so a slow server stands out.",
+    ts: `import { observe, traceAgent } from "tracify-sdk";
+
+const callMcpTool = observe(async function callMcpTool(server: string, tool: string, args: object) {
+  return mcpClient.callTool({ server, name: tool, arguments: args });
+}, { type: "tool" });
+
+export const agent = traceAgent(async (request: string) => {
+  const choice = await pickTool(request);
+  return callMcpTool(choice.server, choice.tool, choice.args);
+});`,
+    py: `import tracify
+
+@tracify.observe(type="tool")
+def call_mcp_tool(server, tool, args):
+    return mcp_client.call_tool(server, tool, args)
+
+@tracify.trace_agent()
+def agent(request):
+    choice = pick_tool(request)
+    return call_mcp_tool(choice.server, choice.tool, choice.args)`,
+  },
   "tool-calling": {
     title: "See the arguments the model chose.",
     lede: "Wrap each tool and the exact payload, the result and every retry are recorded, so loops and rejected schemas stand out.",
