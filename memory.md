@@ -2206,3 +2206,4 @@
 - Run notes: `comments.createRunNote/listRunNotes/remove` (stored under spanId `run:<runId>`), panel in the trace viewer.
 - Roles: added a read-only `viewer` role (`convex/betterAuth/roles.ts`, used by server and client auth config). Members screen: change role, remove, pending invites with copy/cancel. Invite emails are not sent; links are copied by hand.
 - Needs a manual Convex deploy (schema, functions, auth config).
+- Admin page: /admin (admins only, read-only) shows users, projects, usage, alerts, recent runs. Access enforced in convex/admin.ts (allowlist + verified email). Needs a manual Convex deploy.
