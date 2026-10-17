@@ -2208,6 +2208,11 @@
 - robots.ts names AI crawlers explicitly; `/llms-full.txt` serves docs + glossary + comparisons as plain text; llms.txt and sitemap list the new pages; Organization schema has sameAs.
 - Not done: more use-case pages (bespoke art, needs a design-preview PR), best-tools listicle, Search Console/Bing, backlinks.
 
+## 2026-10-16 Teams and sharing (branch `claude/project-thread-uzz5wa`)
+- Public share links: `sharedTraces` table, `convex/sharedTraces.ts` (create/revoke/getForRun, public `resolve` by token), public page `/share/[token]` (read-only, noindex, no user ids/metadata/stack traces). `/share` is allowed on the cloud host in `src/proxy.ts` and has no marketing chrome.
+- Run notes: `comments.createRunNote/listRunNotes/remove` (stored under spanId `run:<runId>`), panel in the trace viewer.
+- Roles: added a read-only `viewer` role (`convex/betterAuth/roles.ts`, used by server and client auth config). Members screen: change role, remove, pending invites with copy/cancel. Invite emails are not sent; links are copied by hand.
+- Needs a manual Convex deploy (schema, functions, auth config).
 ## 2026-10-16 Cost budgets + weekly summary (branch `claude/project-thread-bh6ufi`)
 - Alerts page now has three tabs: Alert rules, Cost budgets, Weekly summary (`src/components/dashboard/alerts/alerts-sections.tsx`).
 - Convex: `costBudgets` + `weeklySummaries` tables, `convex/budgets.ts` (15 min cron, warns once at the chosen % and once when over, per UTC week/month), `convex/weeklySummary.ts` (Monday 08:00 UTC cron, week claimed before sending so it never double-sends), shared sending in `convex/notify.ts`, pure maths in `convex/spendMetrics.ts`.
