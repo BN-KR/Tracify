@@ -30,6 +30,7 @@ import { SidebarAccountMenu } from "@/components/dashboard/sidebar-account-menu"
 import { usePathname, useParams, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { DEMO_BASE_PATH } from "@/lib/demo/demo-config";
+import { FinishSetupCard, PinButton, PinnedSection, SavedViewsSection, usePins, useSavedViews } from "@/components/dashboard/sidebar-extras";
 
 type RailId = "observe" | "analyze" | "improve" | "operate" | "manage" | "help";
 
@@ -201,7 +202,7 @@ export function DashboardSidebar({
           { title: "Costs", icon: BarChart3, href: isSynthetic ? syntheticHref("costs") : projectId ? `/dashboard/${projectId}/costs` : "/dashboard/costs" },
           { title: "Comparisons", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/comparisons` : "/dashboard/comparisons" },
           { title: "Reports", icon: FileText, href: isSynthetic ? syntheticHref("reports") : projectId ? `/dashboard/${projectId}/reports` : "/dashboard/reports" },
-          { title: "Trace Compare", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare" },
+          { title: "Compare runs", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare" },
           { title: "Investigation", icon: Search, href: isSynthetic ? syntheticHref("investigate") : projectId ? `/dashboard/${projectId}/investigate` : "/dashboard/investigate" },
         ],
       },
@@ -284,6 +285,9 @@ export function DashboardSidebar({
   const visualWidth = showPanel ? EXPANDED_WIDTH : COLLAPSED_WIDTH;
   const helpGroup = railGroups.find((group) => group.id === "help");
   const alertsHref = workspaceHref("alerts");
+  const liveProject = !isSynthetic && !demo && !projectIdOverride && Boolean(projectId);
+  const { pins, toggle: togglePin, isPinned } = usePins(projectId);
+  const savedViews = useSavedViews(projectId, liveProject && showPanel);
 
   useEffect(() => {
     function onShellToggle() {
@@ -382,15 +386,28 @@ export function DashboardSidebar({
           </div>
 
           <nav className="min-h-0 flex-1 overflow-y-auto py-1 scrollbar-hide" aria-label={panelGroup.label}>
+            {liveProject ? <PinnedSection pins={pins} pathname={pathname} onToggle={togglePin} onNavClick={() => onMobileClose?.()} /> : null}
             {panelGroup.items.map((item) => (
               <PanelLink
                 key={item.title}
                 item={item}
                 isActive={isActivePath(pathname, item.href, projectId, Boolean(projectIdOverride), currentSearch)}
                 onNavClick={() => onMobileClose?.()}
+                pin={liveProject && !item.external ? { pinned: isPinned(item.href), onToggle: () => togglePin({ href: item.href, title: item.title }) } : undefined}
               />
             ))}
+            {liveProject && savedViews ? <SavedViewsSection views={savedViews} projectId={projectId} onNavClick={() => onMobileClose?.()} /> : null}
           </nav>
+
+          {liveProject ? (
+            <FinishSetupCard
+              projectId={projectId}
+              hasSavedView={Boolean(savedViews?.length)}
+              tracingHref={workspaceHref("tracing")}
+              keysHref={`${projectDashboardHref}/api-keys`}
+              onNavClick={() => onMobileClose?.()}
+            />
+          ) : null}
 
           <div className="border-t border-white/10">
             <div className={cn("p-3", isSynthetic && "captured-sidebar-project")}>
@@ -416,7 +433,7 @@ export function DashboardSidebar({
   );
 }
 
-function PanelLink({ item, isActive, onNavClick }: { item: NavItem; isActive: boolean; onNavClick: () => void }) {
+function PanelLink({ item, isActive, onNavClick, pin }: { item: NavItem; isActive: boolean; onNavClick: () => void; pin?: { pinned: boolean; onToggle: () => void } }) {
   const className = cn(
     "relative flex h-9 items-center gap-3 px-4 font-mono text-[13px] outline-none transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-white/55",
     isActive
@@ -429,9 +446,13 @@ function PanelLink({ item, isActive, onNavClick }: { item: NavItem; isActive: bo
       {item.external ? <span className="ml-auto text-[11px] opacity-50">↗</span> : null}
     </>
   );
-  return item.external ? (
-    <a href={item.href} className={className} onClick={onNavClick}>{content}</a>
-  ) : (
-    <Link href={item.href} className={className} aria-current={isActive ? "page" : undefined} onClick={onNavClick}>{content}</Link>
+  if (item.external) return <a href={item.href} className={className} onClick={onNavClick}>{content}</a>;
+  const link = <Link href={item.href} className={cn(className, pin && "pr-9")} aria-current={isActive ? "page" : undefined} onClick={onNavClick}>{content}</Link>;
+  if (!pin) return link;
+  return (
+    <div className="group/row relative">
+      {link}
+      <PinButton pinned={pin.pinned} title={item.title} onToggle={pin.onToggle} />
+    </div>
   );
 }

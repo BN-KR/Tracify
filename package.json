@@ -14,6 +14,8 @@
     "validate:blog": "node .agents/skills/tracify-blog-tool/scripts/validate-blog-post.mjs",
     "test:blog-quality": "node --test .agents/skills/tracify-blog-tool/scripts/validate-blog-post.test.mjs",
     "test:content": "node --test --experimental-strip-types src/lib/markdoc-blog.test.ts src/lib/blog-framework.test.ts src/lib/markdoc-docs.test.ts src/lib/docs-search.test.ts src/lib/blog-internal-links.test.ts src/components/blog/reading-time.test.ts scripts/lexical-to-markdoc.test.mjs scripts/blog-index-contract.test.mjs scripts/llms-txt-contract.test.mjs .agents/skills/tracify-blog-tool/scripts/validate-blog-post.test.mjs",
+    "test:tools": "node --test --experimental-strip-types src/lib/cost-estimator.test.ts src/lib/referral.test.ts",
+    "test:ask-ai": "node --test --experimental-strip-types src/lib/ask-ai.test.ts",
     "test:activation": "node scripts/activation-contract.test.mjs",
     "test:seo": "node --test scripts/seo-contract.test.mjs",
     "test:regions": "node --test --experimental-strip-types src/lib/regions.test.ts",

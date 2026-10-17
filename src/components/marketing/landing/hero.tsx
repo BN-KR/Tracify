@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
+import { getCopy, type Locale } from "@/lib/i18n";
 
 const feed = [
   { t: "00.000", kind: "AGENT", name: "support-agent", meta: "run started" },
@@ -55,7 +56,8 @@ function LiveFeed() {
   );
 }
 
-export function Hero() {
+export function Hero({ locale = "en" }: { locale?: Locale }) {
+  const t = getCopy(locale).home;
   const reduce = useReducedMotion();
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -102,7 +104,7 @@ export function Hero() {
           transition={{ delay: 0.2 }}
           className="inline-flex items-center gap-2 border border-white/20 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70"
         >
-          <span className="bg-[#f4d44d] px-1.5 text-black">New</span> TypeScript SDK v0.4.0 · OpenAI, Anthropic and LangGraph
+          <span className="bg-[#f4d44d] px-1.5 text-black">{t.badgeNew}</span> {t.badge}
         </motion.p>
         <motion.h1
           initial={reduce ? false : { opacity: 0, y: 30 }}
@@ -110,7 +112,7 @@ export function Hero() {
           transition={{ delay: 0.35, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           className="mt-8 max-w-[1100px] font-pixel text-[clamp(3.2rem,10vw,9.5rem)] leading-[0.9] tracking-[-0.07em]"
         >
-          Watch your agent <span className="text-[#f4d44d]">think.</span>
+          {t.heroA} <span className="text-[#f4d44d]">{t.heroB}</span>
         </motion.h1>
         <motion.p
           initial={reduce ? false : { opacity: 0 }}
@@ -118,7 +120,7 @@ export function Hero() {
           transition={{ delay: 0.7 }}
           className="mt-7 max-w-[620px] text-base leading-7 text-white/70 md:text-lg md:leading-8"
         >
-          Tracify turns every agent run into a map you can read. Each model call, tool call, retry and dollar, wired together so you see exactly where it went sideways.
+          {t.lede}
         </motion.p>
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 10 }}
@@ -127,10 +129,10 @@ export function Hero() {
           className="mt-9 flex flex-wrap justify-center gap-3"
         >
           <Link href="/sign-up" className="group inline-flex min-h-13 items-center gap-3 bg-[#f4d44d] px-7 py-4 font-mono text-[11px] uppercase tracking-[0.14em] text-black hover:bg-white">
-            Start tracing free <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+            {t.ctaPrimary} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
           </Link>
           <Link href="/demo/project" className="inline-flex min-h-13 items-center gap-3 border border-white/30 bg-black/40 px-7 py-4 font-mono text-[11px] uppercase tracking-[0.14em] backdrop-blur-sm hover:bg-white hover:text-black">
-            Explore the demo <ArrowUpRight className="size-4" aria-hidden="true" />
+            {t.ctaSecondary} <ArrowUpRight className="size-4" aria-hidden="true" />
           </Link>
         </motion.div>
       </div>
