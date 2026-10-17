@@ -1,5 +1,10 @@
 # Project Memory
 
+## 2026-10-16 Growth pass — draft PR (branch `claude/project-thread-bq73n8`)
+- New public tool `/tools/ai-cost-estimator` (pure maths in `src/lib/cost-estimator.ts`, tested by `npm run test:tools`; runs in the browser, share link puts numbers in the URL, example prices are round placeholders, never a provider list). Added to sitemap and `public/llms.txt`.
+- Newsletter: existing `NewsletterCapture` (posts to `/api/leads`, intent `newsletter`) now takes a `source` and sends it with any saved referral code in the lead `campaign` field (`newsletter-blog|ref:anna`). `NewsletterPanel` sits after the blog CTA, at the end of docs articles and on the estimator. No backend change, no Convex deploy needed.
+- Referral: `?ref=code` is remembered in localStorage (`tracify.ref`) by `ReferralCapture` in the root layout; `/refer` builds a link. It is only attributed on newsletter/contact leads for now, not on sign-ups. There is no reward scheme (owner has not decided one).
+- Three blog posts: `how-to-estimate-ai-agent-costs`, `how-to-track-llm-token-usage`, `trace-langgraph-agents` (hand-made SVG visuals in `public/media`). Launch drafts for Product Hunt and Hacker News live in the shared project files under `growth/`, nothing posted.
 ## 2026-10-16 Data export and project deletion — draft PR (branch `claude/project-thread-suo63z`)
 - Settings > Data tab (replaces the placeholder Exports tab): "Download all data" streams one JSON file via `/api/projects/[id]/export` (Convex tables paged through `projectData.exportPage`, plus spans and scores from analytics; no API key hash, billing ids or webhook URLs). "Delete this project" needs the exact name plus DELETE, goes through `/api/projects/[id]/delete`: clears analytics rows first, then `projects.deleteProject`, which removes the project and schedules `projectData.purgeBatch` to clear every project table in batches. Needs a manual Convex deploy. Analytics delete needs a Tinybird token that can delete rows (ClickHouse uses ALTER TABLE DELETE).
 ## 2026-10-16 SDK safety and framework helpers — draft PR (branch `claude/project-thread-tetqg9`)

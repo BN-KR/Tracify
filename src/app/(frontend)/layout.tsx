@@ -8,6 +8,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ConsentBanner } from "@/components/privacy/consent-banner-lazy";
+import { ReferralCapture } from "@/components/marketing/referral-capture";
 import { GoogleTagManager } from "@/components/analytics/google-tag-manager";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -60,6 +61,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <ConvexClientProvider initialToken={await getToken()}>
           <TooltipProvider><SiteChrome>{children}</SiteChrome><ConsentBanner /></TooltipProvider>
         </ConvexClientProvider>
+        <ReferralCapture />
         <GoogleTagManager />
       </body>
     </html>

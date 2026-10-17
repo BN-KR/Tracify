@@ -8,6 +8,7 @@ import { DocsSidebar } from "@/components/docs/docs-sidebar";
 import { PostArt } from "@/components/reading/post-art";
 import { ReadPlayhead } from "@/components/reading/read-playhead";
 import { LegalToc } from "@/components/reading/legal-toc";
+import { NewsletterPanel } from "@/components/marketing/newsletter-panel";
 import { MarkdocDoc } from "@/components/docs/markdoc-doc";
 import { getDoc, getDocs, getDocMarkdown } from "@/lib/markdoc-docs";
 
@@ -61,6 +62,7 @@ export default async function DocsArticlePage({ params }: { params: Promise<{ sl
             {previous ? <Link href={`/docs/${previous.slug}`} className="group flex items-center gap-3 border border-black p-5 transition-colors hover:bg-[#f4d44d]"><ChevronLeft className="size-5 transition-transform group-hover:-translate-x-1" /><span><span className="font-mono text-[10px] uppercase tracking-[.14em] text-black/55">Previous</span><span className="mt-2 block font-pixel text-2xl tracking-[-.05em]">{previous.title}</span></span></Link> : <span />}
             {next ? <Link href={`/docs/${next.slug}`} className="group flex items-center justify-between gap-3 border border-black bg-[#090909] p-5 text-right text-[#eceae3] transition-colors hover:bg-[#f4d44d] hover:text-black"><span><span className="font-mono text-[10px] uppercase tracking-[.14em] opacity-60">Next</span><span className="mt-2 block font-pixel text-2xl tracking-[-.05em]">{next.title}</span></span><ArrowRight className="size-5 transition-transform group-hover:translate-x-1" /></Link> : null}
           </div>
+          <div className="max-w-3xl"><NewsletterPanel source="docs" heading="New guides in your inbox." /></div>
         </main>
         <aside className="hidden border-l border-black/15 p-5 xl:block">
           <div className="sticky top-24">

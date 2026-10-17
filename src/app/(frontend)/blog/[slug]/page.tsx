@@ -6,6 +6,7 @@ import { BlogTableOfContents } from "@/components/blog/blog-table-of-contents";
 import { ReadPlayhead } from "@/components/reading/read-playhead";
 import { PostArt } from "@/components/reading/post-art";
 import { RelatedPosts } from "@/components/blog/related-posts";
+import { NewsletterPanel } from "@/components/marketing/newsletter-panel";
 import { ShareButtons } from "@/components/blog/share-buttons";
 import { getReadingTime } from "@/components/blog/reading-time";
 import {
@@ -203,6 +204,8 @@ export default async function BlogPostPage({
               <MarkdocRichText content={post.content} />
 
               <ArticleCta />
+
+              <NewsletterPanel source="blog" />
 
               <div className="mt-12 flex flex-col gap-6 border-t border-black/20 pt-8">
                 <div className="lg:hidden"><ShareButtons title={post.title} /></div>
