@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import { compactNumber, formatCost } from "@/components/dashboard/tracing/format";
-import { DEMO_BASE_PATH, DEMO_PROJECT_NAME } from "@/lib/demo/demo-config";
+import { DemoHeader, Page, RangeLinks } from "@/components/demo/demo-ui";
+import { DEMO_BASE_PATH } from "@/lib/demo/demo-config";
 import { demoSummary } from "@/lib/demo/demo-queries";
 
 export const dynamic = "force-dynamic";
@@ -43,17 +44,10 @@ export default async function DemoCostsPage({ searchParams }: { searchParams: Pr
   ];
 
   return (
-    <div className="font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
-      <header className="flex flex-wrap items-center gap-3 border-b border-[#1F242C] px-4 py-2.5">
-        <h1 className="mr-2 text-base font-semibold tracking-tight">Costs</h1>
-        <span className="font-mono text-xs text-[#8B93A1]">{DEMO_PROJECT_NAME}</span>
-        <div role="group" aria-label="Time range" className="ml-auto flex border border-[#262C35] p-0.5 text-xs">
-          {RANGES.map(([value, label]) => (
-            <Link key={value} href={value === "30" ? `${DEMO_BASE_PATH}/costs` : `${DEMO_BASE_PATH}/costs?range=${value}`} aria-current={String(days) === value ? "true" : undefined}
-              className={`flex h-6 items-center px-2.5 ${String(days) === value ? "bg-[#232A34] !text-white" : "!text-[#8B93A1] hover:!text-white"}`}>{label}</Link>
-          ))}
-        </div>
-      </header>
+    <Page>
+      <DemoHeader title="Costs">
+        <RangeLinks base={`${DEMO_BASE_PATH}/costs`} days={days} options={RANGES} />
+      </DemoHeader>
 
       <div className="space-y-4 p-4">
         <section aria-label="Summary" className="grid grid-cols-2 gap-px border border-[#1F242C] bg-[#1F242C] md:grid-cols-5">
@@ -94,6 +88,6 @@ export default async function DemoCostsPage({ searchParams }: { searchParams: Pr
           </section>
         </div>
       </div>
-    </div>
+    </Page>
   );
 }

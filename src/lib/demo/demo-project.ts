@@ -208,7 +208,7 @@ function planFor(slot: number, index: number, startMs: number, nowMs: number): R
   const day = Math.floor(startMs / 86_400_000);
   return {
     runId: `run_${hex(random, 12)}`, seed, traceName, scenario, startMs, environment, release: releaseAt(ageDays, environment === "staging"),
-    user, session: `sess_${hashString(`${user}:${day}:${Math.floor(startMs / 5_400_000)}`).toString(36).slice(0, 8)}`,
+    user, session: `sess_${hashString(`${user}:${day}:${Math.floor(startMs / 21_600_000)}`).toString(36).slice(0, 8)}`,
     tier: TIERS[userIndex % TIERS.length]!, region: REGIONS[userIndex % REGIONS.length]!, channel: pick(random, CHANNELS), ageDays,
   };
 }

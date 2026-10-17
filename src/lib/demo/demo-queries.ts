@@ -253,3 +253,30 @@ export function demoSummary(days: number, nowMs = Date.now()) {
     range: { from: filters.fromMs, to: filters.toMs },
   };
 }
+
+/** Sessions (one customer's conversation across runs) in the last `days` days, newest first. */
+export function demoSessions(days: number, nowMs = Date.now()) {
+  const map = new Map<string, { sessionId: string; user: string; runs: number; errors: number; costUsd: number; firstMs: number; lastMs: number; agents: Set<string> }>();
+  for (const run of demoFilter({ fromMs: nowMs - days * 86_400_000, toMs: nowMs }, undefined, nowMs)) {
+    const entry = map.get(run.sessionId) ?? { sessionId: run.sessionId, user: run.endUserId, runs: 0, errors: 0, costUsd: 0, firstMs: run.startMs, lastMs: run.startMs, agents: new Set<string>() };
+    entry.runs++; entry.errors += run.errorCount > 0 ? 1 : 0; entry.costUsd += run.totalCostUsd; entry.firstMs = Math.min(entry.firstMs, run.startMs); entry.lastMs = Math.max(entry.lastMs, run.startMs + run.durationMs); entry.agents.add(run.traceName);
+    map.set(run.sessionId, entry);
+  }
+  const all = [...map.values()].sort((a, b) => b.lastMs - a.lastMs);
+  return { total: all.length, sessions: all.slice(0, 50).map(({ agents, ...rest }) => ({ ...rest, agents: [...agents] })) };
+}
+
+/** Customers (end users) in the last `days` days, busiest first. */
+export function demoUsers(days: number, nowMs = Date.now()) {
+  const map = new Map<string, { user: string; tier: string; region: string; runs: number; errors: number; costUsd: number; tokens: number; lastMs: number }>();
+  for (const run of demoFilter({ fromMs: nowMs - days * 86_400_000, toMs: nowMs }, undefined, nowMs)) {
+    const entry = map.get(run.endUserId) ?? { user: run.endUserId, tier: run.meta.customer_tier ?? "", region: run.meta.region ?? "", runs: 0, errors: 0, costUsd: 0, tokens: 0, lastMs: 0 };
+    entry.runs++; entry.errors += run.errorCount > 0 ? 1 : 0; entry.costUsd += run.totalCostUsd; entry.tokens += run.inputTokens + run.outputTokens; entry.lastMs = Math.max(entry.lastMs, run.startMs);
+    map.set(run.endUserId, entry);
+  }
+  const all = [...map.values()].sort((a, b) => b.runs - a.runs);
+  return { total: all.length, users: all.slice(0, 50) };
+}
+
+/** The current time, read outside React components so pages stay pure. */
+export const demoNow = () => Date.now();

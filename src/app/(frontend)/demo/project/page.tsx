@@ -2,7 +2,8 @@ import Link from "next/link";
 
 import { OverviewChart } from "@/components/demo/overview-chart";
 import { compactNumber, formatCost, formatDuration } from "@/components/dashboard/tracing/format";
-import { DEMO_BASE_PATH, DEMO_PROJECT_NAME } from "@/lib/demo/demo-config";
+import { DemoHeader, Page, RangeLinks } from "@/components/demo/demo-ui";
+import { DEMO_BASE_PATH } from "@/lib/demo/demo-config";
 import { demoSummary } from "@/lib/demo/demo-queries";
 
 export const dynamic = "force-dynamic";
@@ -35,17 +36,10 @@ export default async function DemoOverviewPage({ searchParams }: { searchParams:
   const groups = summary.errorGroups.groups.slice(0, 5);
 
   return (
-    <div className="font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
-      <header className="flex flex-wrap items-center gap-3 border-b border-[#1F242C] px-4 py-2.5">
-        <h1 className="mr-2 text-base font-semibold tracking-tight">Overview</h1>
-        <span className="font-mono text-xs text-[#8B93A1]">{DEMO_PROJECT_NAME}</span>
-        <div role="group" aria-label="Time range" className="ml-auto flex border border-[#262C35] p-0.5 text-xs">
-          {RANGES.map(([value, label]) => (
-            <Link key={value} href={value === "7" ? DEMO_BASE_PATH : `${DEMO_BASE_PATH}?range=${value}`} aria-current={String(days) === value ? "true" : undefined}
-              className={`flex h-6 items-center px-2.5 ${String(days) === value ? "bg-[#232A34] !text-white" : "!text-[#8B93A1] hover:!text-white"}`}>{label}</Link>
-          ))}
-        </div>
-      </header>
+    <Page>
+      <DemoHeader title="Home">
+        <RangeLinks base={DEMO_BASE_PATH} days={days} options={RANGES} />
+      </DemoHeader>
 
       <div className="space-y-4 p-4">
         <section aria-label="Summary" className="grid grid-cols-2 gap-px border border-[#1F242C] bg-[#1F242C] md:grid-cols-3 xl:grid-cols-6">
@@ -67,7 +61,7 @@ export default async function DemoOverviewPage({ searchParams }: { searchParams:
           <h2 className="mt-1.5 text-base font-semibold text-white">Release v1.14.0 made refunds time out. v1.14.1 fixed it.</h2>
           <p className="mt-1 max-w-3xl text-[#C9CED6]">The refund agent&apos;s payment call started failing after the release and recovered a few days later. Follow the same path you would use on a real incident.</p>
           <div className="mt-3 flex flex-wrap gap-2 font-mono text-xs">
-            <Link href={`${DEMO_BASE_PATH}/tracing?release=v1.14.0&status=error&range=30d&errors=1`} className="bg-[#f4d44d] px-3 py-1.5 !text-[#090909] hover:bg-white">See the failing traces</Link>
+            <Link href={`${DEMO_BASE_PATH}/tracing?release=v1.14.0&status=error&range=30d&errors=1`} className="bg-[#f4d44d] px-3 py-1.5 !text-[#090909] hover:bg-[#fff4b5]">See the failing traces</Link>
             <Link href={`${DEMO_BASE_PATH}/tracing?traceName=refund-agent&release=v1.14.1&range=30d`} className="border border-white/25 px-3 py-1.5 !text-white hover:border-white">See refunds after the fix</Link>
           </div>
         </section>
@@ -136,6 +130,6 @@ export default async function DemoOverviewPage({ searchParams }: { searchParams:
           ) : <p className="px-3 py-6 text-center text-xs text-[#6B7380]">No failed traces in this period.</p>}
         </section>
       </div>
-    </div>
+    </Page>
   );
 }
