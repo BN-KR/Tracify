@@ -46,6 +46,51 @@ def _redact(text: str) -> str:
     return text
 
 
+class TracifyError(ValueError):
+    """A problem the SDK ran into. `hint` says in plain words how to fix it."""
+
+    def __init__(self, code: str, message: str, hint: str, status: Optional[int] = None):
+        super().__init__(f"{message} {hint}")
+        self.code = code
+        self.hint = hint
+        self.status = status
+
+
+_PII_PATTERNS = [
+    re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"),
+    re.compile(r"\b(?:\d[ -]?){13,19}\b"),
+    re.compile(r"(?<![\w.])\+?\d{1,3}[\s.-]?\(?\d{2,4}\)?[\s.-]\d{3,4}[\s.-]\d{3,4}\b"),
+]
+
+
+def build_redactor(pii: bool = False, patterns: Optional[List[Any]] = None, fn: Optional[Callable[[str], str]] = None, replacement: str = "[redacted]") -> Optional[Callable[[str], str]]:
+    """Build the extra clean-up applied to prompts and answers. Returns None when nothing is asked for."""
+    compiled = list(_PII_PATTERNS) if pii else []
+    for pattern in patterns or []:
+        if isinstance(pattern, str):
+            if pattern:
+                compiled.append(re.compile(re.escape(pattern)))
+        else:
+            compiled.append(pattern)
+    if not compiled and fn is None:
+        return None
+
+    def redact(text: str) -> str:
+        for pattern in compiled:
+            text = pattern.sub(replacement, text)
+        return fn(text) if fn else text
+
+    return redact
+
+
+def sample_bucket(run_id: str) -> float:
+    """Stable number in [0, 1) for a run id, so every span of a run gets the same sampling decision."""
+    h = 2166136261
+    for ch in str(run_id):
+        h = ((h ^ ord(ch)) * 16777619) & 0xFFFFFFFF
+    return h / 4294967296
+
+
 def _payload(value: Any) -> str:
     """Serialise an input or output, remove obvious secrets and cap its size."""
     if value is None:
@@ -236,18 +281,29 @@ class TracifyClient:
         "us": "https://us.cloud.tracify.tech",
     }
 
-    def __init__(self, api_key: Optional[str] = None, host: Optional[str] = None, project_id: Optional[str] = None, region: Optional[str] = None, release: Optional[str] = None, environment: Optional[str] = None, deployment_id: Optional[str] = None, session_id: Optional[str] = None, end_user_id: Optional[str] = None, tags: Optional[List[str]] = None):
-        self.api_key = api_key or os.environ.get("TRACIFY_API_KEY")
+    def __init__(self, api_key: Optional[str] = None, host: Optional[str] = None, project_id: Optional[str] = None, region: Optional[str] = None, release: Optional[str] = None, environment: Optional[str] = None, deployment_id: Optional[str] = None, session_id: Optional[str] = None, end_user_id: Optional[str] = None, tags: Optional[List[str]] = None, sample_rate: float = 1.0, keep_errors: bool = True, redact: Optional[Dict[str, Any]] = None, on_error: Optional[Callable[["TracifyError"], None]] = None):
+        self.on_error = on_error
+        self._warned: set = set()
+        self.api_key = (api_key or os.environ.get("TRACIFY_API_KEY") or "").strip()
         if not self.api_key:
-            raise ValueError("TRACIFY_API_KEY or TRACIFY_API_KEY must be provided or set as an environment variable")
+            raise TracifyError("missing_key", "No Tracify API key was found.", "Pass api_key=... to TracifyClient or set the TRACIFY_API_KEY environment variable. You can create a key on the API keys page of your dashboard.")
+        if not self.api_key.startswith("tracify_sk_"):
+            self._report(TracifyError("odd_key", "That API key does not look like a Tracify key (they start with tracify_sk_).", "Copy the key again from the API keys page of your dashboard; make sure no other service's key was pasted by mistake."))
+        if not isinstance(sample_rate, (int, float)) or isinstance(sample_rate, bool) or not 0 <= sample_rate <= 1:
+            raise TracifyError("bad_sample_rate", f"sample_rate must be a number from 0 to 1, but got {sample_rate!r}.", "Use 1 to record every run, 0.1 to record about one in ten.")
+        self.sample_rate = float(sample_rate)
+        self.keep_errors = keep_errors
+        self._redactor = build_redactor(**redact) if redact else None
         selected_region = (region or os.environ.get("TRACIFY_REGION") or "eu").strip().lower()
         if selected_region not in self.REGION_HOSTS:
-            raise ValueError("TRACIFY_REGION must be 'eu' or 'us'")
+            raise TracifyError("bad_region", f"The region {selected_region!r} is not one Tracify offers.", "Use region='eu' or region='us' (or set TRACIFY_REGION to one of them).")
         self.host = (host or os.environ.get("TRACIFY_HOST") or self.REGION_HOSTS[selected_region]).rstrip("/")
+        if not self.host.startswith(("http://", "https://")):
+            raise TracifyError("bad_host", f"The host {self.host!r} is not a valid web address.", "Use a full address such as 'https://eu.cloud.tracify.tech', or drop the host option and use region='eu' or 'us'.")
         host_region = next((key for key, value in self.REGION_HOSTS.items() if value == self.host), None)
         key_region = self._api_key_region(self.api_key)
         if key_region and host_region and key_region != host_region:
-            raise ValueError(f"Tracify API key region mismatch: this key belongs to {key_region.upper()}, but the client is configured for {host_region.upper()}.")
+            raise TracifyError("region_mismatch", f"Tracify API key region mismatch: this key belongs to {key_region.upper()}, but the client is configured for {host_region.upper()}.", f"Set region='{key_region}' (or TRACIFY_REGION={key_region}), or create a key in the {host_region.upper()} region.")
         self.project_id = project_id
         self.release = release
         self.environment = environment
@@ -271,6 +327,40 @@ class TracifyClient:
             return "eu"
         return None
 
+    def _report(self, error: "TracifyError"):
+        """Tell the app about a problem once per kind: through on_error if given, otherwise as a printed warning."""
+        if error.code in self._warned:
+            return
+        self._warned.add(error.code)
+        if self.on_error:
+            try:
+                self.on_error(error)
+            except Exception:
+                pass  # a faulty handler must never break the app
+        else:
+            print(f"Tracify Warning: {error}")
+
+    def _check_response(self, status: int):
+        if status < 400:
+            return
+        if status == 401:
+            self._report(TracifyError("bad_key", "Tracify rejected the API key (401).", "The key is wrong, was revoked, or belongs to another region. Check TRACIFY_API_KEY and TRACIFY_REGION.", status))
+        elif status == 403:
+            self._report(TracifyError("forbidden", "This API key is not allowed to send data (403).", "Check that the key belongs to the project you expect and has not been disabled.", status))
+        elif status == 429:
+            self._report(TracifyError("rate_limited", "Tracify is receiving too much data from this app (429).", "Lower the volume with sample_rate (for example 0.2), or upgrade your plan.", status))
+        elif status >= 500:
+            self._report(TracifyError("server_error", f"Tracify had a problem on its side ({status}).", "Your app is not affected; data from this moment may be missing. Check the status page if it keeps happening.", status))
+        else:
+            self._report(TracifyError("rejected", f"Tracify did not accept a span ({status}).", "Update the SDK to the latest version; if it still happens, contact support.", status))
+
+    def _sampled_out(self, span: Dict[str, Any]) -> bool:
+        if self.sample_rate >= 1:
+            return False
+        if self.keep_errors and (span.get("errorType") or span.get("errorMessage")):
+            return False
+        return sample_bucket(span.get("runId") or "") >= self.sample_rate
+
     def _send_span(self, span: Dict[str, Any]):
         try:
             headers = {
@@ -278,11 +368,12 @@ class TracifyClient:
                 "Content-Type": "application/json"
             }
             if self._http:
-                self._http.post(self.ingest_url, headers=headers, json=span)
+                response = self._http.post(self.ingest_url, headers=headers, json=span)
             else:
-                _requests_fallback.post(self.ingest_url, headers=headers, json=span, timeout=2)
+                response = _requests_fallback.post(self.ingest_url, headers=headers, json=span, timeout=2)
+            self._check_response(getattr(response, "status_code", 200))
         except Exception as e:
-            print(f"Tracify Warning: Failed to ingest span: {e}")
+            self._report(TracifyError("network", f"Could not reach Tracify ({e}).", "Check your internet connection and the host setting. Your app keeps running; these spans are dropped."))
 
     def ingest(self, **kwargs):
         span = {
@@ -300,6 +391,8 @@ class TracifyClient:
         for key in ("input", "output"):
             if key in span:
                 span[key] = _payload(span[key])
+                if self._redactor and span[key]:
+                    span[key] = self._redactor(span[key])
         span.setdefault("release", self.release or os.environ.get("TRACIFY_RELEASE"))
         span.setdefault("environment", self.environment or os.environ.get("TRACIFY_ENVIRONMENT"))
         span.setdefault("deploymentId", self.deployment_id)
@@ -308,6 +401,8 @@ class TracifyClient:
         span.setdefault("tags", self.tags)
         # Optional unset fields must be omitted: ingestion rejects JSON null for strings.
         span = {key: value for key, value in span.items() if value is not None}
+        if self._sampled_out(span):
+            return
         self._send_span(span)
 
     def get_prompt(self, name: str, environment: str = "production", cache_ttl_seconds: float = 60, fallback: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -751,6 +846,7 @@ def tool_call(tool_name: str, input_data: Any, output_data: Any, latency_ms: int
     )
 
 from .integrations import wrap_openai, wrap_anthropic
+from .tools import trace_tools
 
 def langgraph_callback(**options):
     """Create a LangGraph callback; install tracify-sdk[langgraph] first."""

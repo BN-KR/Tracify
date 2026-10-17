@@ -1,5 +1,7 @@
 # Project Memory
 
+## 2026-10-16 SDK safety and framework helpers — draft PR (branch `claude/project-thread-tetqg9`)
+- Both SDKs (0.4.0 base, NOT published, no version bump): `sampleRate`/`sample_rate` (per-run, stable hash, errors kept), `redact` (pii, patterns, custom fn), `TracifyError` with a plain `hint`, `onError`/`on_error`, key/host/region checks and one-time messages for 401/403/429/5xx/network. New `tracifyMiddleware` (Vercel AI SDK) and `traceTools`/`trace_tools` helpers, plus `templates/` starters in each package. Tests: `safety.test.ts`, `test_safety.py`. Release waits for owner.
 ## 2026-10-16 Ask AI on traces — draft PR (branch `claude/project-thread-n3qyyc`)
 - Trace panel has an "Ask AI" tab: suggested questions + free text, answers cite steps that jump to the step. API `POST /api/projects/[projectId]/runs/[runId]/ask` (signed-in + run access, per-project rate limit). Digest/redaction/built-in answers in `src/lib/ask-ai.ts` (tests: `npm run test:ask-ai`). Uses Anthropic when `TRACIFY_ASK_AI_API_KEY` (or `ANTHROPIC_API_KEY`) is set in Vercel env (model override `TRACIFY_ASK_AI_MODEL`, default claude-haiku-5-5); without a key it answers failures/slowest/cost/summary itself. No Convex change, so no backend deploy.
 
