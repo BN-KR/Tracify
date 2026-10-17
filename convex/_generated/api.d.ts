@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as admin from "../admin.js";
 import type * as agentRuns from "../agentRuns.js";
 import type * as alertMetrics from "../alertMetrics.js";
 import type * as alertRules from "../alertRules.js";
@@ -18,6 +19,7 @@ import type * as auditLogs from "../auditLogs.js";
 import type * as auth from "../auth.js";
 import type * as automations from "../automations.js";
 import type * as billing from "../billing.js";
+import type * as budgets from "../budgets.js";
 import type * as comments from "../comments.js";
 import type * as costCounters from "../costCounters.js";
 import type * as crons from "../crons.js";
@@ -29,6 +31,7 @@ import type * as experiments from "../experiments.js";
 import type * as http from "../http.js";
 import type * as leads from "../leads.js";
 import type * as notificationPreferences from "../notificationPreferences.js";
+import type * as notify from "../notify.js";
 import type * as projects from "../projects.js";
 import type * as prompts from "../prompts.js";
 import type * as resilience from "../resilience.js";
@@ -36,6 +39,8 @@ import type * as retention from "../retention.js";
 import type * as sandbox from "../sandbox.js";
 import type * as savedViews from "../savedViews.js";
 import type * as sessions from "../sessions.js";
+import type * as spendMetrics from "../spendMetrics.js";
+import type * as weeklySummary from "../weeklySummary.js";
 
 import type {
   ApiFromModules,
@@ -44,6 +49,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  admin: typeof admin;
   agentRuns: typeof agentRuns;
   alertMetrics: typeof alertMetrics;
   alertRules: typeof alertRules;
@@ -54,6 +60,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   automations: typeof automations;
   billing: typeof billing;
+  budgets: typeof budgets;
   comments: typeof comments;
   costCounters: typeof costCounters;
   crons: typeof crons;
@@ -65,6 +72,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   leads: typeof leads;
   notificationPreferences: typeof notificationPreferences;
+  notify: typeof notify;
   projects: typeof projects;
   prompts: typeof prompts;
   resilience: typeof resilience;
@@ -72,6 +80,8 @@ declare const fullApi: ApiFromModules<{
   sandbox: typeof sandbox;
   savedViews: typeof savedViews;
   sessions: typeof sessions;
+  spendMetrics: typeof spendMetrics;
+  weeklySummary: typeof weeklySummary;
 }>;
 
 /**
