@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
+import { canAccessProject } from "./projects";
 
 function requireSyncSecret(value: string) {
   const expected = process.env.STRIPE_SYNC_SECRET;
@@ -54,5 +55,28 @@ export const syncSubscription = mutation({
       cancelAtPeriodEnd: args.cancelAtPeriodEnd,
       updatedAt: Date.now(),
     });
+  },
+});
+
+const USAGE_RUN_SCAN_LIMIT = 20_000;
+
+/** Spans saved this calendar month (UTC), used for plan-limit meters and upgrade prompts. */
+export const getMonthlyUsage = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccessProject(project, identity)) return null;
+
+    const now = new Date();
+    const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+    const runs = await ctx.db
+      .query("agentRuns")
+      .withIndex("by_projectId_createdAt", (q) => q.eq("projectId", projectId).gte("createdAt", monthStart))
+      .take(USAGE_RUN_SCAN_LIMIT + 1);
+    const truncated = runs.length > USAGE_RUN_SCAN_LIMIT;
+    const spans = runs.slice(0, USAGE_RUN_SCAN_LIMIT).reduce((sum, run) => sum + run.spanCount, 0);
+    return { spans, truncated, planTier: project.planTier ?? "free" };
   },
 });
