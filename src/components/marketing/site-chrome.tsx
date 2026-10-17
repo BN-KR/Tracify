@@ -12,11 +12,11 @@ const SiteAssistant = dynamic(() => import("@/components/marketing/site-assistan
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isDashboard = pathname.startsWith("/dashboard") || pathname.startsWith("/tracify-preview");
+  const isDashboard = pathname === "/admin" || pathname.startsWith("/dashboard") || pathname.startsWith("/tracify-preview");
   const isPlayground = pathname.startsWith("/playground");
   const isOnboarding = pathname.startsWith("/onboarding");
   const isCloudDirectory = pathname.startsWith("/cloud");
-  const isAuth = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/accept-invitation", "/auth/error"].some((route) => pathname.startsWith(route));
+  const isAuth = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/accept-invitation", "/auth/error", "/share"].some((route) => pathname.startsWith(route));
 
   if (isDashboard || isPlayground || isOnboarding || isAuth || isCloudDirectory) return <>{children}</>;
 

@@ -107,3 +107,61 @@ export const listByRun = query({
       .take(200);
   },
 });
+
+// Run notes are comments on the whole run, stored under a per-run key so the span index finds them.
+const runNoteKey = (runId: string) => `run:${runId}`;
+
+export const createRunNote = mutation({
+  args: { projectId: v.id("projects"), runId: v.string(), content: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+    const project = await ctx.db.get(args.projectId);
+    if (!project || !canAccessProject(project, identity)) throw new Error("Project not found or access denied");
+    if (!canComment(project, identity)) throw new Error("Developer access required");
+    const content = args.content.trim();
+    if (!content || content.length > 4000) throw new Error("Notes must be 1 to 4000 characters");
+    return await ctx.db.insert("comments", {
+      spanId: runNoteKey(args.runId),
+      projectId: args.projectId,
+      runId: args.runId,
+      userId: identity.subject,
+      userName: identity.name || "User",
+      content,
+      createdAt: Date.now(),
+    });
+  },
+});
+
+export const listRunNotes = query({
+  args: { projectId: v.id("projects"), runId: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const project = await ctx.db.get(args.projectId);
+    if (!project || !canAccessProject(project, identity)) return [];
+    const notes = await ctx.db
+      .query("comments")
+      .withIndex("by_spanId", (q) => q.eq("spanId", runNoteKey(args.runId)))
+      .order("asc")
+      .take(200);
+    return notes.filter((note) => note.projectId === args.projectId);
+  },
+});
+
+export const remove = mutation({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, { commentId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+    const comment = await ctx.db.get(commentId);
+    if (!comment) return null;
+    const project = await ctx.db.get(comment.projectId);
+    if (!project || !canAccessProject(project, identity)) throw new Error("Project not found or access denied");
+    const role = getOrgRole(identity);
+    const isAdmin = project.clerkUserId === identity.subject || role === "owner" || role === "admin" || role === "org:admin";
+    if (comment.userId !== identity.subject && !isAdmin) throw new Error("You can only delete your own notes");
+    await ctx.db.delete(commentId);
+    return null;
+  },
+});

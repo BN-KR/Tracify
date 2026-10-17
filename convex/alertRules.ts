@@ -4,6 +4,7 @@ import type { QueryCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { canAccessProject } from "./alerts";
+import { escapeHtml, postJson, sendEmail } from "./notify";
 import { describeBreach, metricAt, metricSeries } from "./alertMetrics";
 
 const metricValidator = v.union(
@@ -15,10 +16,10 @@ const metricValidator = v.union(
 
 const MAX_RULES_PER_PROJECT = 25;
 const MAX_RUNS_SCANNED = 2000;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Slack incoming webhooks only live on hooks.slack.com. */
-function cleanSlackUrl(raw: string | undefined) {
+export function cleanSlackUrl(raw: string | undefined) {
   const value = raw?.trim();
   if (!value) return undefined;
   let url: URL;
@@ -28,7 +29,7 @@ function cleanSlackUrl(raw: string | undefined) {
 }
 
 /** Any public https address. Local and private addresses are refused so a rule cannot poke at internal services. */
-function cleanWebhookUrl(raw: string | undefined) {
+export function cleanWebhookUrl(raw: string | undefined) {
   const value = raw?.trim();
   if (!value) return undefined;
   let url: URL;
@@ -196,47 +197,23 @@ export const evaluate = internalMutation({
   },
 });
 
-function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char] as string);
-}
-
-/** One failed destination must not stop the others, so errors are logged and swallowed. */
-async function postJson(kind: string, url: string, body: unknown) {
-  try {
-    const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "Tracify-Alerts/1.0" }, body: JSON.stringify(body), redirect: "manual", signal: AbortSignal.timeout(10_000) });
-    if (!response.ok) console.error(`[alerts] ${kind} returned`, response.status);
-  } catch (error) {
-    console.error(`[alerts] ${kind} failed`, error);
-  }
-}
-
 export const checkAll = internalAction({
   args: {},
   handler: async (ctx) => {
     const ids: Id<"alertRules">[] = await ctx.runQuery(internal.alertRules.enabledRuleIds, {});
-    const apiKey = process.env.RESEND_API_KEY;
-    const from = process.env.EMAIL_FROM || "Tracify <alerts@tracify.tech>";
     for (const ruleId of ids) {
       try {
         const result = await ctx.runMutation(internal.alertRules.evaluate, { ruleId });
         if (!result.fired) continue;
         const sends: Promise<void>[] = [];
         if (result.emailTo.length > 0) {
-          sends.push((async () => {
-            if (!apiKey) { console.info("[alerts] rule fired, no RESEND_API_KEY set, email skipped", result.name); return; }
-            const response = await fetch("https://api.resend.com/emails", {
-              method: "POST",
-              headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json", "Idempotency-Key": `alert-${ruleId}-${Date.now()}` },
-              body: JSON.stringify({
-                from,
-                to: result.emailTo,
-                subject: `Tracify alert: ${result.name}`,
-                text: `${result.message}\n\nOpen your Tracify dashboard to see what happened.`,
-                html: `<p>${escapeHtml(result.message)}</p><p>Open your Tracify dashboard to see what happened.</p>`,
-              }),
-            });
-            if (!response.ok) console.error("[alerts] email provider returned", response.status);
-          })());
+          sends.push(sendEmail({
+            to: result.emailTo,
+            subject: `Tracify alert: ${result.name}`,
+            text: `${result.message}\n\nOpen your Tracify dashboard to see what happened.`,
+            html: `<p>${escapeHtml(result.message)}</p><p>Open your Tracify dashboard to see what happened.</p>`,
+            idempotencyKey: `alert-${ruleId}-${Date.now()}`,
+          }));
         }
         if (result.slackUrl) sends.push(postJson("slack", result.slackUrl, { text: `:rotating_light: *${result.name}*\n${result.message}` }));
         if (result.webhookUrl) {
