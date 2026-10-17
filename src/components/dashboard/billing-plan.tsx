@@ -10,6 +10,7 @@ import type { Id } from "convex/_generated/dataModel";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn, formatCurrency } from "@/lib/utils";
+import { planById } from "@/lib/pricing-plans";
 
 const PLANS = [
   {
@@ -60,6 +61,10 @@ export function BillingPlan({ projectId }: { projectId: string }) {
     projectId: projectId as Id<"projects">,
   } : "skip");
 
+  const usage = useQuery(api.billing.getMonthlyUsage, projectId ? {
+    projectId: projectId as Id<"projects">,
+  } : "skip");
+
   if (summary === undefined) {
     return (
       <div className="space-y-6">
@@ -85,7 +90,7 @@ export function BillingPlan({ projectId }: { projectId: string }) {
         <UsageCard
           label="Current plan"
           value={currentPlan}
-          detail="From project metadata"
+          detail={usage && currentPlan !== "enterprise" ? `${usage.spans.toLocaleString()} of ${planById(currentPlan).spans} spans used this month` : "From project metadata"}
         />
         <UsageCard
           label="Saved spend"
