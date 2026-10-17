@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as admin from "../admin.js";
 import type * as agentRuns from "../agentRuns.js";
 import type * as alertMetrics from "../alertMetrics.js";
 import type * as alertRules from "../alertRules.js";
@@ -48,6 +49,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  admin: typeof admin;
   agentRuns: typeof agentRuns;
   alertMetrics: typeof alertMetrics;
   alertRules: typeof alertRules;

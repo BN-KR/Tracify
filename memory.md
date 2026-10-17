@@ -2206,3 +2206,4 @@
 - Convex: `costBudgets` + `weeklySummaries` tables, `convex/budgets.ts` (15 min cron, warns once at the chosen % and once when over, per UTC week/month), `convex/weeklySummary.ts` (Monday 08:00 UTC cron, week claimed before sending so it never double-sends), shared sending in `convex/notify.ts`, pure maths in `convex/spendMetrics.ts`.
 - Needs a manual Convex deploy. Email needs `RESEND_API_KEY` (and optionally `EMAIL_FROM`, `SITE_URL`) in the backend env; without it emails are skipped and logged, Slack/webhook still work.
 - `convex/_generated/api.d.ts` was hand-edited (codegen needs a deployment); re-run `npx convex codegen` when convenient.
+- Admin page: /admin (admins only, read-only) shows users, projects, usage, alerts, recent runs. Access enforced in convex/admin.ts (allowlist + verified email). Needs a manual Convex deploy.
