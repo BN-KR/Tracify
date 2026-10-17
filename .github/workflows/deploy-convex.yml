@@ -1,0 +1,51 @@
+name: Deploy backend (Convex)
+
+# Deploys the live EU backend (jovial-owl-711) whenever backend files change on main.
+# Needs one repository secret: CONVEX_DEPLOY_KEY (Production Deploy Key for jovial-owl-711).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "convex/**"
+      - "config/regional-cloud.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/deploy-convex.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-convex
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to jovial-owl-711
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EXPECTED_DEPLOYMENT: jovial-owl-711
+      CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Check the deploy key points at the live backend
+        run: |
+          if [ -z "$CONVEX_DEPLOY_KEY" ]; then
+            echo "::error::CONVEX_DEPLOY_KEY secret is missing. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          case "$CONVEX_DEPLOY_KEY" in
+            "prod:${EXPECTED_DEPLOYMENT}|"*) echo "Deploy key targets ${EXPECTED_DEPLOYMENT}." ;;
+            *) echo "::error::Deploy key does not target production ${EXPECTED_DEPLOYMENT}. Refusing to deploy."; exit 1 ;;
+          esac
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+      - name: Deploy Convex functions
+        run: npx convex deploy --yes
