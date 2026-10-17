@@ -152,3 +152,26 @@ Missing usage is not estimated. Telemetry failures do not change provider result
 
 Anthropic total input tokens include uncached input plus cache reads and cache writes; the original
 usage breakdown remains in metadata for rate-card calculations. See the [provider’s token breakdown](https://platform.claude.com/docs/en/build-with-claude/prompt-caching).
+
+## Framework one-liners
+
+```python
+import tracify
+
+tools = tracify.trace_tools({"search_docs": search_docs, "send_email": send_email})  # plain or async functions
+client = tracify.wrap_openai(OpenAI())   # also wrap_anthropic, langgraph_callback
+```
+
+Copy-paste starters live in [`templates/`](./templates).
+
+## Sampling, redaction and clearer errors
+
+```python
+client = tracify.TracifyClient(
+    sample_rate=0.1,                                   # record about 1 in 10 runs; each run is kept or dropped whole
+    redact={"pii": True, "patterns": [re.compile(r"ACME-\d{6}")]},  # emails, phones, card numbers + your own
+    on_error=lambda error: log(str(error)),            # problems come with a plain-language fix (error.hint)
+)
+```
+
+Spans that report an error are kept even when their run was not sampled (`keep_errors=False` turns that off). Secrets such as bearer tokens and API keys are always removed.

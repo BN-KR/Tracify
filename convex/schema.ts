@@ -209,6 +209,17 @@ export default defineSchema({
     .index("by_runId", ["runId"])
     .index("by_projectId", ["projectId"]),
 
+  sharedTraces: defineTable({
+    projectId: v.id("projects"),
+    runId: v.string(),
+    token: v.string(),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    revokedAt: v.optional(v.number()),
+  })
+    .index("by_token", ["token"])
+    .index("by_projectId_and_runId", ["projectId", "runId"]),
+
   analyticsStatsCache: defineTable({
     projectId: v.id("projects"),
     rangeDays: v.number(),
@@ -296,6 +307,42 @@ export default defineSchema({
     readCount: v.number(),
     updatedAt: v.number(),
   }).index("by_day", ["day"]),
+
+  // Spending limits per calendar week or month. Warns once at `warnAtPercent` and once when the limit is passed.
+  costBudgets: defineTable({
+    projectId: v.id("projects"),
+    name: v.string(),
+    period: v.union(v.literal("week"), v.literal("month")),
+    limitUsd: v.number(),
+    warnAtPercent: v.number(),
+    environment: v.optional(v.string()),
+    emailTo: v.array(v.string()),
+    slackUrl: v.optional(v.string()),
+    webhookUrl: v.optional(v.string()),
+    enabled: v.boolean(),
+    warnedPeriod: v.optional(v.string()),
+    overPeriod: v.optional(v.string()),
+    lastSpend: v.optional(v.number()),
+    lastCheckedAt: v.optional(v.number()),
+    createdBy: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_enabled", ["enabled"]),
+
+  // One weekly email (and optional Slack post) per project, sent Monday morning UTC.
+  weeklySummaries: defineTable({
+    projectId: v.id("projects"),
+    enabled: v.boolean(),
+    emailTo: v.array(v.string()),
+    slackUrl: v.optional(v.string()),
+    lastSentWeek: v.optional(v.string()),
+    lastTestAt: v.optional(v.number()),
+    updatedAt: v.number(),
+  })
+    .index("by_projectId", ["projectId"])
+    .index("by_enabled", ["enabled"]),
 
   costCounters: defineTable({
     projectId: v.id("projects"),

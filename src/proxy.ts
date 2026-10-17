@@ -10,6 +10,7 @@ const CLOUD_APP_PREFIXES = [
   "/forgot-password",
   "/reset-password",
   "/accept-invitation",
+  "/share",
   "/pricing/checkout",
   "/auth/error",
   "/auth/callback",

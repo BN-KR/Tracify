@@ -26,13 +26,14 @@ import {
   Send,
   Copy,
   Check,
-  Share2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CancelRunButton } from "./cancel-run-button";
+import { ShareTraceButton } from "./share-trace-button";
+import { RunNotes } from "./run-notes";
 import { useNow } from "@/hooks/use-now";
 import { captureAnalytics } from "@/lib/analytics";
 import { criticalPath, type CriticalPathResult } from "@/lib/trace-critical-path";
@@ -63,21 +64,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
   const [spansMessage, setSpansMessage] = useState("Cached spans");
   const [spansError, setSpansError] = useState<string | null>(null);
   const [replayIndex, setReplayIndex] = useState(0);
-  const [shareCopied, setShareCopied] = useState(false);
-  const [shareError, setShareError] = useState(false);
   const selectedSpanId = searchParams.get("span");
-
-  async function copyShareLink() {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setShareError(false);
-      setShareCopied(true);
-      window.setTimeout(() => setShareCopied(false), 1600);
-    } catch {
-      setShareError(true);
-      window.setTimeout(() => setShareError(false), 2400);
-    }
-  }
 
   const fetchSpans = useCallback(
     async (refresh: "normal" | "manual" = "normal") => {
@@ -220,14 +207,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             >
               Journey
             </Link>
-            <button
-              type="button"
-              onClick={() => void copyShareLink()}
-              className="flex h-8 items-center gap-2 border border-black/15 bg-white px-3 font-mono text-[11px] uppercase text-black/60 hover:border-black hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
-            >
-              {shareCopied ? <Check className="size-3" /> : <Share2 className="size-3" />}
-              {shareCopied ? "Link copied" : shareError ? "Copy failed" : "Share trace"}
-            </button>
+            <ShareTraceButton projectId={projectId} runId={run.runId} />
             {run.status === "running" && (
               <button
                 type="button"
@@ -253,7 +233,6 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             )}
           </div>
         </div>
-        <div aria-live="polite" className="sr-only">{shareCopied ? "Trace link copied to clipboard." : shareError ? "Trace link could not be copied." : ""}</div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <StatItem label="Status" value={<span className="capitalize">{run.status}</span>} />
           <StatItem label="Total Cost" value={formatCurrency(run.totalCostUsd)} />
@@ -271,6 +250,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
         ) : null}
       </div>
 
+      <RunNotes projectId={projectId} runId={run.runId} />
       <SpanOverview spans={safeSpans} />
       <TraceQualityPanel projectId={projectId} runId={runId} />
       <CriticalPathPanel

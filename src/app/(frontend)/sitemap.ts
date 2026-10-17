@@ -16,13 +16,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const productFeatures = ["trace-viewer", "cost-dashboard", "tool-calls", "llm-calls", "failures", "reports", "runtime-control", "evaluation-engine", "lifecycle"];
-  const useCases = ["research", "support", "automation", "tool-calling"];
+  const useCases = ["research", "support", "automation", "tool-calling", "coding", "rag", "voice", "browser", "multi-agent", "mcp"];
   const documentation = getDocs().map((doc) => doc.slug);
 
   return [
     { url: baseUrl, changeFrequency: "weekly", priority: 1.0 },
     { url: `${baseUrl}/blog`, lastModified: posts[0] ? new Date(getPostDate(posts[0])) : undefined, changeFrequency: "weekly", priority: 0.9 },
     { url: `${baseUrl}/pricing`, changeFrequency: "monthly", priority: 0.7 },
+    ...(["no", "de"] as const).flatMap((locale) => [
+      { url: `${baseUrl}/${locale}`, changeFrequency: "weekly" as const, priority: 0.8 },
+      { url: `${baseUrl}/${locale}/pricing`, changeFrequency: "monthly" as const, priority: 0.7 },
+    ]),
     { url: `${baseUrl}/roadmap`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${baseUrl}/integrations`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${baseUrl}/security`, changeFrequency: "monthly", priority: 0.6 },
@@ -38,6 +42,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...documentation.map((slug) => ({ url: `${baseUrl}/docs/${slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
     ...productFeatures.map((slug) => ({ url: `${baseUrl}/product/${slug}`, changeFrequency: "monthly" as const, priority: 0.8 })),
     ...useCases.map((slug) => ({ url: `${baseUrl}/use-cases/${slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
+    { url: `${baseUrl}/best-llm-observability-tools`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/compare`, changeFrequency: "monthly", priority: 0.8 },
     ...comparisons.map((c) => ({ url: `${baseUrl}/compare/${c.slug}`, changeFrequency: "monthly" as const, priority: 0.8 })),
     ...integrationPages.map((p) => ({ url: `${baseUrl}/integrations/${p.slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
