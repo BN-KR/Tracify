@@ -1,5 +1,5 @@
 import { AlertsBoundary } from "@/components/dashboard/alerts/alerts-boundary";
-import { AlertsWorkspace } from "@/components/dashboard/alerts/alerts-workspace";
+import { AlertsSections } from "@/components/dashboard/alerts/alerts-sections";
 
 export default async function AlertsPage({
   params,
@@ -7,5 +7,5 @@ export default async function AlertsPage({
   params: Promise<{ projectId: string }>;
 }) {
   const { projectId } = await params;
-  return <AlertsBoundary><AlertsWorkspace projectId={projectId} /></AlertsBoundary>;
+  return <AlertsBoundary><AlertsSections projectId={projectId} /></AlertsBoundary>;
 }
