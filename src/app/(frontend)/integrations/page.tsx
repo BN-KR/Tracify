@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { integrationPages } from "@/lib/seo-pages";
 import { pageMetadata } from "@/lib/seo";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
@@ -5,13 +7,17 @@ import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle ,
 import { IntegrationGrid, type Integration } from "@/components/marketing/company/integration-grid";
 
 import { CodeTabs } from "@/components/marketing/company/code-tabs";
-export const metadata = pageMetadata({ title: "AI agent integrations", description: "Connect Tracify with OpenTelemetry, OpenAI, Anthropic, LangChain, CrewAI, Vercel AI SDK, Slack, and more.", path: "/integrations" });
+export const metadata = pageMetadata({ title: "AI agent integrations: OpenAI, LangChain, OTel", description: "Trace OpenAI, Anthropic, LangChain, LangGraph, CrewAI, LlamaIndex, AutoGen, Vercel AI SDK and OpenTelemetry agents in Tracify, plus Slack alerts.", path: "/integrations" });
 
 const integrations: Integration[] = [
   { name: "OpenTelemetry (OTLP)", description: "Ingest spans through the standard OTLP HTTP JSON protocol. Any OTel-instrumented library or exporter works out of the box.", badge: "Native", category: "Tracing" },
   { name: "OpenLLMetry", description: "Drop-in LLM observability instrumentation for OpenAI, Anthropic, Cohere, and more.", badge: "Compatible", category: "Tracing" },
   { name: "LangChain", description: "Trace LangChain agents, chains, and tool calls through the built-in OTel callback handler.", category: "Frameworks" },
   { name: "CrewAI", description: "Monitor CrewAI multi-agent workflows through Python SDK instrumentation.", category: "Frameworks" },
+  { name: "LlamaIndex", description: "Trace LlamaIndex queries, retrieval and agent steps through Python SDK instrumentation.", category: "Frameworks" },
+  { name: "Mastra", description: "Trace Mastra agents and workflows through the TypeScript SDK or OpenTelemetry.", category: "Frameworks" },
+  { name: "Pydantic AI", description: "Trace Pydantic AI agent runs and tool calls through the Python SDK or OpenTelemetry.", category: "Frameworks" },
+  { name: "OpenAI Agents SDK", description: "Trace agent runs, handoffs and tool calls from the OpenAI Agents SDK.", category: "Frameworks" },
   { name: "AutoGen", description: "Trace AutoGen conversations and tool execution through OTel instrumentation or the Python decorator.", category: "Frameworks" },
   { name: "OpenAI SDK", description: "Capture model, latency, tokens, and cost for every OpenAI API call automatically.", category: "Providers" },
   { name: "Anthropic SDK", description: "Trace Claude model calls, tool use, streaming, and extended-thinking spans.", category: "Providers" },
@@ -50,6 +56,12 @@ export default function IntegrationsPage() {
         <Eyebrow>Adapters</Eyebrow>
         <SectionTitle>Filter by what you run.</SectionTitle>
         <div className="mt-12"><IntegrationGrid integrations={integrations} /></div>
+        <div className="mt-16"><Eyebrow>Setup guides</Eyebrow></div>
+        <ul className="mt-6 flex flex-wrap gap-3">
+          {integrationPages.map((o) => (
+            <li key={o.slug}><Link href={`/integrations/${o.slug}`} className="inline-block border border-white/30 px-4 py-2 font-mono text-xs uppercase tracking-[0.12em] text-white hover:bg-[#f4d44d] hover:text-black">{o.name}</Link></li>
+          ))}
+        </ul>
       </DarkBand>
 
       <CreamBand>

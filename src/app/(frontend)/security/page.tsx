@@ -6,7 +6,7 @@ import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle ,
 import { ControlExplorer } from "@/components/marketing/company/control-explorer";
 
 import { RedactionDemo } from "@/components/marketing/company/redaction-demo";
-export const metadata = pageMetadata({ title: "Security", description: "Learn how Tracify protects AI agent telemetry with encryption, project isolation, access controls, and incident response practices.", path: "/security" });
+export const metadata = pageMetadata({ title: "Security for AI agent telemetry", description: "How Tracify protects AI agent traces and prompts: encryption in transit and at rest, project isolation, access controls, EU data residency and redaction.", path: "/security" });
 
 const controls = [
   { title: "Encryption", icon: "lock", summary: "TLS 1.3 in transit and AES-256 at rest.", items: ["API keys are hashed before storage.", "Plaintext project keys are shown once."] },

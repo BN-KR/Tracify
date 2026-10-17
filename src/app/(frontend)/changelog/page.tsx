@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
 import { ClosingBand, DarkBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 
-export const metadata = pageMetadata({ title: "Changelog", description: "Product updates and release notes from the Tracify team.", path: "/changelog" });
+export const metadata = pageMetadata({ title: "Changelog: new in Tracify", description: "Release notes for Tracify: new tracing, cost, alert and evaluation features for AI agent observability, shipped week by week.", path: "/changelog" });
 
 const releaseSource = readFileSync(resolve(process.cwd(), "docs/releases.md"), "utf8");
 

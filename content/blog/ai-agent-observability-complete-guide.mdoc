@@ -12,7 +12,7 @@ tags:
   - AI agents
   - observability
   - production AI
-relatedPosts: []
+relatedPosts: [agentic-ai-observability, llm-tracing-explained, ai-agent-monitoring]
 heroImage:
   src: /media/organic-series/ai-agent-observability-complete-guide.jpg
   alt: A rack of servers in a dark server room
@@ -21,8 +21,8 @@ heroImage:
   hero: /media/organic-series/ai-agent-observability-complete-guide.jpg
   og: /media/organic-series/ai-agent-observability-complete-guide.jpg
 seo:
-  metaTitle: "AI Agent Observability: The Complete Guide"
-  metaDescription: Learn how to instrument, measure, and operate AI agent observability systems that make production behavior understandable and actionable.
+  metaTitle: "AI Agent Observability: The Complete 2026 Guide"
+  metaDescription: What AI agent observability is and how to do it. Traces, tool calls, cost, evals and alerts, with a step-by-step loop for debugging agents in production.
   image:
     src: /media/organic-series/ai-agent-observability-complete-guide.jpg
     alt: A rack of servers in a dark server room
@@ -32,7 +32,7 @@ seo:
     og: /media/organic-series/ai-agent-observability-complete-guide.jpg
 ---
 
-AI agent observability should answer more than “did the request finish?” It should help a person explain what the agent tried, which evidence shaped the path, what the user experienced, and what action is safe next.
+AI agent observability is the practice of recording what an agent tried, which evidence shaped each step, and what the user experienced, so you can debug failures, control cost and ship changes safely. It should answer more than “did the request finish?” It should help a person explain what the agent tried, which evidence shaped the path, what the user experienced, and what action is safe next.
 
 {% trace-scenario title="What should the trace explain?" prompt="A user reports a wrong answer. Which evidence turns the report into an investigation?" outcome="Preserve the task outcome, model and prompt versions, retrieved context, tool calls, retries, and the decision that shaped the final response." /%}
 

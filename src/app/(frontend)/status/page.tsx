@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
 import { ClosingBand, CreamBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 
-export const metadata = pageMetadata({ title: "Status", description: "Current operational status for Tracify services, including ingestion, dashboards, and regional health checks.", path: "/status" });
+export const metadata = pageMetadata({ title: "Tracify status: uptime and incidents", description: "Live operational status for Tracify ingestion, dashboards and API, with regional health checks for the US and EU clouds.", path: "/status" });
 
 const services = [
   { name: "Dashboard + authentication", owner: "Application", icon: Activity },
