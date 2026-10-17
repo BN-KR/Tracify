@@ -933,6 +933,28 @@ export interface SpanRow {
   createdAt: string;
 }
 
+export type ComparisonGroup = {
+  key: string; runs: number; failedRuns: number; avgCostUsd: number; p50DurationMs: number; p95DurationMs: number; avgSteps: number;
+};
+export const COMPARISON_DIMENSIONS = { model: `argMaxIf(modelId, costUsd, modelId != '')`, release: `anyIf(release, release != '')` } as const;
+export type ComparisonDimension = keyof typeof COMPARISON_DIMENSIONS;
+
+/** Runs grouped by their main model or release: how many, how often they fail, what they cost and how long they take. */
+export async function traceGroupComparison(projectId: string, filters: TraceListFilters, by: ComparisonDimension) {
+  const { where, having } = traceListClauses(projectId, filters);
+  const rows = await tinybirdRows<Record<keyof ComparisonGroup | "totalGroups", number | string>>(`
+    SELECT key, count() AS runs, countIf(errorCount > 0) AS failedRuns, avg(totalCostUsd) AS avgCostUsd,
+      quantileExact(0.5)(durationMs) AS p50DurationMs, quantileExact(0.95)(durationMs) AS p95DurationMs, avg(spanCount) AS avgSteps, count() OVER () AS totalGroups
+    FROM (SELECT runId, ${COMPARISON_DIMENSIONS[by]} AS key, ${DURATION_EXPR} AS durationMs, ${ERROR_COUNT_EXPR} AS errorCount, sum(costUsd) AS totalCostUsd, count() AS spanCount
+      FROM spans WHERE ${where} GROUP BY runId ${having})
+    WHERE key != ''
+    GROUP BY key ORDER BY runs DESC, key LIMIT 12`);
+  return rows.map((row): ComparisonGroup => ({
+    key: String(row.key), runs: Number(row.runs), failedRuns: Number(row.failedRuns), avgCostUsd: Number(row.avgCostUsd),
+    p50DurationMs: Number(row.p50DurationMs), p95DurationMs: Number(row.p95DurationMs), avgSteps: Number(row.avgSteps),
+  }));
+}
+
 export type StepListRow = {
   spanId: string; runId: string; name: string; type: string; traceName: string; modelId: string; createdAt: string;
   latencyMs: number; costUsd: number; inputTokens: number; outputTokens: number; errorType: string; errorMessage: string;
