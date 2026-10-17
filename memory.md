@@ -2203,3 +2203,4 @@
 
 ## 2026-10-16 Sidebar extras — draft PR (branch `claude/project-thread-bx8sfj`)
 - Dashboard sidebar panel gets a Pinned section (pin icon on hover per page, kept per project in this browser's localStorage `tracify.sidebar.pins.<projectId>`, max 8), a Saved views list under the page links (up to 5, from the existing saved-views API, hidden if unavailable) and a dismissible "Finish setup" card (API key, first trace, saved view; hides when all done or dismissed, key `tracify.sidebar.setupDismissed.<projectId>`). Frontend only, no backend deploy. Code: `src/components/dashboard/sidebar-extras.tsx`.
+- Admin page: /admin (admins only, read-only) shows users, projects, usage, alerts, recent runs. Access enforced in convex/admin.ts (allowlist + verified email). Needs a manual Convex deploy.
