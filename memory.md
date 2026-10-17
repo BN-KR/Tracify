@@ -1,5 +1,8 @@
 # Project Memory
 
+## 2026-10-16 Ask AI on traces — draft PR (branch `claude/project-thread-n3qyyc`)
+- Trace panel has an "Ask AI" tab: suggested questions + free text, answers cite steps that jump to the step. API `POST /api/projects/[projectId]/runs/[runId]/ask` (signed-in + run access, per-project rate limit). Digest/redaction/built-in answers in `src/lib/ask-ai.ts` (tests: `npm run test:ask-ai`). Uses Anthropic when `TRACIFY_ASK_AI_API_KEY` (or `ANTHROPIC_API_KEY`) is set in Vercel env (model override `TRACIFY_ASK_AI_MODEL`, default claude-haiku-5-5); without a key it answers failures/slowest/cost/summary itself. No Convex change, so no backend deploy.
+
 ## Tracing roadmap authorized 2026-10-14 (in progress)
 - User authorized all five recommended priorities: loading flash; CSV and sorting; OpenAI/Anthropic then LangGraph integrations; cross-trace steps table; saved views. Start base main `fcafb74` after #160/#161 merged, no open PRs. Auth isolated on `codex/project-loading-refresh` in `/home/orca/workspaces/Tracify-loading`. Sessions page files remain out of scope.
 ## 2026-10-15 Search exclusions and comparisons — draft PR (branch `claude/search-exclusions-limits-csfvu6`)
