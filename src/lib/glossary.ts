@@ -8,6 +8,42 @@ export type Term = {
 
 export const glossaryTerms: readonly Term[] = [
   {
+    slug: "trace-viewer",
+    term: "Trace viewer",
+    definition:
+      "A trace viewer is a tool that shows one AI agent run as a timeline of spans, so you can open each model call, tool call, retry and error in order and see what the agent did and why it failed.",
+    expansion:
+      "A good trace viewer shows inputs, outputs, timing, tokens and cost for every step, and lets you jump from a bad answer to the first step that went wrong. Tracify's trace viewer does this for every run sent through the SDK or OpenTelemetry.",
+    related: ["ai-agent-trace", "span", "agent-run"],
+  },
+  {
+    slug: "tool-call-tracking",
+    term: "Tool call tracking",
+    definition:
+      "Tool call tracking is recording every tool an AI agent calls, with its arguments, result, duration and errors, so you can see which tools are slow, fail often or are called with the wrong inputs.",
+    expansion:
+      "Agents often fail at the tool step: a wrong argument, a timeout or a stale result. Tracking tool calls as spans inside the run links each call to the model decision that triggered it and to the cost of the run.",
+    related: ["tool-call", "span", "ai-agent-trace"],
+  },
+  {
+    slug: "ai-pipeline-tracing",
+    term: "AI pipeline tracing",
+    definition:
+      "AI pipeline tracing is following a request through every stage of an AI workflow, such as retrieval, prompt building, model calls, tools and post-processing, as one connected trace.",
+    expansion:
+      "Pipelines fail between stages as often as inside them. A single trace shows where time and cost go, which stage returned bad data, and how an early mistake carried into the final answer.",
+    related: ["llm-tracing", "ai-agent-trace", "span"],
+  },
+  {
+    slug: "ai-agent-tracking",
+    term: "AI agent tracking",
+    definition:
+      "AI agent tracking is monitoring what your agents do in production: which runs happen, what each step costs, which runs fail, and how behavior changes between releases.",
+    expansion:
+      "Tracking covers runs, tool calls, tokens, cost and quality scores over time. It is the monitoring side of AI agent observability, while traces give the detail needed to debug a single run.",
+    related: ["ai-agent-observability", "agent-run", "llm-cost-tracking"],
+  },
+  {
     slug: "llm-observability",
     term: "LLM observability",
     definition:

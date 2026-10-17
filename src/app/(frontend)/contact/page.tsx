@@ -7,7 +7,7 @@ import { ClosingBand, CreamBand, DarkBand, Eyebrow, HeaderAction, SectionTitle ,
 import { CopyButton } from "@/components/marketing/company/copy-button";
 
 import { FitCheck } from "@/components/marketing/company/fit-check";
-export const metadata = pageMetadata({ title: "Contact", description: "Book an Agent Failure Fit Call or talk to Tracify about agent observability, security, and deployment.", path: "/contact" });
+export const metadata = pageMetadata({ title: "Contact the Tracify team", description: "Book an Agent Failure Fit Call or talk to Tracify about agent observability, security, and deployment.", path: "/contact" });
 
 const fitCallSubject = "Agent Failure Fit Call";
 const fitCallBody = `Hi Tracify,
