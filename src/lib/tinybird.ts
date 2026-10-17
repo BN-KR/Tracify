@@ -933,6 +933,28 @@ export interface SpanRow {
   createdAt: string;
 }
 
+export type ComparisonGroup = {
+  key: string; runs: number; failedRuns: number; avgCostUsd: number; p50DurationMs: number; p95DurationMs: number; avgSteps: number;
+};
+export const COMPARISON_DIMENSIONS = { model: `argMaxIf(modelId, costUsd, modelId != '')`, release: `anyIf(release, release != '')` } as const;
+export type ComparisonDimension = keyof typeof COMPARISON_DIMENSIONS;
+
+/** Runs grouped by their main model or release: how many, how often they fail, what they cost and how long they take. */
+export async function traceGroupComparison(projectId: string, filters: TraceListFilters, by: ComparisonDimension) {
+  const { where, having } = traceListClauses(projectId, filters);
+  const rows = await tinybirdRows<Record<keyof ComparisonGroup | "totalGroups", number | string>>(`
+    SELECT key, count() AS runs, countIf(errorCount > 0) AS failedRuns, avg(totalCostUsd) AS avgCostUsd,
+      quantileExact(0.5)(durationMs) AS p50DurationMs, quantileExact(0.95)(durationMs) AS p95DurationMs, avg(spanCount) AS avgSteps, count() OVER () AS totalGroups
+    FROM (SELECT runId, ${COMPARISON_DIMENSIONS[by]} AS key, ${DURATION_EXPR} AS durationMs, ${ERROR_COUNT_EXPR} AS errorCount, sum(costUsd) AS totalCostUsd, count() AS spanCount
+      FROM spans WHERE ${where} GROUP BY runId ${having})
+    WHERE key != ''
+    GROUP BY key ORDER BY runs DESC, key LIMIT 12`);
+  return rows.map((row): ComparisonGroup => ({
+    key: String(row.key), runs: Number(row.runs), failedRuns: Number(row.failedRuns), avgCostUsd: Number(row.avgCostUsd),
+    p50DurationMs: Number(row.p50DurationMs), p95DurationMs: Number(row.p95DurationMs), avgSteps: Number(row.avgSteps),
+  }));
+}
+
 export type StepListRow = {
   spanId: string; runId: string; name: string; type: string; traceName: string; modelId: string; createdAt: string;
   latencyMs: number; costUsd: number; inputTokens: number; outputTokens: number; errorType: string; errorMessage: string;
@@ -972,4 +994,30 @@ export async function traceSteps(projectId: string, filters: TraceListFilters, g
     withFacets ? tinybirdRows<{field:FacetKey;value:string;steps:number}>(facetKeys.map(key=>`SELECT '${key}' AS field, ${key} AS value, count() AS steps FROM spans WHERE ${stepsWhere(projectId,filters,key)} AND ${key} != '' GROUP BY value ORDER BY steps DESC,value LIMIT 100`).join(" UNION ALL ")) : Promise.resolve(null),
   ]);
   return {rows:rows.map(row=>({...row,...Object.fromEntries(["latencyMs","costUsd","inputTokens","outputTokens","calls","errors","p50LatencyMs","p95LatencyMs"].map(key=>[key,Number(row[key as keyof StepListRow]??0)]))})),total:Number(totals[0]?.total??0),stats:Object.fromEntries(Object.entries(stats[0]??{}).map(([k,v])=>[k,Number(v)])),facets,page,pageSize,grouped};
+}
+
+/** One page of raw rows for a project data export, oldest first. */
+export async function exportAnalyticsPage(table: "spans" | "evaluation_scores", projectId: string, offset: number, limit = 2000) {
+  const order = table === "spans" ? "createdAt, spanId" : "createdAt, scoreId";
+  const res = await analyticsSql(`SELECT * FROM ${table} WHERE projectId = '${sqlString(projectId)}' ORDER BY ${order} LIMIT ${Math.floor(limit)} OFFSET ${Math.floor(offset)}`);
+  if (!res.ok) throw new Error(`Analytics export failed: ${res.status}`);
+  return ((await res.json()).data ?? []) as Record<string, unknown>[];
+}
+
+/** Permanently removes every analytics row that belongs to a project. */
+export async function deleteProjectAnalytics(projectId: string) {
+  const condition = `projectId = '${sqlString(projectId)}'`;
+  for (const table of ["spans", "evaluation_scores"] as const) {
+    const res = CLICKHOUSE_URL
+      ? await fetch(`${CLICKHOUSE_URL}/?${new URLSearchParams({ database: CLICKHOUSE_DATABASE })}`, {
+          method: "POST", headers: clickhouseHeaders(), body: `ALTER TABLE ${table} DELETE WHERE ${condition}`, cache: "no-store",
+        })
+      : await fetch(`${TINYBIRD_HOST}/v0/datasources/${table}/delete`, {
+          method: "POST",
+          headers: { ...getHeaders(), "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ delete_condition: condition }),
+          cache: "no-store",
+        });
+    if (!res.ok) throw new Error(`Could not delete ${table}: ${res.status}`);
+  }
 }

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { buildSpanTree, type SpanTreeNode } from "@/lib/tracify-ports/treeBuilding";
 import { chatMessages, compactNumber, downloadFile, formatCost, formatDuration, formatTime, parsePayload } from "./format";
+import { AskAiPanel } from "./ask-ai-panel";
 import { stepKind, TraceGraph, TraceTimeline, TypeIcon } from "./trace-views";
 
 type Span = {
@@ -51,6 +52,7 @@ export function TracePanel({ projectId, runId, summary, view, onView, onClose, o
   const [stepFilter, setStepFilter] = useState<StepFilter>("all");
   const [stepSearch, setStepSearch] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
+  const [side, setSide] = useState<"step" | "ask">("step");
 
   useEffect(() => {
     let live = true;
@@ -197,6 +199,7 @@ export function TracePanel({ projectId, runId, summary, view, onView, onClose, o
     <aside aria-label="Trace detail" className="fixed inset-0 z-40 flex min-w-0 flex-col border-l border-[#1F242C] bg-[#0E1115] font-[family-name:var(--font-geist-sans)] text-[13px] shadow-[-24px_0_48px_rgba(0,0,0,0.45)] lg:left-auto lg:w-[min(1180px,84vw)]">
       <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[#1F242C] px-3 py-2">
         <h2 className="min-w-0 flex-1 truncate text-sm font-semibold">{name}</h2>
+        <button type="button" onClick={() => setSide("ask")} className="h-7 rounded-md bg-[#F4D44D] px-2.5 text-xs font-medium text-[#0B0D10] hover:bg-[#F7DC6B]">Ask AI</button>
         <button type="button" onClick={copyLink} className={toolButton}>{linkCopied ? "Link copied" : "Copy link"}</button>
         <button type="button" onClick={downloadJson} disabled={!spans?.length} className={`${toolButton} disabled:opacity-40`}>JSON</button>
         <button type="button" aria-label="Previous trace" onClick={() => onStep(-1)} className="h-7 w-7 rounded-md border border-[#262C35] hover:border-[#4A5260]">↑</button>
@@ -300,7 +303,19 @@ export function TracePanel({ projectId, runId, summary, view, onView, onClose, o
               )}
             </div>
           </div>
-          <div className="min-h-0 min-w-0 overflow-auto p-4">{selected ? <StepDetail span={selected} /> : null}</div>
+          <div className="flex min-h-0 min-w-0 flex-col">
+            <div role="tablist" aria-label="Side panel" className="flex shrink-0 gap-1 border-b border-[#1F242C] px-2 py-1.5 text-xs">
+              {([["step", "Step"], ["ask", "Ask AI"]] as const).map(([id, label]) => (
+                <button key={id} type="button" role="tab" aria-selected={side === id} onClick={() => setSide(id)}
+                  className={`rounded px-2.5 py-1 ${side === id ? "bg-[#232A34] font-medium text-white" : "text-[#8B93A1] hover:text-white"}`}>{label}</button>
+              ))}
+            </div>
+            {side === "ask" ? (
+              <div className="min-h-0 flex-1"><AskAiPanel projectId={projectId} runId={runId} spans={spans} onSelectStep={(id) => { setCollapsed(new Set()); setStepFilter("all"); setStepSearch(""); setSelectedId(id); requestAnimationFrame(() => document.getElementById(`${view === "tree" ? "step" : view}-${id}`)?.scrollIntoView({ block: "center", inline: "center" })); }} /></div>
+            ) : (
+              <div className="min-h-0 flex-1 overflow-auto p-4">{selected ? <StepDetail span={selected} /> : null}</div>
+            )}
+          </div>
         </div>
       )}
     </aside>
