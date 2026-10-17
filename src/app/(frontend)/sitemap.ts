@@ -23,6 +23,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: baseUrl, changeFrequency: "weekly", priority: 1.0 },
     { url: `${baseUrl}/blog`, lastModified: posts[0] ? new Date(getPostDate(posts[0])) : undefined, changeFrequency: "weekly", priority: 0.9 },
     { url: `${baseUrl}/pricing`, changeFrequency: "monthly", priority: 0.7 },
+    ...(["no", "de"] as const).flatMap((locale) => [
+      { url: `${baseUrl}/${locale}`, changeFrequency: "weekly" as const, priority: 0.8 },
+      { url: `${baseUrl}/${locale}/pricing`, changeFrequency: "monthly" as const, priority: 0.7 },
+    ]),
     { url: `${baseUrl}/roadmap`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${baseUrl}/integrations`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${baseUrl}/security`, changeFrequency: "monthly", priority: 0.6 },

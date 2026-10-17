@@ -6,6 +6,7 @@ import { ArrowUp, ArrowUpRight } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { NewsletterCapture } from "@/components/marketing/newsletter-capture";
 import { TracifyMark } from "@/components/brand/tracify-mark";
+import { LocaleSwitcher } from "@/components/marketing/locale/locale-switcher";
 
 const groups = [
   ["Product", [["Trace viewer", "/product/trace-viewer"], ["Cost dashboard", "/product/cost-dashboard"], ["Tool calls", "/product/tool-calls"], ["Pricing", "/pricing"], ["Integrations", "/integrations"], ["Compare tools", "/compare"]]],
@@ -88,6 +89,7 @@ export function LandingFooter() {
               Status <ArrowUpRight className="size-3" aria-hidden="true" />
             </Link>
           </div>
+          <LocaleSwitcher />
           <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" })} className="inline-flex w-fit items-center gap-2 border border-white/25 px-3 py-2 hover:bg-[#f4d44d] hover:text-black">
             Back to top <ArrowUp className="size-3.5" aria-hidden="true" />
           </button>
