@@ -29,6 +29,7 @@ import { ProjectSwitcher } from "@/components/dashboard/project-switcher";
 import { SidebarAccountMenu } from "@/components/dashboard/sidebar-account-menu";
 import { usePathname, useParams, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { DEMO_BASE_PATH } from "@/lib/demo/demo-config";
 import { FinishSetupCard, PinButton, PinnedSection, SavedViewsSection, usePins, useSavedViews } from "@/components/dashboard/sidebar-extras";
 
 type RailId = "observe" | "analyze" | "improve" | "operate" | "manage" | "help";
@@ -72,6 +73,7 @@ function isActivePath(pathname: string, href: string, projectId: string, isPrevi
     const activeView = new URLSearchParams(currentSearch).get("view") ?? "home";
     return pathname === "/playground" && requestedView === activeView;
   }
+  if (hrefPath === DEMO_BASE_PATH) return pathname === hrefPath;
   if (hrefPath === `/dashboard/${projectId}`) {
     return pathname === "/dashboard" || pathname === hrefPath || (isPreview && pathname.startsWith("/tracify-preview"));
   }
@@ -85,6 +87,7 @@ export function DashboardSidebar({
   projectIdOverride,
   previewProjectName,
   synthetic = false,
+  demo = false,
   isMobileOpen = false,
   onMobileClose,
   onMobileToggle,
@@ -95,6 +98,8 @@ export function DashboardSidebar({
   projectIdOverride?: string;
   previewProjectName?: string;
   synthetic?: boolean;
+  /** The public demo project: same navigation, pointed at the read-only sample pages. */
+  demo?: boolean;
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
   onMobileToggle?: () => void;
@@ -105,7 +110,7 @@ export function DashboardSidebar({
   const projectId = projectIdOverride || (params?.projectId as string) || "";
   const isSynthetic = synthetic && pathname.startsWith("/playground");
   const syntheticHref = (view: string) => (view === "home" ? "/playground" : `/playground/${view}`);
-  const projectDashboardHref = isSynthetic ? "/dashboard" : projectId ? `/dashboard/${projectId}` : "/dashboard";
+  const projectDashboardHref = isSynthetic ? "/dashboard" : demo ? DEMO_BASE_PATH : projectId ? `/dashboard/${projectId}` : "/dashboard";
   const workspaceHref = useCallback(
     (view: string, liveView = view) =>
       isSynthetic
@@ -134,7 +139,8 @@ export function DashboardSidebar({
           label: "Observability",
           items: [
             { title: "Tracing", icon: Activity, href: workspaceHref("tracing") },
-            ...(!isSynthetic ? [{ title: "Steps", icon: Activity, href: workspaceHref("steps") }] : []),
+            ...(!isSynthetic && !demo ? [{ title: "Steps", icon: Activity, href: workspaceHref("steps") }] : []),
+            ...(demo ? [{ title: "Costs", icon: BarChart3, href: workspaceHref("costs") }] : []),
             { title: "Explore", icon: Zap, href: workspaceHref("explore") },
             { title: "Sessions", icon: Activity, href: workspaceHref("sessions") },
             { title: "Users", icon: Users, href: workspaceHref("users") },
@@ -253,7 +259,7 @@ export function DashboardSidebar({
         ],
       },
     ];
-  }, [canAccessContent, isSynthetic, projectDashboardHref, projectId, workspaceHref]);
+  }, [canAccessContent, demo, isSynthetic, projectDashboardHref, projectId, workspaceHref]);
 
   const railGroups = useMemo(() => {
     const byRail = new Map<RailId, NavItem[]>();
@@ -279,7 +285,7 @@ export function DashboardSidebar({
   const visualWidth = showPanel ? EXPANDED_WIDTH : COLLAPSED_WIDTH;
   const helpGroup = railGroups.find((group) => group.id === "help");
   const alertsHref = workspaceHref("alerts");
-  const liveProject = !isSynthetic && !projectIdOverride && Boolean(projectId);
+  const liveProject = !isSynthetic && !demo && !projectIdOverride && Boolean(projectId);
   const { pins, toggle: togglePin, isPinned } = usePins(projectId);
   const savedViews = useSavedViews(projectId, liveProject && showPanel);
 
@@ -345,8 +351,8 @@ export function DashboardSidebar({
         </div>
         {isCollapsed ? (
           <div className="mt-3 flex flex-col items-center gap-2">
-            <ProjectSwitcher isCollapsed previewProjectName={previewProjectName} synthetic={isSynthetic} />
-            <SidebarAccountMenu isCollapsed synthetic={isSynthetic} />
+            <ProjectSwitcher isCollapsed previewProjectName={previewProjectName} synthetic={isSynthetic || demo} />
+            <SidebarAccountMenu isCollapsed synthetic={isSynthetic || demo} />
           </div>
         ) : null}
         {helpOpen && helpGroup ? (
@@ -405,7 +411,7 @@ export function DashboardSidebar({
 
           <div className="border-t border-white/10">
             <div className={cn("p-3", isSynthetic && "captured-sidebar-project")}>
-              <ProjectSwitcher isCollapsed={false} previewProjectName={previewProjectName} synthetic={isSynthetic} />
+              <ProjectSwitcher isCollapsed={false} previewProjectName={previewProjectName} synthetic={isSynthetic || demo} />
             </div>
             {!isSynthetic ? (
               <Link
@@ -418,7 +424,7 @@ export function DashboardSidebar({
               </Link>
             ) : null}
             <div className="border-t border-white/10">
-              <SidebarAccountMenu synthetic={isSynthetic} />
+              <SidebarAccountMenu synthetic={isSynthetic || demo} />
             </div>
           </div>
         </div>

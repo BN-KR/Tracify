@@ -21,6 +21,7 @@ export function DashboardShell({
   previewProjectName,
   dashboardTheme,
   synthetic = false,
+  demo = false,
 }: {
   children: React.ReactNode;
   canAccessContent: boolean;
@@ -29,6 +30,7 @@ export function DashboardShell({
   previewProjectName?: string;
   dashboardTheme?: DashboardTheme;
   synthetic?: boolean;
+  demo?: boolean;
 }) {
   const router = useRouter();
   const params = useParams();
@@ -108,6 +110,7 @@ export function DashboardShell({
         projectIdOverride={previewProjectId}
         previewProjectName={previewProjectName}
         synthetic={synthetic}
+        demo={demo}
         isMobileOpen={isMobileOpen}
         onMobileClose={() => setIsMobileOpen(false)}
         onMobileToggle={() => setIsMobileOpen((current) => !current)}

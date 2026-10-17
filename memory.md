@@ -2215,6 +2215,11 @@
 - robots.ts names AI crawlers explicitly; `/llms-full.txt` serves docs + glossary + comparisons as plain text; llms.txt and sitemap list the new pages; Organization schema has sameAs.
 - Not done: more use-case pages (bespoke art, needs a design-preview PR), best-tools listicle, Search Console/Bing, backlinks.
 
+## 2026-10-16 Public demo project (draft PR, branch `claude/project-thread-c6f532`)
+- `/demo/project` is a read-only, no-sign-up demo of the real dashboard. It runs the real Tracing page against a generated "support-agent" project: ~500 runs/day for 90 days, deterministic per 5-minute slot, so new runs keep appearing live. A built-in story: release v1.14.0 made `issue_refund` time out, v1.14.1 fixed it.
+- Data lives in `src/lib/demo/` (generator + in-memory twins of the analytics queries). The API answers from literal `api/projects/demo/*` routes, which win over `[projectId]`; nothing touches Convex or the analytics backend. Saved views return an empty list and refuse saves.
+- It renders inside the real `DashboardShell`/`DashboardSidebar` (new `demo` prop) so it looks like a normal project: Home, Tracing, Costs, Sessions, Users, Alerts have real sample data; other sidebar pages are generic sample pages (`sample-pages.ts`). Pages are `noindex`, no marketing chrome. The landing hero, nav menu, "try the live demo" card and `/demo` page link to it.
+- `vitest.config.ts` now maps `@/` to `src/` so tests can import app code.
 ## 2026-10-16 Teams and sharing (branch `claude/project-thread-uzz5wa`)
 - Public share links: `sharedTraces` table, `convex/sharedTraces.ts` (create/revoke/getForRun, public `resolve` by token), public page `/share/[token]` (read-only, noindex, no user ids/metadata/stack traces). `/share` is allowed on the cloud host in `src/proxy.ts` and has no marketing chrome.
 - Run notes: `comments.createRunNote/listRunNotes/remove` (stored under spanId `run:<runId>`), panel in the trace viewer.

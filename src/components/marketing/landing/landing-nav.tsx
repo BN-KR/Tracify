@@ -13,7 +13,7 @@ const art = "[image-rendering:pixelated]";
 const menus = {
   Product: {
     img: "/images/landing/hero-graph.png",
-    feature: { title: "See the full loop.", body: "Trace a run, evaluate the output, compare changes, ship with evidence.", href: "/demo", label: "Open the demo" },
+    feature: { title: "See the full loop.", body: "Trace a run, evaluate the output, compare changes, ship with evidence.", href: "/demo/project", label: "Open the demo" },
     links: [
       ["Observe", "Traces, sessions and costs", "/product/trace-viewer"],
       ["Improve", "Evaluations, datasets, prompts", "/product/evaluation-engine"],
