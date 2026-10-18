@@ -1,5 +1,10 @@
 # Project Memory
 
+## 2026-10-17 Paid-plan upgrade prompts — draft PR (branch `claude/project-thread-e9f2e8`)
+- Audit: Stripe Checkout, customer portal, webhook and plan sync already exist (pricing buttons -> `/pricing/checkout` -> `/api/stripe/checkout`). Missing: plan limits are NOT enforced on ingest (only a per-minute rate limit), retention is not tied to plan, and there was no usage meter or upgrade prompt.
+- Added `billing.getMonthlyUsage` (sums this month's run span counts, scans up to 20k runs) and `UpgradeBanner` in the project layout: calm note at 80% of the plan's monthly spans, yellow upgrade bar at 100%, hidden on the billing page and for enterprise. Billing page "Current plan" card shows usage. Needs a manual Convex deploy.
+- Still owner-side: Stripe live keys, the four price IDs, webhook secret, STRIPE_SYNC_SECRET in Vercel/Convex; verify with a real test payment.
+
 ## 2026-10-16 Growth pass — draft PR (branch `claude/project-thread-bq73n8`)
 - New public tool `/tools/ai-cost-estimator` (pure maths in `src/lib/cost-estimator.ts`, tested by `npm run test:tools`; runs in the browser, share link puts numbers in the URL, example prices are round placeholders, never a provider list). Added to sitemap and `public/llms.txt`.
 - Newsletter: existing `NewsletterCapture` (posts to `/api/leads`, intent `newsletter`) now takes a `source` and sends it with any saved referral code in the lead `campaign` field (`newsletter-blog|ref:anna`). `NewsletterPanel` sits after the blog CTA, at the end of docs articles and on the estimator. No backend change, no Convex deploy needed.

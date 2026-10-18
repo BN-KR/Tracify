@@ -1,3 +1,4 @@
+import { UpgradeBanner } from "@/components/dashboard/upgrade-banner";
 import { ProjectRouteGate } from "@/components/dashboard/project-route-gate";
 
 export default async function ProjectDashboardLayout({
@@ -9,5 +10,10 @@ export default async function ProjectDashboardLayout({
 }) {
   const { projectId } = await params;
 
-  return <ProjectRouteGate projectId={projectId}>{children}</ProjectRouteGate>;
+  return (
+    <ProjectRouteGate projectId={projectId}>
+      <UpgradeBanner projectId={projectId} />
+      {children}
+    </ProjectRouteGate>
+  );
 }
