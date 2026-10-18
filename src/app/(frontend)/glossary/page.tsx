@@ -1,6 +1,6 @@
 import { pageMetadata } from "@/lib/seo";
 import { PageHeader } from "@/components/marketing/page-header";
-import { ClosingBand, HeaderAction , StatStrip } from "@/components/marketing/company/blocks";
+import { ClosingBand, HeaderAction  } from "@/components/marketing/company/blocks";
 import { glossaryTerms as terms } from "@/lib/glossary";
 import { GlossaryExplorer } from "@/components/marketing/company/glossary-explorer";
 
@@ -36,10 +36,9 @@ export default function GlossaryPage() {
         lede="Short, direct definitions for the terms used across agent tracing, LLM observability and evaluation, written to be quoted, not just read."
         image="/images/company/glossary-text.png"
       >
-        <HeaderAction href="/demo">See the terms as live traces</HeaderAction>
+        <HeaderAction href="/demo/project">See the terms as live traces</HeaderAction>
         <HeaderAction href="/docs" kind="secondary">Read the docs</HeaderAction>
       </PageHeader>
-      <StatStrip stats={[[String(terms.length),"Terms defined"],["Quotable","One-paragraph answers"],["Linked","Related terms one click away"],["Free","No signup to read"]]} />
 
       <section className="bg-[#eceae3] px-5 pb-24 pt-20 text-black md:px-10">
         <div className="mx-auto max-w-[1320px]">
@@ -53,7 +52,7 @@ export default function GlossaryPage() {
       <ClosingBand
         title="Definitions are the start."
         body="Open a real trace and watch these terms move."
-        actions={[{ href: "/demo", label: "Open the demo", primary: true }, { href: "/blog/what-is-ai-observability", label: "What is AI observability?" }]}
+        actions={[{ href: "/demo/project", label: "Open the demo", primary: true }, { href: "/blog/what-is-ai-observability", label: "What is AI observability?" }]}
       />
     </div>
   );

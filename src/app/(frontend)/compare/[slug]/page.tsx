@@ -56,28 +56,30 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
       </CreamBand>
 
       <DarkBand>
-        <Eyebrow>Side by side</Eyebrow>
-        <SectionTitle>The details.</SectionTitle>
-        <div className="mt-12 overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse text-left text-sm">
-            <thead>
-              <tr className="border-b border-white/30 font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">
-                <th scope="col" className="py-4 pr-6">Area</th>
-                <th scope="col" className="py-4 pr-6">{c.name}</th>
-                <th scope="col" className="py-4 text-[#f4d44d]">Tracify</th>
-              </tr>
-            </thead>
-            <tbody>
-              {c.rows.map(([area, them, us]) => (
-                <tr key={area} className="border-b border-white/15 align-top">
-                  <th scope="row" className="py-5 pr-6 font-mono text-xs uppercase tracking-[0.12em] text-white/70">{area}</th>
-                  <td className="py-5 pr-6 leading-6 text-white/70">{them}</td>
-                  <td className="py-5 leading-6 text-[#eceae3]">{us}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <Eyebrow>Head to head</Eyebrow>
+        <div className="mt-8 grid items-end gap-4 md:grid-cols-[1fr_auto_1fr]">
+          <p className="font-pixel text-[clamp(2rem,5vw,4.2rem)] leading-[0.9] tracking-[-0.06em] text-white/80">{c.name}</p>
+          <p aria-hidden="true" className="font-mono text-xs uppercase tracking-[0.3em] text-[#f4d44d]">vs</p>
+          <p className="font-pixel text-[clamp(2rem,5vw,4.2rem)] leading-[0.9] tracking-[-0.06em] text-[#f4d44d] md:text-right">Tracify</p>
         </div>
+        <dl className="mt-10 border-t border-white/30">
+          {c.rows.map(([area, them, us], i) => (
+            <div key={area} className="group grid gap-3 border-b border-white/15 py-6 transition-colors hover:bg-white/[0.03] md:grid-cols-[1fr_9rem_1fr] md:items-start md:gap-8">
+              <dd className="text-sm leading-6 text-white/70 md:text-base">
+                <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.16em] text-white/40 md:hidden">{c.name}</span>
+                {them}
+              </dd>
+              <dt className="order-first flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white/60 md:order-none md:justify-center md:text-center">
+                <span className="font-pixel text-lg text-[#f4d44d]">{String(i + 1).padStart(2, "0")}</span>
+                {area}
+              </dt>
+              <dd className="border-l-2 border-[#f4d44d] pl-4 text-sm leading-6 text-[#eceae3] md:text-base">
+                <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.16em] text-[#f4d44d] md:hidden">Tracify</span>
+                {us}
+              </dd>
+            </div>
+          ))}
+        </dl>
         <p className="mt-6 text-xs leading-5 text-white/45">Descriptions of other products are summaries and can change. Check {c.name}&apos;s own site for current features and pricing.</p>
       </DarkBand>
 
@@ -96,7 +98,7 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
           </ul>
         </div>
       </CreamBand>
-      <ClosingBand title="See it on your own traces." body="Free to start. First trace in minutes." actions={[{ href: "/sign-up", label: "Start free", primary: true }, { href: "/demo", label: "Open the demo" }]} />
+      <ClosingBand title="See it on your own traces." body="Free to start. First trace in minutes." actions={[{ href: "/sign-up", label: "Start free", primary: true }, { href: "/demo/project", label: "Open the demo" }]} />
     </div>
   );
 }
