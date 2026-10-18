@@ -22,6 +22,16 @@ Use the documentation for implementation details and the blog for explanatory gu
 ## Compare and learn
 
 - [Compare Tracify with other tools](https://www.tracify.tech/compare): Tracify vs Langfuse, LangSmith, Helicone, Arize Phoenix, Braintrust and Datadog.
+- [Free tools for AI agent builders](https://www.tracify.tech/tools): Nine browser-based tools, no sign-up, nothing uploaded.
+- [Agent log checker](https://www.tracify.tech/tools/agent-log-checker): Paste an agent log or trace to find the first failure, slow steps and wasted tokens.
+- [Token counter](https://www.tracify.tech/tools/token-counter): Token counts and prices for GPT, Claude, Gemini, Llama and more (exact for OpenAI, labelled estimates for others).
+- [Model price comparison](https://www.tracify.tech/tools/llm-price-comparison): List prices for every major LLM API and a monthly cost calculator.
+- [Prompt cost checker](https://www.tracify.tech/tools/prompt-cost-checker): Shorten a prompt safely and see the cost per call.
+- [Context window checker](https://www.tracify.tech/tools/context-window-checker): See which models can fit a document in their context window.
+- [Tool definition checker](https://www.tracify.tech/tools/tool-definition-checker): Find mistakes in OpenAI, Anthropic, MCP and Gemini tool definitions.
+- [AI API status](https://www.tracify.tech/tools/ai-api-status): Live status of OpenAI, Anthropic, Gemini and other AI providers.
+- [JSON fixer](https://www.tracify.tech/tools/json-fixer): Repair broken JSON from language models.
+- [Rate limit calculator](https://www.tracify.tech/tools/rate-limit-calculator): How many users an app can serve within its provider's rate limits.
 - [Free AI agent cost estimator](https://www.tracify.tech/tools/ai-cost-estimator): Estimate cost per run, per finished task and per month from traffic and token counts.
 - [Best LLM observability tools](https://www.tracify.tech/best-llm-observability-tools): How to choose a tool, and who each option fits.
 - [Use cases](https://www.tracify.tech/use-cases/coding): Coding, RAG, voice, browser, multi-agent, MCP, support, research, automation and tool-calling agents.
