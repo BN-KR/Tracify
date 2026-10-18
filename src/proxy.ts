@@ -1,5 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { TRACIFY_REGIONS } from "@/lib/regions";
+
+const DEMO_PREFIX = "/demo";
+
+function isDemoPath(pathname: string) {
+  return pathname === DEMO_PREFIX || pathname.startsWith(`${DEMO_PREFIX}/`);
+}
+
 const CLOUD_APP_PREFIXES = [
   "/dashboard",
   "/dash",
@@ -15,6 +23,7 @@ const CLOUD_APP_PREFIXES = [
   "/auth/error",
   "/auth/callback",
   "/cloud/mode",
+  "/demo",
 ];
 
 function isCloudAppPath(pathname: string) {
@@ -34,6 +43,15 @@ function isLocalHost(hostname: string) {
 export function proxy(request: NextRequest) {
   const deploymentKind = process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND ?? "marketing";
   const { pathname, search } = request.nextUrl;
+
+  // The sample project is a sandbox that lives on the cloud site; "/demo" is just its front door.
+  if (pathname === DEMO_PREFIX || pathname === `${DEMO_PREFIX}/`) {
+    const target = isLocalHost(request.nextUrl.hostname) || deploymentKind === "cloud" ? request.url : TRACIFY_REGIONS.eu.origin;
+    return NextResponse.redirect(new URL(`${DEMO_PREFIX}/project${search}`, target));
+  }
+  if (deploymentKind === "marketing" && isDemoPath(pathname) && !isLocalHost(request.nextUrl.hostname)) {
+    return NextResponse.redirect(new URL(`${pathname}${search}`, TRACIFY_REGIONS.eu.origin));
+  }
 
   if (
     deploymentKind === "cloud" &&

@@ -67,7 +67,7 @@ const featured = {
     eyebrow: "Featured / product tour",
     title: "See the full agent improvement loop.",
     body: "Trace a run, evaluate the output, compare changes, and ship with evidence.",
-    href: "/demo",
+    href: "/demo/project",
     label: "Open the demo",
   },
   Solutions: {

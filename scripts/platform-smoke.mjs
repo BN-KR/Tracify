@@ -1,7 +1,7 @@
 const baseUrl = (process.env.TRACIFY_SMOKE_BASE_URL || "http://127.0.0.1:3000").replace(/\/+$/, "");
 const routes = [
   ["/", 200],
-  ["/demo", 200],
+  ["/demo", [200, 302, 307, 308]],
   ["/docs", 200],
   ["/docs/python", 200],
   ["/docs/typescript", 200],

@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { breadcrumbJsonLd, jsonLdString, pageMetadata, SITE_URL } from "@/lib/seo";
 import { PageHeader } from "@/components/marketing/page-header";
 import { ClosingBand, CreamBand, Eyebrow, HeaderAction, SectionTitle } from "@/components/marketing/company/blocks";
 import { NewsletterPanel } from "@/components/marketing/newsletter-panel";
+import { ToolBench } from "@/components/marketing/company/tool-bench";
 import { toolPath, tools } from "@/lib/tools/registry";
 
 const path = "/tools";
@@ -32,19 +32,8 @@ export default function ToolsIndex() {
       </PageHeader>
       <CreamBand id="tools">
         <Eyebrow dark={false}>{tools.length} free tools / no sign-up</Eyebrow>
-        <SectionTitle>Small tools. Real answers.</SectionTitle>
-        <ul className="mt-12 grid gap-px border border-black bg-black sm:grid-cols-2 lg:grid-cols-3">
-          {tools.map((t) => (
-            <li key={t.slug} className="bg-[#eceae3]">
-              <Link href={toolPath(t.slug)} className="group flex h-full min-h-[200px] flex-col p-6 transition-colors hover:bg-[#f4d44d] md:p-7">
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-black/55 group-hover:text-black/70">{t.group}</span>
-                <span className="mt-4 font-pixel text-3xl leading-[0.95] tracking-[-0.06em]">{t.name}</span>
-                <span className="mt-3 text-sm leading-6 text-black/70">{t.blurb}</span>
-                <span className="mt-auto pt-6 font-mono text-[11px] uppercase tracking-[0.14em]">Open the tool <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">→</span></span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <SectionTitle>Pick up a tool.</SectionTitle>
+        <div className="mt-12"><ToolBench /></div>
         <div className="mx-auto max-w-[1320px]"><NewsletterPanel source="tools-index" heading="Get new tools and cost guides when they land." /></div>
       </CreamBand>
       <ClosingBand

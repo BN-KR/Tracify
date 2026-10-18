@@ -1,14 +1,6 @@
-import type { Metadata } from "next";
-import { DemoExploreClient } from "@/components/dashboard/explore/demo-explore-client";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Explore demo — Tracify",
-  description: "Click around Tracify's trace explorer with seeded demo data. No account or backend required.",
-};
-
-// Deliberately outside `[projectId]` (a literal `demo` segment wins over the
-// dynamic route) so this page never goes through ProjectRouteGate / Convex
-// auth. It is pure static/generated data end to end.
+// The old standalone explorer was a duplicate of the demo project's Tracing page.
 export default function DemoExplorePage() {
-  return <DemoExploreClient />;
+  redirect("/demo/project/tracing");
 }

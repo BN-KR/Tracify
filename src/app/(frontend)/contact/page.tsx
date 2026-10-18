@@ -66,7 +66,7 @@ export default function ContactPage() {
         image="/images/company/contact-signal.png"
       >
         <HeaderAction href={fitCallHref}>Book a fit call</HeaderAction>
-        <HeaderAction href="/demo" kind="secondary">Inspect the demo first</HeaderAction>
+        <HeaderAction href="/demo/project" kind="secondary">Inspect the demo first</HeaderAction>
       </PageHeader>
       <StatStrip stats={[["20 min","Free fit call"],["1","Real failure, qualified"],["5 days","To one decision"],["Email","Subject pre-filled"]]} />
 
@@ -163,7 +163,7 @@ export default function ContactPage() {
         title="Prefer to look first?"
         body="Open the demo project, or read how Tracify keeps your telemetry safe."
         actions={[
-          { href: "/demo", label: "Open the demo", primary: true },
+          { href: "/demo/project", label: "Open the demo", primary: true },
           { href: "/security", label: "Review security" },
         ]}
       />
