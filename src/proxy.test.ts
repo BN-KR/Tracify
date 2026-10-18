@@ -22,6 +22,19 @@ describe("deployment host routing", () => {
     expect(response.headers.get("x-middleware-next")).toBe("1");
   });
 
+  it("sends the old demo page and marketing-host demo links to the cloud sandbox", () => {
+    process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND = "marketing";
+    expect(proxy(new NextRequest("https://www.tracify.tech/demo")).headers.get("location")).toBe("https://eu.cloud.tracify.tech/demo/project");
+    expect(proxy(new NextRequest("https://www.tracify.tech/demo/project/costs")).headers.get("location")).toBe("https://eu.cloud.tracify.tech/demo/project/costs");
+  });
+
+  it("serves the demo project on the cloud host", () => {
+    process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND = "cloud";
+    const response = proxy(new NextRequest("https://eu.cloud.tracify.tech/demo/project/tracing"));
+    expect(response.headers.get("location")).toBeNull();
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
   it("keeps the region directory on the marketing host", () => {
     process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND = "cloud";
     const response = proxy(new NextRequest("https://eu.cloud.tracify.tech/cloud"));
