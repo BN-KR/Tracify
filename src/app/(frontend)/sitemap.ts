@@ -2,6 +2,7 @@ import { getPostDate, getPublishedPosts } from "@/lib/markdoc-blog";
 import { getDocs } from "@/lib/markdoc-docs";
 import { comparisons, integrationPages } from "@/lib/seo-pages";
 import { glossaryTerms } from "@/lib/glossary";
+import { tools } from "@/lib/tools/registry";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -38,7 +39,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/changelog`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${baseUrl}/demo`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${baseUrl}/docs`, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/tools/ai-cost-estimator`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/tools`, changeFrequency: "monthly", priority: 0.8 },
+    ...tools.map((t) => ({ url: `${baseUrl}/tools/${t.slug}`, changeFrequency: (t.slug === "ai-api-status" ? "daily" : "monthly") as "daily" | "monthly", priority: 0.8 })),
     { url: `${baseUrl}/glossary`, changeFrequency: "monthly", priority: 0.7 },
     ...documentation.map((slug) => ({ url: `${baseUrl}/docs/${slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
     ...productFeatures.map((slug) => ({ url: `${baseUrl}/product/${slug}`, changeFrequency: "monthly" as const, priority: 0.8 })),

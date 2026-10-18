@@ -7,7 +7,7 @@ import { getCategoryOptions, getPostDate, getPublishedPosts } from "@/lib/markdo
 import Link from "next/link";
 
 export const revalidate = 60;
-export const metadata = pageMetadata({ title: "Blog", description: "Engineering insights, agent patterns, and production AI from the Tracify team.", path: "/blog" });
+export const metadata = pageMetadata({ title: "AI agent observability blog", description: "Guides on AI agent observability, tracing, evaluation, cost control and debugging in production, plus honest Tracify vs alternatives comparisons.", path: "/blog" });
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });

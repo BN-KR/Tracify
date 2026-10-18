@@ -19,6 +19,8 @@ const menus = {
       ["Improve", "Evaluations, datasets, prompts", "/product/evaluation-engine"],
       ["Release", "Experiments, gates, monitors", "/product/lifecycle"],
       ["Operate", "Alerts, reports, integrations", "/integrations"],
+      ["Free tools", "Token counter, price and log checkers", "/tools"],
+      ["Live demo", "Explore a sample project", "/demo/project"],
     ],
   },
   Solutions: {
@@ -29,6 +31,8 @@ const menus = {
       ["Research", "Verify multi-step investigations", "/use-cases/research"],
       ["Automation", "Debug workflows and retry chains", "/use-cases/automation"],
       ["Tool calling", "Catch failed APIs and loops", "/use-cases/tool-calling"],
+      ["Compare", "Tracify next to other tools", "/compare"],
+      ["Alternatives", "The best LLM observability tools", "/best-llm-observability-tools"],
     ],
   },
   Developers: {
@@ -39,6 +43,8 @@ const menus = {
       ["TypeScript SDK", "Trace Node and Next.js agents", "/docs/typescript"],
       ["Python SDK", "Instrument with a decorator", "/docs/python"],
       ["API reference", "Ingest from custom runtimes", "/docs/api"],
+      ["Integrations", "LlamaIndex, AutoGen, Mastra and more", "/integrations"],
+      ["Glossary", "Agent tracing terms, explained", "/glossary"],
     ],
   },
   Company: {
@@ -47,7 +53,9 @@ const menus = {
     links: [
       ["Blog", "Agent engineering notes", "/blog"],
       ["Changelog", "What shipped lately", "/changelog"],
+      ["Roadmap", "What is shipping next", "/roadmap"],
       ["Security", "How Tracify handles data", "/security"],
+      ["Status", "Is everything running?", "/status"],
       ["Contact", "Talk through your stack", "/contact"],
     ],
   },

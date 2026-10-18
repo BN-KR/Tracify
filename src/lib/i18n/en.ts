@@ -52,8 +52,8 @@ export const en: Copy = {
     closeDocs: "Read the docs",
   },
   pricing: {
-    metaTitle: "Pricing",
-    metaDescription: "Free to start, fair as you grow. Tracify plans are sized by spans per month, with Free, Pro, Team and Enterprise options.",
+    metaTitle: "Pricing: free AI agent observability plan",
+    metaDescription: "Start free, then pay by spans per month. Tracify pricing for AI agent tracing, cost tracking and evaluation: Free, Pro, Team and Enterprise plans.",
     eyebrow: "Pricing",
     title: "Pay for steps. Not for surprises.",
     lede: "Free to start, no card. One span is one step your agent takes. Pick the plan that covers a month of them.",

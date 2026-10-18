@@ -3,8 +3,8 @@ import { languageAlternates } from "@/lib/i18n";
 import { PricingPage } from "@/components/marketing/pricing/pricing-page";
 
 export const metadata: Metadata = {
-  title: "Pricing",
-  description: "Free to start, fair as you grow. Tracify plans are sized by spans per month, with Free, Pro, Team and Enterprise options.",
+  title: "Pricing: free AI agent observability plan",
+  description: "Start free, then pay by spans per month. Tracify pricing for AI agent tracing, cost tracking and evaluation: Free, Pro, Team and Enterprise plans.",
   alternates: { canonical: "/pricing", languages: languageAlternates("/pricing") },
 };
 

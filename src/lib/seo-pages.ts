@@ -247,4 +247,93 @@ openai = tracify.wrap_openai(OpenAI())`,
     doc: "typescript",
     faq: [{ q: "Does it work with Next.js route handlers?", a: "Yes. The TypeScript SDK traces server-side code including route handlers and Server Actions." }],
   },
+  {
+    slug: "llamaindex",
+    name: "LlamaIndex",
+    title: "Trace LlamaIndex agents and RAG",
+    description: "Trace LlamaIndex queries, retrieval and agent steps in Tracify with the Python SDK, with tokens, latency and cost per run.",
+    answer: "To trace LlamaIndex with Tracify, wrap each query or agent run in the Python SDK's trace_agent decorator and record retrieval as its own step. Model calls made through a wrapped provider client join the same trace.",
+    captures: ["One trace per query or agent run", "Retrieval as a separate step", "Model calls with tokens and cost", "Errors and slow steps in order"],
+    language: "python",
+    code: `import tracify
+
+@tracify.trace_agent(name="docs-rag")
+def answer(question: str):
+    with tracify.span("retrieve", type="retrieval", input=question):
+        nodes = retriever.retrieve(question)
+    with tracify.span("synthesize", type="llm"):
+        return query_engine.query(question)`,
+    doc: "python",
+    faq: [{ q: "Can I see which retrieved chunks led to a bad answer?", a: "Yes. Retrieval is recorded as its own step in the run, so you can open it next to the model call that used it." }],
+  },
+  {
+    slug: "autogen",
+    name: "AutoGen",
+    title: "Trace AutoGen multi-agent chats",
+    description: "Trace AutoGen conversations, tool execution and model calls in Tracify with the Python SDK or OpenTelemetry.",
+    answer: "To trace AutoGen with Tracify, wrap the conversation in trace_agent and record each tool execution as a step, or send AutoGen's OpenTelemetry spans to Tracify over OTLP.",
+    captures: ["One trace per conversation", "Tool execution per agent turn", "Model calls with tokens and cost", "Loops and failed turns"],
+    language: "python",
+    code: `import tracify
+
+@tracify.trace_agent(name="autogen-team")
+async def run_team(task: str):
+    with tracify.span("team-run", type="agent", input=task):
+        return await team.run(task=task)`,
+    doc: "python",
+    faq: [{ q: "Can I use OpenTelemetry instead of the SDK?", a: "Yes. Tracify accepts OTLP over HTTP, so any OpenTelemetry instrumentation AutoGen emits can be sent to your project." }],
+  },
+  {
+    slug: "mastra",
+    name: "Mastra",
+    title: "Trace Mastra agents and workflows",
+    description: "Trace Mastra agents, tools and workflows in Tracify with the TypeScript SDK or OpenTelemetry.",
+    answer: "To trace Mastra with Tracify, wrap an agent call with traceAgent in the TypeScript SDK, or export Mastra's OpenTelemetry traces to Tracify over OTLP.",
+    captures: ["One trace per agent or workflow run", "Tool calls and results", "Model calls with tokens and cost", "Errors and retries"],
+    language: "typescript",
+    code: `import { traceAgent } from "tracify-sdk";
+
+const run = traceAgent(async (input: string) => {
+  const result = await mastraAgent.generate(input);
+  return result.text;
+}, { name: "mastra-agent" });`,
+    doc: "typescript",
+    faq: [{ q: "Does Mastra work with the Tracify TypeScript SDK?", a: "Yes. Mastra runs as ordinary server-side TypeScript, so traceAgent can wrap its calls, and OTLP export works too." }],
+  },
+  {
+    slug: "pydantic-ai",
+    name: "Pydantic AI",
+    title: "Trace Pydantic AI agents",
+    description: "Trace Pydantic AI agent runs, tool calls and model usage in Tracify with the Python SDK or OpenTelemetry.",
+    answer: "To trace Pydantic AI with Tracify, wrap the agent run in trace_agent and record tools as steps, or send Pydantic AI's OpenTelemetry spans to Tracify over OTLP.",
+    captures: ["One trace per agent run", "Tool calls and validation failures", "Model usage and cost", "Retries in order"],
+    language: "python",
+    code: `import tracify
+
+@tracify.trace_agent(name="pydantic-agent")
+async def ask(question: str):
+    with tracify.span("agent-run", type="agent", input=question):
+        result = await agent.run(question)
+        return result.output`,
+    doc: "python",
+    faq: [{ q: "Will I see structured-output retries?", a: "Yes. Each retry is a separate step inside the run, so you can see why validation failed." }],
+  },
+  {
+    slug: "openai-agents-sdk",
+    name: "OpenAI Agents SDK",
+    title: "Trace the OpenAI Agents SDK",
+    description: "Trace OpenAI Agents SDK runs, handoffs and tool calls in Tracify with tokens, latency and cost.",
+    answer: "To trace the OpenAI Agents SDK with Tracify, wrap the run in trace_agent and wrap the OpenAI client so every model call is recorded with tokens and cost.",
+    captures: ["One trace per agent run", "Handoffs between agents", "Tool calls and results", "Tokens and cost per model call"],
+    language: "python",
+    code: `import tracify
+from agents import Runner
+
+@tracify.trace_agent(name="support-triage")
+async def triage(message: str):
+    result = await Runner.run(agent, message)
+    return result.final_output`,
+    doc: "python",
+    faq: [{ q: "Do I lose OpenAI's own trace viewer?", a: "No. Tracify records alongside it, so you keep both." }],
+  },
 ] as const;
