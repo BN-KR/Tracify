@@ -1,11 +1,12 @@
 import { pageMetadata } from "@/lib/seo";
 import { PageHeader } from "@/components/marketing/page-header";
-import { ClosingBand, HeaderAction  } from "@/components/marketing/company/blocks";
+import { ClosingBand, DarkBand, HeaderAction } from "@/components/marketing/company/blocks";
 import { glossaryTerms as terms } from "@/lib/glossary";
 import { GlossaryExplorer } from "@/components/marketing/company/glossary-explorer";
 
 
 
+import { TermFlipper } from "@/components/marketing/company/term-flipper";
 import { SpanAnatomy } from "@/components/marketing/company/span-anatomy";
 export const metadata = pageMetadata({ title: "AI observability glossary", description: "Plain-language definitions of LLM observability, AI agent tracing, spans, tool calls, and agent evaluation terms used across the Tracify platform.", path: "/glossary" });
 
@@ -39,6 +40,8 @@ export default function GlossaryPage() {
         <HeaderAction href="/demo/project">See the terms as live traces</HeaderAction>
         <HeaderAction href="/docs" kind="secondary">Read the docs</HeaderAction>
       </PageHeader>
+
+      <DarkBand className="!py-12 md:!py-16"><TermFlipper terms={terms} /></DarkBand>
 
       <section className="bg-[#eceae3] px-5 pb-24 pt-20 text-black md:px-10">
         <div className="mx-auto max-w-[1320px]">

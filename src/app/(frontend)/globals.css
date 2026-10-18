@@ -863,3 +863,14 @@ body:has(.tracify-cloud-shell) [role="menu"] [class*="border-black"]{border-colo
 
 /* Norwegian and German pages: room for accents above capitals in the pixel font. */
 .pixel-loose .font-pixel { line-height: 1.12; }
+
+/* Integration pages: packets travelling along the wire from your code to Tracify. */
+@keyframes wire-packet {
+  0% { left: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: calc(100% - 10px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wire-packet { animation: none !important; opacity: 1 !important; left: 50% !important; }
+}
