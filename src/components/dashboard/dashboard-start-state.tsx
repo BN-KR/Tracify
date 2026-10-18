@@ -139,7 +139,7 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
               {hasProject ? "Continue setup" : "Create project"}
             </Link>
             <Link
-              href={hasFirstTrace ? `/dashboard/${effectiveProjectId}/runs` : "/demo/project"}
+              href={hasFirstTrace ? `/dashboard/${effectiveProjectId}/runs` : "/demo"}
               className={buttonVariants({
                 variant: "secondary",
                 className: "h-9 px-4 uppercase",
@@ -195,7 +195,7 @@ export function DashboardStartState({ projectId }: { projectId?: string }) {
           </p>
         </div>
         <Link
-          href={hasFirstTrace ? `/dashboard/${effectiveProjectId}/runs` : "/demo/project"}
+          href={hasFirstTrace ? `/dashboard/${effectiveProjectId}/runs` : "/demo"}
           className={buttonVariants({
             variant: "secondary",
             className: "h-9 px-4 uppercase",
