@@ -23,6 +23,14 @@ export const KIND_TEXT = {
   user: { title: "Users", one: "user", many: "users", other: "Sessions", otherPlural: "sessions", route: "users", otherRoute: "sessions", search: "Search users or sessions", blurb: "Everything one end user did across all their sessions." },
 } as const;
 
+const SORT_CHOICES = [
+  { value: "lastSeenAt:desc", label: "Most recent" }, { value: "lastSeenAt:asc", label: "Oldest activity" },
+  { value: "runs:desc", label: "Most runs" }, { value: "failedRuns:desc", label: "Most failed runs" },
+  { value: "totalCostUsd:desc", label: "Highest cost" }, { value: "tokens:desc", label: "Most tokens" },
+  { value: "spanSeconds:desc", label: "Longest" }, { value: "id:asc", label: "Name A to Z" },
+];
+const initials = (id: string) => (id.replace(/[^A-Za-z0-9]/g, "").slice(0, 2) || "?").toUpperCase();
+
 function currentUrlQuery(): Query {
   if (typeof window === "undefined") return {};
   const query: Query = {};
@@ -169,9 +177,6 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
     return () => window.removeEventListener("keydown", onKey);
   }, [selectIndex, selected, update]);
 
-  function sortBy(next: string) {
-    update({ sort: next, dir: sort === next && direction === "desc" ? "asc" : "desc" });
-  }
   function toggleLive() {
     const next = !live;
     setLive(next);
@@ -191,18 +196,6 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
     ...(query.status ? [{ key: "status", label: query.status === "error" ? "With errors only" : "Healthy only" }] : []),
   ];
   const selectedRow = rows.find((row) => row.id === selected) ?? null;
-  const columns: Array<{ id: string; label: string; right?: boolean; sort?: string }> = [
-    { id: "id", label: text.one === "session" ? "Session" : "User", sort: "id" },
-    { id: "other", label: kind === "session" ? "User" : "Sessions", right: kind === "user" },
-    { id: "runs", label: "Runs", right: true, sort: "runs" },
-    { id: "failed", label: "Failed", right: true, sort: "failedRuns" },
-    { id: "cost", label: "Cost", right: true, sort: "totalCostUsd" },
-    { id: "tokens", label: "Tokens", right: true, sort: "tokens" },
-    ...(kind === "session" ? [{ id: "length", label: "Length", right: true, sort: "spanSeconds" }] : []),
-    { id: "model", label: "Top model" },
-    { id: "last", label: "Last active", sort: "lastSeenAt" },
-  ];
-
   return (
     <div className="flex min-h-svh min-w-0 flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
       <header className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
@@ -233,6 +226,10 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
           <option value="error">With errors</option>
           <option value="healthy">Healthy only</option>
         </select>
+        <label className="sr-only" htmlFor={`${kind}-sort`}>Sort by</label>
+        <select id={`${kind}-sort`} className={control} value={`${sort}:${direction}`} onChange={(event) => { const [nextSort, nextDir] = event.target.value.split(":"); update({ sort: nextSort, dir: nextDir }); }}>
+          {SORT_CHOICES.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
+        </select>
         <button type="button" onClick={toggleLive} aria-pressed={isLive} disabled={Boolean(query.from || query.to)} title={query.from || query.to ? "Live updates are off for a fixed time window" : undefined} className={`${control} flex items-center gap-1.5 disabled:opacity-50`}>
           <span className={`size-1.5 rounded-full ${isLive ? "animate-pulse bg-[#5BE3A0]" : "bg-[#6B7380]"}`} />
           {isLive ? "Live" : query.from || query.to ? "Fixed window" : "Paused"}
@@ -252,7 +249,7 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
         </div>
       ) : null}
 
-      <section aria-label="Summary" className="grid grid-cols-2 gap-px border-b border-[#1F242C] bg-[#1F242C] sm:grid-cols-3 lg:grid-cols-6">
+      <section aria-label="Summary" className={kind === "session" ? "flex flex-wrap gap-x-6 gap-y-1 border-b border-[#1F242C] px-4 py-2 font-mono text-[11px] text-[#8B93A1]" : "grid grid-cols-2 gap-px border-b border-[#1F242C] bg-[#1F242C] sm:grid-cols-3 lg:grid-cols-6"}>
         {([
           [text.title, stats ? compactNumber(stats.groups) : "–"],
           ["Runs", stats ? compactNumber(stats.runs) : "–"],
@@ -260,7 +257,9 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
           [`${text.title} with errors`, stats ? compactNumber(stats.groupsWithErrors) : "–"],
           ["Cost", stats ? formatCost(stats.totalCostUsd) : "–"],
           ["Tokens", stats ? compactNumber(stats.tokens) : "–"],
-        ] as const).map(([label, value]) => (
+        ] as const).map(([label, value]) => kind === "session" ? (
+          <span key={label}>{label} <span className={label === "Failed runs" && stats?.failedRuns ? "text-[#FF8A8A]" : "text-[#E6E9EE]"}>{value}</span></span>
+        ) : (
           <div key={label} className="bg-[#0B0D10] px-4 py-2.5">
             <div className="font-mono text-[10px] uppercase tracking-wider text-[#6B7380]">{label}</div>
             <div className={`mt-0.5 font-mono text-base ${loading && !data ? "text-[#6B7380]" : label === "Failed runs" && stats?.failedRuns ? "text-[#FF8A8A]" : "text-[#E6E9EE]"}`}>{value}</div>
@@ -268,8 +267,8 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
         ))}
       </section>
 
-      <div className={`grid min-h-0 flex-1 ${selected ? "lg:grid-cols-[minmax(0,1fr)_minmax(380px,46%)]" : "grid-cols-1"}`}>
-        <main className={`min-w-0 overflow-auto ${selected ? "hidden lg:block" : ""}`}>
+      <div className={kind === "session" ? "grid min-h-0 flex-1 lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)]" : "relative min-h-0 flex-1"}>
+        <main className={`min-w-0 overflow-auto ${kind === "session" ? `border-r border-[#1F242C] bg-[#0D1014] ${selected ? "hidden lg:block" : ""}` : ""}`}>
           {error ? (
             <div role="alert" className="m-4 border border-[#5B2B2B] bg-[#1A1010] p-4">
               <p className="text-[#FF8A8A]">{error}</p>
@@ -289,47 +288,49 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
                 : <a className="mt-4 inline-block rounded bg-[#F4D44D] px-4 py-2 text-sm font-medium text-[#0B0D10]" href={`/dashboard/${encodeURIComponent(projectId)}/quickstart`}>Open quickstart</a>}
             </div>
           ) : null}
-          {rows.length ? (
-            <table className="w-full min-w-[760px] border-collapse text-left">
-              <caption className="sr-only">{text.title}</caption>
-              <thead className="sticky top-0 z-10 bg-[#0E1115]">
-                <tr>
-                  {columns.map((column) => {
-                    const active = column.sort === sort;
-                    return (
-                      <th key={column.id} scope="col" aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : column.sort ? "none" : undefined} className={`border-b border-[#1F242C] px-3 py-2 font-mono text-[10px] font-medium uppercase tracking-wider text-[#6B7380] ${column.right ? "text-right" : ""}`}>
-                        {column.sort ? (
-                          <button type="button" onClick={() => sortBy(column.sort!)} className={`uppercase hover:text-white ${active ? "text-[#F4D44D]" : ""}`}>
-                            {column.label}{active ? (direction === "asc" ? " ↑" : " ↓") : ""}
-                          </button>
-                        ) : column.label}
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody className={loading ? "opacity-60" : ""}>
-                {rows.map((row) => (
-                  <tr key={row.id} aria-selected={selected === row.id} onClick={() => update({ id: row.id }, false)} className={`h-8 cursor-pointer border-b border-[#14181E] hover:bg-[#12161C] ${selected === row.id ? "bg-[#161B22] shadow-[inset_2px_0_0_#F4D44D]" : fresh.has(row.id) ? "bg-[#1C1A0E]" : ""}`}>
-                    <td className="max-w-[260px] px-3 py-1.5">
-                      <button type="button" onClick={(event) => { event.stopPropagation(); update({ id: row.id }, false); }} className="block max-w-full truncate text-left font-mono text-xs text-[#8AB4FF] hover:underline" title={row.id}>{row.id}</button>
-                    </td>
-                    <td className="max-w-[200px] truncate px-3 py-1.5 font-mono text-xs text-[#C9CED6]">
-                      {kind === "session"
-                        ? row.other ? <a href={`/dashboard/${encodeURIComponent(projectId)}/users?id=${encodeURIComponent(row.other)}`} onClick={(event) => event.stopPropagation()} className="text-[#8AB4FF] hover:underline" title={row.others > 1 ? `${row.others} users` : row.other}>{row.other}{row.others > 1 ? ` +${row.others - 1}` : ""}</a> : <span className="text-[#6B7380]">–</span>
-                        : <span className="block text-right">{compactNumber(row.others)}</span>}
-                    </td>
-                    <td className="px-3 py-1.5 text-right font-mono text-xs">{compactNumber(row.runs)}</td>
-                    <td className={`px-3 py-1.5 text-right font-mono text-xs ${row.failedRuns ? "text-[#FF8A8A]" : "text-[#6B7380]"}`}>{row.failedRuns ? compactNumber(row.failedRuns) : "–"}</td>
-                    <td className="px-3 py-1.5 text-right font-mono text-xs">{formatCost(row.totalCostUsd)}</td>
-                    <td className="px-3 py-1.5 text-right font-mono text-xs text-[#C9CED6]">{compactNumber(row.inputTokens + row.outputTokens)}</td>
-                    {kind === "session" ? <td className="whitespace-nowrap px-3 py-1.5 text-right font-mono text-xs text-[#C9CED6]">{row.spanSeconds ? formatDuration(row.spanSeconds * 1000) : <span className="text-[#6B7380]">–</span>}</td> : null}
-                    <td className="max-w-[160px] truncate px-3 py-1.5 font-mono text-xs text-[#8B93A1]" title={row.topModel}>{row.topModel || "–"}</td>
-                    <td className="whitespace-nowrap px-3 py-1.5 font-mono text-xs text-[#8B93A1]" title={formatTime(row.lastSeenAt)}>{relativeTime(row.lastSeenAt, clock)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {rows.length && kind === "session" ? (
+            <ul aria-label="Sessions" className={loading ? "opacity-60" : ""}>
+              {rows.map((row) => (
+                <li key={row.id} className={`border-b border-[#14181E] ${fresh.has(row.id) ? "bg-[#1C1A0E]" : ""}`}>
+                  <button type="button" aria-current={selected === row.id} onClick={() => update({ id: row.id }, false)} className={`w-full px-4 py-3 text-left hover:bg-[#12161C] ${selected === row.id ? "bg-[#161B22] shadow-[inset_2px_0_0_#F4D44D]" : ""}`}>
+                    <span className="flex items-center gap-2">
+                      <span className={`size-2 shrink-0 rounded-full ${row.failedRuns ? "bg-[#FF6B6B]" : "bg-[#3A424E]"}`} aria-label={row.failedRuns ? "Has failed runs" : "No failed runs"} />
+                      <span className="min-w-0 flex-1 truncate font-mono text-xs font-medium" title={row.id}>{row.id}</span>
+                      <span className="shrink-0 font-mono text-[11px] text-[#8B93A1]" title={formatTime(row.lastSeenAt)}>{relativeTime(row.lastSeenAt, clock)}</span>
+                    </span>
+                    <span className="mt-1 flex items-center gap-2 pl-4 text-[11px] text-[#8B93A1]">
+                      <span className="min-w-0 truncate">{row.other ? `${row.other}${row.others > 1 ? ` +${row.others - 1}` : ""}` : "No user"}</span>
+                      <span className="ml-auto shrink-0 font-mono">{compactNumber(row.runs)} runs{row.spanSeconds ? ` · ${formatDuration(row.spanSeconds * 1000)}` : ""}</span>
+                    </span>
+                    <span className="mt-0.5 flex gap-3 pl-4 font-mono text-[10px] text-[#6B7380]">
+                      {row.failedRuns ? <span className="text-[#FF8A8A]">{compactNumber(row.failedRuns)} failed</span> : null}<span>{formatCost(row.totalCostUsd)}</span>{row.topModel ? <span className="truncate">{row.topModel}</span> : null}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {rows.length && kind === "user" ? (
+            <ul aria-label="Users" className={`grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 ${loading ? "opacity-60" : ""}`}>
+              {rows.map((row) => {
+                const failShare = row.runs ? row.failedRuns / row.runs : 0;
+                return (
+                  <li key={row.id} className={fresh.has(row.id) ? "rounded bg-[#1C1A0E]" : ""}>
+                    <button type="button" aria-current={selected === row.id} onClick={() => update({ id: row.id }, false)} className={`flex h-full w-full flex-col rounded border p-4 text-left hover:border-[#2E3540] ${selected === row.id ? "border-[#F4D44D] bg-[#12161C]" : "border-[#1F242C] bg-[#0E1115]"}`}>
+                      <span className="flex items-center gap-3">
+                        <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-full border border-[#262C35] bg-[#161B22] font-mono text-xs text-[#F4D44D]">{initials(row.id)}</span>
+                        <span className="min-w-0 flex-1"><span className="block truncate font-mono text-xs font-semibold" title={row.id}>{row.id}</span><span className="block text-[11px] text-[#8B93A1]" title={formatTime(row.lastSeenAt)}>Active {relativeTime(row.lastSeenAt, clock)}</span></span>
+                      </span>
+                      <span className="mt-4 grid grid-cols-3 gap-2">
+                        {([["Runs", compactNumber(row.runs)], ["Sessions", compactNumber(row.others)], ["Cost", formatCost(row.totalCostUsd)]] as const).map(([label, value]) => <span key={label}><span className="block font-mono text-sm">{value}</span><span className="block text-[10px] uppercase tracking-wider text-[#6B7380]">{label}</span></span>)}
+                      </span>
+                      <span className="mt-4 block h-1.5 overflow-hidden rounded-full bg-[#1F242C]" role="img" aria-label={`${Math.round(failShare * 100)}% of runs failed`}><span className="block h-full bg-[#FF6B6B]" style={{ width: `${Math.max(failShare > 0 ? 4 : 0, Math.round(failShare * 100))}%` }} /></span>
+                      <span className="mt-1.5 flex items-center gap-2 text-[11px] text-[#8B93A1]"><span className={row.failedRuns ? "text-[#FF8A8A]" : ""}>{row.failedRuns ? `${compactNumber(row.failedRuns)} failed` : "No failures"}</span><span className="ml-auto truncate font-mono text-[10px] text-[#6B7380]">{row.topModel || ""}</span></span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           ) : null}
         </main>
 
@@ -340,6 +341,8 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
             onPrevious={() => selectIndex(-1)} onNext={() => selectIndex(1)}
             onOpen={(targetKind, id) => { window.location.assign(`/dashboard/${encodeURIComponent(projectId)}/${KIND_TEXT[targetKind].route}?id=${encodeURIComponent(id)}`); }}
           />
+        ) : kind === "session" ? (
+          <div className="hidden place-items-center p-10 text-center lg:grid"><div className="max-w-xs"><p className="text-sm font-semibold">Pick a session to read it</p><p className="mt-1 text-xs leading-5 text-[#8B93A1]">The whole conversation opens here, question by answer, in order. Use ↑ and ↓ to move between sessions.</p></div></div>
         ) : null}
       </div>
 

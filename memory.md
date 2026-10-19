@@ -2288,3 +2288,6 @@ Prompts page is now an IDE-style view: prompt rail on the left, release pipeline
 
 ## 2026-10-19 — Playground bench layout
 Playground is now a bench: model chips + temperature + Run in the top bar, collapsible prompt text with a variables row, big side-by-side answer lanes (one per model), run history as a filmstrip at the bottom. Next: Sessions inbox + transcript, Users people cards.
+
+## 2026-10-19 — Sessions inbox and Users cards
+Sessions is an inbox (list left, sort select) with a chat-style transcript reader on the right; Users is a people-card grid (initials, runs/sessions/cost, failure bar) with a profile drawer. Same data and API as before; sort moved from table headers to a select. All six pages from the "completely different layouts" request are done; next up per plan: Datasets+Experiments (distinct from the start).

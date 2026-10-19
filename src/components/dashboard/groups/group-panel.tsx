@@ -79,7 +79,7 @@ export function GroupPanel({ projectId, kind, id, listRow, clock, onClose, onPre
   const runRows = runs?.rows ?? [];
 
   return (
-    <aside aria-label={`${kind === "session" ? "Session" : "User"} ${id}`} className="flex min-h-0 min-w-0 flex-col border-l border-[#1F242C] bg-[#0E1115] lg:max-h-[calc(100svh-6.5rem)] lg:sticky lg:top-0">
+    <aside aria-label={`${kind === "session" ? "Session" : "User"} ${id}`} className={kind === "session" ? "flex min-h-0 min-w-0 flex-col bg-[#0B0D10]" : "absolute inset-y-0 right-0 z-20 flex w-full max-w-[460px] min-h-0 min-w-0 flex-col border-l border-[#1F242C] bg-[#0E1115] shadow-[-24px_0_48px_rgba(0,0,0,0.5)]"}>
       <div className="flex items-center gap-2 border-b border-[#1F242C] px-3 py-2">
         <div className="min-w-0 flex-1">
           <div className="font-mono text-[10px] uppercase tracking-wider text-[#6B7380]">{kind === "session" ? "Session" : "User"}</div>
@@ -145,6 +145,25 @@ export function GroupPanel({ projectId, kind, id, listRow, clock, onClose, onPre
             </h2>
             {!runs ? <p className="px-3 pb-3 text-[#8B93A1]">Loading runs…</p> : null}
             {runs && !runRows.length ? <p className="px-3 pb-3 text-[#8B93A1]">No runs in the last 90 days.</p> : null}
+            {kind === "session" ? (
+              <ol className="grid gap-5 px-4 py-4">
+                {runRows.map((run) => {
+                  const prompt = previewText(run.inputPreview), answer = previewText(run.outputPreview);
+                  return (
+                    <li key={run.runId} className="grid gap-2">
+                      <div className="flex items-center gap-2 font-mono text-[10px] text-[#6B7380]"><span className={`size-1.5 rounded-full ${run.errorCount ? "bg-[#FF6B6B]" : "bg-[#5BE3A0]"}`} aria-label={run.errorCount ? "Failed" : "Succeeded"} /><span title={formatTime(run.startedAt)}>{relativeTime(run.startedAt, clock)}</span><span className="h-px flex-1 bg-[#1F242C]" /><span>{run.traceName || run.runId}</span></div>
+                      {prompt ? <p className="ml-auto w-fit max-w-[85%] rounded border border-[#262C35] bg-[#161B22] px-3 py-2 text-[13px] leading-5 text-[#E6E9EE]">{prompt}</p> : null}
+                      {answer ? <p className="w-fit max-w-[85%] rounded border border-[#1F242C] bg-[#0E1115] px-3 py-2 text-[13px] leading-5 text-[#C9CED6]">{answer}</p> : run.errorCount ? <p className="w-fit rounded border border-[#5B2B2B] bg-[#1A1010] px-3 py-2 text-xs text-[#FF8A8A]">This run failed before it gave an answer.</p> : !prompt ? <p className="text-xs text-[#6B7380]">No text was captured for this run.</p> : null}
+                      <div className="flex flex-wrap items-center gap-x-3 font-mono text-[10px] text-[#6B7380]">
+                        <span>{formatDuration(run.durationMs)}</span><span>{formatCost(run.totalCostUsd)}</span><span>{run.spanCount} steps</span>
+                        {run.errorCount ? <span className="text-[#FF8A8A]">{run.errorCount} errors</span> : null}{run.modelId ? <span>{run.modelId}</span> : null}
+                        <a href={`${tracingBase}?trace=${encodeURIComponent(run.runId)}&range=90d`} className="ml-auto text-[#8AB4FF] underline">Open trace</a>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            ) : (
             <ol>
               {runRows.map((run) => {
                 const prompt = previewText(run.inputPreview), answer = previewText(run.outputPreview);
@@ -168,6 +187,7 @@ export function GroupPanel({ projectId, kind, id, listRow, clock, onClose, onPre
                 );
               })}
             </ol>
+            )}
           </section>
         ) : null}
 
