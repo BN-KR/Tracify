@@ -58,7 +58,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${GeistPixelSquare.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-        <ConvexClientProvider initialToken={await getToken()}>
+        <ConvexClientProvider initialToken={isCloudDeployment ? await getToken() : null}>
           <TooltipProvider><SiteChrome>{children}</SiteChrome><ConsentBanner /></TooltipProvider>
         </ConvexClientProvider>
         <ReferralCapture />

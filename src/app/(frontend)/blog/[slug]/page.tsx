@@ -17,12 +17,19 @@ import {
   type BlogPost,
 } from "@/lib/markdoc-blog";
 import { ogImageUrl } from "@/lib/seo";
+import { comparisons } from "@/lib/seo-pages";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export const revalidate = 60;
+
+// Each "X vs Tracify" post has a matching /compare page that now carries the full article, so the post points search engines there.
+const comparePageFor = (slug: string) => comparisons.find((c) => c.post === slug)?.slug;
+const canonicalPath = (slug: string) => { const compare = comparePageFor(slug); return compare ? `/compare/${compare}` : `/blog/${slug}`; };
+// Workflow notes for contributors, not reader-facing content.
+const internalPosts = new Set(["how-to-write-tracify-blog-posts"]);
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
@@ -61,9 +68,10 @@ export async function generateMetadata({
       images: [image],
     },
     alternates: {
-      canonical: post.seo?.canonicalUrl || `/blog/${slug}`,
+      canonical: post.seo?.canonicalUrl || canonicalPath(slug),
+      types: { "text/markdown": `/blog/${slug}.md` },
     },
-    robots: { index: true, follow: true },
+    robots: { index: !internalPosts.has(slug), follow: true },
   };
 }
 
@@ -80,7 +88,7 @@ function absoluteUrl(value: string) {
 }
 
 function jsonLd(post: BlogPost) {
-  const canonical = post.seo?.canonicalUrl || `https://www.tracify.tech/blog/${post.slug}`;
+  const canonical = post.seo?.canonicalUrl || `https://www.tracify.tech${canonicalPath(post.slug!)}`;
   const image = post.heroImage?.og || post.heroImage?.src;
   const faqItems = extractBlogFaqItems(post.body);
 
@@ -91,6 +99,7 @@ function jsonLd(post: BlogPost) {
       headline: post.title,
       description: post.excerpt,
       datePublished: getPostDate(post),
+      dateModified: post.updatedAt || getPostDate(post),
       mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
       author: post.author === "Tracify Team"
         ? { "@type": "Organization", name: "Tracify", url: "https://www.tracify.tech" }

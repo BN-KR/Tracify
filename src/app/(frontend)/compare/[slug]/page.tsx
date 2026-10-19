@@ -5,6 +5,8 @@ import { pageMetadata, breadcrumbJsonLd, faqJsonLd, jsonLdString } from "@/lib/s
 import { comparisons } from "@/lib/seo-pages";
 import { PageHeader } from "@/components/marketing/page-header";
 import { ClosingBand, CreamBand, DarkBand, Eyebrow, HeaderAction, SectionTitle } from "@/components/marketing/company/blocks";
+import { MarkdocRichText } from "@/components/blog/markdoc-rich-text";
+import { getPublishedPost } from "@/lib/markdoc-blog";
 import { FaqList } from "@/components/marketing/company/faq-list";
 
 export function generateStaticParams() {
@@ -30,13 +32,14 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
     breadcrumbJsonLd([{ name: "Tracify", path: "/" }, { name: "Compare", path: "/compare" }, { name: `Tracify vs ${c.name}`, path: `/compare/${c.slug}` }]),
     faqJsonLd(c.faq),
   ];
+  const article = c.post ? await getPublishedPost(c.post) : null;
   const others = comparisons.filter((item) => item.slug !== c.slug);
   return (
     <div className="overflow-x-clip bg-[#090909]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(schema) }} />
       <PageHeader eyebrow={`Compare / ${c.name}`} title={`Tracify vs ${c.name}`} lede={c.oneLine}>
         <HeaderAction href="/sign-up">Start free</HeaderAction>
-        {c.post && <HeaderAction href={`/blog/${c.post}`} kind="secondary">Read the full comparison</HeaderAction>}
+        {article && <HeaderAction href="#full-comparison" kind="secondary">Read the full comparison</HeaderAction>}
       </PageHeader>
 
       <CreamBand>
@@ -82,6 +85,16 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
         </dl>
         <p className="mt-6 text-xs leading-5 text-white/45">Descriptions of other products are summaries and can change. Check {c.name}&apos;s own site for current features and pricing.</p>
       </DarkBand>
+
+      {article && (
+        <CreamBand>
+          <div id="full-comparison" className="scroll-mt-24">
+            <Eyebrow dark={false}>Full comparison</Eyebrow>
+            <SectionTitle>{article.title}</SectionTitle>
+            <div className="mt-10 max-w-3xl"><MarkdocRichText content={article.content} /></div>
+          </div>
+        </CreamBand>
+      )}
 
       <CreamBand>
         <Eyebrow dark={false}>Questions</Eyebrow>

@@ -2251,3 +2251,8 @@
 
 ## 2026-10-17 Free tools suite — draft PR (branch `claude/project-thread-ozfy2i`)
 - Nine free browser tools under `/tools/*` plus an index (agent log checker, token counter, model price comparison, prompt cost checker, context window checker, tool definition checker, AI API status, JSON fixer, rate limit calculator). Logic in `src/lib/tools/` (tested by `npm run test:tools`), UI in `src/components/marketing/tools/`, list in `src/lib/tools/registry.ts` (feeds index, sitemap, llms.txt). One shared price/limits list in `models.ts` (prices from the LiteLLM public list, checked 2026-10-17; update `PRICES_CHECKED`). OpenAI token counts use the real o200k tokenizer (`gpt-tokenizer`), other families are labelled scaled estimates. AI API status reads provider status feeds via `/api/tools/ai-status` (cached 60s); unreadable feeds show Unknown, never green. Feed URLs for non-OpenAI/Anthropic providers were not verifiable from the build sandbox.
+
+## 2026-10-19 SEO and AI-search pass
+- Root layout only reads the login token on the cloud deployment (`isCloudDeployment`), so public marketing pages are static and CDN-cached. Cloud-app route folders carry `export const dynamic = "force-dynamic"` in their layouts; add it to any new cloud-only route folder or its build will fail prerendering.
+- Each "X vs Tracify" post now has its full text rendered on `/compare/<slug>`, and the post canonicalises there (and is left out of the sitemap). Hero/page H1s no longer start at opacity 0.
+- AI search: `/blog/<slug>.md` plain-text copies, blog guides listed in `llms-full.txt`, extra AI crawlers in robots, `dateModified` on posts. Sitemap lastmod for non-blog pages is `SITE_REVIEWED` in sitemap.ts; bump it on meaningful page changes.
