@@ -39,9 +39,9 @@ export function PageHeader({
         </motion.p>
         <motion.h1
           className="mt-5 max-w-4xl font-pixel text-[clamp(2.8rem,7vw,6.5rem)] leading-[0.88] tracking-[-0.06em]"
-          initial={reduce ? false : { opacity: 0, clipPath: "inset(0 0 100% 0)" }}
-          animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }}
-          transition={{ duration: 0.8, delay: 0.1, ease }}
+          initial={reduce ? false : { y: 16 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.8, ease }}
         >
           {title}
         </motion.h1>

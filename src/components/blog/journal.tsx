@@ -57,7 +57,7 @@ export function JournalHero({ posts, total }: { posts: JournalPost[]; total: num
           <motion.p initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="inline-flex items-center gap-2 border border-white/20 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70">
             <span className="bg-[#f4d44d] px-1.5 text-black">{total}</span> field notes on running agents
           </motion.p>
-          <motion.h1 initial={reduce ? false : { opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.9, ease: [0.16, 1, 0.3, 1] }} className="mt-8 font-pixel text-[clamp(3.2rem,9vw,8.4rem)] leading-[0.88] tracking-[-0.07em]">
+          <motion.h1 initial={reduce ? false : { y: 30 }} animate={{ y: 0 }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} className="mt-8 font-pixel text-[clamp(3.2rem,9vw,8.4rem)] leading-[0.88] tracking-[-0.07em]">
             Notes from inside the <span className="text-[#f4d44d]">agent loop.</span>
           </motion.h1>
           <motion.p initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="mt-7 max-w-[540px] text-base leading-7 text-white/70 md:text-lg md:leading-8">

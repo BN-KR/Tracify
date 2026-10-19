@@ -107,9 +107,9 @@ export function Hero({ locale = "en" }: { locale?: Locale }) {
           <span className="bg-[#f4d44d] px-1.5 text-black">{t.badgeNew}</span> {t.badge}
         </motion.p>
         <motion.h1
-          initial={reduce ? false : { opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          initial={reduce ? false : { y: 30 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           className="mt-8 max-w-[1100px] font-pixel text-[clamp(3.2rem,10vw,9.5rem)] leading-[0.9] tracking-[-0.07em]"
         >
           {t.heroA} <span className="text-[#f4d44d]">{t.heroB}</span>
