@@ -73,7 +73,7 @@ export async function checkTinybirdHealth() {
   if (!response.ok) throw new Error(`Tinybird returned ${response.status}`);
 }
 
-function sqlString(value: string) {
+export function sqlString(value: string) {
   // ClickHouse string literals treat backslash as an escape character, so escape it before quotes.
   return value.replace(/\\/g, "\\\\").replace(/'/g, "''");
 }
@@ -398,7 +398,7 @@ export type TraceListRow = {
 };
 
 /** A step that failed; the same rule as a trace's errorCount. */
-const IS_ERROR = `(spanType = 'error' OR errorType != '')`;
+export const IS_ERROR = `(spanType = 'error' OR errorType != '')`;
 const ERROR_TOOL = `if(toolName != '', toolName, modelId)`;
 // The first 120 characters of the error message with ids, paths and numbers replaced, so the same failure with
 // different ids groups together. Regexes avoid backslashes so they read the same in JS and ClickHouse literals.
@@ -484,7 +484,7 @@ const TRACE_AGGREGATE = `
   substring(if(countIf(parentSpanId = '' AND input != '') > 0, argMinIf(input, createdAt, parentSpanId = '' AND input != ''), argMinIf(input, createdAt, input != '')), 1, 280) AS inputPreview,
   substring(if(countIf(parentSpanId = '' AND output != '') > 0, argMaxIf(output, createdAt, parentSpanId = '' AND output != ''), argMaxIf(output, createdAt, output != '' AND spanType NOT IN ('tool', 'retrieval'))), 1, 280) AS outputPreview`;
 
-async function tinybirdRows<T>(sql: string): Promise<T[]> {
+export async function tinybirdRows<T>(sql: string): Promise<T[]> {
   const res = await analyticsSql(sql);
   if (!res.ok) throw new Error(`Tinybird query failed: ${res.status} ${await res.text()}`);
   return (await res.json()).data as T[];

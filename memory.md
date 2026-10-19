@@ -1,5 +1,10 @@
 # Project Memory
 
+## 2026-10-19 Sessions and Users rebuilt on real data — same draft PR #237
+- Both pages now follow the dashboard page standard: one `GroupExplorer` (`src/components/dashboard/groups/`) with search, time range, environment and status filters, URL state, live polling, sortable columns, CSV export and a side panel (`?id=`) that lists a session's runs in order (or a user's runs) plus the opposite kind (a user's sessions, a session's users). Old `/sessions/<id>` and `/users/<id>` links redirect to `?id=`.
+- Data: `GET /api/projects/[id]/groups/[kind]` (kind session|user) -> `src/lib/tinybird-groups.ts` (aggregates `spans` by sessionId / endUserId). Pure URL parsing in `src/lib/group-filters.ts` (`npm run test:tools`). The SQL was run against a real ClickHouse (chdb) with `npm run test:groups-sql` and `CLICKHOUSE_URL` set; this caught two real bugs (aliases that shadow columns or nest aggregates), so keep outer aliases distinct from inner ones. `tinybird.ts` only gained three `export` keywords.
+- The old `LiveCapturedSessions`/`LiveCapturedUsers` components are no longer mounted. The `/demo` sessions and users pages are separate and unchanged. Not checked on the real Vercel preview signed in (no robot login here): screens were checked with mocked responses.
+
 ## 2026-10-19 Free plan limit on ingest — draft PR #237 (branch `claude/project-thread-ji3n7c`)
 - Free projects are refused at 50,000 spans per UTC month on `/api/ingest` and `/api/otel` with HTTP 429, code `plan_limit_reached`, `Retry-After` until the 1st (shared helper `src/lib/plan-limits-server.ts`, pure rules + tests in `plan-limits.ts`, `npm run test:tools`). Count lives in Redis (`ingest-month:<project>:<YYYY-MM>`), fails open if Redis errors. Paid tiers and unknown tiers are never blocked. A batch crossing the limit is refused whole. The existing SDK already reports 429 once with an upgrade hint and does not retry.
 - `getProjectByApiKey` now returns `planTier` (default free): needs a manual Convex deploy. Until deployed the field is absent and nothing is enforced. Also renamed Steps to Actions in the menu and on the page.
