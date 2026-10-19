@@ -3,12 +3,6 @@ import { expect, test } from "vitest";
 import { api } from "./_generated/api";
 import schema from "./schema";
 
-declare global {
-  interface ImportMeta {
-    glob(pattern: string): Record<string, () => Promise<unknown>>;
-  }
-}
-
 const modules = import.meta.glob("./**/*.ts");
 const lead = { name: "Test User", email: "test@example.com", intent: "contact", message: "A useful request", marketingConsent: false, sourcePath: "/contact" };
 
