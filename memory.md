@@ -2304,3 +2304,6 @@ Human labelling (annotation-queues and human-annotation routes) is now a review 
 ## Dashboards and widgets canvas (PR #237)
 - Dashboards page is now a canvas of widgets (8 catalog widgets in `src/lib/widget-utils.ts`), with edit mode (move/remove) and a widget library drawer; widgets page shows the same library. Data comes from the existing traces and stats APIs, no new backend.
 - Charts are pixel-sized SVGs (`useWidth`), one axis, hover tooltips, red only for failures.
+
+## 2026-10-19 — Automations (rule sentences)
+Automations page is a list of "when X then Y" rules drawn as trigger node -> arrow -> action node, with a pause switch, inline edit sentence and two-step delete; new rules are written as one sentence. Backend: `automations.update/setActive/remove`, https/owner-repo destination checks, tests in convex/automations.test.ts. Needs Convex redeploy. NOTE: nothing actually fires these rules yet (no delivery code), only stores them. Next: Alerts status filters/tags/saved views.
