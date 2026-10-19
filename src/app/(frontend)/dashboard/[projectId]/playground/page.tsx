@@ -1,8 +1,15 @@
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
-import { PromptPlayground } from "@/components/dashboard/prompt-playground";
-import { ImproveLifecycleNav } from "@/components/dashboard/improve-lifecycle-nav";
+import { PlaygroundWorkspace } from "@/components/dashboard/prompts/playground-workspace";
 
-export default async function PlaygroundPage({ params }: { params: Promise<{ projectId: string }> }) {
+export default async function PlaygroundPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ projectId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { projectId } = await params;
-  return <div><DashboardTopbar title="Prompt Playground" description="Compile variables and test prompt changes against your configured model provider." /><ImproveLifecycleNav projectId={projectId} active="compare" /><div className="p-6"><PromptPlayground projectId={projectId} /></div></div>;
+  const raw = await searchParams;
+  const prompt = typeof raw.prompt === "string" ? raw.prompt.slice(0, 100) : undefined;
+  const version = typeof raw.version === "string" && /^\d{1,6}$/.test(raw.version) ? Number(raw.version) : undefined;
+  return <PlaygroundWorkspace projectId={projectId} initialPrompt={prompt} initialVersion={version} />;
 }

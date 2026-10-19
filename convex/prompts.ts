@@ -79,6 +79,7 @@ export const create = mutation({
     type: v.union(v.literal("text"), v.literal("chat")),
     content: v.string(),
     model: v.optional(v.string()),
+    labels: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const { identity } = await requireProject(ctx, args.projectId);
@@ -89,9 +90,11 @@ export const create = mutation({
     if (content.length > MAX_CONTENT_LENGTH) throw new Error("The prompt is too long");
     const duplicate = await ctx.db.query("prompts").withIndex("by_projectId_and_name", (q) => q.eq("projectId", args.projectId).eq("name", name)).first();
     if (duplicate) throw new Error("A prompt with this name already exists");
+    const labels = cleanLabels(args.labels ?? []);
+    if (labels.includes("production")) throw new Error("Production promotion requires a passed evaluation release gate");
     const now = Date.now();
     const promptId = await ctx.db.insert("prompts", { projectId: args.projectId, name, description: args.description?.trim() || undefined, type: args.type, createdBy: identity.subject, createdAt: now, updatedAt: now });
-    await ctx.db.insert("promptVersions", { promptId, projectId: args.projectId, version: 1, content, variables: variablesFromContent(content), labels: ["latest"], model: args.model?.trim() || undefined, createdBy: identity.subject, createdAt: now });
+    await ctx.db.insert("promptVersions", { promptId, projectId: args.projectId, version: 1, content, variables: variablesFromContent(content), labels: [...new Set(["latest", ...labels])], model: args.model?.trim() || undefined, createdBy: identity.subject, createdAt: now });
     return promptId;
   },
 });
@@ -146,7 +149,8 @@ export const updateLabels = mutation({
     const version = await ctx.db.get(args.versionId);
     if (!version || version.projectId !== args.projectId) throw new Error("Prompt version not found");
     const requested = cleanLabels(args.labels);
-    if (requested.includes("production")) throw new Error("Production promotion requires a passed evaluation release gate");
+    // A version that already holds production may keep it (or give it up to roll back); nobody can hand it out here.
+    if (requested.includes("production") && !version.labels.includes("production")) throw new Error("Production promotion requires a passed evaluation release gate");
     // "latest" is managed by Tracify: it stays exactly where it is.
     const labels = [...requested.filter((label) => label !== "latest"), ...(version.labels.includes("latest") ? ["latest"] : [])];
     await moveLabels(ctx, version.promptId, version._id, labels.filter((label) => label !== "latest"));

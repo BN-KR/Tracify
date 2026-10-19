@@ -126,3 +126,21 @@ test("people outside the project can neither read nor change prompts", async () 
     await expect(user.mutation(api.prompts.updateLabels, { projectId, versionId: v1!._id, labels: ["staging"] })).rejects.toThrow();
   }
 });
+
+test("a version already in production keeps it while other labels change, and can give it up", async () => {
+  const { t, owner, projectId } = await setup();
+  await firstPrompt(owner, projectId);
+  const [v1] = await versions(owner, projectId);
+  await t.run((ctx) => ctx.db.patch(v1!._id, { labels: ["latest", "production"] }));
+  await owner.mutation(api.prompts.updateLabels, { projectId, versionId: v1!._id, labels: ["production", "staging"] });
+  expect((await versions(owner, projectId))[0]!.labels.sort()).toEqual(["latest", "production", "staging"]);
+  await owner.mutation(api.prompts.updateLabels, { projectId, versionId: v1!._id, labels: ["staging"] });
+  expect((await versions(owner, projectId))[0]!.labels.sort()).toEqual(["latest", "staging"]);
+});
+
+test("a new prompt can start with labels, but not production", async () => {
+  const { owner, projectId } = await setup();
+  await owner.mutation(api.prompts.create, { projectId, name: "a", type: "text", content: "x", labels: ["staging"] });
+  expect((await versions(owner, projectId))[0]!.labels.sort()).toEqual(["latest", "staging"]);
+  await expect(owner.mutation(api.prompts.create, { projectId, name: "b", type: "text", content: "x", labels: ["production"] })).rejects.toThrow("release gate");
+});
