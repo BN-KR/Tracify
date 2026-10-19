@@ -2300,3 +2300,7 @@ Experiments page is a comparison: pick baseline and candidate runs of one datase
 
 ## 2026-10-19 — Human review deck
 Human labelling (annotation-queues and human-annotation routes) is now a review deck: one trace at a time, question and answer side by side, label with keys 1-4 (Good / Needs work / Bad / Unsure), notes, Enter saves and pulls the next; sidebar has progress, counts, up-next, add-a-trace, agreement; "Reviewed" tab lists history. Backend: submitReview now copies label/notes onto the item (agreement never worked before), new `annotations.release` ("Give back"); tests in convex/annotations.test.ts. Logic `src/lib/review-utils.ts`. Needs Convex redeploy. Next: Dashboards+Widgets, Automations, Alerts views.
+
+## Dashboards and widgets canvas (PR #237)
+- Dashboards page is now a canvas of widgets (8 catalog widgets in `src/lib/widget-utils.ts`), with edit mode (move/remove) and a widget library drawer; widgets page shows the same library. Data comes from the existing traces and stats APIs, no new backend.
+- Charts are pixel-sized SVGs (`useWidth`), one axis, hover tooltips, red only for failures.
