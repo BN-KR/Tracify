@@ -109,3 +109,64 @@ export const recentResults = query({
     return ctx.db.query("evaluationResults").withIndex("by_evaluatorId", (q) => q.eq("evaluatorId", args.evaluatorId)).order("desc").take(30);
   },
 });
+
+/**
+ * Edits an evaluator. The kind (code rule or AI judge) stays fixed; everything else can change.
+ * Each save writes a new version, so earlier results keep pointing at the settings that produced them.
+ */
+export const update = mutation({
+  args: {
+    projectId: v.id("projects"),
+    evaluatorId: v.id("evaluators"),
+    name: v.string(),
+    criteria: v.string(),
+    scoreType: v.union(v.literal("boolean"), v.literal("numeric")),
+    model: v.optional(v.string()),
+    sampleRate: v.number(),
+    enabledOnline: v.boolean(),
+    template: v.optional(v.union(v.literal("groundedness"), v.literal("toxicity"), v.literal("pii"), v.literal("jailbreak"), v.literal("prompt_injection"), v.literal("policy"))),
+  },
+  handler: async (ctx, args) => {
+    await requireProject(ctx, args.projectId);
+    const evaluator = await ctx.db.get(args.evaluatorId);
+    if (!evaluator || evaluator.projectId !== args.projectId) throw new Error("Evaluator not found");
+    const name = args.name.trim();
+    const criteria = args.criteria.trim();
+    if (!name || !criteria) throw new Error("Evaluator name and criteria are required");
+    if (name.length > 100) throw new Error("A name can be at most 100 characters");
+    if (criteria.length > 20_000) throw new Error("The rule or rubric is too long");
+    if (!Number.isFinite(args.sampleRate) || args.sampleRate < 0 || args.sampleRate > 1) throw new Error("Sample rate must be between 0 and 1");
+    if (name !== evaluator.name) {
+      const duplicate = await ctx.db.query("evaluators").withIndex("by_projectId_and_name", (q) => q.eq("projectId", args.projectId).eq("name", name)).first();
+      if (duplicate) throw new Error("An evaluator with this name already exists");
+    }
+    const isJudge = evaluator.type === "llm_judge";
+    if (isJudge && !args.model?.trim()) throw new Error("Name the model that should judge");
+    const latest = await ctx.db.query("evaluatorVersions").withIndex("by_evaluatorId", (q) => q.eq("evaluatorId", args.evaluatorId)).order("desc").first();
+    const now = Date.now();
+    const scoreType = isJudge ? args.scoreType : "boolean";
+    await ctx.db.patch(args.evaluatorId, { name, criteria, updatedAt: now });
+    const version = (latest?.version ?? 0) + 1;
+    await ctx.db.insert("evaluatorVersions", {
+      projectId: args.projectId,
+      evaluatorId: args.evaluatorId,
+      version,
+      config: {
+        target: latest?.config.target ?? "trace",
+        scoreType,
+        prompt: isJudge ? criteria : undefined,
+        model: isJudge ? args.model?.trim() : undefined,
+        rule: isJudge ? undefined : criteria,
+        categories: latest?.config.categories,
+        minScore: isJudge && scoreType === "numeric" ? 0 : undefined,
+        maxScore: isJudge && scoreType === "numeric" ? 1 : undefined,
+        sampleRate: args.enabledOnline ? args.sampleRate : 0,
+        enabledOnline: args.enabledOnline,
+        template: isJudge ? args.template : undefined,
+      },
+      createdBy: (await ctx.auth.getUserIdentity())!.subject,
+      createdAt: now,
+    });
+    return version;
+  },
+});

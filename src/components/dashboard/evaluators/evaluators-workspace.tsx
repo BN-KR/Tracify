@@ -46,9 +46,11 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
   const rows = useQuery(api.evaluators.overview, { projectId: typedProjectId });
   const setActive = useMutation(api.evaluators.setActive);
   const create = useMutation(api.evaluationEngine.createEvaluator);
+  const edit = useMutation(api.evaluators.update);
   const [query, setQuery] = useState<Query>(() => readUrl(initialQuery));
   const [draft, setDraft] = useState(query.q ?? "");
   const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [notice, setNotice] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
@@ -65,11 +67,11 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const typing = event.target instanceof HTMLElement && /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName);
-      if (event.key === "Escape" && !typing) { if (creating) setCreating(false); else if (query.id) update({ id: "" }); }
+      if (event.key === "Escape" && !typing) { if (creating) setCreating(false); else if (editing) setEditing(false); else if (query.id) update({ id: "" }); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [creating, query.id, update]);
+  }, [creating, editing, query.id, update]);
 
   const shown = useMemo(() => {
     const needle = (query.q ?? "").toLowerCase();
@@ -91,6 +93,7 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
   }
 
   const panelOpen = creating || Boolean(selected);
+  const existingNames = (rows ?? []).map((row) => row.evaluator.name);
   return (
     <div className="flex min-h-svh min-w-0 flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
       <header className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
@@ -105,7 +108,7 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
         <select id="eval-status" className={control} value={query.status ?? ""} onChange={(event) => update({ status: event.target.value })}><option value="">On and off</option><option value="on">On</option><option value="off">Off</option></select>
         <span className="flex items-center gap-1.5 font-mono text-[11px] text-[#8B93A1]"><span className="size-1.5 animate-pulse rounded-full bg-[#5BE3A0]" />Live</span>
         <Link href={`/dashboard/${projectId}/scores`} className={`${control} inline-flex items-center`}>Scores</Link>
-        <button type="button" onClick={() => { setCreating(true); update({ id: "" }); }} className="h-7 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909] hover:bg-[#f7de70]">New evaluator</button>
+        <button type="button" onClick={() => { setCreating(true); setEditing(false); update({ id: "" }); }} className="h-7 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909] hover:bg-[#f7de70]">New evaluator</button>
       </header>
       <section aria-label="Summary" className="grid grid-cols-2 gap-px border-b border-[#1F242C] bg-[#1F242C] sm:grid-cols-4">
         {[["Evaluators", String(totals.total)], ["Switched on", String(totals.on)], ["Recent runs", totals.runs.toLocaleString()], ["Pass rate", totals.passRate === null ? "–" : percent(totals.passRate)]].map(([label, value]) => (
@@ -132,8 +135,8 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
                 {shown.map((row) => {
                   const active = row.evaluator._id === query.id;
                   return (
-                    <tr key={row.evaluator._id} onClick={() => { setCreating(false); update({ id: row.evaluator._id }); }} className={`cursor-pointer border-t border-[#161B21] hover:bg-[#11151A] ${active ? "bg-[#11151A] shadow-[inset_2px_0_0_#F4D44D]" : ""} ${row.evaluator.active ? "" : "opacity-60"}`}>
-                      <td className="max-w-[18rem] px-4 py-2"><button type="button" onClick={(event) => { event.stopPropagation(); setCreating(false); update({ id: row.evaluator._id }); }} aria-current={active} className="block max-w-full truncate text-left font-mono text-xs font-medium hover:underline">{row.evaluator.name}</button><div className="truncate font-mono text-[11px] text-[#6B7380]">{row.evaluator.criteria}</div></td>
+                    <tr key={row.evaluator._id} onClick={() => { setCreating(false); setEditing(false); update({ id: row.evaluator._id }); }} className={`cursor-pointer border-t border-[#161B21] hover:bg-[#11151A] ${active ? "bg-[#11151A] shadow-[inset_2px_0_0_#F4D44D]" : ""} ${row.evaluator.active ? "" : "opacity-60"}`}>
+                      <td className="max-w-[18rem] px-4 py-2"><button type="button" onClick={(event) => { event.stopPropagation(); setCreating(false); setEditing(false); update({ id: row.evaluator._id }); }} aria-current={active} className="block max-w-full truncate text-left font-mono text-xs font-medium hover:underline">{row.evaluator.name}</button><div className="truncate font-mono text-[11px] text-[#6B7380]">{row.evaluator.criteria}</div></td>
                       <td className="whitespace-nowrap px-2 py-2 text-[11px] text-[#C9CED6]">{typeText(row.evaluator.type)}</td>
                       <td className="whitespace-nowrap px-2 py-2 font-mono text-xs">{row.stats.passRate === null ? <span className="text-[#6B7380]">no runs</span> : <span className={row.stats.passRate < 0.5 ? "text-[#FF8A8A]" : row.stats.passRate >= 0.9 ? "text-[#5BE3A0]" : ""}>{percent(row.stats.passRate)}<span className="ml-1 text-[10px] text-[#6B7380]">of {row.stats.passed + row.stats.failed}{row.stats.windowFull ? "+" : ""}</span></span>}</td>
                       <td className="hidden whitespace-nowrap px-2 py-2 font-mono text-[11px] text-[#8B93A1] md:table-cell">{row.stats.lastRunAt ? ago(row.stats.lastRunAt, now) : "never"}</td>
@@ -147,22 +150,30 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
         </main>
         {creating ? (
           <aside className="flex min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10]">
-            <EvaluatorForm existing={(rows ?? []).map((row) => row.evaluator.name)} onCancel={() => setCreating(false)} onSave={async (input) => { const id = await create({ projectId: typedProjectId, ...input }); setCreating(false); update({ id }); setNotice({ tone: "ok", text: `${input.name} created. It starts switched on.` }); }} />
+            <EvaluatorForm existing={existingNames} onCancel={() => setCreating(false)} onSave={async (input) => { const id = await create({ projectId: typedProjectId, ...input }); setCreating(false); update({ id }); setNotice({ tone: "ok", text: `${input.name} created. It starts switched on.` }); }} />
           </aside>
-        ) : selected ? <EvaluatorPanel key={selected.evaluator._id} projectId={projectId} row={selected} now={now} onClose={() => update({ id: "" })} onToggle={() => void toggle(selected)} /> : null}
+        ) : selected && editing ? (
+          <aside className="flex min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10]">
+            <EvaluatorForm key={`${selected.evaluator._id}-${selected.config?.version ?? 0}`} editing={selected} existing={existingNames.filter((item) => item !== selected.evaluator.name)} onCancel={() => setEditing(false)} onSave={async (input) => {
+              await edit({ projectId: typedProjectId, evaluatorId: selected.evaluator._id, name: input.name, criteria: input.criteria, scoreType: input.scoreType, model: input.model, sampleRate: input.sampleRate, enabledOnline: input.enabledOnline, template: input.template });
+              setEditing(false); setNotice({ tone: "ok", text: `${input.name} saved. New traces use the new settings; earlier runs keep their results.` });
+            }} />
+          </aside>
+        ) : selected ? <EvaluatorPanel key={selected.evaluator._id} projectId={projectId} row={selected} now={now} onClose={() => update({ id: "" })} onToggle={() => void toggle(selected)} onEdit={() => setEditing(true)} /> : null}
       </div>
       {query.id && rows && !selected && !creating ? <p role="alert" className="border-t border-[#5B2B2B] bg-[#1A1010] px-4 py-2 text-xs text-[#FF8A8A]">That evaluator was not found. <button type="button" onClick={() => update({ id: "" })} className="underline">Back to all evaluators</button></p> : null}
     </div>
   );
 }
 
-function EvaluatorPanel({ projectId, row, now, onClose, onToggle }: { projectId: string; row: Row; now: number; onClose: () => void; onToggle: () => void }) {
+function EvaluatorPanel({ projectId, row, now, onClose, onToggle, onEdit }: { projectId: string; row: Row; now: number; onClose: () => void; onToggle: () => void; onEdit: () => void }) {
   const results = useQuery(api.evaluators.recentResults, { projectId: projectId as Id<"projects">, evaluatorId: row.evaluator._id });
   const { evaluator, config, stats } = row;
   return (
     <aside className="flex min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10]" aria-label={`Evaluator ${evaluator.name}`}>
       <div className="flex items-start gap-2 border-b border-[#1F242C] px-4 py-3">
         <div className="min-w-0 flex-1"><h2 className="truncate font-mono text-sm font-semibold" title={evaluator.name}>{evaluator.name}</h2><p className="mt-0.5 text-[11px] text-[#8B93A1]">{typeText(evaluator.type)} · {evaluator.active ? "on" : "off"} · created {ago(evaluator.createdAt, now)}</p></div>
+        <button type="button" onClick={onEdit} className={control}>Edit</button>
         <button type="button" onClick={onToggle} className={control}>{evaluator.active ? "Switch off" : "Switch on"}</button>
         <button type="button" onClick={onClose} className={control}>Close</button>
       </div>
@@ -219,15 +230,16 @@ function TryRule({ criteria }: { criteria: string }) {
 
 type FormInput = { name: string; type: "code" | "llm_judge"; criteria: string; target: "trace"; scoreType: "boolean" | "numeric"; prompt?: string; model?: string; rule?: string; minScore?: number; maxScore?: number; sampleRate: number; enabledOnline: boolean; template?: Template };
 
-function EvaluatorForm({ existing, onCancel, onSave }: { existing: string[]; onCancel: () => void; onSave: (input: FormInput) => Promise<void> }) {
-  const [name, setName] = useState("");
-  const [type, setType] = useState<"code" | "llm_judge">("code");
-  const [criteria, setCriteria] = useState("");
-  const [template, setTemplate] = useState<Template | "">("");
-  const [scoreType, setScoreType] = useState<"boolean" | "numeric">("boolean");
-  const [model, setModel] = useState("gpt-4o-mini");
-  const [online, setOnline] = useState(false);
-  const [sample, setSample] = useState(100);
+function EvaluatorForm({ existing, editing, onCancel, onSave }: { existing: string[]; editing?: Row; onCancel: () => void; onSave: (input: FormInput) => Promise<void> }) {
+  const config = editing?.config ?? null;
+  const [name, setName] = useState(editing?.evaluator.name ?? "");
+  const [type, setType] = useState<"code" | "llm_judge">(editing?.evaluator.type ?? "code");
+  const [criteria, setCriteria] = useState(editing?.evaluator.criteria ?? "");
+  const [template, setTemplate] = useState<Template | "">(config?.template ?? "");
+  const [scoreType, setScoreType] = useState<"boolean" | "numeric">(config?.scoreType === "numeric" ? "numeric" : "boolean");
+  const [model, setModel] = useState(config?.model ?? "gpt-4o-mini");
+  const [online, setOnline] = useState(config?.enabledOnline ?? false);
+  const [sample, setSample] = useState(Math.max(1, Math.round((config?.sampleRate ?? 1) * 100)));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ruleProblem = type === "code" && criteria.trim() ? checkCodeRule(criteria) : null;
@@ -247,12 +259,13 @@ function EvaluatorForm({ existing, onCancel, onSave }: { existing: string[]; onC
     } catch (reason) { setError(friendly(reason, "That did not save. Check your connection and try again.")); setSaving(false); }
   }
   return (
-    <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-4" aria-label="New evaluator">
-      <h2 className="text-sm font-semibold">New evaluator</h2>
+    <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-4" aria-label={editing ? "Edit evaluator" : "New evaluator"}>
+      <h2 className="text-sm font-semibold">{editing ? `Edit ${editing.evaluator.name}` : "New evaluator"}</h2>
       <label className="grid gap-1 text-[11px] text-[#8B93A1]">Name<input value={name} onChange={(event) => setName(event.target.value)} maxLength={100} placeholder="answer-is-json" className={`${field} h-8 font-mono`} autoFocus /></label>
+      {editing ? <p className="text-[11px] leading-4 text-[#6B7380]">Saving creates a new version of this evaluator. New traces use it straight away; earlier results are not re-scored.</p> : null}
       <div role="radiogroup" aria-label="Kind of evaluator" className="grid grid-cols-2 gap-2">
         {([["code", "Code rule", "Exact and free. Good for format checks."], ["llm_judge", "AI judge", "A model grades the answer against your rubric."]] as const).map(([id, label, hint]) => (
-          <button key={id} type="button" role="radio" aria-checked={type === id} onClick={() => { setType(id); setCriteria(""); setTemplate(""); }} className={`rounded border p-2.5 text-left ${type === id ? "border-[#F4D44D] bg-[#1A170C]" : "border-[#262C35] hover:border-[#3A3420]"}`}><div className="text-xs font-medium">{label}</div><div className="mt-0.5 text-[11px] text-[#8B93A1]">{hint}</div></button>
+          <button key={id} type="button" role="radio" aria-checked={type === id} disabled={Boolean(editing) && type !== id} title={editing ? "The kind cannot change after creation" : undefined} onClick={() => { if (id === type) return; setType(id); setCriteria(""); setTemplate(""); }} className={`rounded border p-2.5 text-left disabled:opacity-40 ${type === id ? "border-[#F4D44D] bg-[#1A170C]" : "border-[#262C35] hover:border-[#3A3420]"}`}><div className="text-xs font-medium">{label}</div><div className="mt-0.5 text-[11px] text-[#8B93A1]">{hint}</div></button>
         ))}
       </div>
       {type === "code" ? (
@@ -275,11 +288,11 @@ function EvaluatorForm({ existing, onCancel, onSave }: { existing: string[]; onC
       )}
       <div className="grid gap-2 rounded border border-[#1F242C] p-3">
         <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={online} onChange={(event) => setOnline(event.target.checked)} className="accent-[#F4D44D]" />Check new traces automatically</label>
-        {online ? <label className="grid gap-1 text-[11px] text-[#8B93A1]">Share of traces to check: <span className="font-mono text-[#E6E9EE]">{sample}%</span><input type="range" min={1} max={100} value={sample} onChange={(event) => setSample(Number(event.target.value))} className="accent-[#F4D44D]" /></label> : <p className="text-[11px] text-[#6B7380]">Off: it only runs when called by hand or from an experiment. You can change this later by making a new evaluator.</p>}
+        {online ? <label className="grid gap-1 text-[11px] text-[#8B93A1]">Share of traces to check: <span className="font-mono text-[#E6E9EE]">{sample}%</span><input type="range" min={1} max={100} value={sample} onChange={(event) => setSample(Number(event.target.value))} className="accent-[#F4D44D]" /></label> : <p className="text-[11px] text-[#6B7380]">Off: it only runs when called by hand or from an experiment. You can change this later with Edit.</p>}
         {online && type === "llm_judge" ? <p className="text-[11px] text-[#6B7380]">Every checked trace is one model call on your judge account, so start with a small share.</p> : null}
       </div>
       {error ? <p role="alert" className="rounded border border-[#5B2B2B] bg-[#1A1010] px-3 py-2 text-xs text-[#FF8A8A]">{error}</p> : null}
-      <div className="flex gap-2"><button type="submit" disabled={saving} className="h-8 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909] disabled:opacity-50">{saving ? "Creating…" : "Create evaluator"}</button><button type="button" onClick={onCancel} disabled={saving} className="h-8 rounded border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:text-white">Cancel</button></div>
+      <div className="flex gap-2"><button type="submit" disabled={saving} className="h-8 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909] disabled:opacity-50">{saving ? "Saving…" : editing ? "Save changes" : "Create evaluator"}</button><button type="button" onClick={onCancel} disabled={saving} className="h-8 rounded border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:text-white">Cancel</button></div>
     </form>
   );
 }

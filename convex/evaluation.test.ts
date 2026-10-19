@@ -48,3 +48,18 @@ test("evaluator overview reports config and recent results", async () => {
   expect(await outsider.query(api.evaluators.overview, { projectId })).toEqual([]);
   expect(await outsider.query(api.evaluators.recentResults, { projectId, evaluatorId })).toEqual([]);
 });
+
+test("editing an evaluator writes a new version and keeps its kind", async () => {
+  const { owner, outsider, projectId } = await setup();
+  const evaluatorId = await owner.mutation(api.evaluationEngine.createEvaluator, { projectId, name: "one", type: "code", criteria: "not_empty", target: "trace", scoreType: "boolean", rule: "not_empty", sampleRate: 0, enabledOnline: false });
+  await owner.mutation(api.evaluationEngine.createEvaluator, { projectId, name: "two", type: "code", criteria: "json_valid", target: "trace", scoreType: "boolean", rule: "json_valid", sampleRate: 0, enabledOnline: false });
+  const base = { projectId, evaluatorId, name: "one-renamed", criteria: "contains:ok", scoreType: "numeric" as const, sampleRate: 0.5, enabledOnline: true };
+  expect(await owner.mutation(api.evaluators.update, base)).toBe(2);
+  const [first] = (await owner.query(api.evaluators.overview, { projectId })).filter((row) => row.evaluator._id === evaluatorId);
+  expect(first!.evaluator).toMatchObject({ name: "one-renamed", criteria: "contains:ok", type: "code" });
+  expect(first!.config).toMatchObject({ version: 2, scoreType: "boolean", rule: "contains:ok", sampleRate: 0.5, enabledOnline: true });
+  await expect(owner.mutation(api.evaluators.update, { ...base, name: "two" })).rejects.toThrow("already exists");
+  await expect(owner.mutation(api.evaluators.update, { ...base, sampleRate: 2 })).rejects.toThrow("between 0 and 1");
+  await expect(owner.mutation(api.evaluators.update, { ...base, criteria: " " })).rejects.toThrow("required");
+  await expect(outsider.mutation(api.evaluators.update, base)).rejects.toThrow("access denied");
+});
