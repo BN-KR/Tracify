@@ -111,7 +111,7 @@ export const en: Copy = {
     included: "Included",
     unlimitedWord: "Unlimited",
     rows: [
-      ["Spans / month", "50k", "500k", "2m"],
+      ["Spans / month", "25k", "500k", "2m"],
       ["Retention", "7 days", "30 days", "90 days"],
       ["Members", "1", "5", "20"],
       ["Projects", "1", "3", "Unlimited"],
