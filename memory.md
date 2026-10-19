@@ -2306,4 +2306,8 @@ Human labelling (annotation-queues and human-annotation routes) is now a review 
 - Charts are pixel-sized SVGs (`useWidth`), one axis, hover tooltips, red only for failures.
 
 ## 2026-10-19 — Automations (rule sentences)
-Automations page is a list of "when X then Y" rules drawn as trigger node -> arrow -> action node, with a pause switch, inline edit sentence and two-step delete; new rules are written as one sentence. Backend: `automations.update/setActive/remove`, https/owner-repo destination checks, tests in convex/automations.test.ts. Needs Convex redeploy. NOTE: nothing actually fires these rules yet (no delivery code), only stores them. Next: Alerts status filters/tags/saved views.
+Automations page is a list of "when X then Y" rules drawn as trigger node -> arrow -> action node, with a pause switch, inline edit sentence and two-step delete; new rules are written as one sentence. Backend: `automations.update/setActive/remove`, https/owner-repo destination checks, tests in convex/automations.test.ts. Needs Convex redeploy. (Delivery now built, see next entry.)
+
+## 2026-10-19 — Alert tags, saved views, and automations that actually send
+- Alerts: status filters existed; added tags (`alertRules.setTags`, up to 8 per rule, inline editor, tag filter chips) and saved views (name + status/tag/search combo, stored in the browser's localStorage, so per browser not per team).
+- Automations now fire: `convex/automationRuntime.ts` (`dispatch`, `buildDelivery`). Triggers: run.failed (scheduled from run ingestion, 1 per minute per rule), alert.created and cost.threshold (from the alert rule and budget checks). Actions: webhook, Slack, GitHub workflow (needs server env AUTOMATIONS_GITHUB_TOKEN). Each rule records last result/count, shown on the page. Private/internal addresses refused. Needs Convex redeploy. Email as an automation action is not built (alert rules already email).

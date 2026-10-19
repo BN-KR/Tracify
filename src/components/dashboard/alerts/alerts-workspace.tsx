@@ -14,6 +14,20 @@ type Status = "all" | "firing" | "ok" | "paused";
 type View = "cards" | "list";
 const VIEW_KEY = "tracify.alerts.view";
 
+type SavedView = { name: string; status: Status; tag: string | null; query: string };
+const SAVED_KEY = "tracify.alerts.savedViews";
+let savedCache: { raw: string | null; value: SavedView[] } = { raw: null, value: [] };
+function readSaved(): SavedView[] {
+  try {
+    const raw = window.localStorage.getItem(SAVED_KEY);
+    if (raw === savedCache.raw) return savedCache.value;
+    const parsed = raw ? (JSON.parse(raw) as SavedView[]) : [];
+    savedCache = { raw, value: Array.isArray(parsed) ? parsed.filter((v) => v && typeof v.name === "string") : [] };
+    return savedCache.value;
+  } catch { return savedCache.value; }
+}
+const EMPTY_SAVED: SavedView[] = [];
+
 const COLORS = { firing: "#FF6B6B", ok: "#5BE3A0", paused: "#6B7380" } as const;
 
 const viewListeners = new Set<() => void>();
@@ -28,6 +42,7 @@ function subscribeView(listener: () => void) {
 export function AlertsWorkspace({ projectId }: { projectId: string }) {
   const data = useQuery(api.alertRules.overview, { projectId: projectId as Id<"projects"> });
   const setEnabled = useMutation(api.alertRules.setEnabled);
+  const setTags = useMutation(api.alertRules.setTags);
   const remove = useMutation(api.alertRules.remove);
   const { data: session } = authClient.useSession();
   const [status, setStatus] = useState<Status>("all");
@@ -35,6 +50,24 @@ export function AlertsWorkspace({ projectId }: { projectId: string }) {
   const [chosen, setChosen] = useState<View | null>(null);
   const view = chosen ?? stored;
   const [query, setQuery] = useState("");
+  const [tag, setTag] = useState<string | null>(null);
+  const saved = useSyncExternalStore(subscribeView, readSaved, () => EMPTY_SAVED);
+  const [naming, setNaming] = useState(false);
+  const [viewName, setViewName] = useState("");
+
+  function writeSaved(next: SavedView[]) {
+    try { window.localStorage.setItem(SAVED_KEY, JSON.stringify(next)); } catch { /* storage unavailable */ }
+    viewListeners.forEach((listener) => listener());
+  }
+  function saveView() {
+    const name = viewName.trim().slice(0, 40);
+    if (!name) return;
+    writeSaved([...saved.filter((v) => v.name !== name), { name, status, tag, query }].slice(-12));
+    setNaming(false);
+    setViewName("");
+  }
+  function applyView(view: SavedView) { setStatus(view.status); setTag(view.tag); setQuery(view.query); }
+  const isFiltered = status !== "all" || tag !== null || query.trim() !== "";
   const [creating, setCreating] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
 
@@ -45,8 +78,9 @@ export function AlertsWorkspace({ projectId }: { projectId: string }) {
   }
 
   const rules = useMemo(() => (data?.rules ?? []).map((rule) => ({ ...rule, status: (!rule.enabled ? "paused" : rule.state === "firing" ? "firing" : "ok") as Exclude<Status, "all"> })), [data]);
+  const allTags = [...new Set(rules.flatMap((rule) => rule.tags ?? []))].sort();
   const counts = { all: rules.length, firing: rules.filter((r) => r.status === "firing").length, ok: rules.filter((r) => r.status === "ok").length, paused: rules.filter((r) => r.status === "paused").length };
-  const visible = rules.filter((rule) => (status === "all" || rule.status === status) && (!query.trim() || `${rule.name} ${rule.environment ?? ""}`.toLowerCase().includes(query.trim().toLowerCase())));
+  const visible = rules.filter((rule) => (status === "all" || rule.status === status) && (!tag || (rule.tags ?? []).includes(tag)) && (!query.trim() || `${rule.name} ${rule.environment ?? ""}`.toLowerCase().includes(query.trim().toLowerCase())));
   const firing = rules.filter((r) => r.status === "firing");
 
   const chip = (value: Status, label: string) => (
@@ -72,6 +106,35 @@ export function AlertsWorkspace({ projectId }: { projectId: string }) {
           <button type="button" onClick={() => setCreating(true)} className="h-7 bg-[#F4D44D] px-3 font-bold text-[#090909]">+ New rule</button>
         </div>
       </header>
+
+      {data && rules.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-[#1F242C] px-4 py-2 text-[12px]" aria-label="Tags and saved views">
+          <span className="mr-1 text-[11px] tracking-[0.08em] text-[#6B7380]">TAGS</span>
+          {allTags.length === 0 ? <span className="text-[#6B7380]">None yet. Add one on any rule.</span> : allTags.map((name) => (
+            <button key={name} type="button" aria-pressed={tag === name} onClick={() => setTag(tag === name ? null : name)} className={`h-6 border px-2 font-mono text-[11px] ${tag === name ? "border-[#F4D44D] text-[#F4D44D]" : "border-[#262C35] text-[#8B93A1] hover:text-[#E6E9EE]"}`}>#{name}</button>
+          ))}
+          <span className="ml-auto flex flex-wrap items-center gap-1.5">
+            {saved.map((view) => (
+              <span key={view.name} className="flex">
+                <button type="button" onClick={() => applyView(view)} className="h-6 border border-[#262C35] px-2 text-[#E6E9EE] hover:border-[#4A5260]">{view.name}</button>
+                <button type="button" aria-label={`Forget view ${view.name}`} onClick={() => writeSaved(saved.filter((v) => v.name !== view.name))} className="h-6 border border-l-0 border-[#262C35] px-1.5 text-[#6B7380] hover:text-[#FF8A8A]">×</button>
+              </span>
+            ))}
+            {naming ? (
+              <form onSubmit={(event) => { event.preventDefault(); saveView(); }} className="flex gap-1">
+                <input autoFocus aria-label="View name" value={viewName} onChange={(event) => setViewName(event.target.value)} placeholder="Name this view" maxLength={40} className="h-6 w-36 border border-[#262C35] bg-[#111418] px-2 outline-none focus:border-[#4A5260]" />
+                <button className="h-6 border border-[#F4D44D] px-2 text-[#F4D44D]">Save</button>
+                <button type="button" onClick={() => setNaming(false)} className="h-6 border border-[#262C35] px-2 text-[#8B93A1]">Cancel</button>
+              </form>
+            ) : (
+              <>
+                {isFiltered ? <button type="button" onClick={() => { setStatus("all"); setTag(null); setQuery(""); }} className="h-6 px-2 text-[#8B93A1] hover:text-[#E6E9EE]">Clear filters</button> : null}
+                <button type="button" disabled={!isFiltered} onClick={() => setNaming(true)} className="h-6 border border-[#262C35] px-2 text-[#8B93A1] enabled:hover:text-[#E6E9EE] disabled:opacity-40">Save this view</button>
+              </>
+            )}
+          </span>
+        </div>
+      ) : null}
 
       {data === undefined ? (
         <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading alerts">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-44 animate-pulse border border-[#1F242C] bg-[#0E1115]" />)}</div>
@@ -107,6 +170,7 @@ export function AlertsWorkspace({ projectId }: { projectId: string }) {
                         </div>
                         <div className="mb-1 mt-1.5 flex items-baseline gap-2.5"><span className="font-mono text-xl font-bold" style={{ color: rule.status === "paused" ? "#6B7380" : color }}>{config.format(rule.value)}</span><span className="font-mono text-[11px] text-[#6B7380]">limit {config.condition(rule.threshold, rule.windowMinutes).replace("> ", "")}</span></div>
                         <AlertChart series={rule.series} threshold={rule.threshold} color={rule.status === "paused" ? "#3A4250" : color} label={`${rule.name}, last 24 hours`} />
+                        <TagEditor name={rule.name} tags={rule.tags ?? []} onChange={(next) => setTags({ ruleId: rule._id, tags: next })} />
                         <div className="mt-2 flex items-center justify-between text-[11px] text-[#6B7380]">
                           <span className="font-mono">{destinations(rule)}</span>
                           <RuleActions rule={rule} confirming={confirmingDelete === rule._id} onToggle={() => void setEnabled({ ruleId: rule._id, enabled: !rule.enabled })} onAskDelete={() => setConfirmingDelete(rule._id)} onCancelDelete={() => setConfirmingDelete(null)} onDelete={() => { void remove({ ruleId: rule._id }); setConfirmingDelete(null); }} />
@@ -124,7 +188,7 @@ export function AlertsWorkspace({ projectId }: { projectId: string }) {
                     return (
                       <tr key={rule._id} className="h-9 border-t border-[#1F242C] hover:bg-[#111418]">
                         <td className="px-3 font-mono text-[10px] font-semibold tracking-[0.1em]" style={{ color }}><i className="mr-1.5 inline-block size-1.5" style={{ background: color }} />{rule.status.toUpperCase()}</td>
-                        <td className="px-3 font-semibold">{rule.name}</td>
+                        <td className="px-3"><b>{rule.name}</b><TagEditor name={rule.name} tags={rule.tags ?? []} onChange={(next) => setTags({ ruleId: rule._id, tags: next })} /></td>
                         <td className="px-3 font-mono text-[12px] text-[#8B93A1]">{config.condition(rule.threshold, rule.windowMinutes)}</td>
                         <td className="px-3 text-[#8B93A1]">{rule.environment ?? "all"}</td>
                         <td className="w-[130px] px-3"><AlertChart series={rule.series} threshold={rule.threshold} color={color} height={22} label={`${rule.name}, last 24 hours`} /></td>
@@ -152,6 +216,32 @@ export function AlertsWorkspace({ projectId }: { projectId: string }) {
         </>
       )}
       {creating ? <AlertRuleForm projectId={projectId} defaultEmail={session?.user?.email ?? ""} onClose={() => setCreating(false)} /> : null}
+    </div>
+  );
+}
+
+function TagEditor({ name, tags, onChange }: { name: string; tags: string[]; onChange: (next: string[]) => Promise<unknown> }) {
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [failed, setFailed] = useState(false);
+  async function commit(next: string[]) {
+    setFailed(false);
+    try { await onChange(next); } catch { setFailed(true); }
+  }
+  return (
+    <div className="mt-1.5 flex flex-wrap items-center gap-1">
+      {tags.map((item) => (
+        <span key={item} className="flex items-center border border-[#262C35] font-mono text-[10px] text-[#8B93A1]">
+          <span className="px-1.5">#{item}</span>
+          <button type="button" aria-label={`Remove tag ${item} from ${name}`} onClick={() => void commit(tags.filter((t) => t !== item))} className="px-1 hover:text-[#FF8A8A]">×</button>
+        </span>
+      ))}
+      {adding ? (
+        <form onSubmit={(event) => { event.preventDefault(); if (draft.trim()) void commit([...tags, draft]); setDraft(""); setAdding(false); }}>
+          <input autoFocus aria-label={`New tag for ${name}`} value={draft} maxLength={24} onChange={(event) => setDraft(event.target.value)} onBlur={() => { setAdding(false); setDraft(""); }} placeholder="tag" className="h-5 w-20 border border-[#4A5260] bg-[#111418] px-1.5 font-mono text-[10px] outline-none" />
+        </form>
+      ) : tags.length < 8 ? <button type="button" onClick={() => setAdding(true)} aria-label={`Add a tag to ${name}`} className="h-5 border border-dashed border-[#262C35] px-1.5 font-mono text-[10px] text-[#6B7380] hover:text-[#E6E9EE]">+ tag</button> : null}
+      {failed ? <span role="alert" className="text-[10px] text-[#FF8A8A]">Couldn’t save</span> : null}
     </div>
   );
 }

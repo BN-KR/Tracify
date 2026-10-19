@@ -29,7 +29,7 @@ function shorten(destination: string) {
 const select = "h-9 border border-[#262C35] bg-[#0B0D10] px-2 font-mono text-xs text-[#F4D44D] outline-none focus:border-[#F4D44D]";
 const input = "h-9 min-w-0 flex-1 border border-[#262C35] bg-[#0B0D10] px-3 font-mono text-xs text-[#E8EAED] outline-none placeholder:text-[#59616B] focus:border-[#F4D44D]";
 
-type Row = { _id: string; name: string; eventSource: string; actionType: string; destination: string; active: boolean };
+type Row = { _id: string; name: string; eventSource: string; actionType: string; destination: string; active: boolean; lastFiredAt?: number; lastStatus?: "ok" | "failed"; lastError?: string; fireCount?: number };
 
 /** "When ... then ..." as one sentence, used for both creating and editing. */
 function Sentence({ initial, submitLabel, onSubmit, onCancel }: { initial: Omit<Row, "_id" | "active">; submitLabel: string; onSubmit: (value: Omit<Row, "_id" | "active">) => Promise<void>; onCancel?: () => void }) {
@@ -153,6 +153,16 @@ export function AutomationsWorkspace({ projectId }: { projectId: string }) {
                       <div aria-hidden className="relative h-px w-10 shrink-0 bg-[#F4D44D]/60 sm:w-20"><span className="absolute -right-px -top-[3px] size-[7px] rotate-45 border-r border-t border-[#F4D44D]/80" /></div>
                       <Node tone="out" title={a?.label ?? row.actionType} sub={shorten(row.destination)} />
                     </div>
+                    <p className="mt-2 flex flex-wrap items-center gap-x-3 font-mono text-[11px]" aria-label="Last delivery">
+                      {row.lastFiredAt ? (
+                        <>
+                          <span className={row.lastStatus === "ok" ? "text-[#5BE3A0]" : "text-[#FF8A8A]"}>{row.lastStatus === "ok" ? "Delivered" : "Failed"}</span>
+                          <span className="text-[#7C8591]">{new Date(row.lastFiredAt).toLocaleString()}</span>
+                          <span className="text-[#7C8591]">{row.fireCount ?? 1} {(row.fireCount ?? 1) === 1 ? "time" : "times"} in total</span>
+                          {row.lastStatus === "failed" && row.lastError ? <span className="text-[#FF8A8A]">{row.lastError}</span> : null}
+                        </>
+                      ) : <span className="text-[#59616B]">Hasn’t fired yet</span>}
+                    </p>
                   </>
                 )}
               </li>

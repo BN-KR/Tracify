@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import type { MutationCtx } from "./_generated/server";
+import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 
 const runStatusValidator = v.union(
@@ -20,6 +21,11 @@ function canAccessProject(
     (identity as { org_id?: unknown }).org_id;
   if (typeof orgId === "string" && project.clerkOrgId === orgId) return true;
   return typeof project.clerkUserId === "string" && project.clerkUserId === identity.subject;
+}
+
+/** Tells any "a run fails" automation. Scheduled, so ingestion never waits on someone else's server. */
+async function announceFailure(ctx: MutationCtx, projectId: Id<"projects">, runId: string, environment?: string) {
+  await ctx.scheduler.runAfter(0, internal.automationRuntime.dispatch, { projectId, source: "run.failed", title: "A run failed", message: `Run ${runId} ended in an error${environment ? ` in ${environment}` : ""}.`, data: { runId, environment } });
 }
 
 async function upsertRunSummary(
@@ -65,6 +71,7 @@ async function upsertRunSummary(
       environment: args.environment,
       release: args.release,
     });
+    if (status === "failed") await announceFailure(ctx, args.projectId, args.runId, args.environment);
     return { id, created: true };
   }
 
@@ -75,6 +82,7 @@ async function upsertRunSummary(
       ? existing.status
       : status;
 
+  if (nextStatus === "failed" && existing.status !== "failed") await announceFailure(ctx, args.projectId, args.runId, args.environment ?? existing.environment);
   await ctx.db.patch(existing._id, {
     status: nextStatus,
     spanCount: existing.spanCount + 1,

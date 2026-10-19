@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 
@@ -47,6 +47,17 @@ export const create = mutation({
 export const EVENT_SOURCES = ["alert.created", "run.failed", "cost.threshold"] as const;
 export const ACTION_TYPES = ["webhook", "slack", "github_dispatch"] as const;
 
+/** Blocks addresses that only make sense inside a network, so a rule can't be pointed at internal services. */
+export function isPrivateHost(host: string) {
+  const h = host.toLowerCase().replace(/^\[|\]$/g, "");
+  if (h === "localhost" || h.endsWith(".localhost") || h.endsWith(".local") || h.endsWith(".internal")) return true;
+  if (h.includes(":")) return h === "::1" || h.startsWith("fc") || h.startsWith("fd") || h.startsWith("fe80");
+  const m = h.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (!m) return !h.includes(".");
+  const [a, b] = [Number(m[1]), Number(m[2])];
+  return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168);
+}
+
 function checkFields(args: { name: string; eventSource: string; actionType: string; destination: string }) {
   const name = args.name.trim();
   const destination = args.destination.trim();
@@ -60,6 +71,8 @@ function checkFields(args: { name: string; eventSource: string; actionType: stri
     let url: URL;
     try { url = new URL(destination); } catch { throw new Error("The destination must be a full web address"); }
     if (url.protocol !== "https:") throw new Error("The destination must start with https://");
+    if (isPrivateHost(url.hostname)) throw new Error("That address points inside a private network");
+    if (args.actionType === "slack" && (url.hostname !== "hooks.slack.com" || !url.pathname.startsWith("/services/"))) throw new Error("Paste a Slack incoming webhook link (starts with https://hooks.slack.com/services/)");
   }
   return { name, destination };
 }
@@ -97,5 +110,23 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     await loadOwned(ctx, args.projectId, args.automationId);
     await ctx.db.delete(args.automationId);
+  },
+});
+
+/** Rules that listen for one kind of event. */
+export const matching = internalQuery({
+  args: { projectId: v.id("projects"), eventSource: v.string() },
+  handler: async (ctx, { projectId, eventSource }) => {
+    const rows = await ctx.db.query("automations").withIndex("by_projectId", (q) => q.eq("projectId", projectId)).take(100);
+    return rows.filter((row) => row.active && row.eventSource === eventSource);
+  },
+});
+
+export const recordDelivery = internalMutation({
+  args: { automationId: v.id("automations"), ok: v.boolean(), error: v.optional(v.string()), at: v.number() },
+  handler: async (ctx, { automationId, ok, error, at }) => {
+    const row = await ctx.db.get(automationId);
+    if (!row) return;
+    await ctx.db.patch(automationId, { lastFiredAt: at, lastStatus: ok ? "ok" : "failed", lastError: ok ? undefined : error?.slice(0, 300), fireCount: (row.fireCount ?? 0) + 1 });
   },
 });

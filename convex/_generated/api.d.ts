@@ -17,6 +17,7 @@ import type * as analyticsCache from "../analyticsCache.js";
 import type * as annotations from "../annotations.js";
 import type * as auditLogs from "../auditLogs.js";
 import type * as auth from "../auth.js";
+import type * as automationRuntime from "../automationRuntime.js";
 import type * as automations from "../automations.js";
 import type * as billing from "../billing.js";
 import type * as budgets from "../budgets.js";
@@ -61,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   annotations: typeof annotations;
   auditLogs: typeof auditLogs;
   auth: typeof auth;
+  automationRuntime: typeof automationRuntime;
   automations: typeof automations;
   billing: typeof billing;
   budgets: typeof budgets;

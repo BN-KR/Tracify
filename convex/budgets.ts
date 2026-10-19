@@ -187,6 +187,7 @@ export const checkAll = internalAction({
           }));
         }
         await Promise.all(sends);
+        await ctx.runAction(internal.automationRuntime.dispatch, { projectId: notice.projectId as Id<"projects">, source: "cost.threshold", title: `${heading}: ${notice.name}`, message: notice.message, data: { budgetId, level: notice.level, spentUsd: notice.spent, limitUsd: notice.limitUsd } });
       } catch (error) {
         console.error("[budgets] check failed", budgetId, error);
       }
