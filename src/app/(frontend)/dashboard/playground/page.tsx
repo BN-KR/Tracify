@@ -1,3 +1,8 @@
-import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
-import { PromptPlayground } from "@/components/dashboard/prompt-playground";
-export default function Page() { return <div><DashboardTopbar title="Prompt Playground" /><div className="p-6"><PromptPlayground projectId="" /></div></div>; }
+import { redirect } from "next/navigation";
+
+import { DEMO_BASE_PATH } from "@/lib/demo/demo-config";
+
+/** The projectless Playground was an old copy; the demo project now hosts the current one. */
+export default function Page() {
+  redirect(`${DEMO_BASE_PATH}/playground`);
+}

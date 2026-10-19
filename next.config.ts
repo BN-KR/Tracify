@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
   // incoming request are passed through and merged with `view=create`.
   async redirects() {
     return [
+      { source: "/playground/playground", destination: "/demo/project/playground", permanent: false },
       {
         source: "/dashboard/:projectId/alerts/new",
         destination: "/dashboard/:projectId/alerts?view=create",
