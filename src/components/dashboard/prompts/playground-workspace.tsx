@@ -13,6 +13,7 @@ type Providers = { openai: boolean; anthropic: boolean };
 type Run = { id: number; at: number; source: string; text: string; models: string[]; temperature: number; results: PlaygroundResult[] };
 const STARTER = "You are a helpful assistant.\n\nUser: {{question}}";
 const field = "w-full rounded border border-[#262C35] bg-[#0E1115] px-2.5 text-xs text-[#E6E9EE] placeholder:text-[#6B7380] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#F4D44D]";
+const stamp = () => Date.now();
 const providerOf = (model: string) => (/^claude/i.test(model) ? "anthropic" : "openai");
 
 export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion }: { projectId: string; initialPrompt?: string; initialVersion?: number }) {
@@ -89,7 +90,7 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion }
       const body = await readJson<{ results?: PlaygroundResult[]; providers?: Providers }>(response);
       if (body.providers) setProviders(body.providers);
       if (!response.ok || !body.results) throw new Error(body.error ?? `The playground could not run this (error ${response.status}). Try again in a moment.`);
-      const entry: Run = { id: ++counter.current, at: Date.now(), source: source || "Unsaved prompt", text, models: [...models], temperature, results: body.results };
+      const entry: Run = { id: ++counter.current, at: stamp(), source: source || "Unsaved prompt", text, models: [...models], temperature, results: body.results };
       setRuns((current) => [entry, ...current].slice(0, 10));
       setShown(entry.id);
       setEditing(false);
