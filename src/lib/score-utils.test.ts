@@ -47,3 +47,47 @@ test("parseScoreInput accepts what people type and explains what it cannot use",
   assert.equal(formatScoreValue(3), "3");
   assert.equal(formatScoreValue(1 / 3), "0.333");
 });
+
+import { dailySeries, histogram, needsAttention, periodChange } from "./score-utils.ts";
+
+test("dailySeries gives one point per day with mean, true share or counts", () => {
+  const rows = [row({ value: 0.2 }), row({ value: 0.4 }), row({ value: 1, createdAt: NOW - 2 * 86_400_000 })];
+  const series = dailySeries(rows, "helpfulness", NOW, 7);
+  assert.equal(series.days.length, 7);
+  assert.equal(series.kind, "numeric");
+  assert.ok(Math.abs((series.days[6].value ?? 0) - 0.3) < 1e-9);
+  assert.equal(series.days[5].value, null);
+  assert.equal(series.days[4].value, 1);
+  assert.equal(series.total, 3);
+  const bools = dailySeries([row({ name: "ok", value: true, dataType: "boolean" }), row({ name: "ok", value: false, dataType: "boolean" })], "ok", NOW, 3);
+  assert.equal(bools.days[2].value, 0.5);
+  assert.equal(dailySeries(rows, "missing", NOW, 3).total, 0);
+});
+
+test("periodChange compares with the period before and handles empty periods", () => {
+  const rows = [row({ value: 0.8 }), row({ value: 0.4, createdAt: NOW - 8 * 86_400_000 })];
+  const change = periodChange(rows, "helpfulness", NOW, 7);
+  assert.equal(change.current, 0.8);
+  assert.equal(change.previous, 0.4);
+  assert.ok(Math.abs((change.change ?? 0) - 0.4) < 1e-9);
+  assert.equal(periodChange([row({})], "helpfulness", NOW, 7).change, null);
+});
+
+test("histogram buckets the data's own range and keeps every value", () => {
+  const buckets = histogram([0, 1, 2, 3, 4, 10], 5);
+  assert.equal(buckets.length, 5);
+  assert.equal(buckets.reduce((sum, bucket) => sum + bucket.count, 0), 6);
+  assert.equal(buckets[4].count, 1);
+  assert.deepEqual(histogram([2, 2]), [{ from: 2, to: 2, count: 2 }]);
+  assert.deepEqual(histogram([]), []);
+});
+
+test("needsAttention picks false yes/no scores and the lowest numbers", () => {
+  const rows = [row({ _id: "hi", value: 0.9 }), row({ _id: "lo", value: 0.1 }), row({ _id: "mid", value: 0.5 }), row({ _id: "no", name: "ok", value: false, dataType: "boolean" }), row({ _id: "yes", name: "ok", value: true, dataType: "boolean" })];
+  assert.deepEqual(needsAttention(rows).map((r) => r._id).sort(), ["lo", "no"]);
+});
+
+test("needsAttention shows at most two scores per name", () => {
+  const rows = Array.from({ length: 5 }, (_, i) => row({ _id: `f${i}`, name: "ok", value: false, dataType: "boolean", createdAt: NOW - i }));
+  assert.equal(needsAttention(rows, 6).length, 2);
+});

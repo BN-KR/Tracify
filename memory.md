@@ -2276,3 +2276,6 @@
 - Root layout only reads the login token on the cloud deployment (`isCloudDeployment`), so public marketing pages are static and CDN-cached. Cloud-app route folders carry `export const dynamic = "force-dynamic"` in their layouts; add it to any new cloud-only route folder or its build will fail prerendering.
 - Each "X vs Tracify" post now has its full text rendered on `/compare/<slug>`, and the post canonicalises there (and is left out of the sitemap). Hero/page H1s no longer start at opacity 0.
 - AI search: `/blog/<slug>.md` plain-text copies, blog guides listed in `llms-full.txt`, extra AI crawlers in robots, `dateModified` on posts. Sitemap lastmod for non-blog pages is `SITE_REVIEWED` in sitemap.ts; bump it on meaningful page changes.
+
+## 2026-10-19 — Scores redesign (charts-first report)
+Scores page rebuilt as its own report layout (trend hero, distribution, sources, "worth a look", small multiples, raw log, drawers). Helpers in `src/lib/score-utils.ts`; UI in `src/components/dashboard/scores/`. Part of the "every page completely different" redesign; next: Evaluators board, Prompts editor, Playground bench, Sessions inbox, Users cards.

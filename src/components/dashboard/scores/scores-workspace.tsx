@@ -1,61 +1,42 @@
 "use client";
 
-import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
-import { filterScores, formatScoreValue, parseScoreInput, SCORE_RANGES, summariseByName, type NameSummary, type ScoreRow } from "@/lib/score-utils";
+import { dailySeries, filterScores, formatScoreValue, histogram, needsAttention, periodChange, SOURCE_TEXT, summariseByName, type ScoreRow } from "@/lib/score-utils";
 import { downloadFile, toCsv } from "../tracing/format";
+import { BarList, Histogram, SplitBar, TrendChart, VolumeStrip } from "./score-charts";
+import { AddScore, ago, control, ScorePanel, Sheet } from "./score-drawer";
 
 type Query = Record<string, string>;
-type SortKey = "createdAt" | "name" | "value";
 const LOADED = 1000;
-const control = "h-7 rounded border border-[#262C35] bg-[#0E1115] px-2.5 text-xs text-[#C9CED6] hover:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#F4D44D]";
-const field = "w-full rounded border border-[#262C35] bg-[#0E1115] px-2.5 text-xs text-[#E6E9EE] placeholder:text-[#6B7380] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#F4D44D]";
-const SOURCE_TEXT: Record<string, string> = { human: "Human", llm: "AI judge", code: "Code rule", user: "App / API" };
+const DAYS = [{ id: "7", label: "7 days" }, { id: "14", label: "14 days" }, { id: "30", label: "30 days" }] as const;
+const percent = (value: number) => `${Math.round(value * 100)}%`;
 
-function ago(timestamp: number, now: number) {
-  const seconds = Math.max(0, Math.round((now - timestamp) / 1000));
-  if (seconds < 60) return "just now";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86_400) return `${Math.floor(seconds / 3600)}h ago`;
-  return new Date(timestamp).toLocaleDateString(undefined, { dateStyle: "medium" });
-}
 function readUrl(initial: Query): Query {
   if (typeof window === "undefined") return initial;
   const query: Query = {};
   for (const [key, value] of new URLSearchParams(window.location.search)) if (value) query[key] = value.slice(0, 200);
   return query;
 }
-const percent = (value: number) => `${Math.round(value * 100)}%`;
 
-function Sparkline({ values }: { values: Array<number | null> }) {
-  const present = values.filter((value): value is number => value !== null);
-  if (present.length < 2) return <span className="text-[10px] text-[#6B7380]">not enough days</span>;
-  const lo = Math.min(...present); const hi = Math.max(...present); const span = hi - lo || 1;
-  const points = values.map((value, index) => (value === null ? null : `${(index / 13) * 80},${22 - ((value - lo) / span) * 20}`)).filter(Boolean).join(" ");
-  return <svg width="80" height="24" viewBox="0 0 80 24" role="img" aria-label="Trend over the last 14 days"><polyline points={points} fill="none" stroke="#F4D44D" strokeWidth="1.5" /></svg>;
-}
-
-function headline(summary: NameSummary) {
-  if (summary.dataType === "numeric" && summary.average !== null) return { big: formatScoreValue(summary.average), small: `average · ${formatScoreValue(summary.min ?? 0)} to ${formatScoreValue(summary.max ?? 0)}` };
-  if (summary.dataType === "boolean" && summary.passRate !== null) return { big: percent(summary.passRate), small: "true" };
-  if (summary.top.length) return { big: summary.top[0].value.length > 14 ? `${summary.top[0].value.slice(0, 13)}…` : summary.top[0].value, small: summary.top.map((item) => `${item.value.slice(0, 12)} ${item.count}`).join(" · ") };
-  return { big: "–", small: "" };
+function Delta({ change, kind }: { change: number | null; kind: string }) {
+  if (change === null) return <span className="text-xs text-[#6B7380]">No earlier period to compare with</span>;
+  if (Math.abs(change) < (kind === "boolean" ? 0.005 : 0.0005) && kind !== "categorical") return <span className="text-xs text-[#8B93A1]">Unchanged from the period before</span>;
+  const up = change > 0;
+  const text = kind === "boolean" ? `${Math.abs(Math.round(change * 100))} points` : kind === "categorical" ? `${Math.abs(Math.round(change))} scores` : formatScoreValue(Math.abs(change));
+  const good = kind === "categorical" ? null : up;
+  return <span className={`text-xs ${good === null ? "text-[#8B93A1]" : good ? "text-[#5BE3A0]" : "text-[#FF8A8A]"}`}>{up ? "▲" : "▼"} {text} {up ? "up" : "down"} on the period before</span>;
 }
 
 export function ScoresWorkspace({ projectId, initialQuery }: { projectId: string; initialQuery: Query }) {
   const typedProjectId = projectId as Id<"projects">;
   const scores = useQuery(api.evaluation.listScores, { projectId: typedProjectId, limit: LOADED }) as ScoreRow[] | undefined;
   const createScore = useMutation(api.evaluation.createScore);
-  const [query, setQuery] = useState<Query>(() => ({ range: "30d", ...readUrl(initialQuery) }));
-  const [draft, setDraft] = useState(query.q ?? "");
-  const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "createdAt", dir: "desc" });
-  const [adding, setAdding] = useState(false);
+  const [query, setQuery] = useState<Query>(() => ({ days: "14", ...readUrl(initialQuery) }));
   const [now, setNow] = useState(() => Date.now());
-  const searchRef = useRef<HTMLInputElement>(null);
-  const selectedId = query.id ?? null;
+  const [logSearch, setLogSearch] = useState("");
 
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 30_000); return () => clearInterval(timer); }, []);
   const update = useCallback((patch: Query) => setQuery((current) => {
@@ -67,227 +48,164 @@ export function ScoresWorkspace({ projectId, initialQuery }: { projectId: string
     const params = new URLSearchParams(query);
     window.history.replaceState(null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`);
   }, [query]);
-
-  const range = SCORE_RANGES.find((item) => item.id === query.range) ?? SCORE_RANGES[2];
-  const since = range.ms ? now - range.ms : undefined;
-  const inRange = useMemo(() => (scores ?? []).filter((row) => !since || row.createdAt >= since), [scores, since]);
-  const filtered = useMemo(() => filterScores(inRange, { q: query.q, name: query.name, source: query.source, type: query.type }), [inRange, query.q, query.name, query.source, query.type]);
-  const summaries = useMemo(() => summariseByName(inRange, now), [inRange, now]);
-  const rows = useMemo(() => {
-    const factor = sort.dir === "asc" ? 1 : -1;
-    return [...filtered].sort((a, b) => {
-      if (sort.key === "name") return factor * a.name.localeCompare(b.name);
-      if (sort.key === "value") return factor * ((typeof a.value === "number" ? a.value : typeof a.value === "boolean" ? Number(a.value) : -Infinity) - (typeof b.value === "number" ? b.value : typeof b.value === "boolean" ? Number(b.value) : -Infinity));
-      return factor * (a.createdAt - b.createdAt);
-    });
-  }, [filtered, sort]);
-  const selected = selectedId ? (scores ?? []).find((row) => row._id === selectedId) ?? null : null;
-  const stats = useMemo(() => {
-    const humans = inRange.filter((row) => row.source === "human").length;
-    const bools = inRange.flatMap((row) => (typeof row.value === "boolean" ? [row.value] : []));
-    return { total: inRange.length, names: summaries.length, humanShare: inRange.length ? humans / inRange.length : null, passRate: bools.length ? bools.filter(Boolean).length / bools.length : null };
-  }, [inRange, summaries.length]);
-
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const typing = event.target instanceof HTMLElement && /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName);
-      if (event.key === "/" && !typing) { event.preventDefault(); searchRef.current?.focus(); }
-      if (event.key === "Escape" && !typing) { if (adding) setAdding(false); else if (selectedId) update({ id: "" }); }
-      if ((event.key === "j" || event.key === "k" || event.key === "ArrowDown" || event.key === "ArrowUp") && !typing && rows.length) {
-        event.preventDefault();
-        const index = rows.findIndex((row) => row._id === selectedId);
-        const next = event.key === "j" || event.key === "ArrowDown" ? Math.min(index + 1, rows.length - 1) : Math.max(index - 1, 0);
-        update({ id: rows[next]._id });
-      }
-    };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") update({ id: "", add: "" }); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [adding, rows, selectedId, update]);
+  }, [update]);
+
+  const days = Number(DAYS.find((item) => item.id === query.days)?.id ?? 14);
+  const windowStart = now - days * 86_400_000;
+  const scoped = useMemo(() => (scores ?? []).filter((row) => !query.source || row.source === query.source), [scores, query.source]);
+  const inWindow = useMemo(() => scoped.filter((row) => row.createdAt >= windowStart), [scoped, windowStart]);
+  const names = useMemo(() => summariseByName(inWindow, now), [inWindow, now]);
+  const selectedName = names.find((item) => item.name === query.name)?.name ?? names[0]?.name ?? null;
+  const series = useMemo(() => (selectedName ? dailySeries(scoped, selectedName, now, days) : null), [scoped, selectedName, now, days]);
+  const change = useMemo(() => (selectedName ? periodChange(scoped, selectedName, now, days) : null), [scoped, selectedName, now, days]);
+  const mine = useMemo(() => inWindow.filter((row) => row.name === selectedName), [inWindow, selectedName]);
+  const attention = useMemo(() => needsAttention(inWindow, 6), [inWindow]);
+  const selectedRow = query.id ? (scores ?? []).find((row) => row._id === query.id) ?? null : null;
+  const logRows = useMemo(() => filterScores(inWindow, { q: logSearch }).slice(0, 100), [inWindow, logSearch]);
+
+  const domain: [number, number] = useMemo(() => {
+    if (!series) return [0, 1];
+    if (series.kind === "boolean") return [0, 1];
+    const values = series.days.flatMap((day) => (day.value === null ? [] : [day.value]));
+    if (!values.length) return [0, 1];
+    const lo = Math.min(...values); const hi = Math.max(...values);
+    if (series.kind === "categorical") return [0, Math.max(1, hi)];
+    if (lo >= 0 && hi <= 1) return [0, 1];
+    const pad = (hi - lo || 1) * 0.15;
+    return [lo - pad, hi + pad];
+  }, [series]);
+  const format = useCallback((value: number) => (series?.kind === "boolean" ? percent(value) : series?.kind === "categorical" ? String(Math.round(value)) : formatScoreValue(Math.round(value * 1000) / 1000)), [series?.kind]);
 
   function exportCsv() {
-    downloadFile(`scores-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(["time", "name", "value", "type", "source", "trace", "span", "comment"], rows.map((row) => [new Date(row.createdAt).toISOString(), row.name, String(row.value), row.dataType, row.source, row.traceId ?? "", row.spanId ?? "", row.comment ?? ""])), "text/csv");
+    downloadFile(`scores-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(["time", "name", "value", "type", "source", "trace", "span", "comment"], inWindow.map((row) => [new Date(row.createdAt).toISOString(), row.name, String(row.value), row.dataType, row.source, row.traceId ?? "", row.spanId ?? "", row.comment ?? ""])), "text/csv");
   }
-  const sortBy = (key: SortKey) => setSort((current) => ({ key, dir: current.key === key && current.dir === "desc" ? "asc" : "desc" }));
-  const th = (key: SortKey, label: string, className = "") => (
-    <th scope="col" aria-sort={sort.key === key ? (sort.dir === "asc" ? "ascending" : "descending") : "none"} className={`px-3 py-2 font-medium ${className}`}>
-      <button type="button" onClick={() => sortBy(key)} className="uppercase tracking-wider hover:text-white">{label}{sort.key === key ? (sort.dir === "asc" ? " ↑" : " ↓") : ""}</button>
-    </th>
-  );
-  const chips = [
-    query.q && { key: "q", label: `“${query.q}”` }, query.name && { key: "name", label: `name ${query.name}` },
-    query.source && { key: "source", label: `source ${SOURCE_TEXT[query.source] ?? query.source}` }, query.type && { key: "type", label: `type ${query.type}` },
-  ].filter(Boolean) as Array<{ key: string; label: string }>;
-  const loadedAll = (scores?.length ?? 0) < LOADED;
+
+  const booleanParts = useMemo(() => {
+    const yes = mine.filter((row) => row.value === true).length; const no = mine.filter((row) => row.value === false).length;
+    return [{ label: "True", value: yes, color: "#5BE3A0" }, { label: "False", value: no, color: "#FF8A8A" }];
+  }, [mine]);
+  const categoryItems = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const row of mine) counts.set(String(row.value), (counts.get(String(row.value)) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([label, value]) => ({ label, value }));
+  }, [mine]);
+  const sourceItems = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const row of mine) counts.set(row.source, (counts.get(row.source) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label: SOURCE_TEXT[label] ?? label, value }));
+  }, [mine]);
+
+  const empty = scores !== undefined && !scores.length;
+  const bigValue = !series || series.overall === null ? "–" : series.kind === "boolean" ? percent(series.overall) : series.kind === "categorical" ? String(series.overall) : formatScoreValue(Math.round(series.overall * 1000) / 1000);
 
   return (
     <div className="flex min-h-svh min-w-0 flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
-      <header className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
-        <h1 className="mr-2 text-base font-semibold tracking-tight">Scores</h1>
-        <form className="min-w-[180px] flex-1" onSubmit={(event) => { event.preventDefault(); update({ q: draft.trim() }); }}>
-          <label htmlFor="score-search" className="sr-only">Search scores</label>
-          <input id="score-search" ref={searchRef} value={draft} onChange={(event) => { setDraft(event.target.value); if (!event.target.value) update({ q: "" }); }} placeholder="Search name, trace, comment or value ( / )" className="h-8 w-full rounded border border-[#262C35] bg-[#0E1115] px-3 font-mono text-xs placeholder:text-[#6B7380] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#F4D44D]" />
-        </form>
+      <header className="flex flex-wrap items-center gap-3 border-b border-[#1F242C] px-6 py-3">
+        <div className="mr-auto"><h1 className="text-base font-semibold tracking-tight">Scores</h1><p className="text-[11px] text-[#6B7380]">How your agent is graded, over time</p></div>
+        <div role="group" aria-label="Time range" className="flex overflow-hidden rounded border border-[#262C35]">
+          {DAYS.map((item) => <button key={item.id} type="button" aria-pressed={String(days) === item.id} onClick={() => update({ days: item.id })} className={`h-7 px-3 text-xs ${String(days) === item.id ? "bg-[#F4D44D] font-medium text-[#090909]" : "bg-[#0E1115] text-[#C9CED6] hover:text-white"}`}>{item.label}</button>)}
+        </div>
         <label className="sr-only" htmlFor="score-source">Source</label>
-        <select id="score-source" className={control} value={query.source ?? ""} onChange={(event) => update({ source: event.target.value })}><option value="">All sources</option>{Object.entries(SOURCE_TEXT).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select>
-        <label className="sr-only" htmlFor="score-type">Type</label>
-        <select id="score-type" className={control} value={query.type ?? ""} onChange={(event) => update({ type: event.target.value })}><option value="">All types</option>{["numeric", "boolean", "categorical", "text"].map((id) => <option key={id} value={id}>{id}</option>)}</select>
-        <label className="sr-only" htmlFor="score-range">Time range</label>
-        <select id="score-range" className={control} value={range.id} onChange={(event) => update({ range: event.target.value })}>{SCORE_RANGES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select>
+        <select id="score-source" className={control} value={query.source ?? ""} onChange={(event) => update({ source: event.target.value, name: "" })}><option value="">All sources</option>{Object.entries(SOURCE_TEXT).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select>
         <span className="flex items-center gap-1.5 font-mono text-[11px] text-[#8B93A1]"><span className="size-1.5 animate-pulse rounded-full bg-[#5BE3A0]" />Live</span>
-        <button type="button" onClick={exportCsv} disabled={!rows.length} className={`${control} disabled:opacity-40`}>Export CSV</button>
-        <button type="button" onClick={() => { setAdding(true); update({ id: "" }); }} className="h-7 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909] hover:bg-[#f7de70]">Add score</button>
+        <button type="button" onClick={exportCsv} disabled={!inWindow.length} className={`${control} disabled:opacity-40`}>Export CSV</button>
+        <button type="button" onClick={() => update({ add: "1", id: "" })} className="h-7 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909] hover:bg-[#f7de70]">Add score</button>
       </header>
-      {chips.length ? (
-        <div className="flex flex-wrap items-center gap-1.5 border-b border-[#1F242C] px-4 py-1.5" aria-label="Active filters">
-          {chips.map((chip) => <button key={chip.key} type="button" onClick={() => { if (chip.key === "q") setDraft(""); update({ [chip.key]: "" }); }} aria-label={`Remove filter ${chip.label}`} className="rounded border border-[#3A3420] bg-[#1A170C] px-2 py-0.5 font-mono text-[11px] text-[#F4D44D]">{chip.label} ×</button>)}
-          <button type="button" onClick={() => { setDraft(""); update({ q: "", name: "", source: "", type: "" }); }} className="px-1 text-[11px] text-[#8B93A1] underline hover:text-white">Clear all</button>
+
+      {scores === undefined ? (
+        <div className="grid gap-4 p-6" role="status" aria-label="Loading scores"><div className="h-9 w-72 animate-pulse rounded bg-[#11151A]" /><div className="h-72 animate-pulse rounded bg-[#11151A]" /><div className="grid gap-4 sm:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="h-28 animate-pulse rounded bg-[#11151A]" />)}</div></div>
+      ) : empty ? (
+        <div className="mx-auto max-w-md p-16 text-center">
+          <h2 className="text-sm font-semibold">No scores yet</h2>
+          <p className="mt-2 text-xs leading-5 text-[#8B93A1]">A score is a grade on a trace: a number, a yes/no or a category. They arrive from evaluators, from people reviewing traces, or from your own code. Add one by hand to see how this page fills in.</p>
+          <button type="button" onClick={() => update({ add: "1" })} className="mt-4 h-8 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909]">Add the first score</button>
         </div>
-      ) : null}
-      <section aria-label="Summary" className="grid grid-cols-2 gap-px border-b border-[#1F242C] bg-[#1F242C] sm:grid-cols-4">
-        {[["Scores", stats.total.toLocaleString()], ["Score names", String(stats.names)], ["True rate (yes/no scores)", stats.passRate === null ? "–" : percent(stats.passRate)], ["Given by people", stats.humanShare === null ? "–" : percent(stats.humanShare)]].map(([label, value]) => (
-          <div key={label} className="bg-[#0B0D10] px-4 py-2.5"><div className="font-mono text-[10px] uppercase tracking-wider text-[#6B7380]">{label}</div><div className="mt-0.5 font-mono text-base">{scores === undefined ? "–" : value}</div></div>
-        ))}
-      </section>
-      <div className={`grid min-h-0 flex-1 ${selected || adding ? "lg:grid-cols-[minmax(0,1fr)_minmax(380px,42%)]" : "grid-cols-1"}`}>
-        <main className={`min-w-0 overflow-auto ${selected || adding ? "hidden lg:block" : ""}`}>
-          {scores === undefined ? (
-            <div className="grid gap-px p-4" role="status" aria-label="Loading scores">{Array.from({ length: 6 }, (_, index) => <div key={index} className="h-9 animate-pulse rounded bg-[#11151A]" />)}</div>
-          ) : !scores.length ? (
-            <div className="mx-auto max-w-md p-10 text-center">
-              <h2 className="text-sm font-semibold">No scores yet</h2>
-              <p className="mt-2 text-xs leading-5 text-[#8B93A1]">A score is a grade on a trace: a number, a yes/no or a category. They arrive from evaluators, from people reviewing traces, or from your own code. You can also add one by hand to see how it looks.</p>
-              <button type="button" onClick={() => setAdding(true)} className="mt-4 h-8 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909]">Add the first score</button>
+      ) : !names.length ? (
+        <div className="p-16 text-center text-xs text-[#8B93A1]">No scores in the last {days} days{query.source ? ` from ${SOURCE_TEXT[query.source]}` : ""}. <button type="button" onClick={() => update({ days: "30", source: "" })} className="text-[#8AB4FF] underline">Look at 30 days, all sources</button></div>
+      ) : (
+        <div className="mx-auto grid w-full max-w-[1320px] gap-8 p-6">
+          <section aria-label="Score trend">
+            <div role="tablist" aria-label="Score name" className="mb-4 flex flex-wrap gap-1.5">
+              {names.slice(0, 10).map((item) => <button key={item.name} role="tab" aria-selected={item.name === selectedName} onClick={() => update({ name: item.name })} className={`h-7 max-w-[14rem] truncate rounded-full border px-3 font-mono text-xs ${item.name === selectedName ? "border-[#F4D44D] bg-[#1A170C] text-[#F4D44D]" : "border-[#262C35] text-[#C9CED6] hover:text-white"}`}>{item.name}</button>)}
+              {names.length > 10 ? <span className="self-center px-1 text-[11px] text-[#6B7380]">+{names.length - 10} more below</span> : null}
             </div>
-          ) : (
-            <>
-              {summaries.length ? (
-                <section aria-label="Scores by name" className="border-b border-[#1F242C] p-3">
-                  <h2 className="mb-2 px-1 text-[10px] uppercase tracking-wider text-[#6B7380]">By score name · click to filter</h2>
-                  <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                    {summaries.slice(0, 12).map((summary) => {
-                      const { big, small } = headline(summary);
-                      const active = query.name === summary.name;
-                      return (
-                        <button key={summary.name} type="button" aria-pressed={active} onClick={() => update({ name: active ? "" : summary.name })} className={`min-w-0 rounded border bg-[#0E1115] p-3 text-left hover:border-[#3A3420] ${active ? "border-[#F4D44D]" : "border-[#1F242C]"}`}>
-                          <div className="flex items-center gap-2"><span className="min-w-0 flex-1 truncate font-mono text-xs font-medium">{summary.name}</span><span className="font-mono text-[10px] text-[#6B7380]">{summary.dataType}{summary.mixed ? " +" : ""}</span></div>
-                          <div className="mt-1.5 flex items-end justify-between gap-2"><div className="min-w-0"><div className="font-mono text-lg leading-none">{big}</div><div className="mt-1 truncate text-[11px] text-[#8B93A1]">{small}</div></div><Sparkline values={summary.trend} /></div>
-                          <div className="mt-1.5 font-mono text-[10px] text-[#6B7380]">{summary.count.toLocaleString()} score{summary.count === 1 ? "" : "s"} · {summary.sources.map((source) => SOURCE_TEXT[source]).join(", ")}{summary.mixed ? " · mixed types" : ""}</div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {summaries.length > 12 ? <p className="mt-2 px-1 text-[11px] text-[#6B7380]">Showing the 12 most recently used of {summaries.length} score names. Search to find the others.</p> : null}
-                </section>
-              ) : null}
-              {!rows.length ? (
-                <div className="p-10 text-center text-xs text-[#8B93A1]">No scores match these filters. <button type="button" onClick={() => { setDraft(""); update({ q: "", name: "", source: "", type: "" }); }} className="text-[#8AB4FF] underline">Clear filters</button></div>
-              ) : (
-                <table className="w-full border-collapse text-left">
-                  <thead className="sticky top-0 bg-[#0B0D10] text-[10px] text-[#6B7380]"><tr>{th("createdAt", "Time")}{th("name", "Name")}{th("value", "Value")}<th scope="col" className="hidden px-3 py-2 font-medium uppercase tracking-wider md:table-cell">Source</th><th scope="col" className="hidden px-3 py-2 font-medium uppercase tracking-wider lg:table-cell">Trace</th></tr></thead>
-                  <tbody>
-                    {rows.slice(0, 200).map((row) => (
-                      <tr key={row._id} onClick={() => { setAdding(false); update({ id: row._id }); }} aria-selected={row._id === selectedId} className={`cursor-pointer border-t border-[#161B21] hover:bg-[#11151A] ${row._id === selectedId ? "bg-[#11151A] shadow-[inset_2px_0_0_#F4D44D]" : ""}`}>
-                        <td className="whitespace-nowrap px-3 py-1.5 font-mono text-[11px] text-[#8B93A1]" title={new Date(row.createdAt).toLocaleString()}>{ago(row.createdAt, now)}</td>
-                        <td className="max-w-[14rem] px-3 py-1.5"><button type="button" onClick={(event) => { event.stopPropagation(); update({ name: row.name }); }} className="block max-w-full truncate text-left font-mono text-xs text-[#8AB4FF] hover:underline" title={`Filter by ${row.name}`}>{row.name}</button></td>
-                        <td className="px-3 py-1.5 font-mono text-xs"><span className={typeof row.value === "boolean" ? (row.value ? "text-[#5BE3A0]" : "text-[#FF8A8A]") : ""}>{formatScoreValue(row.value)}</span></td>
-                        <td className="hidden px-3 py-1.5 text-[11px] text-[#8B93A1] md:table-cell">{SOURCE_TEXT[row.source]}</td>
-                        <td className="hidden max-w-[10rem] truncate px-3 py-1.5 font-mono text-[11px] text-[#6B7380] lg:table-cell">{row.traceId ?? row.spanId ?? "–"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-              <footer className="border-t border-[#1F242C] px-4 py-2 font-mono text-[11px] text-[#6B7380]">
-                {rows.length.toLocaleString()} match{rows.length === 1 ? "es" : ""}{rows.length > 200 ? ", showing the newest 200 (export for all)" : ""}.{" "}
-                {loadedAll ? "Everything in this project is loaded." : `Based on the newest ${LOADED.toLocaleString()} scores in this project.`}
-              </footer>
-            </>
-          )}
-        </main>
-        {adding ? <AddScore onClose={() => setAdding(false)} onSave={async (input) => { const id = await createScore({ projectId: typedProjectId, ...input }); setAdding(false); update({ id }); }} /> : selected ? <ScorePanel projectId={projectId} row={selected} onClose={() => update({ id: "" })} onFilter={(name) => update({ name })} now={now} /> : null}
-      </div>
-      {selectedId && scores && !selected && !adding ? <p role="alert" className="border-t border-[#5B2B2B] bg-[#1A1010] px-4 py-2 text-xs text-[#FF8A8A]">That score is not in the newest {LOADED.toLocaleString()} scores. <button type="button" onClick={() => update({ id: "" })} className="underline">Back to the list</button></p> : null}
-    </div>
-  );
-}
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="min-w-0 rounded-lg border border-[#1F242C] bg-[#0E1115] p-5">
+                <div className="mb-3 flex flex-wrap items-end gap-x-6 gap-y-1">
+                  <div><div className="font-mono text-5xl leading-none tracking-tight">{bigValue}</div><div className="mt-1.5 text-[11px] uppercase tracking-wider text-[#6B7380]">{series?.kind === "numeric" ? "average" : series?.kind === "boolean" ? "true" : "scores"} · last {days} days · {series?.total.toLocaleString()} score{series?.total === 1 ? "" : "s"}</div></div>
+                  <div className="pb-1"><Delta change={change?.change ?? null} kind={series?.kind ?? "numeric"} /></div>
+                </div>
+                {series ? <><TrendChart days={series.days} domain={domain} format={format} unit={series.kind === "numeric" ? "average" : series.kind === "boolean" ? "true" : "scores"} /><VolumeStrip days={series.days} /></> : null}
+              </div>
+              <div className="grid content-start gap-4">
+                <div className="rounded-lg border border-[#1F242C] bg-[#0E1115] p-4"><h2 className="mb-3 text-[10px] uppercase tracking-wider text-[#6B7380]">{series?.kind === "numeric" ? "How scores are spread" : series?.kind === "boolean" ? "True or false" : "Most common"}</h2>
+                  {series?.kind === "numeric" ? <Histogram buckets={histogram(mine.flatMap((row) => (typeof row.value === "number" ? [row.value] : [])))} format={(value) => formatScoreValue(Math.round(value * 100) / 100)} /> : series?.kind === "boolean" ? <SplitBar parts={booleanParts} /> : <BarList items={categoryItems} />}
+                </div>
+                <div className="rounded-lg border border-[#1F242C] bg-[#0E1115] p-4"><h2 className="mb-3 text-[10px] uppercase tracking-wider text-[#6B7380]">Who gave them</h2><BarList items={sourceItems} /></div>
+              </div>
+            </div>
+          </section>
 
-function ScorePanel({ projectId, row, onClose, onFilter, now }: { projectId: string; row: ScoreRow; onClose: () => void; onFilter: (name: string) => void; now: number }) {
-  const sameTrace = useQuery(api.evaluationEngine.traceQuality, row.traceId ? { projectId: projectId as Id<"projects">, traceId: row.traceId } : "skip");
-  const [copied, setCopied] = useState(false);
-  const others = (sameTrace?.scores ?? []).filter((score) => score._id !== row._id);
-  return (
-    <aside className="flex min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10]" aria-label={`Score ${row.name}`}>
-      <div className="flex items-start gap-2 border-b border-[#1F242C] px-4 py-3">
-        <div className="min-w-0 flex-1"><h2 className="truncate font-mono text-sm font-semibold" title={row.name}>{row.name}</h2><p className="mt-0.5 font-mono text-[11px] text-[#6B7380]">{SOURCE_TEXT[row.source]} · {row.dataType} · {ago(row.createdAt, now)}</p></div>
-        <button type="button" onClick={onClose} className="h-7 shrink-0 rounded border border-[#262C35] px-2 text-xs text-[#C9CED6] hover:text-white">Close</button>
-      </div>
-      <div className="grid min-h-0 flex-1 content-start gap-4 overflow-auto p-4">
-        <div><div className="text-[10px] uppercase tracking-wider text-[#6B7380]">Value</div><div className={`mt-1 break-words font-mono text-2xl ${typeof row.value === "boolean" ? (row.value ? "text-[#5BE3A0]" : "text-[#FF8A8A]") : ""}`}>{typeof row.value === "string" ? row.value : formatScoreValue(row.value)}</div></div>
-        {row.comment ? <div><div className="text-[10px] uppercase tracking-wider text-[#6B7380]">Reason or comment</div><p className="mt-1 whitespace-pre-wrap rounded border border-[#1F242C] bg-[#0E1115] p-3 text-xs leading-5 text-[#C9CED6]">{row.comment}</p></div> : null}
-        <dl className="grid grid-cols-[6rem_1fr] gap-x-3 gap-y-1.5 text-xs">
-          <dt className="text-[#6B7380]">Recorded</dt><dd className="font-mono">{new Date(row.createdAt).toLocaleString()}</dd>
-          <dt className="text-[#6B7380]">Given by</dt><dd className="break-all font-mono">{row.createdBy === "system" ? "Tracify (automatic)" : row.createdBy}</dd>
-          {row.traceId ? <><dt className="text-[#6B7380]">Trace</dt><dd><Link href={`/dashboard/${projectId}/tracing?trace=${encodeURIComponent(row.traceId)}`} className="break-all font-mono text-[#8AB4FF] underline">{row.traceId}</Link></dd></> : null}
-          {row.spanId ? <><dt className="text-[#6B7380]">Span</dt><dd className="break-all font-mono">{row.spanId}</dd></> : null}
-        </dl>
-        <div className="flex flex-wrap gap-1.5">
-          <button type="button" onClick={() => onFilter(row.name)} className={control}>Show all “{row.name.length > 24 ? `${row.name.slice(0, 23)}…` : row.name}”</button>
-          <button type="button" onClick={() => { void navigator.clipboard?.writeText(`${window.location.origin}${window.location.pathname}?id=${row._id}`); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className={control}>{copied ? "Link copied" : "Copy link"}</button>
-        </div>
-        {row.traceId ? (
-          <div>
-            <h3 className="mb-1.5 text-[10px] uppercase tracking-wider text-[#6B7380]">Other scores on this trace</h3>
-            {sameTrace === undefined ? <p className="text-xs text-[#8B93A1]" role="status">Loading…</p> : !others.length ? <p className="text-xs text-[#6B7380]">This is the only score on the trace.</p> : (
-              <ul className="grid gap-1">{others.map((score) => <li key={score._id} className="flex items-center gap-2 rounded border border-[#1F242C] bg-[#0E1115] px-2.5 py-1.5"><span className="min-w-0 flex-1 truncate font-mono text-xs">{score.name}</span><span className="font-mono text-xs">{formatScoreValue(score.value)}</span><span className="text-[10px] text-[#6B7380]">{SOURCE_TEXT[score.source]}</span></li>)}</ul>
+          <section aria-label="Needs attention">
+            <h2 className="mb-3 text-sm font-semibold">Worth a look</h2>
+            {!attention.length ? <p className="rounded-lg border border-dashed border-[#262C35] p-6 text-center text-xs text-[#8B93A1]">Nothing stands out. No failed yes/no scores and no unusually low numbers in this period.</p> : (
+              <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {attention.map((row) => (
+                  <li key={row._id}><button type="button" onClick={() => update({ id: row._id, add: "" })} className="block h-full w-full rounded-lg border border-[#2A1E1E] bg-[#120E0E] p-3.5 text-left hover:border-[#5B2B2B]">
+                    <div className="flex items-center gap-2"><span className="min-w-0 flex-1 truncate font-mono text-xs">{row.name}</span><span className="font-mono text-base text-[#FF8A8A]">{formatScoreValue(row.value)}</span></div>
+                    <p className="mt-1.5 line-clamp-2 min-h-8 text-xs leading-4 text-[#B3B9C4]">{row.comment ?? "No reason was recorded."}</p>
+                    <div className="mt-2 flex items-center gap-2 font-mono text-[10px] text-[#6B7380]"><span className="min-w-0 flex-1 truncate">{row.traceId ?? row.spanId ?? "no trace"}</span><span>{SOURCE_TEXT[row.source]} · {ago(row.createdAt, now)}</span></div>
+                  </button></li>
+                ))}
+              </ul>
             )}
-          </div>
-        ) : null}
-      </div>
-    </aside>
-  );
-}
+          </section>
 
-function AddScore({ onClose, onSave }: { onClose: () => void; onSave: (input: { traceId: string; name: string; value: number | boolean | string; dataType: ScoreRow["dataType"]; source: "human" | "user"; comment?: string }) => Promise<void> }) {
-  const [traceId, setTraceId] = useState("");
-  const [name, setName] = useState("");
-  const [dataType, setDataType] = useState<ScoreRow["dataType"]>("numeric");
-  const [value, setValue] = useState("");
-  const [comment, setComment] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+          <section aria-label="All score names">
+            <h2 className="mb-3 text-sm font-semibold">Every score at a glance <span className="ml-1 font-normal text-[#6B7380]">click one to open it above</span></h2>
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {names.map((item) => {
+                const spark = dailySeries(scoped, item.name, now, days);
+                const values = spark.days.flatMap((day) => (day.value === null ? [] : [day.value]));
+                const lo = Math.min(...values); const hi = Math.max(...values); const span = hi - lo || 1;
+                const points = spark.days.map((day, i) => (day.value === null ? null : `${(i / Math.max(1, spark.days.length - 1)) * 120},${30 - ((day.value - lo) / span) * 26}`)).filter(Boolean).join(" ");
+                return (
+                  <li key={item.name}><button type="button" onClick={() => { update({ name: item.name }); window.scrollTo({ top: 0, behavior: "smooth" }); }} aria-pressed={item.name === selectedName} className={`block w-full rounded-lg border bg-[#0E1115] p-3 text-left hover:border-[#3A3420] ${item.name === selectedName ? "border-[#F4D44D]" : "border-[#1F242C]"}`}>
+                    <div className="truncate font-mono text-xs" title={item.name}>{item.name}</div>
+                    <div className="mt-1 flex items-end justify-between gap-2"><span className="font-mono text-xl">{spark.overall === null ? "–" : spark.kind === "boolean" ? percent(spark.overall) : spark.kind === "categorical" ? String(spark.overall) : formatScoreValue(Math.round(spark.overall * 1000) / 1000)}</span>
+                      {values.length > 1 ? <svg width="120" height="32" viewBox="0 0 120 32" role="img" aria-label={`${item.name} over ${days} days`}><polyline points={points} fill="none" stroke="#F4D44D" strokeWidth="1.5" /></svg> : <span className="text-[10px] text-[#6B7380]">one day only</span>}</div>
+                    <div className="mt-1 font-mono text-[10px] text-[#6B7380]">{item.count.toLocaleString()} · {item.sources.map((source) => SOURCE_TEXT[source]).join(", ")}{item.mixed ? " · mixed types" : ""}</div>
+                  </button></li>
+                );
+              })}
+            </ul>
+          </section>
 
-  async function submit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!traceId.trim()) return setError("Paste the id of the trace this score is for.");
-    if (!name.trim()) return setError("Give the score a name, like “helpfulness”.");
-    if (name.trim().length > 100) return setError("A score name can be at most 100 characters.");
-    const parsed = parseScoreInput(dataType, value);
-    if ("error" in parsed) return setError(parsed.error);
-    setSaving(true); setError(null);
-    try { await onSave({ traceId: traceId.trim(), name: name.trim(), value: parsed.value, dataType, source: "human", comment: comment.trim() || undefined }); } catch (reason) {
-      const match = (reason instanceof Error ? reason.message : "").match(/Uncaught Error: ([^\n]+)/);
-      setError(match?.[1] ?? "That did not save. Check your connection and try again.");
-      setSaving(false);
-    }
-  }
-  return (
-    <aside className="flex min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10]">
-      <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-4" aria-label="Add a score">
-        <h2 className="text-sm font-semibold">Add a score</h2>
-        <p className="text-[11px] leading-4 text-[#6B7380]">Grade a trace by hand. It is recorded as a human score and shows up everywhere scores do.</p>
-        <label className="grid gap-1 text-[11px] text-[#8B93A1]">Trace id<input value={traceId} onChange={(event) => setTraceId(event.target.value)} maxLength={200} placeholder="Paste it from the Tracing page" className={`${field} h-8 font-mono`} autoFocus /></label>
-        <label className="grid gap-1 text-[11px] text-[#8B93A1]">Score name<input value={name} onChange={(event) => setName(event.target.value)} maxLength={100} placeholder="helpfulness" className={`${field} h-8 font-mono`} /></label>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="grid gap-1 text-[11px] text-[#8B93A1]">Type<select value={dataType} onChange={(event) => { setDataType(event.target.value as ScoreRow["dataType"]); setValue(""); }} className={`${field} h-8`}><option value="numeric">Number</option><option value="boolean">Yes / no</option><option value="categorical">Category</option><option value="text">Free text</option></select></label>
-          <label className="grid gap-1 text-[11px] text-[#8B93A1]">Value
-            {dataType === "boolean" ? <select value={value} onChange={(event) => setValue(event.target.value)} className={`${field} h-8`}><option value="">Choose…</option><option value="true">Yes (true)</option><option value="false">No (false)</option></select>
-              : <input value={value} onChange={(event) => setValue(event.target.value)} inputMode={dataType === "numeric" ? "decimal" : undefined} placeholder={dataType === "numeric" ? "0.8" : dataType === "categorical" ? "friendly" : "What you noticed"} className={`${field} h-8`} />}
-          </label>
+          <details className="rounded-lg border border-[#1F242C] bg-[#0E1115]" open={query.log === "1"} onToggle={(event) => update({ log: event.currentTarget.open ? "1" : "" })}>
+            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold">Every score, newest first <span className="font-normal text-[#6B7380]">({inWindow.length.toLocaleString()} in this period)</span></summary>
+            <div className="border-t border-[#1F242C] p-4">
+              <label className="sr-only" htmlFor="score-log-search">Search the log</label>
+              <input id="score-log-search" value={logSearch} onChange={(event) => setLogSearch(event.target.value)} placeholder="Search name, trace, comment or value" className="mb-3 h-8 w-full max-w-md rounded border border-[#262C35] bg-[#0B0D10] px-3 font-mono text-xs placeholder:text-[#6B7380] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#F4D44D]" />
+              {!logRows.length ? <p className="py-6 text-center text-xs text-[#8B93A1]">Nothing matches.</p> : (
+                <div className="overflow-x-auto"><table className="w-full border-collapse text-left"><thead className="text-[10px] uppercase tracking-wider text-[#6B7380]"><tr><th className="px-2 py-1.5 font-medium">Time</th><th className="px-2 py-1.5 font-medium">Name</th><th className="px-2 py-1.5 font-medium">Value</th><th className="px-2 py-1.5 font-medium">Source</th><th className="px-2 py-1.5 font-medium">Trace</th></tr></thead>
+                  <tbody>{logRows.map((row) => <tr key={row._id} onClick={() => update({ id: row._id, add: "" })} className="cursor-pointer border-t border-[#161B21] hover:bg-[#11151A]"><td className="whitespace-nowrap px-2 py-1.5 font-mono text-[11px] text-[#8B93A1]">{ago(row.createdAt, now)}</td><td className="max-w-[14rem] truncate px-2 py-1.5 font-mono text-xs">{row.name}</td><td className="px-2 py-1.5 font-mono text-xs">{formatScoreValue(row.value)}</td><td className="px-2 py-1.5 text-[11px] text-[#8B93A1]">{SOURCE_TEXT[row.source]}</td><td className="max-w-[10rem] truncate px-2 py-1.5 font-mono text-[11px] text-[#6B7380]">{row.traceId ?? row.spanId ?? "–"}</td></tr>)}</tbody></table></div>
+              )}
+              <p className="mt-2 font-mono text-[11px] text-[#6B7380]">Based on the newest {LOADED.toLocaleString()} scores in this project{(scores?.length ?? 0) < LOADED ? " (that is all of them)" : ""}. Export for the full period.</p>
+            </div>
+          </details>
         </div>
-        <label className="grid gap-1 text-[11px] text-[#8B93A1]">Comment (optional)<textarea value={comment} onChange={(event) => setComment(event.target.value)} maxLength={4000} rows={3} className={`${field} resize-y p-2 leading-5`} /></label>
-        {error ? <p role="alert" className="rounded border border-[#5B2B2B] bg-[#1A1010] px-3 py-2 text-xs text-[#FF8A8A]">{error}</p> : null}
-        <div className="flex gap-2"><button type="submit" disabled={saving} className="h-8 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909] disabled:opacity-50">{saving ? "Saving…" : "Save score"}</button><button type="button" onClick={onClose} disabled={saving} className="h-8 rounded border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:text-white">Cancel</button></div>
-      </form>
-    </aside>
+      )}
+
+      {query.add ? (
+        <Sheet label="Add a score" onClose={() => update({ add: "" })}><AddScore onClose={() => update({ add: "" })} onSave={async (input) => { const id = await createScore({ projectId: typedProjectId, ...input }); update({ add: "", id }); }} /></Sheet>
+      ) : selectedRow ? (
+        <Sheet label={`Score ${selectedRow.name}`} onClose={() => update({ id: "" })}><ScorePanel projectId={projectId} row={selectedRow} onClose={() => update({ id: "" })} onFilter={(name) => update({ name, id: "" })} now={now} /></Sheet>
+      ) : null}
+      {query.id && scores && !selectedRow && !query.add ? <p role="alert" className="border-t border-[#5B2B2B] bg-[#1A1010] px-4 py-2 text-xs text-[#FF8A8A]">That score is not in the newest {LOADED.toLocaleString()} scores. <button type="button" onClick={() => update({ id: "" })} className="underline">Dismiss</button></p> : null}
+    </div>
   );
 }
