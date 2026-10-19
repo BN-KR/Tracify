@@ -6,6 +6,7 @@ import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
 import { getWrongRegionApiKeyResponse, hashApiKey, isTracifyApiKey } from "@/lib/api-keys";
 import { DEFAULT_REDACTION_RULES, redactPayload, redactRecord } from "@/lib/redaction";
+import { planLimitResponse } from "@/lib/plan-limits-server";
 import { consumeRateLimit } from "@/lib/redis-cache";
 import { persistSpan, type SpanEvent } from "@/lib/span-pipeline";
 
@@ -199,6 +200,9 @@ export async function POST(request: NextRequest) {
       { status: 429, headers: { "Retry-After": String(quota.retryAfterSeconds), "X-RateLimit-Remaining": "0" } },
     );
   }
+
+  const overPlanLimit = await planLimitResponse(project);
+  if (overPlanLimit) return overPlanLimit;
 
   const projectDocId = project._id as Id<"projects">;
   const now = Date.now();

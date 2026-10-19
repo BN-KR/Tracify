@@ -146,7 +146,7 @@ export function StepsExplorer({
       signal: controller.signal,
     })
       .then(async (r) => {
-        if (!r.ok) throw Error("Steps are temporarily unavailable.");
+        if (!r.ok) throw Error("Actions are temporarily unavailable.");
         return r.json() as Promise<Result>;
       })
       .then((body) => {
@@ -322,7 +322,7 @@ export function StepsExplorer({
   return (
     <div className="flex min-h-svh min-w-0 flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
       <header className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
-        <h1 className="text-base font-semibold">Steps</h1>
+        <h1 className="text-base font-semibold">Actions</h1>
         <a href={tracingHref} className={`${control} py-1.5`}>
           Traces
         </a>
@@ -482,7 +482,7 @@ export function StepsExplorer({
               className="flex gap-1"
             >
               {[
-                [false, "All steps"],
+                [false, "All actions"],
                 [true, "Group by step"],
               ].map(([g, label]) => (
                 <button
@@ -535,7 +535,7 @@ export function StepsExplorer({
               className={`${control} ml-auto`}
               onClick={() =>
                 downloadFile(
-                  "steps.csv",
+                  "actions.csv",
                   toCsv(
                     columns.map(
                       (c) =>
@@ -560,7 +560,7 @@ export function StepsExplorer({
             className="mx-4 grid grid-cols-2 gap-px overflow-hidden rounded border border-[#1F242C] bg-[#1F242C] sm:grid-cols-5"
           >
             {[
-              ["Steps", compactNumber(data?.stats.steps ?? 0)],
+              ["Actions", compactNumber(data?.stats.steps ?? 0)],
               ["Errors", compactNumber(data?.stats.errors ?? 0)],
               ["Latency p50", formatDuration(data?.stats.p50LatencyMs)],
               ["Total cost", formatCost(data?.stats.totalCostUsd)],
@@ -597,7 +597,7 @@ export function StepsExplorer({
               </p>
             ) : !rows.length && !error ? (
               <div className="py-12 text-center">
-                <p>No steps match these filters</p>
+                <p>No actions match these filters</p>
                 <p className="mt-2 text-xs text-[#8B93A1]">
                   Try a wider time range or clear a filter.
                 </p>
@@ -609,7 +609,7 @@ export function StepsExplorer({
               >
                 <caption className="sr-only">
                   {grouped
-                    ? "Steps grouped across traces"
+                    ? "Actions grouped across traces"
                     : "Every matching step across traces"}
                 </caption>
                 <thead>
@@ -709,7 +709,7 @@ export function StepsExplorer({
           </div>
           <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1F242C] px-4 py-3 text-xs text-[#8B93A1]">
             <span>
-              {data?.total ?? 0} {grouped ? "step groups" : "steps"}
+              {data?.total ?? 0} {grouped ? "action groups" : "actions"}
             </span>
             <label>
               Rows{" "}

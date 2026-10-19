@@ -1,5 +1,25 @@
 # Project Memory
 
+## 2026-10-19 Scores and Evaluators rebuilt — same draft PR #237
+- Scores (`src/components/dashboard/scores/`): per-name summary cards (mean/range, true rate, top categories, 14-day trend), filters (source, type, range, search, name), sortable table, side panel (reason, trace link, other scores on the trace), add-by-hand form, CSV. Uses the newest 1,000 scores (`listScores` got an optional `limit`, max 1000); `createScore` now validates value against type and lengths. Pure helpers in `src/lib/score-utils.ts`.
+- Evaluators (`src/components/dashboard/evaluators/`): list with pass rate from the last 50 runs, on/off switch, side panel (config, try-a-rule box, recent runs), create form for code rules (live check) and AI judges (templates, sample rate, run on live traces). New Convex queries `evaluators.overview` / `evaluators.recentResults`; creation goes through `evaluationEngine.createEvaluator`. Code rules now live in `src/lib/evaluator-rules.ts` (shared with `/api/evaluators/run`, same behaviour; invalid regex/schema give plain errors). Editing: `evaluators.update` keeps the kind, changes name/rule/settings and writes a new evaluatorVersion each save (runs use the newest version).
+- Tests: `convex/evaluation.test.ts` (3), `evaluator-rules` and `score-utils` tests in `test:tools`. Convex deploy needed for the new queries. Checked with mocked data only.
+
+## 2026-10-19 Prompts and Playground rebuilt — same draft PR #237
+- Prompts page: `src/components/dashboard/prompts/` (list, side panel with Versions / Compare line diff / Usage / Test, editor with variable chips, commit note, extra labels). URL state `?prompt=&tab=&q=`. Live through Convex queries.
+- Convex (`convex/prompts.ts`, needs a manual backend deploy): labels are exclusive pointers per prompt (`moveLabels`), "latest" is automatic, production is never handed out by hand (a version that already holds it may keep or drop it), `commitMessage` on versions, `versionUsage` query, input limits, `create` accepts starting labels. Tests: `convex/prompts.test.ts` (12). convex-test 0.0.56 does not load with the installed convex 1.38 (all convex tests fail the same way, also leads); they pass with `npm i --no-save convex-test@0.0.50`. package.json untouched.
+- Playground: `src/components/dashboard/prompts/playground-workspace.tsx`, `?prompt=<name>&version=<n>` prefill. `/api/playground` now: GET reports which providers have keys, POST runs up to 3 models (OpenAI, or Anthropic for names starting "claude" when `ANTHROPIC_API_KEY` is set), temperature, token usage, timeouts, missing-variable check. Needs `OPENAI_API_KEY` to run anything.
+- Pure helpers `src/lib/prompt-utils.ts` (+ tests in `test:tools`). Old `PromptManagement`/`PromptPlayground` components are unmounted. Screens checked with mocked data only, not signed in on a Vercel preview.
+
+## 2026-10-19 Sessions and Users rebuilt on real data — same draft PR #237
+- Both pages now follow the dashboard page standard: one `GroupExplorer` (`src/components/dashboard/groups/`) with search, time range, environment and status filters, URL state, live polling, sortable columns, CSV export and a side panel (`?id=`) that lists a session's runs in order (or a user's runs) plus the opposite kind (a user's sessions, a session's users). Old `/sessions/<id>` and `/users/<id>` links redirect to `?id=`.
+- Data: `GET /api/projects/[id]/groups/[kind]` (kind session|user) -> `src/lib/tinybird-groups.ts` (aggregates `spans` by sessionId / endUserId). Pure URL parsing in `src/lib/group-filters.ts` (`npm run test:tools`). The SQL was run against a real ClickHouse (chdb) with `npm run test:groups-sql` and `CLICKHOUSE_URL` set; this caught two real bugs (aliases that shadow columns or nest aggregates), so keep outer aliases distinct from inner ones. `tinybird.ts` only gained three `export` keywords.
+- The old `LiveCapturedSessions`/`LiveCapturedUsers` components are no longer mounted. The `/demo` sessions and users pages are separate and unchanged. Not checked on the real Vercel preview signed in (no robot login here): screens were checked with mocked responses.
+
+## 2026-10-19 Free plan limit on ingest — draft PR #237 (branch `claude/project-thread-ji3n7c`)
+- Free projects are refused at 50,000 spans per UTC month on `/api/ingest` and `/api/otel` with HTTP 429, code `plan_limit_reached`, `Retry-After` until the 1st (shared helper `src/lib/plan-limits-server.ts`, pure rules + tests in `plan-limits.ts`, `npm run test:tools`). Count lives in Redis (`ingest-month:<project>:<YYYY-MM>`), fails open if Redis errors. Paid tiers and unknown tiers are never blocked. A batch crossing the limit is refused whole. The existing SDK already reports 429 once with an upgrade hint and does not retry.
+- `getProjectByApiKey` now returns `planTier` (default free): needs a manual Convex deploy. Until deployed the field is absent and nothing is enforced. Also renamed Steps to Actions in the menu and on the page.
+
 ## 2026-10-17 Paid-plan upgrade prompts — draft PR (branch `claude/project-thread-e9f2e8`)
 - Audit: Stripe Checkout, customer portal, webhook and plan sync already exist (pricing buttons -> `/pricing/checkout` -> `/api/stripe/checkout`). Missing: plan limits are NOT enforced on ingest (only a per-minute rate limit), retention is not tied to plan, and there was no usage meter or upgrade prompt.
 - Added `billing.getMonthlyUsage` (sums this month's run span counts, scans up to 20k runs) and `UpgradeBanner` in the project layout: calm note at 80% of the plan's monthly spans, yellow upgrade bar at 100%, hidden on the billing page and for enterprise. Billing page "Current plan" card shows usage. Needs a manual Convex deploy.
@@ -2256,3 +2276,38 @@
 - Root layout only reads the login token on the cloud deployment (`isCloudDeployment`), so public marketing pages are static and CDN-cached. Cloud-app route folders carry `export const dynamic = "force-dynamic"` in their layouts; add it to any new cloud-only route folder or its build will fail prerendering.
 - Each "X vs Tracify" post now has its full text rendered on `/compare/<slug>`, and the post canonicalises there (and is left out of the sitemap). Hero/page H1s no longer start at opacity 0.
 - AI search: `/blog/<slug>.md` plain-text copies, blog guides listed in `llms-full.txt`, extra AI crawlers in robots, `dateModified` on posts. Sitemap lastmod for non-blog pages is `SITE_REVIEWED` in sitemap.ts; bump it on meaningful page changes.
+
+## 2026-10-19 — Scores redesign (charts-first report)
+Scores page rebuilt as its own report layout (trend hero, distribution, sources, "worth a look", small multiples, raw log, drawers). Helpers in `src/lib/score-utils.ts`; UI in `src/components/dashboard/scores/`. Part of the "every page completely different" redesign; next: Evaluators board, Prompts editor, Playground bench, Sessions inbox, Users cards.
+
+## 2026-10-19 — Evaluators board
+Evaluators page is now a three-column board (Live / Manual only / Off) with pass-rate rings; detail opens as a right overlay with failing examples first. Next: Prompts editor, Playground bench, Sessions inbox, Users cards.
+
+## 2026-10-19 — Prompts editor layout
+Prompts page is now an IDE-style view: prompt rail on the left, release pipeline (development → staging → production, with roll back) on top, version history timeline plus line-numbered text/compare/usage/test on the right. Next: Playground bench, Sessions inbox, Users cards.
+
+## 2026-10-19 — Playground bench layout
+Playground is now a bench: model chips + temperature + Run in the top bar, collapsible prompt text with a variables row, big side-by-side answer lanes (one per model), run history as a filmstrip at the bottom. Next: Sessions inbox + transcript, Users people cards.
+
+## 2026-10-19 — Sessions inbox and Users cards
+Sessions is an inbox (list left, sort select) with a chat-style transcript reader on the right; Users is a people-card grid (initials, runs/sessions/cost, failure bar) with a profile drawer. Same data and API as before; sort moved from table headers to a select. All six pages from the "completely different layouts" request are done; next up per plan: Datasets+Experiments (distinct from the start).
+
+## 2026-10-19 — Datasets (spreadsheet layout)
+Datasets page is a spreadsheet: editable grid (click a cell, Ctrl+Enter saves), add-row line on top, paste-rows import (spreadsheet tabs, JSON lines, JSON list; `src/lib/dataset-import.ts`), sheet tabs along the bottom for switching datasets. New Convex module `convex/datasets.ts` (overview, items, updateItem, deleteItem; 3 tests) registered by hand in `_generated/api.d.ts` — Kristoffer must redeploy Convex. Next: Experiments as side-by-side comparison.
+
+## 2026-10-19 — Experiments (side-by-side)
+Experiments page is a comparison: pick baseline and candidate runs of one dataset, metric band (matches expected, score, speed, cost, failed rows with deltas), verdict filters (worse/better/changed/same/not run) and a row-by-row table with both answers. Logic in `src/lib/experiment-compare.ts` (+tests). New-experiment sheet; "Run it now" calls /api/experiments/run (needs OPENAI_API_KEY). Next: Human labelling queue, Dashboards+Widgets, Automations, Alerts views.
+
+## 2026-10-19 — Human review deck
+Human labelling (annotation-queues and human-annotation routes) is now a review deck: one trace at a time, question and answer side by side, label with keys 1-4 (Good / Needs work / Bad / Unsure), notes, Enter saves and pulls the next; sidebar has progress, counts, up-next, add-a-trace, agreement; "Reviewed" tab lists history. Backend: submitReview now copies label/notes onto the item (agreement never worked before), new `annotations.release` ("Give back"); tests in convex/annotations.test.ts. Logic `src/lib/review-utils.ts`. Needs Convex redeploy. Next: Dashboards+Widgets, Automations, Alerts views.
+
+## Dashboards and widgets canvas (PR #237)
+- Dashboards page is now a canvas of widgets (8 catalog widgets in `src/lib/widget-utils.ts`), with edit mode (move/remove) and a widget library drawer; widgets page shows the same library. Data comes from the existing traces and stats APIs, no new backend.
+- Charts are pixel-sized SVGs (`useWidth`), one axis, hover tooltips, red only for failures.
+
+## 2026-10-19 — Automations (rule sentences)
+Automations page is a list of "when X then Y" rules drawn as trigger node -> arrow -> action node, with a pause switch, inline edit sentence and two-step delete; new rules are written as one sentence. Backend: `automations.update/setActive/remove`, https/owner-repo destination checks, tests in convex/automations.test.ts. Needs Convex redeploy. (Delivery now built, see next entry.)
+
+## 2026-10-19 — Alert tags, saved views, and automations that actually send
+- Alerts: status filters existed; added tags (`alertRules.setTags`, up to 8 per rule, inline editor, tag filter chips) and saved views (name + status/tag/search combo, stored in the browser's localStorage, so per browser not per team).
+- Automations now fire: `convex/automationRuntime.ts` (`dispatch`, `buildDelivery`). Triggers: run.failed (scheduled from run ingestion, 1 per minute per rule), alert.created and cost.threshold (from the alert rule and budget checks). Actions: webhook, Slack, GitHub workflow (needs server env AUTOMATIONS_GITHUB_TOKEN). Each rule records last result/count, shown on the page. Private/internal addresses refused. Needs Convex redeploy. Email as an automation action is not built (alert rules already email).

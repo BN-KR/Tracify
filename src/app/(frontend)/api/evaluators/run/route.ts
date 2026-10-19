@@ -1,37 +1,9 @@
 import { NextRequest } from "next/server";
 import { api } from "convex/_generated/api";
 import { getAuthedConvexClient } from "@/lib/convex-server";
+import { runCodeRule } from "@/lib/evaluator-rules";
 
 type Body = { projectId: string; evaluatorId: string; traceId: string; output: string; expectedOutput?: string };
-
-function codeScore(criteria: string, output: string, expectedOutput?: string) {
-  const rule = criteria.toLowerCase();
-  if (rule.includes("contains:")) {
-    const needle = criteria.slice(criteria.toLowerCase().indexOf("contains:") + 9).trim();
-    return output.toLowerCase().includes(needle.toLowerCase()) ? 1 : 0;
-  }
-  if (rule.includes("equals_expected")) return expectedOutput !== undefined && output.trim() === expectedOutput.trim() ? 1 : 0;
-  if (rule.includes("exact_match")) return expectedOutput !== undefined && output.trim() === expectedOutput.trim() ? 1 : 0;
-  if (rule.includes("not_empty")) return output.trim() ? 1 : 0;
-  if (rule.includes("regex:")) {
-    const source = criteria.slice(criteria.toLowerCase().indexOf("regex:") + 6).trim();
-    const match = source.match(/^\/(.*)\/([gimsuy]*)$/);
-    const expression = match ? new RegExp(match[1], match[2]) : new RegExp(source);
-    return expression.test(output) ? 1 : 0;
-  }
-  if (rule.includes("json_valid")) {
-    try { JSON.parse(output); return 1; } catch { return 0; }
-  }
-  if (rule.includes("json_schema:")) {
-    try {
-      const schema = JSON.parse(criteria.slice(criteria.toLowerCase().indexOf("json_schema:") + 12).trim()) as { required?: string[]; type?: string };
-      const parsed = JSON.parse(output) as Record<string, unknown>;
-      if (schema.type === "object" && (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))) return 0;
-      return (schema.required ?? []).every((key) => Object.prototype.hasOwnProperty.call(parsed, key)) ? 1 : 0;
-    } catch { return 0; }
-  }
-  throw new Error("Unsupported code rule. Use contains:<text>, equals_expected, not_empty, or json_valid.");
-}
 
 export async function POST(request: NextRequest) {
   let body: Body;
@@ -54,7 +26,7 @@ export async function POST(request: NextRequest) {
   if (!evaluator) return Response.json({ error: "Evaluator not found or inactive" }, { status: 404 });
   let value: number;
   if (evaluator.type === "code") {
-    try { value = codeScore(evaluator.criteria, body.output, body.expectedOutput); } catch (error) { return Response.json({ error: error instanceof Error ? error.message : "Code evaluator failed" }, { status: 422 }); }
+    try { value = runCodeRule(evaluator.criteria, body.output, body.expectedOutput); } catch (error) { return Response.json({ error: error instanceof Error ? error.message : "Code evaluator failed" }, { status: 422 }); }
   } else {
     const key = process.env.OPENAI_API_KEY;
     if (!key) return Response.json({ error: "OPENAI_API_KEY is required for LLM-as-a-judge evaluators" }, { status: 503 });

@@ -146,6 +146,7 @@ export default defineSchema({
     threshold: v.number(),
     windowMinutes: v.number(),
     environment: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
     emailTo: v.array(v.string()),
     slackUrl: v.optional(v.string()),
     webhookUrl: v.optional(v.string()),
@@ -168,6 +169,10 @@ export default defineSchema({
     actionType: v.string(),
     destination: v.string(),
     active: v.boolean(),
+    lastFiredAt: v.optional(v.number()),
+    lastStatus: v.optional(v.union(v.literal("ok"), v.literal("failed"))),
+    lastError: v.optional(v.string()),
+    fireCount: v.optional(v.number()),
     createdBy: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -372,6 +377,8 @@ export default defineSchema({
     variables: v.array(v.string()),
     labels: v.array(v.string()),
     model: v.optional(v.string()),
+    /** A short note on what changed in this version, like a commit message. */
+    commitMessage: v.optional(v.string()),
     createdBy: v.string(),
     createdAt: v.number(),
   })

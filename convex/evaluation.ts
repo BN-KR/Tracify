@@ -110,14 +110,17 @@ export const setDatasetAccess = mutation({
   },
 });
 
+const MAX_SCORES_SHOWN = 1000;
+
 export const listScores = query({
-  args: { projectId: v.id("projects") },
-  handler: async (ctx, { projectId }) => {
+  args: { projectId: v.id("projects"), limit: v.optional(v.number()) },
+  handler: async (ctx, { projectId, limit }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
     const project = await ctx.db.get(projectId);
     if (!project || !canAccess(project, identity)) return [];
-    return ctx.db.query("scores").withIndex("by_projectId", (q) => q.eq("projectId", projectId)).order("desc").take(100);
+    const count = Math.min(Math.max(Math.floor(limit ?? 100), 1), MAX_SCORES_SHOWN);
+    return ctx.db.query("scores").withIndex("by_projectId", (q) => q.eq("projectId", projectId)).order("desc").take(count);
   },
 });
 
@@ -176,8 +179,17 @@ export const createScore = mutation({
   },
   handler: async (ctx, args) => {
     const { identity } = await requireProject(ctx, args.projectId);
-    if (!args.traceId && !args.spanId) throw new Error("Attach the score to a trace or span");
-    if (!args.name.trim()) throw new Error("Score name is required");
-    return ctx.db.insert("scores", { ...args, name: args.name.trim(), comment: args.comment?.trim() || undefined, createdBy: identity.subject, createdAt: Date.now() });
+    const name = args.name.trim();
+    const traceId = args.traceId?.trim() || undefined;
+    const spanId = args.spanId?.trim() || undefined;
+    if (!traceId && !spanId) throw new Error("Attach the score to a trace or span");
+    if (!name) throw new Error("Score name is required");
+    if (name.length > 100) throw new Error("A score name can be at most 100 characters");
+    if ((traceId?.length ?? 0) > 200 || (spanId?.length ?? 0) > 200) throw new Error("That trace or span id is too long");
+    if ((args.comment?.length ?? 0) > 4000) throw new Error("The comment is too long");
+    if (args.dataType === "numeric" && (typeof args.value !== "number" || !Number.isFinite(args.value))) throw new Error("A numeric score needs a number");
+    if (args.dataType === "boolean" && typeof args.value !== "boolean") throw new Error("A boolean score is true or false");
+    if ((args.dataType === "categorical" || args.dataType === "text") && (typeof args.value !== "string" || !args.value.trim() || args.value.length > 1000)) throw new Error("A text or category score needs a value of up to 1,000 characters");
+    return ctx.db.insert("scores", { ...args, name, traceId, spanId, comment: args.comment?.trim() || undefined, createdBy: identity.subject, createdAt: Date.now() });
   },
 });

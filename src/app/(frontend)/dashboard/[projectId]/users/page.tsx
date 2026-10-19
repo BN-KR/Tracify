@@ -1,6 +1,16 @@
-import { LiveCapturedUsers } from "@/components/dashboard/live-captured-users";
+import { GroupExplorer } from "@/components/dashboard/groups/group-explorer";
 
-export default async function UsersPage({ params }: { params: Promise<{ projectId: string }> }) {
+export default async function UsersPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ projectId: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { projectId } = await params;
-  return <LiveCapturedUsers projectId={projectId} />;
+  const raw = await searchParams;
+  const initialQuery = Object.fromEntries(
+    Object.entries(raw).flatMap(([key, value]) => (typeof value === "string" && value ? [[key, value.slice(0, key === "q" || key === "id" ? 200 : 4096)]] : [])),
+  );
+  return <GroupExplorer projectId={projectId} kind="user" initialQuery={initialQuery} />;
 }

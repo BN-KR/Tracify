@@ -156,6 +156,24 @@ export const setEnabled = mutation({
   },
 });
 
+/** Short labels used to group and filter rules: lowercase, no spaces, up to 8 tags of 24 characters. */
+export function cleanTags(raw: string[]) {
+  const tags = raw.map((tag) => tag.trim().toLowerCase().replace(/\s+/g, "-").slice(0, 24)).filter(Boolean);
+  return [...new Set(tags)].slice(0, 8);
+}
+
+export const setTags = mutation({
+  args: { ruleId: v.id("alertRules"), tags: v.array(v.string()) },
+  handler: async (ctx, { ruleId, tags }) => {
+    const rule = await ctx.db.get(ruleId);
+    if (!rule) throw new Error("Rule not found");
+    await requireProject(ctx, rule.projectId);
+    const clean = cleanTags(tags);
+    await ctx.db.patch(ruleId, { tags: clean, updatedAt: Date.now() });
+    return clean;
+  },
+});
+
 export const remove = mutation({
   args: { ruleId: v.id("alertRules") },
   handler: async (ctx, { ruleId }) => {
@@ -227,6 +245,9 @@ export const checkAll = internalAction({
           }));
         }
         await Promise.all(sends);
+        const data = { ruleId, metric: result.metric, value: result.value, threshold: result.threshold };
+        await ctx.runAction(internal.automationRuntime.dispatch, { projectId: result.projectId as Id<"projects">, source: "alert.created", title: result.name, message: result.message, data });
+        if (result.metric === "cost_usd") await ctx.runAction(internal.automationRuntime.dispatch, { projectId: result.projectId as Id<"projects">, source: "cost.threshold", title: result.name, message: result.message, data });
       } catch (error) {
         console.error("[alerts] rule check failed", ruleId, error);
       }

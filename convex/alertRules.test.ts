@@ -80,3 +80,13 @@ test("Slack and webhook destinations are validated, hidden from the page and ret
   await addRuns(t, projectId as never, "failed", 3);
   expect(await t.mutation(internal.alertRules.evaluate, { ruleId })).toMatchObject({ fired: true, emailTo: [], slackUrl, webhookUrl: "https://hooks.example.com/tracify" });
 });
+
+test("tags are cleaned, capped and limited to the project", async () => {
+  const { projectId, owner, outsider } = await setup();
+  const ruleId = await owner.mutation(api.alertRules.create, { projectId, ...rule });
+  const tags = await owner.mutation(api.alertRules.setTags, { ruleId, tags: [" Prod ", "prod", "on call", "", "x".repeat(40)] });
+  expect(tags).toEqual(["prod", "on-call", "x".repeat(24)]);
+  await expect(outsider.mutation(api.alertRules.setTags, { ruleId, tags: ["a"] })).rejects.toThrow();
+  const overview = await owner.query(api.alertRules.overview, { projectId });
+  expect(overview?.rules[0].tags).toEqual(tags);
+});
