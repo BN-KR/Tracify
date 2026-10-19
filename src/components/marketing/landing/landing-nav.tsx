@@ -7,6 +7,7 @@ import { ArrowRight, ArrowUpRight, Menu, X } from "lucide-react";
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "framer-motion";
 import { TracifyMark } from "@/components/brand/tracify-mark";
 import { authClient } from "@/lib/auth-client";
+import { DitherEmber } from "./dither-ember";
 
 const art = "[image-rendering:pixelated]";
 
@@ -163,12 +164,13 @@ export function LandingNav({ solidAlways = false }: { solidAlways?: boolean }) {
               animate={{ clipPath: "inset(0 0 0% 0)" }}
               exit={{ clipPath: "inset(0 0 100% 0)" }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="hidden border-b border-white/15 bg-[#090909] text-[#eceae3] lg:block"
+              className="relative hidden overflow-hidden border-b border-white/15 bg-[#090909] text-[#eceae3] lg:block"
             >
-              <div className="mx-auto grid max-w-[1440px] grid-cols-[1.2fr_1fr] gap-8 px-8 py-8">
+              <DitherEmber />
+              <div className="relative mx-auto grid max-w-[1440px] grid-cols-[1.2fr_1fr] gap-8 px-8 py-8">
                 <motion.ul key={active} className="grid grid-cols-2 gap-px bg-white/10" initial="hide" animate="show" variants={{ show: { transition: { staggerChildren: 0.05 } } }}>
                   {menu.links.map(([t, b, href], i) => (
-                    <motion.li key={href} variants={{ hide: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }} className="bg-[#090909]">
+                    <motion.li key={href} variants={{ hide: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }} className="bg-[#090909]/55">
                       <Link href={href} onClick={() => setActive(null)} className="group flex h-full flex-col justify-between gap-6 p-5 transition-colors hover:bg-[#f4d44d] hover:text-black">
                         <span className="flex items-center justify-between font-mono text-[10px] text-white/40 group-hover:text-black/60">
                           0{i + 1}
@@ -216,7 +218,8 @@ export function LandingNav({ solidAlways = false }: { solidAlways?: boolean }) {
             aria-modal="true"
             aria-label="Menu"
           >
-            <Image src="/images/landing/nav-tunnel.png" alt="" fill unoptimized sizes="100vw" className={`object-cover opacity-30 ${art}`} />
+            <Image src="/images/landing/nav-tunnel.png" alt="" fill unoptimized sizes="100vw" className={`object-cover opacity-20 ${art}`} />
+            <DitherEmber className="!opacity-25" />
             <div className="relative flex min-h-full flex-col px-5 pb-10">
               <div className="flex h-[64px] items-center justify-between">
                 <Logo />
