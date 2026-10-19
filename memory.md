@@ -2282,3 +2282,6 @@ Scores page rebuilt as its own report layout (trend hero, distribution, sources,
 
 ## 2026-10-19 — Evaluators board
 Evaluators page is now a three-column board (Live / Manual only / Off) with pass-rate rings; detail opens as a right overlay with failing examples first. Next: Prompts editor, Playground bench, Sessions inbox, Users cards.
+
+## 2026-10-19 — Prompts editor layout
+Prompts page is now an IDE-style view: prompt rail on the left, release pipeline (development → staging → production, with roll back) on top, version history timeline plus line-numbered text/compare/usage/test on the right. Next: Playground bench, Sessions inbox, Users cards.

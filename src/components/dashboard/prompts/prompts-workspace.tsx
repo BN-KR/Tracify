@@ -41,7 +41,7 @@ export function PromptsWorkspace({ projectId, initialQuery }: { projectId: strin
   const [now, setNow] = useState(() => Date.now());
   const searchRef = useRef<HTMLInputElement>(null);
   const selected = prompts?.find((prompt) => prompt._id === query.prompt) ?? null;
-  const tab: Tab = (TABS as readonly string[]).includes(query.tab) ? (query.tab as Tab) : "versions";
+  const tab: Tab = (TABS as readonly string[]).includes(query.tab) ? (query.tab as Tab) : "text";
   const usage = useQuery(api.prompts.versionUsage, selected && tab === "usage" ? { projectId: typedProjectId, promptId: selected._id } : "skip");
   const links = useQuery(api.prompts.listTraceLinks, selected && tab === "usage" ? { projectId: typedProjectId } : "skip");
 
@@ -91,7 +91,6 @@ export function PromptsWorkspace({ projectId, initialQuery }: { projectId: strin
   }
 
   const takenNames = (prompts ?? []).map((prompt) => prompt.name);
-  const panelOpen = Boolean(editor || selected);
 
   return (
     <div className="flex min-h-svh min-w-0 flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
@@ -112,64 +111,59 @@ export function PromptsWorkspace({ projectId, initialQuery }: { projectId: strin
           <button type="button" onClick={() => { setDraft(""); update({ q: "" }); }} aria-label={`Remove filter ${query.q}`} className="flex items-center gap-1 rounded border border-[#3A3420] bg-[#1A170C] px-2 py-0.5 font-mono text-[11px] text-[#F4D44D]">“{query.q}” ×</button>
         </div>
       ) : null}
-      <section aria-label="Summary" className="grid grid-cols-3 gap-px border-b border-[#1F242C] bg-[#1F242C]">
-        {[["Prompts", stats.prompts], ["Versions saved", stats.versions], ["In production", stats.production]].map(([label, value]) => (
-          <div key={label} className="bg-[#0B0D10] px-4 py-2.5"><div className="font-mono text-[10px] uppercase tracking-wider text-[#6B7380]">{label}</div><div className="mt-0.5 font-mono text-base">{prompts === undefined ? "–" : value}</div></div>
-        ))}
-      </section>
-      <div className={`grid min-h-0 flex-1 ${panelOpen ? "lg:grid-cols-[minmax(0,1fr)_minmax(420px,48%)]" : "grid-cols-1"}`}>
-        <main className={`min-w-0 overflow-auto ${panelOpen ? "hidden lg:block" : ""}`}>
+      <div className="relative grid min-h-0 flex-1 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <nav aria-label="Prompts" className={`min-h-0 overflow-auto border-r border-[#1F242C] bg-[#0D1014] ${selected ? "hidden lg:block" : ""}`}>
           {prompts === undefined ? (
-            <div className="grid gap-px p-4" role="status" aria-label="Loading prompts">{Array.from({ length: 5 }, (_, index) => <div key={index} className="h-10 animate-pulse rounded bg-[#11151A]" />)}</div>
-          ) : !prompts.length ? (
+            <div className="grid gap-1 p-2" role="status" aria-label="Loading prompts">{Array.from({ length: 6 }, (_, index) => <div key={index} className="h-12 animate-pulse rounded bg-[#11151A]" />)}</div>
+          ) : !prompts.length ? <p className="p-4 text-xs text-[#6B7380]">No prompts yet.</p>
+          : !rows.length ? <p className="p-4 text-xs text-[#8B93A1]">No prompts match “{query.q}”. <button type="button" onClick={() => { setDraft(""); update({ q: "" }); }} className="text-[#8AB4FF] underline">Clear search</button></p>
+          : (
+            <ul className="grid gap-px p-2">
+              {rows.map((prompt) => {
+                const newest = prompt.versions[0];
+                const live = prompt.versions.find((version) => version.labels.includes("production"));
+                const active = prompt._id === query.prompt;
+                return (
+                  <li key={prompt._id}>
+                    <button type="button" aria-current={active} onClick={() => update({ prompt: prompt._id, tab: "" })} className={`w-full rounded px-2.5 py-2 text-left ${active ? "bg-[#161B21] shadow-[inset_2px_0_0_#F4D44D]" : "hover:bg-[#11151A]"}`}>
+                      <span className="flex items-center gap-2"><span className={`size-1.5 shrink-0 rounded-full ${live ? "bg-[#5BE3A0]" : "bg-[#3A424E]"}`} title={live ? `Production runs v${live.version}` : "Not in production"} /><span className="min-w-0 flex-1 truncate font-mono text-xs font-medium">{prompt.name}</span><span className="font-mono text-[10px] text-[#6B7380]">v{newest?.version ?? 0}</span></span>
+                      <span className="mt-0.5 block truncate pl-3.5 text-[11px] text-[#6B7380]">{prompt.description || ago(prompt.updatedAt, now)}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </nav>
+        <main className={`min-h-0 min-w-0 ${selected ? "" : "hidden lg:block"}`}>
+          {prompts !== undefined && !prompts.length ? (
             <div className="mx-auto max-w-md p-10 text-center">
               <h2 className="text-sm font-semibold">Keep your prompts out of your code</h2>
-              <p className="mt-2 text-xs leading-5 text-[#8B93A1]">Save a prompt here, give each version a label like “staging”, and fetch it by name from your app. Change the text without a deploy, compare versions, and see which traces used which version.</p>
+              <p className="mt-2 text-xs leading-5 text-[#8B93A1]">Save a prompt here, move it from development to staging to production, and fetch it by name from your app. Change the text without a deploy, compare versions, and see which traces used which version.</p>
               <button type="button" onClick={() => setEditor({ mode: "prompt", initial: {} })} className="mt-4 h-8 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909]">Create your first prompt</button>
             </div>
-          ) : !rows.length ? (
-            <div className="p-10 text-center text-xs text-[#8B93A1]">No prompts match “{query.q}”. <button type="button" onClick={() => { setDraft(""); update({ q: "" }); }} className="text-[#8AB4FF] underline">Clear search</button></div>
-          ) : (
-            <table className="w-full border-collapse text-left">
-              <thead className="sticky top-0 bg-[#0B0D10] text-[10px] uppercase tracking-wider text-[#6B7380]"><tr><th className="px-4 py-2 font-medium">Name</th><th className="px-2 py-2 font-medium">Version</th><th className="px-2 py-2 font-medium">Labels</th><th className="hidden px-2 py-2 font-medium md:table-cell">Model</th><th className="px-4 py-2 text-right font-medium">Changed</th></tr></thead>
-              <tbody>
-                {rows.map((prompt) => {
-                  const newest = prompt.versions[0];
-                  // Each label belongs to one version, so show where it points: "production v2".
-                  const labels = prompt.versions.flatMap((version) => version.labels.filter((label) => label !== "latest").map((label) => ({ label, version: version.version })));
-                  const active = prompt._id === query.prompt;
-                  return (
-                    <tr key={prompt._id} onClick={() => update({ prompt: prompt._id })} className={`cursor-pointer border-t border-[#161B21] hover:bg-[#11151A] ${active ? "bg-[#11151A] shadow-[inset_2px_0_0_#F4D44D]" : ""}`}>
-                      <td className="max-w-[16rem] px-4 py-2"><button type="button" onClick={(event) => { event.stopPropagation(); update({ prompt: prompt._id }); }} className="block max-w-full truncate text-left font-mono text-xs font-medium hover:underline focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#F4D44D]" aria-current={active}>{prompt.name}</button>{prompt.description ? <div className="truncate text-[11px] text-[#6B7380]">{prompt.description}</div> : null}</td>
-                      <td className="px-2 py-2 font-mono text-xs">v{newest?.version ?? 0}</td>
-                      <td className="px-2 py-2"><div className="flex flex-wrap gap-1">{labels.length ? labels.map(({ label, version }) => <span key={label} className={`rounded border px-1.5 py-0.5 font-mono text-[10px] ${label === "production" ? "border-[#1F4D38] bg-[#0E1A14] text-[#5BE3A0]" : "border-[#262C35] text-[#C9CED6]"}`}>{label} <span className="text-[#6B7380]">v{version}</span></span>) : <span className="text-[11px] text-[#6B7380]">draft</span>}</div></td>
-                      <td className="hidden px-2 py-2 font-mono text-[11px] text-[#8B93A1] md:table-cell">{newest?.model ?? "–"}</td>
-                      <td className="whitespace-nowrap px-4 py-2 text-right font-mono text-[11px] text-[#8B93A1]" title={new Date(prompt.updatedAt).toLocaleString()}>{ago(prompt.updatedAt, now)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
+          ) : selected ? (
+            <PromptDetail
+              key={selected._id}
+              projectId={projectId}
+              prompt={selected}
+              tab={tab}
+              onTab={(next) => update({ tab: next === "text" ? "" : next })}
+              usage={usage}
+              links={links}
+              onNewVersion={(from: PromptVersion) => setEditor({ mode: "version", initial: { content: from.content, model: from.model ?? "" } })}
+              onClose={() => update({ prompt: "", tab: "" })}
+              onSetLabels={async (version, labels) => { await updateLabels({ projectId: typedProjectId, versionId: version._id, labels }); }}
+              onSaveDetails={async (name, description) => { await updatePrompt({ projectId: typedProjectId, promptId: selected._id, name, description }); }}
+            />
+          ) : prompts !== undefined ? (
+            <div className="mx-auto max-w-sm p-10 text-center text-xs leading-5 text-[#8B93A1]"><p className="text-sm font-semibold text-[#E6E9EE]">Pick a prompt</p><p className="mt-1">{stats.prompts} prompts, {stats.versions} versions saved, {stats.production} running in production.</p></div>
+          ) : null}
         </main>
         {editor ? (
-          <aside className="flex min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10]">
+          <aside className="absolute inset-y-0 right-0 z-20 flex w-full max-w-[520px] min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10] shadow-[-24px_0_48px_rgba(0,0,0,0.5)]">
             <PromptEditor key={`${editor.mode}-${editor.initial.content?.length ?? 0}-${selected?._id ?? ""}`} mode={editor.mode} initial={editor.initial} takenNames={takenNames} onCancel={() => setEditor(null)} onSave={save} />
           </aside>
-        ) : selected ? (
-          <PromptDetail
-            key={selected._id}
-            projectId={projectId}
-            prompt={selected}
-            tab={tab}
-            onTab={(next) => update({ tab: next === "versions" ? "" : next })}
-            usage={usage}
-            links={links}
-            onNewVersion={(from: PromptVersion) => setEditor({ mode: "version", initial: { content: from.content, model: from.model ?? "" } })}
-            onClose={() => update({ prompt: "", tab: "" })}
-            onSetLabels={async (version, labels) => { await updateLabels({ projectId: typedProjectId, versionId: version._id, labels }); }}
-            onSaveDetails={async (name, description) => { await updatePrompt({ projectId: typedProjectId, promptId: selected._id, name, description }); }}
-          />
         ) : null}
       </div>
       {query.prompt && prompts && !selected && !editor ? (

@@ -11,9 +11,9 @@ export type PromptVersion = PromptRow["versions"][number];
 export type VersionUsage = FunctionReturnType<typeof api.prompts.versionUsage>[number];
 type TraceLink = FunctionReturnType<typeof api.prompts.listTraceLinks>[number];
 
-export const TABS = ["versions", "compare", "usage", "test"] as const;
+export const TABS = ["text", "compare", "usage", "test"] as const;
 export type Tab = (typeof TABS)[number];
-const TAB_TEXT: Record<Tab, string> = { versions: "Versions", compare: "Compare", usage: "Usage", test: "Test" };
+const TAB_TEXT: Record<Tab, string> = { text: "Text", compare: "Compare", usage: "Usage", test: "Test" };
 const chip = "rounded border px-1.5 py-0.5 font-mono text-[10px]";
 const labelTone = (label: string) => label === "production" ? `${chip} border-[#1F4D38] bg-[#0E1A14] text-[#5BE3A0]` : label === "latest" ? `${chip} border-[#3A3420] bg-[#1A170C] text-[#F4D44D]` : `${chip} border-[#262C35] text-[#C9CED6]`;
 
@@ -41,8 +41,14 @@ export function PromptDetail({ projectId, prompt, tab, onTab, usage, links, onNe
     }
   }
 
+  const [pick, setPick] = useState<string | null>(null);
+  const current = prompt.versions.find((version) => version._id === pick) ?? newest;
+  const holder = (label: string) => prompt.versions.find((version) => version.labels.includes(label));
+  const point = (label: string, version: PromptVersion) => run(() => onSetLabels(version, [...version.labels.filter((item) => item !== label), label]), `“${label}” now points at version ${version.version}.`);
+  const drop = (label: string, version: PromptVersion) => run(() => onSetLabels(version, version.labels.filter((item) => item !== label)), `Removed “${label}” from version ${version.version}.`);
+
   return (
-    <aside className="flex min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10]" aria-label={`Prompt ${prompt.name}`}>
+    <section className="flex min-h-0 min-w-0 flex-col" aria-label={`Prompt ${prompt.name}`}>
       <div className="flex items-start gap-2 border-b border-[#1F242C] px-4 py-3">
         <div className="min-w-0 flex-1">
           {editing ? (
@@ -58,60 +64,80 @@ export function PromptDetail({ projectId, prompt, tab, onTab, usage, links, onNe
             </>
           )}
         </div>
-        <button type="button" onClick={() => onNewVersion(newest)} className="h-7 shrink-0 rounded bg-[#F4D44D] px-2.5 text-xs font-medium text-[#090909] hover:bg-[#f7de70]">New version</button>
-        <button type="button" onClick={onClose} aria-label="Close panel" className="h-7 shrink-0 rounded border border-[#262C35] px-2 text-xs text-[#C9CED6] hover:text-white">Close</button>
+        <button type="button" onClick={() => onNewVersion(current)} className="h-7 shrink-0 rounded bg-[#F4D44D] px-2.5 text-xs font-medium text-[#090909] hover:bg-[#f7de70]">New version</button>
+        <button type="button" onClick={onClose} aria-label="Close prompt" className="h-7 shrink-0 rounded border border-[#262C35] px-2 text-xs text-[#C9CED6] hover:text-white">Close</button>
       </div>
-      <div role="tablist" aria-label="Prompt sections" className="flex gap-1 border-b border-[#1F242C] px-3">
-        {TABS.map((id) => (
-          <button key={id} role="tab" id={`tab-${id}`} aria-selected={tab === id} aria-controls={`panel-${id}`} onClick={() => onTab(id)} className={`h-9 border-b-2 px-2.5 text-xs ${tab === id ? "border-[#F4D44D] text-white" : "border-transparent text-[#8B93A1] hover:text-white"}`}>{TAB_TEXT[id]}</button>
-        ))}
+      <div aria-label="Release pipeline" className="grid gap-px border-b border-[#1F242C] bg-[#1F242C] md:grid-cols-3">
+        {(["development", "staging", "production"] as const).map((label, index) => {
+          const version = holder(label);
+          const production = label === "production";
+          return (
+            <div key={label} className="bg-[#0B0D10] px-4 py-3">
+              <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-[#6B7380]"><span className={`size-1.5 rounded-full ${production ? "bg-[#5BE3A0]" : label === "staging" ? "bg-[#F4D44D]" : "bg-[#6B7380]"}`} />{label}{index < 2 ? <span aria-hidden className="ml-auto text-[#3A424E]">→</span> : null}</div>
+              <div className="mt-1.5 font-mono text-lg">{version ? `v${version.version}` : "–"}</div>
+              <div className="mt-1 text-[11px] text-[#6B7380]">{version ? (version.commitMessage ?? when(version.createdAt)) : "Nothing here yet"}</div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {production ? (
+                  version ? <button type="button" onClick={() => drop("production", version)} className="h-6 rounded border border-[#5B2B2B] px-2 text-[11px] text-[#FF8A8A]" title="Take production off this version, for example to roll back">Roll back</button>
+                    : <span className="text-[11px] text-[#6B7380]">Needs a passed release gate</span>
+                ) : current && !current.labels.includes(label) ? <button type="button" onClick={() => point(label, current)} className="h-6 rounded border border-[#262C35] px-2 text-[11px] text-[#C9CED6] hover:text-white">Point at v{current.version}</button> : <span className="text-[11px] text-[#6B7380]">Viewing this version</span>}
+              </div>
+            </div>
+          );
+        })}
       </div>
       {notice ? <p role={notice.tone === "error" ? "alert" : "status"} className={`mx-4 mt-3 rounded border px-3 py-2 text-xs ${notice.tone === "error" ? "border-[#5B2B2B] bg-[#1A1010] text-[#FF8A8A]" : "border-[#1F4D38] bg-[#0E1A14] text-[#5BE3A0]"}`}>{notice.text}</p> : null}
-      <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="min-h-0 flex-1 overflow-auto p-4">
-        {tab === "versions" ? <Versions prompt={prompt} onNewVersion={onNewVersion} onSetLabels={(version, labels, done) => run(() => onSetLabels(version, labels), done)} /> : null}
-        {tab === "compare" ? <Compare versions={prompt.versions} /> : null}
-        {tab === "usage" ? <Usage projectId={projectId} versions={prompt.versions} usage={usage} links={links} /> : null}
-        {tab === "test" ? <Test projectId={projectId} prompt={prompt} /> : null}
+      <div className="grid min-h-0 flex-1 md:grid-cols-[210px_minmax(0,1fr)]">
+        <nav aria-label="Version history" className="min-h-0 overflow-auto border-b border-[#1F242C] p-2 md:border-b-0 md:border-r">
+          <ol className="grid gap-1">
+            {prompt.versions.map((version) => (
+              <li key={version._id}>
+                <button type="button" aria-current={current?._id === version._id} onClick={() => setPick(version._id)} className={`w-full rounded px-2.5 py-2 text-left ${current?._id === version._id ? "bg-[#161B21] shadow-[inset_2px_0_0_#F4D44D]" : "hover:bg-[#11151A]"}`}>
+                  <span className="flex flex-wrap items-center gap-1"><span className="font-mono text-xs font-semibold">v{version.version}</span>{version.labels.filter((label) => label !== "latest").map((label) => <span key={label} className={labelTone(label)}>{label}</span>)}</span>
+                  <span className="mt-0.5 block truncate text-[11px] text-[#8B93A1]">{version.commitMessage ?? "No message"}</span>
+                  <span className="block font-mono text-[10px] text-[#6B7380]">{when(version.createdAt)}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </nav>
+        <div className="flex min-h-0 min-w-0 flex-col">
+          <div role="tablist" aria-label="Prompt sections" className="flex gap-1 border-b border-[#1F242C] px-3">
+            {TABS.map((id) => (
+              <button key={id} role="tab" id={`tab-${id}`} aria-selected={tab === id} aria-controls={`panel-${id}`} onClick={() => onTab(id)} className={`h-9 border-b-2 px-2.5 text-xs ${tab === id ? "border-[#F4D44D] text-white" : "border-transparent text-[#8B93A1] hover:text-white"}`}>{TAB_TEXT[id]}</button>
+            ))}
+          </div>
+          <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="min-h-0 flex-1 overflow-auto p-4">
+            {tab === "text" && current ? <TextView version={current} onNewVersion={onNewVersion} /> : null}
+            {tab === "compare" ? <Compare versions={prompt.versions} /> : null}
+            {tab === "usage" ? <Usage projectId={projectId} versions={prompt.versions} usage={usage} links={links} /> : null}
+            {tab === "test" ? <Test projectId={projectId} prompt={prompt} /> : null}
+          </div>
+        </div>
       </div>
-    </aside>
+    </section>
   );
 }
 
-function Versions({ prompt, onNewVersion, onSetLabels }: { prompt: PromptRow; onNewVersion: (version: PromptVersion) => void; onSetLabels: (version: PromptVersion, labels: string[], done: string) => void }) {
-  const [open, setOpen] = useState<string | null>(null);
+function TextView({ version, onNewVersion }: { version: PromptVersion; onNewVersion: (version: PromptVersion) => void }) {
+  const lines = version.content.split("\n");
   return (
-    <div className="grid gap-2">
-      <p className="text-[11px] text-[#6B7380]">Newest first. A saved version never changes; edit it to make the next one. Each label points at one version, so giving “staging” to another version moves it.</p>
-      {prompt.versions.map((version) => {
-        const expanded = open === version._id;
-        const toggle = (label: string) => onSetLabels(version, version.labels.includes(label) ? version.labels.filter((item) => item !== label) : [...version.labels, label], version.labels.includes(label) ? `Removed “${label}” from version ${version.version}.` : `“${label}” now points at version ${version.version}.`);
-        return (
-          <article key={version._id} className="rounded border border-[#1F242C] bg-[#0E1115]">
-            <div className="flex flex-wrap items-center gap-2 px-3 py-2">
-              <span className="font-mono text-xs font-semibold">v{version.version}</span>
-              {version.labels.map((label) => <span key={label} className={labelTone(label)}>{label}</span>)}
-              <span className="ml-auto font-mono text-[10px] text-[#6B7380]">{when(version.createdAt)}</span>
-            </div>
-            {version.commitMessage ? <p className="px-3 pb-1 text-xs text-[#C9CED6]">{version.commitMessage}</p> : null}
-            <p className="px-3 pb-2 font-mono text-[10px] text-[#6B7380]">{version.model ? `${version.model} · ` : ""}{version.variables.length ? version.variables.map((name) => `{{${name}}}`).join(" ") : "no variables"}</p>
-            <pre className={`mx-3 mb-2 overflow-auto whitespace-pre-wrap rounded bg-[#0B0D10] p-2.5 font-mono text-[11px] leading-5 text-[#C9CED6] ${expanded ? "max-h-[28rem]" : "max-h-20"}`}>{version.content}</pre>
-            <div className="flex flex-wrap items-center gap-1.5 border-t border-[#1F242C] px-3 py-2">
-              <button type="button" onClick={() => setOpen(expanded ? null : version._id)} className="h-7 rounded border border-[#262C35] px-2 text-[11px] text-[#C9CED6] hover:text-white">{expanded ? "Show less" : "Show all"}</button>
-              <button type="button" onClick={() => void navigator.clipboard?.writeText(version.content)} className="h-7 rounded border border-[#262C35] px-2 text-[11px] text-[#C9CED6] hover:text-white">Copy text</button>
-              <button type="button" onClick={() => onNewVersion(version)} className="h-7 rounded border border-[#262C35] px-2 text-[11px] text-[#C9CED6] hover:text-white">Edit as new version</button>
-              <span className="mx-1 h-4 w-px bg-[#262C35]" />
-              {["development", "staging"].map((label) => (
-                <button key={label} type="button" aria-pressed={version.labels.includes(label)} onClick={() => toggle(label)} className={`h-7 rounded border px-2 font-mono text-[11px] ${version.labels.includes(label) ? "border-[#F4D44D] text-[#F4D44D]" : "border-[#262C35] text-[#C9CED6] hover:text-white"}`}>{label}</button>
-              ))}
-              {version.labels.includes("production") ? (
-                <button type="button" onClick={() => toggle("production")} className="h-7 rounded border border-[#5B2B2B] px-2 text-[11px] text-[#FF8A8A]" title="Take production off this version, for example to roll back">Remove production</button>
-              ) : (
-                <span className="text-[11px] text-[#6B7380]" title="Production is only given to a version that passed an evaluation release gate.">Production needs a passed release gate</span>
-              )}
-            </div>
-          </article>
-        );
-      })}
+    <div className="grid gap-3">
+      <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#8B93A1]">
+        <span className="font-mono text-xs font-semibold text-[#E6E9EE]">v{version.version}</span>
+        {version.model ? <span className="font-mono">{version.model}</span> : null}
+        {version.variables.map((name) => <span key={name} className="rounded border border-[#3A3420] bg-[#1A170C] px-1.5 py-0.5 font-mono text-[10px] text-[#F4D44D]">{`{{${name}}}`}</span>)}
+        {!version.variables.length ? <span>no variables</span> : null}
+        <span className="ml-auto flex gap-1.5">
+          <button type="button" onClick={() => void navigator.clipboard?.writeText(version.content)} className="h-7 rounded border border-[#262C35] px-2 text-[#C9CED6] hover:text-white">Copy text</button>
+          <button type="button" onClick={() => onNewVersion(version)} className="h-7 rounded border border-[#262C35] px-2 text-[#C9CED6] hover:text-white">Edit as new version</button>
+        </span>
+      </div>
+      <div className="overflow-auto rounded border border-[#1F242C] bg-[#0E1115] font-mono text-xs leading-5" role="table" aria-label="Prompt text">
+        {lines.map((line, index) => (
+          <div key={index} role="row" className="grid grid-cols-[2.5rem_1fr]"><span className="select-none pr-2 text-right text-[#4A5260]">{index + 1}</span><span className="whitespace-pre-wrap break-words pr-3 text-[#C9CED6]">{line.split(/(\{\{[^}]+\}\})/).map((part, i) => /^\{\{[^}]+\}\}$/.test(part) ? <mark key={i} className="bg-transparent text-[#F4D44D]">{part}</mark> : part)}{line === "" ? " " : null}</span></div>
+        ))}
+      </div>
     </div>
   );
 }
