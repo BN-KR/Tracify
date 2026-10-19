@@ -375,7 +375,7 @@ export function DashboardSidebar({
 
           {isSynthetic ? (
             <div className="captured-sidebar-context border-y border-white/10">
-              <Link href="/playground" className="captured-sidebar-context-link is-demo">↗ <span>Use Demo App</span></Link>
+              <Link href={DEMO_BASE_PATH} className="captured-sidebar-context-link is-demo">↗ <span>Use Demo App</span></Link>
               <a href={`${MARKETING_ORIGIN}/cloud`} className="captured-sidebar-context-link">⊞ <span>Your Orgs</span></a>
             </div>
           ) : null}

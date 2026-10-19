@@ -21,6 +21,10 @@ const nextConfig: NextConfig = {
   // incoming request are passed through and merged with `view=create`.
   async redirects() {
     return [
+      // The old /playground sandbox is gone; the demo project is the one demo.
+      { source: "/playground/:view(dashboards|explore|prompts|scores|evaluators|human-annotation|datasets|experiments|settings|alerts|costs|playground|sessions|tracing|users)", destination: "/demo/project/:view", permanent: false },
+      { source: "/playground/:path*", destination: "/demo/project", permanent: false },
+      { source: "/playground", destination: "/demo/project", permanent: false },
       {
         source: "/dashboard/:projectId/alerts/new",
         destination: "/dashboard/:projectId/alerts?view=create",

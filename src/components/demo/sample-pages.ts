@@ -20,11 +20,6 @@ export const SAMPLE_PAGES: Record<string, SamplePage> = {
     tables: [{ title: "Prompts", head: ["Prompt", "Live version", "Versions", "Runs (7 days)", "Last change"], right: [3], rows: [
       ["support-agent", "v18", "18", "2,150", "9 days ago"], ["refund-agent", "v18", "14", "292", "9 days ago"], ["order-status", "v17", "9", "390", "6 weeks ago"], ["onboarding-helper", "v17", "6", "260", "6 weeks ago"]] }],
   },
-  playground: {
-    title: "Playground", intro: "Try a prompt on a real run's input before you ship it.", cta: CTA,
-    tables: [{ title: "Recent playground runs", head: ["Prompt", "Model", "Input from", "Result"], rows: [
-      ["refund-agent v19 draft", "claude-sonnet-4-5", "A failed refund run", "Answered without the refund call"], ["support-agent v18", "gpt-4.1", "A billing question", "Same answer, 14% cheaper"], ["order-status v17", "gpt-4.1-mini", "A tracking question", "Answer correct"]] }],
-  },
   scores: {
     title: "Scores", intro: "Quality scores attached to runs, from people, rules and model judges.", cta: CTA,
     tables: [{ title: "Score definitions", head: ["Score", "Type", "Scored runs", "Average"], right: [2, 3], rows: [

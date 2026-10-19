@@ -7,6 +7,8 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { compilePrompt, estimateTokens, extractVariables, MAX_PLAYGROUND_MODELS, PLAYGROUND_MODELS } from "@/lib/prompt-utils";
 import { readJson } from "@/lib/safe-json";
+import { DEMO_PROMPTS, demoResults } from "@/lib/demo/playground-demo-data";
+import { DEMO_BASE_PATH } from "@/lib/demo/demo-config";
 import type { PlaygroundResult } from "@/app/(frontend)/api/playground/route";
 
 type Providers = { openai: boolean; anthropic: boolean };
@@ -16,15 +18,19 @@ const field = "w-full rounded border border-[#262C35] bg-[#0E1115] px-2.5 text-x
 const stamp = () => Date.now();
 const providerOf = (model: string) => (/^claude/i.test(model) ? "anthropic" : "openai");
 
-export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion }: { projectId: string; initialPrompt?: string; initialVersion?: number }) {
-  const prompts = useQuery(api.prompts.list, { projectId: projectId as Id<"projects"> });
+type SavedPrompt = { _id: string; name: string; versions: Array<{ _id: string; version?: number; content: string; model?: string; labels: string[] }> };
+
+/** `demo` runs the same screen on sample prompts and canned answers: nothing is saved, sent or billed. */
+export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion, demo = false }: { projectId: string; initialPrompt?: string; initialVersion?: number; demo?: boolean }) {
+  const livePrompts = useQuery(api.prompts.list, demo ? "skip" : { projectId: projectId as Id<"projects"> });
+  const prompts: SavedPrompt[] | undefined = demo ? DEMO_PROMPTS : livePrompts;
   const [source, setSource] = useState<string>("");
   const [text, setText] = useState(STARTER);
   const [values, setValues] = useState<Record<string, string>>({});
   const [models, setModels] = useState<string[]>(["gpt-4o-mini"]);
   const [custom, setCustom] = useState("");
   const [temperature, setTemperature] = useState(0.2);
-  const [providers, setProviders] = useState<Providers | null>(null);
+  const [providers, setProviders] = useState<Providers | null>(demo ? { openai: true, anthropic: true } : null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [runs, setRuns] = useState<Run[]>([]);
@@ -36,12 +42,13 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion }
   const compiled = useMemo(() => compilePrompt(text, values), [text, values]);
 
   useEffect(() => {
+    if (demo) return;
     let cancelled = false;
     fetch(`/api/playground?projectId=${encodeURIComponent(projectId)}`, { cache: "no-store" })
       .then(async (response) => { const body = await readJson<{ providers?: Providers }>(response); if (!cancelled) setProviders(response.ok && body.providers ? body.providers : { openai: false, anthropic: false }); })
       .catch(() => { if (!cancelled) setProviders({ openai: false, anthropic: false }); });
     return () => { cancelled = true; };
-  }, [projectId]);
+  }, [projectId, demo]);
 
   // ?prompt=name&version=3 opens a saved version once the prompt list has loaded.
   useEffect(() => {
@@ -86,6 +93,14 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion }
     if (blocker || running) return;
     setRunning(true); setError(null);
     try {
+      if (demo) {
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        const entry: Run = { id: ++counter.current, at: stamp(), source: source || "Unsaved prompt", text, models: [...models], temperature, results: demoResults(models, compiled.text) };
+        setRuns((current) => [entry, ...current].slice(0, 10));
+        setShown(entry.id);
+        setEditing(false);
+        return;
+      }
       const response = await fetch("/api/playground", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ projectId, prompt: text, variables: values, models, temperature }) });
       const body = await readJson<{ results?: PlaygroundResult[]; providers?: Providers }>(response);
       if (body.providers) setProviders(body.providers);
@@ -115,10 +130,11 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion }
         <label className="flex items-center gap-2 text-[11px] text-[#8B93A1]">Temp <span className="w-6 font-mono text-[#E6E9EE]">{temperature.toFixed(1)}</span>
           <input aria-label="Temperature" type="range" min={0} max={2} step={0.1} value={temperature} onChange={(event) => setTemperature(Number(event.target.value))} className="w-24 accent-[#F4D44D]" />
         </label>
-        <Link href={`/dashboard/${projectId}/prompts`} className="ml-auto h-7 rounded border border-[#262C35] px-2.5 text-xs leading-7 text-[#C9CED6] hover:text-white">Prompts</Link>
+        <Link href={demo ? `${DEMO_BASE_PATH}/prompts` : `/dashboard/${projectId}/prompts`} className="ml-auto h-7 rounded border border-[#262C35] px-2.5 text-xs leading-7 text-[#C9CED6] hover:text-white">Prompts</Link>
         <button type="button" onClick={run} disabled={Boolean(blocker) || running} className="h-8 rounded bg-[#F4D44D] px-5 text-xs font-medium text-[#090909] hover:bg-[#f7de70] disabled:cursor-not-allowed disabled:opacity-40">{running ? "Running…" : models.length > 1 ? `Run on ${models.length} models` : "Run"}</button>
       </header>
-      {notConnected ? (
+      {demo ? <div role="status" className="border-b border-[#3A3420] bg-[#1A170C] px-4 py-2 text-xs text-[#F4D44D]">Demo: edit the prompt, fill in values and run it. Answers here are samples, nothing is sent to a model. <Link href="/sign-up" className="underline">Start free to run it on real models →</Link></div> : null}
+      {notConnected && !demo ? (
         <div role="status" className="border-b border-[#3A3420] bg-[#1A170C] px-4 py-2 text-xs text-[#F4D44D]">No model provider is connected on this server yet, so runs are switched off. You can still write the prompt and fill in values to see the final text.</div>
       ) : null}
       <section aria-label="Models" className="flex flex-wrap items-center gap-1.5 border-b border-[#1F242C] px-4 py-2">
