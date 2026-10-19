@@ -372,6 +372,8 @@ export default defineSchema({
     variables: v.array(v.string()),
     labels: v.array(v.string()),
     model: v.optional(v.string()),
+    /** A short note on what changed in this version, like a commit message. */
+    commitMessage: v.optional(v.string()),
     createdBy: v.string(),
     createdAt: v.number(),
   })
