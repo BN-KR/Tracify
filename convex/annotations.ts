@@ -136,7 +136,20 @@ export const submitReview = mutation({
     const values = { label: args.label?.trim() || undefined, score: args.score, notes: args.notes?.trim() || undefined, status: "submitted" as const, updatedAt: Date.now() };
     if (existing) await ctx.db.patch(existing._id, values);
     else await ctx.db.insert("annotationReviews", { projectId: args.projectId, annotationId: args.annotationId, reviewerId: identity.subject, reviewerName: identity.name || "Reviewer", ...values, createdAt: Date.now() });
-    await ctx.db.patch(args.annotationId, { status: "completed", completedAt: Date.now() });
+    await ctx.db.patch(args.annotationId, { status: "completed", completedAt: Date.now(), label: values.label ?? annotation.label, notes: values.notes ?? annotation.notes, confidence: args.score ?? annotation.confidence });
+  },
+});
+
+/** Puts an item the caller is reviewing back at the end of the waiting line, for example when they skip it. */
+export const release = mutation({
+  args: { projectId: v.id("projects"), annotationId: v.id("annotations") },
+  handler: async (ctx, args) => {
+    const { identity } = await requireProject(ctx, args.projectId);
+    const annotation = await ctx.db.get(args.annotationId);
+    if (!annotation || annotation.projectId !== args.projectId) throw new Error("Annotation not found");
+    if (annotation.status !== "in_review") throw new Error("Only an item in review can be put back");
+    if (annotation.assignee && annotation.assignee !== identity.subject) throw new Error("This item is being reviewed by someone else");
+    await ctx.db.patch(args.annotationId, { status: "queued", assignee: undefined, assignedAt: undefined, assignmentMethod: undefined });
   },
 });
 

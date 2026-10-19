@@ -2297,3 +2297,6 @@ Datasets page is a spreadsheet: editable grid (click a cell, Ctrl+Enter saves), 
 
 ## 2026-10-19 — Experiments (side-by-side)
 Experiments page is a comparison: pick baseline and candidate runs of one dataset, metric band (matches expected, score, speed, cost, failed rows with deltas), verdict filters (worse/better/changed/same/not run) and a row-by-row table with both answers. Logic in `src/lib/experiment-compare.ts` (+tests). New-experiment sheet; "Run it now" calls /api/experiments/run (needs OPENAI_API_KEY). Next: Human labelling queue, Dashboards+Widgets, Automations, Alerts views.
+
+## 2026-10-19 — Human review deck
+Human labelling (annotation-queues and human-annotation routes) is now a review deck: one trace at a time, question and answer side by side, label with keys 1-4 (Good / Needs work / Bad / Unsure), notes, Enter saves and pulls the next; sidebar has progress, counts, up-next, add-a-trace, agreement; "Reviewed" tab lists history. Backend: submitReview now copies label/notes onto the item (agreement never worked before), new `annotations.release` ("Give back"); tests in convex/annotations.test.ts. Logic `src/lib/review-utils.ts`. Needs Convex redeploy. Next: Dashboards+Widgets, Automations, Alerts views.
