@@ -67,3 +67,45 @@ export const get = query({
     return evaluator;
   },
 });
+
+const STATS_WINDOW = 50;
+
+/** Every evaluator with its newest configuration and how its last runs went (up to 50 runs each). */
+export const overview = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, { projectId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccess(project, identity)) return [];
+    const evaluators = await ctx.db.query("evaluators").withIndex("by_projectId", (q) => q.eq("projectId", projectId)).order("desc").take(100);
+    return Promise.all(evaluators.map(async (evaluator) => {
+      const version = await ctx.db.query("evaluatorVersions").withIndex("by_evaluatorId", (q) => q.eq("evaluatorId", evaluator._id)).order("desc").first();
+      const results = await ctx.db.query("evaluationResults").withIndex("by_evaluatorId", (q) => q.eq("evaluatorId", evaluator._id)).order("desc").take(STATS_WINDOW);
+      const passed = results.filter((result) => result.status === "passed").length;
+      const failed = results.filter((result) => result.status === "failed").length;
+      const errored = results.filter((result) => result.status === "error").length;
+      const judged = passed + failed;
+      const numbers = results.flatMap((result) => (typeof result.value === "number" && result.status !== "error" && result.status !== "skipped" ? [result.value] : []));
+      return {
+        evaluator,
+        config: version ? { version: version.version, ...version.config } : null,
+        stats: { runs: results.length, windowFull: results.length === STATS_WINDOW, passed, failed, errored, passRate: judged ? passed / judged : null, average: numbers.length ? numbers.reduce((sum, value) => sum + value, 0) / numbers.length : null, lastRunAt: results[0]?.createdAt ?? null },
+      };
+    }));
+  },
+});
+
+/** The most recent runs of one evaluator, newest first. */
+export const recentResults = query({
+  args: { projectId: v.id("projects"), evaluatorId: v.id("evaluators") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+    const project = await ctx.db.get(args.projectId);
+    if (!project || !canAccess(project, identity)) return [];
+    const evaluator = await ctx.db.get(args.evaluatorId);
+    if (!evaluator || evaluator.projectId !== args.projectId) return [];
+    return ctx.db.query("evaluationResults").withIndex("by_evaluatorId", (q) => q.eq("evaluatorId", args.evaluatorId)).order("desc").take(30);
+  },
+});
