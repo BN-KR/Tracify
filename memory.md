@@ -2294,3 +2294,6 @@ Sessions is an inbox (list left, sort select) with a chat-style transcript reade
 
 ## 2026-10-19 — Datasets (spreadsheet layout)
 Datasets page is a spreadsheet: editable grid (click a cell, Ctrl+Enter saves), add-row line on top, paste-rows import (spreadsheet tabs, JSON lines, JSON list; `src/lib/dataset-import.ts`), sheet tabs along the bottom for switching datasets. New Convex module `convex/datasets.ts` (overview, items, updateItem, deleteItem; 3 tests) registered by hand in `_generated/api.d.ts` — Kristoffer must redeploy Convex. Next: Experiments as side-by-side comparison.
+
+## 2026-10-19 — Experiments (side-by-side)
+Experiments page is a comparison: pick baseline and candidate runs of one dataset, metric band (matches expected, score, speed, cost, failed rows with deltas), verdict filters (worse/better/changed/same/not run) and a row-by-row table with both answers. Logic in `src/lib/experiment-compare.ts` (+tests). New-experiment sheet; "Run it now" calls /api/experiments/run (needs OPENAI_API_KEY). Next: Human labelling queue, Dashboards+Widgets, Automations, Alerts views.
