@@ -2285,3 +2285,6 @@ Evaluators page is now a three-column board (Live / Manual only / Off) with pass
 
 ## 2026-10-19 — Prompts editor layout
 Prompts page is now an IDE-style view: prompt rail on the left, release pipeline (development → staging → production, with roll back) on top, version history timeline plus line-numbered text/compare/usage/test on the right. Next: Playground bench, Sessions inbox, Users cards.
+
+## 2026-10-19 — Playground bench layout
+Playground is now a bench: model chips + temperature + Run in the top bar, collapsible prompt text with a variables row, big side-by-side answer lanes (one per model), run history as a filmstrip at the bottom. Next: Sessions inbox + transcript, Users people cards.

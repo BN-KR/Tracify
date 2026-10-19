@@ -92,6 +92,7 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion }
       const entry: Run = { id: ++counter.current, at: Date.now(), source: source || "Unsaved prompt", text, models: [...models], temperature, results: body.results };
       setRuns((current) => [entry, ...current].slice(0, 10));
       setShown(entry.id);
+      setEditing(false);
     } catch (reason) { setError(reason instanceof Error ? reason.message : "The playground could not run this."); }
     finally { setRunning(false); }
   }
@@ -99,99 +100,89 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion }
   const current = runs.find((item) => item.id === shown) ?? null;
   const notConnected = providers && !providers.openai && !providers.anthropic;
 
+  const [editing, setEditing] = useState(true);
+  const lanes = running ? models.map((model) => ({ model, pending: true as const })) : current ? current.results : [];
   return (
-    <div className="flex min-h-svh min-w-0 flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
+    <div className="flex h-svh min-w-0 flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
       <header className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
-        <h1 className="mr-2 text-base font-semibold tracking-tight">Playground</h1>
-        <span className="text-xs text-[#8B93A1]">Try a prompt on real models before you save it.</span>
+        <h1 className="mr-1 text-base font-semibold tracking-tight">Playground</h1>
+        <label className="sr-only" htmlFor="pg-source">Start from a saved prompt</label>
+        <select id="pg-source" value="" onChange={(event) => pick(event.target.value)} className={`${field} h-8 max-w-64 font-mono`} disabled={!prompts?.length}>
+          <option value="">{prompts === undefined ? "Loading prompts…" : prompts.length ? source ? `${source}` : "Start from a saved prompt…" : "No saved prompts yet"}</option>
+          {prompts?.flatMap((prompt) => prompt.versions.map((version) => <option key={version._id} value={`${prompt._id}|${version._id}`}>{prompt.name} · v{version.version}{version.labels.length ? ` (${version.labels.join(", ")})` : ""}</option>))}
+        </select>
+        <label className="flex items-center gap-2 text-[11px] text-[#8B93A1]">Temp <span className="w-6 font-mono text-[#E6E9EE]">{temperature.toFixed(1)}</span>
+          <input aria-label="Temperature" type="range" min={0} max={2} step={0.1} value={temperature} onChange={(event) => setTemperature(Number(event.target.value))} className="w-24 accent-[#F4D44D]" />
+        </label>
         <Link href={`/dashboard/${projectId}/prompts`} className="ml-auto h-7 rounded border border-[#262C35] px-2.5 text-xs leading-7 text-[#C9CED6] hover:text-white">Prompts</Link>
+        <button type="button" onClick={run} disabled={Boolean(blocker) || running} className="h-8 rounded bg-[#F4D44D] px-5 text-xs font-medium text-[#090909] hover:bg-[#f7de70] disabled:cursor-not-allowed disabled:opacity-40">{running ? "Running…" : models.length > 1 ? `Run on ${models.length} models` : "Run"}</button>
       </header>
       {notConnected ? (
-        <div role="status" className="border-b border-[#3A3420] bg-[#1A170C] px-4 py-2.5 text-xs text-[#F4D44D]">No model provider is connected on this server yet, so runs are switched off. Everything else on this page works: you can still write the prompt and fill in values to see the final text.</div>
+        <div role="status" className="border-b border-[#3A3420] bg-[#1A170C] px-4 py-2 text-xs text-[#F4D44D]">No model provider is connected on this server yet, so runs are switched off. You can still write the prompt and fill in values to see the final text.</div>
       ) : null}
-      <div className="grid min-h-0 flex-1 gap-px bg-[#1F242C] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-        <section className="flex min-h-0 flex-col gap-3 overflow-auto bg-[#0B0D10] p-4" aria-label="Prompt and settings">
-          <label className="grid gap-1 text-[11px] text-[#8B93A1]">Start from a saved prompt
-            <select value="" onChange={(event) => pick(event.target.value)} className={`${field} h-8 font-mono`} disabled={!prompts?.length}>
-              <option value="">{prompts === undefined ? "Loading prompts…" : prompts.length ? source ? `Using ${source}. Pick another…` : "Pick a prompt version…" : "No saved prompts yet"}</option>
-              {prompts?.flatMap((prompt) => prompt.versions.map((version) => <option key={version._id} value={`${prompt._id}|${version._id}`}>{prompt.name} · v{version.version}{version.labels.length ? ` (${version.labels.join(", ")})` : ""}</option>))}
-            </select>
-          </label>
-          <label className="grid gap-1 text-[11px] text-[#8B93A1]">Prompt text
-            <textarea value={text} onChange={(event) => { setText(event.target.value); setSource((current) => current && !current.endsWith("(edited)") ? `${current} (edited)` : current); }} spellCheck={false} className={`${field} min-h-48 resize-y p-3 font-mono leading-5`} />
-          </label>
-          <p className="font-mono text-[10px] text-[#6B7380]">{text.length.toLocaleString()} characters · about {estimateTokens(text).toLocaleString()} tokens (estimate)</p>
-          <fieldset className="grid gap-2 border-t border-[#1F242C] pt-3">
-            <legend className="mb-1 text-[11px] text-[#8B93A1]">Values for the variables</legend>
-            {variables.length ? variables.map((name) => (
-              <label key={name} className="grid gap-1 text-[11px] text-[#8B93A1]"><span className="font-mono text-[#F4D44D]">{`{{${name}}}`}</span>
-                <textarea value={values[name] ?? ""} onChange={(event) => setValues((current) => ({ ...current, [name]: event.target.value }))} rows={2} className={`${field} resize-y p-2 leading-5`} />
-              </label>
-            )) : <p className="text-xs text-[#6B7380]">This prompt has no variables. Write {"{{name}}"} to add one.</p>}
-          </fieldset>
-          <fieldset className="grid gap-2 border-t border-[#1F242C] pt-3">
-            <legend className="mb-1 text-[11px] text-[#8B93A1]">Models (up to {MAX_PLAYGROUND_MODELS}, run side by side)</legend>
-            <div className="flex flex-wrap gap-1.5">
-              {[...PLAYGROUND_MODELS, ...models.filter((model) => !(PLAYGROUND_MODELS as readonly string[]).includes(model))].map((model) => {
-                const on = models.includes(model);
-                const off = providers ? !providers[providerOf(model)] : false;
-                return <button key={model} type="button" aria-pressed={on} onClick={() => toggleModel(model)} disabled={!on && models.length >= MAX_PLAYGROUND_MODELS} title={off ? "This provider is not connected on the server" : undefined} className={`h-7 rounded border px-2 font-mono text-[11px] disabled:opacity-40 ${on ? "border-[#F4D44D] text-[#F4D44D]" : "border-[#262C35] text-[#C9CED6] hover:text-white"} ${off ? "line-through decoration-[#6B7380]" : ""}`}>{model}</button>;
-              })}
-            </div>
-            <div className="flex gap-1.5">
-              <input value={custom} onChange={(event) => setCustom(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addCustom(); } }} placeholder="Another model name, e.g. claude-sonnet-5-5" aria-label="Add another model" className={`${field} h-7 font-mono`} />
-              <button type="button" onClick={addCustom} className="h-7 shrink-0 rounded border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:text-white">Add</button>
-            </div>
-            <label className="grid gap-1 text-[11px] text-[#8B93A1]"><span>Temperature <span className="font-mono text-[#E6E9EE]">{temperature.toFixed(1)}</span> <span className="text-[#6B7380]">(lower = steadier, higher = more varied)</span></span>
-              <input type="range" min={0} max={2} step={0.1} value={temperature} onChange={(event) => setTemperature(Number(event.target.value))} className="accent-[#F4D44D]" />
+      <section aria-label="Models" className="flex flex-wrap items-center gap-1.5 border-b border-[#1F242C] px-4 py-2">
+        <span className="mr-1 text-[11px] text-[#6B7380]">Models (up to {MAX_PLAYGROUND_MODELS})</span>
+        {[...PLAYGROUND_MODELS, ...models.filter((model) => !(PLAYGROUND_MODELS as readonly string[]).includes(model))].map((model) => {
+          const on = models.includes(model);
+          const off = providers ? !providers[providerOf(model)] : false;
+          return <button key={model} type="button" aria-pressed={on} onClick={() => toggleModel(model)} disabled={!on && models.length >= MAX_PLAYGROUND_MODELS} title={off ? "This provider is not connected on the server" : undefined} className={`h-7 rounded border px-2 font-mono text-[11px] disabled:opacity-40 ${on ? "border-[#F4D44D] text-[#F4D44D]" : "border-[#262C35] text-[#C9CED6] hover:text-white"} ${off ? "line-through decoration-[#6B7380]" : ""}`}>{model}</button>;
+        })}
+        <input value={custom} onChange={(event) => setCustom(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addCustom(); } }} placeholder="Add model, e.g. claude-sonnet-5-5" aria-label="Add another model" className="h-7 w-64 rounded border border-[#262C35] bg-[#0E1115] px-2.5 font-mono text-xs text-[#E6E9EE] placeholder:text-[#6B7380] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#F4D44D]" />
+        <button type="button" onClick={addCustom} className="h-7 rounded border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:text-white">Add</button>
+      </section>
+      <section aria-label="Prompt" className="border-b border-[#1F242C] bg-[#0D1014] px-4 py-2">
+        <div className="flex items-center gap-2 text-[11px] text-[#8B93A1]">
+          <button type="button" aria-expanded={editing} onClick={() => setEditing(!editing)} className="font-medium text-[#C9CED6] hover:text-white">{editing ? "▾" : "▸"} Prompt text</button>
+          <span className="font-mono text-[10px] text-[#6B7380]">{text.length.toLocaleString()} characters · about {estimateTokens(text).toLocaleString()} tokens</span>
+        </div>
+        {editing ? <textarea aria-label="Prompt text" value={text} onChange={(event) => { setText(event.target.value); setSource((current) => current && !current.endsWith("(edited)") ? `${current} (edited)` : current); }} spellCheck={false} rows={4} className={`${field} mt-1.5 resize-y p-3 font-mono leading-5`} /> : null}
+        <div className="mt-2 flex flex-wrap items-start gap-2" aria-label="Values for the variables">
+          {variables.length ? variables.map((name) => (
+            <label key={name} className="grid min-w-[180px] flex-1 gap-1 text-[11px] text-[#8B93A1]"><span className="font-mono text-[#F4D44D]">{`{{${name}}}`}</span>
+              <textarea value={values[name] ?? ""} onChange={(event) => setValues((current) => ({ ...current, [name]: event.target.value }))} rows={1} className={`${field} resize-y p-2 leading-5`} />
             </label>
-          </fieldset>
-          {error ? <p role="alert" className="rounded border border-[#5B2B2B] bg-[#1A1010] px-3 py-2 text-xs text-[#FF8A8A]">{error}</p> : null}
-          <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={run} disabled={Boolean(blocker) || running} className="h-8 rounded bg-[#F4D44D] px-4 text-xs font-medium text-[#090909] hover:bg-[#f7de70] disabled:cursor-not-allowed disabled:opacity-40">{running ? "Running…" : models.length > 1 ? `Run on ${models.length} models` : "Run"}</button>
-            {blocker ? <span className="text-[11px] text-[#8B93A1]">{blocker}</span> : null}
+          )) : <p className="text-xs text-[#6B7380]">No variables. Write {"{{name}}"} in the prompt to add one.</p>}
+        </div>
+        {error ? <p role="alert" className="mt-2 rounded border border-[#5B2B2B] bg-[#1A1010] px-3 py-2 text-xs text-[#FF8A8A]">{error}</p> : null}
+        {blocker ? <p className="mt-2 text-[11px] text-[#8B93A1]">{blocker}</p> : null}
+      </section>
+      <section className="min-h-0 flex-1 overflow-auto bg-[#0B0D10] p-3" aria-label="Results" aria-live="polite">
+        {lanes.length ? (
+          <div className={`grid h-full min-h-[260px] gap-3 ${lanes.length === 2 ? "lg:grid-cols-2" : lanes.length >= 3 ? "lg:grid-cols-3" : ""}`}>
+            {lanes.map((lane) => (
+              <article key={lane.model} className="flex min-h-0 min-w-0 flex-col rounded border border-[#1F242C] bg-[#0E1115]">
+                <div className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-3 py-2"><span className="font-mono text-xs font-semibold">{lane.model}</span>
+                  {"pending" in lane ? <span className="ml-auto text-[11px] text-[#8B93A1]">Running…</span> : <span className="ml-auto font-mono text-[10px] text-[#8B93A1]">{(lane.latencyMs / 1000).toFixed(1)}s{lane.inputTokens != null ? ` · ${lane.inputTokens.toLocaleString()} in · ${(lane.outputTokens ?? 0).toLocaleString()} out` : ""}</span>}</div>
+                {"pending" in lane ? <div role="status" aria-label="Running" className="grid gap-2 p-3"><div className="h-3 w-2/3 animate-pulse rounded bg-[#11151A]" /><div className="h-3 w-full animate-pulse rounded bg-[#11151A]" /><div className="h-3 w-5/6 animate-pulse rounded bg-[#11151A]" /></div>
+                  : lane.error ? <p role="alert" className="p-3 text-xs text-[#FF8A8A]">{lane.error}</p>
+                  : <pre className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap p-4 font-mono text-[13px] leading-6 text-[#E6E9EE]">{lane.output || "The model returned nothing."}</pre>}
+                {"pending" in lane || lane.error || !lane.output ? null : <div className="border-t border-[#1F242C] px-3 py-1.5"><button type="button" onClick={() => void navigator.clipboard?.writeText(lane.output)} className="text-[11px] text-[#8AB4FF] underline">Copy answer</button></div>}
+              </article>
+            ))}
           </div>
-        </section>
-        <section className="flex min-h-0 flex-col overflow-auto bg-[#0B0D10] p-4" aria-label="Results" aria-live="polite">
-          {running ? (
-            <div role="status" className="grid gap-2" aria-label="Running"><div className="h-4 w-40 animate-pulse rounded bg-[#11151A]" /><div className="h-40 animate-pulse rounded bg-[#11151A]" /></div>
-          ) : current ? (
-            <>
-              <p className="mb-2 font-mono text-[11px] text-[#6B7380]">{current.source} · temperature {current.temperature.toFixed(1)} · {new Date(current.at).toLocaleTimeString()}</p>
-              <div className={`grid gap-3 ${current.results.length > 1 ? "xl:grid-cols-2" : ""} ${current.results.length > 2 ? "2xl:grid-cols-3" : ""}`}>
-                {current.results.map((result) => (
-                  <article key={result.model} className="min-w-0 rounded border border-[#1F242C] bg-[#0E1115]">
-                    <div className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-3 py-2"><span className="font-mono text-xs font-semibold">{result.model}</span>
-                      <span className="ml-auto font-mono text-[10px] text-[#8B93A1]">{(result.latencyMs / 1000).toFixed(1)}s{result.inputTokens != null ? ` · ${result.inputTokens.toLocaleString()} in · ${(result.outputTokens ?? 0).toLocaleString()} out` : ""}</span></div>
-                    {result.error ? <p role="alert" className="p-3 text-xs text-[#FF8A8A]">{result.error}</p> : <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap p-3 font-mono text-xs leading-5 text-[#C9CED6]">{result.output || "The model returned nothing."}</pre>}
-                    {!result.error && result.output ? <div className="border-t border-[#1F242C] px-3 py-1.5"><button type="button" onClick={() => void navigator.clipboard?.writeText(result.output)} className="text-[11px] text-[#8AB4FF] underline">Copy answer</button></div> : null}
-                  </article>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="m-auto max-w-sm p-8 text-center">
-              <h2 className="text-sm font-semibold">Nothing run yet</h2>
-              <p className="mt-2 text-xs leading-5 text-[#8B93A1]">Fill in the variables, pick one to three models and press Run. Answers appear here with how long each took and how many tokens it used.</p>
-              {variables.length ? <details className="mt-4 text-left"><summary className="cursor-pointer text-[11px] text-[#8AB4FF]">Preview the final text</summary><pre className="mt-2 max-h-60 overflow-auto whitespace-pre-wrap rounded border border-[#1F242C] bg-[#0E1115] p-3 font-mono text-[11px] leading-5 text-[#C9CED6]">{compiled.text}</pre></details> : null}
-            </div>
-          )}
-          {runs.length ? (
-            <div className="mt-4 border-t border-[#1F242C] pt-3">
-              <h2 className="mb-1.5 text-[11px] uppercase tracking-wider text-[#6B7380]">This session</h2>
-              <ul className="grid gap-1">
-                {runs.map((item) => (
-                  <li key={item.id} className="flex items-center gap-2">
-                    <button type="button" onClick={() => setShown(item.id)} aria-current={item.id === shown} className={`min-w-0 flex-1 truncate rounded border px-2 py-1 text-left font-mono text-[11px] ${item.id === shown ? "border-[#F4D44D] text-white" : "border-[#1F242C] text-[#8B93A1] hover:text-white"}`}>{new Date(item.at).toLocaleTimeString()} · {item.source} · {item.models.join(", ")}</button>
-                    <button type="button" onClick={() => { setText(item.text); setModels(item.models); setTemperature(item.temperature); }} className="h-7 shrink-0 rounded border border-[#262C35] px-2 text-[11px] text-[#C9CED6] hover:text-white">Reuse</button>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-1.5 text-[10px] text-[#6B7380]">Kept in this tab only. Closing it clears the list.</p>
-            </div>
-          ) : null}
-        </section>
-      </div>
+        ) : (
+          <div className="m-auto max-w-sm p-8 text-center">
+            <h2 className="text-sm font-semibold">Nothing run yet</h2>
+            <p className="mt-2 text-xs leading-5 text-[#8B93A1]">Pick one to three models, fill in the variables and press Run. Each model gets its own big lane, with its time and token use.</p>
+            {variables.length ? <details className="mt-4 text-left"><summary className="cursor-pointer text-[11px] text-[#8AB4FF]">Preview the final text</summary><pre className="mt-2 max-h-60 overflow-auto whitespace-pre-wrap rounded border border-[#1F242C] bg-[#0E1115] p-3 font-mono text-[11px] leading-5 text-[#C9CED6]">{compiled.text}</pre></details> : null}
+          </div>
+        )}
+      </section>
+      {runs.length ? (
+        <footer aria-label="Run history" className="border-t border-[#1F242C] bg-[#0D1014] px-3 py-2">
+          <ul className="flex gap-2 overflow-x-auto">
+            {runs.map((item) => (
+              <li key={item.id} className="shrink-0">
+                <div className={`w-56 rounded border px-2.5 py-1.5 ${item.id === shown ? "border-[#F4D44D]" : "border-[#1F242C]"}`}>
+                  <button type="button" onClick={() => setShown(item.id)} aria-current={item.id === shown} className="block w-full truncate text-left font-mono text-[11px] text-[#C9CED6] hover:text-white">{new Date(item.at).toLocaleTimeString()} · {item.models.join(", ")}</button>
+                  <div className="mt-0.5 flex items-center gap-2 text-[10px] text-[#6B7380]"><span className="min-w-0 flex-1 truncate">{item.source}</span><button type="button" onClick={() => { setText(item.text); setModels(item.models); setTemperature(item.temperature); }} className="text-[#8AB4FF] underline">Reuse</button></div>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1 text-[10px] text-[#6B7380]">Kept in this tab only. Closing it clears the list.</p>
+        </footer>
+      ) : null}
     </div>
   );
 }
