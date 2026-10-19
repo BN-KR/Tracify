@@ -2291,3 +2291,6 @@ Playground is now a bench: model chips + temperature + Run in the top bar, colla
 
 ## 2026-10-19 — Sessions inbox and Users cards
 Sessions is an inbox (list left, sort select) with a chat-style transcript reader on the right; Users is a people-card grid (initials, runs/sessions/cost, failure bar) with a profile drawer. Same data and API as before; sort moved from table headers to a select. All six pages from the "completely different layouts" request are done; next up per plan: Datasets+Experiments (distinct from the start).
+
+## 2026-10-19 — Datasets (spreadsheet layout)
+Datasets page is a spreadsheet: editable grid (click a cell, Ctrl+Enter saves), add-row line on top, paste-rows import (spreadsheet tabs, JSON lines, JSON list; `src/lib/dataset-import.ts`), sheet tabs along the bottom for switching datasets. New Convex module `convex/datasets.ts` (overview, items, updateItem, deleteItem; 3 tests) registered by hand in `_generated/api.d.ts` — Kristoffer must redeploy Convex. Next: Experiments as side-by-side comparison.
