@@ -17,7 +17,7 @@
 - The old `LiveCapturedSessions`/`LiveCapturedUsers` components are no longer mounted. The `/demo` sessions and users pages are separate and unchanged. Not checked on the real Vercel preview signed in (no robot login here): screens were checked with mocked responses.
 
 ## 2026-10-19 Free plan limit on ingest — draft PR #237 (branch `claude/project-thread-ji3n7c`)
-- Free projects are refused at 50,000 spans per UTC month on `/api/ingest` and `/api/otel` with HTTP 429, code `plan_limit_reached`, `Retry-After` until the 1st (shared helper `src/lib/plan-limits-server.ts`, pure rules + tests in `plan-limits.ts`, `npm run test:tools`). Count lives in Redis (`ingest-month:<project>:<YYYY-MM>`), fails open if Redis errors. Paid tiers and unknown tiers are never blocked. A batch crossing the limit is refused whole. The existing SDK already reports 429 once with an upgrade hint and does not retry.
+- Free projects are refused at 25,000 spans per UTC month (was 50,000 until Oct 19 2026) on `/api/ingest` and `/api/otel` with HTTP 429, code `plan_limit_reached`, `Retry-After` until the 1st (shared helper `src/lib/plan-limits-server.ts`, pure rules + tests in `plan-limits.ts`, `npm run test:tools`). Count lives in Redis (`ingest-month:<project>:<YYYY-MM>`), fails open if Redis errors. Paid tiers and unknown tiers are never blocked. A batch crossing the limit is refused whole. The existing SDK already reports 429 once with an upgrade hint and does not retry.
 - `getProjectByApiKey` now returns `planTier` (default free): needs a manual Convex deploy. Until deployed the field is absent and nothing is enforced. Also renamed Steps to Actions in the menu and on the page.
 
 ## 2026-10-17 Paid-plan upgrade prompts — draft PR (branch `claude/project-thread-e9f2e8`)

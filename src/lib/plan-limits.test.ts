@@ -3,7 +3,7 @@ import test from "node:test";
 import { enforcedSpanLimit, monthKey, planLimitMessage, secondsUntilNextMonth } from "./plan-limits.ts";
 
 test("only the free plan is blocked at its limit", () => {
-  assert.equal(enforcedSpanLimit("free"), 50_000);
+  assert.equal(enforcedSpanLimit("free"), 25_000);
   for (const tier of ["pro", "team", "enterprise", undefined, "unknown"]) assert.equal(enforcedSpanLimit(tier), null);
 });
 
@@ -19,5 +19,5 @@ test("seconds until reset count to the first of next month, across year end", ()
 });
 
 test("message names the limit", () => {
-  assert.match(planLimitMessage(50_000), /50,000 free spans/);
+  assert.match(planLimitMessage(25_000), /25,000 free spans/);
 });

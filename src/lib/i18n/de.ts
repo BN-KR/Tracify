@@ -111,7 +111,7 @@ export const de: Copy = {
     included: "Enthalten",
     unlimitedWord: "Unbegrenzt",
     rows: [
-      ["Spans / Monat", "50k", "500k", "2m"],
+      ["Spans / Monat", "25k", "500k", "2m"],
       ["Aufbewahrung", "7 Tage", "30 Tage", "90 Tage"],
       ["Mitglieder", "1", "5", "20"],
       ["Projekte", "1", "3", "Unbegrenzt"],

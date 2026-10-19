@@ -204,3 +204,7 @@
 - **Decision:** Route all "Start free" and "Run your first trace" CTAs to the `/sign-up` page to consolidate the conversion funnel.
 - **Decision:** Encode pricing plan selection directly into the URL using query parameters (e.g., `/sign-up?plan=pro`) to allow the onboarding flow to pre-select the user's intent.
 - **Decision:** Use an anchor link (`#workspace-terminal`) for the Hero's "View live demo" CTA to keep users on the landing page for initial product education.
+
+## Free tier cut to 25,000 spans (Oct 19 2026)
+- **Decision:** Free plan is now 25,000 spans per month (was 50,000), same 7-day retention, 1 project, 1 member. Chosen by the owner after comparing competitor free tiers (most sit at 5k-25k).
+- **Where:** one source of truth, `src/lib/pricing-plans.ts` (`spanLimit`); marketing copy, billing card and the language files follow it. No Convex change needed.
