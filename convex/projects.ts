@@ -487,6 +487,7 @@ export const getProjectByApiKey = query({
       redactionEnabled: project.redactionEnabled ?? true,
       redactionRules: project.redactionRules ?? [],
       retentionDays: project.retentionDays ?? 365,
+      planTier: project.planTier ?? "free",
     };
   },
 });

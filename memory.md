@@ -1,5 +1,9 @@
 # Project Memory
 
+## 2026-10-19 Free plan limit on ingest — draft PR #237 (branch `claude/project-thread-ji3n7c`)
+- Free projects are refused at 50,000 spans per UTC month on `/api/ingest` and `/api/otel` with HTTP 429, code `plan_limit_reached`, `Retry-After` until the 1st (shared helper `src/lib/plan-limits-server.ts`, pure rules + tests in `plan-limits.ts`, `npm run test:tools`). Count lives in Redis (`ingest-month:<project>:<YYYY-MM>`), fails open if Redis errors. Paid tiers and unknown tiers are never blocked. A batch crossing the limit is refused whole. The existing SDK already reports 429 once with an upgrade hint and does not retry.
+- `getProjectByApiKey` now returns `planTier` (default free): needs a manual Convex deploy. Until deployed the field is absent and nothing is enforced. Also renamed Steps to Actions in the menu and on the page.
+
 ## 2026-10-17 Paid-plan upgrade prompts — draft PR (branch `claude/project-thread-e9f2e8`)
 - Audit: Stripe Checkout, customer portal, webhook and plan sync already exist (pricing buttons -> `/pricing/checkout` -> `/api/stripe/checkout`). Missing: plan limits are NOT enforced on ingest (only a per-minute rate limit), retention is not tied to plan, and there was no usage meter or upgrade prompt.
 - Added `billing.getMonthlyUsage` (sums this month's run span counts, scans up to 20k runs) and `UpgradeBanner` in the project layout: calm note at 80% of the plan's monthly spans, yellow upgrade bar at 100%, hidden on the billing page and for enterprise. Billing page "Current plan" card shows usage. Needs a manual Convex deploy.
