@@ -2279,3 +2279,6 @@
 
 ## 2026-10-19 — Scores redesign (charts-first report)
 Scores page rebuilt as its own report layout (trend hero, distribution, sources, "worth a look", small multiples, raw log, drawers). Helpers in `src/lib/score-utils.ts`; UI in `src/components/dashboard/scores/`. Part of the "every page completely different" redesign; next: Evaluators board, Prompts editor, Playground bench, Sessions inbox, Users cards.
+
+## 2026-10-19 — Evaluators board
+Evaluators page is now a three-column board (Live / Manual only / Off) with pass-rate rings; detail opens as a right overlay with failing examples first. Next: Prompts editor, Playground bench, Sessions inbox, Users cards.

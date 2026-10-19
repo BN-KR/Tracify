@@ -39,6 +39,24 @@ function readUrl(initial: Query): Query {
 }
 const percent = (value: number) => `${Math.round(value * 100)}%`;
 const friendly = (reason: unknown, fallback: string) => ((reason instanceof Error ? reason.message : "").match(/Uncaught Error: ([^\n]+)/)?.[1] ?? fallback);
+const LANES = [
+  { id: "live", title: "Live", dot: "bg-[#5BE3A0]", hint: "Checking a share of new traces as they arrive.", empty: "Nothing is checking traces automatically. Edit an evaluator and turn on “Check new traces automatically”." },
+  { id: "manual", title: "Manual only", dot: "bg-[#F4D44D]", hint: "On, but only runs by hand or inside an experiment.", empty: "Nothing here. Every switched-on evaluator is live." },
+  { id: "off", title: "Off", dot: "bg-[#6B7380]", hint: "Paused. Nothing runs and nothing is lost.", empty: "Nothing is switched off." },
+] as const;
+const laneOf = (row: Row) => (!row.evaluator.active ? "off" : row.config?.enabledOnline ? "live" : "manual");
+function Ring({ rate }: { rate: number | null }) {
+  const radius = 16;
+  const circumference = 2 * Math.PI * radius;
+  const color = rate === null ? "#3A424E" : rate < 0.5 ? "#FF8A8A" : rate >= 0.9 ? "#5BE3A0" : "#F4D44D";
+  return (
+    <svg viewBox="0 0 44 44" className="size-11 shrink-0" role="img" aria-label={rate === null ? "No runs yet" : `${percent(rate)} pass rate`}>
+      <circle cx="22" cy="22" r={radius} fill="none" stroke="#1F242C" strokeWidth="4" />
+      {rate !== null ? <circle cx="22" cy="22" r={radius} fill="none" stroke={color} strokeWidth="4" strokeLinecap="butt" strokeDasharray={`${circumference * rate} ${circumference}`} transform="rotate(-90 22 22)" /> : null}
+      <text x="22" y="25.5" textAnchor="middle" className="fill-[#E6E9EE] font-mono text-[10px]">{rate === null ? "–" : Math.round(rate * 100)}</text>
+    </svg>
+  );
+}
 const typeText = (type: string) => (type === "code" ? "Code rule" : "AI judge");
 
 export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: string; initialQuery: Query }) {
@@ -78,13 +96,6 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
     return (rows ?? []).filter((row) => (!query.status || (query.status === "on") === row.evaluator.active) && (!query.type || row.evaluator.type === query.type) && (!needle || row.evaluator.name.toLowerCase().includes(needle) || row.evaluator.criteria.toLowerCase().includes(needle)));
   }, [rows, query.q, query.status, query.type]);
   const selected = rows?.find((row) => row.evaluator._id === query.id) ?? null;
-  const totals = useMemo(() => {
-    const all = rows ?? [];
-    const judged = all.reduce((sum, row) => sum + row.stats.passed + row.stats.failed, 0);
-    const passed = all.reduce((sum, row) => sum + row.stats.passed, 0);
-    return { total: all.length, on: all.filter((row) => row.evaluator.active).length, runs: all.reduce((sum, row) => sum + row.stats.runs, 0), passRate: judged ? passed / judged : null };
-  }, [rows]);
-
   async function toggle(row: Row) {
     try {
       await setActive({ projectId: typedProjectId, evaluatorId: row.evaluator._id, active: !row.evaluator.active });
@@ -92,7 +103,6 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
     } catch (reason) { setNotice({ tone: "error", text: friendly(reason, "That did not save. Check your connection and try again.") }); }
   }
 
-  const panelOpen = creating || Boolean(selected);
   const existingNames = (rows ?? []).map((row) => row.evaluator.name);
   return (
     <div className="flex min-h-svh min-w-0 flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
@@ -110,16 +120,11 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
         <Link href={`/dashboard/${projectId}/scores`} className={`${control} inline-flex items-center`}>Scores</Link>
         <button type="button" onClick={() => { setCreating(true); setEditing(false); update({ id: "" }); }} className="h-7 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909] hover:bg-[#f7de70]">New evaluator</button>
       </header>
-      <section aria-label="Summary" className="grid grid-cols-2 gap-px border-b border-[#1F242C] bg-[#1F242C] sm:grid-cols-4">
-        {[["Evaluators", String(totals.total)], ["Switched on", String(totals.on)], ["Recent runs", totals.runs.toLocaleString()], ["Pass rate", totals.passRate === null ? "–" : percent(totals.passRate)]].map(([label, value]) => (
-          <div key={label} className="bg-[#0B0D10] px-4 py-2.5"><div className="font-mono text-[10px] uppercase tracking-wider text-[#6B7380]">{label}</div><div className="mt-0.5 font-mono text-base">{rows === undefined ? "–" : value}</div></div>
-        ))}
-      </section>
       {notice ? <p role={notice.tone === "error" ? "alert" : "status"} className={`mx-4 mt-3 rounded border px-3 py-2 text-xs ${notice.tone === "error" ? "border-[#5B2B2B] bg-[#1A1010] text-[#FF8A8A]" : "border-[#1F4D38] bg-[#0E1A14] text-[#5BE3A0]"}`}>{notice.text}</p> : null}
-      <div className={`grid min-h-0 flex-1 ${panelOpen ? "lg:grid-cols-[minmax(0,1fr)_minmax(400px,46%)]" : "grid-cols-1"}`}>
-        <main className={`min-w-0 overflow-auto ${panelOpen ? "hidden lg:block" : ""}`}>
+      <div className="relative flex min-h-0 flex-1">
+        <main className="min-w-0 flex-1 overflow-auto">
           {rows === undefined ? (
-            <div className="grid gap-px p-4" role="status" aria-label="Loading evaluators">{Array.from({ length: 5 }, (_, index) => <div key={index} className="h-10 animate-pulse rounded bg-[#11151A]" />)}</div>
+            <div className="grid gap-3 p-4 lg:grid-cols-3" role="status" aria-label="Loading evaluators">{Array.from({ length: 3 }, (_, index) => <div key={index} className="h-64 animate-pulse rounded bg-[#11151A]" />)}</div>
           ) : !rows.length ? (
             <div className="mx-auto max-w-md p-10 text-center">
               <h2 className="text-sm font-semibold">Grade your agent automatically</h2>
@@ -129,31 +134,51 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
           ) : !shown.length ? (
             <div className="p-10 text-center text-xs text-[#8B93A1]">No evaluators match these filters. <button type="button" onClick={() => { setDraft(""); update({ q: "", type: "", status: "" }); }} className="text-[#8AB4FF] underline">Clear filters</button></div>
           ) : (
-            <table className="w-full border-collapse text-left">
-              <thead className="sticky top-0 bg-[#0B0D10] text-[10px] uppercase tracking-wider text-[#6B7380]"><tr><th className="px-4 py-2 font-medium">Name</th><th className="px-2 py-2 font-medium">Type</th><th className="px-2 py-2 font-medium">Pass rate</th><th className="hidden px-2 py-2 font-medium md:table-cell">Last run</th><th className="px-4 py-2 text-right font-medium">On</th></tr></thead>
-              <tbody>
-                {shown.map((row) => {
-                  const active = row.evaluator._id === query.id;
-                  return (
-                    <tr key={row.evaluator._id} onClick={() => { setCreating(false); setEditing(false); update({ id: row.evaluator._id }); }} className={`cursor-pointer border-t border-[#161B21] hover:bg-[#11151A] ${active ? "bg-[#11151A] shadow-[inset_2px_0_0_#F4D44D]" : ""} ${row.evaluator.active ? "" : "opacity-60"}`}>
-                      <td className="max-w-[18rem] px-4 py-2"><button type="button" onClick={(event) => { event.stopPropagation(); setCreating(false); setEditing(false); update({ id: row.evaluator._id }); }} aria-current={active} className="block max-w-full truncate text-left font-mono text-xs font-medium hover:underline">{row.evaluator.name}</button><div className="truncate font-mono text-[11px] text-[#6B7380]">{row.evaluator.criteria}</div></td>
-                      <td className="whitespace-nowrap px-2 py-2 text-[11px] text-[#C9CED6]">{typeText(row.evaluator.type)}</td>
-                      <td className="whitespace-nowrap px-2 py-2 font-mono text-xs">{row.stats.passRate === null ? <span className="text-[#6B7380]">no runs</span> : <span className={row.stats.passRate < 0.5 ? "text-[#FF8A8A]" : row.stats.passRate >= 0.9 ? "text-[#5BE3A0]" : ""}>{percent(row.stats.passRate)}<span className="ml-1 text-[10px] text-[#6B7380]">of {row.stats.passed + row.stats.failed}{row.stats.windowFull ? "+" : ""}</span></span>}</td>
-                      <td className="hidden whitespace-nowrap px-2 py-2 font-mono text-[11px] text-[#8B93A1] md:table-cell">{row.stats.lastRunAt ? ago(row.stats.lastRunAt, now) : "never"}</td>
-                      <td className="px-4 py-2 text-right"><button type="button" role="switch" aria-checked={row.evaluator.active} aria-label={`${row.evaluator.name} is ${row.evaluator.active ? "on" : "off"}`} onClick={(event) => { event.stopPropagation(); void toggle(row); }} className={`relative h-5 w-9 rounded-full border ${row.evaluator.active ? "border-[#F4D44D] bg-[#F4D44D]" : "border-[#262C35] bg-[#0E1115]"}`}><span className={`absolute top-0.5 size-3.5 rounded-full ${row.evaluator.active ? "left-[18px] bg-[#090909]" : "left-0.5 bg-[#6B7380]"}`} /></button></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="grid items-start gap-3 p-4 lg:grid-cols-3">
+              {LANES.map((lane) => {
+                const cards = shown.filter((row) => laneOf(row) === lane.id);
+                return (
+                  <section key={lane.id} aria-label={lane.title} className="min-w-0 rounded border border-[#1F242C] bg-[#0E1115]">
+                    <header className="border-b border-[#1F242C] px-3 py-2.5">
+                      <div className="flex items-center gap-2"><span className={`size-2 rounded-full ${lane.dot}`} /><h2 className="text-xs font-semibold">{lane.title}</h2><span className="ml-auto font-mono text-[11px] text-[#6B7380]">{cards.length}</span></div>
+                      <p className="mt-1 text-[11px] leading-4 text-[#6B7380]">{lane.hint}</p>
+                    </header>
+                    <ul className="grid gap-2 p-2">
+                      {cards.length ? cards.map((row) => {
+                        const active = row.evaluator._id === query.id;
+                        const rate = row.stats.passRate;
+                        return (
+                          <li key={row.evaluator._id} className={`rounded border bg-[#0B0D10] ${active ? "border-[#F4D44D]" : "border-[#1F242C] hover:border-[#2E3540]"}`}>
+                            <button type="button" aria-current={active} onClick={() => { setCreating(false); setEditing(false); update({ id: row.evaluator._id }); }} className="flex w-full items-center gap-3 p-3 text-left">
+                              <Ring rate={rate} />
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate font-mono text-xs font-medium" title={row.evaluator.name}>{row.evaluator.name}</span>
+                                <span className="mt-0.5 block truncate font-mono text-[11px] text-[#6B7380]">{row.evaluator.criteria}</span>
+                                <span className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[10px] uppercase tracking-wider text-[#8B93A1]"><span>{typeText(row.evaluator.type)}</span>{row.config?.enabledOnline ? <span>{percent(row.config.sampleRate)} of traces</span> : null}<span>{row.stats.lastRunAt ? ago(row.stats.lastRunAt, now) : "never run"}</span></span>
+                              </span>
+                            </button>
+                            <div className="flex items-center gap-2 border-t border-[#161B21] px-3 py-1.5 text-[11px]">
+                              <span className="text-[#6B7380]">{row.stats.runs ? `${row.stats.passed + row.stats.failed} judged${row.stats.windowFull ? "+" : ""}` : "No runs yet"}</span>
+                              {row.stats.failed ? <span className="font-mono text-[#FF8A8A]">{row.stats.failed} failing</span> : null}
+                              {row.stats.errored ? <span className="font-mono text-[#F4D44D]">{row.stats.errored} errors</span> : null}
+                              <button type="button" onClick={() => void toggle(row)} className="ml-auto text-[#8AB4FF] underline">{row.evaluator.active ? "Switch off" : "Switch on"}</button>
+                            </div>
+                          </li>
+                        );
+                      }) : <li className="rounded border border-dashed border-[#262C35] p-4 text-center text-[11px] text-[#6B7380]">{lane.empty}</li>}
+                    </ul>
+                  </section>
+                );
+              })}
+            </div>
           )}
         </main>
         {creating ? (
-          <aside className="flex min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10]">
+          <aside className="absolute inset-y-0 right-0 z-20 flex w-full max-w-[460px] min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10] shadow-[-24px_0_48px_rgba(0,0,0,0.5)]">
             <EvaluatorForm existing={existingNames} onCancel={() => setCreating(false)} onSave={async (input) => { const id = await create({ projectId: typedProjectId, ...input }); setCreating(false); update({ id }); setNotice({ tone: "ok", text: `${input.name} created. It starts switched on.` }); }} />
           </aside>
         ) : selected && editing ? (
-          <aside className="flex min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10]">
+          <aside className="absolute inset-y-0 right-0 z-20 flex w-full max-w-[460px] min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10] shadow-[-24px_0_48px_rgba(0,0,0,0.5)]">
             <EvaluatorForm key={`${selected.evaluator._id}-${selected.config?.version ?? 0}`} editing={selected} existing={existingNames.filter((item) => item !== selected.evaluator.name)} onCancel={() => setEditing(false)} onSave={async (input) => {
               await edit({ projectId: typedProjectId, evaluatorId: selected.evaluator._id, name: input.name, criteria: input.criteria, scoreType: input.scoreType, model: input.model, sampleRate: input.sampleRate, enabledOnline: input.enabledOnline, template: input.template });
               setEditing(false); setNotice({ tone: "ok", text: `${input.name} saved. New traces use the new settings; earlier runs keep their results.` });
@@ -170,7 +195,7 @@ function EvaluatorPanel({ projectId, row, now, onClose, onToggle, onEdit }: { pr
   const results = useQuery(api.evaluators.recentResults, { projectId: projectId as Id<"projects">, evaluatorId: row.evaluator._id });
   const { evaluator, config, stats } = row;
   return (
-    <aside className="flex min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10]" aria-label={`Evaluator ${evaluator.name}`}>
+    <aside className="absolute inset-y-0 right-0 z-20 flex w-full max-w-[460px] min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10] shadow-[-24px_0_48px_rgba(0,0,0,0.5)]" aria-label={`Evaluator ${evaluator.name}`}>
       <div className="flex items-start gap-2 border-b border-[#1F242C] px-4 py-3">
         <div className="min-w-0 flex-1"><h2 className="truncate font-mono text-sm font-semibold" title={evaluator.name}>{evaluator.name}</h2><p className="mt-0.5 text-[11px] text-[#8B93A1]">{typeText(evaluator.type)} · {evaluator.active ? "on" : "off"} · created {ago(evaluator.createdAt, now)}</p></div>
         <button type="button" onClick={onEdit} className={control}>Edit</button>
@@ -192,6 +217,14 @@ function EvaluatorPanel({ projectId, row, now, onClose, onToggle, onEdit }: { pr
           {[["Runs", stats.runs + (stats.windowFull ? "+" : "")], ["Passed", String(stats.passed)], ["Failed", String(stats.failed)], ["Errors", String(stats.errored)]].map(([label, value]) => <div key={label} className="bg-[#0E1115] px-2 py-2"><div className="font-mono text-base">{value}</div><div className="text-[10px] uppercase tracking-wider text-[#6B7380]">{label}</div></div>)}
         </div>
         {evaluator.type === "code" ? <TryRule criteria={evaluator.criteria} /> : null}
+        {results?.some((result) => result.status === "failed") ? (
+          <div>
+            <h3 className="mb-1.5 text-[10px] uppercase tracking-wider text-[#FF8A8A]">Failing examples</h3>
+            <ul className="grid gap-1">{results.filter((result) => result.status === "failed").slice(0, 3).map((result) => (
+              <li key={result._id} className="rounded border border-[#5B2B2B] bg-[#1A1010] px-2.5 py-1.5 text-[11px] leading-4 text-[#E6E9EE]">{result.explanation ?? "Failed the check."}{result.traceId ? <> <Link href={`/dashboard/${projectId}/tracing?trace=${encodeURIComponent(result.traceId)}`} className="font-mono text-[#8AB4FF] underline">Open trace</Link></> : null}</li>
+            ))}</ul>
+          </div>
+        ) : null}
         <div>
           <h3 className="mb-1.5 text-[10px] uppercase tracking-wider text-[#6B7380]">Recent runs</h3>
           {results === undefined ? <p className="text-xs text-[#8B93A1]" role="status">Loading…</p> : !results.length ? <p className="rounded border border-dashed border-[#262C35] p-4 text-center text-xs text-[#8B93A1]">No runs yet. {evaluator.active ? (config?.enabledOnline ? "New traces will be checked as they arrive." : "This evaluator only runs when called by hand.") : "Switch it on to start."}</p> : (
