@@ -27,7 +27,7 @@ export default function CloudModePage() {
       }
     >
       <div className="grid gap-4">
-        <Link href="/playground" className="group border border-[#f4d44d] bg-[#f4d44d] p-7 text-black transition-colors hover:bg-white">
+        <Link href="/demo/project" className="group border border-[#f4d44d] bg-[#f4d44d] p-7 text-black transition-colors hover:bg-white">
           <Sparkles className="size-7" aria-hidden="true" />
           <span className="mt-10 block font-pixel text-5xl leading-none tracking-[-0.06em]">Sandbox</span>
           <span className="mt-3 block text-sm leading-6 text-black/70">Open the populated Tracify demo. No account or live telemetry required.</span>
