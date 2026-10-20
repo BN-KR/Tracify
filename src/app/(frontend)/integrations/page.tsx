@@ -6,8 +6,17 @@ import { Reveal } from "@/components/marketing/landing/reveal";
 import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle , StatStrip } from "@/components/marketing/company/blocks";
 import { IntegrationGrid, type Integration } from "@/components/marketing/company/integration-grid";
 
+import { faqJsonLd, jsonLdString } from "@/lib/seo";
 import { CodeTabs } from "@/components/marketing/company/code-tabs";
-export const metadata = pageMetadata({ title: "AI agent integrations: OpenAI, LangChain, OTel", description: "Trace OpenAI, Anthropic, LangChain, LangGraph, CrewAI, LlamaIndex, AutoGen, Vercel AI SDK and OpenTelemetry agents in Tracify, plus Slack alerts.", path: "/integrations" });
+export const metadata = pageMetadata({ title: "AI agent integrations: trace OpenAI, LangChain, OTel", description: "Trace OpenAI, Anthropic, LangChain, LangGraph, CrewAI, LlamaIndex, AutoGen, Vercel AI SDK and OpenTelemetry agents in Tracify, plus Slack alerts.", path: "/integrations" });
+
+const faqs = [
+  { q: "Which AI agent frameworks does Tracify work with?", a: "Anything that speaks OpenTelemetry works through the OTLP endpoint. LangChain, CrewAI, LlamaIndex, AutoGen, Mastra, Pydantic AI and the OpenAI Agents SDK are covered through the Python and TypeScript SDKs or OTel instrumentation." },
+  { q: "Do I need to change my agent code to trace it?", a: "Usually a few lines: install the SDK, set a project key and wrap the client or add the OTel exporter. Provider calls such as OpenAI and Anthropic record model, latency, tokens and cost automatically." },
+  { q: "Can I send traces from an OpenTelemetry setup I already have?", a: "Yes. Point an OTLP HTTP JSON exporter at Tracify with your project key. See the ingest reference in the docs for the endpoint and headers." },
+  { q: "Does Tracify send alerts to Slack?", a: "Yes. Project alerts can post failures and threshold breaches to a validated Slack webhook." },
+  { q: "What if my tool is not listed?", a: "If it can export OpenTelemetry spans it already works. Otherwise use the contact page to request an adapter." },
+] as const;
 
 const integrations: Integration[] = [
   { name: "OpenTelemetry (OTLP)", description: "Ingest spans through the standard OTLP HTTP JSON protocol. Any OTel-instrumented library or exporter works out of the box.", badge: "Native", category: "Tracing" },
@@ -85,6 +94,20 @@ export default function IntegrationsPage() {
           </div>
           <Reveal><CodeTabs /></Reveal>
         </div>
+      </CreamBand>
+
+      <CreamBand>
+        <Eyebrow dark={false}>Questions</Eyebrow>
+        <SectionTitle>Integration questions, answered.</SectionTitle>
+        <div className="mt-10 max-w-3xl border-t border-black/25">
+          {faqs.map(({ q, a }) => (
+            <details key={q} className="border-b border-black/25 py-4">
+              <summary className="cursor-pointer font-pixel text-2xl tracking-[-0.05em]">{q}</summary>
+              <p className="mt-3 text-sm leading-6 text-black/70">{a}</p>
+            </details>
+          ))}
+        </div>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(faqJsonLd(faqs.map(({ q, a }) => ({ q, a })))) }} />
       </CreamBand>
 
       <ClosingBand

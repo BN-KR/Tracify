@@ -21,7 +21,7 @@ heroImage:
   hero: /media/organic-series/ai-agent-observability-complete-guide.jpg
   og: /media/organic-series/ai-agent-observability-complete-guide.jpg
 seo:
-  metaTitle: "AI Agent Observability: The Complete 2026 Guide"
+  metaTitle: "AI Agent Observability: The Complete Guide"
   metaDescription: What AI agent observability is and how to do it. Traces, tool calls, cost, evals and alerts, with a step-by-step loop for debugging agents in production.
   image:
     src: /media/organic-series/ai-agent-observability-complete-guide.jpg
@@ -32,259 +32,260 @@ seo:
     og: /media/organic-series/ai-agent-observability-complete-guide.jpg
 ---
 
-AI agent observability is the practice of recording what an agent tried, which evidence shaped each step, and what the user experienced, so you can debug failures, control cost and ship changes safely. It should answer more than “did the request finish?” It should help a person explain what the agent tried, which evidence shaped the path, what the user experienced, and what action is safe next.
+AI agent observability is the practice of recording what an agent tried, which evidence shaped each step, and what the user got in the end, so a person can debug failures, control cost and ship changes with confidence. A normal service either answers or errors. An agent can answer fluently, call the wrong tool twice, spend four times the usual budget and still return a confident, wrong result with a green status code. Observability is how you see that happen.
 
-{% trace-scenario title="What should the trace explain?" prompt="A user reports a wrong answer. Which evidence turns the report into an investigation?" outcome="Preserve the task outcome, model and prompt versions, retrieved context, tool calls, retries, and the decision that shaped the final response." /%}
+{% trace-scenario title="Which evidence would you open first?" prompt="A customer says the support agent promised a refund the policy does not allow. The run shows status ok and normal latency." outcome="Open the retrieval span to see which policy text the model was given, then the model span to see what it did with it. The final text alone cannot tell you which one failed." /%}
 
 ## At a glance
 
-This guide is for platform operators, engineers, and leaders responsible for agents in production. It helps you **connect outcomes to inspectable execution evidence** so you can leave with a trace that supports debugging, evaluation, ownership, and change.
+This guide is for engineers and technical leads who run agents in production, or are about to. It gives you a way to decide **{% highlight %}how much observability you need now{% /highlight %}**, what to record at each level, and which signal to open first for each kind of failure. It is the overview. Where a topic has its own deep dive, we link to it instead of repeating it.
 
-| Before you start | What to define | What good looks like |
+![A five-step ladder from logs to traces, outcomes, evals and control](/media/ai-agent-observability-complete-guide-ladder.svg)
+
+### The observability ladder
+
+The model used through the rest of this article has five rungs. Each rung answers a harder question than the one below it, and each one needs the one below to work.
+
+| Rung | Question it answers | What you record |
 | --- | --- | --- |
-| A workflow, incident, or release decision | Task boundary, evidence fields, owners, and retention limits | A person can move from user effect to representative trace and bounded action |
+| 1. Logs | What happened? | Timestamped events and errors |
+| 2. Traces | Why did it happen? | Parent and child spans for model calls, tools and retrieval |
+| 3. Outcomes | Did the user win? | Terminal status, feedback and task result |
+| 4. Evals | Is it good enough? | Scores against a fixed set of cases |
+| 5. Control | May it act, and can we stop it safely? | Budgets, approvals, alerts and release gates |
 
-### The observability loop
+Most teams stall at rung 1 or 2. They can see that something happened, but not whether it mattered. Rungs 3 to 5 are where observability starts paying for itself.
 
-Use **Frame → Follow → Assess → Respond → Learn**:
+> **Decision rule:** Climb one rung at a time, and only record evidence that changes a decision. More events are not automatically more observability.
 
-1. **Frame:** name the user task, expected outcome, and trust boundary.
-2. **Follow:** connect model calls, retrieval, tools, retries, approvals, and state changes.
-3. **Assess:** compare outcome quality, reliability, latency, cost, and policy results.
-4. **Respond:** route the evidence to an owner with a safe first action.
-5. **Learn:** turn confirmed mechanisms into tests, controls, alerts, or release decisions.
+## What agent observability is, and what it is not
 
-> **Decision rule:** Instrument the evidence a person needs to change behavior. More events are not automatically more observability.
+Observability comes from systems engineering. A system is observable when you can explain its internal state from the outputs it produces. For an agent, the internal state is the chain of decisions: what it read, what it chose, what it called and what it did with the result. The outputs you need to keep are therefore traces, not only logs.
 
-## 1. Start with the task and its outcome
+That definition draws a few useful boundaries.
 
-Define the parent task before choosing a span name or dashboard. What did the user ask? What result counts as useful? Which actions are allowed? Which failure would create harm? A fluent final answer is not the same as a successful task, and a successful API call is not proof that the business action was correct.
+- **It is not only monitoring.** Monitoring watches known signals and alerts on them. Observability lets you ask a question you did not plan for, such as which retrieved document led to this answer. The [monitoring guide](/blog/ai-agent-monitoring) covers the alerting half in depth.
+- **It is not only LLM logging.** Logging prompts and completions covers a single model call. Agents loop, branch, call tools and hand work to other agents. The [overview of AI observability](/blog/what-is-ai-observability) explains how the definition grew past model calls.
+- **It is not APM with a new name.** Latency and error rate still matter, but they do not detect a wrong answer. See [agent observability versus traditional APM](/blog/ai-agent-observability-vs-apm) for what carries over and what does not.
+- **It is not evaluation alone.** Evals score quality on known cases. Observability tells you what real traffic did, and gives evals their test cases.
 
-| Outcome question | Evidence to connect |
-| --- | --- |
-| Did the task complete? | Terminal status, user-visible result, fallback or refusal |
-| Was the result supported? | Retrieved sources, citations, policy and validation results |
-| Was the path reliable? | Dependency status, retries, timeouts, tool outcomes |
-| Was the cost acceptable? | Model usage, provider, retry count, cost per successful task |
-| Can it be changed safely? | Release, prompt, model, policy, and configuration versions |
+### Why agents are harder to see than services
 
-The [AI agent monitoring guide](/blog/ai-agent-monitoring) shows how these signals become alerts and bounded responses. This article focuses on the evidence model underneath those decisions; it does not prescribe one observability vendor or retention policy.
+Three properties make agents different from the services most teams already know how to observe.
 
-## 2. Follow the complete execution path
+First, agents are **non-deterministic**. The same input can take a different path next time, so one reproduction proves little. You need the recorded path of the run that went wrong.
 
-A useful trace tells a causal story from the parent task to the final state. Preserve stable identifiers across model calls, retrieval, tools, validation, retries, human review, and downstream writes. Record the transition that changed the path, not only the final text.
+Second, agents **fail quietly**. A tool that returns stale data does not throw. A model that ignores an instruction does not log an error. The failure is in the meaning, not the status code.
 
-### Use layers that answer different questions
+Third, agents **spend money as they think**. Every loop iteration is a model call with a price. A retry storm or an unbounded loop is a cost incident before it is an outage. The [agentic observability article](/blog/agentic-ai-observability) goes deeper on reasoning chains and autonomy failures.
 
-| Evidence layer | What it contains | Who uses it |
-| --- | --- | --- |
-| Task | Input class, intent, expected outcome, terminal status, user effect | Product and workflow owner |
-| Execution | Model, retrieval, tool, validator, retry, and timing spans | Engineer and operator |
-| Decision | Policy result, approval, selected action, fallback, confidence | Risk owner and reviewer |
-| Change context | Release, prompt, model, dataset, provider, configuration | Release and evaluation owner |
+## Rung 1 and 2: logs and traces
 
-Keep these layers connected but distinct. A fast response can be wrong. A successful tool call can return stale data. A high evaluator score can hide a failure in a consequential cohort. [LLM tracing explained](/blog/llm-tracing-explained) covers propagation details; observability makes the propagated story useful to a decision-maker.
+Logs are where everyone starts, and for a single script they are enough. They stop being enough when a request touches several model calls and tools, because a flat list of lines does not show which call caused which.
 
-![A rack of servers representing the connected evidence path behind an AI agent run](/media/organic-series/ai-agent-observability-complete-guide.jpg)
+A **trace** fixes that by tying every step of one run into {% highlight %}a tree{% /highlight %}. The run is the parent. Each model call, tool call and retrieval is a child span with its own input, output, duration and error. When a step starts another step, the second is nested inside the first, so the tree shows the real call structure, including loops.
 
-*A useful observability system makes the path from task to decision inspectable without requiring a person to reconstruct the architecture from raw logs.*
+### What a good span records
 
-### A trace shape people can inspect
+A span is useful when another person can read it without asking you anything. At minimum, record:
 
-The following is an illustrative event shape, not vendor-specific executable telemetry. Keep sensitive values redacted and preserve only the fields an authorized investigator needs.
+- the **type**: model call, tool call, retrieval or generic step;
+- the **input and output**, trimmed and with secrets removed;
+- the **duration** and whether it **failed**, with the error;
+- for model calls, the **model name, input tokens, output tokens and cost**;
+- the **release or version** that produced it, so you can compare before and after.
 
-```json
-{
-  "task": {"id": "run_1842", "type": "renewal_guidance", "status": "blocked"},
-  "change": {"release": "2026-08-25.3", "prompt": "renewal-v7", "model": "candidate"},
-  "spans": [
-    {"kind": "retrieval", "freshness": "stale", "duration_ms": 220},
-    {"kind": "tool", "name": "account_state", "status": "ok", "duration_ms": 480}
-  ],
-  "decision": {"action": "escalate", "reason": "freshness_check_failed", "owner": "account-ops"}
-}
+Deep detail on the schema lives in [instrumenting AI agents for observability](/blog/instrumenting-ai-agents-for-observability), and the propagation rules in [LLM tracing explained](/blog/llm-tracing-explained). Here is what the minimum looks like with the Tracify TypeScript SDK. The names come from the [TypeScript SDK reference](/docs/typescript).
+
+```ts
+import { observe, span, traceAgent } from "tracify-sdk";
+
+const searchDocs = observe(
+  async function searchDocs(query: string) {
+    return search(query); // your retrieval function
+  },
+  { type: "retrieval" },
+);
+
+export const answer = traceAgent(
+  async (question: string) => {
+    const docs = await searchDocs(question);
+    return span(
+      "chat",
+      async (step) => {
+        const reply = await callModel(question, docs); // your model client
+        step.set({
+          model: "your-model-id",
+          inputTokens: reply.usage.input,
+          outputTokens: reply.usage.output,
+        });
+        return reply.text;
+      },
+      { type: "llm", input: question },
+    );
+  },
+  { name: "support-agent", environment: "production", release: "2026-10-20" },
+);
 ```
 
-The important property is not the field names. It is the path from observed evidence to a terminal decision an operator can explain. Avoid copying secrets or full prompts into every span when a stable reference and authorized lookup will do.
+`traceAgent` marks the boundary of one run. `observe` wraps a function so each call becomes a span, and `span` records a block of work. Anything started inside another step becomes its child automatically, so concurrent runs stay in separate traces. The Python SDK follows the same shape, covered in the [Python SDK reference](/docs/python).
 
-## 3. Choose signals that support action
+If you already use the OpenAI or Anthropic client, or LangGraph, you can wrap the client once and keep your existing calls. That path is described in [provider integrations](/docs/provider-integrations). Anything that speaks OpenTelemetry can also send spans, which the [integrations page](/integrations) lists.
 
-Start with a small set of signals that can separate a provider problem, release regression, bad cohort, tool contract failure, or policy boundary. Pair aggregates with representative traces and slices by workflow, release, input class, provider, model, tool, and environment.
+> **Field note:** Instrument the boundary of a request first, then add child spans only where you have asked a question the trace could not answer. A trace with five meaningful spans beats one with fifty empty ones.
 
-| Signal | Useful question | First investigation |
+### Read a trace like a story
+
+Open a failed run and read it from the first span, not the last. The last span shows the symptom. The first span where reality and expectation diverge shows the cause. Typical first divergences are a retrieval that returned the wrong document, a tool that returned an empty result the model then ignored, and a model call that received a truncated prompt.
+
+The [guide to debugging AI agents in production](/blog/debug-ai-agents-in-production) turns this into a repeatable incident workflow. The anatomy of a Tracify trace is also laid out in [trace anatomy](/docs/trace-anatomy).
+
+## Rung 3: outcomes
+
+A trace tells you what the agent did. It does not tell you whether that was good. For that you need an **outcome** attached to the run: did the task finish, did the user accept the result, did a person have to correct it?
+
+Outcomes come from three places.
+
+| Source | Example | Strength | Weakness |
+| --- | --- | --- | --- |
+| Terminal status | Completed, refused, escalated, timed out | Always available | Says nothing about quality |
+| Explicit feedback | Thumbs up or down, a rating, a comment | Direct signal from the user | Sparse and biased toward extremes |
+| Implicit behavior | The user retried, rephrased or abandoned | Plentiful | Needs interpretation |
+
+Record all three when you can, and always the first. A run with no terminal status is itself a finding: it means something ended without the agent noticing.
+
+### Segment before you average
+
+An average success rate hides the failures that matter. Break outcomes down by workflow, release, input type, model and customer. A {% highlight %}flat 94 percent{% /highlight %} can be 99 percent on routine questions and 60 percent on the one question type your biggest customer asks. If you can only add one dimension, add the **release**, because most regressions arrive with a change you made.
+
+Tracify lets you attach feedback and scores to a trace, described in [feedback and scores](/docs/feedback-and-scores), so the user's verdict sits next to the spans that produced it.
+
+## Rung 4: evals
+
+Evals answer a question traces cannot: is this change better or worse than the last one? You run the agent against a fixed set of cases, score the results, and compare scores across versions.
+
+The cases should come from real traffic. Every bad run you debug is a candidate: add its input and the behavior you expected, and the same failure cannot return unnoticed. The practical steps are in the [AI agent evaluation guide](/blog/ai-agent-evaluation-practical-guide), and the regression side in [AI agent regression testing](/blog/ai-agent-regression-testing).
+
+### Keep evals honest
+
+Three habits keep evals trustworthy.
+
+1. **Freeze the set** while you compare versions. Changing cases and code together tells you nothing.
+2. **Read the worst runs**, not only the score. A better average with one new severe failure is a regression.
+3. **Refresh from production** on a schedule, so the set reflects what users actually ask now.
+
+{% editorial-panel eyebrow="Operating principle" title="Every fixed bug becomes a test case." body="When you debug a bad run, save its input and the behavior you expected. The next release is checked against it automatically, so the same mistake costs you nothing the second time." tone="yellow" /%}
+
+Tracify's [evaluation docs](/docs/evaluation) describe how to score runs, and [release gates](/docs/release-gates) describe how to block a deployment when scores drop.
+
+## Which signal to open first
+
+When something is wrong in production, the fastest teams do not browse. They match the symptom to one signal and open that first. The map below shows the five symptoms we see most often, and the table after it adds the reasoning.
+
+![A map from five common production symptoms to the first signal to open](/media/ai-agent-observability-complete-guide-symptom-map.svg)
+
+| Symptom | Open first | Why this one | If it looks fine |
+| --- | --- | --- | --- |
+| Wrong or unsupported answer | Retrieval and tool spans | The model can only use what it was given | Read the model span and its prompt |
+| Slow run | The longest child span | Latency concentrates in one dependency | Check retries and loop count |
+| Cost spike | Number of model calls per run | Cost is calls times tokens | Check prompt size and model choice |
+| Silent failure | Terminal status and error spans | Failures can end without an error | Look for runs with no terminal status |
+| Unsafe or unexpected action | Tool call arguments and approval record | The action was authorized somewhere | Check the policy and who approved |
+
+### Worked example: the refund that should not have happened
+
+Back to the opening scenario. The agent promised a refund the policy does not allow. Status was ok and latency was normal, so no alert fired.
+
+1. **Open the retrieval span.** It returned the refund policy for a different product line, because the query was too broad.
+2. **Open the model span.** The model followed the wrong policy faithfully. It did not hallucinate, it was misinformed.
+3. **Decide the fix.** The mechanism is retrieval, so change the retrieval filter, not the prompt. Rewriting the prompt would have hidden the symptom.
+4. **Lock it in.** Save the input as an eval case with the expected refusal. The next release is checked against it.
+
+Without the trace, the likely response is a longer prompt that says "follow the refund policy carefully". With the trace, the team fixes the cause in one change.
+
+## Cost and latency are first-class signals
+
+For agents, cost and latency belong beside correctness, not in a separate finance report. Both are properties of the path the agent took, so they are best read from the same trace.
+
+Record the model, input tokens and output tokens on every model span. Cost follows from those, and the SDK also accepts a cost value when you have it from your own pricing. Tracify does not guess prices for you. The [cost tracking docs](/docs/costs) explain how cost is calculated and shown.
+
+Then watch {% highlight %}cost per successful task{% /highlight %}, not cost per call. A cheap model that fails and retries three times can cost more than a larger model that gets it right once. A rising cost per task with flat traffic usually means more loop iterations or longer prompts.
+
+{% editorial-panel eyebrow="Diagnostic shortcut" title="Cost spike? Count the calls first." body="{% highlight %}Cost is calls times tokens.{% /highlight %} Open a few expensive runs and count their model spans before you touch a prompt. A retry loop or an unbounded planning cycle shows up immediately as a long, repetitive chain." tone="dark" /%}
+
+## Control: budgets, approvals and alerts
+
+The top rung is where observability starts to act. Once you can see a run, you can set limits on it and decide who must approve what.
+
+- **Alerts** route a threshold breach to a person who can act. {% highlight %}An alert with no owner is noise with a timestamp.{% /highlight %} The detail is in the [agent monitoring guide](/blog/ai-agent-monitoring).
+- **Budgets and loop limits** stop a runaway run before it becomes an invoice. Set a maximum number of steps and a maximum spend per run.
+- **Human approval** gates irreversible actions such as sending money or messages. The [human-in-the-loop guide](/blog/human-in-the-loop-ai-agents) explains where to draw that line.
+- **Release gates** block a deployment when evals regress.
+
+> **Security note:** Treat traces as sensitive data. They contain prompts, retrieved documents and tool arguments. Remove secrets before sending, limit who can read raw inputs, and choose a data region that fits your obligations. Tracify's SDK removes obvious secrets such as bearer tokens, API keys and password-style values and caps long values, but this is a safety net, not a guarantee. See [data regions](/docs/data-regions) and the [security page](/security) for what is stored where.
+
+### Fail open
+
+{% highlight %}Observability code must never break the agent it watches.{% /highlight %} Send telemetry in the background, treat a failed send as a warning, and never block the user's request on it. The Tracify SDK logs a warning on a failed send rather than throwing into your agent, and cost ceilings are designed to fail open so that monitoring cannot quietly stop production traffic.
+
+## Special cases worth knowing
+
+Some agents need extra care. Each has its own article, so here is only the pointer and the one idea to take away.
+
+| Agent type | One idea to take away | Deep dive |
 | --- | --- | --- |
-| Completion and terminal failure | Did the task finish, and why not? | Parent runs split by failure class and workflow |
-| Quality or evaluator result | Did the result meet the user contract? | Matched baseline/candidate traces and criterion failures |
-| Latency | Which critical path became slow? | p95 child spans, retries, and dependency timing |
-| Cost | Did spend rise for the same outcome? | Cost per successful task and repeated attempts |
-| Policy or safety result | Did the agent cross a forbidden boundary? | Decision evidence, blocked action, and owner |
+| Multi-agent systems | Trace the handoff, not only each agent | [Agentic AI observability](/blog/agentic-ai-observability) |
+| Tool servers over MCP | Record the tool contract and the result | [MCP observability guide](/blog/mcp-observability-guide) |
+| Browser agents | Keep the screenshot or action beside the span | [Browser agent observability](/blog/browser-agent-observability) |
 
-The [LLM observability metrics guide](/blog/llm-observability-metrics-that-matter) explains metric selection in more detail. Keep the first dashboard small enough that each signal has a consumer, review cadence, and bounded response.
+## Choosing tools without buying a platform too early
 
-> **Signal rule:** If a dimension cannot change the investigation or release decision, leave it off the first view. Add detail in response to a real question.
+You can start with open standards and a small amount of code. OpenTelemetry gives you a vendor-neutral way to emit spans, and many frameworks already instrument themselves. Move to a dedicated tool when you need the things a generic backend does not do well: reading model inputs and outputs as a conversation, grouping failures, scoring runs and comparing releases.
 
-## 4. Protect context without destroying usefulness
+The [guide to choosing AI observability tools](/blog/ai-observability-tools) lists the real categories and the criteria that separate them. The short version: pick on the rung you need next, not the one you hope to reach someday.
 
-Observability must respect privacy, access, and retention constraints. Redact secrets and unnecessary personal data at collection boundaries. Separate identifiers from content where possible. Make it clear who can inspect raw inputs, retrieved documents, tool arguments, and user reports, and record when a consequential decision required approval.
+## A rollout plan that does not stall
 
-The boundary is not “log everything” versus “log nothing.” It is choosing the minimum evidence that lets an authorized person reproduce the relevant path. A stable run identifier, version markers, structured classifications, and references to protected artifacts are often more useful than unbounded transcript storage.
+1. **Week 1: traces for one workflow.** Instrument the request boundary and the model and tool calls for your most important workflow. Confirm you can open a real run and explain it.
+2. **Week 2: outcomes.** Add a terminal status and, if possible, user feedback. Segment by release.
+3. **Week 3: a first eval set.** Take your ten worst recent runs, write the expected behavior, and score them.
+4. **Week 4: one alert and one limit.** Alert on something with an owner. Add a step limit and a per-run budget.
+5. **Then repeat for the next workflow.** Resist instrumenting everything at once.
 
-## 5. Make review a repeatable operating practice
+{% editorial-panel eyebrow="Decision room" title="Ship the smallest view that lets a stranger explain a run." body="If a new teammate can open a trace and explain what happened, why, and what to change, you are observable enough for now. If they need you in the room, add the missing field and nothing else." tone="paper" /%}
 
-Observability becomes operational when teams rehearse it. Ask a new operator to explain one representative successful run, one degraded run, and one failure using only the recorded evidence. Note where they need tribal knowledge. Add the smallest missing field, boundary event, or classification that would make the next review faster.
+## Mistakes we see most often
 
-During an incident, one person should reconstruct the timeline while another protects users through the existing fallback, pause, or approval path. Afterward, record which evidence was missing and whether the remedy belongs in code, data, prompt, policy, instrumentation, or the runbook. [Debugging AI agents in production](/blog/debug-ai-agents-in-production) provides a concrete investigation sequence.
+- **Logging everything, answering nothing.** Huge volume with no outcome or owner attached.
+- **Averaging away the problem.** One flat success rate hiding a failing segment.
+- **Fixing the prompt instead of the mechanism.** Retrieval, tool and policy bugs get patched with wording.
+- **No terminal status.** Runs that simply stop are invisible.
+- **Raw secrets in traces.** Telemetry becomes a second place to leak data.
+- **Alerts without owners.** Nobody acts, so everyone mutes them.
 
-### Assign ownership at the signal
+## Your checklist
 
-Every important signal needs an owner and a response. A latency drift may belong to the platform team; a groundedness regression to the workflow owner; a policy violation to the risk owner. Ownership should include the first action, escalation route, and review deadline. An alert with no consumer is noise with a timestamp.
+- [ ] One workflow has a trace boundary, and a stranger can explain a run from it.
+- [ ] Model spans record model, tokens and cost.
+- [ ] Every run ends with a terminal status.
+- [ ] Outcomes can be segmented by release.
+- [ ] A small eval set exists, made from real bad runs.
+- [ ] Secrets are removed and access to raw inputs is limited.
+- [ ] One alert has an owner and a first action.
+- [ ] A step limit and a per-run budget are set.
 
-## 6. Turn evidence into change
+## Next step
 
-The durable output of observability is not a larger event volume. It is a changed decision: a new regression case, a narrower tool contract, a corrected threshold, a staged release, an explicit refusal, or a documented acceptance of bounded risk.
+Pick the one workflow that would hurt most if it failed quietly. Instrument its boundary with the SDK, open three real runs (one good, one slow, one wrong), and write down what you could not answer. Add only the evidence that closes those gaps. The [Tracify quickstart](/docs/quickstart) walks through sending your first trace, and the free plan includes 25,000 spans a month, which is enough to try this on one real workflow.
 
-For a renewal assistant, a wrong answer might result from stale account state or from a model misreading a valid tool response. The final text alone cannot distinguish those mechanisms. The trace can. Compare the failing path with a known-good case from the same workflow and release, then change the control that addresses the mechanism rather than rewriting the prompt by instinct.
-
-> **Learning rule:** Preserve the evidence that disproves your first hypothesis. Disagreement between the user outcome, evaluator, and trace often reveals the missing contract.
-
-## Operational checklist
-
-- Name the parent task, expected outcome, and trust boundary.
-- Connect model, retrieval, tool, retry, approval, and state transitions.
-- Record release, prompt, model, policy, and configuration versions.
-- Pair aggregate signals with representative traces and meaningful slices.
-- Redact secrets and define authorized access and retention.
-- Give each important signal an owner, cadence, and bounded response.
-- Rehearse one success, degraded path, and failure with a new operator.
-- Turn confirmed mechanisms into tests, controls, alerts, or release decisions.
-
-## Next step: make observability actionable
-
-Choose one workflow and reconstruct three runs: a success, a degraded path, and a failure. Mark the missing evidence, add only what changes the investigation, and assign the next bounded action to an owner. The result should be a trace that helps the next person decide—not merely a longer log.
-
-## The ai agent observability complete guide operating model
-
-## Put ai agent observability complete guide into practice
-
-A useful article should help a reader move from an idea to a safe production decision. Start by stating the user-visible outcome, then identify the inputs, the owner, the evidence, and the terminal states. Do not begin with a tool or framework. Begin with the decision the system must support and the cost of getting that decision wrong. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Define the contract
-
-Write the input and output contract before tuning the model. Name required fields, acceptable values, missing-data behavior, and the response a user receives when the system cannot proceed. A schema validates shape, but it does not prove meaning or authorization. Follow parsing with semantic checks, policy checks, and an explicit fallback. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Separate proposal from authority
-
-A model can classify, extract, summarize, rank, or propose an action. Deterministic code should own permissions, limits, accounting, retention, and irreversible side effects. This boundary makes the system easier to test and easier to explain after an incident. If a model suggestion is rejected, route it to a visible state instead of silently rewriting it. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Build representative cases
-
-Create a small case set before claiming that an implementation works. Include ordinary examples, empty inputs, ambiguous requests, stale data, conflicting evidence, malformed outputs, permission boundaries, and provider failures. Label the expected user outcome and the unacceptable failure. Keep the cases versioned so a later change can be compared against the same baseline. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Validate the full path
-
-Unit tests are valuable for parsers, transitions, policies, and retry rules, but they do not prove the workflow works end to end. Add scenario tests that exercise retrieval, model calls, tool calls, timeouts, duplicate events, approvals, and partial completion. Preserve the trace for each important scenario and check both the final result and the intermediate evidence. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Make retries safe
-
-Every external write needs a stable identity, a bounded retry policy, and a reconciliation path. A timeout is not proof that an action failed. Record unknown outcomes explicitly, query the provider when possible, and prevent duplicate work with idempotency keys. Never let a generic retry loop decide whether a financial, permission, or communication side effect is safe. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Design human review
-
-Human review should be specific and actionable. Show the proposed action, normalized arguments, evidence, policy version, expected consequence, and expiration. Bind approval to that exact proposal. If a material field changes, invalidate the approval. Record the reviewer, decision, reason, and result so rejection patterns become improvements rather than repeated surprises. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Instrument useful evidence
-
-A trace should connect the original request to each meaningful stage and the final outcome. Capture versions, latency, cost, status, error category, tool arguments after redaction, and the evidence used for the decision. Avoid collecting sensitive payloads merely because they are available. Store references or structured summaries when raw content is not necessary for diagnosis. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Measure outcomes
-
-Completion rate is not enough. Measure correctness, user acceptance, review rate, repair rate, latency, cost, retries, and the frequency of unsafe or unauthorized proposals. Segment the results by version, model, customer cohort, input class, and failure mechanism. A higher automation rate can be a regression when it creates more corrections or delays discovery of mistakes. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Roll out in stages
-
-Use observation, shadow mode, suggestions, prepared drafts, approved execution, and only then broader automation. Give each stage an owner, cohort, success threshold, and rollback condition. Preserve the manual path until the automated path has demonstrated normal and degraded behavior. Keep in-flight work recoverable when a release is paused. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Operate failure states
-
-Make waiting, degraded, unknown, failed, cancelled, and completed distinct states. Tell the user whether the system is waiting for data, approval, a provider, a retry window, or manual repair. Give every waiting state an expiration or escalation path. Silent queues and ambiguous success messages are operational defects, not cosmetic issues. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Review changes
-
-Prompts, models, schemas, retrieval indexes, tools, providers, and policies are all dependencies. Version them and record their versions with each run. When behavior changes, compare a representative cohort with the previous baseline. Review quality, safety, latency, cost, and correction work together; optimizing one dimension can damage another. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Example decision record
-
-For a meaningful release, write a short record with the goal, affected workflow, expected improvement, known risks, evidence set, rollout stage, owner, rollback command, and review date. Link it to representative traces and the test cases that protect the most important boundary. This record turns a vague confidence claim into something another engineer can inspect. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-### Practical checklist
-
-Before launch, confirm that the workflow has a named owner, a clear contract, policy enforcement, safe side effects, representative tests, useful traces, and a recovery path. After launch, sample successful and failed runs, inspect corrections, update the case set, and retire metrics that do not change a decision. The goal is not maximal automation; it is a dependable user outcome that the team can explain and improve. For ai agent observability complete guide, use this as a concrete review criterion: connect the decision to its evidence, owner, and recovery path.
-
-## Failure scenarios in ai agent observability complete guide
-
-The happy path is the least informative path. Rehearse empty input, malformed output, stale context, unavailable dependencies, rate limits, duplicate callbacks, and a provider timeout after an external system may already have accepted the request. For each case, state the expected user-visible result, the durable record that proves what happened, and the person or process responsible for recovery.
-
-### A concrete runbook
-
-When an incident starts, identify the affected workflow and version, determine whether the problem is global or cohort-specific, pause new side effects if needed, and preserve a representative trace. Compare a failed run with the last known healthy run. Look for the first meaningful divergence rather than the loudest error. Record the hypothesis, reversible change, verification signal, and owner before editing production behavior.
-
-### Data and permissions
-
-Review every input source for freshness, scope, and authorization. A technically correct answer built from data the user should not see is still a failure. Propagate tenant and user context through retrieval and tools, filter before the model sees data when possible, and avoid treating a model instruction as permission. Test cross-tenant, revoked-access, and stale-credential cases explicitly.
-
-### Cost and capacity
-
-Measure cost per successful outcome, not merely cost per model call. A cheap answer that triggers retries, review, or correction can be more expensive than a larger reliable call. Set token, time, concurrency, and provider budgets. Define what degrades first when capacity is constrained, and ensure that load shedding does not bypass authorization or create untracked work.
-
-### Quality drift
-
-Quality can move when user questions, documents, providers, or model behavior changes. Keep a fixed regression set and a recent production sample. Compare not only averages but severe failures, cohort movement, abstention behavior, and correction work. If the system is uncertain, a safe review or explicit limitation is often preferable to a confident unsupported result.
-
-### Recovery and replay
-
-Replay only when the workflow is designed for it. Separate read-only analysis from side effects, preserve idempotency keys, and mark whether a run was original, retried, reconciled, or replayed. A replay should not silently send a message, charge an account, or change permissions. Provide operators with a dry-run mode and a clear confirmation step for consequential actions.
-
-### What to document
-
-Keep the contract, state machine, dependency versions, permissions, test cases, dashboards, alerts, rollback procedure, and escalation contacts near the workflow. Documentation should answer what the system does, what it cannot do, what evidence it records, and how to stop it safely. Update it after incidents and material changes, not only during an initial launch.
-
-### A review question
-
-Ask: if this workflow is wrong for one customer tomorrow, can the team identify the affected runs, stop further harm, explain the mechanism, recover unknown side effects, and prove the fix? If any answer is no, the next improvement belongs in observability, authorization, state management, testing, or the runbook—not in more persuasive output wording.
-
-### Closing practice
-
-Choose one representative workflow and perform the full exercise this week. Write its contract, rehearse two degraded cases, inspect one trace, measure one user outcome, and name one rollback condition. Keep the result small enough to use. Reliable systems are built through repeated evidence-based decisions, not through a single promise that the model will behave.
-
-## Final review questions
-
-Before treating this guidance as complete, ask what a careful operator would need at the moment the system surprises them. Can they tell which version ran, what evidence was available, which policy applied, and whether an external action is still unknown? Can they stop new work without losing recoverable state? Can they distinguish a model-quality problem from a retrieval problem, a policy problem, a provider problem, or an integration problem? These questions turn a conceptual guide into an operational one.
-
-A useful review compares three runs: one that succeeded cleanly, one that succeeded only after a retry or human correction, and one that failed. Record the timeline, state transitions, inputs, outputs, costs, and user-visible result. The comparison often reveals that the system’s most important missing feature is not another metric but a durable boundary: a missing owner, an ambiguous terminal state, an unlogged approval, an unsafe retry, or an output that was accepted without semantic validation.
-
-Treat the result as a living contract. When a model, prompt, tool, policy, provider, data source, or workflow state changes, update the representative cases and rerun the relevant checks. Keep the old behavior available during staged rollout when the side effects matter. Retire a control only when its replacement covers the same failure and the evidence shows that the new boundary is understood.
-
-The best implementation is usually the smallest one that makes the decision explicit. Prefer a narrow workflow with clear permissions, predictable recovery, and honest uncertainty over a broad agent that can do more but cannot explain what it did. Measure the correction work created for people, not just the work removed from the queue. If the new path saves time while increasing hidden review or incident cost, it has not improved the user outcome.
-
-Use this guide to produce a concrete next action. Pick one workflow, name its owner, write the contract, collect representative traces, choose one quality and one safety signal, and set a rollback condition. Review the result with engineering, security, and the people who handle exceptions. Their questions are part of the system design. A dependable production workflow is not defined by a long prompt or a high demo score; it is defined by a user-visible outcome that remains explainable, bounded, and recoverable as conditions change.
-
-## From ai agent observability complete guide draft to durable practice
-
-A production article should leave the reader with a sequence they can execute and inspect. Start with a baseline: one representative input, one expected outcome, one failure case, and one trace or record that makes the result visible. Change one meaningful variable at a time. If the result improves, record why; if it regresses, preserve the case so the regression becomes a durable test instead of a forgotten anecdote.
-
-When choosing between alternatives, state the tradeoff plainly. Simpler systems are easier to operate but may provide less coverage. More retrieval, more tools, or more model calls may improve one quality measure while increasing latency, cost, privacy exposure, and failure surface. The right choice depends on the user outcome and the risk budget. A recommendation is only useful when the reader knows when not to use it.
-
-Make uncertainty visible. Use abstention, escalation, citations, confidence bands, or a clear “not enough evidence” state when the workflow cannot support a reliable result. Do not convert missing evidence into confident prose. Define which uncertainties are acceptable, which require human review, and which should stop execution. Then test those boundaries with examples that are deliberately incomplete or adversarial.
-
-Plan ownership beyond launch. Someone should own the workflow contract, dependency updates, dashboards, incident response, and review cadence. The owner should be able to answer how a release is evaluated, how a bad change is rolled back, and how users are informed during degradation. Shared ownership without a named decision-maker usually becomes no ownership when the first failure crosses team boundaries.
-
-Include the maintenance loop in the implementation. Sample production results, inspect correction work, refresh the regression set, review costs and latency, and remove metrics that do not guide action. Feed confirmed incidents into tests, policies, or state transitions. A fix that changes only wording may hide a symptom; a durable fix changes the mechanism that allowed the failure or makes the failure safe and visible.
-
-Finally, define completion precisely. A workflow is not complete because the demo passed or because the model produced a plausible answer. It is complete when its inputs and outputs are bounded, its authority is explicit, its evidence is traceable, its side effects are safe to retry or reconcile, its degraded states are honest, and its owner can prove the result with representative cases. Use that standard to decide what to build next and what to leave out.
 ## Frequently asked questions
 
-{% faq-item question="Where should observability begin?" answer="Begin with one user-visible workflow and its expected outcome. Define the parent task, terminal states, and trust boundaries, then add the smallest connected evidence that lets another person explain a representative run." /%}
+{% faq-item question="What is AI agent observability?" answer="It is the practice of recording what an agent tried, what evidence shaped each step and what the user received, so teams can debug failures, control cost and release changes safely. It is built on traces of model calls, tool calls and retrieval, plus outcomes and evaluations." /%}
 
-{% faq-item question="What is the smallest useful trace?" answer="A stable task identifier, outcome and terminal status, relevant release and model context, the important child operations, timing and failure classifications, and the decision or fallback that ended the path. Add raw content only when an authorized investigation requires it." /%}
+{% faq-item question="How is agent observability different from monitoring?" answer="Monitoring watches signals you chose in advance and alerts when they cross a threshold. Observability lets you investigate a question you did not plan for, such as which retrieved document caused a wrong answer. You need both, and monitoring depends on the traces observability provides." /%}
 
-{% faq-item question="Who owns the evidence?" answer="The owner is the person or team who can act when the signal changes. Assign ownership by workflow and consequence, then document the first response, escalation route, review cadence, and access boundaries. Shared dashboards without accountable consumers decay into noise." /%}
+{% faq-item question="Do I need a special tool, or can I use OpenTelemetry?" answer="You can start with OpenTelemetry spans and a general backend. A dedicated tool becomes worth it when you need to read model inputs and outputs as a conversation, score runs, compare releases and group similar failures." /%}
+
+{% faq-item question="What should I record on every model call?" answer="The model name, input and output tokens, duration, any error, a trimmed input and output with secrets removed, and the release that produced it. Cost can be derived from tokens or passed in directly." /%}
+
+{% faq-item question="How do I start without slowing the agent down?" answer="Instrument one workflow at its request boundary and send telemetry in the background so a failed send never blocks a user. Add child spans only when a real question needs them." /%}

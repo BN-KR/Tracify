@@ -279,7 +279,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ feature: string }> }): Promise<Metadata> {
   const { feature } = await params;
   const page = productFeatures[feature as Feature];
-  return page ? pageMetadata({ title: page.title, description: page.description, path: `/product/${feature}` }) : { title: "Product" };
+  const seoTitles: Partial<Record<string, string>> = { "trace-viewer": "AI agent trace viewer: spans, tool calls and cost" };
+  return page ? pageMetadata({ title: seoTitles[feature] ?? page.title, description: page.description, path: `/product/${feature}` }) : { title: "Product" };
 }
 
 function ProductBreadcrumb({ title, slug }: { title: string; slug: string }) {

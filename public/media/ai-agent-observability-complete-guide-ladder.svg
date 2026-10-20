@@ -1,0 +1,25 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ladTitle ladDesc">
+  <title id="ladTitle">The five-rung agent observability ladder</title>
+  <desc id="ladDesc">A staircase of five steps on a black canvas. From the bottom: Logs, Traces, Outcomes, Evals and Control. Each step is labeled with the question it lets a team answer, from what happened, to why, to did it work, to is it good enough, to may it act.</desc>
+  <rect width="1600" height="900" fill="#0a0a0a"/>
+  <text x="80" y="78" fill="#f4d44d" font-family="monospace" font-size="20" letter-spacing="3">THE OBSERVABILITY LADDER</text>
+  <g font-family="monospace" font-weight="700">
+    <rect x="80" y="660" width="260" height="160" fill="#f6f1e6"/>
+    <text x="104" y="712" font-size="30" fill="#0a0a0a">1 LOGS</text>
+    <text x="104" y="752" font-size="16" fill="#0a0a0a">What happened?</text>
+    <rect x="340" y="540" width="260" height="280" fill="#f6f1e6"/>
+    <text x="364" y="592" font-size="30" fill="#0a0a0a">2 TRACES</text>
+    <text x="364" y="632" font-size="16" fill="#0a0a0a">Why did it happen?</text>
+    <rect x="600" y="420" width="260" height="400" fill="#f6f1e6"/>
+    <text x="624" y="472" font-size="30" fill="#0a0a0a">3 OUTCOMES</text>
+    <text x="624" y="512" font-size="16" fill="#0a0a0a">Did the user win?</text>
+    <rect x="860" y="300" width="260" height="520" fill="#f6f1e6"/>
+    <text x="884" y="352" font-size="30" fill="#0a0a0a">4 EVALS</text>
+    <text x="884" y="392" font-size="16" fill="#0a0a0a">Is it good enough?</text>
+    <rect x="1120" y="180" width="400" height="640" fill="#f4d44d"/>
+    <text x="1144" y="232" font-size="30" fill="#0a0a0a">5 CONTROL</text>
+    <text x="1144" y="272" font-size="16" fill="#0a0a0a">May it act, and can</text>
+    <text x="1144" y="296" font-size="16" fill="#0a0a0a">we stop it safely?</text>
+  </g>
+  <g stroke="#f4d44d" stroke-width="3" fill="none"><path d="M210 640 V610 H340"/><path d="M470 520 V490 H600"/><path d="M730 400 V370 H860"/><path d="M990 280 V250 H1120"/></g>
+</svg>
