@@ -34,7 +34,7 @@ Use the documentation for implementation details and the blog for explanatory gu
 - [Rate limit calculator](https://www.tracify.tech/tools/rate-limit-calculator): How many users an app can serve within its provider's rate limits.
 - [Free AI agent cost estimator](https://www.tracify.tech/tools/ai-cost-estimator): Estimate cost per run, per finished task and per month from traffic and token counts.
 - [Best LLM observability tools](https://www.tracify.tech/best-llm-observability-tools): How to choose a tool, and who each option fits.
-- [Use cases](https://www.tracify.tech/use-cases/coding): Coding, RAG, voice, browser, multi-agent, MCP, support, research, automation and tool-calling agents.
+- [Use cases](https://www.tracify.tech/use-cases/coding): Coding, RAG, voice, browser, multi-agent, MCP, chatbot, sales, SQL, document, cost control, release testing and internal copilot use cases, plus support, research, automation and tool-calling agents.
 - [Glossary](https://www.tracify.tech/glossary): Short definitions of agent observability terms, one page per term.
 - [Trace OpenAI calls](https://www.tracify.tech/integrations/openai), [Anthropic](https://www.tracify.tech/integrations/anthropic), [LangGraph](https://www.tracify.tech/integrations/langgraph), [OpenTelemetry](https://www.tracify.tech/integrations/opentelemetry): Setup pages per integration.
 - [Full text for AI](https://www.tracify.tech/llms-full.txt): Docs, glossary, comparisons and integrations as one plain-text file.
