@@ -1,6 +1,8 @@
 import { FACET_KEYS, activityTimeZone, type ActivityDay, type ErrorGroup, type FacetCounts, type FacetKey, type HistogramBucket, type TraceListFilters, type TraceStats } from "@/lib/tinybird";
 import { flowGraph, flowPairId, type FlowStep } from "@/lib/trace-flow";
 import { validTraceSort } from "@/lib/trace-sort";
+import type { GroupFilters, GroupKind } from "@/lib/group-filters";
+import type { GroupRow, GroupStats } from "@/lib/tinybird-groups";
 import { demoGroupId, demoRuns, demoSteps, type DemoRun } from "./demo-project";
 
 /** In-memory twins of the analytics queries behind the Tracing page, run over the demo project's runs. */
@@ -254,29 +256,98 @@ export function demoSummary(days: number, nowMs = Date.now()) {
   };
 }
 
-/** Sessions (one customer's conversation across runs) in the last `days` days, newest first. */
-export function demoSessions(days: number, nowMs = Date.now()) {
-  const map = new Map<string, { sessionId: string; user: string; runs: number; errors: number; costUsd: number; firstMs: number; lastMs: number; agents: Set<string> }>();
-  for (const run of demoFilter({ fromMs: nowMs - days * 86_400_000, toMs: nowMs }, undefined, nowMs)) {
-    const entry = map.get(run.sessionId) ?? { sessionId: run.sessionId, user: run.endUserId, runs: 0, errors: 0, costUsd: 0, firstMs: run.startMs, lastMs: run.startMs, agents: new Set<string>() };
-    entry.runs++; entry.errors += run.errorCount > 0 ? 1 : 0; entry.costUsd += run.totalCostUsd; entry.firstMs = Math.min(entry.firstMs, run.startMs); entry.lastMs = Math.max(entry.lastMs, run.startMs + run.durationMs); entry.agents.add(run.traceName);
-    map.set(run.sessionId, entry);
-  }
-  const all = [...map.values()].sort((a, b) => b.lastMs - a.lastMs);
-  return { total: all.length, sessions: all.slice(0, 50).map(({ agents, ...rest }) => ({ ...rest, agents: [...agents] })) };
-}
-
-/** Customers (end users) in the last `days` days, busiest first. */
-export function demoUsers(days: number, nowMs = Date.now()) {
-  const map = new Map<string, { user: string; tier: string; region: string; runs: number; errors: number; costUsd: number; tokens: number; lastMs: number }>();
-  for (const run of demoFilter({ fromMs: nowMs - days * 86_400_000, toMs: nowMs }, undefined, nowMs)) {
-    const entry = map.get(run.endUserId) ?? { user: run.endUserId, tier: run.meta.customer_tier ?? "", region: run.meta.region ?? "", runs: 0, errors: 0, costUsd: 0, tokens: 0, lastMs: 0 };
-    entry.runs++; entry.errors += run.errorCount > 0 ? 1 : 0; entry.costUsd += run.totalCostUsd; entry.tokens += run.inputTokens + run.outputTokens; entry.lastMs = Math.max(entry.lastMs, run.startMs);
-    map.set(run.endUserId, entry);
-  }
-  const all = [...map.values()].sort((a, b) => b.runs - a.runs);
-  return { total: all.length, users: all.slice(0, 50) };
-}
-
 /** The current time, read outside React components so pages stay pure. */
 export const demoNow = () => Date.now();
+
+/** Sessions or users of the demo project in the shape the Sessions and Users pages read, with the same filters, sorting and paging. */
+function demoGroupRows(kind: GroupKind, filters: Pick<GroupFilters, "fromMs" | "toMs" | "query" | "environment">, nowMs: number): GroupRow[] {
+  const key = kind === "session" ? "sessionId" : "endUserId";
+  const otherKey = kind === "session" ? "endUserId" : "sessionId";
+  const groups = new Map<string, { runs: DemoRun[]; others: Set<string> }>();
+  const needle = filters.query?.toLowerCase();
+  for (const run of demoFilter({ fromMs: filters.fromMs, toMs: filters.toMs }, undefined, nowMs)) {
+    if (filters.environment && run.environment !== filters.environment) continue;
+    if (needle && !run[key].toLowerCase().includes(needle) && !run[otherKey].toLowerCase().includes(needle)) continue;
+    const group = groups.get(run[key]) ?? { runs: [], others: new Set<string>() };
+    group.runs.push(run); group.others.add(run[otherKey]); groups.set(run[key], group);
+  }
+  return [...groups.entries()].map(([id, { runs, others }]) => {
+    const first = Math.min(...runs.map((run) => run.startMs)), last = Math.max(...runs.map((run) => run.startMs + run.durationMs));
+    const cost = new Map<string, number>();
+    for (const run of runs) cost.set(run.modelId, (cost.get(run.modelId) ?? 0) + run.totalCostUsd);
+    return {
+      id, runs: runs.length, spanCount: runs.reduce((sum, run) => sum + run.spanCount, 0), failedRuns: runs.filter((run) => run.errorCount > 0).length,
+      totalCostUsd: runs.reduce((sum, run) => sum + run.totalCostUsd, 0), inputTokens: runs.reduce((sum, run) => sum + run.inputTokens, 0), outputTokens: runs.reduce((sum, run) => sum + run.outputTokens, 0),
+      firstSeenAt: stamp(first), lastSeenAt: stamp(last), spanSeconds: Math.round((last - first) / 1000), others: others.size, other: runs[0][otherKey],
+      environment: runs[0].environment, topModel: [...cost.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "",
+    };
+  });
+}
+
+export function demoGroups(kind: GroupKind, filters: GroupFilters, nowMs = Date.now()) {
+  const all = demoGroupRows(kind, filters, nowMs).filter((row) => (filters.status === "error" ? row.failedRuns > 0 : filters.status === "healthy" ? row.failedRuns === 0 : true));
+  const value = (row: GroupRow) => {
+    switch (filters.sort) {
+      case "firstSeenAt": return row.firstSeenAt;
+      case "runs": return row.runs;
+      case "failedRuns": return row.failedRuns;
+      case "totalCostUsd": return row.totalCostUsd;
+      case "tokens": return row.inputTokens + row.outputTokens;
+      case "spanSeconds": return row.spanSeconds;
+      case "id": return row.id;
+      default: return row.lastSeenAt;
+    }
+  };
+  const sign = filters.direction === "asc" ? 1 : -1;
+  all.sort((a, b) => { const x = value(a), y = value(b); return (x < y ? -1 : x > y ? 1 : 0) * sign || a.id.localeCompare(b.id); });
+  const environments = new Map<string, Set<string>>();
+  const key = kind === "session" ? "sessionId" : "endUserId";
+  for (const run of demoFilter({ fromMs: filters.fromMs, toMs: filters.toMs }, undefined, nowMs)) { const set = environments.get(run.environment) ?? new Set<string>(); set.add(run[key]); environments.set(run.environment, set); }
+  const stats: GroupStats = {
+    groups: all.length, runs: all.reduce((sum, row) => sum + row.runs, 0), failedRuns: all.reduce((sum, row) => sum + row.failedRuns, 0), groupsWithErrors: all.filter((row) => row.failedRuns > 0).length,
+    totalCostUsd: all.reduce((sum, row) => sum + row.totalCostUsd, 0), tokens: all.reduce((sum, row) => sum + row.inputTokens + row.outputTokens, 0),
+  };
+  return {
+    rows: all.slice(filters.page * filters.pageSize, (filters.page + 1) * filters.pageSize), total: all.length, stats, page: filters.page, pageSize: filters.pageSize,
+    environments: [...environments.entries()].map(([value, ids]) => ({ value, groups: ids.size })).sort((a, b) => b.groups - a.groups),
+  };
+}
+
+export function demoGroupDetail(kind: GroupKind, id: string, nowMs = Date.now()) {
+  const key = kind === "session" ? "sessionId" : "endUserId";
+  const otherKey = kind === "session" ? "endUserId" : "sessionId";
+  const runs = demoFilter({ fromMs: nowMs - 90 * 86_400_000, toMs: nowMs }, undefined, nowMs).filter((run) => run[key] === id);
+  const row = demoGroupRows(kind, { fromMs: nowMs - 90 * 86_400_000, toMs: nowMs }, nowMs).find((item) => item.id === id) ?? null;
+  const siblings = new Map<string, { id: string; runs: number; failedRuns: number; totalCostUsd: number; lastMs: number }>();
+  for (const run of runs) {
+    const entry = siblings.get(run[otherKey]) ?? { id: run[otherKey], runs: 0, failedRuns: 0, totalCostUsd: 0, lastMs: 0 };
+    entry.runs++; entry.failedRuns += run.errorCount > 0 ? 1 : 0; entry.totalCostUsd += run.totalCostUsd; entry.lastMs = Math.max(entry.lastMs, run.startMs); siblings.set(entry.id, entry);
+  }
+  return { row, siblings: [...siblings.values()].sort((a, b) => b.lastMs - a.lastMs).slice(0, 25).map(({ lastMs, ...rest }) => ({ ...rest, lastSeenAt: stamp(lastMs) })) };
+}
+
+/** The cost breakdowns the dashboard widgets read, for the last `days` days of the demo project. */
+export function demoCostStats(days: number, nowMs = Date.now()) {
+  const daily = new Map<string, { day: string; totalCostUsd: number; spanCount: number }>();
+  const models = new Map<string, { modelId: string; totalCostUsd: number; spanCount: number }>();
+  const tools = new Map<string, { toolName: string; totalCostUsd: number; spanCount: number }>();
+  const users = new Map<string, { endUserId: string; totalCostUsd: number; totalTokens: number; spanCount: number }>();
+  for (const run of demoFilter({ fromMs: nowMs - days * 86_400_000, toMs: nowMs }, undefined, nowMs)) {
+    const day = stamp(Math.floor(run.startMs / 86_400_000) * 86_400_000).slice(0, 10);
+    const bucket = daily.get(day) ?? { day, totalCostUsd: 0, spanCount: 0 };
+    bucket.totalCostUsd += run.totalCostUsd; bucket.spanCount += run.spanCount; daily.set(day, bucket);
+    for (const [modelId, usage] of Object.entries(run.modelUsage)) {
+      const entry = models.get(modelId) ?? { modelId, totalCostUsd: 0, spanCount: 0 };
+      entry.totalCostUsd += usage.costUsd; entry.spanCount += usage.calls; models.set(modelId, entry);
+    }
+    for (const span of demoSteps(run)) {
+      if (!span.toolName) continue;
+      const entry = tools.get(span.toolName) ?? { toolName: span.toolName, totalCostUsd: 0, spanCount: 0 };
+      entry.totalCostUsd += span.costUsd; entry.spanCount++; tools.set(span.toolName, entry);
+    }
+    const user = users.get(run.endUserId) ?? { endUserId: run.endUserId, totalCostUsd: 0, totalTokens: 0, spanCount: 0 };
+    user.totalCostUsd += run.totalCostUsd; user.totalTokens += run.inputTokens + run.outputTokens; user.spanCount += run.spanCount; users.set(run.endUserId, user);
+  }
+  const byCost = <T extends { totalCostUsd: number }>(items: Map<string, T>, limit: number) => [...items.values()].sort((a, b) => b.totalCostUsd - a.totalCostUsd).slice(0, limit);
+  return { dailyCosts: [...daily.values()].sort((a, b) => a.day.localeCompare(b.day)), modelCosts: byCost(models, 10), toolCosts: byCost(tools, 10), userCosts: byCost(users, 10) };
+}
