@@ -17,6 +17,7 @@ const YELLOW = "#F4D44D";
 const RED = "#FF6B6B";
 const BLUE = "#8AB4FF";
 const GRAY = "#8B93A1";
+const MAX_BAR = 28;
 const MARGIN = { left: 50, right: 8, top: 8, bottom: 22 };
 
 const bucketStart = (bucket: ChartBucket) => Date.parse(bucket.bucket.replace(" ", "T") + "Z");
@@ -141,7 +142,7 @@ function SeriesChart({ kind, stacked = false, series, points, bucketSeconds, hei
                 if (value <= 0) return null;
                 const top = y(base + value), bottom = y(base);
                 base += stacked ? value : 0;
-                const barWidth = Math.max(2, step - 2);
+                const barWidth = Math.min(MAX_BAR, Math.max(2, step - 2));
                 return <rect key={`${index}-${item.key}`} x={xCenter(index) - barWidth / 2} y={top} width={barWidth} height={Math.max(2, bottom - top - (stacked && base > value ? 1 : 0))} rx={2} fill={item.color} opacity={hover === null || hover === index ? 1 : 0.55} />;
               });
             }) : lines.map(({ item, path }) => (
@@ -206,15 +207,15 @@ export function TracesOverTime({ histogram, range, onZoom }: { histogram?: Histo
   return (
     <div className="px-4 pt-3">
       <div className="mb-1.5 flex items-center justify-between text-xs text-[#8B93A1]">
-        <span>Traces over time{!empty && histogram ? " · click a bar to zoom" : ""}</span>
-        <span className="flex items-center gap-3"><span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-[#F4D44D]" />traces</span><span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-[#FF6B6B]" />with errors</span></span>
+        <span>Traces over time, ok and with errors stacked{!empty && histogram ? " · click a bar to zoom" : ""}</span>
+        <span className="flex items-center gap-3"><span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-[#F4D44D]" />ok</span><span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-[#FF6B6B]" />with errors</span></span>
       </div>
       <div className="rounded-lg border border-[#1F242C] bg-[#0E1115] px-2" style={{ minHeight: 100 }}>
         {empty ? <p className="py-8 text-center text-xs text-[#4A5260]">No traces to chart</p> : histogram ? (
           <SeriesChart kind="bars" stacked height={100} points={points} bucketSeconds={histogram.bucketSeconds} label="Traces over time, split into ok and with errors"
             format={(v) => compactNumber(Math.round(v))} onZoom={onZoom}
             series={[{ key: "ok", color: YELLOW, values: traces.map((n, i) => n - errors[i]!) }, { key: "errors", color: RED, values: errors }]}
-            tooltip={(i) => [{ label: "Traces", color: YELLOW, value: String(traces[i]) }, { label: "With errors", color: RED, value: String(errors[i]) }]} />
+            tooltip={(i) => [{ label: "Total", color: GRAY, value: String(traces[i]) }, { label: "ok", color: YELLOW, value: String(traces[i]! - errors[i]!) }, { label: "With errors", color: RED, value: String(errors[i]) }]} />
         ) : null}
       </div>
     </div>
@@ -260,7 +261,7 @@ function RangeCharts({ histogram, range, onZoom }: { histogram?: Histogram; rang
         <Card wide title="Traces" summary={`${compactNumber(totals.traces)} total · ${compactNumber(totals.errors)} with errors`} legend={[{ label: "ok", color: YELLOW }, { label: "with errors", color: RED }]}>
           <SeriesChart {...common} kind="bars" stacked height={170} label="Traces over time, split into ok and with errors" format={(v) => compactNumber(Math.round(v))}
             series={[{ key: "ok", color: YELLOW, values: traces.map((n, i) => n - errors[i]!) }, { key: "errors", color: RED, values: errors }]}
-            tooltip={(i) => [{ label: "Traces", color: YELLOW, value: String(traces[i]) }, { label: "With errors", color: RED, value: String(errors[i]) }]} />
+            tooltip={(i) => [{ label: "Total", color: GRAY, value: String(traces[i]) }, { label: "ok", color: YELLOW, value: String(traces[i]! - errors[i]!) }, { label: "With errors", color: RED, value: String(errors[i]) }]} />
         </Card>
         <Card title="Error rate" summary={totals.traces ? `${((totals.errors / totals.traces) * 100).toFixed(1)}% overall` : "—"}>
           <SeriesChart {...common} kind="line" label="Share of traces with errors over time" format={(v) => `${v < 10 ? v.toFixed(1) : Math.round(v)}%`}
