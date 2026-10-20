@@ -56,4 +56,15 @@ describe("deployment host routing", () => {
     expect(response.headers.get("location")).toBeNull();
     expect(response.headers.get("x-middleware-next")).toBe("1");
   });
+
+  it("serves the admin area on the cloud host and sends marketing-host visits through region selection", () => {
+    process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND = "cloud";
+    const cloud = proxy(new NextRequest("https://eu.cloud.tracify.tech/admin/leads"));
+    expect(cloud.headers.get("location")).toBeNull();
+    expect(cloud.headers.get("x-middleware-next")).toBe("1");
+
+    process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND = "marketing";
+    const marketing = proxy(new NextRequest("https://www.tracify.tech/admin"));
+    expect(marketing.headers.get("location")).toBe("https://www.tracify.tech/cloud?next=%2Fadmin");
+  });
 });

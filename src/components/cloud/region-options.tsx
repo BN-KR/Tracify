@@ -14,7 +14,7 @@ export function RegionOptions({ regions, next, intent }: { regions: RegionOption
     const target = `/cloud/connecting?region=${encodeURIComponent(regionId)}&next=${encodeURIComponent(next)}&intent=${intent}`;
     // Give the user an explicit handoff state before the browser may cross to a
     // different regional origin. This avoids a click appearing to do nothing.
-    window.setTimeout(() => { window.location.assign(target); }, 300);
+    window.setTimeout(() => { window.location.assign(target); }, 120);
   }
 
   return <div className="relative border border-white/20 bg-[#111]">

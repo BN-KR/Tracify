@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronUp, CreditCard, Globe2, LogOut, Sparkles, UserPen } from "lucide-react";
+import { ChevronUp, CreditCard, Globe2, LogOut, ShieldCheck, Sparkles, UserPen } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
@@ -32,6 +32,7 @@ export function SidebarAccountMenu({
   const { data: session } = authClient.useSession();
   const projects = useQuery(api.projects.getProjectsByUserOrOrg, synthetic ? "skip" : undefined) || [];
   const currentProject = projects.find((project) => project._id === projectId) ?? projects[0] ?? null;
+  const adminAccess = useQuery(api.admin.access, synthetic ? "skip" : undefined);
   const isFree = !synthetic && (currentProject?.planTier ?? "free") === "free";
   const region = getTracifyRegion();
 
@@ -90,6 +91,14 @@ export function SidebarAccountMenu({
             <span>Billing</span>
           </Link>
         </DropdownMenuItem>
+        {adminAccess?.allowed ? (
+          <DropdownMenuItem asChild>
+            <Link href="/admin" prefetch>
+              <ShieldCheck className="size-4" />
+              <span>Admin</span>
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem asChild>
           <a href={`${MARKETING_ORIGIN}/cloud`}>
             <Globe2 className="size-4" />

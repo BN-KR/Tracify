@@ -23,6 +23,7 @@ const CLOUD_APP_PREFIXES = [
   "/auth/error",
   "/auth/callback",
   "/cloud/mode",
+  "/admin",
   "/demo",
 ];
 

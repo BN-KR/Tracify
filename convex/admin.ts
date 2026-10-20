@@ -18,20 +18,35 @@ function list(name: string) {
  * Admin access is enforced here, on the backend. The caller must be on the
  * allowlist AND have a verified email address on their account.
  */
-async function requireAdmin(ctx: QueryCtx) {
+async function adminEmail(ctx: QueryCtx) {
   const identity = await ctx.auth.getUserIdentity();
-  if (!identity) throw new Error("Admin access required");
+  if (!identity) return null;
   const email = identity.email?.toLowerCase();
   const emails = [...BUILT_IN_ADMIN_EMAILS, ...list("TRACIFY_LIBRARY_ADMIN_EMAILS").map((x) => x.toLowerCase())];
   const allowed = list("TRACIFY_ADMIN_USER_IDS").includes(identity.subject) || (!!email && (emails.includes(email) || ADMIN_DOMAINS.some((d) => email.endsWith("@" + d))));
-  if (!allowed || !email) throw new Error("Admin access required");
+  if (!allowed || !email) return null;
   const account = (await ctx.runQuery(components.betterAuth.adapter.findOne, {
     model: "user",
     where: [{ field: "email", value: email }],
   })) as AuthUser | null;
-  if (!account || account.emailVerified !== true) throw new Error("Admin access required");
+  if (!account || account.emailVerified !== true) return null;
+  return email;
+}
+
+async function requireAdmin(ctx: QueryCtx) {
+  const email = await adminEmail(ctx);
+  if (!email) throw new Error("Admin access required");
   return { email };
 }
+
+/** Lets the app decide whether to show the Admin link and page. Never throws. */
+export const access = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    return { authenticated: !!identity, allowed: !!identity && !!(await adminEmail(ctx)) };
+  },
+});
 
 export const overview = query({
   args: {},
