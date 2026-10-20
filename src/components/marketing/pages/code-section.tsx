@@ -407,6 +407,141 @@ def agent(request):
     choice = pick_tool(request)
     return call_mcp_tool(choice.server, choice.tool, choice.args)`,
   },
+  chatbot: {
+    title: "Trace every turn, not just the chat.",
+    lede: "Open one trace per conversation and one span per turn, and the history each reply used is stored next to it.",
+    ts: `import { span, traceAgent } from "tracify-sdk";
+
+export const reply = traceAgent(async (history: string[], message: string) => {
+  const context = await span("load-history", () => trimHistory(history), { type: "tool", input: message });
+  return span("reply", () => callModel(context, message), { type: "llm" });
+}, { environment: "production" });`,
+    py: `import tracify
+
+@tracify.trace_agent(environment="production")
+def reply(history, message):
+    with tracify.span("load-history", type="tool", input=message):
+        context = trim_history(history)
+    with tracify.span("reply", type="llm"):
+        return call_model(context, message)`,
+  },
+  sales: {
+    title: "Put the lead and the draft in one trace.",
+    lede: "Record the record lookup, the draft and the send check as spans, and every message has the data behind it.",
+    ts: `import { span, traceAgent } from "tracify-sdk";
+
+export const outreach = traceAgent(async (leadId: string) => {
+  const lead = await span("load-lead", () => crm.get(leadId), { type: "tool", input: leadId });
+  const draft = await span("write-draft", () => writeEmail(lead), { type: "llm" });
+  return span("send-check", () => checkAndSend(lead, draft), { type: "tool" });
+}, { environment: "production" });`,
+    py: `import tracify
+
+@tracify.trace_agent(environment="production")
+def outreach(lead_id):
+    with tracify.span("load-lead", type="tool", input=lead_id):
+        lead = crm.get(lead_id)
+    with tracify.span("write-draft", type="llm"):
+        draft = write_email(lead)
+    with tracify.span("send-check", type="tool"):
+        return check_and_send(lead, draft)`,
+  },
+  sql: {
+    title: "Store the SQL exactly as it ran.",
+    lede: "Wrap the schema read, the query and the explanation, and a wrong number points to the query that made it.",
+    ts: `import { span, traceAgent } from "tracify-sdk";
+
+export const ask = traceAgent(async (question: string) => {
+  const sql = await span("write-sql", () => writeSql(question), { type: "llm", input: question });
+  const rows = await span("run-query", () => db.query(sql), { type: "tool", input: sql });
+  return span("explain", () => explain(question, rows), { type: "llm" });
+}, { environment: "production" });`,
+    py: `import tracify
+
+@tracify.trace_agent(environment="production")
+def ask(question):
+    with tracify.span("write-sql", type="llm", input=question):
+        sql = write_sql(question)
+    with tracify.span("run-query", type="tool", input=sql):
+        rows = db.query(sql)
+    with tracify.span("explain", type="llm"):
+        return explain(question, rows)`,
+  },
+  documents: {
+    title: "Make every field traceable to its page.",
+    lede: "Record the read and the extraction as separate spans, and a wrong field shows the text the model saw.",
+    ts: `import { span, traceAgent } from "tracify-sdk";
+
+export const extract = traceAgent(async (fileId: string) => {
+  const pages = await span("read-pages", () => readPages(fileId), { type: "tool", input: fileId });
+  const fields = await span("extract-fields", () => extractFields(pages), { type: "llm" });
+  return span("validate", () => validate(fields), { type: "tool" });
+}, { environment: "production" });`,
+    py: `import tracify
+
+@tracify.trace_agent(environment="production")
+def extract(file_id):
+    with tracify.span("read-pages", type="tool", input=file_id):
+        pages = read_pages(file_id)
+    with tracify.span("extract-fields", type="llm"):
+        fields = extract_fields(pages)
+    with tracify.span("validate", type="tool"):
+        return validate(fields)`,
+  },
+  "cost-control": {
+    title: "Price every step as it runs.",
+    lede: "Model calls already carry their token cost. Wrap the steps around them and the trace adds up where the money went.",
+    ts: `import { span, traceAgent } from "tracify-sdk";
+
+export const work = traceAgent(async (task: string) => {
+  const plan = await span("plan", () => callModel(task), { type: "llm", input: task });
+  return span("act", () => runTools(plan), { type: "tool" });
+}, { environment: "production", release: "2.14" });`,
+    py: `import tracify
+
+@tracify.trace_agent(environment="production")
+def work(task):
+    with tracify.span("plan", type="llm", input=task):
+        plan = call_model(task)
+    with tracify.span("act", type="tool"):
+        return run_tools(plan)`,
+  },
+  release: {
+    title: "Label the release once.",
+    lede: "Pass a release to the SDK and every run is tagged, so two versions can be compared on the same screen.",
+    ts: `import { span, traceAgent } from "tracify-sdk";
+
+export const answer = traceAgent(async (question: string) => {
+  return span("answer", () => callModel(question), { type: "llm", input: question });
+}, { environment: "production", release: "2.15" });`,
+    py: `import tracify
+
+@tracify.trace_agent(environment="production")
+def answer(question):
+    with tracify.span("answer", type="llm", input=question):
+        return call_model(question)`,
+  },
+  copilot: {
+    title: "Record what the assistant reached for.",
+    lede: "Wrap the tool choice and each access check, and a refused read is a step with a reason.",
+    ts: `import { span, traceAgent } from "tracify-sdk";
+
+export const assist = traceAgent(async (userId: string, question: string) => {
+  const tools = await span("choose-tools", () => pickTools(question), { type: "llm", input: question });
+  const docs = await span("read-docs", () => readAllowed(userId, tools), { type: "tool" });
+  return span("answer", () => callModel(question, docs), { type: "llm" });
+}, { environment: "production" });`,
+    py: `import tracify
+
+@tracify.trace_agent(environment="production")
+def assist(user_id, question):
+    with tracify.span("choose-tools", type="llm", input=question):
+        tools = pick_tools(question)
+    with tracify.span("read-docs", type="tool"):
+        docs = read_allowed(user_id, tools)
+    with tracify.span("answer", type="llm"):
+        return call_model(question, docs)`,
+  },
   "tool-calling": {
     title: "See the arguments the model chose.",
     lede: "Wrap each tool and the exact payload, the result and every retry are recorded, so loops and rejected schemas stand out.",
