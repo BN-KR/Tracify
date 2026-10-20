@@ -113,7 +113,7 @@ Prompt responses are cached for 60 seconds by default. Pass `{ cacheTtlMs: 0, fa
 
 MIT
 
-## Provider integrations (0.4.0, unreleased)
+## Provider integrations (0.4.0)
 
 Wrap an existing client once. Its normal calls, typed results, streaming chunks and errors keep working.
 Provider packages are optional; install the providers you use. Node.js is required (async context propagation).

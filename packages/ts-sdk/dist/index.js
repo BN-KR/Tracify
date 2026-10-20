@@ -1,14 +1,27 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TracifyLangGraphHandler = exports.wrapAnthropic = exports.wrapOpenAI = exports.decision = exports.toolCall = exports.llmCall = exports.Step = exports.TracifyClient = exports.MAX_PAYLOAD_CHARS = exports.TRACIFY_REGION_HOSTS = void 0;
+exports.traceTools = exports.tracifyMiddleware = exports.TracifyLangGraphHandler = exports.wrapAnthropic = exports.wrapOpenAI = exports.decision = exports.toolCall = exports.llmCall = exports.Step = exports.TracifyClient = exports.MAX_PAYLOAD_CHARS = exports.TRACIFY_REGION_HOSTS = exports.TracifyError = void 0;
 exports.currentRunId = currentRunId;
 exports.currentTraceContext = currentTraceContext;
 exports.integrationPayload = integrationPayload;
 exports.currentSpanId = currentSpanId;
+exports.buildRedactor = buildRedactor;
+exports.sampleBucket = sampleBucket;
 exports.span = span;
 exports.observe = observe;
 exports.traceAgent = traceAgent;
 const node_async_hooks_1 = require("node:async_hooks");
+/** A problem the SDK ran into, with a plain-language fix in `hint`. */
+class TracifyError extends Error {
+    constructor(code, message, hint, status) {
+        super(`${message} ${hint}`);
+        this.name = "TracifyError";
+        this.code = code;
+        this.hint = hint;
+        this.status = status;
+    }
+}
+exports.TracifyError = TracifyError;
 exports.TRACIFY_REGION_HOSTS = {
     eu: "https://eu.cloud.tracify.tech",
     us: "https://us.cloud.tracify.tech",
@@ -66,6 +79,44 @@ function payload(value) {
     text = text.replace(SECRET_FIELD, '$1[redacted]');
     return text.length > exports.MAX_PAYLOAD_CHARS ? `${text.slice(0, exports.MAX_PAYLOAD_CHARS)}… [truncated ${text.length - exports.MAX_PAYLOAD_CHARS} chars]` : text;
 }
+const PII_PATTERNS = [
+    /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,
+    /\b(?:\d[ -]?){13,19}\b/g,
+    /(?<![\w.])\+?\d{1,3}[\s.-]?\(?\d{2,4}\)?[\s.-]\d{3,4}[\s.-]\d{3,4}\b/g,
+];
+/** Build a function that applies the extra clean-up asked for in `redact`. Returns undefined when nothing is asked. */
+function buildRedactor(options) {
+    if (!options)
+        return undefined;
+    const replacement = options.replacement ?? "[redacted]";
+    const patterns = [];
+    if (options.pii)
+        patterns.push(...PII_PATTERNS);
+    for (const pattern of options.patterns ?? []) {
+        if (typeof pattern === "string") {
+            if (pattern)
+                patterns.push(new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"));
+        }
+        else
+            patterns.push(new RegExp(pattern.source, pattern.flags.includes("g") ? pattern.flags : `${pattern.flags}g`));
+    }
+    if (!patterns.length && !options.fn)
+        return undefined;
+    return (text) => {
+        for (const pattern of patterns)
+            text = text.replace(pattern, replacement);
+        return options.fn ? options.fn(text) : text;
+    };
+}
+/** Stable number in [0, 1) for a run id, so every span of a run gets the same sampling decision. */
+function sampleBucket(runId) {
+    let hash = 2166136261;
+    for (let i = 0; i < runId.length; i++) {
+        hash ^= runId.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0) / 4294967296;
+}
 function createId() {
     if (globalThis.crypto?.randomUUID) {
         return globalThis.crypto.randomUUID();
@@ -116,16 +167,29 @@ class TracifyClient {
     constructor(config = {}) {
         this._lastFailOpen = false;
         this.promptCache = new Map();
-        this.apiKey = config.apiKey || process.env.TRACIFY_API_KEY || '';
+        this.sampleRate = 1;
+        this.keepErrors = true;
+        this.warned = new Set();
+        this.apiKey = (config.apiKey || process.env.TRACIFY_API_KEY || '').trim();
+        this.onError = config.onError;
+        if (config.sampleRate !== undefined && !(config.sampleRate >= 0 && config.sampleRate <= 1)) {
+            throw new TracifyError("bad_sample_rate", `sampleRate must be a number from 0 to 1, but got ${String(config.sampleRate)}.`, "Use 1 to record every run, 0.1 to record about one in ten.");
+        }
+        this.sampleRate = config.sampleRate ?? 1;
+        this.keepErrors = config.keepErrors ?? true;
+        this.redactor = buildRedactor(config.redact);
         if (!this.apiKey) {
-            console.warn('Tracify Warning: TRACIFY_API_KEY is not set');
+            this.report(new TracifyError("missing_key", "No Tracify API key was found, so nothing will be recorded.", "Pass { apiKey } to the client or set the TRACIFY_API_KEY environment variable. You can create a key on the API keys page of your dashboard."));
+        }
+        else if (!this.apiKey.startsWith("tracify_sk_")) {
+            this.report(new TracifyError("odd_key", "That API key does not look like a Tracify key (they start with tracify_sk_).", "Copy the key again from the API keys page of your dashboard; make sure no other service's key was pasted by mistake."));
         }
         const configuredRegion = config.region ?? parseRegion(process.env.TRACIFY_REGION) ?? "eu";
         this.host = (config.host || process.env.TRACIFY_HOST || exports.TRACIFY_REGION_HOSTS[configuredRegion]).replace(/\/$/, '');
         const selectedHostRegion = Object.entries(exports.TRACIFY_REGION_HOSTS).find(([, host]) => host === this.host)?.[0];
         const keyRegion = apiKeyRegion(this.apiKey);
         if (keyRegion && selectedHostRegion && keyRegion !== selectedHostRegion) {
-            throw new Error(`Tracify API key region mismatch: this key belongs to ${keyRegion.toUpperCase()}, but the client is configured for ${selectedHostRegion.toUpperCase()}.`);
+            throw new TracifyError("region_mismatch", `Tracify API key region mismatch: this key belongs to ${keyRegion.toUpperCase()}, but the client is configured for ${selectedHostRegion.toUpperCase()}.`, `Set region: "${keyRegion}" (or TRACIFY_REGION=${keyRegion}), or create a key in the ${selectedHostRegion.toUpperCase()} region.`);
         }
         this.projectId = config.projectId;
         this.release = config.release;
@@ -134,14 +198,63 @@ class TracifyClient {
         this.sessionId = config.sessionId;
         this.endUserId = config.endUserId;
         this.tags = config.tags;
+        try {
+            new URL(this.host);
+        }
+        catch {
+            throw new TracifyError("bad_host", `The host "${this.host}" is not a valid web address.`, 'Use a full address such as "https://eu.cloud.tracify.tech", or drop the host option and use region: "eu" or "us".');
+        }
         this.ingestUrl = `${this.host}/api/ingest`;
         this.checkCostUrl = `${this.host}/api/orchestration/check-cost`;
+    }
+    clean(value) {
+        const text = payload(value);
+        return this.redactor && text ? this.redactor(text) : text;
+    }
+    /** Tell the app about a problem once per kind: through `onError` if given, otherwise as a console warning. */
+    report(error) {
+        if (this.warned.has(error.code))
+            return;
+        this.warned.add(error.code);
+        if (this.onError) {
+            try {
+                this.onError(error);
+            }
+            catch { /* a faulty handler must never break the app */ }
+        }
+        else
+            console.warn(`Tracify Warning: ${error.message}`);
+    }
+    /** True when this span should be dropped by sampling. */
+    sampledOut(runId, data) {
+        if (this.sampleRate >= 1)
+            return false;
+        if (this.keepErrors && (data.errorType || data.errorMessage))
+            return false;
+        return sampleBucket(runId) >= this.sampleRate;
+    }
+    async checkIngestResponse(response) {
+        if (response.ok)
+            return;
+        const status = response.status;
+        if (status === 401)
+            this.report(new TracifyError("bad_key", "Tracify rejected the API key (401).", "The key is wrong, was revoked, or belongs to another region. Check TRACIFY_API_KEY and TRACIFY_REGION.", status));
+        else if (status === 403)
+            this.report(new TracifyError("forbidden", "This API key is not allowed to send data (403).", "Check that the key belongs to the project you expect and has not been disabled.", status));
+        else if (status === 429)
+            this.report(new TracifyError("rate_limited", "Tracify is receiving too much data from this app (429).", "Lower the volume with sampleRate (for example 0.2), or upgrade your plan.", status));
+        else if (status >= 500)
+            this.report(new TracifyError("server_error", `Tracify had a problem on its side (${status}).`, "Your app is not affected; data from this moment may be missing. Check the status page if it keeps happening.", status));
+        else
+            this.report(new TracifyError("rejected", `Tracify did not accept a span (${status}).`, "Update the SDK to the latest version; if it still happens, contact support.", status));
     }
     async ingest(data) {
         if (!this.apiKey)
             return;
         const context = stepContext.getStore();
         const spanId = data.spanId || createId();
+        if (this.sampledOut(data.runId || currentRunId(), data))
+            return;
         const parentSpanId = data.parentSpanId || (context?.spanId && context.spanId !== spanId ? context.spanId : undefined);
         const span = {
             ...data,
@@ -151,8 +264,8 @@ class TracifyClient {
             parentSpanId,
             createdAt: data.createdAt || new Date().toISOString(),
             metadata: data.metadata || {},
-            input: payload(data.input),
-            output: payload(data.output),
+            input: this.clean(data.input),
+            output: this.clean(data.output),
             release: data.release ?? this.release,
             environment: data.environment ?? this.environment,
             deploymentId: data.metadata?.deploymentId ?? this.deploymentId,
@@ -168,7 +281,7 @@ class TracifyClient {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(span),
-            }).catch(err => console.warn('Tracify Warning: Failed to ingest span:', err));
+            }).then((response) => this.checkIngestResponse(response)).catch((err) => this.report(new TracifyError("network", `Could not reach Tracify (${err?.message ?? err}).`, "Check your internet connection and the host setting. Your app keeps running; these spans are dropped.")));
         }
         catch {
             // Ignore errors in telemetry
@@ -509,3 +622,7 @@ Object.defineProperty(exports, "wrapOpenAI", { enumerable: true, get: function (
 Object.defineProperty(exports, "wrapAnthropic", { enumerable: true, get: function () { return providers_1.wrapAnthropic; } });
 var langgraph_1 = require("./integrations/langgraph");
 Object.defineProperty(exports, "TracifyLangGraphHandler", { enumerable: true, get: function () { return langgraph_1.TracifyLangGraphHandler; } });
+var vercel_ai_1 = require("./integrations/vercel-ai");
+Object.defineProperty(exports, "tracifyMiddleware", { enumerable: true, get: function () { return vercel_ai_1.tracifyMiddleware; } });
+var tools_1 = require("./integrations/tools");
+Object.defineProperty(exports, "traceTools", { enumerable: true, get: function () { return tools_1.traceTools; } });
