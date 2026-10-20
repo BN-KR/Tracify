@@ -25,8 +25,22 @@ export function redactAssistantText(value: string) {
     .slice(0, 4000);
 }
 
-export function fallbackAssistantAnswer(message: string) {
+export const ASSISTANT_SYSTEM_PROMPT = [
+  "You are the friendly assistant on Tracify's public website. Tracify is an observability platform for AI agents.",
+  "Talk like a helpful person: reply to greetings and small talk warmly in one short sentence, then offer help with Tracify.",
+  "Answer product questions only from the supplied public context. Be concise (2 to 4 sentences), honest and practical.",
+  "If the question has nothing to do with Tracify or AI agents (cooking, health, homework and so on), say politely in your own words that you can only help with Tracify, and suggest one or two things you can help with. Vary your wording; never repeat a stock sentence.",
+  "Never claim to access an account, trace, API key or deployment. If the context is not enough, say so and point to the docs or contact page.",
+  "Do not output markdown links; citations are added separately.",
+].join(" ");
+
+const GREETING = /^(yo|hi|hey|hello|hiya|sup|howdy|hej|good (morning|afternoon|evening))\b[\s!.?]*$/i;
+const PRODUCT_WORDS = /\b(tracify|trace|traces|span|agent|agents|llm|model|eval|evaluat\w*|sdk|api|key|docs?|pricing|price|plan|cost|region|alert|dashboard|prompt|playground|demo|install|setup|quickstart|security|privacy|support|contact)\b/i;
+
+export function fallbackAssistantAnswer(message: string): { answer: string; citations: AssistantCitation[]; offTopic?: boolean } {
   const lower = message.toLowerCase();
+  if (GREETING.test(message.trim())) return { answer: "Hey! I can help with Tracify: how traces work, SDK setup, pricing, or the playground. What are you trying to do?", citations: [{ title: "Explore the product", href: "/demo" }] };
+  if (!PRODUCT_WORDS.test(message)) return { answer: "That one is outside what I can help with, since I only know Tracify. Ask me about tracing an AI agent, setting up the SDK, pricing or the playground and I'll gladly help.", citations: [], offTopic: true };
   if (lower.includes("playground") || lower.includes("demo")) return { answer: "Use Explore to open a private simulated workspace with populated runs, costs, alerts, and trace examples. It does not create a real project or require a region.", citations: [{ title: "Open the playground", href: "/sign-in?redirect=/playground" }, { title: "Documentation", href: "/docs" }] };
   if (lower.includes("price") || lower.includes("cost")) return { answer: "You can compare the current plans and included usage on the pricing page. The playground is simulated and does not consume project telemetry.", citations: [{ title: "View pricing", href: "/pricing" }] };
   if (lower.includes("install") || lower.includes("sdk") || lower.includes("api key")) return { answer: "Start with the quickstart: install the SDK, configure the regional API key, wrap your agent, and send one trace. If you already have an account, choose Build and select its region first.", citations: [{ title: "Open the quickstart", href: "/docs/quickstart" }, { title: "Choose a cloud region", href: "/cloud?next=/onboarding" }] };

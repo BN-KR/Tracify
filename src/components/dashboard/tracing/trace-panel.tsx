@@ -311,7 +311,7 @@ export function TracePanel({ projectId, runId, summary, view, onView, onClose, o
               ))}
             </div>
             {side === "ask" ? (
-              <div className="min-h-0 flex-1"><AskAiPanel projectId={projectId} runId={runId} spans={spans} onSelectStep={(id) => { setCollapsed(new Set()); setStepFilter("all"); setStepSearch(""); setSelectedId(id); requestAnimationFrame(() => document.getElementById(`${view === "tree" ? "step" : view}-${id}`)?.scrollIntoView({ block: "center", inline: "center" })); }} /></div>
+              <div className="min-h-0 flex-1 overflow-hidden"><AskAiPanel projectId={projectId} runId={runId} spans={spans} onSelectStep={(id) => { setCollapsed(new Set()); setStepFilter("all"); setStepSearch(""); setSelectedId(id); requestAnimationFrame(() => document.getElementById(`${view === "tree" ? "step" : view}-${id}`)?.scrollIntoView({ block: "center", inline: "center" })); }} /></div>
             ) : (
               <div className="min-h-0 flex-1 overflow-auto p-4">{selected ? <StepDetail span={selected} /> : null}</div>
             )}
