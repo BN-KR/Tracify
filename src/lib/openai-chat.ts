@@ -1,5 +1,5 @@
-/** Shared OpenAI chat helpers for Ask AI and the Playground. Default is the cheapest model on the free tier. */
-export const DEFAULT_OPENAI_MODEL = "gpt-5-nano";
+/** Shared OpenAI chat helpers for Ask AI and the Playground. Default is the light model with low reasoning. */
+export const DEFAULT_OPENAI_MODEL = "gpt-5.6-luna";
 
 /** gpt-5 and o-series models reason first: no custom temperature, and the token cap counts the hidden thinking. */
 export function isReasoningModel(model: string) {
@@ -10,8 +10,8 @@ export function buildOpenAiBody(model: string, messages: Array<{ role: "system" 
   const body: Record<string, unknown> = { model, messages };
   if (isReasoningModel(model)) {
     body.max_completion_tokens = options.maxOutputTokens;
-    // Only the original gpt-5 family accepts "minimal"; keeps answers fast and cheap.
-    if (/^gpt-5(-|$)/i.test(model)) body.reasoning_effort = "minimal";
+    // Low reasoning keeps answers fast and cheap; every reasoning model accepts it.
+    body.reasoning_effort = "low";
   } else {
     body.max_tokens = options.maxOutputTokens;
     if (options.temperature !== undefined) body.temperature = options.temperature;

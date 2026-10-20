@@ -3,10 +3,10 @@ import test from "node:test";
 import { buildOpenAiBody, friendlyOpenAiError, providerForKey } from "./openai-chat.ts";
 
 test("reasoning models drop temperature and use the completion cap", () => {
-  const body = buildOpenAiBody("gpt-5-nano", [], { temperature: 0.2, maxOutputTokens: 100 });
+  const body = buildOpenAiBody("gpt-5.6-luna", [], { temperature: 0.2, maxOutputTokens: 100 });
   assert.equal(body.temperature, undefined);
   assert.equal(body.max_completion_tokens, 100);
-  assert.equal(body.reasoning_effort, "minimal");
+  assert.equal(body.reasoning_effort, "low");
 });
 test("classic models keep temperature", () => {
   const body = buildOpenAiBody("gpt-4o-mini", [], { temperature: 0.2, maxOutputTokens: 100 });
