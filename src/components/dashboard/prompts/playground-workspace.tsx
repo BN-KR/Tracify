@@ -11,12 +11,12 @@ import { DEMO_PROMPTS, demoResults } from "@/lib/demo/playground-demo-data";
 import { DEMO_BASE_PATH } from "@/lib/demo/demo-config";
 import type { PlaygroundResult } from "@/app/(frontend)/api/playground/route";
 
-type Providers = { openai: boolean; anthropic: boolean };
+type Providers = { openai: boolean; anthropic: boolean; gemini?: boolean };
 type Run = { id: number; at: number; source: string; text: string; models: string[]; temperature: number; results: PlaygroundResult[] };
 const STARTER = "You are a helpful assistant.\n\nUser: {{question}}";
 const field = "w-full rounded border border-[#262C35] bg-[#0E1115] px-2.5 text-xs text-[#E6E9EE] placeholder:text-[#6B7380] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#F4D44D]";
 const stamp = () => Date.now();
-const providerOf = (model: string) => (/^claude/i.test(model) ? "anthropic" : "openai");
+const providerOf = (model: string) => (/^claude/i.test(model) ? "anthropic" : /^gemini/i.test(model) ? "gemini" : "openai");
 
 type SavedPrompt = { _id: string; name: string; versions: Array<{ _id: string; version?: number; content: string; model?: string; labels: string[] }> };
 
@@ -86,7 +86,7 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion, 
   const blocker = !text.trim() ? "Write a prompt first."
     : !models.length ? "Pick at least one model."
     : compiled.missing.length ? `Fill in ${compiled.missing.map((name) => `{{${name}}}`).join(", ")}.`
-    : unavailable.length ? `${providerOf(unavailable[0]) === "openai" ? "OpenAI" : "Anthropic"} is not connected on this server, so ${unavailable[0]} cannot run.`
+    : unavailable.length ? `${{ openai: "OpenAI", anthropic: "Anthropic", gemini: "Gemini" }[providerOf(unavailable[0])]} is not connected on this server, so ${unavailable[0]} cannot run.`
     : null;
 
   async function run() {
@@ -114,7 +114,7 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion, 
   }
 
   const current = runs.find((item) => item.id === shown) ?? null;
-  const notConnected = providers && !providers.openai && !providers.anthropic;
+  const notConnected = providers && !providers.openai && !providers.anthropic && !providers.gemini;
 
   const [editing, setEditing] = useState(true);
   const lanes = running ? models.map((model) => ({ model, pending: true as const })) : current ? current.results : [];
