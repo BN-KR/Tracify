@@ -109,7 +109,7 @@ Prompt responses are cached for 60 seconds by default. Use `cache_ttl_seconds=0`
 
 MIT
 
-## Provider integrations (0.4.0, unreleased)
+## Provider integrations (0.4.0)
 
 Install the optional provider/framework extras you use: `pip install 'tracify-sdk[openai,anthropic,langgraph]'`.
 Set `TRACIFY_API_KEY` and the existing regional configuration.

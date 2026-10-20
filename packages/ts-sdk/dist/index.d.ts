@@ -11,6 +11,35 @@ export interface TracifyConfig {
     sessionId?: string;
     endUserId?: string;
     tags?: string[];
+    /**
+     * Share of runs to record, from 0 (none) to 1 (all, the default). The choice is made per run, so a kept
+     * run is always complete and a dropped run leaves nothing behind. Spans that report an error are still
+     * kept unless `keepErrors` is false.
+     */
+    sampleRate?: number;
+    /** Keep spans that report an error even when their run was not sampled. Defaults to true. */
+    keepErrors?: boolean;
+    /** Extra clean-up of prompts and answers before they leave your app. Built-in secret removal always runs. */
+    redact?: RedactionOptions;
+    /** Called instead of printing a warning when the SDK has a problem sending data. */
+    onError?: (error: TracifyError) => void;
+}
+export interface RedactionOptions {
+    /** Mask emails, phone numbers and card numbers. */
+    pii?: boolean;
+    /** Extra patterns to mask. Strings are matched as plain text. */
+    patterns?: Array<RegExp | string>;
+    /** Your own last-step cleaner; its result is what gets sent. */
+    fn?: (text: string) => string;
+    /** What masked text is replaced with. Defaults to "[redacted]". */
+    replacement?: string;
+}
+/** A problem the SDK ran into, with a plain-language fix in `hint`. */
+export declare class TracifyError extends Error {
+    readonly code: string;
+    readonly hint: string;
+    readonly status?: number;
+    constructor(code: string, message: string, hint: string, status?: number);
 }
 export type TracifyRegion = "eu" | "us";
 export declare const TRACIFY_REGION_HOSTS: Record<TracifyRegion, string>;
@@ -98,6 +127,10 @@ export declare function currentTraceContext(): {
 export declare function integrationPayload(value: unknown): string;
 export declare function currentSpanId(): string | undefined;
 export declare const MAX_PAYLOAD_CHARS = 10000;
+/** Build a function that applies the extra clean-up asked for in `redact`. Returns undefined when nothing is asked. */
+export declare function buildRedactor(options?: RedactionOptions): ((text: string) => string) | undefined;
+/** Stable number in [0, 1) for a run id, so every span of a run gets the same sampling decision. */
+export declare function sampleBucket(runId: string): number;
 export declare class TracifyClient {
     protected apiKey: string;
     protected host: string;
@@ -112,7 +145,18 @@ export declare class TracifyClient {
     private sessionId?;
     private endUserId?;
     private tags?;
+    private sampleRate;
+    private keepErrors;
+    private redactor?;
+    private onError?;
+    private warned;
     constructor(config?: TracifyConfig);
+    private clean;
+    /** Tell the app about a problem once per kind: through `onError` if given, otherwise as a console warning. */
+    private report;
+    /** True when this span should be dropped by sampling. */
+    private sampledOut;
+    private checkIngestResponse;
     ingest(data: SpanData): Promise<void>;
     /** Resolve a prompt version labeled for an environment without redeploying application code. */
     getPrompt(name: string, environment?: string, options?: PromptResolutionOptions): Promise<PromptResolution>;
@@ -197,3 +241,5 @@ export declare const toolCall: (data: Omit<SpanData, "spanType">) => Promise<voi
 export declare const decision: (data: Omit<SpanData, "spanType">) => Promise<void>;
 export { wrapOpenAI, wrapAnthropic, type IntegrationOptions } from "./integrations/providers";
 export { TracifyLangGraphHandler } from "./integrations/langgraph";
+export { tracifyMiddleware } from "./integrations/vercel-ai";
+export { traceTools } from "./integrations/tools";
