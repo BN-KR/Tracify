@@ -2,6 +2,8 @@
 
 Observability and tracing for AI agents. Gain full visibility into your agent's decision-making process, tool usage, and LLM costs.
 
+Tracify records each agent run as one trace: every model call, tool call, retry, failure and cost. It also ingests OpenTelemetry. Free plan available. Docs: [tracify.tech/docs](https://www.tracify.tech/docs). New to agent observability? Read the [complete guide](https://www.tracify.tech/blog/ai-agent-observability-complete-guide).
+
 ## Installation
 
 ```bash
@@ -10,7 +12,7 @@ pip install tracify-sdk
 
 ## Quickstart
 
-1. Get your API Key from the [Tracify Dashboard](https://tracify.tech).
+1. Get your API Key from the [Tracify Dashboard](https://www.tracify.tech).
 2. Set it as an environment variable:
 
 ```bash

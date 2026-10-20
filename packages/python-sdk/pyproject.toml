@@ -10,6 +10,7 @@ authors = [
 ]
 description = "Observability, runtime enforcement, and tracing for AI agents."
 license = "MIT"
+keywords = ["ai", "agents", "observability", "tracing", "llm", "llm-observability", "agent-tracing", "opentelemetry", "cost-tracking", "langchain", "openai", "anthropic"]
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
@@ -25,9 +26,10 @@ dependencies = [
 where = ["src"]
 
 [project.urls]
-"Homepage" = "https://tracify.tech"
-"Documentation" = "https://docs.tracify.tech"
-"Bug Tracker" = "https://github.com/tracify/python-sdk/issues"
+"Homepage" = "https://www.tracify.tech"
+"Documentation" = "https://www.tracify.tech/docs"
+"Bug Tracker" = "https://github.com/BN-KR/Tracify/issues"
+"Source" = "https://github.com/BN-KR/Tracify"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
