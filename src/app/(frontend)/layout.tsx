@@ -9,6 +9,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ConsentBanner } from "@/components/privacy/consent-banner-lazy";
 import { ReferralCapture } from "@/components/marketing/referral-capture";
+import { CloudPrewarm } from "@/components/marketing/cloud-prewarm";
 import { GoogleTagManager } from "@/components/analytics/google-tag-manager";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -61,6 +62,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <ConvexClientProvider initialToken={isCloudDeployment ? await getToken() : null}>
           <TooltipProvider><SiteChrome>{children}</SiteChrome><ConsentBanner /></TooltipProvider>
         </ConvexClientProvider>
+        {isCloudDeployment ? null : <CloudPrewarm />}
         <ReferralCapture />
         <GoogleTagManager />
       </body>

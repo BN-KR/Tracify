@@ -1,5 +1,5 @@
 import { createClient } from "@convex-dev/better-auth";
-import { dash, sendEmail, sentinel } from "@better-auth/infra";
+import { dash, sentinel } from "@better-auth/infra";
 import { convex } from "@convex-dev/better-auth/plugins";
 import type { GenericCtx } from "@convex-dev/better-auth/utils";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
@@ -14,6 +14,27 @@ export const authComponent = createClient<DataModel, typeof schema>(
   components.betterAuth,
   { local: { schema }, verbose: false },
 );
+
+const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] ?? c);
+
+/**
+ * Sends sign-in emails straight through our own Resend account. Better Auth's hosted
+ * email sender is a paid dashboard feature, so using it meant verification and
+ * password reset emails never left the building.
+ */
+async function sendAuthEmail(args: { to: string; subject: string; heading: string; body: string; action: string; url: string }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) { console.info("[auth-email] no RESEND_API_KEY set, email skipped:", args.subject); return; }
+  const safeUrl = escapeHtml(args.url);
+  const html = `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#090909"><h1 style="font-size:20px;margin:0 0 12px">${escapeHtml(args.heading)}</h1><p style="font-size:14px;line-height:1.6;margin:0 0 20px">${escapeHtml(args.body)}</p><p style="margin:0 0 20px"><a href="${safeUrl}" style="display:inline-block;background:#f4d44d;color:#090909;padding:12px 20px;font-size:14px;text-decoration:none;font-weight:600">${escapeHtml(args.action)}</a></p><p style="font-size:12px;color:#666;line-height:1.5;margin:0">If the button does not work, paste this link into your browser:<br>${safeUrl}</p></div>`;
+  const text = `${args.heading}\n\n${args.body}\n\n${args.action}: ${args.url}`;
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from: process.env.EMAIL_FROM || "Tracify <kb@tracify.tech>", to: args.to, subject: args.subject, html, text }),
+  });
+  if (!response.ok) throw new Error(`Email provider returned ${response.status}`);
+}
 
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
   const database = authComponent.adapter(ctx);
@@ -49,16 +70,27 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     resetPasswordTokenExpiresIn: 60 * 60,
     revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) => {
-      await sendEmail({
-        template: "reset-password",
+      await sendAuthEmail({
         to: user.email,
-        variables: {
-          resetLink: url,
-          userEmail: user.email,
-          userName: user.name,
-          appName: "tracify",
-          expirationMinutes: "60",
-        },
+        subject: "Reset your Tracify password",
+        heading: "Reset your password",
+        body: "Use the button below to choose a new password. The link works for 60 minutes. If you did not ask for this, you can ignore this email.",
+        action: "Choose a new password",
+        url,
+      });
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendAuthEmail({
+        to: user.email,
+        subject: "Confirm your email for Tracify",
+        heading: "Confirm your email",
+        body: "Welcome to Tracify. Confirm your email address to finish setting up your account.",
+        action: "Confirm email",
+        url,
       });
     },
   },
