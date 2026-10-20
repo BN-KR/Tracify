@@ -1,3 +1,6 @@
+## 2026-10-20 Ask AI can use an alternate provider — draft PR
+- `completeWithFallback` (`src/lib/llm-chain.ts`) tries an OpenAI-compatible alternate provider first when `ASK_AI_ALT_API_KEY` is set (address `ASK_AI_ALT_BASE_URL`, model `ASK_AI_ALT_MODEL`), then Gemini. OpenAI is skipped when the alternate key is set, because it can cost money. A model is sent only if it is listed in `ASK_AI_ALT_MODELS_ALLOWED`. Ask AI only. Tests in `llm-chain.test.ts`.
+
 # Project Memory
 
 ## 2026-10-19 Scores and Evaluators rebuilt — same draft PR #237

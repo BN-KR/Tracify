@@ -34,3 +34,36 @@ test("empty OpenAI answer still tries Gemini", async () => {
     assert.equal((await completeWithFallback("t", { openai: "k", gemini: "g" }, {}, prompt)).text, "ok");
   } finally { restore(); }
 });
+
+process.env.ASK_AI_ALT_BASE_URL = "https://alt.example.test/v1";
+process.env.ASK_AI_ALT_MODELS_ALLOWED = "demo-model";
+
+test("alternate provider answers first and the others are not called", async () => {
+  const urls: string[] = [];
+  const restore = stub((url) => { urls.push(url); return json(200, { choices: [{ message: { content: "alt" } }] }); });
+  try {
+    const result = await completeWithFallback("t", { alt: "z", openai: "k", gemini: "g" }, { alt: "demo-model" }, prompt);
+    assert.deepEqual([result.text, result.provider, urls.length], ["alt", "alt", 1]);
+    assert.ok(urls[0].startsWith("https://alt.example.test/"));
+  } finally { restore(); }
+});
+
+test("falls back to OpenAI when the alternate provider is rate limited", async () => {
+  const restore = stub((url) => url.includes("alt.example") ? json(429, { error: { message: "Rate limit" } }) : json(200, { choices: [{ message: { content: "oa" } }] }));
+  const quiet = console.error; console.error = () => {};
+  try {
+    const result = await completeWithFallback("t", { alt: "z", openai: "k" }, { alt: "demo-model" }, prompt);
+    assert.deepEqual([result.text, result.provider, result.failures], ["oa", "openai", ["rate"]]);
+  } finally { restore(); console.error = quiet; }
+});
+
+test("the alternate provider never sends a model that is not on the allowed list", async () => {
+  let called = 0;
+  const restore = stub(() => { called++; return json(200, { choices: [{ message: { content: "x" } }] }); });
+  const quiet = console.error; console.error = () => {};
+  try {
+    assert.equal((await completeWithFallback("t", { alt: "z" }, { alt: "other-model" }, prompt)).text, "");
+    assert.equal(called, 0);
+    assert.equal((await completeWithFallback("t", { alt: "z" }, { alt: "Demo-Model" }, prompt)).text, "x");
+  } finally { restore(); console.error = quiet; }
+});
