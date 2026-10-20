@@ -3,6 +3,8 @@ import { api } from "convex/_generated/api";
 import { getAuthedConvexClient } from "@/lib/convex-server";
 import { compilePrompt, MAX_PLAYGROUND_MODELS } from "@/lib/prompt-utils";
 import { readJson } from "@/lib/safe-json";
+import { buildGeminiBody, friendlyGeminiError, geminiUrl, parseGemini } from "@/lib/gemini-chat";
+import { buildOpenAiBody, DEFAULT_OPENAI_MODEL, friendlyOpenAiError } from "@/lib/openai-chat";
 
 type PlaygroundBody = { projectId?: string; prompt?: string; variables?: Record<string, unknown>; model?: string; models?: string[]; temperature?: number };
 export type PlaygroundResult = { model: string; output: string; latencyMs: number; inputTokens?: number; outputTokens?: number; error?: string };
@@ -12,12 +14,13 @@ const MAX_VALUE = 20_000;
 const TIMEOUT_MS = 60_000;
 
 function providerFor(model: string) {
-  return /^claude/i.test(model) ? "anthropic" : "openai";
+  return /^claude/i.test(model) ? "anthropic" : /^gemini/i.test(model) ? "gemini" : "openai";
 }
+const PROVIDER_NAMES = { openai: "OpenAI", anthropic: "Anthropic", gemini: "Gemini" } as const;
 
 /** Which providers have a key on the server. The page uses this to say "not set up" before anyone writes a prompt. */
 function configured() {
-  return { openai: Boolean(process.env.OPENAI_API_KEY), anthropic: Boolean(process.env.ANTHROPIC_API_KEY) };
+  return { openai: Boolean(process.env.OPENAI_API_KEY), anthropic: Boolean(process.env.ANTHROPIC_API_KEY), gemini: Boolean(process.env.GEMINI_API_KEY) };
 }
 
 async function authorise(projectId: string) {
@@ -45,10 +48,19 @@ export async function GET(request: NextRequest) {
 }
 
 async function runOpenAi(model: string, text: string, temperature: number, signal: AbortSignal): Promise<Omit<PlaygroundResult, "model" | "latencyMs">> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", { method: "POST", signal, headers: { "content-type": "application/json", authorization: "Bearer " + process.env.OPENAI_API_KEY }, body: JSON.stringify({ model, messages: [{ role: "user", content: text }], temperature }) });
+  const response = await fetch("https://api.openai.com/v1/chat/completions", { method: "POST", signal, headers: { "content-type": "application/json", authorization: "Bearer " + process.env.OPENAI_API_KEY }, body: JSON.stringify(buildOpenAiBody(model, [{ role: "user", content: text }], { temperature, maxOutputTokens: 2048 })) });
   const data = await readJson<{ choices?: Array<{ message?: { content?: string } }>; usage?: { prompt_tokens?: number; completion_tokens?: number }; error?: { message?: string } }>(response);
-  if (!response.ok) return { output: "", error: data.error?.message || "The model provider rejected the request." };
+  if (!response.ok) return { output: "", error: friendlyOpenAiError(response.status, data.error?.message) };
   return { output: data.choices?.[0]?.message?.content ?? "", inputTokens: data.usage?.prompt_tokens, outputTokens: data.usage?.completion_tokens };
+}
+
+async function runGemini(model: string, text: string, temperature: number, signal: AbortSignal): Promise<Omit<PlaygroundResult, "model" | "latencyMs">> {
+  const response = await fetch(geminiUrl(model), { method: "POST", signal, headers: { "content-type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY ?? "" }, body: JSON.stringify(buildGeminiBody(text, { temperature, maxOutputTokens: 2048 })) });
+  const data = await readJson<Parameters<typeof parseGemini>[0]>(response);
+  if (!response.ok) return { output: "", error: friendlyGeminiError(response.status, data.error?.message) };
+  const parsed = parseGemini(data);
+  if (parsed.blocked) return { output: "", error: "Gemini declined to answer this prompt." };
+  return { output: parsed.text, inputTokens: parsed.inputTokens, outputTokens: parsed.outputTokens };
 }
 
 async function runAnthropic(model: string, text: string, temperature: number, signal: AbortSignal): Promise<Omit<PlaygroundResult, "model" | "latencyMs">> {
@@ -70,7 +82,7 @@ export async function POST(request: NextRequest) {
   const compiled = compilePrompt(body.prompt, values);
   if (compiled.missing.length) return Response.json({ error: `Fill in ${compiled.missing.map((name) => `{{${name}}}`).join(", ")} before running.`, missing: compiled.missing }, { status: 422 });
 
-  const requested = body.models?.length ? body.models : [body.model || "gpt-4o-mini"];
+  const requested = body.models?.length ? body.models : [body.model || DEFAULT_OPENAI_MODEL];
   const models = [...new Set(requested.map((model) => String(model).trim()).filter((model) => /^[A-Za-z0-9._:/-]{1,80}$/.test(model)))].slice(0, MAX_PLAYGROUND_MODELS);
   if (!models.length) return Response.json({ error: "Pick at least one model." }, { status: 422 });
   const temperature = Number.isFinite(body.temperature) ? Math.min(Math.max(body.temperature as number, 0), 2) : 0.2;
@@ -79,14 +91,15 @@ export async function POST(request: NextRequest) {
   const missingProvider = models.find((model) => !keys[providerFor(model)]);
   if (missingProvider) {
     const provider = providerFor(missingProvider);
-    return Response.json({ error: `The ${provider === "openai" ? "OpenAI" : "Anthropic"} connection is not set up on this server yet, so ${missingProvider} cannot run.`, code: "provider_not_configured", providers: keys }, { status: 503 });
+    return Response.json({ error: `The ${PROVIDER_NAMES[provider]} connection is not set up on this server yet, so ${missingProvider} cannot run.`, code: "provider_not_configured", providers: keys }, { status: 503 });
   }
 
   const results: PlaygroundResult[] = await Promise.all(models.map(async (model) => {
     const startedAt = Date.now();
     const signal = AbortSignal.timeout(TIMEOUT_MS);
     try {
-      const run = providerFor(model) === "anthropic" ? runAnthropic : runOpenAi;
+      const provider = providerFor(model);
+      const run = provider === "anthropic" ? runAnthropic : provider === "gemini" ? runGemini : runOpenAi;
       return { model, latencyMs: Date.now() - startedAt, ...(await run(model, compiled.text, temperature, signal)) };
     } catch (error) {
       const timedOut = error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
