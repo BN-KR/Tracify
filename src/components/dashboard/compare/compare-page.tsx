@@ -141,7 +141,7 @@ function RunPicker({ label, hint, value, runs, onChange, clock }: { label: strin
   const known = runs?.some((run) => run.runId === value);
   return (
     <label className="block min-w-0">
-      <span className="mb-1 block text-xs text-[#8B93A1]"><span className={`mr-1 inline-block rounded px-1.5 font-mono font-medium text-[#0B0D10] ${label === "Run A" ? "bg-[#F4D44D]" : "bg-[#8AB4FF]"}`}>{label}</span> {hint}</span>
+      <span className="mb-1 block text-xs text-[#8B93A1]"><span className={`mr-1 inline-block rounded px-1.5 font-mono font-medium text-[#0B0D10] ${label === "Run A" ? "bg-[#F4D44D]" : "bg-[#ECEAE3]"}`}>{label}</span> {hint}</span>
       <select value={value} onChange={(event) => onChange(event.target.value)} className={`${field} w-full`}>
         {runs && !runs.length ? <option value="">No runs in this range</option> : null}
         {!runs ? <option value="">Loading runs…</option> : null}
