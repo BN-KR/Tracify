@@ -2,7 +2,7 @@
   "name": "tracify-sdk",
   "version": "0.5.0",
   "description": "Observability, runtime enforcement, and tracing for AI agents.",
-  "homepage": "https://tracify.tech",
+  "homepage": "https://www.tracify.tech",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BN-KR/Tracify.git",
@@ -18,12 +18,22 @@
     "test": "vitest run",
     "prepublishOnly": "npm run build"
   },
+  "bugs": {
+    "url": "https://github.com/BN-KR/Tracify/issues"
+  },
   "keywords": [
     "ai",
     "agents",
     "observability",
     "tracing",
-    "llm"
+    "llm",
+    "llm-observability",
+    "agent-tracing",
+    "opentelemetry",
+    "cost-tracking",
+    "langchain",
+    "openai",
+    "anthropic"
   ],
   "author": "Tracify Team",
   "license": "MIT",
