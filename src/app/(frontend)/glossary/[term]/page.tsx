@@ -35,7 +35,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ t
           <Link href="/glossary" className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f4d44d] hover:underline">← Glossary / {String(index + 1).padStart(2, "0")} of {glossaryTerms.length}</Link>
           <div className="mt-8 grid gap-px border-2 border-[#eceae3] bg-[#eceae3] lg:grid-cols-[1.1fr_1fr]">
             <div className="bg-[#090909] p-8 md:p-12">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/45">n. / AI agents</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/45">n. / {t.group ?? "AI agents"}</p>
               <h1 className="mt-5 font-pixel text-[clamp(2.6rem,6.5vw,6rem)] leading-[0.88] tracking-[-0.06em]">{t.term}</h1>
             </div>
             <div className="bg-[#f4d44d] p-8 text-black md:p-12">
@@ -53,6 +53,12 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ t
         <div className="max-w-3xl">
           <Eyebrow dark={false}>In more detail</Eyebrow>
           <p className="mt-6 text-lg leading-8 text-black/80">{t.expansion}</p>
+          {t.example && (
+            <div className="mt-10 border-l-4 border-[#f4d44d] bg-black/[0.04] p-6">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/50">Example</p>
+              <p className="mt-3 text-base leading-7 text-black/80">{t.example}</p>
+            </div>
+          )}
           {related.length > 0 && (
             <div className="mt-12">
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/50">Related terms</p>
@@ -61,7 +67,7 @@ export default async function GlossaryTermPage({ params }: { params: Promise<{ t
               </ul>
             </div>
           )}
-          <div className="mt-10"><HeaderAction href="/demo/project">See it in a live trace</HeaderAction></div>
+          <div className="mt-10"><HeaderAction href={t.link?.href ?? "/demo/project"}>{t.link?.label ?? "See it in a live trace"}</HeaderAction></div>
         </div>
       </CreamBand>
       <ClosingBand title="Definitions are the start." body="Open a real trace and watch these terms move." actions={[{ href: "/demo/project", label: "Open the demo", primary: true }, { href: "/docs", label: "Read the docs" }]} />

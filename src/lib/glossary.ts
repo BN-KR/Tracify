@@ -1,12 +1,23 @@
+import { tracingTerms } from "./glossary-data/tracing";
+import { modelTerms } from "./glossary-data/models";
+import { agentTerms } from "./glossary-data/agents";
+import { opsTerms } from "./glossary-data/ops";
+
 export type Term = {
   slug: string;
   term: string;
   definition: string;
   expansion: string;
   related: readonly string[];
+  /** Short topic label shown above the term, e.g. "Tracing basics". */
+  group?: string;
+  /** A concrete, realistic example in plain prose. */
+  example?: string;
+  /** Where to go next in the product or docs. */
+  link?: { href: string; label: string };
 };
 
-export const glossaryTerms: readonly Term[] = [
+const coreTerms: readonly Term[] = [
   {
     slug: "trace-viewer",
     term: "Trace viewer",
@@ -241,4 +252,6 @@ export const glossaryTerms: readonly Term[] = [
       "Drift is caught by tracking scores, cost and failure rates over time and alerting when they move away from a baseline.",
     related: ["agent-evaluation", "llm-observability"],
   },
-] as const;
+];
+
+export const glossaryTerms: readonly Term[] = [...coreTerms, ...tracingTerms, ...modelTerms, ...agentTerms, ...opsTerms];
