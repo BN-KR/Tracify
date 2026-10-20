@@ -6,8 +6,8 @@ import type { Id } from "convex/_generated/dataModel";
 import { getAuthedConvexClient } from "@/lib/convex-server";
 import { consumeRateLimit } from "@/lib/redis-cache";
 import { getSpansForRun } from "@/lib/tinybird";
-import { buildGeminiBody, DEFAULT_GEMINI_MODEL, geminiUrl, parseGemini } from "@/lib/gemini-chat";
-import { buildOpenAiBody, DEFAULT_OPENAI_MODEL, providerForKey } from "@/lib/openai-chat";
+import { completeWithFallback } from "@/lib/llm-chain";
+import { providerForKey } from "@/lib/openai-chat";
 import { buildUserMessage, MAX_QUESTION_LENGTH, quickAnswer, resolveCitations, SYSTEM_PROMPT, type AskAnswer, type AskSpan } from "@/lib/ask-ai";
 
 export const maxDuration = 30;
@@ -30,74 +30,41 @@ function geminiKey() {
 }
 
 type AskResult = { answer: AskAnswer | null; busy?: boolean };
-type Attempt = { answer: AskAnswer | null; busy: boolean };
 
-async function askPrimary(spans: AskSpan[], question: string): Promise<Attempt> {
-  const apiKey = askKey();
-  const provider = providerForKey(apiKey);
-  const userMessage = buildUserMessage(spans, question);
+async function askClaude(apiKey: string, spans: AskSpan[], question: string): Promise<{ text: string; busy: boolean }> {
   try {
-    const response = provider === "anthropic"
-      ? await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({ model: process.env.TRACIFY_ASK_AI_MODEL || "claude-haiku-5-5", max_tokens: 600, system: SYSTEM_PROMPT, messages: [{ role: "user", content: userMessage }] }),
-        signal: AbortSignal.timeout(20_000),
-      })
-      : await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify(buildOpenAiBody(process.env.TRACIFY_ASK_AI_MODEL || DEFAULT_OPENAI_MODEL, [{ role: "system", content: SYSTEM_PROMPT }, { role: "user", content: userMessage }], { temperature: 0.2, maxOutputTokens: 1500 })),
-        signal: AbortSignal.timeout(25_000),
-      });
-    if (!response.ok) {
-      console.error("Ask AI provider error:", provider, response.status);
-      return { answer: null, busy: response.status === 429 };
-    }
-    const data = await response.json() as { content?: Array<{ type: string; text?: string }>; choices?: Array<{ message?: { content?: string | null } }> };
-    const text = provider === "anthropic"
-      ? data.content?.filter((block) => block.type === "text").map((block) => block.text ?? "").join("").trim()
-      : data.choices?.[0]?.message?.content?.trim();
-    return { answer: text ? resolveCitations(text, spans) : null, busy: false };
-  } catch (error) {
-    console.error("Ask AI request failed:", error);
-    return { answer: null, busy: false };
-  }
-}
-
-async function askGemini(spans: AskSpan[], question: string): Promise<Attempt> {
-  try {
-    const response = await fetch(geminiUrl(process.env.TRACIFY_ASK_AI_GEMINI_MODEL || DEFAULT_GEMINI_MODEL), {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "content-type": "application/json", "x-goog-api-key": geminiKey() },
-      body: JSON.stringify(buildGeminiBody(buildUserMessage(spans, question), { system: SYSTEM_PROMPT, temperature: 0.2, maxOutputTokens: 800 })),
+      headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: process.env.TRACIFY_ASK_AI_MODEL || "claude-haiku-5-5", max_tokens: 600, system: SYSTEM_PROMPT, messages: [{ role: "user", content: buildUserMessage(spans, question) }] }),
       signal: AbortSignal.timeout(20_000),
     });
     if (!response.ok) {
-      console.error("Ask AI provider error: gemini", response.status);
-      return { answer: null, busy: response.status === 429 };
+      console.error("Ask AI provider error: anthropic", response.status);
+      return { text: "", busy: response.status === 429 };
     }
-    const { text } = parseGemini(await response.json());
-    return { answer: text ? resolveCitations(text, spans) : null, busy: false };
+    const data = await response.json() as { content?: Array<{ type: string; text?: string }> };
+    return { text: data.content?.filter((block) => block.type === "text").map((block) => block.text ?? "").join("").trim() ?? "", busy: false };
   } catch (error) {
     console.error("Ask AI request failed:", error);
-    return { answer: null, busy: false };
+    return { text: "", busy: false };
   }
 }
 
+/** Main provider first, Gemini as the backup when the main one is missing, busy, out of credit or failing. */
 async function askModel(spans: AskSpan[], question: string): Promise<AskResult> {
-  let busy = false;
-  if (askKey()) {
-    const first = await askPrimary(spans, question);
-    if (first.answer) return first;
-    busy = first.busy;
+  const apiKey = askKey();
+  const gemini = geminiKey();
+  if (apiKey && providerForKey(apiKey) === "anthropic") {
+    const claude = await askClaude(apiKey, spans, question);
+    if (claude.text) return { answer: resolveCitations(claude.text, spans) };
+    if (!gemini) return { answer: null, busy: claude.busy };
+    const backup = await completeWithFallback("Ask AI", { gemini }, { gemini: process.env.TRACIFY_ASK_AI_GEMINI_MODEL }, { system: SYSTEM_PROMPT, user: buildUserMessage(spans, question), temperature: 0.2, maxOutputTokens: 800 });
+    return { answer: backup.text ? resolveCitations(backup.text, spans) : null, busy: claude.busy || backup.failures.includes("rate") };
   }
-  if (geminiKey()) {
-    const second = await askGemini(spans, question);
-    if (second.answer) return second;
-    busy = busy || second.busy;
-  }
-  return { answer: null, busy };
+  const result = await completeWithFallback("Ask AI", { openai: apiKey || undefined, gemini: gemini || undefined }, { openai: process.env.TRACIFY_ASK_AI_MODEL, gemini: process.env.TRACIFY_ASK_AI_GEMINI_MODEL }, { system: SYSTEM_PROMPT, user: buildUserMessage(spans, question), temperature: 0.2, maxOutputTokens: 1500, timeoutMs: 25_000 });
+  if (result.text) return { answer: resolveCitations(result.text, spans) };
+  return { answer: null, busy: result.failures.some((failure) => failure === "rate" || failure === "quota") };
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ projectId: string; runId: string }> }) {
@@ -144,7 +111,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
   const configured = Boolean(askKey() || geminiKey());
   return NextResponse.json({
     answer: busy
-      ? "The AI service is busy right now (the free plan only allows a few questions per minute). Wait a minute and try again, or ask one of the suggested questions."
+      ? "The AI service is busy right now. Wait a minute and try again, or ask one of the suggested questions."
       : configured
       ? "I couldn't reach the AI service just now. Try again in a moment, or ask one of the suggested questions."
       : "Free-form questions need AI switched on for this workspace. For now I can answer what went wrong, what was slowest, what cost the most, and a short summary.",

@@ -42,7 +42,7 @@ export function AskAiPanel({ projectId, runId, spans, onSelectStep }: {
 
   return (
     <section aria-label="Ask AI" className="flex h-full min-h-0 flex-col text-[#E6E9EE]">
-      <div className="min-h-0 flex-1 overflow-auto p-4">
+      <div data-lenis-prevent className="min-h-0 flex-1 overflow-auto overscroll-contain p-4">
         {messages.length === 0 ? (
           <div className="flex flex-col gap-3">
             <p className="text-sm leading-6 text-[#C9CED6]">Ask anything about this run. Answers point to the exact steps they come from.</p>
