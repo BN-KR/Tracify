@@ -66,6 +66,16 @@ function RunsCompare({ projectId, range, left, right, set }: { projectId: string
     return () => { cancelled = true; };
   }, [projectId, window]);
 
+  // Small projects often have fewer than two runs in the chosen window: step out to the next longer one
+  // (up to 90 days) instead of leaving the page empty.
+  const [startRange] = useState(range);
+  useEffect(() => {
+    if (!runs || runs.length >= 2 || (left && right)) return;
+    const next = RANGES[RANGES.findIndex((item) => item.id === range) + 1];
+    if (next) set({ range: next.id });
+  }, [left, range, right, runs, set]);
+  const widened = range !== startRange;
+
   // Default to the newest failed run against the newest healthy one, so the page is useful on first open.
   useEffect(() => {
     if (!runs?.length || (left && right)) return;
@@ -89,7 +99,9 @@ function RunsCompare({ projectId, range, left, right, set }: { projectId: string
         <RunPicker label="Run B" hint="the one to measure against" value={right} runs={runs} onChange={(value) => set({ right: value })} clock={clock} />
       </div>
       {error ? <p role="alert" className="rounded border border-[#5A2A2E] bg-[#1A0F11] p-3 text-[#FF8A8A]">{error}</p> : null}
-      {runs && runs.length < 2 ? <p className="rounded border border-[#1F242C] bg-[#0E1115] p-6 text-[#8B93A1]">There are fewer than two runs in this time range. Pick a longer range, or send a few more runs.</p> : null}
+      {widened && runs && runs.length >= 2 ? <p className="m-0 text-xs text-[#8B93A1]">Few runs lately, so the range was widened to {RANGES.find((item) => item.id === range)?.label.toLowerCase()}.</p> : null}
+      {runs && runs.length < 2 && range === "90d" ? <p className="rounded border border-[#1F242C] bg-[#0E1115] p-6 text-[#8B93A1]">This project has {runs.length === 1 ? "only one run" : "no runs"} in the last 90 days. Send one more run and you can compare them here. You can also paste any run ID above.</p> : null}
+      {runs && runs.length < 2 && range !== "90d" ? <p className="m-0 text-xs text-[#8B93A1]">Looking further back for runs…</p> : null}
       {a.error || b.error ? <p role="alert" className="rounded border border-[#5A2A2E] bg-[#1A0F11] p-3 text-[#FF8A8A]">{a.error || b.error}</p> : null}
       {ta && tb ? <>
         <Totals a={ta} b={tb} />
@@ -129,12 +141,16 @@ function RunPicker({ label, hint, value, runs, onChange, clock }: { label: strin
   const known = runs?.some((run) => run.runId === value);
   return (
     <label className="block min-w-0">
-      <span className="mb-1 block text-xs text-[#8B93A1]"><span className="font-medium text-[#E6E9EE]">{label}</span> · {hint}</span>
+      <span className="mb-1 block text-xs text-[#8B93A1]"><span className={`mr-1 inline-block rounded px-1.5 font-mono font-medium text-[#0B0D10] ${label === "Run A" ? "bg-[#F4D44D]" : "bg-[#8AB4FF]"}`}>{label}</span> {hint}</span>
       <select value={value} onChange={(event) => onChange(event.target.value)} className={`${field} w-full`}>
+        {runs && !runs.length ? <option value="">No runs in this range</option> : null}
         {!runs ? <option value="">Loading runs…</option> : null}
         {value && !known ? <option value={value}>{value}</option> : null}
         {runs?.map((run) => <option key={run.runId} value={run.runId}>{run.errorCount ? "Failed" : "OK"} · {run.traceName || run.runId.slice(0, 8)} · {formatDuration(run.durationMs)} · {formatCost(run.totalCostUsd)} · {relativeTime(run.startedAt, clock)}</option>)}
       </select>
+      <input type="text" aria-label={`Paste a run ID for ${label}`} placeholder="or paste a run ID and press Enter" maxLength={200}
+        onKeyDown={(event) => { if (event.key === "Enter") { const id = event.currentTarget.value.trim(); if (id) { onChange(id); event.currentTarget.value = ""; } } }}
+        className={`${field} mt-1 w-full font-mono text-[11px] placeholder:text-[#4A5260]`} />
     </label>
   );
 }
@@ -231,6 +247,12 @@ function GroupsCompare({ projectId, range, by, set }: { projectId: string; range
   }, [by, projectId, window]);
 
   const rows = data?.by === by ? data.groups : null;
+  // One group (or none) is nothing to compare, so look further back first.
+  useEffect(() => {
+    if (!rows || rows.length >= 2) return;
+    const next = RANGES[RANGES.findIndex((item) => item.id === range) + 1];
+    if (next) set({ range: next.id });
+  }, [range, rows, set]);
   const winners = rows ? pickWinners(rows) : null;
   const max = (pick: (row: GroupRow) => number) => Math.max(...(rows ?? []).map(pick), 0.0000001);
   const tracingHref = (row: GroupRow) => `/dashboard/${projectId}/tracing?range=${range}&${by === "model" ? "modelId" : "release"}=${encodeURIComponent(row.key)}`;
