@@ -1,0 +1,13 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="symTitle symDesc">
+  <title id="symTitle">Symptom to first signal map for AI agents</title>
+  <desc id="symDesc">A cream canvas with five rows. Each row pairs a production symptom with the first signal to open: wrong answer opens the retrieval span, slow run opens the longest child span, cost spike opens repeated calls, silent failure opens the terminal status, and unsafe action opens the approval record.</desc>
+  <rect width="1600" height="900" fill="#eceae3"/>
+  <text x="80" y="78" fill="#0a0a0a" font-family="monospace" font-size="20" letter-spacing="3">SYMPTOM  TO  FIRST SIGNAL</text>
+  <g font-family="monospace" font-weight="700">
+    <g transform="translate(80,130)"><rect width="560" height="120" fill="#0a0a0a"/><text x="28" y="72" font-size="28" fill="#eceae3">Wrong answer</text><rect x="700" width="820" height="120" fill="#f4d44d"/><text x="728" y="72" font-size="26" fill="#0a0a0a">Open the retrieval and tool spans</text><path d="M560 60 H700" stroke="#0a0a0a" stroke-width="4"/></g>
+    <g transform="translate(80,290)"><rect width="560" height="120" fill="#0a0a0a"/><text x="28" y="72" font-size="28" fill="#eceae3">Slow run</text><rect x="700" width="820" height="120" fill="#f4d44d"/><text x="728" y="72" font-size="26" fill="#0a0a0a">Open the longest child span</text><path d="M560 60 H700" stroke="#0a0a0a" stroke-width="4"/></g>
+    <g transform="translate(80,450)"><rect width="560" height="120" fill="#0a0a0a"/><text x="28" y="72" font-size="28" fill="#eceae3">Cost spike</text><rect x="700" width="820" height="120" fill="#f4d44d"/><text x="728" y="72" font-size="26" fill="#0a0a0a">Count repeated model calls</text><path d="M560 60 H700" stroke="#0a0a0a" stroke-width="4"/></g>
+    <g transform="translate(80,610)"><rect width="560" height="120" fill="#0a0a0a"/><text x="28" y="72" font-size="28" fill="#eceae3">Silent failure</text><rect x="700" width="820" height="120" fill="#f4d44d"/><text x="728" y="72" font-size="26" fill="#0a0a0a">Check the terminal status</text><path d="M560 60 H700" stroke="#0a0a0a" stroke-width="4"/></g>
+    <g transform="translate(80,770)"><rect width="560" height="100" fill="#0a0a0a"/><text x="28" y="62" font-size="28" fill="#eceae3">Unsafe action</text><rect x="700" width="820" height="100" fill="#f4d44d"/><text x="728" y="62" font-size="26" fill="#0a0a0a">Open the approval record</text><path d="M560 50 H700" stroke="#0a0a0a" stroke-width="4"/></g>
+  </g>
+</svg>

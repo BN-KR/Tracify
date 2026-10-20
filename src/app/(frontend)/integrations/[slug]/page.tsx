@@ -46,11 +46,42 @@ export default async function IntegrationPage({ params }: { params: Promise<{ sl
 
       <CreamBand>
         <Eyebrow dark={false}>Setup</Eyebrow>
-        <SectionTitle>A few lines.</SectionTitle>
-        <div className="mt-10 border-2 border-black bg-[#090909] text-[#eceae3]">
-          <div className="flex items-center gap-2 border-b border-white/20 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50"><span className="size-2 bg-[#f4d44d]" aria-hidden="true" />{p.language}</div>
-          <pre className="overflow-x-auto p-6 font-mono text-[13px] leading-6"><code>{p.code}</code></pre>
-        </div>
+        <SectionTitle>{p.steps ? `${p.steps.length} steps.` : "A few lines."}</SectionTitle>
+        {p.steps ? (
+          <ol className="mt-10 grid gap-6">
+            {p.steps.map((step, i) => (
+              <li key={step.title} className="grid gap-4 border-2 border-black bg-white p-5 md:grid-cols-[minmax(0,320px)_1fr] md:p-8">
+                <div>
+                  <span className="font-pixel text-4xl leading-none tracking-[-0.06em]">{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="mt-3 font-mono text-sm uppercase tracking-[0.12em]">{step.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-black/70">{step.body}</p>
+                </div>
+                {step.code ? (
+                  <div className="min-w-0 self-start border-2 border-black bg-[#090909] text-[#eceae3]">
+                    <div className="flex items-center gap-2 border-b border-white/20 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50"><span className="size-2 bg-[#f4d44d]" aria-hidden="true" />{step.language ?? p.language}</div>
+                    <pre className="overflow-x-auto p-5 font-mono text-[13px] leading-6"><code>{step.code}</code></pre>
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <div className="mt-10 border-2 border-black bg-[#090909] text-[#eceae3]">
+            <div className="flex items-center gap-2 border-b border-white/20 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50"><span className="size-2 bg-[#f4d44d]" aria-hidden="true" />{p.language}</div>
+            <pre className="overflow-x-auto p-6 font-mono text-[13px] leading-6"><code>{p.code}</code></pre>
+          </div>
+        )}
+        {p.notes?.length ? (
+          <div className="mt-10 grid gap-px border-2 border-black bg-black md:grid-cols-2">
+            {p.notes.map((note) => (
+              <div key={note.title} className="bg-[#f4d44d]/40 p-6 md:[&:last-child:nth-child(odd)]:col-span-2">
+                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-black/60">Good to know</p>
+                <h3 className="mt-2 font-mono text-sm uppercase tracking-[0.12em]">{note.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-black/75">{note.body}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
         <p className="mt-4 text-sm text-black/60">Full details in the <Link className="underline" href={`/docs/${p.doc}`}>documentation</Link>. All integrations are listed on the <Link className="underline" href="/integrations">integrations page</Link>.</p>
         <div className="mt-14"><FaqList items={p.faq} /></div>
         <ul className="mt-10 flex flex-wrap gap-3">

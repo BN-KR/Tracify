@@ -1,4 +1,4 @@
-import { pageMetadata } from "@/lib/seo";
+import { faqJsonLd, jsonLdString, pageMetadata } from "@/lib/seo";
 import { ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/marketing/page-header";
 import { Reveal } from "@/components/marketing/landing/reveal";
@@ -6,7 +6,15 @@ import { ClosingBand, DarkBand, CreamBand, Eyebrow, HeaderAction, SectionTitle ,
 import { ControlExplorer } from "@/components/marketing/company/control-explorer";
 
 import { RedactionDemo } from "@/components/marketing/company/redaction-demo";
-export const metadata = pageMetadata({ title: "Security for AI agent telemetry", description: "How Tracify protects AI agent traces and prompts: encryption in transit and at rest, project isolation, access controls, EU data residency and redaction.", path: "/security" });
+export const metadata = pageMetadata({ title: "Security and EU data residency for AI agent traces", description: "How Tracify protects AI agent traces and prompts: encryption in transit and at rest, project isolation, access controls, EU data residency and redaction.", path: "/security" });
+
+const faqs = [
+  { q: "Where is Tracify data stored?", a: "EU region accounts, traces and cache are stored in Ireland. Queued span events pass through Inngest in the United States, so Tracify does not claim end-to-end EU residency." },
+  { q: "Are prompts and personal data redacted?", a: "Email, phone, card, SSN and API-key patterns are redacted before queued events leave the EU region." },
+  { q: "How are API keys protected?", a: "Project keys are shown once at creation and only a hash is stored on our side." },
+  { q: "Can one project see another project's traces?", a: "No. Telemetry is scoped to the project derived from the authenticated key, and there is no cross-project query path." },
+  { q: "Will Tracify slow down or break my production agent?", a: "Runtime policies are observe-first and cost ceilings fail open, so monitoring does not silently change or block production traffic." },
+] as const;
 
 const controls = [
   { title: "Encryption", icon: "lock", summary: "TLS 1.3 in transit and AES-256 at rest.", items: ["API keys are hashed before storage.", "Plaintext project keys are shown once."] },
@@ -101,6 +109,20 @@ export default function SecurityPage() {
           ))}
         </div>
       </DarkBand>
+
+      <CreamBand>
+        <Eyebrow dark={false}>Questions</Eyebrow>
+        <SectionTitle>Security questions, answered plainly.</SectionTitle>
+        <div className="mt-10 max-w-3xl border-t border-black/25">
+          {faqs.map(({ q, a }) => (
+            <details key={q} className="border-b border-black/25 py-4">
+              <summary className="cursor-pointer font-pixel text-2xl tracking-[-0.05em]">{q}</summary>
+              <p className="mt-3 text-sm leading-6 text-black/70">{a}</p>
+            </details>
+          ))}
+        </div>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(faqJsonLd(faqs.map(({ q, a }) => ({ q, a })))) }} />
+      </CreamBand>
 
       <ClosingBand
         title="Found something? Tell us first."

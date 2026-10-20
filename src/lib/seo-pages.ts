@@ -1,3 +1,4 @@
+import { integrationGuides } from "./integration-guides";
 /**
  * Content for the /compare and /integrations/[slug] landing pages.
  * Competitor statements are deliberately high level and conservative; each page tells readers to check the other
@@ -146,9 +147,20 @@ export type IntegrationPage = {
   code: string;
   doc: string;
   faq: readonly Faq[];
+  /** Optional step-by-step setup. When present it replaces the single code block on the page. */
+  steps?: readonly IntegrationStep[];
+  /** Optional plain notes on what is and is not traced, shown after the steps. */
+  notes?: readonly { title: string; body: string }[];
 };
 
-export const integrationPages: readonly IntegrationPage[] = [
+export type IntegrationStep = {
+  title: string;
+  body: string;
+  language?: "typescript" | "python" | "bash";
+  code?: string;
+};
+
+const coreIntegrationPages: readonly IntegrationPage[] = [
   {
     slug: "openai",
     name: "OpenAI",
@@ -341,3 +353,5 @@ async def triage(message: str):
     faq: [{ q: "Do I lose OpenAI's own trace viewer?", a: "No. Tracify records alongside it, so you keep both." }],
   },
 ] as const;
+
+export const integrationPages: readonly IntegrationPage[] = [...coreIntegrationPages, ...integrationGuides];
