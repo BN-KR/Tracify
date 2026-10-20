@@ -456,7 +456,9 @@ function traceListClauses(projectId: string, filters: TraceListFilters) {
 
 // Shared by the full trace row and the lighter run-id filter so HAVING clauses mean the same thing in both.
 const DURATION_EXPR = `if(countIf(parentSpanId = '') > 0, maxIf(latencyMs, parentSpanId = ''), greatest(dateDiff('millisecond', min(createdAt), max(createdAt)), max(latencyMs)))`;
-const FINISHED_EXPR = `(countIf(spanType = 'run_end') > 0 OR countIf(parentSpanId = '' AND ${IS_ERROR}) > 0 OR argMaxIf(lower(JSONExtractString(metadata, 'status')), createdAt, parentSpanId = '' AND JSONExtractString(metadata, 'status') != '') NOT IN ('', 'running', 'pending', 'queued', 'in_progress', 'started'))`;
+// A trace whose last span is more than 5 minutes old is finished even without a run_end span, so SDK runs that never send
+// one do not show as "running" forever.
+const FINISHED_EXPR = `(max(createdAt) < now() - INTERVAL 5 MINUTE OR countIf(spanType = 'run_end') > 0 OR countIf(parentSpanId = '' AND ${IS_ERROR}) > 0 OR argMaxIf(lower(JSONExtractString(metadata, 'status')), createdAt, parentSpanId = '' AND JSONExtractString(metadata, 'status') != '') NOT IN ('', 'running', 'pending', 'queued', 'in_progress', 'started'))`;
 const ERROR_COUNT_EXPR = `countIf(${IS_ERROR})`;
 
 /** Run ids of every trace matching the filters, for queries that aggregate steps instead of traces. */
