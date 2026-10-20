@@ -27,7 +27,7 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion, 
   const [source, setSource] = useState<string>("");
   const [text, setText] = useState(STARTER);
   const [values, setValues] = useState<Record<string, string>>({});
-  const [models, setModels] = useState<string[]>(["gpt-4o-mini"]);
+  const [models, setModels] = useState<string[]>(["gpt-5-nano"]);
   const [custom, setCustom] = useState("");
   const [temperature, setTemperature] = useState(0.2);
   const [providers, setProviders] = useState<Providers | null>(demo ? { openai: true, anthropic: true } : null);

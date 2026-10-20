@@ -51,5 +51,5 @@ export function estimateTokens(text: string) {
   return Math.ceil(text.length / 4);
 }
 
-export const PLAYGROUND_MODELS = ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "gpt-4.1"] as const;
+export const PLAYGROUND_MODELS = ["gpt-5-nano", "gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "gpt-4.1"] as const;
 export const MAX_PLAYGROUND_MODELS = 3;
