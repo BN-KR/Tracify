@@ -14,7 +14,6 @@ type ListResponse = {
 };
 type Query = Record<string, string>;
 
-const LIVE_STORAGE = "tracify.groups.live";
 /** URL keys that choose the view, not the data, so they are not sent to the list request. */
 const VIEW_KEYS = ["range", "from", "to", "id"];
 
@@ -48,7 +47,7 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
   const [settledKey, setSettledKey] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [clock, setClock] = useState(() => Date.now());
-  const [live, setLive] = useState(true);
+  const [live] = useState(true);
   const [draft, setDraft] = useState(query.q ?? "");
   const [fresh, setFresh] = useState<Set<string>>(() => new Set());
   const searchRef = useRef<HTMLInputElement>(null);
@@ -57,7 +56,6 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
 
   // The live/paused choice is remembered per browser, which only exists after hydration.
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { try { if (window.localStorage.getItem(LIVE_STORAGE) === "paused") setLive(false); } catch {} }, []);
   useEffect(() => { const timer = setInterval(() => setClock(Date.now()), 10_000); return () => clearInterval(timer); }, []);
 
   const update = useCallback((patch: Query, resetPage = true) => {
@@ -177,12 +175,6 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
     return () => window.removeEventListener("keydown", onKey);
   }, [selectIndex, selected, update]);
 
-  function toggleLive() {
-    const next = !live;
-    setLive(next);
-    if (next) setNow(Date.now());
-    try { window.localStorage.setItem(LIVE_STORAGE, next ? "live" : "paused"); } catch {}
-  }
   function exportCsv() {
     downloadFile(`${text.many}-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.csv`, toCsv(
       [text.one, text.other, "Runs", "Failed runs", "Cost (USD)", "Tokens", "First seen (UTC)", "Last seen (UTC)", "Environment", "Top model"],
@@ -230,10 +222,6 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
         <select id={`${kind}-sort`} className={control} value={`${sort}:${direction}`} onChange={(event) => { const [nextSort, nextDir] = event.target.value.split(":"); update({ sort: nextSort, dir: nextDir }); }}>
           {SORT_CHOICES.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
         </select>
-        <button type="button" onClick={toggleLive} aria-pressed={isLive} disabled={Boolean(query.from || query.to)} title={query.from || query.to ? "Live updates are off for a fixed time window" : undefined} className={`${control} flex items-center gap-1.5 disabled:opacity-50`}>
-          <span className={`size-1.5 rounded-full ${isLive ? "animate-pulse bg-[#5BE3A0]" : "bg-[#6B7380]"}`} />
-          {isLive ? "Live" : query.from || query.to ? "Fixed window" : "Paused"}
-        </button>
         <button type="button" onClick={() => { setNow(Date.now()); load(); }} className={control}>Refresh</button>
         <button type="button" onClick={exportCsv} disabled={!rows.length} className={`${control} disabled:opacity-40`}>Export CSV</button>
       </header>
