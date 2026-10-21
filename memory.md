@@ -2340,3 +2340,7 @@ Automations page is a list of "when X then Y" rules drawn as trigger node -> arr
 
 ## 2026-10-21 Green GitHub checks — draft PR (branch `claude/project-thread-d21l4z`)
 - Fixed the red Checks workflow with no product change: `vite` added as devDependency (Convex backend tests use `import.meta.glob`), `packages/ts-sdk` excluded from root `tsc` (own CI job), 21 lint errors fixed (hook order, `any` types, setState-in-effect suppressed with reasons), SEO test no longer expects a public `/playground` layout (playground lives under the already-noindex dashboard). Checked locally with pnpm: tsc, lint, all site tests, marketing and cloud builds.
+
+## 2026-10-21 Branch protection and GitGuardian
+- Main's 8 checks: Build (marketing), Build (cloud), Code errors (types), Code style (lint), Tests (sites), Tests (TypeScript SDK), Tests (Python SDK), Leaked keys. Branch protection on main is set up by Kristoffer by hand (GitHub ruleset).
+- GitGuardian check showed on #265 but not on later PRs; checking whether it returns on a fresh push.
