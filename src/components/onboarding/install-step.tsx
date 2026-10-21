@@ -102,14 +102,14 @@ export function InstallStep() {
       </div>
       {tab === "prompt" ? (
         <>
-          <div className="mb-4 border border-black/15 bg-[#f3f2ed] p-4 font-sans text-sm leading-6 text-[#92400E]">
-            Do not paste live API keys into AI coding tools unless you trust the
-            environment. Prefer adding the key locally to .env.
+          <div className="mb-3 border border-black/15 bg-[#f3f2ed] px-3 py-2 font-sans text-xs leading-5 text-[#92400E]">
+            Keep live API keys out of AI coding tools unless you trust them. Add the key to .env locally.
           </div>
           <CodeCopyBlock
             label="AI setup prompt"
             value={active.code}
             multiline
+            collapsible
             copyLabel="Copy setup prompt"
           />
         </>
