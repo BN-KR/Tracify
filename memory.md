@@ -1,3 +1,6 @@
+## 2026-10-21 Thumbs up/down on runs — draft PR (branch `claude/project-thread-1cr2yp`)
+- Tracing list has a new "Feedback" column (on by default, hidden on the demo project): two small thumb buttons per run. One tap saves a yes/no score named `feedback` (human, boolean) on the trace; tapping the same thumb again removes it (undo); the other thumb switches it. Convex `evaluation.myFeedback` (the signed-in person's thumbs for the page's runs) and `evaluation.setFeedback` (value true/false/null), needs a manual Convex deploy. UI in `src/components/dashboard/tracing/feedback.tsx`. Saved column choices from before do not show the column until it is switched on in Columns. Checked with a scratch page, not the signed-in dashboard.
+
 ## 2026-10-20 Ask AI can use an alternate provider — draft PR
 - `completeWithFallback` (`src/lib/llm-chain.ts`) tries an OpenAI-compatible alternate provider first when `ASK_AI_ALT_API_KEY` is set (address `ASK_AI_ALT_BASE_URL`, model `ASK_AI_ALT_MODEL`), then Gemini. OpenAI is skipped when the alternate key is set, because it can cost money. A model is sent only if it is listed in `ASK_AI_ALT_MODELS_ALLOWED`. Ask AI only. Tests in `llm-chain.test.ts`.
 

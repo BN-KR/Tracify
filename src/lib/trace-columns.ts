@@ -21,6 +21,7 @@ export const COLUMN_DEFS: ColumnDef[] = [
   { id: "input", label: "Input", group: "Trace", hint: "First input, shortened" },
   { id: "output", label: "Output", group: "Trace", hint: "Last output, shortened" },
   { id: "rootType", label: "Root step type", group: "Trace", hint: "agent, llm, tool…", extra: true },
+  { id: "feedback", label: "Feedback", group: "Trace", hint: "Your thumbs up or down" },
   { id: "latency", label: "Latency", group: "Performance", hint: "Total time of the trace" },
   { id: "ttftMs", label: "Time to first token", group: "Performance", hint: "Fastest first token of any step", extra: true },
   { id: "steps", label: "Steps", group: "Performance", hint: "Number of steps" },
@@ -46,7 +47,7 @@ export const COLUMN_DEFS: ColumnDef[] = [
   { id: "firstErrorType", label: "First error type", group: "Errors", hint: "Type of the earliest failure", extra: true },
   { id: "firstErrorMessage", label: "First error message", group: "Errors", hint: "Message of the earliest failure", extra: true },
 ];
-export const DEFAULT_COLUMNS = ["startedAt", "status", "name", "input", "output", "latency", "cost", "tokens", "model"];
+export const DEFAULT_COLUMNS = ["startedAt", "status", "name", "input", "output", "feedback", "latency", "cost", "tokens", "model"];
 export const MAX_META_COLUMNS = 20;
 
 export const META_PREFIX = "meta:";
