@@ -99,7 +99,7 @@ export function Hero({ locale = "en" }: { locale?: Locale }) {
 
       <div className="mx-auto flex max-w-[1320px] flex-col items-center px-5 pt-32 text-center md:pt-40">
         <motion.p
-          initial={reduce ? false : { opacity: 0, y: 10 }}
+          initial={reduce ? false : { y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="inline-flex items-center gap-2 border border-white/20 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70"
@@ -115,15 +115,15 @@ export function Hero({ locale = "en" }: { locale?: Locale }) {
           {t.heroA} <span className="text-[#f4d44d]">{t.heroB}</span>
         </motion.h1>
         <motion.p
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={reduce ? false : { y: 8 }}
+          animate={{ y: 0 }}
           transition={{ delay: 0.7 }}
           className="mt-7 max-w-[620px] text-base leading-7 text-white/70 md:text-lg md:leading-8"
         >
           {t.lede}
         </motion.p>
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 10 }}
+          initial={reduce ? false : { y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.85 }}
           className="mt-9 flex flex-wrap justify-center gap-3"
