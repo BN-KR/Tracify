@@ -41,7 +41,6 @@ export function DashboardCommandMenu({ projectId, showTrigger = true }: CommandM
       ["Users", `${base}/users`],
       ["Alerts", `${base}/alerts`],
       ["Automations", `${base}/automations`],
-      ["Widget library", `${base}/widgets`],
       ["Search traces", `${base}/search`],
       ["Costs", `${base}/costs`],
       ["Scores", `${base}/scores`],

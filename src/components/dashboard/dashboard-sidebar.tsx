@@ -141,7 +141,7 @@ export function DashboardSidebar({
             { title: "Tracing", icon: Activity, href: workspaceHref("tracing") },
             ...(!isSynthetic && !demo ? [{ title: "Actions", icon: Activity, href: workspaceHref("steps") }] : []),
             ...(demo ? [{ title: "Costs", icon: BarChart3, href: workspaceHref("costs") }] : []),
-            { title: "Explore", icon: Zap, href: workspaceHref("explore") },
+            ...(isSynthetic || demo ? [{ title: "Explore", icon: Zap, href: workspaceHref("explore") }] : []),
             { title: "Sessions", icon: Activity, href: workspaceHref("sessions") },
             { title: "Users", icon: Users, href: workspaceHref("users") },
             { title: "Alerts", icon: Activity, href: workspaceHref("alerts") },
