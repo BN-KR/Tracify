@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, Terminal, Code2, BookOpen, KeyRound } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { scoreSnippet } from "@/lib/score-snippets";
 import { getDeploymentRegion, getTracifyRegion } from "@/lib/regions";
 
 interface QuickstartGuideProps {
@@ -54,6 +55,9 @@ const runAgent = traceAgent(async () => {
   });
   return "Success";
 });`;
+
+  const scorePy = scoreSnippet("python", projectId);
+  const scoreTs = scoreSnippet("typescript", projectId);
 
   const installPy = "pip install tracify-sdk";
   const installTs = "npm install tracify-sdk";
@@ -128,6 +132,17 @@ const runAgent = traceAgent(async () => {
           onCopy={() => copyToClipboard(`TRACIFY_API_KEY=YOUR_API_KEY\nTRACIFY_REGION=${region.id}`, 'env')}
           copied={copied === 'env'}
         />
+      </section>
+
+      <section className="space-y-4 pt-6">
+        <h3 className="flex items-center gap-2 font-mono text-xs text-black/60 uppercase">
+          <Check className="size-4" /> 4. Grade your own runs (optional)
+        </h3>
+        <p className="text-[11px] text-black/55 font-mono">
+          Let your agent score each run from code. Scores appear on the Scores page with no copy-pasting.
+        </p>
+        <CodeBlock code={scorePy} onCopy={() => copyToClipboard(scorePy, 'score-py')} copied={copied === 'score-py'} language="python" />
+        <CodeBlock code={scoreTs} onCopy={() => copyToClipboard(scoreTs, 'score-ts')} copied={copied === 'score-ts'} language="typescript" />
       </section>
 
       <div className="pt-10 flex gap-4">
