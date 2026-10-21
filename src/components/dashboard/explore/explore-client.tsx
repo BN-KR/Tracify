@@ -142,7 +142,7 @@ export function ExploreClient({
           <p className="text-xs text-neutral-400">
             {isDemo
               ? "Seeded demo data — click any row to open its trace map. No backend involved."
-              : "Trace explorer for this project. Live data from Convex."}
+              : "Trace explorer for this project. Live data from your project."}
           </p>
         </div>
         <span className="text-[11px] uppercase tracking-wide border border-neutral-700 px-2 py-1 text-neutral-400">

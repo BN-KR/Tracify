@@ -74,7 +74,7 @@ export function InvestigationMode({ projectId }: { projectId: string }) {
     const modelCalls = spans.filter((span) => span.modelId).length;
     const toolCalls = spans.filter((span) => span.toolName).length;
     return [
-      { label: "Run status", value: run?.status ?? "Not selected", detail: "Convex run summary", kind: "confirmed" as const },
+      { label: "Run status", value: run?.status ?? "Not selected", detail: "Saved run summary", kind: "confirmed" as const },
       { label: "Errors", value: String(errors.length), detail: errors[0]?.errorType || errors[0]?.errorMessage || "No error span recorded", kind: "confirmed" as const },
       { label: "Slowest span", value: slowest ? `${slowest.latencyMs ?? 0} ms` : "Not available", detail: slowest?.spanType ?? "Span data unavailable", kind: "confirmed" as const },
       { label: "Model / tool calls", value: `${modelCalls} / ${toolCalls}`, detail: "Observed in the selected timeline", kind: "confirmed" as const },

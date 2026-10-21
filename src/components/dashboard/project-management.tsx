@@ -163,7 +163,7 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
                 Recent Saved Runs
               </h2>
               <p className="mt-1 font-mono text-[11px] text-black/55">
-                Convex-backed activity used when analytics storage is unavailable.
+                Saved activity used when analytics are unavailable.
               </p>
             </div>
           </div>
@@ -231,7 +231,7 @@ export function ProjectManagement({ projectId }: { projectId: string }) {
               </h2>
               <p className="mt-2 font-mono text-[11px] leading-5 text-red-300/60">
                 This removes the project plus saved runs, alerts, and comments
-                from Convex. Type the exact project name, then type DELETE.
+                from your account. Type the exact project name, then type DELETE.
               </p>
             </div>
           </div>

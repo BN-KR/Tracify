@@ -194,7 +194,7 @@ export function ProjectReport({ projectId }: { projectId: string }) {
       {stats?.unavailable ? (
         <div className="flex items-center gap-2 border border-black/15 bg-white p-4 font-mono text-[11px] text-black/60 print:border-black print:bg-black print:text-white">
           <AlertTriangle className="size-4" />
-          Analytics are unavailable. This report is using Convex saved summaries where possible.
+          Analytics are unavailable. This report is using saved run summaries where possible.
         </div>
       ) : null}
     </div>
