@@ -73,4 +73,19 @@ describe("deployment host routing", () => {
     const response = proxy(new NextRequest("https://eu.cloud.tracify.tech/"));
     expect(response.headers.get("location")).toBe("https://eu.cloud.tracify.tech/sign-in");
   });
+
+  it("uses the forwarded public host when the server only sees its own bind address", () => {
+    process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND = "cloud";
+    const headers = { host: "localhost:3000", "x-forwarded-host": "eu.cloud.tracify.tech", "x-forwarded-proto": "https" };
+
+    expect(proxy(new NextRequest("http://localhost:3000/", { headers })).headers.get("location")).toBe("https://eu.cloud.tracify.tech/sign-in");
+    expect(proxy(new NextRequest("http://localhost:3000/blog/x", { headers })).headers.get("location")).toBe("https://www.tracify.tech/blog/x");
+    expect(proxy(new NextRequest("http://localhost:3000/sign-in", { headers })).headers.get("location")).toBeNull();
+  });
+
+  it("still treats a genuine localhost host header as local", () => {
+    process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND = "cloud";
+    const response = proxy(new NextRequest("http://localhost:3000/", { headers: { host: "localhost:3000" } }));
+    expect(response.headers.get("location")).toBeNull();
+  });
 });
