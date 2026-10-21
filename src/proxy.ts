@@ -64,7 +64,10 @@ export function proxy(request: NextRequest) {
   const hostname = publicHostname(publicHost);
   const local = isLocalHost(hostname);
   const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
-  const publicOrigin = `${forwardedProto || request.nextUrl.protocol.replace(":", "")}://${publicHost}`;
+  // Coolify's router rewrites x-forwarded-proto to "http" before it reaches the app, so a real
+  // public host is always https; only local development keeps the protocol it was reached on.
+  const protocol = local ? forwardedProto || request.nextUrl.protocol.replace(":", "") : "https";
+  const publicOrigin = `${protocol}://${publicHost}`;
 
   // The sample project is a sandbox that lives on the cloud site; "/demo" is just its front door.
   if (pathname === DEMO_PREFIX || pathname === `${DEMO_PREFIX}/`) {
