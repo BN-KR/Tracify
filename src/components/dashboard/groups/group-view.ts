@@ -30,7 +30,6 @@ export type GroupView = {
   load: () => void;
   isLive: boolean;
   fixedWindow: boolean;
-  toggleLive: () => void;
   refresh: () => void;
   exportCsv: () => void;
   now: number;

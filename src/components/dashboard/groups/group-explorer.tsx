@@ -10,7 +10,6 @@ import type { GroupView, ListResponse, Query } from "./group-view";
 import { SessionsView } from "./sessions-view";
 import { UsersView } from "./users-view";
 
-const LIVE_STORAGE = "tracify.groups.live";
 /** URL keys that choose the view, not the data, so they are not sent to the list request. */
 const VIEW_KEYS = ["range", "from", "to", "id"];
 
@@ -31,16 +30,13 @@ export function GroupExplorer({ projectId, kind, initialQuery, basePath }: { pro
   const [settledKey, setSettledKey] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [clock, setClock] = useState(() => Date.now());
-  const [live, setLive] = useState(true);
+  const live = true;
   const [draft, setDraft] = useState(query.q ?? "");
   const [fresh, setFresh] = useState<Set<string>>(() => new Set());
   const searchRef = useRef<HTMLInputElement>(null);
   const requestId = useRef(0);
   const selected = query.id ?? null;
 
-  // The live/paused choice is remembered per browser, which only exists after hydration.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { try { if (window.localStorage.getItem(LIVE_STORAGE) === "paused") setLive(false); } catch {} }, []);
   useEffect(() => { const timer = setInterval(() => setClock(Date.now()), 10_000); return () => clearInterval(timer); }, []);
 
   const update = useCallback((patch: Query, resetPage = true) => {
@@ -160,12 +156,6 @@ export function GroupExplorer({ projectId, kind, initialQuery, basePath }: { pro
     return () => window.removeEventListener("keydown", onKey);
   }, [selectIndex, selected, update]);
 
-  function toggleLive() {
-    const next = !live;
-    setLive(next);
-    if (next) setNow(Date.now());
-    try { window.localStorage.setItem(LIVE_STORAGE, next ? "live" : "paused"); } catch {}
-  }
   function exportCsv() {
     downloadFile(`${text.many}-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.csv`, toCsv(
       [text.one, text.other, "Runs", "Failed runs", "Cost (USD)", "Tokens", "First seen (UTC)", "Last seen (UTC)", "Environment", "Top model"],
@@ -181,7 +171,7 @@ export function GroupExplorer({ projectId, kind, initialQuery, basePath }: { pro
   const root = basePath ?? `/dashboard/${encodeURIComponent(projectId)}`;
   const view: GroupView = {
     kind, projectId, basePath: root, query, update, data, rows, stats, total, page, pageSize, pageCount, sort, direction, loading, error, load,
-    isLive, fixedWindow: Boolean(query.from || query.to), toggleLive, refresh: () => { setNow(Date.now()); load(); }, exportCsv, now, clock, setNow,
+    isLive, fixedWindow: Boolean(query.from || query.to), refresh: () => { setNow(Date.now()); load(); }, exportCsv, now, clock, setNow,
     draft, setDraft, searchRef, filters, clearFilters: () => { setDraft(""); update({ q: "", environment: "", status: "" }); },
     selected, selectedRow: rows.find((row) => row.id === selected) ?? null, fresh, selectIndex,
     open: (targetKind, id) => { window.location.assign(`${root}/${KIND_TEXT[targetKind].route}?id=${encodeURIComponent(id)}`); },
