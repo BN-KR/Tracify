@@ -7,13 +7,17 @@ export function CodeCopyBlock({
   value,
   multiline = false,
   copyLabel = "Copy",
+  collapsible = false,
 }: {
   label: string;
   value: string;
   multiline?: boolean;
   copyLabel?: string;
+  collapsible?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const clamped = collapsible && !expanded;
 
   async function copy() {
     await navigator.clipboard.writeText(value);
@@ -35,13 +39,24 @@ export function CodeCopyBlock({
       </div>
       <pre
         className={
-          multiline
+          (multiline
             ? "overflow-x-auto whitespace-pre p-3 text-sm leading-6 text-[#f4d44d]"
-            : "overflow-x-auto whitespace-pre p-3 text-sm text-[#f4d44d]"
+            : "overflow-x-auto whitespace-pre p-3 text-sm text-[#f4d44d]") +
+          (clamped ? " h-[calc(4*1.5rem+1.5rem)] overflow-y-hidden" : "")
         }
       >
         <code>{value}</code>
       </pre>
+      {collapsible ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((open) => !open)}
+          aria-expanded={expanded}
+          className="w-full border-t border-white/15 px-3 py-2 text-left text-[11px] uppercase tracking-wide text-white/70 transition-colors hover:text-[#f4d44d]"
+        >
+          {expanded ? "Show less ↑" : "Show full prompt ↓"}
+        </button>
+      ) : null}
     </div>
   );
 }
