@@ -64,8 +64,8 @@ export function ScorePanel({ projectId, row, onClose, onFilter, now }: { project
   );
 }
 
-export function AddScore({ onClose, onSave }: { onClose: () => void; onSave: (input: { traceId: string; name: string; value: number | boolean | string; dataType: ScoreRow["dataType"]; source: "human" | "user"; comment?: string }) => Promise<void> }) {
-  const [traceId, setTraceId] = useState("");
+export function AddScore({ onClose, onSave, presetTraceId }: { onClose: () => void; presetTraceId?: string; onSave: (input: { traceId: string; name: string; value: number | boolean | string; dataType: ScoreRow["dataType"]; source: "human" | "user"; comment?: string }) => Promise<void> }) {
+  const [traceId, setTraceId] = useState(presetTraceId ?? "");
   const [name, setName] = useState("");
   const [dataType, setDataType] = useState<ScoreRow["dataType"]>("numeric");
   const [value, setValue] = useState("");
@@ -92,8 +92,9 @@ export function AddScore({ onClose, onSave }: { onClose: () => void; onSave: (in
       <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-4" aria-label="Add a score">
         <h2 className="text-sm font-semibold">Add a score</h2>
         <p className="text-[11px] leading-4 text-[#6B7380]">Grade a trace by hand. It is recorded as a human score and shows up everywhere scores do.</p>
-        <label className="grid gap-1 text-[11px] text-[#8B93A1]">Trace id<input value={traceId} onChange={(event) => setTraceId(event.target.value)} maxLength={200} placeholder="Paste it from the Tracing page" className={`${field} h-8 font-mono`} autoFocus /></label>
-        <label className="grid gap-1 text-[11px] text-[#8B93A1]">Score name<input value={name} onChange={(event) => setName(event.target.value)} maxLength={100} placeholder="helpfulness" className={`${field} h-8 font-mono`} /></label>
+        {presetTraceId ? <div className="grid gap-1 text-[11px] text-[#8B93A1]">Scoring this run<div className="break-all rounded border border-[#262C35] bg-[#0E1115] px-2.5 py-1.5 font-mono text-xs text-[#E6E9EE]" data-testid="score-run-id">{presetTraceId}</div></div>
+          : <label className="grid gap-1 text-[11px] text-[#8B93A1]">Trace id<input value={traceId} onChange={(event) => setTraceId(event.target.value)} maxLength={200} placeholder="Paste it from the Tracing page" className={`${field} h-8 font-mono`} autoFocus /></label>}
+        <label className="grid gap-1 text-[11px] text-[#8B93A1]">Score name<input value={name} onChange={(event) => setName(event.target.value)} maxLength={100} placeholder="helpfulness" className={`${field} h-8 font-mono`} autoFocus={Boolean(presetTraceId)} /></label>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1 text-[11px] text-[#8B93A1]">Type<select value={dataType} onChange={(event) => { setDataType(event.target.value as ScoreRow["dataType"]); setValue(""); }} className={`${field} h-8`}><option value="numeric">Number</option><option value="boolean">Yes / no</option><option value="categorical">Category</option><option value="text">Free text</option></select></label>
           <label className="grid gap-1 text-[11px] text-[#8B93A1]">Value
