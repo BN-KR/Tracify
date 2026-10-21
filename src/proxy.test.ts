@@ -67,4 +67,10 @@ describe("deployment host routing", () => {
     const marketing = proxy(new NextRequest("https://www.tracify.tech/admin"));
     expect(marketing.headers.get("location")).toBe("https://www.tracify.tech/cloud?next=%2Fadmin");
   });
+
+  it("sends a cold visit to the cloud root to sign-in", () => {
+    process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND = "cloud";
+    const response = proxy(new NextRequest("https://eu.cloud.tracify.tech/"));
+    expect(response.headers.get("location")).toBe("https://eu.cloud.tracify.tech/sign-in");
+  });
 });

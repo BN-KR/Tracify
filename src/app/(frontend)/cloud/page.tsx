@@ -12,7 +12,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function CloudRegionPage() {
+const AUTH_ENTRY_PATHS = ["/sign-in", "/sign-up"];
+
+export default async function CloudRegionPage({ searchParams }: { searchParams: Promise<{ next?: string | string[] }> }) {
+  // "Sign in" on the marketing site must land on sign-in and "Sign up" on sign-up; anything else keeps the Sandbox/Build step.
+  const requested = (await searchParams).next;
+  const requestedPath = typeof requested === "string" ? requested.split("?")[0] : "";
+  const next = AUTH_ENTRY_PATHS.includes(requestedPath) ? requestedPath : "/cloud/mode";
   const regions = getAvailableRegions();
   return (
     <CloudShell
@@ -27,7 +33,7 @@ export default function CloudRegionPage() {
         <Fact icon={ShieldCheck} label="Regional boundary" />
         <Fact icon={Globe2} label="Sandbox and Build" />
       </div>
-      <RegionOptions regions={regions} next="/cloud/mode" intent="build" />
+      <RegionOptions regions={regions} next={next} intent="build" />
     </CloudShell>
   );
 }

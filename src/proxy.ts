@@ -54,6 +54,11 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(`${pathname}${search}`, TRACIFY_REGIONS.eu.origin));
   }
 
+  // Someone opening the cloud site cold lands on sign-in, not sign-up.
+  if (deploymentKind === "cloud" && pathname === "/" && !isLocalHost(request.nextUrl.hostname)) {
+    return NextResponse.redirect(new URL(`/sign-in${search}`, request.url));
+  }
+
   if (
     deploymentKind === "cloud" &&
     !isCloudAppPath(pathname) &&
