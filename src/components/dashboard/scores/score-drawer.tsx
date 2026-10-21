@@ -64,7 +64,52 @@ export function ScorePanel({ projectId, row, onClose, onFilter, now }: { project
   );
 }
 
-export function AddScore({ onClose, onSave, presetTraceId }: { onClose: () => void; presetTraceId?: string; onSave: (input: { traceId: string; name: string; value: number | boolean | string; dataType: ScoreRow["dataType"]; source: "human" | "user"; comment?: string }) => Promise<void> }) {
+const RUN_DOT: Record<string, string> = { completed: "bg-[#5BE3A0]", failed: "bg-[#FF8A8A]", running: "bg-[#F4D44D]", cancelled: "bg-[#6B7380]" };
+
+/** Tap a recent run instead of pasting its id. Pasting stays available for older runs. */
+function RunPicker({ projectId, value, onChange }: { projectId: string; value: string; onChange: (traceId: string) => void }) {
+  const runs = useQuery(api.agentRuns.getRecentRunsByProject, { projectId: projectId as Id<"projects"> });
+  const [search, setSearch] = useState("");
+  const [pasting, setPasting] = useState(false);
+  const [now] = useState(() => Date.now());
+  const needle = search.trim().toLowerCase();
+  const shown = (runs ?? []).filter((run) => !needle || [run.runId, run.status, run.primaryModel, run.environment, run.release].some((part) => part?.toLowerCase().includes(needle)));
+  const picked = runs?.find((run) => run.runId === value);
+  if (pasting || (runs && !runs.length)) {
+    return (
+      <label className="grid gap-1 text-[11px] text-[#8B93A1]">Trace id
+        <input value={value} onChange={(event) => onChange(event.target.value)} maxLength={200} placeholder={runs && !runs.length ? "No runs yet. Paste a trace id" : "Paste the trace id"} className={`${field} h-8 font-mono`} autoFocus />
+        {runs?.length ? <button type="button" onClick={() => { setPasting(false); onChange(""); }} className="justify-self-start text-[11px] text-[#8AB4FF] underline">Pick from recent runs instead</button> : null}
+      </label>
+    );
+  }
+  return (
+    <fieldset className="grid gap-1.5 text-[11px] text-[#8B93A1]">
+      <legend className="mb-1">Which run is this score for?</legend>
+      <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search recent runs by id, model or status" aria-label="Search recent runs" className={`${field} h-8`} autoFocus />
+      {runs === undefined ? <p role="status" className="py-3 text-xs">Loading recent runs…</p> : !shown.length ? <p className="py-3 text-xs">No recent run matches “{search}”.</p> : (
+        <ul className="grid max-h-64 gap-1 overflow-auto" role="radiogroup" aria-label="Recent runs">
+          {shown.map((run) => {
+            const on = run.runId === value;
+            return (
+              <li key={run._id}>
+                <button type="button" role="radio" aria-checked={on} onClick={() => onChange(run.runId)} className={`flex w-full items-center gap-2 rounded border px-2.5 py-1.5 text-left hover:border-[#3A424E] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#F4D44D] ${on ? "border-[#F4D44D] bg-[#16140A]" : "border-[#1F242C] bg-[#0E1115]"}`}>
+                  <span className={`size-2 shrink-0 rounded-full ${RUN_DOT[run.status] ?? "bg-[#6B7380]"}`} aria-hidden />
+                  <span className="min-w-0 flex-1"><span className="block truncate font-mono text-xs text-[#E6E9EE]">{run.runId}</span><span className="block truncate text-[10px] text-[#6B7380]">{run.status} · {run.spanCount} step{run.spanCount === 1 ? "" : "s"}{run.primaryModel ? ` · ${run.primaryModel}` : ""}</span></span>
+                  <span className="shrink-0 font-mono text-[10px] text-[#6B7380]">{ago(Date.parse(run.startedAt) || 0, now)}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {picked ? <p className="text-[11px] text-[#C9CED6]">Selected: <span className="font-mono">{picked.runId}</span></p> : null}
+      <button type="button" onClick={() => { setPasting(true); onChange(""); }} className="justify-self-start text-[11px] text-[#8AB4FF] underline">Run not listed? Paste its id</button>
+    </fieldset>
+  );
+}
+
+export function AddScore({ projectId, onClose, onSave, presetTraceId }: { projectId: string; onClose: () => void; presetTraceId?: string; onSave: (input: { traceId: string; name: string; value: number | boolean | string; dataType: ScoreRow["dataType"]; source: "human" | "user"; comment?: string }) => Promise<void> }) {
   const [traceId, setTraceId] = useState(presetTraceId ?? "");
   const [name, setName] = useState("");
   const [dataType, setDataType] = useState<ScoreRow["dataType"]>("numeric");
@@ -75,7 +120,7 @@ export function AddScore({ onClose, onSave, presetTraceId }: { onClose: () => vo
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!traceId.trim()) return setError("Paste the id of the trace this score is for.");
+    if (!traceId.trim()) return setError("Pick the run this score is for.");
     if (!name.trim()) return setError("Give the score a name, like “helpfulness”.");
     if (name.trim().length > 100) return setError("A score name can be at most 100 characters.");
     const parsed = parseScoreInput(dataType, value);
@@ -93,7 +138,7 @@ export function AddScore({ onClose, onSave, presetTraceId }: { onClose: () => vo
         <h2 className="text-sm font-semibold">Add a score</h2>
         <p className="text-[11px] leading-4 text-[#6B7380]">Grade a trace by hand. It is recorded as a human score and shows up everywhere scores do.</p>
         {presetTraceId ? <div className="grid gap-1 text-[11px] text-[#8B93A1]">Scoring this run<div className="break-all rounded border border-[#262C35] bg-[#0E1115] px-2.5 py-1.5 font-mono text-xs text-[#E6E9EE]" data-testid="score-run-id">{presetTraceId}</div></div>
-          : <label className="grid gap-1 text-[11px] text-[#8B93A1]">Trace id<input value={traceId} onChange={(event) => setTraceId(event.target.value)} maxLength={200} placeholder="Paste it from the Tracing page" className={`${field} h-8 font-mono`} autoFocus /></label>}
+          : <RunPicker projectId={projectId} value={traceId} onChange={setTraceId} />}
         <label className="grid gap-1 text-[11px] text-[#8B93A1]">Score name<input value={name} onChange={(event) => setName(event.target.value)} maxLength={100} placeholder="helpfulness" className={`${field} h-8 font-mono`} autoFocus={Boolean(presetTraceId)} /></label>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1 text-[11px] text-[#8B93A1]">Type<select value={dataType} onChange={(event) => { setDataType(event.target.value as ScoreRow["dataType"]); setValue(""); }} className={`${field} h-8`}><option value="numeric">Number</option><option value="boolean">Yes / no</option><option value="categorical">Category</option><option value="text">Free text</option></select></label>

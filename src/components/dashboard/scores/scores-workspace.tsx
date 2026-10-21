@@ -201,7 +201,7 @@ export function ScoresWorkspace({ projectId, initialQuery }: { projectId: string
       )}
 
       {query.add ? (
-        <Sheet label="Add a score" onClose={() => update({ add: "" })}><AddScore onClose={() => update({ add: "" })} onSave={async (input) => { const id = await createScore({ projectId: typedProjectId, ...input }); update({ add: "", id }); }} /></Sheet>
+        <Sheet label="Add a score" onClose={() => update({ add: "" })}><AddScore projectId={projectId} onClose={() => update({ add: "" })} onSave={async (input) => { const id = await createScore({ projectId: typedProjectId, ...input }); update({ add: "", id }); }} /></Sheet>
       ) : selectedRow ? (
         <Sheet label={`Score ${selectedRow.name}`} onClose={() => update({ id: "" })}><ScorePanel projectId={projectId} row={selectedRow} onClose={() => update({ id: "" })} onFilter={(name) => update({ name, id: "" })} now={now} /></Sheet>
       ) : null}
