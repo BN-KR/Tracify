@@ -86,7 +86,7 @@ export function proxy(request: NextRequest) {
     !pathname.startsWith("/api/") &&
     !local
   ) {
-    return NextResponse.redirect(new URL(`${pathname}${search}`, "https://www.tracify.tech"));
+    return NextResponse.redirect(new URL(`${pathname}${search}`, process.env.NEXT_PUBLIC_MARKETING_ORIGIN || "https://www.tracify.tech"));
   }
 
   if (deploymentKind === "marketing" && isCloudAppPath(pathname) && !local) {
