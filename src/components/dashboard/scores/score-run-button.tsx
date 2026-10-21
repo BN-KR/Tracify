@@ -17,6 +17,7 @@ export function ScoreRunButton({ projectId, traceId, className }: { projectId: s
       {open ? (
         <Sheet label="Score this run" onClose={() => setOpen(false)}>
           <AddScore
+            projectId={projectId}
             presetTraceId={traceId}
             onClose={() => setOpen(false)}
             onSave={async (input) => { await createScore({ projectId: projectId as Id<"projects">, ...input }); setSaved(true); setOpen(false); }}
