@@ -13,6 +13,7 @@ import type * as agentRuns from "../agentRuns.js";
 import type * as alertMetrics from "../alertMetrics.js";
 import type * as alertRules from "../alertRules.js";
 import type * as alerts from "../alerts.js";
+import type * as autoScoring from "../autoScoring.js";
 import type * as analyticsCache from "../analyticsCache.js";
 import type * as annotations from "../annotations.js";
 import type * as auditLogs from "../auditLogs.js";
@@ -59,6 +60,7 @@ declare const fullApi: ApiFromModules<{
   alertMetrics: typeof alertMetrics;
   alertRules: typeof alertRules;
   alerts: typeof alerts;
+  autoScoring: typeof autoScoring;
   analyticsCache: typeof analyticsCache;
   annotations: typeof annotations;
   auditLogs: typeof auditLogs;

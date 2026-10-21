@@ -6,6 +6,7 @@ import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
+import { checkTrigger, estimatedGradeCost, JUDGE_MODELS, MAX_DAILY_LIMIT, WHEN_LABELS, type RuleWhen } from "../../../../convex/autoScoring";
 import { checkCodeRule, RULE_HELP, runCodeRule } from "@/lib/evaluator-rules";
 import { formatScoreValue } from "@/lib/score-utils";
 
@@ -40,7 +41,7 @@ function readUrl(initial: Query): Query {
 const percent = (value: number) => `${Math.round(value * 100)}%`;
 const friendly = (reason: unknown, fallback: string) => ((reason instanceof Error ? reason.message : "").match(/Uncaught Error: ([^\n]+)/)?.[1] ?? fallback);
 const LANES = [
-  { id: "live", title: "Live", dot: "bg-[#5BE3A0]", hint: "Checking a share of new traces as they arrive.", empty: "Nothing is checking traces automatically. Edit an evaluator and turn on “Check new traces automatically”." },
+  { id: "live", title: "Live", dot: "bg-[#5BE3A0]", hint: "Checking a share of new traces as they arrive.", empty: "Nothing is checking traces automatically. Edit an evaluator and turn on “Grade new steps automatically”." },
   { id: "manual", title: "Manual only", dot: "bg-[#F4D44D]", hint: "On, but only runs by hand or inside an experiment.", empty: "Nothing here. Every switched-on evaluator is live." },
   { id: "off", title: "Off", dot: "bg-[#6B7380]", hint: "Paused. Nothing runs and nothing is lost.", empty: "Nothing is switched off." },
 ] as const;
@@ -57,6 +58,8 @@ function Ring({ rate }: { rate: number | null }) {
     </svg>
   );
 }
+const formatCost = (usd: number) => (usd < 0.01 ? `$${usd.toFixed(4)}` : `$${usd.toFixed(2)}`);
+const ruleSummary = (config: NonNullable<Row["config"]>) => `${WHEN_LABELS[config.trigger?.when ?? "every"].toLowerCase()}${config.trigger?.modelContains ? ` that used “${config.trigger.modelContains}”` : ""}, ${percent(config.sampleRate)} of them${config.trigger?.dailyLimit ? `, at most ${config.trigger.dailyLimit.toLocaleString("en-US")} a day` : ""}`;
 const typeText = (type: string) => (type === "code" ? "Code rule" : "AI judge");
 
 export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: string; initialQuery: Query }) {
@@ -154,7 +157,7 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
                               <span className="min-w-0 flex-1">
                                 <span className="block truncate font-mono text-xs font-medium" title={row.evaluator.name}>{row.evaluator.name}</span>
                                 <span className="mt-0.5 block truncate font-mono text-[11px] text-[#6B7380]">{row.evaluator.criteria}</span>
-                                <span className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[10px] uppercase tracking-wider text-[#8B93A1]"><span>{typeText(row.evaluator.type)}</span>{row.config?.enabledOnline ? <span>{percent(row.config.sampleRate)} of traces</span> : null}<span>{row.stats.lastRunAt ? ago(row.stats.lastRunAt, now) : "never run"}</span></span>
+                                <span className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[10px] uppercase tracking-wider text-[#8B93A1]"><span>{typeText(row.evaluator.type)}</span>{row.config?.enabledOnline ? <span>{WHEN_LABELS[row.config.trigger?.when ?? "every"]} · {percent(row.config.sampleRate)}</span> : null}<span>{row.stats.lastRunAt ? ago(row.stats.lastRunAt, now) : "never run"}</span></span>
                               </span>
                             </button>
                             <div className="flex items-center gap-2 border-t border-[#161B21] px-3 py-1.5 text-[11px]">
@@ -180,7 +183,7 @@ export function EvaluatorsWorkspace({ projectId, initialQuery }: { projectId: st
         ) : selected && editing ? (
           <aside className="absolute inset-y-0 right-0 z-20 flex w-full max-w-[460px] min-h-0 flex-col border-l border-[#1F242C] bg-[#0B0D10] shadow-[-24px_0_48px_rgba(0,0,0,0.5)]">
             <EvaluatorForm key={`${selected.evaluator._id}-${selected.config?.version ?? 0}`} editing={selected} existing={existingNames.filter((item) => item !== selected.evaluator.name)} onCancel={() => setEditing(false)} onSave={async (input) => {
-              await edit({ projectId: typedProjectId, evaluatorId: selected.evaluator._id, name: input.name, criteria: input.criteria, scoreType: input.scoreType, model: input.model, sampleRate: input.sampleRate, enabledOnline: input.enabledOnline, template: input.template });
+              await edit({ projectId: typedProjectId, evaluatorId: selected.evaluator._id, name: input.name, criteria: input.criteria, scoreType: input.scoreType, model: input.model, sampleRate: input.sampleRate, enabledOnline: input.enabledOnline, trigger: input.trigger, template: input.template });
               setEditing(false); setNotice({ tone: "ok", text: `${input.name} saved. New traces use the new settings; earlier runs keep their results.` });
             }} />
           </aside>
@@ -208,7 +211,7 @@ function EvaluatorPanel({ projectId, row, now, onClose, onToggle, onEdit }: { pr
           <dl className="grid grid-cols-[8rem_1fr] gap-x-3 gap-y-1.5 text-xs">
             <dt className="text-[#6B7380]">Checks</dt><dd>{config.target === "trace" ? "Whole traces" : config.target === "span" ? "Single steps" : "Dataset items"}</dd>
             <dt className="text-[#6B7380]">Gives</dt><dd>{{ boolean: "Pass or fail", numeric: `A number${config.minScore !== undefined || config.maxScore !== undefined ? ` (${config.minScore ?? 0} to ${config.maxScore ?? 1})` : ""}`, categorical: `A category${config.categories?.length ? ` (${config.categories.join(", ")})` : ""}`, text: "Text" }[config.scoreType]}</dd>
-            <dt className="text-[#6B7380]">Live traces</dt><dd>{config.enabledOnline ? `Checks ${percent(config.sampleRate)} of new traces automatically` : "Only when run by hand or from an experiment"}</dd>
+            <dt className="text-[#6B7380]">Auto-scoring</dt><dd>{config.enabledOnline ? `Grades ${ruleSummary(config)}` : "Only when run by hand or from an experiment"}</dd>
             {config.model ? <><dt className="text-[#6B7380]">Judge model</dt><dd className="font-mono">{config.model}</dd></> : null}
             <dt className="text-[#6B7380]">Version</dt><dd className="font-mono">v{config.version}</dd>
           </dl>
@@ -261,7 +264,7 @@ function TryRule({ criteria }: { criteria: string }) {
   );
 }
 
-type FormInput = { name: string; type: "code" | "llm_judge"; criteria: string; target: "trace"; scoreType: "boolean" | "numeric"; prompt?: string; model?: string; rule?: string; minScore?: number; maxScore?: number; sampleRate: number; enabledOnline: boolean; template?: Template };
+type FormInput = { name: string; type: "code" | "llm_judge"; criteria: string; target: "trace"; scoreType: "boolean" | "numeric"; prompt?: string; model?: string; rule?: string; minScore?: number; maxScore?: number; sampleRate: number; enabledOnline: boolean; trigger?: { when: RuleWhen; modelContains?: string; dailyLimit?: number }; template?: Template };
 
 function EvaluatorForm({ existing, editing, onCancel, onSave }: { existing: string[]; editing?: Row; onCancel: () => void; onSave: (input: FormInput) => Promise<void> }) {
   const config = editing?.config ?? null;
@@ -270,7 +273,10 @@ function EvaluatorForm({ existing, editing, onCancel, onSave }: { existing: stri
   const [criteria, setCriteria] = useState(editing?.evaluator.criteria ?? "");
   const [template, setTemplate] = useState<Template | "">(config?.template ?? "");
   const [scoreType, setScoreType] = useState<"boolean" | "numeric">(config?.scoreType === "numeric" ? "numeric" : "boolean");
-  const [model, setModel] = useState(config?.model ?? "gpt-4o-mini");
+  const [model, setModel] = useState(config?.model ?? JUDGE_MODELS[0].id);
+  const [when, setWhen] = useState<RuleWhen>(config?.trigger?.when ?? "every");
+  const [modelContains, setModelContains] = useState(config?.trigger?.modelContains ?? "");
+  const [dailyLimit, setDailyLimit] = useState(config?.trigger?.dailyLimit ? String(config.trigger.dailyLimit) : "");
   const [online, setOnline] = useState(config?.enabledOnline ?? false);
   const [sample, setSample] = useState(Math.max(1, Math.round((config?.sampleRate ?? 1) * 100)));
   const [saving, setSaving] = useState(false);
@@ -285,10 +291,13 @@ function EvaluatorForm({ existing, editing, onCancel, onSave }: { existing: stri
     if (existing.some((item) => item.toLowerCase() === trimmed.toLowerCase())) return setError(`You already have an evaluator called “${trimmed}”.`);
     if (!criteria.trim()) return setError(type === "code" ? "Write the rule to check." : "Write the rubric for the judge.");
     if (type === "code" && ruleProblem) return setError(ruleProblem);
-    if (type === "llm_judge" && !model.trim()) return setError("Name the model that should judge.");
+    const limit = dailyLimit.trim() ? Number(dailyLimit) : undefined;
+    const trigger = { when, modelContains: modelContains.trim() || undefined, dailyLimit: limit };
+    const triggerProblem = online ? checkTrigger(trigger) : null;
+    if (triggerProblem) return setError(triggerProblem);
     setSaving(true); setError(null);
     try {
-      await onSave({ name: trimmed, type, criteria: criteria.trim(), target: "trace", scoreType: type === "code" ? "boolean" : scoreType, prompt: type === "llm_judge" ? criteria.trim() : undefined, model: type === "llm_judge" ? model.trim() : undefined, rule: type === "code" ? criteria.trim() : undefined, minScore: type === "llm_judge" && scoreType === "numeric" ? 0 : undefined, maxScore: type === "llm_judge" && scoreType === "numeric" ? 1 : undefined, sampleRate: online ? sample / 100 : 0, enabledOnline: online, template: type === "llm_judge" && template ? template : undefined });
+      await onSave({ name: trimmed, type, criteria: criteria.trim(), target: "trace", scoreType: type === "code" ? "boolean" : scoreType, prompt: type === "llm_judge" ? criteria.trim() : undefined, model: type === "llm_judge" ? model.trim() : undefined, rule: type === "code" ? criteria.trim() : undefined, minScore: type === "llm_judge" && scoreType === "numeric" ? 0 : undefined, maxScore: type === "llm_judge" && scoreType === "numeric" ? 1 : undefined, sampleRate: online ? sample / 100 : 0, enabledOnline: online, trigger: online ? trigger : undefined, template: type === "llm_judge" && template ? template : undefined });
     } catch (reason) { setError(friendly(reason, "That did not save. Check your connection and try again.")); setSaving(false); }
   }
   return (
@@ -315,14 +324,29 @@ function EvaluatorForm({ existing, editing, onCancel, onSave }: { existing: stri
           <label className="grid gap-1 text-[11px] text-[#8B93A1]">Rubric<textarea value={criteria} onChange={(event) => setCriteria(event.target.value)} rows={5} placeholder="Describe what a good answer looks like and when to give a low score." className={`${field} resize-y p-2 leading-5`} /></label>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="grid gap-1 text-[11px] text-[#8B93A1]">Gives<select value={scoreType} onChange={(event) => setScoreType(event.target.value as "boolean" | "numeric")} className={`${field} h-8`}><option value="boolean">Pass or fail</option><option value="numeric">A number from 0 to 1</option></select></label>
-            <label className="grid gap-1 text-[11px] text-[#8B93A1]">Judge model<input value={model} onChange={(event) => setModel(event.target.value)} maxLength={80} className={`${field} h-8 font-mono`} /></label>
+            <label className="grid gap-1 text-[11px] text-[#8B93A1]">Judge model<select value={model} onChange={(event) => setModel(event.target.value)} className={`${field} h-8 font-mono`}>{JUDGE_MODELS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
           </div>
         </>
       )}
       <div className="grid gap-2 rounded border border-[#1F242C] p-3">
-        <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={online} onChange={(event) => setOnline(event.target.checked)} className="accent-[#F4D44D]" />Check new traces automatically</label>
-        {online ? <label className="grid gap-1 text-[11px] text-[#8B93A1]">Share of traces to check: <span className="font-mono text-[#E6E9EE]">{sample}%</span><input type="range" min={1} max={100} value={sample} onChange={(event) => setSample(Number(event.target.value))} className="accent-[#F4D44D]" /></label> : <p className="text-[11px] text-[#6B7380]">Off: it only runs when called by hand or from an experiment. You can change this later with Edit.</p>}
-        {online && type === "llm_judge" ? <p className="text-[11px] text-[#6B7380]">Every checked trace is one model call on your judge account, so start with a small share.</p> : null}
+        <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={online} onChange={(event) => setOnline(event.target.checked)} className="accent-[#F4D44D]" />Grade new steps automatically</label>
+        {online ? <label className="grid gap-1 text-[11px] text-[#8B93A1]">Share of matching steps to grade: <span className="font-mono text-[#E6E9EE]">{sample}%</span><input type="range" min={1} max={100} value={sample} onChange={(event) => setSample(Number(event.target.value))} className="accent-[#F4D44D]" /></label> : <p className="text-[11px] text-[#6B7380]">Off: it only runs when called by hand or from an experiment. You can change this later with Edit.</p>}
+        {online ? (
+          <fieldset className="grid gap-3 border-t border-[#1F242C] pt-3">
+            <legend className="sr-only">When this rule grades</legend>
+            <div className="text-[10px] uppercase tracking-wider text-[#6B7380]">When it grades</div>
+            <div role="radiogroup" aria-label="Which steps to grade" className="grid grid-cols-3 gap-2">
+              {(Object.keys(WHEN_LABELS) as RuleWhen[]).map((id) => (
+                <button key={id} type="button" role="radio" aria-checked={when === id} onClick={() => setWhen(id)} className={`rounded border px-2 py-2 text-left text-[11px] leading-4 focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#F4D44D] ${when === id ? "border-[#F4D44D] bg-[#1A1708] text-[#F4D44D]" : "border-[#262C35] text-[#C9CED6] hover:border-[#3A424E]"}`}>{WHEN_LABELS[id]}</button>
+              ))}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="grid gap-1 text-[11px] text-[#8B93A1]">Only steps using a model (optional)<input value={modelContains} onChange={(event) => setModelContains(event.target.value)} maxLength={80} placeholder="gpt-4o" className={`${field} h-8 font-mono`} /></label>
+              <label className="grid gap-1 text-[11px] text-[#8B93A1]">Most grades per day (optional)<input value={dailyLimit} onChange={(event) => setDailyLimit(event.target.value.replace(/\D/g, ""))} inputMode="numeric" maxLength={6} placeholder={`No cap · up to ${MAX_DAILY_LIMIT.toLocaleString("en-US")}`} className={`${field} h-8 font-mono`} /></label>
+            </div>
+            <p className="text-[11px] leading-4 text-[#6B7380]">{type === "llm_judge" ? `Each grade is one model call, about ${formatCost(estimatedGradeCost(model))} on your judge account. ${dailyLimit ? `With the cap, at most about ${formatCost(estimatedGradeCost(model) * Number(dailyLimit))} a day.` : "Set a daily cap to keep a busy day from running up the bill."}` : "Code rules are free and instant, so no cap is needed."}</p>
+          </fieldset>
+        ) : null}
       </div>
       {error ? <p role="alert" className="rounded border border-[#5B2B2B] bg-[#1A1010] px-3 py-2 text-xs text-[#FF8A8A]">{error}</p> : null}
       <div className="flex gap-2"><button type="submit" disabled={saving} className="h-8 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909] disabled:opacity-50">{saving ? "Saving…" : editing ? "Save changes" : "Create evaluator"}</button><button type="button" onClick={onCancel} disabled={saving} className="h-8 rounded border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:text-white">Cancel</button></div>

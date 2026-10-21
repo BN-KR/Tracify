@@ -2343,3 +2343,8 @@ Automations page is a list of "when X then Y" rules drawn as trigger node -> arr
 
 ## 2026-10-21 Green GitHub checks — draft PR (branch `claude/project-thread-d21l4z`)
 - Fixed the red Checks workflow with no product change: `vite` added as devDependency (Convex backend tests use `import.meta.glob`), `packages/ts-sdk` excluded from root `tsc` (own CI job), 21 lint errors fixed (hook order, `any` types, setState-in-effect suppressed with reasons), SEO test no longer expects a public `/playground` layout (playground lives under the already-noindex dashboard). Checked locally with pnpm: tsc, lint, all site tests, marketing and cloud builds.
+
+## 2026-10-21 Auto-scoring rules — draft PR (branch `claude/project-thread-qcw3w4`)
+- Built on the existing live-evaluation path (`/evaluation/online` in `convex/http.ts`), no new page. A rule = an evaluator version with an optional `config.trigger` { when: every | failed | run_end, modelContains, dailyLimit } plus the existing share (`sampleRate`). Logic lives in `convex/autoScoring.ts` (pure, tested in `src/lib/auto-scoring.test.ts`, in `test:tools`).
+- Daily cap counts that evaluator's results since UTC midnight (`evaluators.gradesToday`). AI judges are limited to the approved list in `JUDGE_MODELS` (gpt-4o-mini, gpt-4.1-mini); the form shows an estimated cost per grade. "End of a run" matches the `run_end` span.
+- Needs a Convex deploy (schema field is optional; old versions behave as "every step"). Checked with typecheck, unit tests and a mocked form screenshot only; not against live traces.
