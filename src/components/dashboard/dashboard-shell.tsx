@@ -98,6 +98,9 @@ export function DashboardShell({
 
   const layoutSidebarWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
+  // Account settings is a full page with its own settings sidebar, not part of a project's dashboard.
+  if (pathname === "/dashboard/account") return <>{children}</>;
+
   return (
     <div
       data-dashboard-theme={activeTheme}

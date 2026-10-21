@@ -74,6 +74,8 @@ function isActivePath(pathname: string, href: string, projectId: string, isPrevi
     return pathname === "/playground" && requestedView === activeView;
   }
   if (hrefPath === DEMO_BASE_PATH) return pathname === hrefPath;
+  // Without a project every in-app link falls back to "/dashboard"; as a prefix it would match every page (e.g. Account).
+  if (hrefPath === "/dashboard") return pathname === hrefPath;
   if (hrefPath === `/dashboard/${projectId}`) {
     return pathname === "/dashboard" || pathname === hrefPath || (isPreview && pathname.startsWith("/tracify-preview"));
   }
