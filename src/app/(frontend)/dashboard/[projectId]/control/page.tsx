@@ -1,10 +1,6 @@
-import { ProjectOrchestration } from "@/components/dashboard/project-orchestration";
+import { notFound } from "next/navigation";
 
-export default async function ControlPage({
-  params,
-}: {
-  params: Promise<{ projectId: string }>;
-}) {
-  const { projectId } = await params;
-  return <ProjectOrchestration projectId={projectId} />;
+// Unfinished: hidden until it runs on real data.
+export default function Page() {
+  notFound();
 }
