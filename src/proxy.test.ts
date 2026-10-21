@@ -88,4 +88,11 @@ describe("deployment host routing", () => {
     const response = proxy(new NextRequest("http://localhost:3000/", { headers: { host: "localhost:3000" } }));
     expect(response.headers.get("location")).toBeNull();
   });
+
+  it("keeps redirects on https when the router reports the request as http", () => {
+    process.env.NEXT_PUBLIC_TRACIFY_DEPLOYMENT_KIND = "cloud";
+    const headers = { host: "staging.eu.cloud.tracify.tech", "x-forwarded-proto": "http" };
+    const response = proxy(new NextRequest("http://staging.eu.cloud.tracify.tech/", { headers }));
+    expect(response.headers.get("location")).toBe("https://staging.eu.cloud.tracify.tech/sign-in");
+  });
 });

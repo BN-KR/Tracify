@@ -63,7 +63,7 @@ const COLLAPSED_STORAGE_KEY = "tracify.sidebar.collapsed";
 const COLLAPSED_WIDTH = 72;
 const EXPANDED_WIDTH = 296;
 const RAIL_WIDTH = 72;
-const MARKETING_ORIGIN = "https://www.tracify.tech";
+const MARKETING_ORIGIN = process.env.NEXT_PUBLIC_MARKETING_ORIGIN || "https://www.tracify.tech";
 
 function isActivePath(pathname: string, href: string, projectId: string, isPreview = false, currentSearch = "") {
   if (href.startsWith("http")) return false;
@@ -123,7 +123,7 @@ export function DashboardSidebar({
     [isSynthetic, projectDashboardHref],
   );
 
-  const dynamicGroups = useMemo<NavGroup[]>(() => {
+  const rawGroups = useMemo<NavGroup[]>(() => {
     if (isSynthetic || projectId) {
       return [
         {
@@ -141,7 +141,7 @@ export function DashboardSidebar({
             { title: "Tracing", icon: Activity, href: workspaceHref("tracing") },
             ...(!isSynthetic && !demo ? [{ title: "Actions", icon: Activity, href: workspaceHref("steps") }] : []),
             ...(demo ? [{ title: "Costs", icon: BarChart3, href: workspaceHref("costs") }] : []),
-            { title: "Explore", icon: Zap, href: workspaceHref("explore") },
+            ...(isSynthetic || demo ? [{ title: "Explore", icon: Zap, href: workspaceHref("explore") }] : []),
             { title: "Sessions", icon: Activity, href: workspaceHref("sessions") },
             { title: "Users", icon: Users, href: workspaceHref("users") },
             { title: "Alerts", icon: Activity, href: workspaceHref("alerts") },
@@ -257,6 +257,18 @@ export function DashboardSidebar({
       },
     ];
   }, [canAccessContent, demo, isSynthetic, projectDashboardHref, projectId, workspaceHref]);
+
+  // With no project yet, `/dashboard/<page>` would be read as a project id and the page would
+  // sit on its loading skeleton, so every in-app link falls back to the project start page.
+  const dynamicGroups = useMemo<NavGroup[]>(() => {
+    if (isSynthetic || demo || projectId) return rawGroups;
+    return rawGroups.map((group) => ({
+      ...group,
+      items: group.items.map((item) =>
+        item.external || !item.href.startsWith("/dashboard/") ? item : { ...item, href: "/dashboard" },
+      ),
+    }));
+  }, [demo, isSynthetic, projectId, rawGroups]);
 
   const railGroups = useMemo(() => {
     const byRail = new Map<RailId, NavItem[]>();

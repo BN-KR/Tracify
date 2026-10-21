@@ -1046,10 +1046,10 @@ export async function costBreakdown(projectId: string, filters: TraceListFilters
   const dimensions = Object.entries(COST_DIMENSIONS) as Array<[CostDimension, string]>;
 
   const [totals, perTrace, previous, series, groups, top] = await Promise.all([
-    tinybirdRows<Record<string, number>>(`SELECT sum(costUsd) AS costUsd, sum(inputTokens) AS inputTokens, sum(outputTokens) AS outputTokens, uniqExact(runId) AS traces, count() AS steps,
+    tinybirdRows<Record<string, number>>(`SELECT sum(costUsd) AS totalCost, sum(inputTokens) AS totalInput, sum(outputTokens) AS totalOutput, uniqExact(runId) AS traces, count() AS steps,
       countIf(modelId != '') AS modelCalls, countIf(modelId != '' AND costUsd = 0 AND inputTokens + outputTokens > 0) AS unpricedCalls FROM spans WHERE ${scope}`),
-    tinybirdRows<Record<string, number>>(`SELECT quantileExact(0.5)(cost) AS p50, quantileExact(0.95)(cost) AS p95, max(cost) AS max FROM (SELECT runId, sum(costUsd) AS cost FROM spans WHERE ${scope} GROUP BY runId)`),
-    tinybirdRows<Record<string, number>>(`SELECT sum(costUsd) AS costUsd, uniqExact(runId) AS traces FROM spans WHERE ${before}`),
+    tinybirdRows<Record<string, number>>(`SELECT quantileExact(0.5)(cost) AS p50, quantileExact(0.95)(cost) AS p95, max(cost) AS maxCost FROM (SELECT runId, sum(costUsd) AS cost FROM spans WHERE ${scope} GROUP BY runId)`),
+    tinybirdRows<Record<string, number>>(`SELECT sum(costUsd) AS totalCost, uniqExact(runId) AS traces FROM spans WHERE ${before}`),
     tinybirdRows<{ bucket: string; model: string; costUsd: number }>(`SELECT toStartOfInterval(createdAt, INTERVAL ${bucketSeconds} SECOND) AS bucket, modelId AS model, sum(costUsd) AS costUsd
       FROM spans WHERE ${scope} GROUP BY bucket, model HAVING costUsd > 0 ORDER BY bucket LIMIT 5000`),
     tinybirdRows<CostGroup & { field: CostDimension }>(dimensions.map(([field, column]) => `SELECT '${field}' AS field, key, calls, traces, costUsd, inputTokens, outputTokens, avgLatencyMs FROM (
@@ -1066,11 +1066,11 @@ export async function costBreakdown(projectId: string, filters: TraceListFilters
   return {
     range: { from: filters.fromMs, to: filters.toMs },
     totals: {
-      costUsd: num(total.costUsd), inputTokens: num(total.inputTokens), outputTokens: num(total.outputTokens), traces: num(total.traces), steps: num(total.steps),
+      costUsd: num(total.totalCost), inputTokens: num(total.totalInput), outputTokens: num(total.totalOutput), traces: num(total.traces), steps: num(total.steps),
       modelCalls: num(total.modelCalls), unpricedCalls: num(total.unpricedCalls),
-      p50TraceCostUsd: num(perTrace[0]?.p50), p95TraceCostUsd: num(perTrace[0]?.p95), maxTraceCostUsd: num(perTrace[0]?.max),
+      p50TraceCostUsd: num(perTrace[0]?.p50), p95TraceCostUsd: num(perTrace[0]?.p95), maxTraceCostUsd: num(perTrace[0]?.maxCost),
     },
-    previous: { costUsd: num(previous[0]?.costUsd), traces: num(previous[0]?.traces) },
+    previous: { costUsd: num(previous[0]?.totalCost), traces: num(previous[0]?.traces) },
     bucketSeconds,
     series: series.map((row) => ({ bucket: String(row.bucket), model: String(row.model), costUsd: num(row.costUsd) })),
     groups: ranked,
