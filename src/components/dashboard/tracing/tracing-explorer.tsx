@@ -1,4 +1,5 @@
 "use client";
+import { ViewSwitch } from "./view-switch";
 import { SavedViews } from "./saved-views";
 import { DEMO_BASE_PATH, DEMO_PROJECT_ID } from "@/lib/demo/demo-config";
 import { columnsFromUrl } from "@/lib/saved-view-state";
@@ -81,8 +82,6 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   // Phones start with the filter sidebar collapsed so the traces are visible first.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (window.matchMedia("(max-width: 767px)").matches) setFiltersOpen(false); }, []);
-  // The live/paused choice is remembered per browser.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   // The error-groups panel's open/closed choice is remembered per browser.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { try { if (window.localStorage.getItem(ERRORS_STORAGE) === "closed") setErrorsOpen(false); } catch {} }, []);
@@ -218,7 +217,6 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     const timer = setTimeout(() => setFresh(new Set()), 2500);
     return () => clearTimeout(timer);
   }, [fresh]);
-  const isLive = live && !query.from && !query.to;
 
   const total = data?.total ?? 0;
   const page = Number(query.page ?? 0);
@@ -319,6 +317,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     <div className="flex min-h-svh flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
       <header className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
         <h1 className="mr-2 text-base font-semibold tracking-tight">Tracing</h1>
+        <ViewSwitch projectId={projectId} view="runs" />
         <form
           className="flex min-w-[220px] flex-1 items-center gap-2 rounded-md border border-[#262C35] bg-[#111418] px-2.5 focus-within:border-[#4A5260]"
           onSubmit={(event) => { event.preventDefault(); submitSearch(searchDraft.trim()); }}

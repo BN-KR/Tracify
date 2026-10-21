@@ -1,3 +1,4 @@
+import { StepsExplorer } from "@/components/dashboard/tracing/steps-explorer";
 import { TracingExplorer } from "@/components/dashboard/tracing/tracing-explorer";
 
 export default async function TracingPage({
@@ -12,5 +13,6 @@ export default async function TracingPage({
   const initialQuery = Object.fromEntries(
     Object.entries(raw).flatMap(([key, value]) => (typeof value === "string" && value ? [[key, value.slice(0, key === "q" || key === "sort" ? 200 : 4096)]] : [])),
   );
+  if (raw.view === "actions") return <StepsExplorer projectId={projectId} initialQuery={initialQuery} />;
   return <TracingExplorer projectId={projectId} initialQuery={initialQuery} />;
 }

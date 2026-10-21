@@ -54,8 +54,6 @@ export function GroupExplorer({ projectId, kind, initialQuery }: { projectId: st
   const requestId = useRef(0);
   const selected = query.id ?? null;
 
-  // The live/paused choice is remembered per browser, which only exists after hydration.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { const timer = setInterval(() => setClock(Date.now()), 10_000); return () => clearInterval(timer); }, []);
 
   const update = useCallback((patch: Query, resetPage = true) => {
