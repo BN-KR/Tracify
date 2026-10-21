@@ -387,7 +387,7 @@ export function CostDashboard({ projectId }: { projectId: string }) {
               Most Expensive Saved Runs
             </h2>
             <p className="mt-1 font-mono text-[11px] text-black/55">
-              Convex summaries, sorted by total run cost.
+              Run summaries, sorted by total run cost.
             </p>
           </div>
           <Link
