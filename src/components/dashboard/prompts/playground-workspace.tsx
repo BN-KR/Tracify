@@ -11,12 +11,13 @@ import { DEMO_PROMPTS, demoResults } from "@/lib/demo/playground-demo-data";
 import { DEMO_BASE_PATH } from "@/lib/demo/demo-config";
 import type { PlaygroundResult } from "@/app/(frontend)/api/playground/route";
 
-type Providers = { openai: boolean; anthropic: boolean; gemini?: boolean };
+type Providers = { openai: boolean; anthropic: boolean };
 type Run = { id: number; at: number; source: string; text: string; models: string[]; temperature: number; results: PlaygroundResult[] };
 const STARTER = "You are a helpful assistant.\n\nUser: {{question}}";
 const field = "w-full rounded border border-[#262C35] bg-[#0E1115] px-2.5 text-xs text-[#E6E9EE] placeholder:text-[#6B7380] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#F4D44D]";
 const stamp = () => Date.now();
-const providerOf = (model: string) => (/^claude/i.test(model) ? "anthropic" : /^gemini/i.test(model) ? "gemini" : "openai");
+const KEY_NAMES = [["OPENAI_API_KEY", "OpenAI models"], ["ANTHROPIC_API_KEY", "Claude models"]] as const;
+const providerOf = (model: string) => (/^claude/i.test(model) ? "anthropic" : "openai");
 
 type SavedPrompt = { _id: string; name: string; versions: Array<{ _id: string; version?: number; content: string; model?: string; labels: string[] }> };
 
@@ -49,6 +50,17 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion, 
       .catch(() => { if (!cancelled) setProviders({ openai: false, anthropic: false }); });
     return () => { cancelled = true; };
   }, [projectId, demo]);
+
+  // Start on a model whose key exists, so a server with only one provider does not open on a dead default.
+  const defaulted = useRef(false);
+  useEffect(() => {
+    if (defaulted.current || !providers || demo) return;
+    defaulted.current = true;
+    const fallback = providers.openai ? null : providers.anthropic ? "claude-sonnet-5-5" : null;
+    // One-time pick after the server reports its providers.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (fallback) setModels((current) => current.length === 1 && current[0] === "gpt-5.6-luna" ? [fallback] : current);
+  }, [providers, demo]);
 
   // ?prompt=name&version=3 opens a saved version once the prompt list has loaded.
   useEffect(() => {
@@ -86,7 +98,7 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion, 
   const blocker = !text.trim() ? "Write a prompt first."
     : !models.length ? "Pick at least one model."
     : compiled.missing.length ? `Fill in ${compiled.missing.map((name) => `{{${name}}}`).join(", ")}.`
-    : unavailable.length ? `${{ openai: "OpenAI", anthropic: "Anthropic", gemini: "Gemini" }[providerOf(unavailable[0])]} is not connected on this server, so ${unavailable[0]} cannot run.`
+    : unavailable.length ? `${{ openai: "OpenAI", anthropic: "Anthropic" }[providerOf(unavailable[0])]} is not connected on this server, so ${unavailable[0]} cannot run.`
     : null;
 
   async function run() {
@@ -114,7 +126,7 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion, 
   }
 
   const current = runs.find((item) => item.id === shown) ?? null;
-  const notConnected = providers && !providers.openai && !providers.anthropic && !providers.gemini;
+  const notConnected = providers && !providers.openai && !providers.anthropic;
 
   const [editing, setEditing] = useState(true);
   const lanes = running ? models.map((model) => ({ model, pending: true as const })) : current ? current.results : [];
@@ -135,7 +147,7 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion, 
       </header>
       {demo ? <div role="status" className="border-b border-[#3A3420] bg-[#1A170C] px-4 py-2 text-xs text-[#F4D44D]">Demo: edit the prompt, fill in values and run it. Answers here are samples, nothing is sent to a model. <Link href="/sign-up" className="underline">Start free to run it on real models →</Link></div> : null}
       {notConnected && !demo ? (
-        <div role="status" className="border-b border-[#3A3420] bg-[#1A170C] px-4 py-2 text-xs text-[#F4D44D]">No model provider is connected on this server yet, so runs are switched off. You can still write the prompt and fill in values to see the final text.</div>
+        <div role="status" className="border-b border-[#3A3420] bg-[#1A170C] px-4 py-2 text-xs text-[#F4D44D]">Add a model key to run prompts. Until one is connected, runs are switched off and no answers are made up. You can still write the prompt and fill in values to see the final text.</div>
       ) : null}
       <section aria-label="Models" className="flex flex-wrap items-center gap-1.5 border-b border-[#1F242C] px-4 py-2">
         <span className="mr-1 text-[11px] text-[#6B7380]">Models (up to {MAX_PLAYGROUND_MODELS})</span>
@@ -176,6 +188,15 @@ export function PlaygroundWorkspace({ projectId, initialPrompt, initialVersion, 
                 {"pending" in lane || lane.error || !lane.output ? null : <div className="border-t border-[#1F242C] px-3 py-1.5"><button type="button" onClick={() => void navigator.clipboard?.writeText(lane.output)} className="text-[11px] text-[#8AB4FF] underline">Copy answer</button></div>}
               </article>
             ))}
+          </div>
+        ) : notConnected && !demo ? (
+          <div className="m-auto max-w-sm p-8 text-center" data-testid="playground-add-key">
+            <h2 className="text-sm font-semibold">Add a key to run prompts</h2>
+            <p className="mt-2 text-xs leading-5 text-[#8B93A1]">The Playground only shows real answers from a real model. Add a key for one provider on the server and this page switches on.</p>
+            <ul className="mt-4 grid gap-1.5 text-left font-mono text-[11px] text-[#C9CED6]">
+              {KEY_NAMES.map(([name, label]) => <li key={name} className="flex items-center justify-between gap-3 rounded border border-[#1F242C] bg-[#0E1115] px-3 py-1.5"><span>{name}</span><span className="text-[#6B7380]">{label}</span></li>)}
+            </ul>
+            <p className="mt-3 text-[11px] text-[#6B7380]">One is enough. Your prompt and values stay here while you set it up.</p>
           </div>
         ) : (
           <div className="m-auto max-w-sm p-8 text-center">

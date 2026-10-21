@@ -21,14 +21,14 @@ const stepPresentation = {
 
 function PixelStepper({ activeIndex }: { activeIndex: number }) {
   return (
-    <ol className="flex w-full max-w-md items-stretch gap-1.5" aria-label="Setup progress">
+    <ol className="flex w-full max-w-xl items-stretch gap-2" aria-label="Setup progress">
       {onboardingSteps.map((step, i) => {
         const done = i < activeIndex;
         const active = i === activeIndex;
         return (
           <li key={step.id} className="min-w-0 flex-1" aria-current={active ? "step" : undefined}>
-            <div className={`h-2 ${done ? "bg-black" : active ? "animate-mono-pulse bg-[#fff4b5] outline outline-2 outline-black" : "bg-black/20"}`} />
-            <p className={`mt-1.5 hidden truncate font-mono text-[9px] uppercase tracking-[0.1em] sm:block ${active ? "text-black" : done ? "text-black/70" : "text-black/45"}`}>{step.label}</p>
+            <div className={`h-3.5 ${done ? "bg-black" : active ? "animate-mono-pulse bg-[#fff4b5] outline outline-[3px] -outline-offset-[1px] outline-black" : "bg-black/25 outline outline-1 -outline-offset-1 outline-black/50"}`} />
+            <p className={`mt-2 hidden truncate font-mono text-[11px] uppercase tracking-[0.1em] sm:block ${active ? "font-bold text-black" : done ? "text-black" : "text-black/65"}`}>{step.label}</p>
           </li>
         );
       })}
@@ -47,7 +47,7 @@ export function OnboardingShell({
   const activeIndex = onboardingSteps.findIndex((step) => step.id === currentStep);
   return (
     <main className="relative grid min-h-svh bg-[#f4d44d] font-mono text-black lg:grid-cols-[minmax(380px,0.85fr)_minmax(0,1.15fr)]">
-      <aside className="relative isolate order-first flex min-h-[200px] flex-col justify-between overflow-hidden bg-[#090909] p-6 text-[#eceae3] sm:p-8 md:p-10 lg:min-h-svh">
+      <aside className="relative isolate order-first flex min-h-[200px] flex-col justify-between overflow-hidden bg-[#090909] p-6 text-[#eceae3] sm:p-8 md:p-10 lg:sticky lg:top-0 lg:h-svh lg:self-start">
         <Image key={presentation.img} src={`/images/landing/${presentation.img}.png`} alt="" fill priority unoptimized sizes="(min-width:1024px) 45vw, 100vw" className="-z-10 object-cover opacity-30 [image-rendering:pixelated]" />
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,#090909_10%,rgba(9,9,9,0.88)_55%,rgba(9,9,9,0.65)_100%)]" />
         <div className="flex items-start justify-between gap-6">
