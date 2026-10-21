@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 
-interface DotPatternProps {
+interface DotPatternProps extends Omit<React.SVGProps<SVGSVGElement>, "width" | "height" | "x" | "y" | "cx" | "cy" | "cr"> {
   width?: number;
   height?: number;
   x?: number;
@@ -12,7 +12,6 @@ interface DotPatternProps {
   cy?: number;
   cr?: number;
   className?: string;
-  [key: string]: any;
 }
 
 export function DotPattern({

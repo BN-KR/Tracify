@@ -6,6 +6,7 @@ export function ShareButtons({ title }: { title: string }) {
   const [url, setUrl] = useState("");
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial client-side sync after mount
     setUrl(window.location.href);
   }, []);
 

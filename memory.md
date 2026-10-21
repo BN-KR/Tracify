@@ -2337,3 +2337,6 @@ Automations page is a list of "when X then Y" rules drawn as trigger node -> arr
 ## 2026-10-20 Compare works on small projects — draft PR (branch `claude/project-thread-ly2i9d`)
 - Two runs: if the range has fewer than two runs, it steps out to longer ranges (up to 90 days) and says so; each picker also takes a pasted run ID; A/B badges are yellow/cream. Models and releases tab widens the same way when only one group exists. Front end only (`compare-page.tsx`), no Convex deploy. Checked with mocked responses only.
 - Oct 21: Removed our own Gemini usage (Ask AI, site assistant, Playground); tracing of customer Gemini calls is unchanged.
+
+## 2026-10-21 Green GitHub checks — draft PR (branch `claude/project-thread-d21l4z`)
+- Fixed the red Checks workflow with no product change: `vite` added as devDependency (Convex backend tests use `import.meta.glob`), `packages/ts-sdk` excluded from root `tsc` (own CI job), 21 lint errors fixed (hook order, `any` types, setState-in-effect suppressed with reasons), SEO test no longer expects a public `/playground` layout (playground lives under the already-noindex dashboard). Checked locally with pnpm: tsc, lint, all site tests, marketing and cloud builds.

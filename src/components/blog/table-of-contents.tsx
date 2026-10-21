@@ -11,18 +11,22 @@ const hideScrollbar: React.CSSProperties = {
   msOverflowStyle: "none",
 };
 
-export function TableOfContents({ body, collapsible }: { body: any[]; collapsible?: boolean }) {
+type PortableBlock = {
+  _type?: string;
+  style?: string;
+  children?: { text?: string }[];
+};
+
+export function TableOfContents({ body, collapsible }: { body: PortableBlock[]; collapsible?: boolean }) {
   const [activeId, setActiveId] = useState<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  if (!body || !Array.isArray(body)) return null;
-
-  const headings = body.filter(
-    (block: any) => block?._type === "block" && (block.style === "h2" || block.style === "h3")
+  const headings = (Array.isArray(body) ? body : []).filter(
+    (block) => block?._type === "block" && (block.style === "h2" || block.style === "h3")
   );
 
-  const headingItems = headings.map((heading: any) => {
-    const text = heading.children?.map((c: any) => c.text).join("") || "";
+  const headingItems = headings.map((heading) => {
+    const text = heading.children?.map((c) => c.text).join("") || "";
     const slug = slugify(text);
     return { text, slug, level: heading.style };
   });
@@ -50,7 +54,7 @@ export function TableOfContents({ body, collapsible }: { body: any[]; collapsibl
     link?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [activeId]);
 
-  if (headingItems.length < 2) return null;
+  if (!Array.isArray(body) || headingItems.length < 2) return null;
 
   const list = (
     <ul className="flex flex-col gap-0.5">
