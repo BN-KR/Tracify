@@ -61,28 +61,27 @@ function RunsCompare({ projectId, range, left, right, set }: { projectId: string
   useEffect(() => {
     let cancelled = false;
     fetch(`/api/projects/${projectId}/traces?${window}&pageSize=100`).then((res) => res.ok ? res.json() : Promise.reject(new Error(String(res.status))))
-      .then((data: { rows: RunOption[] }) => { if (!cancelled) { setRuns(data.rows); setError(""); } })
+      .then((data: { rows: RunOption[] }) => { if (!cancelled) { setRuns(data.rows.map((row) => ({ ...row, errorCount: Number(row.errorCount) || 0, durationMs: Number(row.durationMs) || 0, totalCostUsd: Number(row.totalCostUsd) || 0 }))); setError(""); } })
       .catch(() => { if (!cancelled) setError("Runs could not be loaded. Try again in a moment."); });
     return () => { cancelled = true; };
   }, [projectId, window]);
 
-  // Small projects often have fewer than two runs in the chosen window: step out to the next longer one
-  // (up to 90 days) instead of leaving the page empty.
+  // One effect decides everything, so two router updates never overwrite each other.
+  // Fewer than two runs in the window: step out to the next longer one (up to 90 days).
+  // Otherwise default to the newest failed run against the newest healthy one.
   const [startRange] = useState(range);
   useEffect(() => {
-    if (!runs || runs.length >= 2 || (left && right)) return;
-    const next = RANGES[RANGES.findIndex((item) => item.id === range) + 1];
-    if (next) set({ range: next.id });
+    if (!runs || (left && right)) return;
+    if (runs.length < 2) {
+      const next = RANGES[RANGES.findIndex((item) => item.id === range) + 1];
+      if (next) set({ range: next.id });
+      return;
+    }
+    const bad = runs.find((run) => run.errorCount > 0) ?? runs[0]!;
+    const good = runs.find((run) => run.errorCount === 0 && run.runId !== bad.runId) ?? runs.find((run) => run.runId !== bad.runId)!;
+    set({ left: left || bad.runId, right: right || (left && left !== bad.runId ? bad.runId : good.runId) });
   }, [left, range, right, runs, set]);
   const widened = range !== startRange;
-
-  // Default to the newest failed run against the newest healthy one, so the page is useful on first open.
-  useEffect(() => {
-    if (!runs?.length || (left && right)) return;
-    const bad = runs.find((run) => run.errorCount > 0) ?? runs[0]!;
-    const good = runs.find((run) => run.errorCount === 0 && run.runId !== bad.runId) ?? runs.find((run) => run.runId !== bad.runId);
-    set({ left: left || bad.runId, right: right || good?.runId || null });
-  }, [left, right, runs, set]);
 
   const a = useSpans(projectId, left), b = useSpans(projectId, right);
   const rows = useMemo(() => a.spans && b.spans ? alignSteps(a.spans, b.spans) : null, [a.spans, b.spans]);
@@ -101,7 +100,7 @@ function RunsCompare({ projectId, range, left, right, set }: { projectId: string
       {error ? <p role="alert" className="rounded border border-[#5A2A2E] bg-[#1A0F11] p-3 text-[#FF8A8A]">{error}</p> : null}
       {widened && runs && runs.length >= 2 ? <p className="m-0 text-xs text-[#8B93A1]">Few runs lately, so the range was widened to {RANGES.find((item) => item.id === range)?.label.toLowerCase()}.</p> : null}
       {runs && runs.length < 2 && range === "90d" ? <p className="rounded border border-[#1F242C] bg-[#0E1115] p-6 text-[#8B93A1]">This project has {runs.length === 1 ? "only one run" : "no runs"} in the last 90 days. Send one more run and you can compare them here. You can also paste any run ID above.</p> : null}
-      {runs && runs.length < 2 && range !== "90d" ? <p className="m-0 text-xs text-[#8B93A1]">Looking further back for runs…</p> : null}
+      {runs && runs.length < 2 && range !== "90d" && !(left && right) ? <p className="m-0 text-xs text-[#8B93A1]">Looking further back for runs…</p> : null}
       {a.error || b.error ? <p role="alert" className="rounded border border-[#5A2A2E] bg-[#1A0F11] p-3 text-[#FF8A8A]">{a.error || b.error}</p> : null}
       {ta && tb ? <>
         <Totals a={ta} b={tb} />
@@ -144,9 +143,10 @@ function RunPicker({ label, hint, value, runs, onChange, clock }: { label: strin
       <span className="mb-1 block text-xs text-[#8B93A1]"><span className={`mr-1 inline-block rounded px-1.5 font-mono font-medium text-[#0B0D10] ${label === "Run A" ? "bg-[#F4D44D]" : "bg-[#ECEAE3]"}`}>{label}</span> {hint}</span>
       <select value={value} onChange={(event) => onChange(event.target.value)} className={`${field} w-full`}>
         {runs && !runs.length ? <option value="">No runs in this range</option> : null}
+        {runs && runs.length > 0 && !value ? <option value="">Pick a run</option> : null}
         {!runs ? <option value="">Loading runs…</option> : null}
         {value && !known ? <option value={value}>{value}</option> : null}
-        {runs?.map((run) => <option key={run.runId} value={run.runId}>{run.errorCount ? "Failed" : "OK"} · {run.traceName || run.runId.slice(0, 8)} · {formatDuration(run.durationMs)} · {formatCost(run.totalCostUsd)} · {relativeTime(run.startedAt, clock)}</option>)}
+        {runs?.map((run) => <option key={run.runId} value={run.runId}>{run.errorCount > 0 ? "Failed" : "OK"} · {run.traceName || run.runId.slice(0, 8)} · {formatDuration(run.durationMs)} · {formatCost(run.totalCostUsd)} · {relativeTime(run.startedAt, clock)}</option>)}
       </select>
       <input type="text" aria-label={`Paste a run ID for ${label}`} placeholder="or paste a run ID and press Enter" maxLength={200}
         onKeyDown={(event) => { if (event.key === "Enter") { const id = event.currentTarget.value.trim(); if (id) { onChange(id); event.currentTarget.value = ""; } } }}
