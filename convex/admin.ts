@@ -70,6 +70,13 @@ export const overview = query({
     }));
 
     const projectDocs = await ctx.db.query("projects").order("desc").take(CAP);
+    const userById = new Map(users.map((u) => [u.id, u]));
+    const projectsByOwner = new Map<string, number>();
+    for (const p of projectDocs) {
+      const ownerId = p.ownerId ?? p.clerkUserId;
+      if (ownerId) projectsByOwner.set(ownerId, (projectsByOwner.get(ownerId) ?? 0) + 1);
+    }
+    const usersWithProjects = users.map((u) => ({ ...u, projectCount: projectsByOwner.get(u.id) ?? 0 }));
     const projects = projectDocs.map((p) => ({
       id: p._id,
       name: p.name,
@@ -80,7 +87,9 @@ export const overview = query({
       createdAt: p.createdAt ?? p._creationTime,
       periodEnd: p.subscriptionCurrentPeriodEnd ?? null,
       cancelling: p.cancelAtPeriodEnd ?? false,
-      owner: p.clerkUserId ?? p.clerkOrgId ?? null,
+      owner: p.ownerId ?? p.clerkUserId ?? p.clerkOrgId ?? null,
+      ownerEmail: userById.get(p.ownerId ?? p.clerkUserId ?? "")?.email ?? null,
+      ownerName: userById.get(p.ownerId ?? p.clerkUserId ?? "")?.name ?? null,
     }));
     const nameById = new Map(projectDocs.map((p) => [p._id as string, p.name]));
 
@@ -146,7 +155,7 @@ export const overview = query({
       leads,
       newLeads: leads.filter((l) => l.status === "new").length,
       audit,
-      users,
+      users: usersWithProjects,
       projects,
       usage,
       alerts,

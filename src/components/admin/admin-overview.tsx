@@ -63,6 +63,14 @@ function Table({ head, rows, empty }: { head: string[]; rows: React.ReactNode[][
   );
 }
 
+type AdminProject = AdminData["projects"][number];
+const ownerCell = (p: AdminProject, openUser: (email: string) => void) =>
+  p.ownerEmail ? (
+    <button type="button" onClick={() => openUser(p.ownerEmail!)} className="text-left hover:text-[#F4D44D]" title="Show this user">
+      {p.ownerEmail}{p.ownerName ? <span className="ml-2 text-[#8B93A1]">{p.ownerName}</span> : null}
+    </button>
+  ) : p.owner ? pill("unknown owner", "warn") : dim("—");
+
 const mono = (v: React.ReactNode) => <span className="font-mono text-[12px]">{v}</span>;
 const dim = (v: React.ReactNode) => <span className="font-mono text-[12px] text-[#8B93A1]">{v}</span>;
 const pill = (text: string, tone: "ok" | "bad" | "warn" | "mute") => (
@@ -80,12 +88,13 @@ export function AdminView({ data }: { data: AdminData | undefined }) {
   const [tab, setTab] = useState<Tab>("Overview");
   const [search, setSearch] = useState("");
   const q = search.trim().toLowerCase();
+  function openUser(email: string) { setTab("Users"); setSearch(email); }
   function exportTab() {
     if (!data) return;
     const d = data;
     const sets: Record<string, [string[], unknown[][]]> = {
-      Users: [["name", "email", "verified", "signed up"], d.users.map((u) => [u.name, u.email, u.verified, new Date(u.signedUpAt).toISOString()])],
-      Projects: [["project", "plan", "subscription", "api key", "created"], d.projects.map((p) => [p.name, p.plan, p.subscription, p.hasApiKey, new Date(p.createdAt).toISOString()])],
+      Users: [["name", "email", "verified", "projects", "signed up"], d.users.map((u) => [u.name, u.email, u.verified, u.projectCount, new Date(u.signedUpAt).toISOString()])],
+      Projects: [["project", "owner email", "owner name", "plan", "subscription", "api key", "created"], d.projects.map((p) => [p.name, p.ownerEmail ?? "", p.ownerName ?? "", p.plan, p.subscription, p.hasApiKey, new Date(p.createdAt).toISOString()])],
       Billing: [["project", "plan", "subscription", "renews", "cancelling"], d.projects.map((p) => [p.name, p.plan, p.subscription, p.periodEnd ? new Date(p.periodEnd).toISOString() : "", p.cancelling])],
       Usage: [["project", "runs 7d", "steps", "failed", "cost usd"], d.usage.map((u) => [u.project, u.runs, u.spans, u.failed, u.costUsd])],
       Alerts: [["project", "type", "message", "state", "triggered"], d.alerts.map((a) => [a.project, a.type, a.message, a.state, a.triggeredAt])],
@@ -165,18 +174,18 @@ export function AdminView({ data }: { data: AdminData | undefined }) {
           )}
 
           {tab === "Users" && (
-            <Table head={["Name", "Email", "Verified", "Signed up"]} empty="No matching users."
-              rows={data.users.filter((u) => !q || `${u.name} ${u.email}`.toLowerCase().includes(q)).map((u) => [u.name || "—", u.email, u.verified ? pill("verified", "ok") : pill("not verified", "warn"), <span key="t" title={abs(u.signedUpAt)}>{dim(ago(u.signedUpAt))}</span>])} />
+            <Table head={["Name", "Email", "Verified", "Projects", "Signed up"]} empty="No matching users."
+              rows={data.users.filter((u) => !q || `${u.name} ${u.email}`.toLowerCase().includes(q)).map((u) => [u.name || "—", u.email, u.verified ? pill("verified", "ok") : pill("not verified", "warn"), mono(u.projectCount), <span key="t" title={abs(u.signedUpAt)}>{dim(ago(u.signedUpAt))}</span>])} />
           )}
 
           {tab === "Projects" && (
-            <Table head={["Project", "Plan", "Subscription", "API key", "Last key use", "Created"]} empty="No matching projects."
-              rows={data.projects.filter((p) => !q || p.name.toLowerCase().includes(q)).map((p) => [p.name, p.plan, dim(p.subscription ?? "—"), p.hasApiKey ? pill("active", "ok") : pill("none", "mute"), dim(p.lastKeyUseAt ? ago(p.lastKeyUseAt) : "never"), dim(ago(p.createdAt))])} />
+            <Table head={["Project", "Owner", "Plan", "Subscription", "API key", "Last key use", "Created"]} empty="No matching projects."
+              rows={data.projects.filter((p) => !q || `${p.name} ${p.ownerEmail ?? ""} ${p.ownerName ?? ""}`.toLowerCase().includes(q)).map((p) => [p.name, ownerCell(p, openUser), p.plan, dim(p.subscription ?? "—"), p.hasApiKey ? pill("active", "ok") : pill("none", "mute"), dim(p.lastKeyUseAt ? ago(p.lastKeyUseAt) : "never"), dim(ago(p.createdAt))])} />
           )}
 
           {tab === "Billing" && (
-            <Table head={["Project", "Plan", "Subscription", "Renews", "Cancelling"]} empty="No matching projects."
-              rows={data.projects.filter((p) => p.plan !== "free" || p.subscription).filter((p) => !q || p.name.toLowerCase().includes(q)).map((p) => [p.name, p.plan, dim(p.subscription ?? "—"), dim(p.periodEnd ? abs(p.periodEnd) : "—"), p.cancelling ? pill("yes", "warn") : dim("no")])} />
+            <Table head={["Project", "Owner", "Plan", "Subscription", "Renews", "Cancelling"]} empty="No matching projects."
+              rows={data.projects.filter((p) => p.plan !== "free" || p.subscription).filter((p) => !q || `${p.name} ${p.ownerEmail ?? ""}`.toLowerCase().includes(q)).map((p) => [p.name, ownerCell(p, openUser), p.plan, dim(p.subscription ?? "—"), dim(p.periodEnd ? abs(p.periodEnd) : "—"), p.cancelling ? pill("yes", "warn") : dim("no")])} />
           )}
 
           {tab === "Leads" && (

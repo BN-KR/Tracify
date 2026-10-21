@@ -6,6 +6,8 @@ export default defineSchema({
     name: v.string(),
     slug: v.optional(v.string()),
     clerkUserId: v.optional(v.string()),
+    // Auth user id of the project's creator. Replaces the legacy clerkUserId name; both are written until the old one is retired.
+    ownerId: v.optional(v.string()),
     clerkOrgId: v.optional(v.string()),
     createdAt: v.optional(v.number()),
     updatedAt: v.optional(v.number()),
@@ -56,6 +58,7 @@ export default defineSchema({
   })
     .index("by_clerkOrgId", ["clerkOrgId"])
     .index("by_clerkUserId", ["clerkUserId"])
+    .index("by_ownerId", ["ownerId"])
     .index("by_slug", ["slug"])
     .index("by_stripeCustomerId", ["stripeCustomerId"])
     .index("by_stripeSubscriptionId", ["stripeSubscriptionId"])
