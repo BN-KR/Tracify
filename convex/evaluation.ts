@@ -193,3 +193,49 @@ export const createScore = mutation({
     return ctx.db.insert("scores", { ...args, name, traceId, spanId, comment: args.comment?.trim() || undefined, createdBy: identity.subject, createdAt: Date.now() });
   },
 });
+
+const FEEDBACK_SCORE = "feedback";
+const MAX_FEEDBACK_TRACES = 200;
+
+/** The signed-in person's thumbs up (true) or down (false) for each of the given traces. */
+export const myFeedback = query({
+  args: { projectId: v.id("projects"), traceIds: v.array(v.string()) },
+  handler: async (ctx, { projectId, traceIds }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return {};
+    const project = await ctx.db.get(projectId);
+    if (!project || !canAccess(project, identity)) return {};
+    const result: Record<string, boolean> = {};
+    for (const traceId of traceIds.slice(0, MAX_FEEDBACK_TRACES)) {
+      const scores = await ctx.db
+        .query("scores")
+        .withIndex("by_projectId_and_traceId", (q) => q.eq("projectId", projectId).eq("traceId", traceId))
+        .order("desc")
+        .take(50);
+      const mine = scores.find((score) => score.name === FEEDBACK_SCORE && !score.spanId && score.createdBy === identity.subject && typeof score.value === "boolean");
+      if (mine) result[traceId] = mine.value as boolean;
+    }
+    return result;
+  },
+});
+
+/** One tap: save a yes/no score on a run. The value `null` removes the person's score again (undo). */
+export const setFeedback = mutation({
+  args: { projectId: v.id("projects"), traceId: v.string(), value: v.union(v.boolean(), v.null()) },
+  handler: async (ctx, { projectId, traceId, value }) => {
+    const { identity } = await requireProject(ctx, projectId);
+    const id = traceId.trim();
+    if (!id || id.length > 200) throw new Error("That trace id is not valid");
+    const existing = (
+      await ctx.db
+        .query("scores")
+        .withIndex("by_projectId_and_traceId", (q) => q.eq("projectId", projectId).eq("traceId", id))
+        .take(200)
+    ).filter((score) => score.name === FEEDBACK_SCORE && !score.spanId && score.createdBy === identity.subject);
+    for (const score of existing) await ctx.db.delete(score._id);
+    if (value === null) return null;
+    return ctx.db.insert("scores", {
+      projectId, traceId: id, name: FEEDBACK_SCORE, value, dataType: "boolean", source: "human", createdBy: identity.subject, createdAt: Date.now(),
+    });
+  },
+});

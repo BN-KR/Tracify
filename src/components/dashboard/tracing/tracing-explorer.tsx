@@ -8,6 +8,7 @@ import { stepLabel } from "./agent-map";
 import { traceCsv } from "@/lib/trace-csv";
 import { EXCLUDE_PREFIX, parseSearch } from "@/lib/trace-search";
 import { SearchBox } from "./search-box";
+import { FeedbackCell, useFeedback, type FeedbackState } from "./feedback";
 import { RANGES, TimeRangePicker } from "./time-range-picker";
 import { ColumnsMenu, DEFAULT_COLUMNS, columnLabel, extraCell, extraIdsFor, isKnownColumn, metaKeysFor, orderColumns, type TraceRowExtras } from "./trace-columns";
 import { TraceCharts, TracesOverTime, type ChartBucket } from "./trace-charts";
@@ -215,6 +216,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   }, [listParams, live, projectId, query.from, query.range, query.to, requestKey, settledKey]);
 
   const rows = useMemo(() => data?.rows ?? [], [data]);
+  const feedback = useFeedback(projectId, useMemo(() => rows.map((row) => row.runId), [rows]), projectId !== DEMO_PROJECT_ID && columns.includes("feedback"));
   const stats = data?.stats;
   const activeGroup = data?.errorGroups?.groups.find((group) => group.id === query.errorGroup);
   const activeGroupLabel = activeGroup ? errorGroupLabel(activeGroup) : pickedGroup?.id === query.errorGroup ? pickedGroup?.label : query.errorGroup?.slice(0, 8);
@@ -433,12 +435,14 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                 {activeFilters.length || query.q ? <button type="button" className="mt-4 rounded-md bg-[#F4D44D] px-4 py-2 text-sm font-medium text-[#0B0D10]" onClick={() => { setSearchDraft(""); update({ ...Object.fromEntries(activeFilters.map((f) => [f.key, ""])), q: "", range: "30d" }); }}>Clear filters and show 30 days</button> : <a className="mt-4 inline-block rounded-md bg-[#F4D44D] px-4 py-2 text-sm font-medium text-[#0B0D10]" href={projectId === DEMO_PROJECT_ID ? `${DEMO_BASE_PATH}` : `/dashboard/${projectId}/quickstart`}>{projectId === DEMO_PROJECT_ID ? "Back to the overview" : "Open quickstart"}</a>}
               </div>
             ) : (
+              <>
+              {feedback.failed ? <p role="alert" className="mt-3 text-xs text-[#FF8A8A]">{feedback.failed}</p> : null}
               <table className="mt-3 w-full min-w-[900px] border-separate border-spacing-0 text-[13px]">
                 <thead className="sticky top-0 z-10 bg-[#0B0D10]">
                   <tr className="text-left text-xs text-[#8B93A1]">
                     {columns.map((id) => {
                       const label = columnLabel(id);
-                      const sortKey = id;
+                      const sortKey = id === "feedback" ? "" : id;
                       const active = sortKey && (query.sort ?? "startedAt") === sortKey;
                       return (
                         <th key={id} scope="col" className="border-b border-[#1F242C] px-2.5 py-1.5 font-medium" aria-sort={active ? ((query.dir ?? "desc") === "asc" ? "ascending" : "descending") : undefined}>
@@ -453,11 +457,12 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                     <tr key={row.runId} aria-selected={selected === row.runId}
                       className={`cursor-pointer transition-colors duration-700 ${selected === row.runId ? "bg-[#161B22] shadow-[inset_3px_0_0_#F4D44D]" : fresh.has(row.runId) ? "bg-[#1F2A1F]" : "hover:bg-[#12161C]"}`}
                       onClick={() => update({ trace: row.runId }, false)}>
-                      {columns.map((id) => <td key={id} className="max-w-[320px] truncate border-b border-[#171B21] px-2.5 py-1.5 align-middle">{cell(id, row, update, clock)}</td>)}
+                      {columns.map((id) => <td key={id} className="max-w-[320px] truncate border-b border-[#171B21] px-2.5 py-1.5 align-middle">{cell(id, row, update, clock, feedback, projectId)}</td>)}
                     </tr>
                   ))}
                 </tbody>
               </table>
+              </>
             )}
           </div>
 
@@ -491,7 +496,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   );
 }
 
-function cell(id: string, row: TraceRow, update: (patch: TraceQuery, resetPage?: boolean) => void, clock: number) {
+function cell(id: string, row: TraceRow, update: (patch: TraceQuery, resetPage?: boolean) => void, clock: number, feedback: FeedbackState, projectId: string) {
   const link = (key: string, value: string) => value
     ? <button type="button" className="truncate text-[#8AB4FF] hover:underline" onClick={(event) => { event.stopPropagation(); update({ [key]: encodeValues([value]) }); }}>{value}</button>
     : <span className="text-[#4A5260]">—</span>;
@@ -503,6 +508,7 @@ function cell(id: string, row: TraceRow, update: (patch: TraceQuery, resetPage?:
     case "name": return <span className="font-medium">{row.traceName || <span className="font-mono text-xs text-[#8B93A1]">{row.runId.slice(0, 12)}</span>}</span>;
     case "input": return <span className="text-[#C9CED6]">{previewText(row.inputPreview) || <span className="text-[#4A5260]">—</span>}</span>;
     case "output": return <span className="text-[#C9CED6]">{previewText(row.outputPreview) || <span className="text-[#4A5260]">—</span>}</span>;
+    case "feedback": return projectId === DEMO_PROJECT_ID ? <span className="text-[#4A5260]">—</span> : <FeedbackCell runId={row.runId} feedback={feedback} />;
     case "latency": return <span className="font-mono text-xs">{formatDuration(row.durationMs)}</span>;
     case "cost": return <span className="font-mono text-xs">{formatCost(row.totalCostUsd)}</span>;
     case "tokens": return <span className="font-mono text-xs text-[#C9CED6]">{compactNumber(Number(row.inputTokens) + Number(row.outputTokens))}</span>;
