@@ -1,5 +1,6 @@
 "use client";
 import { SavedViews } from "./saved-views";
+import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 import { DEMO_BASE_PATH, DEMO_PROJECT_ID } from "@/lib/demo/demo-config";
 import { columnsFromUrl } from "@/lib/saved-view-state";
 
@@ -325,8 +326,17 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
   return (
     <div className="flex min-h-svh flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
+      <DashboardTopbar
+        title="Tracing"
+        controls={
+          <TimeRangePicker range={query.range ?? "90d"} from={query.from ? Number(query.from) : undefined} to={query.to ? Number(query.to) : undefined} now={now}
+          onPreset={(id) => { setNow(Date.now()); update({ range: id, from: "", to: "" }); }}
+          onCustom={(from, to) => { const current = Date.now(); setNow(current); update({ from: String(from), to: String(Math.min(to, current)) }); }}
+          onReset={() => update({ from: "", to: "" })} />
+        }
+        live={{ on: Boolean(isLive), onToggle: toggleLive, disabled: Boolean(query.from || query.to), title: query.from || query.to ? "Live updates are off while zoomed to a fixed window" : isLive ? "New traces appear automatically. Click to pause." : "Paused. Click to resume live updates." }}
+      />
       <header className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
-        <h1 className="mr-2 text-base font-semibold tracking-tight">Tracing</h1>
         <form
           className="flex min-w-[220px] flex-1 items-center gap-2 rounded-md border border-[#262C35] bg-[#111418] px-2.5 focus-within:border-[#4A5260]"
           onSubmit={(event) => { event.preventDefault(); submitSearch(searchDraft.trim()); }}
@@ -338,15 +348,6 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
             placeholder="Search text, or filter: model:gpt-5  status:error  latency:>2s" />
           {query.q ? <button type="button" className="text-xs text-[#8B93A1] hover:text-white" onClick={() => { setSearchDraft(""); update({ q: "" }); }}>Clear</button> : <kbd className="hidden rounded border border-[#262C35] px-1.5 font-mono text-[10px] text-[#6B7380] sm:block" aria-hidden="true">/</kbd>}
         </form>
-        <TimeRangePicker range={query.range ?? "90d"} from={query.from ? Number(query.from) : undefined} to={query.to ? Number(query.to) : undefined} now={now}
-          onPreset={(id) => { setNow(Date.now()); update({ range: id, from: "", to: "" }); }}
-          onCustom={(from, to) => { const current = Date.now(); setNow(current); update({ from: String(from), to: String(Math.min(to, current)) }); }}
-          onReset={() => update({ from: "", to: "" })} />
-        <button type="button" aria-pressed={isLive} onClick={toggleLive} disabled={Boolean(query.from || query.to)}
-          title={query.from || query.to ? "Live updates are off while zoomed to a fixed window" : isLive ? "New traces appear automatically. Click to pause." : "Paused. Click to resume live updates."}
-          className="flex h-8 items-center gap-2 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-50">
-          <span aria-hidden="true" className={`size-2 rounded-full ${isLive ? "animate-pulse bg-[#5BE3A0]" : "bg-[#6B7380]"}`} />{isLive ? "Live" : "Paused"}
-        </button>
         <button type="button" onClick={() => setNow(Date.now())} className="h-8 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">Refresh</button>
       </header>
 

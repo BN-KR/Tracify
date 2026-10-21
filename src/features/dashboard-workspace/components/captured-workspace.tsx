@@ -1,15 +1,14 @@
 "use client";
 
+import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import {
-  Bot,
   ChevronDown,
   Copy,
   ExternalLink,
   Filter,
-  PanelLeft,
   Pencil,
   Search,
   X,
@@ -155,26 +154,9 @@ export function CapturedWorkspace({
 
   return (
     <div className="captured-workspace" data-workspace-mode={workspace.mode} data-hydrated={hydrated ? "true" : "false"}>
-      <header className="captured-workspace-header">
-        <div className="captured-workspace-breadcrumbs">
-          <button
-            type="button"
-            className="captured-icon-button"
-            aria-label="Toggle sidebar"
-            onClick={() => window.dispatchEvent(new Event("tracify:toggle-sidebar"))}
-          >
-            <PanelLeft />
-          </button>
-          <span className="captured-mobile-logo" aria-hidden="true"><i /></span>
-          <button type="button" className="captured-crumb" onClick={() => window.dispatchEvent(new Event("tracify:open-project-switcher"))}>
-            {workspace.project.organizationName}<ChevronDown />
-          </button>
-          <span>/</span>
-          <button type="button" className="captured-crumb" onClick={() => window.dispatchEvent(new Event("tracify:open-project-switcher"))}>
-            {workspace.project.name}<ChevronDown />
-          </button>
-        </div>
-        <div className="captured-workspace-header-actions">
+      <DashboardTopbar
+        title={SURFACE_LABELS[surface]}
+        controls={
           <label className="captured-range">
             <select aria-label="Dashboard time range" value={range} onChange={(event) => { const value = event.target.value; setRange(value); updateRouteState("range", value); }}>
               <option value="1d">1d</option>
@@ -184,11 +166,8 @@ export function CapturedWorkspace({
             </select>
             <span>{range === "1d" ? "Past 1 day" : `Past ${range.slice(0, -1)} days`}</span><ChevronDown />
           </label>
-          <button type="button" className="captured-assistant" onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}>
-            <Bot /> Assistant <kbd>Ctrl I</kbd>
-          </button>
-        </div>
-      </header>
+        }
+      />
 
       <div className="captured-workspace-toolbar">
         <h1>{SURFACE_LABELS[surface]}</h1>
