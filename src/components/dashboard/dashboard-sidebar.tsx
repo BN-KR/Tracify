@@ -111,6 +111,20 @@ export function DashboardSidebar({
   const isSynthetic = synthetic && pathname.startsWith("/playground");
   const syntheticHref = (view: string) => (view === "home" ? "/playground" : `/playground/${view}`);
   const projectDashboardHref = isSynthetic ? "/dashboard" : demo ? DEMO_BASE_PATH : projectId ? `/dashboard/${projectId}` : "/dashboard";
+  // Sessions only appear in the menu once the project has recorded one (or while you are already on that page).
+  const [hasSessions, setHasSessions] = useState<boolean | null>(null);
+  const hasLiveProject = !isSynthetic && !demo && Boolean(projectId);
+  useEffect(() => {
+    if (!hasLiveProject) return;
+    const controller = new AbortController();
+    const to = Date.now();
+    fetch(`/api/projects/${encodeURIComponent(projectId)}/groups/session?from=${to - 90 * 86_400_000}&to=${to}`, { cache: "no-store", signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body: { total?: number } | null) => { if (body && typeof body.total === "number") setHasSessions(body.total > 0); })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [hasLiveProject, projectId]);
+  const showSessions = !hasLiveProject || hasSessions !== false || pathname.includes("/sessions");
   const workspaceHref = useCallback(
     (view: string, liveView = view) =>
       isSynthetic
@@ -141,7 +155,7 @@ export function DashboardSidebar({
             { title: "Tracing", icon: Activity, href: workspaceHref("tracing") },
             ...(demo ? [{ title: "Costs", icon: BarChart3, href: workspaceHref("costs") }] : []),
             { title: "Explore", icon: Zap, href: workspaceHref("explore") },
-            { title: "Sessions", icon: Activity, href: workspaceHref("sessions") },
+            ...(showSessions ? [{ title: "Sessions", icon: Activity, href: workspaceHref("sessions") }] : []),
             { title: "Users", icon: Users, href: workspaceHref("users") },
             { title: "Alerts", icon: Activity, href: workspaceHref("alerts") },
           ],
@@ -188,7 +202,7 @@ export function DashboardSidebar({
           { title: "Home", icon: LayoutDashboard, href: isSynthetic ? syntheticHref("home") : projectDashboardHref },
           { title: "Dashboards", icon: LayoutDashboard, href: isSynthetic ? syntheticHref("dashboards") : projectId ? `/dashboard/${projectId}/dashboards` : "/dashboard/dashboards" },
           { title: "Tracing", icon: Activity, href: isSynthetic ? syntheticHref("tracing") : projectId ? `/dashboard/${projectId}/tracing` : "/dashboard/runs" },
-          { title: "Sessions", icon: Activity, href: isSynthetic ? syntheticHref("sessions") : projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions" },
+          ...(showSessions ? [{ title: "Sessions", icon: Activity, href: isSynthetic ? syntheticHref("sessions") : projectId ? `/dashboard/${projectId}/sessions` : "/dashboard/sessions" }] : []),
           { title: "Users", icon: Users, href: isSynthetic ? syntheticHref("users") : projectId ? `/dashboard/${projectId}/users` : "/dashboard/users" },
           { title: "Search", icon: Search, href: isSynthetic ? syntheticHref("search") : projectId ? `/dashboard/${projectId}/search` : "/dashboard/search" },
         ],
@@ -257,7 +271,7 @@ export function DashboardSidebar({
         ],
       },
     ];
-  }, [canAccessContent, demo, isSynthetic, projectDashboardHref, projectId, workspaceHref]);
+  }, [canAccessContent, demo, isSynthetic, projectDashboardHref, projectId, showSessions, workspaceHref]);
 
   const railGroups = useMemo(() => {
     const byRail = new Map<RailId, NavItem[]>();
