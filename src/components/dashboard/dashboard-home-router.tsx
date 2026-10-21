@@ -27,6 +27,11 @@ export function DashboardHomeRouter() {
       router.replace(`/sign-in?redirect_url=${encodeURIComponent("/dashboard")}`);
       return;
     }
+    // A signed-in account with no project goes straight to onboarding, like a new sign-up does.
+    if (projects && !projects.length) {
+      router.replace("/onboarding");
+      return;
+    }
     if (!projects?.length) return;
 
     const storedProjectId = window.localStorage.getItem(LAST_PROJECT_STORAGE_KEY);
