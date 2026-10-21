@@ -24,14 +24,9 @@ function askKey() {
   return process.env.TRACIFY_ASK_AI_API_KEY || process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY || "";
 }
 
-/** An alternate OpenAI-compatible provider (allowed models only) is used when its key is set; then OpenAI, which can cost money, is not used at all. Gemini stays as the backup. */
+/** An alternate OpenAI-compatible provider (allowed models only) is used when its key is set; then OpenAI, which can cost money, is not used at all. */
 function altKey() {
   return process.env.ASK_AI_ALT_API_KEY || "";
-}
-
-/** Gemini is the backup: used when the main provider is missing, busy or failing. */
-function geminiKey() {
-  return process.env.GEMINI_API_KEY || "";
 }
 
 type AskResult = { answer: AskAnswer | null; busy?: boolean };
@@ -56,18 +51,15 @@ async function askClaude(apiKey: string, spans: AskSpan[], question: string): Pr
   }
 }
 
-/** Main provider first, Gemini as the backup when the main one is missing, busy, out of credit or failing. */
+/** Anthropic key first; otherwise the alternate provider or OpenAI. */
 async function askModel(spans: AskSpan[], question: string): Promise<AskResult> {
   const apiKey = askKey();
-  const gemini = geminiKey();
   if (apiKey && providerForKey(apiKey) === "anthropic") {
     const claude = await askClaude(apiKey, spans, question);
     if (claude.text) return { answer: resolveCitations(claude.text, spans) };
-    if (!gemini) return { answer: null, busy: claude.busy };
-    const backup = await completeWithFallback("Ask AI", { gemini }, { gemini: process.env.TRACIFY_ASK_AI_GEMINI_MODEL }, { system: SYSTEM_PROMPT, user: buildUserMessage(spans, question), temperature: 0.2, maxOutputTokens: 800 });
-    return { answer: backup.text ? resolveCitations(backup.text, spans) : null, busy: claude.busy || backup.failures.includes("rate") };
+    return { answer: null, busy: claude.busy };
   }
-  const result = await completeWithFallback("Ask AI", { alt: altKey() || undefined, openai: altKey() ? undefined : apiKey || undefined, gemini: gemini || undefined }, { alt: process.env.ASK_AI_ALT_MODEL, openai: process.env.TRACIFY_ASK_AI_MODEL, gemini: process.env.TRACIFY_ASK_AI_GEMINI_MODEL }, { system: SYSTEM_PROMPT, user: buildUserMessage(spans, question), temperature: 0.2, maxOutputTokens: 1500, timeoutMs: 25_000 });
+  const result = await completeWithFallback("Ask AI", { alt: altKey() || undefined, openai: altKey() ? undefined : apiKey || undefined }, { alt: process.env.ASK_AI_ALT_MODEL, openai: process.env.TRACIFY_ASK_AI_MODEL }, { system: SYSTEM_PROMPT, user: buildUserMessage(spans, question), temperature: 0.2, maxOutputTokens: 1500, timeoutMs: 25_000 });
   if (result.text) return { answer: resolveCitations(result.text, spans) };
   return { answer: null, busy: result.failures.some((failure) => failure === "rate" || failure === "quota") };
 }
@@ -113,7 +105,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pro
   if (ai) return NextResponse.json({ ...ai, source: "ai" });
   const basic = quickAnswer(question, spans);
   if (basic) return NextResponse.json({ ...basic, source: "basic" });
-  const configured = Boolean(askKey() || geminiKey() || altKey());
+  const configured = Boolean(askKey() || altKey());
   return NextResponse.json({
     answer: busy
       ? "The AI service is busy right now. Wait a minute and try again, or ask one of the suggested questions."
