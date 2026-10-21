@@ -37,7 +37,7 @@ export function AuthShell({ mode, children }: { mode: AuthMode; children: ReactN
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,#090909_10%,rgba(9,9,9,0.88)_55%,rgba(9,9,9,0.65)_100%)]" />
         <div className="flex items-center justify-between">
           <Link href="/" aria-label="Tracify home" className="active-press focus-visible:outline-2 focus-visible:outline-offset-4"><BrandLogo className="text-[#eceae3]" /></Link>
-          <Link href="https://www.tracify.tech" className="active-press hidden min-h-11 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/60 hover:text-white sm:flex">Back to site <ArrowUpRight className="size-3.5" /></Link>
+          <Link href={process.env.NEXT_PUBLIC_MARKETING_ORIGIN || "https://www.tracify.tech"} className="active-press hidden min-h-11 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/60 hover:text-white sm:flex">Back to site <ArrowUpRight className="size-3.5" /></Link>
         </div>
         <div className="mt-10 lg:mt-0">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#f4d44d]">{modeCopy.marker}</p>

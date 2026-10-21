@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const MARKETING_ORIGIN = "https://www.tracify.tech";
+const MARKETING_ORIGIN = process.env.NEXT_PUBLIC_MARKETING_ORIGIN || "https://www.tracify.tech";
 
 export function SidebarAccountMenu({
   isCollapsed = false,
