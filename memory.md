@@ -2325,3 +2325,5 @@ Automations page is a list of "when X then Y" rules drawn as trigger node -> arr
 - Marketing layout now renders `CloudPrewarm` (preconnect plus speculation rules for the EU cloud mode/sign-in/sign-up/demo pages). Region handoff delays cut from 300ms+1200ms to 120ms+400ms.
 - Admin "Users" count reads only the Convex deployment the host points at; older accounts may live on `focused-otter-289`.
 - Auth emails: `convex/betterAuth/auth.ts` used `sendEmail` from `@better-auth/infra` (Better Auth's hosted sender, Pro plan only), so password-reset emails never sent and no verification email existed. Now both go through our own Resend (`RESEND_API_KEY`, optional `EMAIL_FROM`). Verification is sent on sign-up but NOT required to sign in. `dash` and `sentinel` plugins (BETTER_AUTH_API_KEY) are still connected to the hosted dashboard. Needs backend deploy.
+
+- Oct 21: Removed our own Gemini usage (Ask AI, site assistant, Playground); tracing of customer Gemini calls is unchanged.
