@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalQuery, mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
+import { checkTrigger, judgeModel } from "./autoScoring";
 
 function orgId(identity: unknown) {
   const value = (identity as { orgId?: unknown; org_id?: unknown }).orgId ?? (identity as { org_id?: unknown }).org_id;
@@ -124,10 +125,13 @@ export const update = mutation({
     model: v.optional(v.string()),
     sampleRate: v.number(),
     enabledOnline: v.boolean(),
+    trigger: v.optional(v.object({ when: v.union(v.literal("every"), v.literal("failed"), v.literal("run_end")), modelContains: v.optional(v.string()), dailyLimit: v.optional(v.number()) })),
     template: v.optional(v.union(v.literal("groundedness"), v.literal("toxicity"), v.literal("pii"), v.literal("jailbreak"), v.literal("prompt_injection"), v.literal("policy"))),
   },
   handler: async (ctx, args) => {
     await requireProject(ctx, args.projectId);
+    const triggerProblem = checkTrigger(args.trigger);
+    if (triggerProblem) throw new Error(triggerProblem);
     const evaluator = await ctx.db.get(args.evaluatorId);
     if (!evaluator || evaluator.projectId !== args.projectId) throw new Error("Evaluator not found");
     const name = args.name.trim();
@@ -141,7 +145,7 @@ export const update = mutation({
       if (duplicate) throw new Error("An evaluator with this name already exists");
     }
     const isJudge = evaluator.type === "llm_judge";
-    if (isJudge && !args.model?.trim()) throw new Error("Name the model that should judge");
+    if (isJudge && !judgeModel(args.model)) throw new Error("Pick one of the approved judge models");
     const latest = await ctx.db.query("evaluatorVersions").withIndex("by_evaluatorId", (q) => q.eq("evaluatorId", args.evaluatorId)).order("desc").first();
     const now = Date.now();
     const scoreType = isJudge ? args.scoreType : "boolean";
@@ -162,11 +166,21 @@ export const update = mutation({
         maxScore: isJudge && scoreType === "numeric" ? 1 : undefined,
         sampleRate: args.enabledOnline ? args.sampleRate : 0,
         enabledOnline: args.enabledOnline,
+        trigger: args.enabledOnline ? args.trigger : undefined,
         template: isJudge ? args.template : undefined,
       },
       createdBy: (await ctx.auth.getUserIdentity())!.subject,
       createdAt: now,
     });
     return version;
+  },
+});
+
+/** How many grades one evaluator has produced since the UTC day began; used to enforce each rule's daily cap. */
+export const gradesToday = internalQuery({
+  args: { evaluatorId: v.id("evaluators"), since: v.number(), limit: v.number() },
+  handler: async (ctx, args) => {
+    const recent = await ctx.db.query("evaluationResults").withIndex("by_evaluatorId", (q) => q.eq("evaluatorId", args.evaluatorId)).order("desc").take(args.limit);
+    return recent.filter((result) => result.createdAt >= args.since).length;
   },
 });

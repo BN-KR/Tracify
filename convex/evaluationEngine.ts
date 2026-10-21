@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
+import { checkTrigger, judgeModel } from "./autoScoring";
 
 type Identity = { subject: string; tokenIdentifier: string };
 
@@ -128,10 +129,14 @@ export const createEvaluator = mutation({
     maxScore: v.optional(v.number()),
     sampleRate: v.number(),
     enabledOnline: v.boolean(),
+    trigger: v.optional(v.object({ when: v.union(v.literal("every"), v.literal("failed"), v.literal("run_end")), modelContains: v.optional(v.string()), dailyLimit: v.optional(v.number()) })),
     template: v.optional(v.union(v.literal("groundedness"), v.literal("toxicity"), v.literal("pii"), v.literal("jailbreak"), v.literal("prompt_injection"), v.literal("policy"))),
   },
   handler: async (ctx, args) => {
     const { identity } = await getProject(ctx, args.projectId);
+    const triggerProblem = checkTrigger(args.trigger);
+    if (triggerProblem) throw new Error(triggerProblem);
+    if (args.type === "llm_judge" && !judgeModel(args.model)) throw new Error("Pick one of the approved judge models");
     const name = args.name.trim();
     const criteria = args.criteria.trim();
     if (!name || !criteria) throw new Error("Evaluator name and criteria are required");
@@ -144,7 +149,7 @@ export const createEvaluator = mutation({
       projectId: args.projectId,
       evaluatorId,
       version: 1,
-      config: { target: args.target, scoreType: args.scoreType, prompt: args.prompt?.trim() || undefined, model: args.model?.trim() || undefined, rule: args.rule?.trim() || undefined, categories: args.categories, minScore: args.minScore, maxScore: args.maxScore, sampleRate: args.sampleRate, enabledOnline: args.enabledOnline, template: args.template },
+      config: { target: args.target, scoreType: args.scoreType, prompt: args.prompt?.trim() || undefined, model: args.model?.trim() || undefined, rule: args.rule?.trim() || undefined, categories: args.categories, minScore: args.minScore, maxScore: args.maxScore, sampleRate: args.sampleRate, enabledOnline: args.enabledOnline, trigger: args.enabledOnline ? args.trigger : undefined, template: args.template },
       createdBy: identity.subject,
       createdAt: now,
     });
