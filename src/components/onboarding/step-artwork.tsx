@@ -34,24 +34,6 @@ function Waterfall({ live }: { live: boolean }) {
   );
 }
 
-function Radar() {
-  const reduce = useReducedMotion();
-  return (
-    <div className="relative mx-auto size-40" aria-hidden="true">
-      {[0, 1, 2, 3].map((n) => (
-        <motion.span
-          key={n}
-          className="absolute inset-0 border border-[#f4d44d]"
-          initial={{ scale: 0.2, opacity: 0.9 }}
-          animate={reduce ? { scale: 0.3 + n * 0.25, opacity: 0.4 } : { scale: [0.2, 1], opacity: [0.9, 0] }}
-          transition={{ duration: 3.2, repeat: Infinity, delay: n * 0.8, ease: "easeOut" }}
-        />
-      ))}
-      <span className="absolute inset-[44%] bg-[#f4d44d]" />
-    </div>
-  );
-}
-
 function Burst() {
   const reduce = useReducedMotion();
   const cells = Array.from({ length: 28 }, (_, i) => ({
@@ -122,9 +104,8 @@ export function StepArtwork({ step }: { step: OnboardingStepId }) {
         ) : null}
         {step === "waiting" ? (
           <div className="space-y-5">
-            <Radar />
-            <p className="text-center text-[11px] uppercase tracking-[0.16em] text-[#f4d44d]">listening for your first run</p>
             <Waterfall live={false} />
+            <p className="border-t border-white/10 pt-4 text-[11px] uppercase tracking-[0.16em] text-white/45">Waiting for your first run</p>
           </div>
         ) : null}
         {step === "success" ? (

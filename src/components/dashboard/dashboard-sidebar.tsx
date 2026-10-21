@@ -203,7 +203,6 @@ export function DashboardSidebar({
           { title: "Comparisons", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/comparisons` : "/dashboard/comparisons" },
           { title: "Reports", icon: FileText, href: isSynthetic ? syntheticHref("reports") : projectId ? `/dashboard/${projectId}/reports` : "/dashboard/reports" },
           { title: "Compare runs", icon: GitCompare, href: isSynthetic ? syntheticHref("compare") : projectId ? `/dashboard/${projectId}/compare` : "/dashboard/compare" },
-          { title: "Investigation", icon: Search, href: isSynthetic ? syntheticHref("investigate") : projectId ? `/dashboard/${projectId}/investigate` : "/dashboard/investigate" },
         ],
       },
       {
@@ -218,14 +217,12 @@ export function DashboardSidebar({
           { title: "Datasets", icon: Database, href: isSynthetic ? syntheticHref("datasets") : projectId ? `/dashboard/${projectId}/datasets` : "/dashboard/datasets" },
           { title: "Experiments", icon: GitCompare, href: isSynthetic ? syntheticHref("experiments") : projectId ? `/dashboard/${projectId}/experiments` : "/dashboard/experiments" },
           { title: "Playground", icon: FlaskConical, href: isSynthetic ? syntheticHref("playground") : projectId ? `/dashboard/${projectId}/playground` : "/dashboard/playground" },
-          { title: "Resilience", icon: Zap, href: isSynthetic ? syntheticHref("resilience") : projectId ? `/dashboard/${projectId}/resilience` : "/dashboard/resilience" },
         ],
       },
       {
         id: "operate",
         label: "Operate",
         items: [
-          { title: "Runtime Policy", icon: ShieldCheck, href: isSynthetic ? syntheticHref("control") : projectId ? `/dashboard/${projectId}/control` : "/dashboard/control" },
           { title: "Alerts", icon: Activity, href: isSynthetic ? syntheticHref("alerts") : projectId ? `/dashboard/${projectId}/alerts` : "/dashboard/alerts" },
           { title: "Automations", icon: Zap, href: isSynthetic ? syntheticHref("automations") : projectId ? `/dashboard/${projectId}/automations` : "/dashboard/automations" },
           { title: "Operations", icon: Globe2, href: isSynthetic ? syntheticHref("operations") : projectId ? `/dashboard/${projectId}/operations` : "/dashboard/operations" },

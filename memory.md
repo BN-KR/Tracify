@@ -2328,3 +2328,4 @@ Automations page is a list of "when X then Y" rules drawn as trigger node -> arr
 
 ## 2026-10-20 Compare works on small projects — draft PR (branch `claude/project-thread-ly2i9d`)
 - Two runs: if the range has fewer than two runs, it steps out to longer ranges (up to 90 days) and says so; each picker also takes a pasted run ID; A/B badges are yellow/cream. Models and releases tab widens the same way when only one group exists. Front end only (`compare-page.tsx`), no Convex deploy. Checked with mocked responses only.
+- Oct 21: Removed our own Gemini usage (Ask AI, site assistant, Playground); tracing of customer Gemini calls is unchanged.

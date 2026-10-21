@@ -50,7 +50,6 @@ export function DashboardCommandMenu({ projectId, showTrigger = true }: CommandM
       ["Human Annotation", `${base}/human-annotation`],
       ["Evaluation", `${base}/evaluation`],
       ["Evaluation rules", `${base}/evals/rules`],
-      ["Resilience", `${base}/resilience`],
       ["Prompt Management", `${base}/prompt-management`],
       ["Prompts", `${base}/prompts`],
       ["Playground", `${base}/playground`],

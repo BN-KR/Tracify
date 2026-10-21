@@ -58,16 +58,15 @@ export async function POST(request: NextRequest) {
   let answer = fallback.answer;
   let citations: AssistantCitation[] = fallback.citations;
   const openaiKey = process.env.TRACIFY_ASSISTANT_OPENAI_API_KEY || process.env.OPENAI_API_KEY || "";
-  const geminiKey = process.env.GEMINI_API_KEY || "";
   // Low reasoning still spends tokens thinking, so the cap needs headroom or the answer comes back empty.
   const maxCompletionTokens = configuredLimit("TRACIFY_ASSISTANT_MAX_COMPLETION_TOKENS", 800, 200, 1500);
   let provider = "fallback";
 
-  if (openaiKey || geminiKey) {
+  if (openaiKey) {
     const result = await completeWithFallback(
       "Site assistant",
-      { openai: openaiKey || undefined, gemini: geminiKey || undefined },
-      { openai: process.env.TRACIFY_ASSISTANT_MODEL, gemini: process.env.TRACIFY_ASSISTANT_GEMINI_MODEL },
+      { openai: openaiKey },
+      { openai: process.env.TRACIFY_ASSISTANT_MODEL },
       { system: ASSISTANT_SYSTEM_PROMPT, user: `Public context:\n${context.map((entry) => `${entry.title}: ${entry.text}`).join("\n")}\n\nVisitor message: ${message}`, temperature: 0.4, maxOutputTokens: maxCompletionTokens, timeoutMs: 15_000 },
     );
     if (result.text) {

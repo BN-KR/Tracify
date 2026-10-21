@@ -615,7 +615,7 @@ function Detail({ label, value }: { label: string; value: string }) { return <di
 function PromptPlaygroundSurface({ workspace, onReadOnly }: { workspace: DashboardWorkspace; onReadOnly: (action: string) => void }) {
   const [prompt, setPrompt] = useState("You are a support agent. Answer {{question}} using only verified context.");
   const [question, setQuestion] = useState("Where is my order?");
-  const [output, setOutput] = useState("Run the prompt to inspect the model response.");
+  const [output, setOutput] = useState("Add a model key to run prompts. No answer is shown until a real model replies.");
   return <main className="captured-reference-playground">
     <div className="captured-playground-card">
       <div className="captured-playground-model-row"><select aria-label="Model"><option>{workspace.models[1] ?? "anthropic: claude-sonnet-4-5-20250929"}</option></select><button type="button" aria-label="Model settings">☷</button><span /><button type="button" onClick={() => onReadOnly("Save as prompt")}>▣ Save as prompt</button><button type="button" onClick={() => onReadOnly("Open split window")}>＋ New split window</button></div>
@@ -626,7 +626,7 @@ function PromptPlaygroundSurface({ workspace, onReadOnly }: { workspace: Dashboa
       </div>
       <div className="captured-playground-add-row"><button type="button">⊕ Message <span>⌄</span></button><button type="button">⊕ Placeholder</button></div>
       <div className="captured-playground-output"><span>Output</span><pre>{output}</pre></div>
-      <div className="captured-playground-submit"><button type="button" onClick={() => setOutput(`Your order was located with verified tool evidence.\n\nModel: ${workspace.models[1] ?? "claude"}`)}>Submit</button><button type="button" aria-label="Playground settings">⚙</button></div>
+      <div className="captured-playground-submit"><button type="button" onClick={() => setOutput("This preview screen cannot run prompts. Open the Playground in a project and add a model key to get real answers.")}>Submit</button><button type="button" aria-label="Playground settings">⚙</button></div>
     </div>
   </main>;
 }
