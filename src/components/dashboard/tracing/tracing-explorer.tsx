@@ -44,6 +44,12 @@ function currentUrlQuery(): TraceQuery {
   return query;
 }
 
+// A shared run link (/tracing/<runId>) has no query string; its run id arrives from the server as initialQuery.trace.
+function withPathTrace(url: TraceQuery, initial: TraceQuery): TraceQuery {
+  if (url.trace || !initial.trace || !/\/tracing\/[^/]+\/?$/.test(window.location.pathname)) return url;
+  return { ...url, trace: initial.trace, ...(url.range ? {} : { range: initial.range ?? "90d" }) };
+}
+
 function readColumns(): string[] {
   try {
     const stored = JSON.parse(window.localStorage.getItem(COLUMN_STORAGE) ?? "null");
@@ -56,7 +62,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   // Next.js syncs our history.replaceState calls into its router and can remount this page with the search
   // params it was first rendered with. The live URL is authoritative in the browser: merging stale server
   // params back in would resurrect removed filters or map mode after Show traces.
-  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "90d", ...(typeof window === "undefined" ? initialQuery : currentUrlQuery()) }));
+  const [query, setQuery] = useState<TraceQuery>(() => ({ range: "90d", ...(typeof window === "undefined" ? initialQuery : withPathTrace(currentUrlQuery(), initialQuery)) }));
   const [data, setData] = useState<ListResponse | null>(null);
   const [facets, setFacets] = useState<FacetCounts>({});
   const [settledKey, setSettledKey] = useState<string | null>(null);
@@ -102,7 +108,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
 
   useEffect(() => {
     const params = new URLSearchParams(query);
-    window.history.replaceState(null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`);
+    window.history.replaceState(null, "", `${window.location.pathname.replace(/\/tracing\/[^/]+\/?$/, "/tracing")}${params.size ? `?${params}` : ""}`);
   }, [query]);
 
   const apiParams = useMemo(() => {
