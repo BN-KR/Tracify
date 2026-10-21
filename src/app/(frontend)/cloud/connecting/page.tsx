@@ -7,7 +7,7 @@ import { TRACIFY_REGIONS, parseTracifyRegion } from "@/lib/regions";
 export default function CloudConnectingPage() {
   const params = useSearchParams();
   const regionId = parseTracifyRegion(params.get("region")) ?? "eu";
-  const next = params.get("next") || "/sign-up";
+  const next = params.get("next") || "/sign-in";
   const intent = params.get("intent") || "build";
   const region = TRACIFY_REGIONS[regionId];
 
