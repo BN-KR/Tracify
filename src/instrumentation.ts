@@ -44,7 +44,12 @@ export function register() {
   const isLocalOrigin =
     process.env.NODE_ENV !== "production" &&
     /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(siteUrl ?? "");
-  if (siteUrl !== expectedOrigin && !isLocalOrigin) {
+  // Staging and PR preview copies run on their own hosts. Opt in explicitly with
+  // TRACIFY_ENVIRONMENT=staging; production never sets it.
+  const isStagingOrigin =
+    process.env.TRACIFY_ENVIRONMENT === "staging" &&
+    /^https:\/\/(staging|pr-\d+\.preview)\.eu\.cloud\.tracify\.tech$/.test(siteUrl ?? "");
+  if (siteUrl !== expectedOrigin && !isLocalOrigin && !isStagingOrigin) {
     throw new Error(`NEXT_PUBLIC_SITE_URL must be ${expectedOrigin} for the ${publicRegion.toUpperCase()} deployment`);
   }
 }
