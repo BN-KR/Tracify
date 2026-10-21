@@ -17,7 +17,7 @@ export const chip = "h-8 border border-[#3A3A34] bg-[#090909] px-2.5 font-mono t
 
 /** Search, range, filters, live and export, drawn the same way on both pages so only the layout around them differs. */
 export function GroupControls({ view, search = true }: { view: GroupView; search?: boolean }) {
-  const { kind, query, update, data, setNow, draft, setDraft, searchRef, isLive, fixedWindow } = view;
+  const { kind, query, update, data, setNow, draft, setDraft, searchRef } = view;
   const text = KIND_TEXT[kind];
   const sort = (GROUP_SORTS as readonly string[]).includes(view.sort) ? view.sort : "lastSeenAt";
   return (
@@ -54,10 +54,6 @@ export function GroupControls({ view, search = true }: { view: GroupView; search
       <select id={`${kind}-sort`} className={chip} value={`${sort}:${view.direction}`} onChange={(event) => { const [nextSort, nextDir] = event.target.value.split(":"); update({ sort: nextSort, dir: nextDir }); }}>
         {SORT_CHOICES.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
       </select>
-      <button type="button" onClick={view.toggleLive} aria-pressed={isLive} disabled={fixedWindow} title={fixedWindow ? "Live updates are off for a fixed time window" : undefined} className={`${chip} flex items-center gap-1.5`}>
-        <span className={`size-1.5 ${isLive ? "animate-pulse bg-[#5BE3A0]" : "bg-[#7a7869]"}`} />
-        {isLive ? "Live" : fixedWindow ? "Fixed window" : "Paused"}
-      </button>
       <button type="button" onClick={view.refresh} className={chip}>Refresh</button>
       <button type="button" onClick={view.exportCsv} disabled={!view.rows.length} className={chip}>Export CSV</button>
     </div>

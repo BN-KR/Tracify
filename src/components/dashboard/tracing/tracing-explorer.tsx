@@ -31,7 +31,6 @@ type ListResponse = {
 export type TraceQuery = Record<string, string>;
 
 const COLUMN_STORAGE = "tracify.tracing.columns";
-const LIVE_STORAGE = "tracify.tracing.live";
 const ERRORS_STORAGE = "tracify.tracing.errorGroups";
 /** URL keys that change the view, not the data, so they are not sent to the API. */
 const VIEW_KEYS = ["range", "from", "to", "trace", "mode", "view", "columns", "savedView"];
@@ -72,7 +71,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   const [columns, setColumns] = useState<string[]>(DEFAULT_COLUMNS);
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [now, setNow] = useState(() => Date.now());
-  const [live, setLive] = useState(true);
+  const [live] = useState(true);
   const [clock, setClock] = useState(() => Date.now());
   const [fresh, setFresh] = useState<Set<string>>(() => new Set());
   const [errorsOpen, setErrorsOpen] = useState(true);
@@ -90,7 +89,6 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   useEffect(() => { if (window.matchMedia("(max-width: 767px)").matches) setFiltersOpen(false); }, []);
   // The live/paused choice is remembered per browser.
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { try { if (window.localStorage.getItem(LIVE_STORAGE) === "paused") setLive(false); } catch {} }, []);
   // The error-groups panel's open/closed choice is remembered per browser.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { try { if (window.localStorage.getItem(ERRORS_STORAGE) === "closed") setErrorsOpen(false); } catch {} }, []);
@@ -286,12 +284,6 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     update(patch);
   }
 
-  function toggleLive() {
-    const next = !live;
-    setLive(next);
-    if (next) setNow(Date.now());
-    try { window.localStorage.setItem(LIVE_STORAGE, next ? "live" : "paused"); } catch {}
-  }
 
   function toggleErrors() {
     const next = !errorsOpen;
@@ -348,11 +340,6 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
           onPreset={(id) => { setNow(Date.now()); update({ range: id, from: "", to: "" }); }}
           onCustom={(from, to) => { const current = Date.now(); setNow(current); update({ from: String(from), to: String(Math.min(to, current)) }); }}
           onReset={() => update({ from: "", to: "" })} />
-        <button type="button" aria-pressed={isLive} onClick={toggleLive} disabled={Boolean(query.from || query.to)}
-          title={query.from || query.to ? "Live updates are off while zoomed to a fixed window" : isLive ? "New traces appear automatically. Click to pause." : "Paused. Click to resume live updates."}
-          className="flex h-8 items-center gap-2 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-50">
-          <span aria-hidden="true" className={`size-2 rounded-full ${isLive ? "animate-pulse bg-[#5BE3A0]" : "bg-[#6B7380]"}`} />{isLive ? "Live" : "Paused"}
-        </button>
         <button type="button" onClick={() => setNow(Date.now())} className="h-8 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">Refresh</button>
       </header>
 

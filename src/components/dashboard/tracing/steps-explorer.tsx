@@ -369,22 +369,6 @@ export function StepsExplorer({
         <button
           type="button"
           className={control}
-          aria-pressed={live && !query.from && !query.to}
-          disabled={Boolean(query.from || query.to)}
-          onClick={() => {
-            const next = !live;
-            setLive(next);
-            localStorage.setItem(
-              "tracify.tracing.live",
-              next ? "live" : "paused",
-            );
-          }}
-        >
-          {live ? "Live" : "Paused"}
-        </button>
-        <button
-          type="button"
-          className={control}
           onClick={() => {
             setNow(Date.now());
             setAttempt((n) => n + 1);
