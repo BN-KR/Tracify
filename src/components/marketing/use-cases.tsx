@@ -176,8 +176,8 @@ export function UseCases() {
             WHO USES TRACIFY?
           </motion.div>
           <motion.h2
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ y: 12 }}
+            whileInView={{ y: 0 }}
             viewport={{ once: true }}
             className="font-pixel font-bold text-white mb-6 uppercase tracking-tighter"
             style={{
