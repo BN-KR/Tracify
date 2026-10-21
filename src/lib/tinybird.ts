@@ -1023,3 +1023,61 @@ export async function deleteProjectAnalytics(projectId: string) {
     if (!res.ok) throw new Error(`Could not delete ${table}: ${res.status}`);
   }
 }
+
+export const COST_DIMENSIONS = { model: "modelId", tool: "toolName", user: "endUserId", agent: "traceName", release: "release", environment: "environment" } as const;
+export type CostDimension = keyof typeof COST_DIMENSIONS;
+export type CostGroup = { key: string; calls: number; traces: number; costUsd: number; inputTokens: number; outputTokens: number; avgLatencyMs: number };
+
+/**
+ * Spend for every trace matching the filters: totals, the previous period of the same length, cost per bucket by model,
+ * a ranked list per dimension and the most expensive traces. All of it comes from stored steps; nothing is estimated.
+ */
+export async function costBreakdown(projectId: string, filters: TraceListFilters) {
+  const num = (value: unknown) => { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : 0; };
+  const scopeFor = (range: TraceListFilters) => {
+    const { where, having } = traceListClauses(projectId, range);
+    return having ? `${where} AND runId IN (${matchingRunIds(where, having)})` : where;
+  };
+  const scope = scopeFor(filters);
+  const length = filters.toMs - filters.fromMs;
+  const before = scopeFor({ ...filters, fromMs: filters.fromMs - length, toMs: filters.fromMs - 1000 });
+  const spanSeconds = Math.max(60, Math.floor(length / 1000));
+  const bucketSeconds = [3600, 7200, 10800, 21600, 43200, 86400].find((size) => spanSeconds / size <= 120) ?? 86400;
+  const dimensions = Object.entries(COST_DIMENSIONS) as Array<[CostDimension, string]>;
+
+  const [totals, perTrace, previous, series, groups, top] = await Promise.all([
+    tinybirdRows<Record<string, number>>(`SELECT sum(costUsd) AS costUsd, sum(inputTokens) AS inputTokens, sum(outputTokens) AS outputTokens, uniqExact(runId) AS traces, count() AS steps,
+      countIf(modelId != '') AS modelCalls, countIf(modelId != '' AND costUsd = 0 AND inputTokens + outputTokens > 0) AS unpricedCalls FROM spans WHERE ${scope}`),
+    tinybirdRows<Record<string, number>>(`SELECT quantileExact(0.5)(cost) AS p50, quantileExact(0.95)(cost) AS p95, max(cost) AS max FROM (SELECT runId, sum(costUsd) AS cost FROM spans WHERE ${scope} GROUP BY runId)`),
+    tinybirdRows<Record<string, number>>(`SELECT sum(costUsd) AS costUsd, uniqExact(runId) AS traces FROM spans WHERE ${before}`),
+    tinybirdRows<{ bucket: string; model: string; costUsd: number }>(`SELECT toStartOfInterval(createdAt, INTERVAL ${bucketSeconds} SECOND) AS bucket, modelId AS model, sum(costUsd) AS costUsd
+      FROM spans WHERE ${scope} GROUP BY bucket, model HAVING costUsd > 0 ORDER BY bucket LIMIT 5000`),
+    tinybirdRows<CostGroup & { field: CostDimension }>(dimensions.map(([field, column]) => `SELECT '${field}' AS field, key, calls, traces, costUsd, inputTokens, outputTokens, avgLatencyMs FROM (
+      SELECT ${column} AS key, count() AS calls, uniqExact(runId) AS traces, sum(costUsd) AS costUsd, sum(inputTokens) AS inputTokens, sum(outputTokens) AS outputTokens, avg(latencyMs) AS avgLatencyMs
+      FROM spans WHERE ${scope} AND ${column} != '' GROUP BY key ORDER BY costUsd DESC, calls DESC, key LIMIT 25)`).join(" UNION ALL ")),
+    listTraces(projectId, { ...filters, sort: "cost", direction: "desc", page: 0, pageSize: 10 }),
+  ]);
+
+  const total = totals[0] ?? {};
+  const ranked = Object.fromEntries(dimensions.map(([field]) => [field, [] as CostGroup[]])) as Record<CostDimension, CostGroup[]>;
+  for (const row of groups) {
+    ranked[row.field]?.push({ key: String(row.key), calls: num(row.calls), traces: num(row.traces), costUsd: num(row.costUsd), inputTokens: num(row.inputTokens), outputTokens: num(row.outputTokens), avgLatencyMs: num(row.avgLatencyMs) });
+  }
+  return {
+    range: { from: filters.fromMs, to: filters.toMs },
+    totals: {
+      costUsd: num(total.costUsd), inputTokens: num(total.inputTokens), outputTokens: num(total.outputTokens), traces: num(total.traces), steps: num(total.steps),
+      modelCalls: num(total.modelCalls), unpricedCalls: num(total.unpricedCalls),
+      p50TraceCostUsd: num(perTrace[0]?.p50), p95TraceCostUsd: num(perTrace[0]?.p95), maxTraceCostUsd: num(perTrace[0]?.max),
+    },
+    previous: { costUsd: num(previous[0]?.costUsd), traces: num(previous[0]?.traces) },
+    bucketSeconds,
+    series: series.map((row) => ({ bucket: String(row.bucket), model: String(row.model), costUsd: num(row.costUsd) })),
+    groups: ranked,
+    topTraces: top.rows.map((row) => ({
+      runId: row.runId, traceName: row.traceName, startedAt: row.startedAt, costUsd: num(row.totalCostUsd), inputTokens: num(row.inputTokens), outputTokens: num(row.outputTokens),
+      durationMs: num(row.durationMs), modelId: row.modelId, errored: num(row.errorCount) > 0,
+    })),
+  };
+}
+export type CostBreakdown = Awaited<ReturnType<typeof costBreakdown>>;
