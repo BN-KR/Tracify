@@ -11,7 +11,7 @@ import { Typewriter } from "@/components/marketing/typewriter";
 // ── Animation Variants ─────────────────────────────────────────────────────
 
 const containerVariants: Variants = {
-  hidden: { opacity: 0 },
+  hidden: {},
   show: {
     opacity: 1,
     transition: {
@@ -22,7 +22,7 @@ const containerVariants: Variants = {
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 8 },
+  hidden: { y: 8 },
   show: {
     opacity: 1,
     y: 0,

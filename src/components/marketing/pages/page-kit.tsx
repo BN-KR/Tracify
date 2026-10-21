@@ -52,8 +52,8 @@ export function PageHero({
     <div className={variant === "left" ? "lg:ml-auto lg:w-[52%]" : variant === "full" ? "max-w-5xl" : ""}>
       <motion.p
         className={`flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] ${paper ? "text-black/60" : "text-[#f4d44d]"}`}
-        initial={reduce ? false : { opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={reduce ? false : { y: 16 }}
+        animate={{ y: 0 }}
         transition={{ delay: 0.15, duration: 0.6 }}
       >
         <span className={`size-2 ${paper ? "bg-[#090909]" : "bg-[#f4d44d]"}`} aria-hidden="true" />
@@ -61,16 +61,16 @@ export function PageHero({
       </motion.p>
       <motion.h1
         className={`mt-6 text-balance font-pixel leading-[0.8] tracking-[-0.075em] ${size} ${variant === "full" ? "max-w-[14ch]" : long ? "max-w-[13ch]" : "max-w-[12ch]"}`}
-        initial={reduce ? false : { opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={reduce ? false : { y: 24 }}
+        animate={{ y: 0 }}
         transition={{ delay: 0.25, duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
       >
         {title}
       </motion.h1>
       <motion.p
         className={`mt-8 max-w-xl text-pretty text-base leading-7 md:text-lg ${paper ? "text-black/70" : "text-[#eceae3]/75"}`}
-        initial={reduce ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={reduce ? false : { y: 10 }}
+        animate={{ y: 0 }}
         transition={{ delay: 0.55, duration: 0.7 }}
       >
         {lead}

@@ -1,0 +1,13 @@
+# Keep gitleaks' default rules, but ignore documentation files whose curl examples
+# use placeholder keys (for example `Authorization: Bearer tracify_sk_live_your_key`).
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Placeholder curl examples in docs, notes, agent skill files and the SEO page copy"
+paths = [
+  '''\.agents/skills/.*''',
+  '''scratchpad\.md''',
+  '''tracify_build_plan\.md''',
+  '''src/lib/seo-pages\.ts''',
+]
