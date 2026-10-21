@@ -54,7 +54,7 @@ function CompareChart({ metric, data }: { metric: Metric; data: Response }) {
       return values;
     };
     return { current: build(data.current), previous: build(data.previous) };
-  }, [data, metric]);
+  }, [data.current, data.previous, metric]);
   const length = Math.max(series.current.length, series.previous.length);
   const max = Math.max(1e-9, ...series.current.map((v) => v ?? 0), ...series.previous.map((v) => v ?? 0));
   const slot = width / length;

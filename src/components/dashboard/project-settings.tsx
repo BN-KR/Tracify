@@ -48,10 +48,6 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  if (!projectId) {
-    return <div className="border border-black/15 bg-white p-6"><h2 className="font-mono text-xl text-black">Project Settings</h2><p className="mt-2 max-w-xl font-sans text-sm leading-6 text-black/60">Project settings are shown read-only until a project is selected.</p></div>;
-  }
-
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (project) {
@@ -69,6 +65,10 @@ export function ProjectSettings({ projectId }: ProjectSettingsProps) {
     }
   }, [project]);
   /* eslint-enable react-hooks/set-state-in-effect */
+
+  if (!projectId) {
+    return <div className="border border-black/15 bg-white p-6"><h2 className="font-mono text-xl text-black">Project Settings</h2><p className="mt-2 max-w-xl font-sans text-sm leading-6 text-black/60">Project settings are shown read-only until a project is selected.</p></div>;
+  }
 
   async function handleSave() {
     if (!projectId) return;

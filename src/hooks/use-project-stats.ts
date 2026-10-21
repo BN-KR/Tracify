@@ -135,6 +135,7 @@ export function useProjectStats({
     hasSeenLiveKeyRef.current = false;
     activeRequestKeyRef.current = `${projectId}:${range}`;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial client-side sync after mount
     void fetchStats({ showLoading: true, force: true });
 
     function handleVisibilityChange() {

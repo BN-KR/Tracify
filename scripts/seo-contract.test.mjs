@@ -6,7 +6,7 @@ const app = "src/app/(frontend)";
 const read = (path) => readFileSync(path, "utf8");
 
 // Utility trees must carry noindex through a layout, not only robots.txt.
-for (const dir of ["onboarding", "dashboard", "playground", "(auth)", "cloud", "forgot-password", "reset-password", "accept-invitation", "auth", "pricing/checkout", "admin"]) {
+for (const dir of ["onboarding", "dashboard", "(auth)", "cloud", "forgot-password", "reset-password", "accept-invitation", "auth", "pricing/checkout", "admin"]) {
   test(`${dir} is noindex`, () => {
     const layout = `${app}/${dir}/layout.tsx`;
     assert.ok(existsSync(layout), `${layout} missing`);

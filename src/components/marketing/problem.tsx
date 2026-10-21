@@ -129,7 +129,7 @@ function TerminalPanel() {
     if (!isInView) return;
     
     loopStateRef.current.active = true;
-    let timeouts: NodeJS.Timeout[] = [];
+    const timeouts: NodeJS.Timeout[] = [];
 
     const run = async () => {
       const currentRun = LOG_VARIANTS[runIndex];
@@ -350,7 +350,7 @@ export function Problem() {
             className="font-sans text-[16px] leading-relaxed max-w-[600px]"
             style={{ color: "#CCCCCC" }}
           >
-            When something breaks, you're left digging through logs, guessing what happened, 
+            When something breaks, you&apos;re left digging through logs, guessing what happened, 
             and trying to reconstruct the run step by step.
           </p>
         </div>
