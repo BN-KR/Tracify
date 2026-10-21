@@ -5,9 +5,9 @@ import Image from "next/image";
 import { useState } from "react";
 
 import {
+  BookOpen,
   Bell,
-  ChevronDown,
-  PanelLeft,
+  ChevronRight,
   UserPen,
   LogOut,
   Settings,
@@ -20,7 +20,9 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 
+import { buttonVariants } from "@/components/ui/button";
 import { getOnboardingHref } from "@/lib/onboarding-navigation";
+import { getTracifyRegion } from "@/lib/regions";
 
 import { authClient } from "@/lib/auth-client";
 import { OrganizationSwitcher } from "@/components/auth/organization-switcher";
@@ -40,13 +42,9 @@ import { cn, formatRelativeTime } from "@/lib/utils";
 interface DashboardTopbarProps {
   title?: string;
   description?: string;
-  /** Replaces the default time-range select (pages with their own range picker). */
-  controls?: React.ReactNode;
-  /** Pass only on pages that update by themselves; renders the Live toggle. */
-  live?: { on: boolean; onToggle: () => void; disabled?: boolean; title?: string };
 }
 
-export function DashboardTopbar({ title, description, controls, live }: DashboardTopbarProps) {
+export function DashboardTopbar({ title, description }: DashboardTopbarProps) {
   const onboardingHref = getOnboardingHref();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -56,7 +54,9 @@ export function DashboardTopbar({ title, description, controls, live }: Dashboar
   const projectSettingsHref = projectId ? `/dashboard/${projectId}/settings` : "/dashboard/account";
   const projectManageHref = projectId ? `/dashboard/${projectId}/manage` : "/dashboard";
   const projectDocsHref = projectId ? `/dashboard/${projectId}/docs` : "/docs";
+  const dashboardHref = projectId ? `/dashboard/${projectId}` : "/dashboard";
 
+  const environmentContext = searchParams.get("environment")?.trim() || "all environments";
   const usesRunsWindow = pathname.includes("/runs") || pathname.includes("/search");
   const requestedRange = usesRunsWindow ? searchParams.get("days") : searchParams.get("range");
   const rangeContext = ["1", "7", "30", "90"].includes(requestedRange ?? "")
@@ -65,7 +65,9 @@ export function DashboardTopbar({ title, description, controls, live }: Dashboar
       ? "30d"
       : "7d";
   const rangeValue = rangeContext.replace("d", "");
+  const environmentValue = environmentContext === "all environments" ? "all" : environmentContext;
 
+  const region = getTracifyRegion();
   const { data: session } = authClient.useSession();
   const { data: organization } = authClient.useActiveOrganization();
   const user = session?.user;
@@ -110,94 +112,127 @@ export function DashboardTopbar({ title, description, controls, live }: Dashboar
   };
 
   const segments = pathname.split("/").filter(Boolean);
-
-  const barButton =
-    "inline-flex h-[30px] items-center gap-1.5 border border-[#262C35] bg-[#0B0D10] px-2.5 text-xs text-[#C9CED6] transition-colors hover:border-[#4A5260] hover:text-white";
-  const pageTitle = title || (segments[2] ? segments[2].replace(/-/g, " ") : "Overview");
+  const sectionHref =
+    projectId && segments.length > 2
+      ? `/dashboard/${projectId}/${segments[2]}`
+      : dashboardHref;
 
   return (
-    <header className="tracify-dashboard-topbar flex h-11 shrink-0 items-center justify-between gap-3 border-b border-[#1F242C] bg-[#0B0D10] px-3 font-mono text-xs text-[#E6E9EE] lg:px-3.5">
-      <span className="sr-only">{description ? `${pageTitle}: ${description}` : pageTitle}</span>
+    <header className="tracify-dashboard-topbar flex h-14 shrink-0 items-center justify-between border-b border-black/15 bg-[#f3f2ed] px-4 font-mono lg:px-6">
+      <span className="sr-only">
+        {title || "Dashboard"}{description ? `: ${description}` : ""}
+      </span>
 
-      <div className="flex min-w-0 items-center gap-2">
-        <button
-          type="button"
-          aria-label="Toggle sidebar"
-          onClick={() => window.dispatchEvent(new Event("tracify:toggle-sidebar"))}
-          className={cn(barButton, "w-[30px] justify-center px-0")}
-        >
-          <PanelLeft className="size-4" />
-        </button>
-        <button
-          type="button"
-          onClick={() => window.dispatchEvent(new Event("tracify:open-project-switcher"))}
-          className="hidden max-w-[160px] items-center gap-1 truncate px-2 py-1 text-[#8B93A1] hover:text-white md:inline-flex"
-        >
-          <span className="truncate">{organization?.name || "Workspace"}</span>
-          <ChevronDown className="size-3 shrink-0" />
-        </button>
-        <span className="hidden text-[#6B7380] md:inline">/</span>
-        <button
-          type="button"
-          onClick={() => window.dispatchEvent(new Event("tracify:open-project-switcher"))}
-          className="hidden max-w-[200px] items-center gap-1 truncate px-2 py-1 text-[#8B93A1] hover:text-white md:inline-flex"
-        >
-          <span className="truncate">{project?.name || "Project"}</span>
-          <ChevronDown className="size-3 shrink-0" />
-        </button>
-        <span className="hidden text-[#6B7380] md:inline">/</span>
-        <h1 className="truncate border-b-2 border-[#F4D44D] px-1 py-1 text-xs font-semibold capitalize leading-none text-[#E6E9EE]">
-          {pageTitle}
-        </h1>
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-black/55">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <Link
+              href={dashboardHref}
+              className="shrink-0 text-black transition-colors hover:text-black/70"
+            >
+              Dashboard
+            </Link>
+            {segments.length > 2 && (
+              <>
+                <ChevronRight className="size-3 shrink-0" />
+                {segments.length > 3 ? (
+                  <Link
+                    href={sectionHref}
+                    className="truncate text-black transition-colors hover:text-black/70"
+                  >
+                    {segments[2]}
+                  </Link>
+                ) : (
+                  <span className="truncate text-black">{segments[2]}</span>
+                )}
+              </>
+            )}
+            {segments.length > 3 && (
+              <>
+                <ChevronRight className="size-3 shrink-0" />
+                <span className="truncate text-black/60">{segments[3]}</span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2">
-        {controls ?? (
-          <label className={cn(barButton, "relative")}>
+      <div className="flex items-center gap-2 text-[12px] text-black/60">
+        <div className="tracify-topbar-controls hidden items-center gap-1 lg:flex">
+          <Link
+            href={`/cloud/region?next=${encodeURIComponent(pathname)}`}
+            className="tracify-topbar-region inline-flex h-8 items-center gap-1.5 border border-black/15 bg-white px-2.5 font-mono text-[10px] uppercase tracking-[0.08em] text-black/70 transition-colors hover:border-black hover:text-black"
+            title="Switch regional cloud"
+          >
+            <span aria-hidden="true">{region.flag}</span>
+            <span>{region.shortName} cloud</span>
+          </Link>
+          <label className="tracify-topbar-select">
             <span className="sr-only">Dashboard time range</span>
             <select
               aria-label="Dashboard time range"
               value={rangeValue}
               onChange={(event) => updateDashboardQuery(usesRunsWindow ? "days" : "range", event.target.value)}
-              className="cursor-pointer appearance-none bg-transparent pr-1 outline-none"
             >
               <option value="1">1d</option>
               <option value="7">7d</option>
               <option value="30">30d</option>
               <option value="90">90d</option>
             </select>
-            <ChevronDown className="size-3" />
           </label>
-        )}
-        {live ? (
+          <label className="tracify-topbar-select">
+            <span className="sr-only">Environment</span>
+            <select
+              aria-label="Environment"
+              value={environmentValue}
+              onChange={(event) => updateDashboardQuery("environment", event.target.value === "all" ? "all environments" : event.target.value)}
+            >
+              <option value="all">All environments</option>
+              <option value="default">default</option>
+              <option value="production">production</option>
+            </select>
+          </label>
           <button
             type="button"
-            aria-pressed={live.on}
-            disabled={live.disabled}
-            title={live.title}
-            onClick={live.onToggle}
-            className={cn(barButton, "hidden sm:inline-flex disabled:opacity-50")}
+            className="tracify-topbar-filter"
+            onClick={() => window.dispatchEvent(new Event("tracify:toggle-dashboard-filters"))}
           >
-            <span aria-hidden="true" className={cn("size-2", live.on ? "animate-pulse bg-[#5BE3A0]" : "bg-[#6B7380]")} />
-            {live.on ? "Live" : "Paused"}
+            Filters
           </button>
-        ) : null}
-        <button
-          type="button"
-          onClick={() => window.dispatchEvent(new Event("tracify:open-command"))}
-          className={cn(barButton, "hidden md:inline-flex")}
-        >
-          Assistant
-          <kbd className="border border-[#262C35] px-1 text-[10px] text-[#6B7380]">Ctrl I</kbd>
-        </button>
+        </div>
+
         <DashboardCommandMenu projectId={projectId} />
         <OrganizationSwitcher />
 
         {!hasDismissedOnboarding() ? (
-          <button onClick={handleOnboardingClick} className={cn(barButton, "hidden sm:inline-flex")}>
+          <button
+            onClick={handleOnboardingClick}
+            className={buttonVariants({
+              variant: "ghost",
+              size: "sm",
+              className: "h-8 px-3 text-[12px]",
+            })}
+          >
             Setup
           </button>
         ) : null}
+
+        <div className="hidden max-w-[360px] items-center gap-2 border border-black/15 bg-white px-2 sm:flex">
+          <span className="size-1.5 bg-emerald-600" aria-hidden="true" />
+          <span className="truncate text-[10px] uppercase tracking-widest text-black/70">
+            {organization?.name || "Personal workspace"}
+          </span>
+          <span className="text-black/55">/</span>
+          <span className="truncate text-[10px] text-black/55">{project?.name || "Loading project…"}</span>
+          <span className="text-black/55">/</span>
+          <span className="truncate text-[10px] uppercase text-black/55" title="Environment context">
+            {environmentContext}
+          </span>
+          <span className="text-black/55">/</span>
+          <span className="shrink-0 text-[10px] uppercase text-black/55" title="Dashboard time range">
+            {rangeContext}
+          </span>
+        </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -205,7 +240,7 @@ export function DashboardTopbar({ title, description, controls, live }: Dashboar
               type="button"
               aria-label="Open account menu"
               title="Account menu"
-              className="flex h-[30px] w-[30px] items-center justify-center overflow-hidden border border-[#262C35] bg-[#0B0D10] text-[#F4D44D] outline-none transition-colors hover:border-[#4A5260] focus-visible:ring-2 focus-visible:ring-[#F4D44D]"
+              className="flex h-8 w-8 items-center justify-center border border-black/15 bg-white text-black/70 transition-colors hover:border-black hover:text-black outline-none overflow-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f2ed]"
             >
               {user?.image ? (
                 <Image
@@ -289,15 +324,15 @@ export function DashboardTopbar({ title, description, controls, live }: Dashboar
                 aria-label={unreadAlertCount > 0 ? `Open alerts, ${unreadAlertCount} unread` : "Open alerts"}
                 title="Alerts"
                 className={cn(
-                  "relative flex h-[30px] items-center border px-2 outline-none transition-colors hover:border-[#4A5260] hover:text-white focus-visible:ring-2 focus-visible:ring-[#F4D44D]",
+                  "relative flex h-8 items-center border px-2 outline-none transition-colors hover:bg-[#f3f2ed] hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-[#f3f2ed]",
                   unreadAlertCount > 0
-                    ? "border-[#F4D44D] bg-[#0B0D10] text-white"
-                    : "border-[#262C35] bg-[#0B0D10] text-[#C9CED6]",
+                    ? "border-black bg-[#f3f2ed] text-black shadow-[0_0_0_1px_rgba(0,0,0,0.18)]"
+                    : "border-black/15 bg-white text-black/60",
                 )}
               >
                 <Bell className="size-4" />
                 {unreadAlertCount > 0 ? (
-                  <span className="absolute -right-1.5 -top-1.5 flex min-w-4 items-center justify-center bg-[#F4D44D] px-1 text-[9px] font-bold leading-4 text-black">
+                  <span className="absolute -right-1.5 -top-1.5 flex min-w-4 items-center justify-center bg-black px-1 text-[9px] font-bold leading-4 text-white shadow-[0_0_0_2px_#f3f2ed]">
                     {unreadAlertCount > 9 ? "9+" : unreadAlertCount}
                   </span>
                 ) : null}
@@ -388,6 +423,13 @@ export function DashboardTopbar({ title, description, controls, live }: Dashboar
           </DropdownMenu>
         )}
 
+        <a
+          href="https://www.tracify.tech/docs"
+          className="flex h-8 items-center gap-2 border border-black/15 bg-white px-2 text-black/60 transition-colors hover:bg-[#f3f2ed] hover:text-black"
+        >
+          <BookOpen className="size-4" />
+          <span className="hidden sm:inline">Docs</span>
+        </a>
       </div>
     </header>
   );
