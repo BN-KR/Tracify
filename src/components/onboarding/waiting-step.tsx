@@ -154,20 +154,19 @@ export function WaitingStep() {
         title="Now run your agent."
         description="Start it the way you normally do. The second your first run arrives, this page lights up on its own."
       />
-      <div className="relative overflow-hidden border border-black bg-[#090909] p-6 text-[#eceae3]">
-        <div className="flex items-center gap-5">
-          <div className="relative size-16 shrink-0" aria-hidden="true">
-            {[0, 1, 2].map((n) => (
-              <span key={n} className="absolute inset-0 animate-ping border border-[#f4d44d] motion-reduce:animate-none" style={{ animationDelay: `${n * 0.7}s`, animationDuration: "2.4s" }} />
-            ))}
-            <span className="absolute inset-[38%] bg-[#f4d44d]" />
-          </div>
-          <div className="min-w-0">
-            <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#f4d44d]">listening · {elapsed}s</p>
+      <div className="border border-black bg-[#090909] px-6 py-5 text-[#eceae3]">
+        <div className="flex items-center gap-4">
+          <span className="relative flex size-3 shrink-0" aria-hidden="true">
+            <span className="absolute inset-0 animate-ping bg-[#f4d44d] opacity-60 motion-reduce:animate-none" style={{ animationDuration: "2.4s" }} />
+            <span className="relative size-3 bg-[#f4d44d]" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">Listening for a run</p>
             <p className="mt-1 truncate font-pixel text-2xl tracking-[-0.05em]">{projectName}</p>
-            <p className="mt-1 truncate font-mono text-[11px] text-white/45">{keyDisplay}</p>
           </div>
+          <p className="font-mono text-sm tabular-nums text-[#f4d44d]">{String(Math.floor(elapsed / 60)).padStart(2, "0")}:{String(elapsed % 60).padStart(2, "0")}</p>
         </div>
+        <p className="mt-4 truncate border-t border-white/10 pt-3 font-mono text-[11px] text-white/45">{keyDisplay}</p>
       </div>
 
       <details className="group mt-5 border border-black/15 bg-[#f3f2ed]">

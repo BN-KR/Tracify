@@ -2332,3 +2332,8 @@ Automations page is a list of "when X then Y" rules drawn as trigger node -> arr
 - Demo project now serves these pages from sample data: `/demo/project/{sessions,users,dashboards}`, plus demo API routes `/api/projects/demo/groups/[kind]` and `/api/projects/demo/stats`.
 - Gotcha: the cloud shell CSS (`globals.css`, `.tracify-cloud-shell main [class*="bg-[#eceae3]"]` etc.) rewrites any class containing `bg-[#eceae3]`, `bg-white`, `text-black`, `border-black` to dark. Use uppercase hex (`bg-[#ECEAE3]`) for cream backgrounds inside dashboard pages.
 - Local preview needs dummy `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`, `NEXT_PUBLIC_POSTHOG_HOST` in `.env.local`, or hydration silently dies.
+- Costs page rebuilt on real data only: `/dashboard/[projectId]/costs` renders `src/components/dashboard/costs/costs-explorer.tsx`, fed by `GET /api/projects/[projectId]/costs` (`costBreakdown` in `src/lib/tinybird.ts`, step-level ClickHouse sums, same filter clauses as Tracing). No estimates or sandbox fixtures; calls with tokens but no price are counted and called out on the page. Demo costs page and `CostDashboard` are untouched.
+
+## 2026-10-20 Compare works on small projects — draft PR (branch `claude/project-thread-ly2i9d`)
+- Two runs: if the range has fewer than two runs, it steps out to longer ranges (up to 90 days) and says so; each picker also takes a pasted run ID; A/B badges are yellow/cream. Models and releases tab widens the same way when only one group exists. Front end only (`compare-page.tsx`), no Convex deploy. Checked with mocked responses only.
+- Oct 21: Removed our own Gemini usage (Ask AI, site assistant, Playground); tracing of customer Gemini calls is unchanged.
