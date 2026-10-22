@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import { dailySeries, filterScores, formatScoreValue, histogram, needsAttention, periodChange, SOURCE_TEXT, summariseByName, type ScoreRow } from "@/lib/score-utils";
+import { scoreSnippet, type ScoreSnippetLanguage } from "@/lib/score-snippets";
 import { downloadFile, toCsv } from "../tracing/format";
 import { BarList, Histogram, SplitBar, TrendChart, VolumeStrip } from "./score-charts";
 import { AddScore, ago, control, ScorePanel, Sheet } from "./score-drawer";
@@ -19,6 +20,23 @@ function readUrl(initial: Query): Query {
   const query: Query = {};
   for (const [key, value] of new URLSearchParams(window.location.search)) if (value) query[key] = value.slice(0, 200);
   return query;
+}
+
+function GradeFromCode({ projectId }: { projectId: string }) {
+  const [language, setLanguage] = useState<ScoreSnippetLanguage>("python");
+  const [copied, setCopied] = useState(false);
+  const code = scoreSnippet(language, projectId);
+  return (
+    <div className="mt-8 text-left">
+      <div className="flex items-center gap-2">
+        <h3 className="mr-auto text-xs font-semibold">Or let your agent grade itself</h3>
+        {(["python", "typescript"] as const).map((item) => <button key={item} type="button" aria-pressed={language === item} onClick={() => setLanguage(item)} className={`h-7 rounded border px-3 text-xs ${language === item ? "border-[#F4D44D] bg-[#F4D44D] font-medium text-[#090909]" : "border-[#262C35] text-[#C9CED6] hover:text-white"}`}>{item === "python" ? "Python" : "TypeScript"}</button>)}
+        <button type="button" onClick={() => { void navigator.clipboard.writeText(code).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }); }} className="h-7 rounded border border-[#262C35] px-3 text-xs text-[#C9CED6] hover:text-white">{copied ? "Copied" : "Copy"}</button>
+      </div>
+      <pre className="mt-2 overflow-x-auto rounded border border-[#262C35] bg-[#0E1115] p-4 font-mono text-[11px] leading-5 text-[#F4D44D]">{code}</pre>
+      <p className="mt-2 text-[11px] text-[#6B7380]">Run your agent once and the scores appear here within seconds.</p>
+    </div>
+  );
 }
 
 function Delta({ change, kind }: { change: number | null; kind: string }) {
@@ -119,10 +137,11 @@ export function ScoresWorkspace({ projectId, initialQuery }: { projectId: string
       {scores === undefined ? (
         <div className="grid gap-4 p-6" role="status" aria-label="Loading scores"><div className="h-9 w-72 animate-pulse rounded bg-[#11151A]" /><div className="h-72 animate-pulse rounded bg-[#11151A]" /><div className="grid gap-4 sm:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="h-28 animate-pulse rounded bg-[#11151A]" />)}</div></div>
       ) : empty ? (
-        <div className="mx-auto max-w-md p-16 text-center">
+        <div className="mx-auto max-w-2xl p-16 text-center">
           <h2 className="text-sm font-semibold">No scores yet</h2>
           <p className="mt-2 text-xs leading-5 text-[#8B93A1]">A score is a grade on a trace: a number, a yes/no or a category. They arrive from evaluators, from people reviewing traces, or from your own code. Add one by hand to see how this page fills in.</p>
           <button type="button" onClick={() => update({ add: "1" })} className="mt-4 h-8 rounded bg-[#F4D44D] px-3 text-xs font-medium text-[#090909]">Add the first score</button>
+          <GradeFromCode projectId={projectId} />
         </div>
       ) : !names.length ? (
         <div className="p-16 text-center text-xs text-[#8B93A1]">No scores in the last {days} days{query.source ? ` from ${SOURCE_TEXT[query.source]}` : ""}. <button type="button" onClick={() => update({ days: "30", source: "" })} className="text-[#8AB4FF] underline">Look at 30 days, all sources</button></div>
@@ -201,7 +220,7 @@ export function ScoresWorkspace({ projectId, initialQuery }: { projectId: string
       )}
 
       {query.add ? (
-        <Sheet label="Add a score" onClose={() => update({ add: "" })}><AddScore onClose={() => update({ add: "" })} onSave={async (input) => { const id = await createScore({ projectId: typedProjectId, ...input }); update({ add: "", id }); }} /></Sheet>
+        <Sheet label="Add a score" onClose={() => update({ add: "" })}><AddScore projectId={projectId} onClose={() => update({ add: "" })} onSave={async (input) => { const id = await createScore({ projectId: typedProjectId, ...input }); update({ add: "", id }); }} /></Sheet>
       ) : selectedRow ? (
         <Sheet label={`Score ${selectedRow.name}`} onClose={() => update({ id: "" })}><ScorePanel projectId={projectId} row={selectedRow} onClose={() => update({ id: "" })} onFilter={(name) => update({ name, id: "" })} now={now} /></Sheet>
       ) : null}

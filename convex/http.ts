@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
+import { DEFAULT_JUDGE_MODEL, judgeCost, judgeModel, startOfUtcDay, stepMatches } from "./autoScoring";
 import { authComponent, createAuth } from "./betterAuth/auth";
 
 const http = httpRouter();
@@ -156,7 +157,13 @@ http.route({
     const monitorAlerts: Array<{ projectId: string; runId: string; type: string; message: string; triggeredAt: string }> = [];
     for (const item of bundle) {
       const config = item.version.config;
-      if (!config.enabledOnline || Math.random() > config.sampleRate) continue;
+      if (!config.enabledOnline) continue;
+      if (!stepMatches(config.trigger, { spanType: body.spanType, modelId: body.modelId })) continue;
+      if (Math.random() > config.sampleRate) continue;
+      if (config.trigger?.dailyLimit !== undefined) {
+        const gradedToday = await ctx.runQuery(internal.evaluators.gradesToday, { evaluatorId: item.evaluator._id, since: startOfUtcDay(Date.now()), limit: config.trigger.dailyLimit });
+        if (gradedToday >= config.trigger.dailyLimit) continue;
+      }
       const dedupeKey = `${body.traceId}:${body.spanId}:${item.evaluator._id}:${item.version.version}`;
       const startedAt = Date.now();
       try {
@@ -172,7 +179,7 @@ http.route({
           const key = process.env.OPENAI_API_KEY;
           if (!key) throw new Error("OPENAI_API_KEY is not configured");
           const prompt = config.prompt || templatePrompt(config.template) || item.evaluator.criteria;
-          const judge = await fetchJudge("https://api.openai.com/v1/chat/completions", { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` }, body: JSON.stringify({ model: config.model || "gpt-4o-mini", temperature: 0, response_format: { type: "json_object" }, messages: [{ role: "system", content: `${redactSensitive(prompt)}\nReturn only JSON with score, passed, and explanation. score must be between 0 and 1.` }, { role: "user", content: JSON.stringify({ input: redactSensitive(body.input), output: redactSensitive(body.output), expectedOutput: body.expectedOutput ? redactSensitive(body.expectedOutput) : undefined, metadata: body.metadata ? redactSensitive(body.metadata) : {} }) }] }) });
+          const judge = await fetchJudge("https://api.openai.com/v1/chat/completions", { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` }, body: JSON.stringify({ model: judgeModel(config.model)?.id ?? DEFAULT_JUDGE_MODEL, temperature: 0, response_format: { type: "json_object" }, messages: [{ role: "system", content: `${redactSensitive(prompt)}\nReturn only JSON with score, passed, and explanation. score must be between 0 and 1.` }, { role: "user", content: JSON.stringify({ input: redactSensitive(body.input), output: redactSensitive(body.output), expectedOutput: body.expectedOutput ? redactSensitive(body.expectedOutput) : undefined, metadata: body.metadata ? redactSensitive(body.metadata) : {} }) }] }) });
           const data = await judge.json() as { choices?: Array<{ message?: { content?: string } }>; usage?: { prompt_tokens?: number; completion_tokens?: number }; error?: { message?: string } };
           if (!judge.ok) throw new Error(data.error?.message || "Judge request failed");
           const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}");
@@ -182,7 +189,7 @@ http.route({
           dataType = config.scoreType;
           status = Boolean(parsed.passed ?? score >= (config.minScore ?? 0.5)) ? "passed" : "failed";
           explanation = String(parsed.explanation || "");
-          costUsd = ((data.usage?.prompt_tokens || 0) * 0.00000015) + ((data.usage?.completion_tokens || 0) * 0.0000006);
+          costUsd = judgeCost(judgeModel(config.model)?.id ?? DEFAULT_JUDGE_MODEL, data.usage?.prompt_tokens || 0, data.usage?.completion_tokens || 0);
         }
         const persisted = await ctx.runMutation(internal.evaluationEngine.persistExecutionResult, { projectId, jobId, evaluatorId: item.evaluator._id, evaluatorVersion: item.version.version, traceId: body.traceId, spanId: body.spanId, value, dataType, status, explanation, latencyMs: Date.now() - startedAt, costUsd, dedupeKey });
         const resultId = persisted.resultId;

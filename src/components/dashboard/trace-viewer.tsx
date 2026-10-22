@@ -33,6 +33,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CancelRunButton } from "./cancel-run-button";
 import { ShareTraceButton } from "./share-trace-button";
+import { ScoreRunButton } from "./scores/score-run-button";
 import { RunNotes } from "./run-notes";
 import { useNow } from "@/hooks/use-now";
 import { captureAnalytics } from "@/lib/analytics";
@@ -195,6 +196,7 @@ export function TraceViewer({ projectId, runId }: TraceViewerProps) {
             >
               Compare
             </Link>
+            <ScoreRunButton projectId={projectId} traceId={run.runId} className="flex h-8 items-center border border-black/15 bg-[#f4d44d] px-3 font-mono text-[11px] uppercase text-black hover:border-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black" />
             <ShareTraceButton projectId={projectId} runId={run.runId} />
             {run.status === "running" && (
               <button

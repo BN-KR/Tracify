@@ -542,6 +542,11 @@ export default defineSchema({
       maxScore: v.optional(v.number()),
       sampleRate: v.number(),
       enabledOnline: v.boolean(),
+      trigger: v.optional(v.object({
+        when: v.union(v.literal("every"), v.literal("failed"), v.literal("run_end")),
+        modelContains: v.optional(v.string()),
+        dailyLimit: v.optional(v.number()),
+      })),
       template: v.optional(v.union(v.literal("groundedness"), v.literal("toxicity"), v.literal("pii"), v.literal("jailbreak"), v.literal("prompt_injection"), v.literal("policy"))),
     }),
     createdBy: v.string(),

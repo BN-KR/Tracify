@@ -1,4 +1,5 @@
 "use client";
+import { ViewSwitch } from "./view-switch";
 import { SavedViews } from "./saved-views";
 import { DEMO_BASE_PATH, DEMO_PROJECT_ID } from "@/lib/demo/demo-config";
 import { columnsFromUrl } from "@/lib/saved-view-state";
@@ -8,6 +9,7 @@ import { stepLabel } from "./agent-map";
 import { traceCsv } from "@/lib/trace-csv";
 import { EXCLUDE_PREFIX, parseSearch } from "@/lib/trace-search";
 import { SearchBox } from "./search-box";
+import { FeedbackCell, useFeedback, type FeedbackState } from "./feedback";
 import { RANGES, TimeRangePicker } from "./time-range-picker";
 import { ColumnsMenu, DEFAULT_COLUMNS, columnLabel, extraCell, extraIdsFor, isKnownColumn, metaKeysFor, orderColumns, type TraceRowExtras } from "./trace-columns";
 import { TraceCharts, TracesOverTime, type ChartBucket } from "./trace-charts";
@@ -31,7 +33,6 @@ type ListResponse = {
 export type TraceQuery = Record<string, string>;
 
 const COLUMN_STORAGE = "tracify.tracing.columns";
-const LIVE_STORAGE = "tracify.tracing.live";
 const ERRORS_STORAGE = "tracify.tracing.errorGroups";
 /** URL keys that change the view, not the data, so they are not sent to the API. */
 const VIEW_KEYS = ["range", "from", "to", "trace", "mode", "view", "columns", "savedView"];
@@ -72,7 +73,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   const [columns, setColumns] = useState<string[]>(DEFAULT_COLUMNS);
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [now, setNow] = useState(() => Date.now());
-  const [live, setLive] = useState(true);
+  const [live] = useState(true);
   const [clock, setClock] = useState(() => Date.now());
   const [fresh, setFresh] = useState<Set<string>>(() => new Set());
   const [errorsOpen, setErrorsOpen] = useState(true);
@@ -88,9 +89,6 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   // Phones start with the filter sidebar collapsed so the traces are visible first.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (window.matchMedia("(max-width: 767px)").matches) setFiltersOpen(false); }, []);
-  // The live/paused choice is remembered per browser.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { try { if (window.localStorage.getItem(LIVE_STORAGE) === "paused") setLive(false); } catch {} }, []);
   // The error-groups panel's open/closed choice is remembered per browser.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { try { if (window.localStorage.getItem(ERRORS_STORAGE) === "closed") setErrorsOpen(false); } catch {} }, []);
@@ -215,6 +213,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   }, [listParams, live, projectId, query.from, query.range, query.to, requestKey, settledKey]);
 
   const rows = useMemo(() => data?.rows ?? [], [data]);
+  const feedback = useFeedback(projectId, useMemo(() => rows.map((row) => row.runId), [rows]), projectId !== DEMO_PROJECT_ID && columns.includes("feedback"));
   const stats = data?.stats;
   const activeGroup = data?.errorGroups?.groups.find((group) => group.id === query.errorGroup);
   const activeGroupLabel = activeGroup ? errorGroupLabel(activeGroup) : pickedGroup?.id === query.errorGroup ? pickedGroup?.label : query.errorGroup?.slice(0, 8);
@@ -226,7 +225,6 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     const timer = setTimeout(() => setFresh(new Set()), 2500);
     return () => clearTimeout(timer);
   }, [fresh]);
-  const isLive = live && !query.from && !query.to;
 
   const total = data?.total ?? 0;
   const page = Number(query.page ?? 0);
@@ -286,12 +284,6 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     update(patch);
   }
 
-  function toggleLive() {
-    const next = !live;
-    setLive(next);
-    if (next) setNow(Date.now());
-    try { window.localStorage.setItem(LIVE_STORAGE, next ? "live" : "paused"); } catch {}
-  }
 
   function toggleErrors() {
     const next = !errorsOpen;
@@ -333,6 +325,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
     <div className="flex min-h-svh flex-col bg-[#0B0D10] font-[family-name:var(--font-geist-sans)] text-[13px] text-[#E6E9EE]">
       <header className="flex flex-wrap items-center gap-2 border-b border-[#1F242C] px-4 py-2">
         <h1 className="mr-2 text-base font-semibold tracking-tight">Tracing</h1>
+        <ViewSwitch projectId={projectId} view="runs" />
         <form
           className="flex min-w-[220px] flex-1 items-center gap-2 rounded-md border border-[#262C35] bg-[#111418] px-2.5 focus-within:border-[#4A5260]"
           onSubmit={(event) => { event.preventDefault(); submitSearch(searchDraft.trim()); }}
@@ -348,11 +341,6 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
           onPreset={(id) => { setNow(Date.now()); update({ range: id, from: "", to: "" }); }}
           onCustom={(from, to) => { const current = Date.now(); setNow(current); update({ from: String(from), to: String(Math.min(to, current)) }); }}
           onReset={() => update({ from: "", to: "" })} />
-        <button type="button" aria-pressed={isLive} onClick={toggleLive} disabled={Boolean(query.from || query.to)}
-          title={query.from || query.to ? "Live updates are off while zoomed to a fixed window" : isLive ? "New traces appear automatically. Click to pause." : "Paused. Click to resume live updates."}
-          className="flex h-8 items-center gap-2 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260] disabled:opacity-50">
-          <span aria-hidden="true" className={`size-2 rounded-full ${isLive ? "animate-pulse bg-[#5BE3A0]" : "bg-[#6B7380]"}`} />{isLive ? "Live" : "Paused"}
-        </button>
         <button type="button" onClick={() => setNow(Date.now())} className="h-8 rounded-md border border-[#262C35] px-2.5 text-xs text-[#C9CED6] hover:border-[#4A5260]">Refresh</button>
       </header>
 
@@ -433,12 +421,14 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                 {activeFilters.length || query.q ? <button type="button" className="mt-4 rounded-md bg-[#F4D44D] px-4 py-2 text-sm font-medium text-[#0B0D10]" onClick={() => { setSearchDraft(""); update({ ...Object.fromEntries(activeFilters.map((f) => [f.key, ""])), q: "", range: "30d" }); }}>Clear filters and show 30 days</button> : <a className="mt-4 inline-block rounded-md bg-[#F4D44D] px-4 py-2 text-sm font-medium text-[#0B0D10]" href={projectId === DEMO_PROJECT_ID ? `${DEMO_BASE_PATH}` : `/dashboard/${projectId}/quickstart`}>{projectId === DEMO_PROJECT_ID ? "Back to the overview" : "Open quickstart"}</a>}
               </div>
             ) : (
+              <>
+              {feedback.failed ? <p role="alert" className="mt-3 text-xs text-[#FF8A8A]">{feedback.failed}</p> : null}
               <table className="mt-3 w-full min-w-[900px] border-separate border-spacing-0 text-[13px]">
                 <thead className="sticky top-0 z-10 bg-[#0B0D10]">
                   <tr className="text-left text-xs text-[#8B93A1]">
                     {columns.map((id) => {
                       const label = columnLabel(id);
-                      const sortKey = id;
+                      const sortKey = id === "feedback" ? "" : id;
                       const active = sortKey && (query.sort ?? "startedAt") === sortKey;
                       return (
                         <th key={id} scope="col" className="border-b border-[#1F242C] px-2.5 py-1.5 font-medium" aria-sort={active ? ((query.dir ?? "desc") === "asc" ? "ascending" : "descending") : undefined}>
@@ -453,11 +443,12 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
                     <tr key={row.runId} aria-selected={selected === row.runId}
                       className={`cursor-pointer transition-colors duration-700 ${selected === row.runId ? "bg-[#161B22] shadow-[inset_3px_0_0_#F4D44D]" : fresh.has(row.runId) ? "bg-[#1F2A1F]" : "hover:bg-[#12161C]"}`}
                       onClick={() => update({ trace: row.runId }, false)}>
-                      {columns.map((id) => <td key={id} className="max-w-[320px] truncate border-b border-[#171B21] px-2.5 py-1.5 align-middle">{cell(id, row, update, clock)}</td>)}
+                      {columns.map((id) => <td key={id} className="max-w-[320px] truncate border-b border-[#171B21] px-2.5 py-1.5 align-middle">{cell(id, row, update, clock, feedback, projectId)}</td>)}
                     </tr>
                   ))}
                 </tbody>
               </table>
+              </>
             )}
           </div>
 
@@ -491,7 +482,7 @@ export function TracingExplorer({ projectId, initialQuery }: { projectId: string
   );
 }
 
-function cell(id: string, row: TraceRow, update: (patch: TraceQuery, resetPage?: boolean) => void, clock: number) {
+function cell(id: string, row: TraceRow, update: (patch: TraceQuery, resetPage?: boolean) => void, clock: number, feedback: FeedbackState, projectId: string) {
   const link = (key: string, value: string) => value
     ? <button type="button" className="truncate text-[#8AB4FF] hover:underline" onClick={(event) => { event.stopPropagation(); update({ [key]: encodeValues([value]) }); }}>{value}</button>
     : <span className="text-[#4A5260]">—</span>;
@@ -503,6 +494,7 @@ function cell(id: string, row: TraceRow, update: (patch: TraceQuery, resetPage?:
     case "name": return <span className="font-medium">{row.traceName || <span className="font-mono text-xs text-[#8B93A1]">{row.runId.slice(0, 12)}</span>}</span>;
     case "input": return <span className="text-[#C9CED6]">{previewText(row.inputPreview) || <span className="text-[#4A5260]">—</span>}</span>;
     case "output": return <span className="text-[#C9CED6]">{previewText(row.outputPreview) || <span className="text-[#4A5260]">—</span>}</span>;
+    case "feedback": return projectId === DEMO_PROJECT_ID ? <span className="text-[#4A5260]">—</span> : <FeedbackCell runId={row.runId} feedback={feedback} />;
     case "latency": return <span className="font-mono text-xs">{formatDuration(row.durationMs)}</span>;
     case "cost": return <span className="font-mono text-xs">{formatCost(row.totalCostUsd)}</span>;
     case "tokens": return <span className="font-mono text-xs text-[#C9CED6]">{compactNumber(Number(row.inputTokens) + Number(row.outputTokens))}</span>;

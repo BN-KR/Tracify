@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { buildSpanTree, type SpanTreeNode } from "@/lib/tracify-ports/treeBuilding";
 import { chatMessages, compactNumber, downloadFile, formatCost, formatDuration, formatTime, parsePayload } from "./format";
 import { AskAiPanel } from "./ask-ai-panel";
+import { ScoreRunButton } from "../scores/score-run-button";
 import { stepKind, TraceGraph, TraceTimeline, TypeIcon } from "./trace-views";
 
 type Span = {
@@ -200,6 +201,7 @@ export function TracePanel({ projectId, runId, summary, view, onView, onClose, o
       <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-[#1F242C] px-3 py-2">
         <h2 className="min-w-0 flex-1 truncate text-sm font-semibold">{name}</h2>
         <button type="button" onClick={() => setSide("ask")} className="h-7 rounded-md bg-[#F4D44D] px-2.5 text-xs font-medium text-[#0B0D10] hover:bg-[#F7DC6B]">Ask AI</button>
+        <ScoreRunButton projectId={projectId} traceId={runId} className={toolButton} />
         <button type="button" onClick={copyLink} className={toolButton}>{linkCopied ? "Link copied" : "Copy link"}</button>
         <button type="button" onClick={downloadJson} disabled={!spans?.length} className={`${toolButton} disabled:opacity-40`}>JSON</button>
         <button type="button" aria-label="Previous trace" onClick={() => onStep(-1)} className="h-7 w-7 rounded-md border border-[#262C35] hover:border-[#4A5260]">↑</button>
