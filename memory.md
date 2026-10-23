@@ -1,3 +1,6 @@
+## 2026-10-23 Trace opens on the failing step — draft PR (branch `claude/project-thread-93ofte`)
+- Opening a trace that has a failed step now selects the earliest failed step (not the first step) and scrolls it into view once. A red "Failed" bar under the trace header shows the step name, error type and message, plus "first of N" when there are several and a "Show failing step" button. Code: `src/components/dashboard/tracing/trace-panel.tsx` (`earliestFailedId`). A `?step=` link still wins. Checked with a scratch page and mocked data only (desktop + phone), not the signed-in dashboard.
+
 ## 2026-10-21 Thumbs up/down on runs — draft PR (branch `claude/project-thread-1cr2yp`)
 - Tracing list has a new "Feedback" column (on by default, hidden on the demo project): two small thumb buttons per run. One tap saves a yes/no score named `feedback` (human, boolean) on the trace; tapping the same thumb again removes it (undo); the other thumb switches it. Convex `evaluation.myFeedback` (the signed-in person's thumbs for the page's runs) and `evaluation.setFeedback` (value true/false/null), needs a manual Convex deploy. UI in `src/components/dashboard/tracing/feedback.tsx`. Saved column choices from before do not show the column until it is switched on in Columns. Checked with a scratch page, not the signed-in dashboard.
 
