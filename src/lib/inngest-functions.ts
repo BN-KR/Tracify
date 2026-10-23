@@ -5,6 +5,7 @@ import { getConvexClient } from "@/lib/convex";
 import { inngest } from "@/lib/inngest";
 import { persistSpan, type SpanEvent } from "@/lib/span-pipeline";
 import { getTracifyRegion } from "@/lib/regions";
+import { runRetention } from "@/lib/retention-job";
 import { sendTransactionalEmail } from "@/lib/transactional-email";
 
 /**
@@ -219,5 +220,15 @@ export const processAlert = inngest.createFunction(
     });
 
     return { ok: true };
+  },
+);
+
+/** Every day at 03:17 UTC: delete data older than each plan keeps (7 / 30 / 90 days). Needs TRACIFY_RETENTION_SECRET. */
+export const dailyRetention = inngest.createFunction(
+  { id: "daily-retention", name: "Remove data past plan retention", retries: 2, triggers: [{ cron: "17 3 * * *" }] },
+  async ({ step }) => {
+    const secret = process.env.TRACIFY_RETENTION_SECRET;
+    if (!secret) return { skipped: true, reason: "TRACIFY_RETENTION_SECRET is not set" };
+    return step.run("purge", () => runRetention(secret));
   },
 );
