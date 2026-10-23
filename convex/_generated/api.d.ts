@@ -10,6 +10,7 @@
 
 import type * as admin from "../admin.js";
 import type * as agentRuns from "../agentRuns.js";
+import type * as alertMessages from "../alertMessages.js";
 import type * as alertMetrics from "../alertMetrics.js";
 import type * as alertRules from "../alertRules.js";
 import type * as alerts from "../alerts.js";
@@ -57,6 +58,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   agentRuns: typeof agentRuns;
+  alertMessages: typeof alertMessages;
   alertMetrics: typeof alertMetrics;
   alertRules: typeof alertRules;
   alerts: typeof alerts;
