@@ -3,15 +3,17 @@
 import { useCallback, useEffect, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, KeyRound, LogOut, Monitor, ShieldCheck, UserRound, Bell } from "lucide-react";
+import { ArrowLeft, KeyRound, LogOut, Monitor, ShieldCheck, UserRound, Bell, Gauge } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "convex/_generated/api";
 import { authClient } from "@/lib/auth-client";
+import { UsageTab } from "@/components/dashboard/account/usage-tab";
 import { cn } from "@/lib/utils";
 
 const TABS = [
   { id: "profile", label: "Profile", blurb: "Name and sign-in email", icon: UserRound },
   { id: "security", label: "Password", blurb: "Change how you sign in", icon: KeyRound },
+  { id: "usage", label: "Usage", blurb: "Spans used this month", icon: Gauge },
   { id: "sessions", label: "Devices", blurb: "Where you are signed in", icon: Monitor },
   { id: "email", label: "Email", blurb: "What we may send you", icon: Bell },
 ] as const;
@@ -339,6 +341,7 @@ export function AccountSettings() {
           <p className="mb-6 mt-1 font-sans text-sm text-[#8B93A1]">Account settings follow you across every project.</p>
           {active === "profile" ? <Profile /> : null}
           {active === "security" ? <Password /> : null}
+          {active === "usage" ? <UsageTab /> : null}
           {active === "sessions" ? <Devices /> : null}
           {active === "email" ? <EmailPrefs /> : null}
           <button
