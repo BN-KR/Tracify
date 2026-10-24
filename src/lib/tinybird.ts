@@ -1024,6 +1024,27 @@ export async function deleteProjectAnalytics(projectId: string) {
   }
 }
 
+/** Removes analytics rows older than `days` days for the given projects (one delete per table, however many projects). */
+export async function purgeExpiredAnalytics(projectIds: string[], days: number) {
+  if (!projectIds.length) return;
+  if (!Number.isInteger(days) || days < 1) throw new Error("Retention days must be a positive integer");
+  const ids = projectIds.map((id) => `'${sqlString(id)}'`).join(",");
+  for (const table of ["spans", "evaluation_scores"] as const) {
+    const condition = `projectId IN (${ids}) AND createdAt < now() - INTERVAL ${days} DAY`;
+    const res = CLICKHOUSE_URL
+      ? await fetch(`${CLICKHOUSE_URL}/?${new URLSearchParams({ database: CLICKHOUSE_DATABASE })}`, {
+          method: "POST", headers: clickhouseHeaders(), body: `ALTER TABLE ${table} DELETE WHERE ${condition}`, cache: "no-store",
+        })
+      : await fetch(`${TINYBIRD_HOST}/v0/datasources/${table}/delete`, {
+          method: "POST",
+          headers: { ...getHeaders(), "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ delete_condition: condition }),
+          cache: "no-store",
+        });
+    if (!res.ok) throw new Error(`Could not purge ${table}: ${res.status}`);
+  }
+}
+
 export const COST_DIMENSIONS = { model: "modelId", tool: "toolName", user: "endUserId", agent: "traceName", release: "release", environment: "environment" } as const;
 export type CostDimension = keyof typeof COST_DIMENSIONS;
 export type CostGroup = { key: string; calls: number; traces: number; costUsd: number; inputTokens: number; outputTokens: number; avgLatencyMs: number };
