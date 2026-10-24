@@ -47,6 +47,7 @@ import type * as sharedTraces from "../sharedTraces.js";
 import type * as sessions from "../sessions.js";
 import type * as spendMetrics from "../spendMetrics.js";
 import type * as weeklySummary from "../weeklySummary.js";
+import type * as welcomeEmail from "../welcomeEmail.js";
 
 import type {
   ApiFromModules,
@@ -94,6 +95,7 @@ declare const fullApi: ApiFromModules<{
   sessions: typeof sessions;
   spendMetrics: typeof spendMetrics;
   weeklySummary: typeof weeklySummary;
+  welcomeEmail: typeof welcomeEmail;
 }>;
 
 /**
