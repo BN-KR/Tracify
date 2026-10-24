@@ -7,6 +7,7 @@ import { persistSpan, type SpanEvent } from "@/lib/span-pipeline";
 import { getTracifyRegion } from "@/lib/regions";
 import { runRetention } from "@/lib/retention-job";
 import { sendTransactionalEmail } from "@/lib/transactional-email";
+import { renderNoTraceEmail } from "@/lib/email-templates";
 
 /**
  * Milestone 2 activation pipeline:
@@ -113,7 +114,9 @@ export const onboardingReminder = inngest.createFunction(
     await step.sleep("wait-one-day", "1d");
     const state = await step.run("check-activation", async () => getConvexClient().query(api.agentRuns.getProjectOnboardingState, { projectId: event.data.projectId as Id<"projects"> }));
     if (state?.hasReceivedFirstSpan) return { skipped: true, reason: "activated" };
-    await step.run("send-reminder", async () => sendTransactionalEmail({ to: event.data.email, subject: "Your Tracify project is ready", text: `Hi ${event.data.name || "there"},\n\nYour Tracify project is ready, but it has not received a first trace yet. Continue setup: ${getTracifyRegion().origin}/onboarding`, html: `<p>Hi ${event.data.name || "there"},</p><p>Your Tracify project is ready, but it has not received a first trace yet.</p><p><a href="${getTracifyRegion().origin}/onboarding">Continue setup</a></p>`, idempotencyKey: `onboarding-reminder-${event.data.projectId}` }));
+    const origin = getTracifyRegion().origin;
+    const email = renderNoTraceEmail({ name: event.data.name, projectName: event.data.projectName, projectId: event.data.projectId, origin });
+    await step.run("send-reminder", async () => sendTransactionalEmail({ to: event.data.email, ...email, idempotencyKey: `onboarding-reminder-${event.data.projectId}` }));
     return { skipped: false };
   },
 );
