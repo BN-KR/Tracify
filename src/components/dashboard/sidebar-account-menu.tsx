@@ -1,11 +1,14 @@
 "use client";
 
-import { ChevronUp, CreditCard, Globe2, LogOut, ShieldCheck, Sparkles, UserPen } from "lucide-react";
+import { ChevronUp, CreditCard, Gauge, Globe2, LogOut, ShieldCheck, Sparkles, UserPen } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { authClient } from "@/lib/auth-client";
+import { UsageBar } from "@/components/dashboard/usage-bar";
+import { usageLevel } from "@/lib/plan-limits";
+import { planById, type PlanId } from "@/lib/pricing-plans";
 import { getTracifyRegion } from "@/lib/regions";
 import { cn } from "@/lib/utils";
 import {
@@ -35,6 +38,12 @@ export function SidebarAccountMenu({
   const adminAccess = useQuery(api.admin.access, synthetic ? "skip" : undefined);
   const isFree = !synthetic && (currentProject?.planTier ?? "free") === "free";
   const region = getTracifyRegion();
+  const usage = useQuery(
+    api.billing.getMonthlyUsage,
+    synthetic || !currentProject ? "skip" : { projectId: currentProject._id },
+  );
+  const usageTier = usage?.planTier ?? "free";
+  const usagePlan = planById(usageTier as PlanId);
 
   const user = session?.user;
   const name = synthetic ? "Demo viewer" : user?.name || "Account";
@@ -71,6 +80,20 @@ export function SidebarAccountMenu({
           <span className="truncate text-[10px] opacity-55">{email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {usage && usageTier !== "enterprise" ? (
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/account?tab=usage" className="flex-col !items-stretch gap-1.5">
+              <span className="flex items-center justify-between text-[11px]">
+                <span className="flex items-center gap-2"><Gauge className="size-4" /> Usage this month</span>
+                <span className={usageLevel(usage.spans, usageTier) === "ok" ? "opacity-60" : "!text-[#f4d44d]"}>
+                  {Math.round((usage.spans / usagePlan.spanLimit) * 100)}%
+                </span>
+              </span>
+              <UsageBar spans={usage.spans} tier={usageTier} />
+              <span className="text-[10px] opacity-55">{usage.spans.toLocaleString()} of {usagePlan.spans} spans · {currentProject?.name}</span>
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         {isFree ? (
           <DropdownMenuItem asChild>
             <Link href={billingHref} className="!text-[#f4d44d]">

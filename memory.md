@@ -1,5 +1,6 @@
 ## 2026-10-23 Plan caps and usage meter — draft PR (branch `claude/project-thread-7fb92q`)
 - Pro and Team now stop taking new data at their plan plus a 10% buffer (550k / 2.2m spans per UTC month; Free still stops at 25k). Same 429 `plan_limit_reached` path on `/api/ingest` and `/api/otel`; Enterprise and unknown tiers never blocked. Rules in `src/lib/plan-limits.ts` (`enforcedSpanLimit`, `usageLevel`, `PAID_GRACE`), tests in `test:tools`. Redis counter starts fresh when this ships, so paid projects are undercounted for the rest of that month (lenient).
+- Also: Usage tab in Account settings (`account/usage-tab.tsx`, one bar per project) and a usage bar in the user-icon dropdown (`usage-bar.tsx`, `sidebar-account-menu.tsx`).
 - New `UsageMeter` (`src/components/dashboard/usage-meter.tsx`) at the top of the Billing page: bar with 80% and included ticks, hatched buffer zone, status chip, reset date, upgrade button. `UpgradeBanner` uses the same levels. No Convex change. Screenshots: shared files `plan-caps/usage-meter.png` (scratch page, not signed in).
 
 ## 2026-10-21 Thumbs up/down on runs — draft PR (branch `claude/project-thread-1cr2yp`)
